@@ -12,7 +12,7 @@ import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { vectorStyles } from '../../styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties, VECTOR_STYLES } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME, COUNT_PROP_LABEL } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -123,10 +123,12 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   createDefaultLayer(options) {
+    const defaultDynamicProperties = getDefaultDynamicProperties();
     const styleDescriptor = VectorStyle.createDescriptor({
-      [vectorStyles.LINE_COLOR]: {
+      [VECTOR_STYLES.LINE_COLOR]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
@@ -135,16 +137,15 @@ export class ESPewPewSource extends AbstractESAggSource {
           color: 'Blues'
         }
       },
-      [vectorStyles.LINE_WIDTH]: {
+      [VECTOR_STYLES.LINE_WIDTH]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN
           },
-          minSize: 4,
-          maxSize: 32,
         }
       }
     });
@@ -203,13 +204,15 @@ export class ESPewPewSource extends AbstractESAggSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(
-      layerName,
+    const esResponse = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
       searchSource,
       registerCancelCallback,
-      i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+      requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
         defaultMessage: 'Source-destination connections request'
-      }));
+      }),
+    });
 
     const { featureCollection } = convertToLines(esResponse);
 

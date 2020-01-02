@@ -23,14 +23,15 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from '../../../../visualizations/public';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { round } from 'lodash';
 
+import { Vis } from '../../../../visualizations/public';
 import { tableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
+import { getAngularModule } from '../../get_inner_angular';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;
@@ -96,11 +97,18 @@ describe('Table Vis - AggTable Directive', function () {
     );
   };
 
+  const initLocalAngular = () => {
+    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    initTableVisLegacyModule(tableVisModule);
+  };
+
+  beforeEach(initLocalAngular);
+
   ngMock.inject(function () {
     visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
   });
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
     ngMock.inject(function ($injector, Private, config) {
       tableAggResponse = legacyResponseHandlerProvider().handler;

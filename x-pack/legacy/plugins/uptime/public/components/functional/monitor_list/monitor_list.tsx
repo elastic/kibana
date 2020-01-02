@@ -33,7 +33,7 @@ import { MonitorListDrawer } from './monitor_list_drawer';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { OverviewPageLink } from '../overview_page_link';
+import { OverviewPageLink } from './overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -208,7 +208,7 @@ export const MonitorListComponent = (props: Props) => {
               field: 'monitor_id',
               name: '',
               sortable: true,
-              width: '40px',
+              width: '24px',
               isExpander: true,
               render: (id: string) => {
                 return (
@@ -238,8 +238,8 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <OverviewPageLink
               dataTestSubj="xpack.uptime.monitorList.prevButton"

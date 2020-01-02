@@ -114,6 +114,8 @@ const mapStateToProps = (state: State) => {
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
 
+DragDropContextWrapper.displayName = 'DragDropContextWrapper';
+
 const onBeforeCapture = (before: BeforeCapture) => {
   const x =
     window.pageXOffset !== undefined

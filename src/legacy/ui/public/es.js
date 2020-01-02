@@ -44,16 +44,17 @@ const plugins = [function (Client, config) {
   config.connectionClass = CustomAngularConnector;
 }];
 
+export function createEsService(esFactory, esUrl, esApiVersion, esRequestTimeout) {
+  return esFactory({
+    host: esUrl,
+    log: 'info',
+    requestTimeout: esRequestTimeout,
+    apiVersion: esApiVersion,
+    plugins
+  });
+}
+
 uiModules
   .get('kibana', ['elasticsearch', 'kibana/config'])
-
   //Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-  .service('es', function (esFactory, esUrl, esApiVersion, esRequestTimeout) {
-    return esFactory({
-      host: esUrl,
-      log: 'info',
-      requestTimeout: esRequestTimeout,
-      apiVersion: esApiVersion,
-      plugins
-    });
-  });
+  .service('es', createEsService);

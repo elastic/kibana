@@ -21,9 +21,10 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
-import { uniq } from 'lodash';
+import { uniq, noop } from 'lodash';
 
 import { Subscription } from 'rxjs';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
   subscribeWithScope,
@@ -35,13 +36,10 @@ import {
   AppStateClass as TAppStateClass,
   KbnUrl,
   SaveOptions,
-  SavedObjectFinder,
   unhashUrl,
 } from './legacy_imports';
-import { FilterStateManager, IndexPattern, SavedQuery } from '../../../data/public';
-import { Query } from '../../../../../plugins/data/public';
-
-import './dashboard_empty_screen_directive';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
+import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -71,6 +69,10 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../plugins/kibana_react/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -78,9 +80,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   getAppState: any;
   globalState: State;
-  indexPatterns: {
-    getDefault: () => Promise<IndexPattern>;
-  };
+  indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
   kbnUrl: KbnUrl;
   AppStateClass: TAppStateClass<DashboardAppState>;
@@ -117,14 +117,10 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
-
-    function getUnhashableStates(): State[] {
-      return [getAppState(), globalState].filter(Boolean);
-    }
 
     let lastReloadRequestTime = 0;
 
@@ -149,6 +145,16 @@ export class DashboardAppController {
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
+    $scope.getShouldShowEditHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsEditMode() &&
+      !dashboardConfig.getHideWriteControls();
+
+    $scope.getShouldShowViewHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsViewMode() &&
+      !dashboardConfig.getHideWriteControls();
+
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
         return;
@@ -171,10 +177,21 @@ export class DashboardAppController {
       } else {
         indexPatterns.getDefault().then(defaultIndexPattern => {
           $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern];
+            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
         });
       }
+    };
+
+    const getEmptyScreenProps = (shouldShowEditHelp: boolean): DashboardEmptyScreenProps => {
+      const emptyScreenProps: DashboardEmptyScreenProps = {
+        onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
+        showLinkToVisualize: shouldShowEditHelp,
+      };
+      if (shouldShowEditHelp) {
+        emptyScreenProps.onVisualizeClick = noop;
+      }
+      return emptyScreenProps;
     };
 
     const getDashboardInput = (): DashboardContainerInput => {
@@ -188,6 +205,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
+      const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+      const shouldShowViewHelp = $scope.getShouldShowViewHelp();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -200,6 +219,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -239,6 +259,15 @@ export class DashboardAppController {
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
+
+          dashboardContainer.renderEmpty = () => {
+            const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+            const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
+            return isEmptyState ? (
+              <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
+            ) : null;
+          };
 
           updateIndexPatterns(dashboardContainer);
 
@@ -339,15 +368,6 @@ export class DashboardAppController {
 
     updateBreadcrumbs();
     dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-
-    $scope.getShouldShowEditHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsEditMode() &&
-      !dashboardConfig.getHideWriteControls();
-    $scope.getShouldShowViewHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsViewMode() &&
-      !dashboardConfig.getHideWriteControls();
 
     const getChangesFromAppStateForContainerState = () => {
       const appStateDashboardInput = getDashboardInput();
@@ -724,6 +744,10 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
+        );
+
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
@@ -734,6 +758,8 @@ export class DashboardAppController {
         });
       }
     };
+
+    navActions[TopNavIds.VISUALIZE] = async () => {};
 
     navActions[TopNavIds.OPTIONS] = anchorElement => {
       showOptionsPopover({
@@ -753,7 +779,7 @@ export class DashboardAppController {
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',
         sharingData: {

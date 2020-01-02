@@ -351,7 +351,7 @@ export function getTestUrl(job, customUrl) {
                 });
 
               } else {
-                if (response.hits.total > 0) {
+                if (response.hits.total.value > 0) {
                   testDoc = response.hits.hits[0]._source;
                 }
               }

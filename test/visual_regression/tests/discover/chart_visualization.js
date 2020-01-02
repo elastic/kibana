@@ -48,10 +48,12 @@ export default function ({ getService, getPageObjects }) {
 
     describe('query', function () {
       this.tags(['skipFirefox']);
+      let renderCounter = 0;
 
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Hourly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -70,6 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Daily');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -79,6 +83,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Weekly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -92,6 +97,7 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -101,6 +107,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Monthly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -110,6 +117,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Yearly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -119,6 +127,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Auto');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -133,6 +142,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(1);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });

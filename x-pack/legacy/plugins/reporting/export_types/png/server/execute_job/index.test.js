@@ -45,6 +45,7 @@ beforeEach(() => {
       getScopedSavedObjectsClient: jest.fn(),
     },
     uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
+    log: jest.fn(),
   };
 
   mockServer.config().get.mockImplementation((key) => {

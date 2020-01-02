@@ -21,10 +21,11 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { Vis } from '../../../../visualizations/public';
+import { getAngularModule } from '../../get_inner_angular';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
@@ -52,7 +53,14 @@ describe('Table Vis - AggTableGroup Directive', function () {
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);
   };
 
-  beforeEach(ngMock.module('kibana'));
+  const initLocalAngular = () => {
+    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    initTableVisLegacyModule(tableVisModule);
+  };
+
+  beforeEach(initLocalAngular);
+
+  beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
     ngMock.inject(function ($injector, Private) {
       // this is provided in table_vis_controller.js

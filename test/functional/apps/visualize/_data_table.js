@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
       // check that it works after a save and reload
       const SAVE_NAME = 'viz w/ percents';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(SAVE_NAME);
       await PageObjects.visualize.waitForVisualization();
 

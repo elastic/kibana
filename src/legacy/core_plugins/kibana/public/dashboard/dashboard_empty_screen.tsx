@@ -18,29 +18,43 @@
  */
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPage,
+  EuiText,
+} from '@elastic/eui';
 import * as constants from './dashboard_empty_screen_constants';
 
-export interface Props {
+export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;
   onLinkClick: () => void;
+  onVisualizeClick?: () => void;
 }
 
-export function DashboardEmptyScreen({ showLinkToVisualize, onLinkClick }: Props) {
+export function DashboardEmptyScreen({
+  showLinkToVisualize,
+  onLinkClick,
+}: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
-    <p className="linkToVisualizeParagraph">
-      <FormattedMessage
-        id="kbn.dashboard.addVisualizationDescription3"
-        defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-        values={{
-          visualizeAppLink: (
-            <a className="euiLink" href="#/visualize">
-              {constants.visualizeAppLinkTest}
-            </a>
-          ),
-        }}
-      />
-    </p>
+    <EuiText data-test-subj="linkToVisualizeParagraph">
+      <p>
+        <FormattedMessage
+          id="kbn.dashboard.addVisualizationDescription3"
+          defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
+          values={{
+            visualizeAppLink: (
+              <a className="euiLink" href="#/visualize">
+                {constants.visualizeAppLinkTest}
+              </a>
+            ),
+          }}
+        />
+      </p>
+    </EuiText>
   );
   const paragraph = (
     description1: string,
@@ -50,15 +64,15 @@ export function DashboardEmptyScreen({ showLinkToVisualize, onLinkClick }: Props
     dataTestSubj?: string
   ) => {
     return (
-      <p>
-        <span>
+      <EuiText size="m">
+        <p>
           {description1}
           <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
             {linkText}
           </EuiLink>
           {description2}
-        </span>
-      </p>
+        </p>
+      </EuiText>
     );
   };
   const addVisualizationParagraph = (
@@ -70,6 +84,7 @@ export function DashboardEmptyScreen({ showLinkToVisualize, onLinkClick }: Props
         constants.addVisualizationLinkAriaLabel,
         'emptyDashboardAddPanelButton'
       )}
+      <EuiSpacer size="m" />
       {linkToVisualizeParagraph}
     </React.Fragment>
   );
@@ -81,11 +96,19 @@ export function DashboardEmptyScreen({ showLinkToVisualize, onLinkClick }: Props
   );
   return (
     <I18nProvider>
-      <React.Fragment>
-        <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
-        <h2>{constants.fillDashboardTitle}</h2>
-        {showLinkToVisualize ? addVisualizationParagraph : enterEditModeParagraph}
-      </React.Fragment>
+      <EuiPage className="dshStartScreen" restrictWidth={'36em'}>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
+            <EuiSpacer size="s" />
+            <EuiText grow={true}>
+              <h2 key={0.5}>{constants.fillDashboardTitle}</h2>
+            </EuiText>
+            <EuiSpacer size="m" />
+            {showLinkToVisualize ? addVisualizationParagraph : enterEditModeParagraph}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     </I18nProvider>
   );
 }

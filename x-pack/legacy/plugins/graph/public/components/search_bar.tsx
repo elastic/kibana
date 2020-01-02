@@ -10,10 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
-import {
-  QueryStringInput,
-  IndexPattern,
-} from '../../../../../../src/legacy/core_plugins/data/public';
+import { IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
 import {
   GraphState,
@@ -23,7 +20,12 @@ import {
 } from '../state_management';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { IDataPluginServices, Query, esKuery } from '../../../../../../src/plugins/data/public';
+import {
+  QueryStringInput,
+  IDataPluginServices,
+  Query,
+  esKuery,
+} from '../../../../../../src/plugins/data/public';
 
 export interface OuterSearchBarProps {
   isLoading: boolean;
@@ -86,7 +88,7 @@ export function SearchBarComponent(props: SearchBarProps) {
       }
     }
     fetchPattern();
-  }, [currentDatasource]);
+  }, [currentDatasource, indexPatternProvider]);
 
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 const sessionId = Date.now();
 
-export function getMSearchParams(config: UiSettingsClientContract) {
+export function getMSearchParams(config: IUiSettingsClient) {
   return {
     rest_total_hits_as_int: true,
     ignore_throttled: getIgnoreThrottled(config),
@@ -29,7 +29,7 @@ export function getMSearchParams(config: UiSettingsClientContract) {
   };
 }
 
-export function getSearchParams(config: UiSettingsClientContract, esShardTimeout: number = 0) {
+export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
   return {
     rest_total_hits_as_int: true,
     ignore_unavailable: true,
@@ -40,16 +40,16 @@ export function getSearchParams(config: UiSettingsClientContract, esShardTimeout
   };
 }
 
-export function getIgnoreThrottled(config: UiSettingsClientContract) {
+function getIgnoreThrottled(config: IUiSettingsClient) {
   return !config.get('search:includeFrozen');
 }
 
-export function getMaxConcurrentShardRequests(config: UiSettingsClientContract) {
+function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
   const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
 
-export function getPreference(config: UiSettingsClientContract) {
+export function getPreference(config: IUiSettingsClient) {
   const setRequestPreference = config.get('courier:setRequestPreference');
   if (setRequestPreference === 'sessionId') return sessionId;
   return setRequestPreference === 'custom'

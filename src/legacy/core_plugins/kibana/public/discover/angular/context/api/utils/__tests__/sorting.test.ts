@@ -16,10 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { reverseSortDir } from '../sorting';
-import { SortDirection } from '../../../../../../../../../ui/public/courier';
-
-jest.mock('ui/new_platform');
+import { reverseSortDir, SortDirection } from '../sorting';
 
 describe('function reverseSortDir', function() {
   test('reverse a given sort direction', function() {

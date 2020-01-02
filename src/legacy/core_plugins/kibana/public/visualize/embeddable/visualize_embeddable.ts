@@ -18,7 +18,6 @@
  */
 
 import _, { forEach } from 'lodash';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
@@ -33,6 +32,7 @@ import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
 import { SearchSourceContract } from '../../../../../ui/public/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
+  IIndexPattern,
   TimeRange,
   Query,
   onlyDisabledFiltersChanged,
@@ -61,7 +61,7 @@ export interface VisSavedObject extends SavedObject {
 
 export interface VisualizeEmbeddableConfiguration {
   savedVisualization: VisSavedObject;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
   appState?: AppState;
@@ -81,7 +81,7 @@ export interface VisualizeInput extends EmbeddableInput {
 
 export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   savedObjectId: string;
   visTypeName: string;
 }
@@ -148,8 +148,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     this.vis._setUiState(this.uiState);
-
-    this.appState = appState;
 
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -377,6 +375,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {

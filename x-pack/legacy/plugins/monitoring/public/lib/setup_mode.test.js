@@ -69,12 +69,15 @@ function setModules() {
 
 describe('setup_mode', () => {
   beforeEach(async () => {
-    jest.doMock('ui/chrome', () => ({
-      getInjected: key => {
-        if (key === 'isOnCloud') {
-          return false;
+    jest.doMock('ui/new_platform', () => ({
+      npSetup: {
+        plugins: {
+          cloud: {
+            cloudId: undefined,
+            isCloudEnabled: false,
+          }
         }
-      },
+      }
     }));
     setModules();
   });
@@ -122,12 +125,15 @@ describe('setup_mode', () => {
 
     it('should not fetch data if on cloud', async done => {
       const addDanger = jest.fn();
-      jest.doMock('ui/chrome', () => ({
-        getInjected: key => {
-          if (key === 'isOnCloud') {
-            return true;
+      jest.doMock('ui/new_platform', () => ({
+        npSetup: {
+          plugins: {
+            cloud: {
+              cloudId: 'test',
+              isCloudEnabled: true,
+            }
           }
-        },
+        }
       }));
       data = {
         _meta: {

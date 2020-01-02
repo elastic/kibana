@@ -62,7 +62,7 @@ const putRoleTest = (
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+    mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
     const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

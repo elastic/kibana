@@ -7,15 +7,26 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
-
-jest.mock('ui/new_platform');
+import { MockPluginContextWrapper } from '../../../utils/testHelpers';
 
 describe('Home component', () => {
   it('should render services', () => {
-    expect(shallow(<Home tab="services" />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="services" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
   });
 
   it('should render traces', () => {
-    expect(shallow(<Home tab="traces" />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="traces" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
   });
 });

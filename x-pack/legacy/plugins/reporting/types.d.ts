@@ -25,13 +25,15 @@ export type Job = EventEmitter & {
 
 export interface ReportingPlugin {
   queue: {
-    addJob: (type: string, payload: object, options: object) => Job;
+    addJob: <PayloadType>(type: string, payload: PayloadType, options: object) => Job;
   };
   // TODO: convert exportTypesRegistry to TS
   exportTypesRegistry: {
-    getById: (id: string) => ExportTypeDefinition;
-    getAll: () => ExportTypeDefinition[];
-    get: (callback: (item: ExportTypeDefinition) => boolean) => ExportTypeDefinition;
+    getById: <T, U, V, W>(id: string) => ExportTypeDefinition<T, U, V, W>;
+    getAll: <T, U, V, W>() => Array<ExportTypeDefinition<T, U, V, W>>;
+    get: <T, U, V, W>(
+      callback: (item: ExportTypeDefinition<T, U, V, W>) => boolean
+    ) => ExportTypeDefinition<T, U, V, W>;
   };
   browserDriverFactory: HeadlessChromiumDriverFactory;
 }
@@ -182,7 +184,7 @@ export interface ConditionalHeadersConditions {
 }
 
 export interface CryptoFactory {
-  decrypt: (headers?: Record<string, string>) => string;
+  decrypt: (headers?: string) => any;
 }
 
 export interface TimeRangeParams {
@@ -196,17 +198,11 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-export interface JobDocPayload {
-  headers?: Record<string, string>;
-  jobParams: any;
+export interface JobDocPayload<JobParamsType> {
+  headers?: string; // serialized encrypted headers
+  jobParams: JobParamsType;
   title: string;
   type: string | null;
-  objects?: null | object[];
-}
-
-export interface JobSource {
-  _id: string;
-  _source: JobDoc;
 }
 
 export interface JobDocOutput {
@@ -214,18 +210,21 @@ export interface JobDocOutput {
   contentType: string;
 }
 
-export interface JobDoc {
+export interface JobDocExecuted<JobParamsType> {
   jobtype: string;
-  output: JobDocOutput;
-  payload: JobDocPayload;
+  output: JobDocOutputExecuted;
+  payload: JobDocPayload<JobParamsType>;
   status: string; // completed, failed, etc
 }
 
-export interface JobDocExecuted {
-  jobtype: string;
-  output: JobDocOutputExecuted;
-  payload: JobDocPayload;
-  status: string; // completed, failed, etc
+export interface JobSource<JobParamsType> {
+  _id: string;
+  _source: {
+    jobtype: string;
+    output: JobDocOutput;
+    payload: JobDocPayload<JobParamsType>;
+    status: string; // completed, failed, etc
+  };
 }
 
 /*
@@ -251,41 +250,35 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-type JobParamsUrl = object;
-
-interface JobParamsSavedObject {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-}
-
-export type ESQueueCreateJobFn = (
-  jobParams: JobParamsSavedObject | JobParamsUrl,
+export type ESQueueCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
   headers: Record<string, string>,
   request: RequestFacade
-) => Promise<JobParamsSavedObject | JobParamsUrl>;
+) => Promise<JobParamsType>;
 
-export type ImmediateCreateJobFn = (
-  jobParams: any,
+export type ImmediateCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
   headers: Record<string, string>,
   req: RequestFacade
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: any;
+  jobParams: JobParamsType;
 }>;
 
-export type ESQueueWorkerExecuteFn = (
+export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
-  job: JobDoc,
+  job: JobDocPayloadType,
   cancellationToken?: CancellationToken
 ) => void;
 
-export type JobIDForImmediate = null;
-
-export type ImmediateExecuteFn = (
-  jobId: JobIDForImmediate,
-  job: JobDocPayload,
+/*
+ * ImmediateExecuteFn receives the job doc payload because the payload was
+ * generated in the CreateFn
+ */
+export type ImmediateExecuteFn<JobParamsType> = (
+  jobId: null,
+  job: JobDocPayload<JobParamsType>,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
@@ -296,30 +289,48 @@ export interface ESQueueWorkerOptions {
   intervalErrorMultiplier: number;
 }
 
-export interface ESQueueInstance {
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+type GenericWorkerFn<JobParamsType> = (
+  jobSource: JobSource<JobParamsType>,
+  ...workerRestArgs: any[]
+) => void | Promise<JobDocOutputExecuted>;
+
+export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   registerWorker: (
-    jobtype: string,
-    workerFn: any,
+    pluginId: string,
+    workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn | ImmediateCreateJobFn;
-export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn | ImmediateExecuteFn; // prettier-ignore
+export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type ExecuteJobFactory<ExecuteJobFnType> = (server: ServerFacade) => ExecuteJobFnType;
 
-export interface ExportTypeDefinition {
+export interface ExportTypeDefinition<
+  JobParamsType,
+  CreateJobFnType,
+  JobPayloadType,
+  ExecuteJobFnType
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFactory: CreateJobFactory;
-  executeJobFactory: ExecuteJobFactory;
+  createJobFactory: CreateJobFactory<CreateJobFnType>;
+  executeJobFactory: ExecuteJobFactory<ExecuteJobFnType>;
   validLicenses: string[];
 }
 
 export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
+  register: <JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
+    exportTypeDefinition: ExportTypeDefinition<
+      JobParamsType,
+      CreateJobFnType,
+      JobPayloadType,
+      ExecuteJobFnType
+    >
+  ) => void;
 }
 
 export { CancellationToken } from './common/cancellation_token';

@@ -18,7 +18,9 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardEmptyScreen, Props } from '../dashboard_empty_screen';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from '../dashboard_empty_screen';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('DashboardEmptyScreen', () => {
   const defaultProps = {
@@ -26,7 +28,7 @@ describe('DashboardEmptyScreen', () => {
     onLinkClick: jest.fn(),
   };
 
-  function mountComponent(props?: Props) {
+  function mountComponent(props?: DashboardEmptyScreenProps) {
     const compProps = props || defaultProps;
     const comp = mountWithIntl(<DashboardEmptyScreen {...compProps} />);
     return comp;
@@ -35,14 +37,14 @@ describe('DashboardEmptyScreen', () => {
   test('renders correctly with visualize paragraph', () => {
     const component = mountComponent();
     expect(component).toMatchSnapshot();
-    const paragraph = component.find('.linkToVisualizeParagraph');
+    const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(1);
   });
 
   test('renders correctly without visualize paragraph', () => {
     const component = mountComponent({ ...defaultProps, ...{ showLinkToVisualize: false } });
     expect(component).toMatchSnapshot();
-    const paragraph = component.find('.linkToVisualizeParagraph');
+    const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(0);
   });
 });

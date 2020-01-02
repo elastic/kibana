@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import {
   InfraMetric,
   InfraMetricData,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../../graphql/types';
-
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraMetricsRequestOptions {
   nodeIds: {
@@ -27,8 +26,9 @@ export interface InfraMetricsRequestOptions {
 
 export interface InfraMetricsAdapter {
   getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
+    requestContext: RequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    request: KibanaRequest // NP_TODO: temporarily needed until metrics getVisData no longer needs full request
   ): Promise<InfraMetricData[]>;
 }
 

@@ -26,7 +26,8 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
-import { fromRoot } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
@@ -279,8 +280,6 @@ export function uiRenderMixin(kbnServer, server, config) {
         uiPlugins,
 
         legacyMetadata,
-
-        capabilities: await request.getCapabilities(),
       },
     });
 

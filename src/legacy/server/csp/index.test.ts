@@ -40,8 +40,7 @@ test('default CSP rules', () => {
   expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
     Array [
       "script-src 'unsafe-eval' 'self'",
-      "worker-src blob:",
-      "child-src blob:",
+      "worker-src blob: 'self'",
       "style-src 'unsafe-inline' 'self'",
     ]
   `);

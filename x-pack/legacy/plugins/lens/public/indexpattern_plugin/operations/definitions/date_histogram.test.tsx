@@ -9,11 +9,7 @@ import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
@@ -34,7 +30,7 @@ jest.mock('ui/new_platform', () => ({
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as UiSettingsClientContract,
+  uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',

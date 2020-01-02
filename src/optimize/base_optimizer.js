@@ -31,8 +31,8 @@ import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
-
+import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
+import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');

@@ -21,7 +21,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -35,7 +35,7 @@ import { createTileMapTypeDefinition } from './tile_map_type';
 
 /** @private */
 interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

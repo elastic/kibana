@@ -22,9 +22,7 @@ import { createTableVisFn } from './table_vis_fn';
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
-jest.mock('ui/new_platform');
-
-jest.mock('ui/vis/response_handlers/legacy', () => {
+jest.mock('./legacy_imports', () => {
   const mockResponseHandler = jest.fn().mockReturnValue(
     Promise.resolve({
       tables: [{ columns: [], rows: [] }],
@@ -37,7 +35,7 @@ jest.mock('ui/vis/response_handlers/legacy', () => {
   };
 });
 
-const { mockResponseHandler } = jest.requireMock('ui/vis/response_handlers/legacy');
+const { mockResponseHandler } = jest.requireMock('./legacy_imports');
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn);

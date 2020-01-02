@@ -71,7 +71,7 @@ module.exports = function (grunt) {
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
-        'licenses',
+        'run:licenses',
         'test:quick',
       ])
     );

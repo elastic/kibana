@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 import { useShallowCompareEffect } from './use_shallow_compare_effect';
 
 describe('useShallowCompareEffect', () => {

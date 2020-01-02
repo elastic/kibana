@@ -15,6 +15,7 @@ import { ml } from '../../../services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
+import { mlCalendarService } from '../../../services/calendar_service';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -147,49 +148,53 @@ function showResults(resp, action) {
   }
 }
 
-export function cloneJob(jobId) {
-  loadFullJob(jobId)
-    .then((job) => {
-      if(job.custom_settings && job.custom_settings.created_by) {
-        // if the job is from a wizards, i.e. contains a created_by property
-        // use tempJobCloningObjects to temporarily store the job
-        mlJobService.tempJobCloningObjects.job = job;
+export async function cloneJob(jobId) {
+  try {
+    const job = await loadFullJob(jobId);
+    if (job.custom_settings && job.custom_settings.created_by) {
+      // if the job is from a wizards, i.e. contains a created_by property
+      // use tempJobCloningObjects to temporarily store the job
+      mlJobService.tempJobCloningObjects.job = job;
 
-        if (
-          job.data_counts.earliest_record_timestamp !== undefined &&
-          job.data_counts.latest_record_timestamp !== undefined &&
-          job.data_counts.latest_bucket_timestamp !== undefined) {
-          // if the job has run before, use the earliest and latest record timestamp
-          // as the cloned job's time range
-          let start = job.data_counts.earliest_record_timestamp;
-          let end = job.data_counts.latest_record_timestamp;
+      if (
+        job.data_counts.earliest_record_timestamp !== undefined &&
+        job.data_counts.latest_record_timestamp !== undefined &&
+        job.data_counts.latest_bucket_timestamp !== undefined) {
+        // if the job has run before, use the earliest and latest record timestamp
+        // as the cloned job's time range
+        let start = job.data_counts.earliest_record_timestamp;
+        let end = job.data_counts.latest_record_timestamp;
 
-          if (job.datafeed_config.aggregations !== undefined) {
-            // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
-            // as the start and end of the data in the index.
-            const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
-            // round down to the start of the nearest bucket
-            start = Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
-            // use latest_bucket_timestamp and add two bucket spans minus one ms
-            end = job.data_counts.latest_bucket_timestamp + (bucketSpanMs * 2) - 1;
-          }
-
-          mlJobService.tempJobCloningObjects.start = start;
-          mlJobService.tempJobCloningObjects.end = end;
+        if (job.datafeed_config.aggregations !== undefined) {
+          // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
+          // as the start and end of the data in the index.
+          const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+          // round down to the start of the nearest bucket
+          start = Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+          // use latest_bucket_timestamp and add two bucket spans minus one ms
+          end = job.data_counts.latest_bucket_timestamp + (bucketSpanMs * 2) - 1;
         }
-      } else {
-        // otherwise use the tempJobCloningObjects
-        mlJobService.tempJobCloningObjects.job = job;
+
+        mlJobService.tempJobCloningObjects.start = start;
+        mlJobService.tempJobCloningObjects.end = end;
       }
-      window.location.href = '#/jobs/new_job';
-    })
-    .catch((error) => {
-      mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
-        defaultMessage: 'Could not clone {jobId}. Job could not be found',
-        values: { jobId }
-      }));
-    });
+    } else {
+      // otherwise use the tempJobCloningObjects
+      mlJobService.tempJobCloningObjects.job = job;
+    }
+
+    if (job.calendars) {
+      mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(job.calendars);
+    }
+
+    window.location.href = '#/jobs/new_job';
+  } catch (error) {
+    mlMessageBarService.notify.error(error);
+    toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
+      defaultMessage: 'Could not clone {jobId}. Job could not be found',
+      values: { jobId },
+    }));
+  }
 }
 
 export function closeJobs(jobs, finish = () => {}) {

@@ -29,33 +29,29 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <UserHostWorkingDir
-            contextId="context-123"
-            eventId="event-123"
-            userDomain={null}
-            userName={null}
-            hostName={null}
-            workingDirectory={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <UserHostWorkingDir
+          contextId="context-123"
+          eventId="event-123"
+          userDomain={null}
+          userName={null}
+          hostName={null}
+          workingDirectory={null}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <UserHostWorkingDir
-            contextId="context-123"
-            eventId="event-123"
-            userDomain={undefined}
-            userName={undefined}
-            hostName={undefined}
-            workingDirectory={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <UserHostWorkingDir
+          contextId="context-123"
+          eventId="event-123"
+          userDomain={undefined}
+          userName={undefined}
+          hostName={undefined}
+          workingDirectory={undefined}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

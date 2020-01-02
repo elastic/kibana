@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 import { SearchRequest, SearchResponse } from '../types';
 
 export interface ApiCaller {
@@ -36,6 +36,6 @@ export interface FetchOptions {
 
 export interface FetchHandlers {
   es: ApiCaller;
-  config: UiSettingsClientContract;
+  config: IUiSettingsClient;
   esShardTimeout: number;
 }

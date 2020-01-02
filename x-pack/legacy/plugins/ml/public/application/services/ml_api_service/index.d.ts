@@ -17,6 +17,8 @@ import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 import { DeepPartial } from '../../../../common/types/common';
 import { annotations } from './annotations';
+import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -63,6 +65,18 @@ export interface MlInfoResponse {
   cloudId?: string;
 }
 
+export interface SuccessCardinality {
+  id: 'success_cardinality';
+}
+
+export interface CardinalityModelPlotHigh {
+  id: 'cardinality_model_plot_high';
+  modelPlotCardinality: number;
+}
+
+export type CardinalityValidationResult = SuccessCardinality | CardinalityModelPlotHigh;
+export type CardinalityValidationResults = CardinalityValidationResult[];
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -102,14 +116,8 @@ declare interface Ml {
   setupDataRecognizerConfig(obj: object): Promise<any>;
   getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
-  calendars(): Promise<
-    Array<{
-      calendar_id: string;
-      description: string;
-      events: any[];
-      job_ids: string[];
-    }>
-  >;
+  calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }): Promise<Calendar[]>;
+  updateCalendar(obj: UpdateCalendar): Promise<any>;
 
   getVisualizerFieldStats(obj: object): Promise<any>;
   getVisualizerOverallStats(obj: object): Promise<any>;
@@ -164,6 +172,7 @@ declare interface Ml {
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
   getCardinalityOfFields(obj: Record<string, any>): any;
+  validateCardinality$(job: CombinedJob): Observable<CardinalityValidationResults>;
 }
 
 declare const ml: Ml;

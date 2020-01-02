@@ -22,6 +22,7 @@ import { Filter } from './meta_filter';
 
 export * from './build_filters';
 export * from './get_filter_params';
+export * from './get_filter_field';
 
 export * from './custom_filter';
 export * from './exists_filter';

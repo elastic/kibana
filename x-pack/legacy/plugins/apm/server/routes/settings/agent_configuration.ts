@@ -170,6 +170,9 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     });
 
     if (!config) {
+      context.logger.info(
+        `Config was not found for ${body.service.name}/${body.service.environment}`
+      );
       throw new Boom('Not found', { statusCode: 404 });
     }
 

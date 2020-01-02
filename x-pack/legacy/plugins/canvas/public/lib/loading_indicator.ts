@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { loadingCount } from 'ui/chrome';
+import * as Rx from 'rxjs';
+import { CoreStart } from 'src/core/public';
 
 let isActive = false;
 
@@ -14,17 +14,22 @@ export interface LoadingIndicatorInterface {
   hide: () => void;
 }
 
+const loadingCount$ = new Rx.BehaviorSubject(0);
+
+export const initLoadingIndicator = (addLoadingCount: CoreStart['http']['addLoadingCount']) =>
+  addLoadingCount(loadingCount$);
+
 export const loadingIndicator = {
   show: () => {
     if (!isActive) {
-      loadingCount.increment();
       isActive = true;
+      loadingCount$.next(1);
     }
   },
   hide: () => {
     if (isActive) {
-      loadingCount.decrement();
       isActive = false;
+      loadingCount$.next(0);
     }
   },
 };

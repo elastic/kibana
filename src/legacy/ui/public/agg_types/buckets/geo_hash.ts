@@ -18,13 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { geohashColumns } from 'ui/vis/map/decode_geo_hash';
 import chrome from '../../chrome';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { AutoPrecisionParamEditor } from '../../vis/editors/default/controls/auto_precision';
 import { UseGeocentroidParamEditor } from '../../vis/editors/default/controls/use_geocentroid';
 import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/controls/is_filtered_by_collar';
 import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
-import { geohashColumns } from '../../utils/decode_geo_hash';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 

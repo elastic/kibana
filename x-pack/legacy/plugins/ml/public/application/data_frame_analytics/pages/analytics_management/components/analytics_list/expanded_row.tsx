@@ -6,7 +6,6 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
-import { idx } from '@kbn/elastic-idx';
 
 import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
@@ -64,7 +63,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
-  const index = idx(item, _ => _.config.dest.index) as string;
+  const index = item?.config?.dest?.index;
   const dependentVariable = getDependentVar(item.config.analysis);
   const predictionFieldName = getPredictionFieldName(item.config.analysis);
   // default is 'ml'
@@ -133,7 +132,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     }
   }, [jobIsCompleted]);
 
-  const stateValues = { ...item.stats };
+  const stateValues: any = { ...item.stats };
+
+  if (item.config?.description) {
+    stateValues.description = item.config.description;
+  }
   delete stateValues.progress;
 
   const state: SectionConfig = {

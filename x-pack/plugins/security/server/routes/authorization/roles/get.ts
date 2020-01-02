@@ -28,7 +28,7 @@ export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefi
             body: transformElasticsearchRoleToRole(
               elasticsearchRole,
               request.params.name,
-              authz.getApplicationName()
+              authz.applicationName
             ),
           });
         }

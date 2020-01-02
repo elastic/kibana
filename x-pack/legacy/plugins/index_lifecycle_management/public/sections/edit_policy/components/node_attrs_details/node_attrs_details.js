@@ -27,7 +27,7 @@ export class NodeAttrsDetails extends PureComponent {
     selectedNodeAttrs: PropTypes.string.isRequired,
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.fetchNodeDetails(this.props.selectedNodeAttrs);
   }
 

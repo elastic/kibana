@@ -48,10 +48,7 @@ export function explorerChartsContainerServiceFactory(callback) {
 
   callback(getDefaultChartsData());
 
-  let requestCount = 0;
   const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
 
     const data = getDefaultChartsData();
 
@@ -380,11 +377,6 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     Promise.all(seriesPromises)
       .then(response => {
-        // TODO: Add test to prevent this regression.
-        // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
-          return;
-        }
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {

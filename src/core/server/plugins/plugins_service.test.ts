@@ -43,6 +43,7 @@ let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
+
 const setupDeps = coreMock.createInternalSetup();
 const logger = loggingServiceMock.create();
 

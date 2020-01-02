@@ -322,18 +322,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.existOrFail('saveDashboardSuccess');
       const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await this.waitForSaveModalToClose();
+      await PageObjects.common.waitForSaveModalToClose();
 
       return message;
-    }
-
-    async waitForSaveModalToClose() {
-      log.debug('Waiting for dashboard save modal to close');
-      await retry.try(async () => {
-        if (await testSubjects.exists('savedObjectSaveModal')) {
-          throw new Error('dashboard save still open');
-        }
-      });
     }
 
     async deleteDashboard(dashboardName, dashboardId) {

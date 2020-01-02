@@ -31,6 +31,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
   const comboBox = getService('comboBox');
+  const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
     async getQueryField() {
@@ -292,6 +293,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
+    async waitForChartLoadingComplete(renderCount) {
+      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+    }
   }
 
   return new DiscoverPage();

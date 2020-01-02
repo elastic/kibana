@@ -26,7 +26,7 @@ const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
 describe('config/deprecation warnings', function () {
-  this.timeout(15 * SECOND);
+  this.timeout(65 * SECOND);
 
   let stdio = '';
   let proc = null;
@@ -53,7 +53,7 @@ describe('config/deprecation warnings', function () {
 
     // Either time out in 60 seconds, or resolve once the line is in our buffer
     return Promise.race([
-      new Promise((resolve) => setTimeout(resolve, 60000)),
+      new Promise((resolve) => setTimeout(resolve, 60 * SECOND)),
       new Promise((resolve, reject) => {
         proc.stdout.on('data', (chunk) => {
           stdio += chunk.toString('utf8');

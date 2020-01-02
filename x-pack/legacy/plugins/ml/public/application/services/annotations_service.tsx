@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { Annotation } from '../../../common/types/annotations';
 
@@ -74,4 +74,4 @@ export const annotation$ = new BehaviorSubject<AnnotationState>(null);
   Instead of passing around callbacks or deeply nested props, it can be imported for both
   angularjs controllers/directives and React components.
 */
-export const annotationsRefresh$ = new Subject();
+export const annotationsRefresh$ = new BehaviorSubject(false);

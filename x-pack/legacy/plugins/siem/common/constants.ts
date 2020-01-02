@@ -15,7 +15,11 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
 export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
+
+// DEPRECATED: THIS WILL BE REMOVED VERY SOON AND IS NO LONGER USED ON THE BACKEND
+// TODO: Remove this as soon as no code is left that is pulling data from it.
 export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
+
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
@@ -32,12 +36,21 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 
 /**
- * Id for the SIGNALS alerting type
+ * Id for the signals alerting type
  */
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
- * Detection engine route
+ * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;
+export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
+
+/**
+ * Default signals index key for kibana.dev.yml
+ */
+export const SIGNALS_INDEX_KEY = 'signalsIndex';
+export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
+export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
+export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;

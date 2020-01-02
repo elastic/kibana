@@ -66,7 +66,7 @@ export const ShardAllocation = ({
         </h1>
       </EuiTitle>
       <EuiSpacer size="xs"/>
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+      <EuiFlexGroup wrap responsive={false} gutterSize="s">
         {
           types.map(type => (
             <EuiFlexItem grow={false} key={type.label}>

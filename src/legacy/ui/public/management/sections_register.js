@@ -22,15 +22,15 @@ import { i18n } from '@kbn/i18n';
 
 export const management = new ManagementSection('management', {
   display: i18n.translate('common.ui.management.displayName', {
-    defaultMessage: 'Management'
-  })
+    defaultMessage: 'Management',
+  }),
 });
 
 management.register('data', {
   display: i18n.translate('common.ui.management.connectDataDisplayName', {
-    defaultMessage: 'Connect Data'
+    defaultMessage: 'Connect Data',
   }),
-  order: 0
+  order: 0,
 });
 
 management.register('elasticsearch', {

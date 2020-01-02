@@ -56,7 +56,7 @@ export class EditSettingsJson extends React.PureComponent {
     }
     return newSettings;
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { indexName } = this.props;
     this.props.loadIndexData({ dataType: TAB_SETTINGS, indexName });
   }

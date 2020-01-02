@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
@@ -31,10 +31,7 @@ jest.mock('../../../containers/source', () => ({
   WithSource: ({
     children,
   }: {
-    children: (args: {
-      indicesExist: boolean;
-      indexPattern: StaticIndexPattern;
-    }) => React.ReactNode;
+    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
   }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
 }));
 

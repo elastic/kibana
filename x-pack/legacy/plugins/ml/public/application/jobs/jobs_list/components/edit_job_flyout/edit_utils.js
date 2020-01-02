@@ -236,11 +236,10 @@ function processCustomSettings(jobData, datafeedData) {
   if (jobData.custom_settings !== undefined) {
     customSettings = { ...jobData.custom_settings };
 
-    if (jobData.custom_settings.created_by !== undefined) {
-      if (jobData.detectors !== undefined || Object.keys(datafeedData).length ||
-        (jobData.custom_settings.custom_urls !== undefined && jobData.custom_settings.custom_urls.length)) {
-        processCreatedBy(customSettings);
-      }
+    if (jobData.custom_settings.created_by !== undefined &&
+      (jobData.detectors !== undefined || Object.keys(datafeedData).length)
+    ) {
+      processCreatedBy(customSettings);
     }
   }
 

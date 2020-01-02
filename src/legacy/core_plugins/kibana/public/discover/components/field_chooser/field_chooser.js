@@ -16,25 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-//field_name directive will be replaced very soon
-import 'ui/directives/field_name';
-import './discover_field';
-import './discover_field_search_directive';
-import './discover_index_pattern_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import {
-  getServices,
-  FieldList
-} from '../../kibana_services';
+import './discover_field';
+import './discover_field_search_directive';
+import './discover_index_pattern_directive';
+import { FieldList } from '../../../../../../../plugins/data/public';
 import fieldChooserTemplate from './field_chooser.html';
 
-const { uiModules } =  getServices();
-const app = uiModules.get('apps/discover');
-
-app.directive('discFieldChooser', function ($location, config, $route) {
+export function createFieldChooserDirective($location, config, $route) {
   return {
     restrict: 'E',
     scope: {
@@ -50,12 +42,11 @@ app.directive('discFieldChooser', function ($location, config, $route) {
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
-
       $scope.showFilter = false;
-      $scope.toggleShowFilter = () =>  $scope.showFilter = !$scope.showFilter;
+      $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
 
       $scope.selectedIndexPattern = $scope.indexPatternList.find(
-        (pattern) => pattern.id === $scope.indexPattern.id
+        pattern => pattern.id === $scope.indexPattern.id
       );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
       $scope.setIndexPattern = function (id) {
@@ -68,23 +59,17 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         $route.reload();
       });
 
-      const filter = $scope.filter = {
-        props: [
-          'type',
-          'aggregatable',
-          'searchable',
-          'missing',
-          'name'
-        ],
+      const filter = ($scope.filter = {
+        props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],
         defaults: {
           missing: true,
           type: 'any',
-          name: ''
+          name: '',
         },
         boolOpts: [
           { label: 'any', value: undefined },
           { label: 'yes', value: true },
-          { label: 'no', value: false }
+          { label: 'no', value: false },
         ],
         reset: function () {
           filter.vals = _.clone(filter.defaults);
@@ -105,15 +90,18 @@ app.directive('discFieldChooser', function ($location, config, $route) {
           return _.some(filter.props, function (prop) {
             return filter.vals[prop] !== filter.defaults[prop];
           });
-        }
-      };
+        },
+      });
 
       function isFieldFiltered(field) {
-        const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
-        const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
-        const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
-        const scriptedOrMissing = !filter.vals.missing || field.type === '_source' ||  field.scripted || field.rowCount > 0;
-        const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+        const matchFilter = filter.vals.type === 'any' || field.type === filter.vals.type;
+        const isAggregatable =
+          filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable;
+        const isSearchable =
+          filter.vals.searchable == null || field.searchable === filter.vals.searchable;
+        const scriptedOrMissing =
+          !filter.vals.missing || field.type === '_source' || field.scripted || field.rowCount > 0;
+        const matchName = !filter.vals.name || field.name.indexOf(filter.vals.name) !== -1;
 
         return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
       }
@@ -131,7 +119,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         filter.active = filter.getActive();
         if (filter.vals) {
           let count = 0;
-          Object.keys(filter.vals).forEach((key) => {
+          Object.keys(filter.vals).forEach(key => {
             if (key === 'missing' || key === 'name') {
               return;
             }
@@ -144,11 +132,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         }
       });
 
-      $scope.$watchMulti([
-        '[]fieldCounts',
-        '[]columns',
-        '[]hits'
-      ], function (cur, prev) {
+      $scope.$watchMulti(['[]fieldCounts', '[]columns', '[]hits'], function (cur, prev) {
         const newHits = cur[2] !== prev[2];
         let fields = $scope.fields;
         const columns = $scope.columns || [];
@@ -198,7 +182,9 @@ app.directive('discFieldChooser', function ($location, config, $route) {
       };
 
       function getVisualizeUrl(field) {
-        if (!$scope.state) {return '';}
+        if (!$scope.state) {
+          return '';
+        }
 
         let agg = {};
         const isGeoPoint = field.type === 'geo_point';
@@ -211,18 +197,17 @@ app.directive('discFieldChooser', function ($location, config, $route) {
             schema: 'segment',
             params: {
               field: field.name,
-              interval: 'auto'
-            }
+              interval: 'auto',
+            },
           };
-
         } else if (isGeoPoint) {
           agg = {
             type: 'geohash_grid',
             schema: 'segment',
             params: {
               field: field.name,
-              precision: 3
-            }
+              precision: 3,
+            },
           };
         } else {
           agg = {
@@ -231,26 +216,28 @@ app.directive('discFieldChooser', function ($location, config, $route) {
             params: {
               field: field.name,
               size: parseInt(config.get('discover:aggs:terms:size'), 10),
-              orderBy: '2'
-            }
+              orderBy: '2',
+            },
           };
         }
 
-        return '#/visualize/create?' + $.param(_.assign(_.clone($location.search()), {
-          indexPattern: $scope.state.index,
-          type: type,
-          _a: rison.encode({
-            filters: $scope.state.filters || [],
-            query: $scope.state.query || undefined,
-            vis: {
+        return (
+          '#/visualize/create?' +
+          $.param(
+            _.assign(_.clone($location.search()), {
+              indexPattern: $scope.state.index,
               type: type,
-              aggs: [
-                { schema: 'metric', type: 'count', 'id': '2' },
-                agg,
-              ]
-            }
-          })
-        }));
+              _a: rison.encode({
+                filters: $scope.state.filters || [],
+                query: $scope.state.query || undefined,
+                vis: {
+                  type: type,
+                  aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
+                },
+              }),
+            })
+          )
+        );
       }
 
       $scope.computeDetails = function (field, recompute) {
@@ -261,7 +248,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
               hits: $scope.hits,
               field: field,
               count: 5,
-              grouped: false
+              grouped: false,
             }),
           };
           _.each(field.details.buckets, function (bucket) {
@@ -285,13 +272,14 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         const fieldNamesInDocs = _.keys(fieldCounts);
         const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
 
-        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
-          .forEach(function (unknownFieldName) {
-            fieldSpecs.push({
-              name: unknownFieldName,
-              type: 'unknown'
-            });
+        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function (
+          unknownFieldName
+        ) {
+          fieldSpecs.push({
+            name: unknownFieldName,
+            type: 'unknown',
           });
+        });
 
         const fields = new FieldList(indexPattern, fieldSpecs);
 
@@ -303,6 +291,6 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         return fields;
       }
-    }
+    },
   };
-});
+}

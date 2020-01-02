@@ -173,14 +173,14 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
           for (let i = 0; i < queryFields.length; i++) {
             const field = queryFields[i];
             // Use lodash get to allow nested JSON fields to be retrieved.
-            const tokenValues: string[] = get(record, field) || null;
+            const tokenValues: string[] | string | null = get(record, field) || null;
             if (tokenValues === null) {
               continue;
             }
             // Create a pair `influencerField:value`.
             // In cases where there are multiple influencer field values for an anomaly
             // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-            let result = tokenValues
+            let result = (Array.isArray(tokenValues) ? tokenValues : [tokenValues])
               .map(value => `${field}:"${getResultTokenValue(value)}"`)
               .join(' OR ');
             result = tokenValues.length > 1 ? `(${result})` : result;

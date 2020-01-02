@@ -65,6 +65,8 @@ connects to this Kibana instance.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
 of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 headers, set this value to [] (an empty list).
+Removing the `authorization` header from being whitelisted means that you cannot 
+use <<basic-authentication, basic authentication>> in Kibana.
 
 `elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
 for responses from the back end or Elasticsearch. This value must be a positive
@@ -146,6 +148,36 @@ will default to `true`.
 
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
+
+`logging.rotate:`:: [experimental] Specifies the options for the logging rotate feature.
+When not defined, all the sub options defaults would be applied.
+The following example shows a valid logging rotate configuration:
++
+--
+    logging.rotate:
+      enabled: true
+      everyBytes: 10485760
+      keepFiles: 10
+--
+
+`logging.rotate.enabled:`:: [experimental] *Default: false* Set the value of this setting to `true` to
+enable log rotation. If you do not have a `logging.dest` set that is different from `stdout`
+that feature would not take any effect.
+
+`logging.rotate.everyBytes:`:: [experimental] *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the 
+limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
+this option should be at least greater than 1024.
+
+`logging.rotate.keepFiles:`:: [experimental] *Default: 7* The number of most recent rotated log files to keep 
+on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles` 
+option has to be in the range of 2 to 1024 files.
+
+`logging.rotate.pollingInterval:`:: [experimental] *Default: 10000* The number of milliseconds for the polling strategy in case 
+the `logging.rotate.usePolling` is enabled. That option has to be in the range of 5000 to 3600000 milliseconds.
+
+`logging.rotate.usePolling:`:: [experimental] *Default: false* By default we try to understand the best way to monitoring 
+the log file. However, there is some systems where it could not be always accurate. In those cases, if needed, 
+the `polling` method could be used enabling that option.
 
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output.
@@ -257,6 +289,12 @@ system and process performance metrics. The minimum value is 100.
 running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
+
+[[server-compression]]`server.compression.enabled:`:: *Default: `true`* Set to `false` to disable HTTP compression for all responses.
+
+`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the Kibana host, or a reverse
+proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
+This setting may not be used when `server.compression.enabled` is set to `false`.
 
 [[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
 

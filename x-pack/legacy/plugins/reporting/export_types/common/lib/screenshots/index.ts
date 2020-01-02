@@ -10,7 +10,7 @@ import { ServerFacade, CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import {
   ElementsPositionAndAttribute,
-  Screenshot,
+  ScreenshotResults,
   ScreenshotObservableOpts,
   TimeRange,
 } from './types';
@@ -25,11 +25,6 @@ import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 import { skipTelemetry } from './skip_telemetry';
-
-interface ScreenshotResults {
-  timeRange: TimeRange;
-  screenshots: Screenshot[];
-}
 
 export function screenshotsObservableFactory(server: ServerFacade) {
   const config = server.config();
@@ -48,7 +43,7 @@ export function screenshotsObservableFactory(server: ServerFacade) {
       browserTimezone,
     });
 
-    // @ts-ignore this needs to be refactored to use less random type declaration and instead rely on structures that work with inference
+    // @ts-ignore this needs to be refactored to use less random type declaration and instead rely on structures that work with inference TODO
     return create$.pipe(
       mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(

@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
@@ -38,11 +39,10 @@ import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/da
 
 const {
   ui: { SearchBar },
-  search,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
-export const savedQueryService = search.services.savedQueryService;
+export const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 interface SiemSearchBarRedux {
   end: number;
@@ -69,7 +69,7 @@ interface SiemSearchBarDispatch {
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId?: string;
   dataTestSubj?: string;
 }

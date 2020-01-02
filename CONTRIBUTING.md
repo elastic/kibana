@@ -24,6 +24,7 @@ A high level overview of our contributing guidelines.
   - [Internationalization](#internationalization)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
+    - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -374,6 +375,29 @@ macOS users on a machine with a discrete graphics card may see significant speed
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
+### Instrumenting with Elastic APM
+Kibana ships with the [Elastic APM Node.js Agent](https://github.com/elastic/apm-agent-nodejs) built-in for debugging purposes.
+
+Its default configuration is meant to be used by core Kibana developers only, but it can easily be re-configured to your needs.
+In its default configuration it's disabled and will, once enabled, send APM data to a centrally managed Elasticsearch cluster accessible only to Elastic employees.
+
+To change the location where data is sent, use the [`serverUrl`](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#server-url) APM config option.
+To activate the APM agent, use the [`active`](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#active) APM config option.
+
+All config options can be set either via environment variables, or by creating an appropriate config file under `config/apm.dev.js`.
+For more information about configuring the APM agent, please refer to [the documentation](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html).
+
+Example `config/apm.dev.js` file:
+
+```js
+module.exports = {
+  active: true,
+};
+```
+
+Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
+The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
+
 ### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
 exist in Mocha but all new unit tests should be written in Jest. Mocha tests
@@ -389,7 +413,7 @@ The following table outlines possible test file locations and how to invoke them
 | Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
 | Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
 | Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
-| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                    | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
 | Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
 
 For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)

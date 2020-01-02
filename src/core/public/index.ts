@@ -62,7 +62,7 @@ import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './i
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
+import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
@@ -112,14 +112,13 @@ export {
   HttpErrorResponse,
   HttpErrorRequest,
   HttpInterceptor,
-  HttpResponse,
+  IHttpResponse,
   HttpHandler,
-  HttpBody,
   IBasePath,
   IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
-  InterceptedHttpResponse,
+  IHttpResponseInterceptorOverrides,
 } from './http';
 
 export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
@@ -157,8 +156,8 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
-  /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -196,8 +195,8 @@ export interface CoreStart {
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
-  /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -281,7 +280,6 @@ export {
   PluginInitializerContext,
   SavedObjectsStart,
   PluginOpaqueId,
-  UiSettingsClient,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   UiSettingsState,
 };

@@ -6,17 +6,23 @@
 import React from 'react';
 import Boom from 'boom';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mockManagementPlugin } from '../../../../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import { Space } from '../../../../../common/model/space';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { SelectableSpacesControl } from './selectable_spaces_control';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../../../lib/mocks';
 import { SpacesManager } from '../../../../lib';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+
+jest.mock('../../../../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
+}));
 
 interface SetupOpts {
   mockSpaces?: Space[];

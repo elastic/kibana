@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { I18nStart, UiSettingsClientContract } from 'src/core/public';
+import { I18nStart, IUiSettingsClient } from 'src/core/public';
 import { TypesStart } from './types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 
-export const [getUISettings, setUISettings] = createGetterSetter<UiSettingsClientContract>(
-  'UISettings'
-);
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 

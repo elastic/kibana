@@ -2,6 +2,7 @@
 
 exports[`NewVisModal filter for visualization types should render as expected 1`] = `
 <NewVisModal
+  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -107,6 +108,24 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
   }
   isOpen={true}
   onClose={[Function]}
+  savedObjects={Object {}}
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "visualize:enableLabs",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    }
+  }
   visTypesRegistry={
     Object {
       "all": [Function],
@@ -865,6 +884,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   className="euiModal__flex"
                 >
                   <TypeSelection
+                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -1235,6 +1255,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp
+                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>
@@ -1287,6 +1308,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
 
 exports[`NewVisModal should render as expected 1`] = `
 <NewVisModal
+  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -1392,6 +1414,24 @@ exports[`NewVisModal should render as expected 1`] = `
   }
   isOpen={true}
   onClose={[Function]}
+  savedObjects={Object {}}
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "visualize:enableLabs",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    }
+  }
   visTypesRegistry={
     Object {
       "all": [Function],
@@ -2141,6 +2181,7 @@ exports[`NewVisModal should render as expected 1`] = `
                   className="euiModal__flex"
                 >
                   <TypeSelection
+                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -2499,6 +2540,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp
+                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>

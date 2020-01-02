@@ -19,9 +19,12 @@
 
 
 import $ from 'jquery';
-import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+import React from 'react';
+
+import { CUSTOM_LEGEND_VIS_TYPES, VisLegend } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
 import { VislibVisProvider } from '../../../ui/public/vislib/vis';
 import chrome from '../../../ui/public/chrome';
+import { mountReactNode } from '../../../../core/public/utils';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -30,24 +33,30 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-
 export class vislibVisController {
   constructor(el, vis) {
     this.el = el;
     this.vis = vis;
-    this.$scope = null;
+    this.unmount = null;
+    this.legendRef = React.createRef();
 
+    // vis mount point
     this.container = document.createElement('div');
     this.container.className = 'visLib';
     this.el.appendChild(this.container);
 
+    // chart mount point
     this.chartEl = document.createElement('div');
     this.chartEl.className = 'visLib__chart';
     this.container.appendChild(this.chartEl);
+    // legend mount point
+    this.legendEl = document.createElement('div');
+    this.legendEl.className = 'visLib__legend';
+    this.container.appendChild(this.legendEl);
   }
 
   render(esResponse, visParams) {
-    if (this.vis.vislibVis) {
+    if (this.vislibVis) {
       this.destroy();
     }
 
@@ -56,62 +65,69 @@ export class vislibVisController {
         const $injector = await chrome.dangerouslyGetActiveInjector();
         const Private = $injector.get('Private');
         this.Vislib = Private(VislibVisProvider);
-        this.$compile = $injector.get('$compile');
-        this.$rootScope = $injector.get('$rootScope');
       }
 
       if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
         return resolve();
       }
 
-      this.vis.vislibVis = new this.Vislib(this.chartEl, visParams);
-      this.vis.vislibVis.on('brush', this.vis.API.events.brush);
-      this.vis.vislibVis.on('click', this.vis.API.events.filter);
-      this.vis.vislibVis.on('renderComplete', resolve);
+      this.vislibVis = new this.Vislib(this.chartEl, visParams);
+      this.vislibVis.on('brush', this.vis.API.events.brush);
+      this.vislibVis.on('click', this.vis.API.events.filter);
+      this.vislibVis.on('renderComplete', resolve);
 
-      this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+      this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
 
       if (visParams.addLegend) {
         $(this.container).attr('class', (i, cls) => {
           return cls.replace(/visLib--legend-\S+/g, '');
         }).addClass(legendClassName[visParams.legendPosition]);
 
-        this.$scope = this.$rootScope.$new();
-        this.$scope.refreshLegend = 0;
-        this.$scope.vis = this.vis;
-        this.$scope.visData = esResponse;
-        this.$scope.visParams = visParams;
-        this.$scope.uiState = this.$scope.vis.getUiState();
-        const legendHtml = this.$compile('<vislib-legend></vislib-legend>')(this.$scope);
-        this.container.appendChild(legendHtml[0]);
-        this.$scope.$digest();
+        this.mountLegend(esResponse, visParams.legendPosition);
       }
 
-      this.vis.vislibVis.render(esResponse, this.vis.getUiState());
+      this.vislibVis.render(esResponse, this.vis.getUiState());
 
       // refreshing the legend after the chart is rendered.
       // this is necessary because some visualizations
       // provide data necessary for the legend only after a render cycle.
-      if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
-        this.$scope.refreshLegend++;
-        this.$scope.$digest();
-
-        this.vis.vislibVis.render(esResponse, this.vis.getUiState());
+      if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)) {
+        this.unmountLegend();
+        this.mountLegend(esResponse, visParams.legendPosition);
+        this.vislibVis.render(esResponse, this.vis.getUiState());
       }
     });
   }
 
-  destroy() {
-    if (this.vis.vislibVis) {
-      this.vis.vislibVis.off('brush', this.vis.API.events.brush);
-      this.vis.vislibVis.off('click', this.vis.API.events.filter);
-      this.vis.vislibVis.destroy();
-      delete this.vis.vislibVis;
+  mountLegend(visData, position) {
+    this.unmount = mountReactNode(
+      <VisLegend
+        ref={this.legendRef}
+        vis={this.vis}
+        vislibVis={this.vislibVis}
+        visData={visData}
+        position={position}
+        uiState={this.vis.getUiState()}
+      />
+    )(this.legendEl);
+  }
+
+  unmountLegend() {
+    if (this.unmount) {
+      this.unmount();
     }
-    $(this.container).find('vislib-legend').remove();
-    if (this.$scope) {
-      this.$scope.$destroy();
-      this.$scope = null;
+  }
+
+  destroy() {
+    if (this.unmount) {
+      this.unmount();
+    }
+
+    if (this.vislibVis) {
+      this.vislibVis.off('brush', this.vis.API.events.brush);
+      this.vislibVis.off('click', this.vis.API.events.filter);
+      this.vislibVis.destroy();
+      delete this.vislibVis;
     }
   }
 }

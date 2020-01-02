@@ -6,8 +6,14 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+} from '../../../../../common/constants';
+import { RuleAlertType } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -26,20 +32,35 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
 });
 
-export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  risk_score: 50,
-  type: 'filter',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  filter: {},
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+  signal_ids: ['somefakeid1', 'somefakeid2'],
+  status: 'closed',
+});
+
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  status: 'closed',
+});
+
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  status: 'closed',
 });
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
@@ -106,10 +127,38 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   },
 });
 
+export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByIdsPayload(),
+  },
+});
+
+export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByQueryPayload(),
+  },
+});
+
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
+});
+
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
 
@@ -139,6 +188,23 @@ export const getResult = (): RuleAlertType => ({
     tags: [],
     to: 'now',
     type: 'query',
+    threats: [
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0040',
+          name: 'impact',
+          reference: 'https://attack.mitre.org/tactics/TA0040/',
+        },
+        techniques: [
+          {
+            id: 'T1499',
+            name: 'endpoint denial of service',
+            reference: 'https://attack.mitre.org/techniques/T1499/',
+          },
+        ],
+      },
+    ],
     references: ['http://www.example.com', 'https://ww.example.com'],
   },
   interval: '5m',
@@ -156,6 +222,6 @@ export const getResult = (): RuleAlertType => ({
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });

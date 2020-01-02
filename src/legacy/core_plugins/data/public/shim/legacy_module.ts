@@ -21,9 +21,9 @@ import { once } from 'lodash';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 
 /** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
+export const initLegacyModule = once((indexPatterns: IndexPatternsContract): void => {
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

@@ -7,7 +7,7 @@
 import Joi from 'joi';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { FeatureWithAllOrReadPrivileges } from './feature';
 
 // Each feature gets its own property on the UICapabilities object,

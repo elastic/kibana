@@ -136,7 +136,7 @@ describe('#start()', () => {
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
       apps: new Map([['app1', { id: 'app1' }]]),
       legacyApps: new Map(),
-      injectedMetadata,
+      http,
     });
   });
 
@@ -153,7 +153,7 @@ describe('#start()', () => {
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
       apps: new Map(),
       legacyApps: new Map([['legacyApp1', { id: 'legacyApp1' }]]),
-      injectedMetadata,
+      http,
     });
   });
 

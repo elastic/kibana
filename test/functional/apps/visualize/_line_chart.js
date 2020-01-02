@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });

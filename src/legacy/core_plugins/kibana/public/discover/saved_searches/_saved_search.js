@@ -18,13 +18,13 @@
  */
 
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { getServices } from '../kibana_services';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
-const { uiModules, SavedObjectProvider } = getServices();
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('discover/saved_searches', []);
 
-module.factory('SavedSearch', function (Private) {
+export function createSavedSearchFactory(Private) {
   const SavedObject = Private(SavedObjectProvider);
   createLegacyClass(SavedSearch).inherits(SavedObject);
   function SavedSearch(id) {
@@ -32,7 +32,6 @@ module.factory('SavedSearch', function (Private) {
       type: SavedSearch.type,
       mapping: SavedSearch.mapping,
       searchSource: SavedSearch.searchSource,
-
       id: id,
       defaults: {
         title: '',
@@ -68,4 +67,6 @@ module.factory('SavedSearch', function (Private) {
   };
 
   return SavedSearch;
-});
+}
+
+module.factory('SavedSearch', createSavedSearchFactory);

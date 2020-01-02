@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { npStart } from 'ui/new_platform';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { AutocompleteSuggestion, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
-import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
@@ -19,7 +18,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: AutocompleteSuggestion[];
   }>;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface WithKueryAutocompletionLifecycleState {

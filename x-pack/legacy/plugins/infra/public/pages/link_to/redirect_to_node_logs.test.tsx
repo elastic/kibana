@@ -34,11 +34,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct container filter', () => {
@@ -47,11 +47,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct pod filter', () => {
@@ -60,11 +60,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct position', () => {
@@ -75,11 +75,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct user-defined filter', () => {
@@ -92,11 +92,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct custom source id', () => {
@@ -107,11 +107,11 @@ describe('RedirectToNodeLogs component', () => {
     );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
-/>
-`);
+      <Redirect
+        push={false}
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
+      />
+    `);
   });
 });
 

@@ -19,19 +19,21 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import { createStateStub } from './_utils';
-import { QueryParameterActionsProvider } from '../actions';
+import { getQueryParameterActions } from '../actions';
 
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(ngMock.module('app/discover'));
 
   describe('action setPredecessorCount', function () {
     let setPredecessorCount;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      setPredecessorCount = Private(QueryParameterActionsProvider).setPredecessorCount;
+    beforeEach(ngMock.inject(function createPrivateStubs() {
+      setPredecessorCount = getQueryParameterActions().setPredecessorCount;
     }));
 
     it('should set the predecessorCount to the given value', function () {

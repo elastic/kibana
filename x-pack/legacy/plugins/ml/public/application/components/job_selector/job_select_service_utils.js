@@ -37,16 +37,16 @@ function getInvalidJobIds(ids) {
 
 export const jobSelectServiceFactory = (globalState) => {
   const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-  const jobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+  const jobSelectService$ = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
 
   // Subscribe to changes to globalState and trigger
   // a jobSelectService update if the job selection changed.
   const listener = () => {
     const { jobIds: newJobIds, selectedGroups: newSelectedGroups } = getSelectedJobIds(globalState);
-    const oldSelectedJobIds = jobSelectService.getValue().selection;
+    const oldSelectedJobIds = jobSelectService$.getValue().selection;
 
     if (newJobIds && !(isEqual(oldSelectedJobIds, newJobIds))) {
-      jobSelectService.next({ selection: newJobIds, groups: newSelectedGroups });
+      jobSelectService$.next({ selection: newJobIds, groups: newSelectedGroups });
     }
   };
 
@@ -56,7 +56,7 @@ export const jobSelectServiceFactory = (globalState) => {
     globalState.off('save_with_changes', listener);
   };
 
-  return { jobSelectService, unsubscribeFromGlobalState };
+  return { jobSelectService$, unsubscribeFromGlobalState };
 };
 
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups

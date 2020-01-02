@@ -22,11 +22,7 @@ export function defineGetAllRolesRoutes({ router, authz, clusterClient }: RouteD
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole(
-                elasticsearchRole,
-                roleName,
-                authz.getApplicationName()
-              )
+              transformElasticsearchRoleToRole(elasticsearchRole, roleName, authz.applicationName)
             )
             .sort((roleA, roleB) => {
               if (roleA.name < roleB.name) {

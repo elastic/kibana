@@ -24,7 +24,7 @@ import {
 const ROOT_ELEMENT_ID = 'react-infra-root';
 const BREADCRUMBS_ELEMENT_ID = 'react-infra-breadcrumbs';
 
-export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
+export class KibanaFramework implements InfraFrameworkAdapter {
   public appState: object;
   public kbnVersion?: string;
   public timezone?: string;

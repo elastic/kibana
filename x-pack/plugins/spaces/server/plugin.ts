@@ -6,13 +6,11 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
@@ -41,9 +39,6 @@ export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
-  };
-  capabilities: {
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
@@ -132,6 +127,16 @@ export class Plugin {
       features: plugins.features,
     });
 
+    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
+      try {
+        const activeSpace = await spacesService.getActiveSpace(request);
+        const features = plugins.features.getFeatures();
+        return toggleUICapabilities(features, uiCapabilities, activeSpace);
+      } catch (e) {
+        return uiCapabilities;
+      }
+    });
+
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
     }
@@ -188,15 +193,6 @@ export class Plugin {
       kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
       features: featuresSetup,
       licensing: licensingSetup,
-    });
-    legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
-        const features = featuresSetup.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
     });
   }
 }

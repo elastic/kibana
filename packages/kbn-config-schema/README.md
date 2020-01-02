@@ -12,6 +12,8 @@ Kibana configuration entries providing developers with a fully typed model of th
     - [`schema.number()`](#schemanumber)
     - [`schema.boolean()`](#schemaboolean)
     - [`schema.literal()`](#schemaliteral)
+    - [`schema.buffer()`](#schemabuffer)
+    - [`schema.stream()`](#schemastream)
   - [Composite types](#composite-types)
     - [`schema.arrayOf()`](#schemaarrayof)
     - [`schema.object()`](#schemaobject)
@@ -171,6 +173,36 @@ const valueSchema = [
   schema.literal(100500),
   schema.literal(false),
 ];
+```
+
+#### `schema.buffer()`
+
+Validates input data as a NodeJS `Buffer`.
+
+__Output type:__ `Buffer`
+
+__Options:__
+  * `defaultValue: TBuffer | Reference<TBuffer> | (() => TBuffer)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: TBuffer) => Buffer | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+
+__Usage:__
+```typescript
+const valueSchema = schema.buffer({ defaultValue: Buffer.from('Hi, there!') });
+```
+
+#### `schema.stream()`
+
+Validates input data as a NodeJS `stream`.
+
+__Output type:__ `Stream`, `Readable` or `Writtable`
+
+__Options:__
+  * `defaultValue: TStream | Reference<TStream> | (() => TStream)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: TStream) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+
+__Usage:__
+```typescript
+const valueSchema = schema.stream({ defaultValue: new Stream() });
 ```
 
 ### Composite types

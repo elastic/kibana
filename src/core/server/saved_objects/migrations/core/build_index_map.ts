@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Config } from '../../../config';
 import { MappingProperties } from '../../mappings';
 import { SavedObjectsSchema } from '../../schema';
+import { LegacyConfig } from '../../../legacy/config';
 
 export interface CreateIndexMapOptions {
-  config: Config;
+  config: LegacyConfig;
   kibanaIndexName: string;
   schema: SavedObjectsSchema;
   indexMap: MappingProperties;
@@ -39,6 +39,7 @@ export interface IndexMap {
  * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
  */
 export function createIndexMap({
+  /** @deprecated Remove once savedObjectsSchemas are exposed from Core */
   config,
   kibanaIndexName,
   schema,

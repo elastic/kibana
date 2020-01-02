@@ -59,6 +59,11 @@ export interface ProviderSession {
    * entirely determined by the authentication provider that owns the current session.
    */
   state: unknown;
+
+  /**
+   * Cookie "Path" attribute that is validated against the current Kibana server configuration.
+   */
+  path: string;
 }
 
 /**
@@ -160,6 +165,11 @@ export class Authenticator {
   private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
+   * Which base path the HTTP server is hosted on.
+   */
+  private readonly serverBasePath: string;
+
+  /**
    * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
   private readonly idleTimeout: number | null = null;
@@ -213,6 +223,7 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+    this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
     // only set these vars if they are defined in options (otherwise coalesce to existing/default)
     this.idleTimeout = this.options.config.session.idleTimeout;
@@ -277,6 +288,7 @@ export class Authenticator {
         provider: attempt.provider,
         idleTimeoutExpiration,
         lifespanExpiration,
+        path: this.serverBasePath,
       });
     }
 
@@ -465,6 +477,7 @@ export class Authenticator {
         provider: providerType,
         idleTimeoutExpiration,
         lifespanExpiration,
+        path: this.serverBasePath,
       });
     }
   }

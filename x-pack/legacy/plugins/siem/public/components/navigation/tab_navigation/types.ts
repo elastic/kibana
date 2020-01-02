@@ -10,9 +10,9 @@ import { Timeline } from '../../url_state/types';
 import { HostsTableType } from '../../../store/hosts/model';
 import { esFilters, Query } from '../../../../../../../../src/plugins/data/public';
 
-import { SiemNavigationComponentProps } from '../types';
+import { SiemNavigationProps } from '../types';
 
-export interface TabNavigationProps extends SiemNavigationComponentProps {
+export interface TabNavigationProps extends SiemNavigationProps {
   pathName: string;
   pageName: string;
   tabName: HostsTableType | undefined;

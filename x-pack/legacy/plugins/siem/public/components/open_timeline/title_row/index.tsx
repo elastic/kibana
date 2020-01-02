@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
@@ -21,7 +20,7 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSele
  * Renders the row containing the tile (e.g. Open Timelines / All timelines)
  * and action buttons (i.e. Favorite Selected and Delete Selected)
  */
-export const TitleRow = pure<Props>(
+export const TitleRow = React.memo<Props>(
   ({ onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
     <HeaderSection title={title}>
       {(onAddTimelinesToFavorites || onDeleteSelected) && (

@@ -21,13 +21,13 @@ import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path_service';
-import { AnonymousPaths } from './anonymous_paths';
 
-type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
+export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
+  anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
+const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -37,7 +37,10 @@ const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
   delete: jest.fn(),
   options: jest.fn(),
   basePath: new BasePath(basePath),
-  anonymousPaths: new AnonymousPaths(new BasePath(basePath)),
+  anonymousPaths: {
+    register: jest.fn(),
+    isAnonymous: jest.fn(),
+  },
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   stop: jest.fn(),

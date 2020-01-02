@@ -32,9 +32,7 @@ describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)}
-        </TestProviders>
+        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -59,9 +57,7 @@ describe('Field Renderers', () => {
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{dateRenderer(mockData.complete.source!.firstSeen)}</TestProviders>
-      );
+      const wrapper = shallow(dateRenderer(mockData.complete.source!.firstSeen));
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -78,9 +74,7 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)}
-        </TestProviders>
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -113,9 +107,7 @@ describe('Field Renderers', () => {
       ip: null,
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -158,9 +150,7 @@ describe('Field Renderers', () => {
       ip: ['10.10.10.10'],
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -194,9 +184,7 @@ describe('Field Renderers', () => {
 
   describe('#whoisRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallowWithIntl(whoisRenderer('10.10.10.10'));
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -208,7 +196,7 @@ describe('Field Renderers', () => {
         <TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DragDropContext'))).toMatchSnapshot();
     });
   });
 

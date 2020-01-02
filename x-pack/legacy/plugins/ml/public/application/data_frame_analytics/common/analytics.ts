@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { idx } from '@kbn/elastic-idx';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
@@ -28,6 +27,14 @@ interface RegressionAnalysis {
     dependent_variable: string;
     training_percent?: number;
     prediction_field_name?: string;
+  };
+}
+
+interface ClassificationAnalysis {
+  classification: {
+    dependent_variable: string;
+    training_percent?: number;
+    num_top_classes?: string;
   };
 }
 
@@ -77,11 +84,16 @@ interface LoadEvaluateResult {
   error: string | null;
 }
 
-type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
+type AnalysisConfig =
+  | OutlierAnalysis
+  | RegressionAnalysis
+  | ClassificationAnalysis
+  | GenericAnalysis;
 
 export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
   UNKNOWN = 'unknown',
 }
 
@@ -99,6 +111,10 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
   let depVar = '';
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    depVar = analysis.classification.dependent_variable;
   }
   return depVar;
 };
@@ -132,6 +148,11 @@ export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
+export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+};
+
 export const isRegressionResultsSearchBoolQuery = (
   arg: any
 ): arg is RegressionResultsSearchBoolQuery => {
@@ -142,7 +163,7 @@ export const isRegressionResultsSearchBoolQuery = (
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
-  // description?: string;
+  description?: string;
   dest: {
     index: IndexName;
     results_field: string;
@@ -220,12 +241,13 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = idx(response, _ => _.regression.mean_squared_error.error) as number;
+  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
   }
 
-  let rSquared = idx(response, _ => _.regression.r_squared.value) as number;
+  let rSquared = response?.regression?.r_squared?.value;
   if (rSquared) {
     rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
   }
@@ -261,7 +283,7 @@ export function getEvalQueryBody({
 
   if (searchQuery !== undefined && ignoreDefaultQuery === true) {
     query = searchQuery;
-  } else if (isRegressionResultsSearchBoolQuery(searchQuery)) {
+  } else if (searchQuery !== undefined && isRegressionResultsSearchBoolQuery(searchQuery)) {
     const searchQueryClone = cloneDeep(searchQuery);
     searchQueryClone.bool.must.push(query);
     query = searchQueryClone;

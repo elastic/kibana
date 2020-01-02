@@ -47,7 +47,7 @@ export class IndexedFieldsTable extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.fields !== this.props.fields) {
       this.setState({
         fields: this.mapFields(nextProps.fields)

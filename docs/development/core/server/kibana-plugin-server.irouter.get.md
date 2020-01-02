@@ -9,5 +9,5 @@ Register a route handler for `GET` request.
 <b>Signature:</b>
 
 ```typescript
-get: RouteRegistrar;
+get: RouteRegistrar<'get'>;
 ```

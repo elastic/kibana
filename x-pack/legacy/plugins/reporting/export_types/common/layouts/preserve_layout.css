@@ -92,11 +92,6 @@ visualize-app .visEditor__canvas {
   display: none;
 }
 
-/* slightly increate legend text size for readability */
-.visualize visualize-legend .visLegend__valueTitle {
-  font-size: 1.2em;
-}
-
 /* Ensure the min-height of the small breakpoint isn't used */
 .vis-editor visualization {
   min-height: 0 !important;

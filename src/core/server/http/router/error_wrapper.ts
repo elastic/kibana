@@ -23,13 +23,14 @@ import { KibanaRequest } from './request';
 import { KibanaResponseFactory } from './response';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
+import { RouteMethod } from './route';
 
 export const wrapErrors = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-  handler: RequestHandler<P, Q, B>
-): RequestHandler<P, Q, B> => {
+  handler: RequestHandler<P, Q, B, RouteMethod>
+): RequestHandler<P, Q, B, RouteMethod> => {
   return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
+    request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
     try {

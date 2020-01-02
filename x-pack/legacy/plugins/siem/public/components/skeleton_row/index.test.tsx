@@ -13,11 +13,7 @@ import { SkeletonRow } from './index';
 
 describe('SkeletonRow', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <SkeletonRow />
-      </TestProviders>
-    );
+    const wrapper = shallow(<SkeletonRow />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 

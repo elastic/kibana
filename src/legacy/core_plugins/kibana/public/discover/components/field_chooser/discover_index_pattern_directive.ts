@@ -16,18 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { getServices } from '../../kibana_services';
+import { wrapInI18nContext } from '../../kibana_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 
-const { wrapInI18nContext, uiModules } = getServices();
-
-const app = uiModules.get('apps/discover');
-
-app.directive('discoverIndexPatternSelect', function(reactDirective: any) {
+export function createIndexPatternSelectDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
     ['indexPatternList', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
   ]);
-});
+}

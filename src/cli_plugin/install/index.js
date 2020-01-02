@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { fromRoot, pkg } from '../../legacy/utils';
+import { fromRoot, pkg } from '../../core/server/utils';
 import install from './install';
 import Logger from '../lib/logger';
-import { getConfig } from '../../legacy/server/path';
+import { getConfigPath } from '../../core/server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
 import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
@@ -50,7 +50,7 @@ export default function pluginInstall(program) {
     .option(
       '-c, --config <path>',
       'path to the config file',
-      getConfig()
+      getConfigPath()
     )
     .option(
       '-t, --timeout <duration>',

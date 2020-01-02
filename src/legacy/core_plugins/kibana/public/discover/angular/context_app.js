@@ -18,13 +18,13 @@
  */
 
 import _ from 'lodash';
-import { getServices, callAfterBindingsWorkaround } from './../kibana_services';
+import { getServices, callAfterBindingsWorkaround, getAngularModule } from './../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
 import {
   createInitialQueryParametersState,
-  QueryParameterActionsProvider,
+  getQueryParameterActions,
   QUERY_PARAMETER_KEYS,
 } from './context/query_parameters';
 import {
@@ -34,17 +34,12 @@ import {
   QueryActionsProvider,
 } from './context/query';
 
-const { uiModules, timefilter } = getServices();
+const { timefilter } = getServices();
 
 // load directives
 import '../../../../data/public/legacy';
 
-const module = uiModules.get('apps/context', [
-  'elasticsearch',
-  'kibana',
-  'kibana/config',
-  'ngRoute',
-]);
+const module = getAngularModule();
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -67,7 +62,7 @@ module.directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, config, Private) {
-  const queryParameterActions = Private(QueryParameterActionsProvider);
+  const queryParameterActions = getQueryParameterActions();
   const queryActions = Private(QueryActionsProvider);
 
   timefilter.disableAutoRefreshSelector();

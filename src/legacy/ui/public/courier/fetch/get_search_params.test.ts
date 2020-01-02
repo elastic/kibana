@@ -18,12 +18,12 @@
  */
 
 import { getMSearchParams, getSearchParams } from './get_search_params';
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 function getConfigStub(config: any = {}) {
   return {
     get: key => config[key],
-  } as UiSettingsClientContract;
+  } as IUiSettingsClient;
 }
 
 describe('getMSearchParams', () => {

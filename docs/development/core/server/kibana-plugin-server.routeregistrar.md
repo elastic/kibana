@@ -4,10 +4,10 @@
 
 ## RouteRegistrar type
 
-Handler to declare a route.
+Route handler common definition
 
 <b>Signature:</b>
 
 ```typescript
-export declare type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+export declare type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 ```

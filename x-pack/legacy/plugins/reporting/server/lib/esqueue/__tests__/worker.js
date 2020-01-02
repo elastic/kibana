@@ -246,7 +246,9 @@ describe('Worker class', function () {
     it('should use error multiplier when processPendingJobs rejects the Promise', async function () {
       worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
-      const processPendingJobsStub = sinon.stub(worker, '_processPendingJobs').returns(Promise.reject(new Error('test error')));
+      const processPendingJobsStub = sinon
+        .stub(worker, '_processPendingJobs')
+        .rejects(new Error('test error'));
 
       await allowPoll(defaultWorkerOptions.interval);
       expect(processPendingJobsStub.callCount).to.be(1);
@@ -517,7 +519,7 @@ describe('Worker class', function () {
     it('should emit for errors from claiming job', function (done) {
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.reject({ statusCode: 401 }));
+        .rejects({ statusCode: 401 });
 
       worker.once(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
         try {
@@ -531,13 +533,13 @@ describe('Worker class', function () {
         }
       });
 
-      worker._claimPendingJobs(getMockJobs());
+      worker._claimPendingJobs(getMockJobs()).catch(() => {});
     });
 
     it('should reject the promise if an error claiming the job', function () {
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.reject({ statusCode: 409 }));
+        .rejects({ statusCode: 409 });
       return worker._claimPendingJobs(getMockJobs())
         .catch(err => {
           expect(err).to.eql({ statusCode: 409 });
@@ -547,7 +549,7 @@ describe('Worker class', function () {
     it('should get the pending job', function () {
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.resolve({ test: 'cool' }));
+        .resolves({ test: 'cool' });
       sinon.stub(worker, '_performJob').callsFake(identity);
       return worker._claimPendingJobs(getMockJobs())
         .then(claimedJob => {
@@ -607,7 +609,7 @@ describe('Worker class', function () {
       mockQueue.client.callWithInternalUser.restore();
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.reject({ statusCode: 409 }));
+        .rejects({ statusCode: 409 });
       return worker._failJob(job)
         .then((res) => expect(res).to.equal(true));
     });
@@ -616,7 +618,7 @@ describe('Worker class', function () {
       mockQueue.client.callWithInternalUser.restore();
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.reject({ statusCode: 401 }));
+        .rejects({ statusCode: 401 });
       return worker._failJob(job)
         .then((res) => expect(res).to.equal(false));
     });
@@ -654,7 +656,7 @@ describe('Worker class', function () {
       mockQueue.client.callWithInternalUser.restore();
       sinon.stub(mockQueue.client, 'callWithInternalUser')
         .withArgs('update')
-        .returns(Promise.reject({ statusCode: 401 }));
+        .rejects({ statusCode: 401 });
 
       worker.on(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, function (err) {
         try {
@@ -842,7 +844,7 @@ describe('Worker class', function () {
 
   describe('job failures', function () {
     function getFailStub(workerWithFailure) {
-      return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
+      return sinon.stub(workerWithFailure, '_failJob').resolves();
     }
 
     describe('saving output failure', () => {
@@ -857,7 +859,7 @@ describe('Worker class', function () {
 
         sinon.stub(mockQueue.client, 'callWithInternalUser')
           .withArgs('update')
-          .returns(Promise.reject({ statusCode: 413 }));
+          .rejects({ statusCode: 413 });
 
         const workerFn = function (jobPayload) {
           return new Promise(function (resolve) {
@@ -878,7 +880,7 @@ describe('Worker class', function () {
       it('causes _processPendingJobs to reject the Promise', function () {
         sinon.stub(mockQueue.client, 'callWithInternalUser')
           .withArgs('search')
-          .returns(Promise.reject(new Error('test error')));
+          .rejects(new Error('test error'));
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
         return worker._processPendingJobs()
           .then(() => {

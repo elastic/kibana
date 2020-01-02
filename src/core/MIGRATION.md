@@ -16,15 +16,15 @@
     - [Switch to new platform services](#switch-to-new-platform-services)
     - [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
   - [Browser-side plan of action](#browser-side-plan-of-action)
-      - [1. Create a plugin definition file](#1-create-a-plugin-definition-file)
-      - [2. Export all static code and types from `public/index.ts`](#2-export-all-static-code-and-types-from-publicindexts)
-      - [3. Export your runtime contract](#3-export-your-runtime-contract)
-      - [4. Move "owned" UI modules into your plugin and expose them from your public contract](#4-move-owned-ui-modules-into-your-plugin-and-expose-them-from-your-public-contract)
-      - [5. Provide plugin extension points decoupled from angular.js](#5-provide-plugin-extension-points-decoupled-from-angularjs)
-      - [6. Move all webpack alias imports into uiExport entry files](#6-move-all-webpack-alias-imports-into-uiexport-entry-files)
-      - [7. Switch to new platform services](#7-switch-to-new-platform-services)
-      - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
-      - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
+    - [1. Create a plugin definition file](#1-create-a-plugin-definition-file)
+    - [2. Export all static code and types from `public/index.ts`](#2-export-all-static-code-and-types-from-publicindexts)
+    - [3. Export your runtime contract](#3-export-your-runtime-contract)
+    - [4. Move "owned" UI modules into your plugin and expose them from your public contract](#4-move-owned-ui-modules-into-your-plugin-and-expose-them-from-your-public-contract)
+    - [5. Provide plugin extension points decoupled from angular.js](#5-provide-plugin-extension-points-decoupled-from-angularjs)
+    - [6. Move all webpack alias imports into uiExport entry files](#6-move-all-webpack-alias-imports-into-uiexport-entry-files)
+    - [7. Switch to new platform services](#7-switch-to-new-platform-services)
+    - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
+    - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
   - [Frequently asked questions](#frequently-asked-questions)
     - [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
     - [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
@@ -71,7 +71,7 @@ Plugins are defined as classes and exposed to the platform itself through a simp
 
 The basic file structure of a new platform plugin named "demo" that had both client-side and server-side code would be:
 
-```
+```tree
 src/plugins
   demo
     kibana.json [1]
@@ -83,7 +83,7 @@ src/plugins
       plugin.ts [5]
 ```
 
-**[1] `kibana.json`** is a static manifest file that is used to identify the plugin and to determine what kind of code the platform should execute from the plugin:
+**[1] `kibana.json`** is a [static manifest](../../docs/development/core/server/kibana-plugin-server.pluginmanifest.md) file that is used to identify the plugin and to determine what kind of code the platform should execute from the plugin:
 
 ```json
 {
@@ -93,13 +93,14 @@ src/plugins
   "ui": true
 }
 ```
+More details about[manifest file format](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md)
 
 Note that `package.json` files are irrelevant to and ignored by the new platform.
 
 **[2] `public/index.ts`** is the entry point into the client-side code of this plugin. It must export a function named `plugin`, which will receive a standard set of core capabilities as an argument (e.g. logger). It should return an instance of its plugin definition for the platform to register at load time.
 
 ```ts
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -110,7 +111,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
 
 ```ts
-import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -133,7 +134,7 @@ export class Plugin {
 **[4] `server/index.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
 ```ts
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -144,7 +145,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -185,7 +186,7 @@ There is no equivalent behavior to `start` or `stop` in legacy plugins, so this 
 The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin. For example, the core `UiSettings` service exposes a function `get` to all plugin `setup` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
-import { CoreSetup } from '../../../core/public';
+import { CoreSetup } from 'kibana/server';
 
 export class Plugin {
   public setup(core: CoreSetup) {
@@ -199,6 +200,15 @@ Different service interfaces can and will be passed to `setup` and `stop` becaus
 For example, the `stop` function in the browser gets invoked as part of the `window.onbeforeunload` event, which means you can't necessarily execute asynchronous code here in a reliable way. For that reason, `core` likely wouldn't provide any asynchronous functions to plugin `stop` functions in the browser.
 
 Core services that expose functionality to plugins always have their `setup` function ran before any plugins.
+
+These are the contracts exposed by the core services for each lifecycle event:
+
+| lifecycle event | contract                                                                                                        |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| *contructor*    | [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md) |
+| *setup*         | [CoreSetup](../../docs/development/core/server/kibana-plugin-server.coresetup.md)                               |
+| *start*         | [CoreStart](../../docs/development/core/server/kibana-plugin-server.corestart.md)                               |
+| *stop*          |                                                                                                                 |
 
 ### Integrating with other plugins
 
@@ -357,6 +367,7 @@ npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
 Legacy server-side plugins access functionality from core and other plugins at runtime via function arguments, which is similar to how they must be architected to use the new plugin system. This greatly simplifies the plan of action for migrating server-side plugins.
 
 Here is the high-level for migrating a server-side plugin:
+
 - De-couple from hapi.js server and request objects
 - Introduce a new plugin definition shim
 - Replace legacy services in shim with new platform services
@@ -515,7 +526,7 @@ interface FooSetup {
 }
 
 // We inject the miminal legacy dependencies into our plugin including dependencies on other legacy
-// plugins. Take care to only expose the legacy functionality you need e.g. don't inject the whole 
+// plugins. Take care to only expose the legacy functionality you need e.g. don't inject the whole
 // `Legacy.Server` if you only depend on `Legacy.Server['route']`.
 interface LegacySetup {
   route: Legacy.Server['route']
@@ -539,7 +550,7 @@ export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, D
   public setup(core: CoreSetup, plugins: PluginsSetup, __LEGACY: LegacySetup): DemoSetup {
     // We're still using the legacy Elasticsearch and http router here, but we're now accessing
     // these services in the same way a NP plugin would: injected into the setup function. It's
-    // also obvious that these dependencies needs to be removed by migrating over to the New 
+    // also obvious that these dependencies needs to be removed by migrating over to the New
     // Platform services exposed through core.
     const serverFacade: ServerFacade = {
       plugins: {
@@ -603,6 +614,7 @@ export default (kibana) => {
   });
 }
 ```
+
 > Note: An equally valid approach is to extend `CoreSetup` with a `__legacy`
 > property instead of introducing a third parameter to your plugins lifecycle
 > function. The important thing is that you reduce the legacy API surface that
@@ -657,7 +669,7 @@ the legacy core.
 A similar approach can be taken for your plugin dependencies. To start
 consuming an API from a New Platform plugin access these from
 `server.newPlatform.setup.plugins` and inject it into your plugin's setup
-function. 
+function.
 
 ```ts
 init(server) {
@@ -689,7 +701,7 @@ entirely powered by the New Platform and New Platform plugins.
 > Note: All New Platform plugins are exposed to legacy plugins via
 > `server.newPlatform.setup.plugins`. Once you move your plugin over to the
 > New Platform you will have to explicitly declare your dependencies on other
-> plugins in your `kibana.json` manifest file. 
+> plugins in your `kibana.json` manifest file.
 
 At this point, your legacy server-side plugin logic is no longer coupled to legacy plugins.
 
@@ -702,6 +714,7 @@ Many plugins will copy and paste all of their plugin code into a new plugin dire
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
 Other plugins may want to move subsystems over individually. For instance, you can move routes over to the New Platform in groups rather than all at once. Other examples that could be broken up:
+
 - Configuration schema ([see example](./MIGRATION_EXAMPLES.md#declaring-config-schema))
 - HTTP route registration ([see example](./MIGRATION_EXAMPLES.md#http-routes))
 - Polling mechanisms (eg. job worker)
@@ -726,7 +739,7 @@ This definition isn't going to do much for us just yet, but as we get further in
 
 ```ts
 // public/plugin.ts
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
 
 /**
@@ -794,7 +807,7 @@ While you're at it, you can also add your plugin initializer to this file:
 
 ```ts
 // public/index.ts
-import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/server';
 import { DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps, DemoPlugin } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
@@ -828,7 +841,7 @@ So we will take a similar approach to what was described above in the server sec
 
 ```ts
 // public/legacy.ts
-import { PluginInitializerContext } from '../../../../core/public';
+import { PluginInitializerContext } from 'kibana/server';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 
@@ -858,10 +871,10 @@ The point is that, over time, this becomes the one file in our plugin containing
 
 Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:
 
-* Deleted because it doesn't need to be used anymore
-* Moved to or replaced by something in core that isn't coupled to angular
-* Moved to or replaced by an extension point in a specific plugin that "owns" that functionality
-* Copied into each plugin that depends on it and becomes an implementation detail there
+- Deleted because it doesn't need to be used anymore
+- Moved to or replaced by something in core that isn't coupled to angular
+- Moved to or replaced by an extension point in a specific plugin that "owns" that functionality
+- Copied into each plugin that depends on it and becomes an implementation detail there
 
 To rapidly define ownership and determine interdependencies, UI modules should move to the most appropriate plugins to own them. Modules that are considered "core" can remain in the ui directory as the platform team works to move them out.
 
@@ -873,12 +886,12 @@ If it is determined that your plugin is going to own any UI modules that other p
 
 Depending on the module's level of complexity and the number of other places in Kibana that rely on it, there are a number of strategies you could use for this:
 
-* **Do it all at once.** Move the code, expose it from your plugin, and update all imports across Kibana.
+- **Do it all at once.** Move the code, expose it from your plugin, and update all imports across Kibana.
   - This works best for small pieces of code that aren't widely used.
-* **Shim first, move later.** Expose the code from your plugin by importing it in your shim and then re-exporting it from your plugin first, then gradually update imports to pull from the new location, leaving the actual moving of the code as a final step.
+- **Shim first, move later.** Expose the code from your plugin by importing it in your shim and then re-exporting it from your plugin first, then gradually update imports to pull from the new location, leaving the actual moving of the code as a final step.
   - This works best for the largest, most widely used modules that would otherwise result in huge, hard-to-review PRs.
   - It makes things easier by splitting the process into small, incremental PRs, but is probably overkill for things with a small surface area.
-* **Hybrid approach.** As a middle ground, you can also move the code to your plugin immediately, and then re-export your plugin code from the original `ui/public` directory.
+- **Hybrid approach.** As a middle ground, you can also move the code to your plugin immediately, and then re-export your plugin code from the original `ui/public` directory.
   - This eliminates any concerns about backwards compatibility by allowing you to update the imports across Kibana later.
   - Works best when the size of the PR is such that moving the code can be done without much refactoring.
 
@@ -940,6 +953,7 @@ Many plugins at this point will copy over their plugin definition class & the co
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
 Other plugins may want to move subsystems over individually. Examples of pieces that could be broken up:
+
 - Registration logic (eg. viz types, embeddables, chrome nav controls)
 - Application mounting
 - Polling mechanisms (eg. job worker)
@@ -977,6 +991,7 @@ At the very least, any plugin exposing an extension point should do so with firs
 Legacy Kibana has never run as a single page application. Each plugin has it's own entry point and gets "ownership" of every module it imports when it is loaded into the browser. This has allowed stateful modules to work without breaking other plugins because each time the user navigates to a new plugin, the browser reloads with a different entry bundle, clearing the state of the previous plugin.
 
 Because of this "feature" many undesirable things developed in the legacy platform:
+
 - We had to invent an unconventional and fragile way of allowing plugins to integrate and communicate with one another, `uiExports`.
 - It has never mattered if shared modules in `ui/public` were stateful or cleaned up after themselves, so many of them behave like global singletons. These modules could never work in single-page application because of this state.
 - We've had to ship Webpack with Kibana in production so plugins could be disabled or installed and still have access to all the "platform" features of `ui/public` modules and all the `uiExports` would be present for any enabled plugins.
@@ -994,7 +1009,6 @@ One goal of a stable Kibana core API is to allow Kibana instances to run plugins
 
 This method of building and installing plugins comes with side effects which are important to be aware of when developing a plugin.
 
-
 - **Any code you export to other plugins will get copied into their bundles.** If a plugin is built for 8.1 and is running on Kibana 8.2, any modules it imported that changed will not be updated in that plugin.
 - **When a plugin is disabled, other plugins can still import its static exports.** This can make code difficult to reason about and result in poor user experience. For example, users generally expect that all of a plugin’s features will be disabled when the plugin is disabled. If another plugin imports a disabled plugin’s feature and exposes it to the user, then users will be confused about whether that plugin really is disabled or not.
 - **Plugins cannot share state by importing each others modules.** Sharing state via imports does not work because exported modules will be copied into plugins that import them. Let’s say your plugin exports a module that’s imported by other plugins. If your plugin populates state into this module, a natural expectation would be that the other plugins now have access to this state. However, because those plugins have copies of the exported module, this assumption will be incorrect.
@@ -1004,16 +1018,19 @@ This method of building and installing plugins comes with side effects which are
 The general rule of thumb here is: any module that is not purely functional should not be shared statically, and instead should be exposed at runtime via the plugin's `setup` and/or `start` contracts.
 
 Ask yourself these questions when deciding to share code through static exports or plugin contracts:
+
 - Is its behavior dependent on any state populated from my plugin?
 - If a plugin uses an old copy (from an older version of Kibana) of this module, will it still break?
 
 If you answered yes to any of the above questions, you probably have an impure module that cannot be shared across plugins. Another way to think about this: if someone literally copied and pasted your exported module into their plugin, would it break if:
+
 - Your original module changed in a future version and the copy was the old version; or
 - If your plugin doesn’t have access to the copied version in the other plugin (because it doesn't know about it).
 
 If your module were to break for either of these reasons, it should not be exported statically. This can be more easily illustrated by examples of what can and cannot be exported statically.
 
 Examples of code that could be shared statically:
+
 - Constants. Strings and numbers that do not ever change (even between Kibana versions)
   - If constants do change between Kibana versions, then they should only be exported statically if the old value would not _break_ if it is still used. For instance, exporting a constant like `VALID_INDEX_NAME_CHARACTERS` would be fine, but exporting a constant like `API_BASE_PATH` would not because if this changed, old bundles using the previous value would break.
 - React components that do not depend on module state.
@@ -1022,25 +1039,33 @@ Examples of code that could be shared statically:
 - Pure computation functions, for example lodash-like functions like `mapValues`.
 
 Examples of code that could **not** be shared statically and how to fix it:
+
 - A function that calls a Core service, but does not take that service as a parameter.
   - If the function does not take a client as an argument, it must have an instance of the client in its internal state, populated by your plugin. This would not work across plugin boundaries because your plugin would not be able to call `setClient` in the copy of this module in other plugins:
+
     ```js
     let esClient;
     export const setClient = (client) => esClient = client;
     export const query = (params) => esClient.search(params);
     ```
+
   - This could be fixed by requiring the calling code to provide the client:
+
     ```js
     export const query = (esClient, params) => esClient.search(params);
     ```
+
 - A function that allows other plugins to register values that get pushed into an array defined internally to the module.
   - The values registered would only be visible to the plugin that imported it. Each plugin would essentially have their own registry of visTypes that is not visible to any other plugins.
+
     ```js
     const visTypes = [];
     export const registerVisType = (visType) => visTypes.push(visType);
     export const getVisTypes = () => visTypes;
     ```
+
   - For state that does need to be shared across plugins, you will need to expose methods in your plugin's `setup` and `start` contracts.
+
     ```js
     class MyPlugin {
       constructor() { this.visTypes = [] }
@@ -1084,6 +1109,7 @@ If you have code that should be available to other plugins on both the client an
 ### How can I avoid passing Core services deeply within my UI component tree?
 
 There are some Core services that are purely presentational, for example `core.overlays.openModal()` or `core.application.createLink()` where UI code does need access to these deeply within your application. However, passing these services down as props throughout your application leads to lots of boilerplate. To avoid this, you have three options:
+
 1. Use an abstraction layer, like Redux, to decouple your UI code from core (**this is the highly preferred option**); or
     - [redux-thunk](https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument) and [redux-saga](https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions) already have ways to do this.
 2. Use React Context to provide these services to large parts of your React tree; or
@@ -1121,12 +1147,12 @@ The packages directory should have the least amount of code in Kibana. Just beca
 
 Many of the utilities you're using to build your plugins are available in the New Platform or in New Platform plugins. To help you build the shim for these new services, use the tables below to find where the New Platform equivalent lives.
 
-
 #### Client-side
 
 TODO: add links to API docs on items in "New Platform" column.
 
 ##### Core services
+
 In client code, `core` can be imported in legacy plugins via the `ui/new_platform` module.
 
 ```ts
@@ -1140,7 +1166,6 @@ import { npStart: { core } } from 'ui/new_platform';
 | `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-public.uisettingsclient.md)                                                                                                |                                                                                                                                                |
 | `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md)                                                                       |                                                                                                                                                |
 | `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                                                                               |                                                                                                                                                |
-| `chrome.getInjected`                                  | --                                                                                                                                                                                         | Not implemented yet, see [#41990](https://github.com/elastic/kibana/issues/41990)                                                              |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                                                                         | Use application mounting via `core.application.register` (not available to legacy plugins at this time).                                       |
 | `import { recentlyAccessed } from 'ui/persisted_log'` | [`core.chrome.recentlyAccessed`](/docs/development/core/public/kibana-plugin-public.chromerecentlyaccessed.md)                                                                             |                                                                                                                                                |
 | `ui/capabilities`                                     | [`core.application.capabilities`](/docs/development/core/public/kibana-plugin-public.capabilities.md)                                                                                      |                                                                                                                                                |
@@ -1150,11 +1175,12 @@ import { npStart: { core } } from 'ui/new_platform';
 | `ui/routes`                                           | --                                                                                                                                                                                         | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
 | `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
 | `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
-| `uiExports/injectedVars`                              | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
+| `uiExports/injectedVars` / `chrome.getInjected`       | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
 ##### Plugins for shared application services
+
 In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
 
 The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
@@ -1167,7 +1193,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 
 | Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                                        |
 | ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `import 'ui/apply_filters'`                       | `import { applyFiltersPopover } from '../data/public'`       | Directive is deprecated.                                                                                 |
+| `import 'ui/apply_filters'`                       | N/A. Replaced by triggering an APPLY_FILTER_TRIGGER trigger.       | Directive is deprecated.                                                                                 |
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                   |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                                                             |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                                                     |
@@ -1189,6 +1215,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 #### Server-side
 
 ##### Core services
+
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
 | Legacy Platform                                    | New Platform                                                                                                                      | Notes                                                                       |
@@ -1198,6 +1225,7 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | `request.getBasePath()`                            | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                       |                                                                             |
 | `server.plugins.elasticsearch.getCluster('data')`  | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)   | Handlers will also include a pre-configured client                          |
 | `server.plugins.elasticsearch.getCluster('admin')` | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | Handlers will also include a pre-configured client                          |
+| `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md) | |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
@@ -1246,9 +1274,45 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `visTypes`                   |                                                                                                                           |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
+Examples:
+
+- **uiSettingDefaults**
+
+Before:
+
+```js
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+After:
+
+```ts
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  })
+}
+```
+
 ## How to
 
 ### Configure plugin
+
 Kibana provides ConfigService if a plugin developer may want to support adjustable runtime behavior for their plugins. Access to Kibana config in New platform has been subject to significant refactoring.
 
 Config service does not provide access to the whole config anymore. New platform plugin cannot read configuration parameters of the core services nor other plugins directly. Use plugin contract to provide data.
@@ -1262,8 +1326,10 @@ const basePath = core.http.basePath.get(request);
 ```
 
 In order to have access to your plugin config, you *should*:
+
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
+
 ```typescript
 // my_plugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -1273,7 +1339,9 @@ export const config = {
 };
 export type MyPluginConfigType = TypeOf<typeof config.schema>;
 ```
+
 - Read config value exposed via initializerContext. No config path is required.
+
 ```typescript
 class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -1284,6 +1352,7 @@ class MyPlugin {
 ```
 
 If your plugin also have a client-side part, you can also expose configuration properties to it using a whitelisting mechanism with the configuration `exposeToBrowser` property.
+
 ```typescript
 // my_plugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -1305,6 +1374,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 ```
 
 Configuration containing only the exposed properties will be then available on the client-side using the plugin's `initializerContext`:
+
 ```typescript
 // my_plugin/public/index.ts
 interface ClientConfigType {
@@ -1320,10 +1390,19 @@ export class Plugin implements Plugin<PluginSetup, PluginStart> {
   }
 ```
 
+All plugins are considered enabled by default. If you want to disable your plugin by default, you could declare the `enabled` flag in plugin config. This is a special Kibana platform key. The platform reads its value and won't create a plugin instance if `enabled: false`.
+```js
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};
+```
+
 ### Mock new platform services in tests
 
 #### Writing mocks for your plugin
+
 Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts:
+
 ```typescript
 // my_plugin/server/plugin.test.ts
 import { configServiceMock } from 'src/core/server/mocks';
@@ -1335,6 +1414,7 @@ const plugin = new MyPlugin({ configService }, …);
 ```
 
 Or if you need to get the whole core `setup` or `start` contracts:
+
 ```typescript
 // my_plugin/public/plugin.test.ts
 import { coreMock } from 'src/core/public/mocks';
@@ -1347,8 +1427,8 @@ coreSetup.uiSettings.get.mockImplementation((key: string) => {
 const plugin = new MyPlugin(coreSetup, ...);
 ```
 
-
 Although it isn't mandatory, we strongly recommended you export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root `/server` and `/public` directories in your plugin:
+
 ```typescript
 // my_plugin/server/mocks.ts or my_plugin/public/mocks.ts
 const createSetupContractMock = () => {
@@ -1365,26 +1445,31 @@ export const myPluginMocks = {
   createStart: …
 }
 ```
+
 Plugin mocks should consist of mocks for *public APIs only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call the original implementation in tests.
 
 #### Using mocks in your tests
+
 During the migration process, it is likely you are preparing your plugin by shimming in new platform-ready dependencies via the legacy `ui/new_platform` module:
+
 ```typescript
 import { npSetup, npStart } from 'ui/new_platform';
 ```
 
 If you are using this approach, the easiest way to mock core and new platform-ready plugins in your legacy tests is to mock the `ui/new_platform` module:
+
 ```typescript
 jest.mock('ui/new_platform');
 ```
 
-This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
+This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](../../src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
 
 If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
 
 > Note: The `ui/new_platform` mock is only designed for use by old Jest tests. If you are writing new tests, you should structure your code and tests such that you don't need this mock. Instead, you should import the `core` mock directly and instantiate it.
 
 #### What about karma tests?
+
 While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
 
 For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
@@ -1392,11 +1477,15 @@ For these tests, we are maintaining a separate set of mocks. Files with a `.karm
 It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.
 
 ### Provide Legacy Platform API to the New platform plugin
+
 #### On the server side
+
 During migration, you can face a problem that not all API is available in the New platform yet. You can work around this by extending your
 new platform plugin with Legacy API:
+
 - create New platform plugin
 - New platform plugin should expose a method `registerLegacyAPI` that allows passing API from the Legacy platform and store it in the NP plugin instance
+
 ```js
 class MyPlugin {
   public async setup(core){
@@ -1406,7 +1495,9 @@ class MyPlugin {
   }
 }
 ```
+
 - The legacy plugin provides API calling `registerLegacyAPI`
+
 ```js
 new kibana.Plugin({
   init(server){
@@ -1418,7 +1509,9 @@ new kibana.Plugin({
   }
 })
 ```
+
 - The new platform plugin access stored Legacy platform API via `getLegacyAPI` getter. Getter function must have name indicating that’s API provided from the Legacy platform.
+
 ```js
 class MyPlugin {
   private getLegacyAPI(){
@@ -1437,6 +1530,7 @@ class MyPlugin {
 ```
 
 #### On the client side
-It's not currently possible to use a similar pattern on the client-side. 
-Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform. 
+
+It's not currently possible to use a similar pattern on the client-side.
+Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform.
 So you can utilize the same approach for only *stateless Angular components*, as long as they are not consumed by a New Platform application. When New Platform applications are on the page, no legacy code is executed, so the `registerLegacyAPI` function would not be called.

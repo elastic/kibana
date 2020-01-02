@@ -5,17 +5,20 @@
  */
 
 import React from 'react';
-import 'jest-dom/extend-expect';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { SpanMetadata } from '..';
 import { Span } from '../../../../../../typings/es_schemas/ui/Span';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
+  MockPluginContextWrapper
 } from '../../../../../utils/testHelpers';
 
+const renderOptions = {
+  wrapper: MockPluginContextWrapper
+};
+
 describe('SpanMetadata', () => {
-  afterEach(cleanup);
   describe('render', () => {
     it('renders', () => {
       const span = ({
@@ -31,7 +34,7 @@ describe('SpanMetadata', () => {
           id: '7efbc7056b746fcb'
         }
       } as unknown) as Span;
-      const output = render(<SpanMetadata span={span} />);
+      const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent']);
     });
   });
@@ -55,7 +58,7 @@ describe('SpanMetadata', () => {
           type: 'external'
         }
       } as unknown) as Span;
-      const output = render(<SpanMetadata span={span} />);
+      const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
     });
   });
@@ -78,7 +81,7 @@ describe('SpanMetadata', () => {
           type: 'external'
         }
       } as unknown) as Span;
-      const output = render(<SpanMetadata span={span} />);
+      const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent']);
       expectTextsNotInDocument(output, ['Span']);
     });

@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { GroupsFilterPopover } from './groups_filter_popover';
+import { GroupsFilterPopoverComponent } from './groups_filter_popover';
 import { mockSiemJobs } from '../../__mocks__/api';
 import { SiemJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
@@ -21,7 +21,7 @@ describe('GroupsFilterPopover', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <GroupsFilterPopover siemJobs={siemJobs} onSelectedGroupsChanged={jest.fn()} />
+      <GroupsFilterPopoverComponent siemJobs={siemJobs} onSelectedGroupsChanged={jest.fn()} />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -29,7 +29,7 @@ describe('GroupsFilterPopover', () => {
   test('when a filter is clicked, it becomes checked ', () => {
     const mockOnSelectedGroupsChanged = jest.fn();
     const wrapper = mount(
-      <GroupsFilterPopover
+      <GroupsFilterPopoverComponent
         siemJobs={siemJobs}
         onSelectedGroupsChanged={mockOnSelectedGroupsChanged}
       />

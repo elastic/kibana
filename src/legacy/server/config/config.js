@@ -21,9 +21,9 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { getConfig } from '../path';
-import { pkg, unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
-
+import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
@@ -111,7 +111,6 @@ export class Config {
       buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       dist: IS_KIBANA_DISTRIBUTABLE,
-      defaultConfigPath: getConfig(),
     };
 
     if (!context.dev && !context.prod) {

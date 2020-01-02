@@ -30,7 +30,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placehold
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
-const exists = promisify(fs.exists);
+const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
@@ -145,23 +145,27 @@ export class Build {
     ];
 
     // verify that asset sources exist and import is valid before writing anything
-    await Promise.all(urlAssets.map(async (asset) => {
-      if (!await exists(asset.path)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
-          `  Make sure that the request is relative to "${asset.root}"`
-        );
-      }
+    await Promise.all(
+      urlAssets.map(async asset => {
+        try {
+          await access(asset.path);
+        } catch (e) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
+              `  Make sure that the request is relative to "${asset.root}"`
+          );
+        }
 
-      if (!isPathInside(asset.path, asset.boundry)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
-          `  which is outside of "${asset.boundry}"`
-        );
-      }
-    }));
+        if (!isPathInside(asset.path, asset.boundry)) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
+              `  which is outside of "${asset.boundry}"`
+          );
+        }
+      })
+    );
 
     // write css
     await mkdirAsync(this.targetDir, { recursive: true });

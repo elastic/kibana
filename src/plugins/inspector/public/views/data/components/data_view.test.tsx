@@ -21,7 +21,7 @@ import React from 'react';
 import { getDataViewDescription } from '../index';
 import { DataAdapter } from '../../../adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { UiSettingsClientContract } from '../../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 jest.mock('../lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
@@ -31,7 +31,7 @@ describe('Inspector Data View', () => {
   let DataView: any;
 
   beforeEach(() => {
-    const uiSettings = {} as UiSettingsClientContract;
+    const uiSettings = {} as IUiSettingsClient;
 
     DataView = getDataViewDescription(uiSettings);
   });

@@ -251,7 +251,6 @@ describe('kibana_map tests', function () {
       kibanaMap.removeLayer(layer);
       expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
 
-
     });
 
   });
@@ -317,6 +316,29 @@ describe('kibana_map tests', function () {
 
       expect(kibanaMap.getLeafletBaseLayer()).to.eql(null);
 
+
+    });
+
+    it('WMS - should clean attribution', async function () {
+
+      const options = {
+        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+        version: '1.1.0',
+        layers: '0',
+        format: 'image/png',
+        transparent: true,
+        attribution: '<div>foobar</div>',
+        styles: '',
+        minZoom: 1,
+        maxZoom: 18
+      };
+
+      kibanaMap.setBaseLayer({
+        baseLayerType: 'wms',
+        options: options
+      });
+
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('&lt;div&gt;foobar&lt;/div&gt;');
 
     });
 

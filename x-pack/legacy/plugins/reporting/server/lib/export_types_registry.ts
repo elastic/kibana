@@ -10,7 +10,7 @@ import { ServerFacade } from '../../types';
 import { PLUGIN_ID } from '../../common/constants';
 import { oncePerServer } from './once_per_server';
 import { LevelLogger } from './level_logger';
-// @ts-ignore untype module
+// @ts-ignore untype module TODO
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 
 function scan(pattern: string) {

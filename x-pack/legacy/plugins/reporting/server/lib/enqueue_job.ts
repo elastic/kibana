@@ -8,6 +8,8 @@ import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
+  ESQueueCreateJobFn,
+  ImmediateCreateJobFn,
   Job,
   ServerFacade,
   RequestFacade,
@@ -32,17 +34,19 @@ export function enqueueJobFactory(server: ServerFacade) {
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
   const { exportTypesRegistry, queue: jobQueue } = server.plugins.reporting!;
 
-  return async function enqueueJob(
+  return async function enqueueJob<JobParamsType>(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: object,
+    jobParams: JobParamsType,
     user: string,
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ): Promise<Job> {
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
+
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
-    const createJob = exportType.createJobFactory(server);
+    const createJob = exportType.createJobFactory(server) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {

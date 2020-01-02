@@ -9,13 +9,25 @@
  */
 
 import { chain, each, get, union, uniq } from 'lodash';
+import moment from 'moment-timezone';
 
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+
+import { npStart } from 'ui/new_platform';
+import { timefilter } from 'ui/timefilter';
+
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../../common/constants/search';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
+import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -23,13 +35,8 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../../common/constants/search';
+import { getSwimlaneContainerWidth } from './legacy_utils';
 
-import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // create new job objects based on standard job config objects
@@ -49,7 +56,7 @@ export function getClearedSelectedAnomaliesState() {
   };
 }
 
-export function getDefaultViewBySwimlaneData() {
+export function getDefaultSwimlaneData() {
   return {
     fieldName: '',
     laneLabels: [],
@@ -58,7 +65,7 @@ export function getDefaultViewBySwimlaneData() {
   };
 }
 
-export async function getFilteredTopInfluencers(
+export async function loadFilteredTopInfluencers(
   jobIds,
   earliestMs,
   latestMs,
@@ -131,6 +138,14 @@ export function getInfluencers(selectedJobs = []) {
   return influencers;
 }
 
+export function getDateFormatTz() {
+  const config = npStart.core.uiSettings;
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+  return dateFormatTz;
+}
+
 export function getFieldsByJob() {
   return mlJobService.jobs.reduce((reducedFieldsByJob, job) => {
     // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -193,9 +208,89 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
-// Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
+export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
+  // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
+  // and the max bucket span for the jobs shown in the chart.
+  const bounds = timefilter.getActiveBounds();
+  const buckets = new TimeBuckets();
+  buckets.setInterval('auto');
+  buckets.setBounds(bounds);
+
+  const intervalSeconds = buckets.getInterval().asSeconds();
+
+  // if the swimlane cell widths are too small they will not be visible
+  // calculate how many buckets will be drawn before the swimlanes are actually rendered
+  // and increase the interval to widen the cells if they're going to be smaller than 8px
+  // this has to be done at this stage so all searches use the same interval
+  const timerangeSeconds = (bounds.max.valueOf() - bounds.min.valueOf()) / 1000;
+  const numBuckets = parseInt(timerangeSeconds / intervalSeconds);
+  const cellWidth = Math.floor(swimlaneContainerWidth / numBuckets * 100) / 100;
+
+  // if the cell width is going to be less than 8px, double the interval
+  if (cellWidth < 8) {
+    buckets.setInterval((intervalSeconds * 2) + 's');
+  }
+
+  const maxBucketSpanSeconds = selectedJobs.reduce((memo, job) => Math.max(memo, job.bucketSpanSeconds), 0);
+  if (maxBucketSpanSeconds > intervalSeconds) {
+    buckets.setInterval(maxBucketSpanSeconds + 's');
+    buckets.setBounds(bounds);
+  }
+
+  return buckets.getInterval();
+}
+
+export function loadViewByTopFieldValuesForSelectedTime(
+  earliestMs,
+  latestMs,
+  selectedJobs,
+  viewBySwimlaneFieldName,
+  swimlaneLimit,
+  noInfluencersConfigured
+) {
+  const selectedJobIds = selectedJobs.map(d => d.id);
+
+  // Find the top field values for the selected time, and then load the 'view by'
+  // swimlane over the full time range for those specific field values.
+  return new Promise((resolve) => {
+    if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
+      mlResultsService.getTopInfluencers(
+        selectedJobIds,
+        earliestMs,
+        latestMs,
+        swimlaneLimit
+      ).then((resp) => {
+        if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
+          resolve([]);
+        }
+
+        const topFieldValues = [];
+        const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
+        topInfluencers.forEach((influencerData) => {
+          if (influencerData.maxAnomalyScore > 0) {
+            topFieldValues.push(influencerData.influencerFieldValue);
+          }
+        });
+        resolve(topFieldValues);
+      });
+    } else {
+      mlResultsService.getScoresByBucket(
+        selectedJobIds,
+        earliestMs,
+        latestMs,
+        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)).asSeconds() + 's',
+        swimlaneLimit
+      ).then((resp) => {
+        const topFieldValues = Object.keys(resp.results);
+        resolve(topFieldValues);
+      });
+    }
+  });
+}
+
+// Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
 export function getViewBySwimlaneOptions({
-  currentSwimlaneViewByFieldName,
+  currentViewBySwimlaneFieldName,
   filterActive,
   filteredFields,
   isAndOperator,
@@ -219,20 +314,20 @@ export function getViewBySwimlaneOptions({
   viewByOptions.push(VIEW_BY_JOB_LABEL);
   let viewBySwimlaneOptions = viewByOptions;
 
-  let swimlaneViewByFieldName = undefined;
+  let viewBySwimlaneFieldName = undefined;
 
   if (
-    viewBySwimlaneOptions.indexOf(currentSwimlaneViewByFieldName) !== -1
+    viewBySwimlaneOptions.indexOf(currentViewBySwimlaneFieldName) !== -1
   ) {
     // Set the swimlane viewBy to that stored in the state (URL) if set.
     // This means we reset it to the current state because it was set by the listener
     // on initialization.
-    swimlaneViewByFieldName = currentSwimlaneViewByFieldName;
+    viewBySwimlaneFieldName = currentViewBySwimlaneFieldName;
   } else {
     if (selectedJobIds.length > 1) {
       // If more than one job selected, default to job ID.
-      swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-    } else {
+      viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
+    } else if (mlJobService.jobs.length > 0) {
       // For a single job, default to the first partition, over,
       // by or influencer field of the first selected job.
       const firstSelectedJob = mlJobService.jobs.find((job) => {
@@ -245,7 +340,7 @@ export function getViewBySwimlaneOptions({
           detector.partition_field_name !== undefined &&
           firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.partition_field_name;
+          viewBySwimlaneFieldName = detector.partition_field_name;
           return false;
         }
 
@@ -253,7 +348,7 @@ export function getViewBySwimlaneOptions({
           detector.over_field_name !== undefined &&
           firstJobInfluencers.indexOf(detector.over_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.over_field_name;
+          viewBySwimlaneFieldName = detector.over_field_name;
           return false;
         }
 
@@ -265,17 +360,17 @@ export function getViewBySwimlaneOptions({
           detector.over_field_name === undefined &&
           firstJobInfluencers.indexOf(detector.by_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.by_field_name;
+          viewBySwimlaneFieldName = detector.by_field_name;
           return false;
         }
       });
 
-      if (swimlaneViewByFieldName === undefined) {
+      if (viewBySwimlaneFieldName === undefined) {
         if (firstJobInfluencers.length > 0) {
-          swimlaneViewByFieldName = firstJobInfluencers[0];
+          viewBySwimlaneFieldName = firstJobInfluencers[0];
         } else {
           // No influencers for first selected job - set to first available option.
-          swimlaneViewByFieldName = viewBySwimlaneOptions.length > 0
+          viewBySwimlaneFieldName = viewBySwimlaneOptions.length > 0
             ? viewBySwimlaneOptions[0]
             : undefined;
         }
@@ -301,7 +396,7 @@ export function getViewBySwimlaneOptions({
   }
 
   return {
-    swimlaneViewByFieldName,
+    viewBySwimlaneFieldName,
     viewBySwimlaneOptions,
   };
 }
@@ -339,8 +434,8 @@ export function processOverallResults(scoresByTime, searchBounds, interval) {
 export function processViewByResults(
   scoresByInfluencerAndTime,
   sortedLaneValues,
-  overallSwimlaneData,
-  swimlaneViewByFieldName,
+  bounds,
+  viewBySwimlaneFieldName,
   interval,
 ) {
   // Processes the scores for the 'view by' swimlane.
@@ -348,14 +443,14 @@ export function processViewByResults(
   // values in the order in which they should be displayed,
   // or pass an empty array to sort lanes according to max score over all time.
   const dataset = {
-    fieldName: swimlaneViewByFieldName,
+    fieldName: viewBySwimlaneFieldName,
     points: [],
     interval
   };
 
   // Set the earliest and latest to be the same as the overall swimlane.
-  dataset.earliest = overallSwimlaneData.earliest;
-  dataset.latest = overallSwimlaneData.latest;
+  dataset.earliest = bounds.earliest;
+  dataset.latest = bounds.latest;
 
   const laneLabels = [];
   const maxScoreByLaneLabel = {};
@@ -548,7 +643,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
         if (newRequestCount < requestCount) {
-          resolve(undefined);
+          resolve([]);
         }
 
         if ((selectedCells !== null && Object.keys(selectedCells).length > 0) ||
@@ -557,8 +652,144 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
           resolve(resp.records);
         }
 
-        resolve(undefined);
+        resolve([]);
       });
+  });
+}
+
+export function loadOverallData(selectedJobs, interval, bounds) {
+  return new Promise((resolve) => {
+    // Loads the overall data components i.e. the overall swimlane and influencers list.
+    if (selectedJobs === null) {
+      resolve({
+        loading: false,
+        hasResuts: false
+      });
+      return;
+    }
+
+    // Ensure the search bounds align to the bucketing interval used in the swimlane so
+    // that the first and last buckets are complete.
+    const searchBounds = getBoundsRoundedToInterval(
+      bounds,
+      interval,
+      false
+    );
+    const selectedJobIds = selectedJobs.map(d => d.id);
+
+    // Load the overall bucket scores by time.
+    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+    // which wouldn't be the case if e.g. '1M' was used.
+    // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
+    // to ensure the search is inclusive of end time.
+    const overallBucketsBounds = getBoundsRoundedToInterval(
+      bounds,
+      interval,
+      true
+    );
+    mlResultsService.getOverallBucketScores(
+      selectedJobIds,
+      // Note there is an optimization for when top_n == 1.
+      // If top_n > 1, we should test what happens when the request takes long
+      // and refactor the loading calls, if necessary, to avoid delays in loading other components.
+      1,
+      overallBucketsBounds.min.valueOf(),
+      overallBucketsBounds.max.valueOf(),
+      interval.asSeconds() + 's'
+    ).then((resp) => {
+      const overallSwimlaneData = processOverallResults(
+        resp.results,
+        searchBounds,
+        interval.asSeconds(),
+      );
+
+      console.log('Explorer overall swimlane data set:', overallSwimlaneData);
+      resolve({
+        loading: false,
+        overallSwimlaneData,
+      });
+    });
+  });
+}
+
+export function loadViewBySwimlane(
+  fieldValues,
+  bounds,
+  selectedJobs,
+  viewBySwimlaneFieldName,
+  swimlaneLimit,
+  influencersFilterQuery,
+  noInfluencersConfigured
+) {
+
+  return new Promise((resolve) => {
+
+    const finish = (resp) => {
+      if (resp !== undefined) {
+        const viewBySwimlaneData = processViewByResults(
+          resp.results,
+          fieldValues,
+          bounds,
+          viewBySwimlaneFieldName,
+          getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)).asSeconds(),
+        );
+        console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
+
+        resolve({
+          viewBySwimlaneData,
+          viewBySwimlaneDataLoading: false
+        });
+      } else {
+        resolve({ viewBySwimlaneDataLoading: false });
+      }
+    };
+
+    if (
+      selectedJobs === undefined ||
+      viewBySwimlaneFieldName === undefined
+    ) {
+      finish();
+      return;
+    } else {
+      // Ensure the search bounds align to the bucketing interval used in the swimlane so
+      // that the first and last buckets are complete.
+      const timefilterBounds = timefilter.getActiveBounds();
+      const searchBounds = getBoundsRoundedToInterval(
+        timefilterBounds,
+        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)),
+        false,
+      );
+      const selectedJobIds = selectedJobs.map(d => d.id);
+
+      // load scores by influencer/jobId value and time.
+      // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+      // which wouldn't be the case if e.g. '1M' was used.
+      const interval = `${getSwimlaneBucketInterval(
+        selectedJobs,
+        getSwimlaneContainerWidth(noInfluencersConfigured)
+      ).asSeconds()}s`;
+      if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
+        mlResultsService.getInfluencerValueMaxScoreByTime(
+          selectedJobIds,
+          viewBySwimlaneFieldName,
+          fieldValues,
+          searchBounds.min.valueOf(),
+          searchBounds.max.valueOf(),
+          interval,
+          swimlaneLimit,
+          influencersFilterQuery
+        ).then(finish);
+      } else {
+        const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
+        mlResultsService.getScoresByBucket(
+          jobIds,
+          searchBounds.min.valueOf(),
+          searchBounds.max.valueOf(),
+          interval,
+          swimlaneLimit
+        ).then(finish);
+      }
+    }
   });
 }
 
@@ -588,4 +819,33 @@ export async function loadTopInfluencers(
       resolve({});
     }
   });
+}
+
+export function restoreAppState(appState) {
+  // Select any jobs set in the global state (i.e. passed in the URL).
+  let selectedCells;
+  let filterData = {};
+
+  // keep swimlane selection, restore selectedCells from AppState
+  if (appState.mlExplorerSwimlane.selectedType !== undefined) {
+    selectedCells = {
+      type: appState.mlExplorerSwimlane.selectedType,
+      lanes: appState.mlExplorerSwimlane.selectedLanes,
+      times: appState.mlExplorerSwimlane.selectedTimes,
+      showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
+      viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+    };
+  }
+
+  // keep influencers filter selection, restore from AppState
+  if (appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+    filterData = {
+      influencersFilterQuery: appState.mlExplorerFilter.influencersFilterQuery,
+      filterActive: appState.mlExplorerFilter.filterActive,
+      filteredFields: appState.mlExplorerFilter.filteredFields,
+      queryString: appState.mlExplorerFilter.queryString,
+    };
+  }
+
+  return { filterData, selectedCells, viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName };
 }

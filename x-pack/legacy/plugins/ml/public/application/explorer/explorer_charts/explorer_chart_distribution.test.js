@@ -56,7 +56,7 @@ describe('ExplorerChart', () => {
     // the directive just ends up being empty.
     expect(wrapper.isEmptyRender()).toBeTruthy();
     expect(wrapper.find('.content-wrapper')).toHaveLength(0);
-    expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(0);
+    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(0);
   });
 
   test('Loading status active, no chart', () => {
@@ -69,7 +69,7 @@ describe('ExplorerChart', () => {
     );
 
     // test if the loading indicator is shown
-    expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(1);
+    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(1);
   });
 
   // For the following tests the directive needs to be rendered in the actual DOM,
@@ -97,7 +97,7 @@ describe('ExplorerChart', () => {
     const wrapper = init(mockChartData);
 
     // the loading indicator should not be shown
-    expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(0);
+    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(0);
 
     // test if all expected elements are present
     // need to use getDOMNode() because the chart is not rendered via react itself

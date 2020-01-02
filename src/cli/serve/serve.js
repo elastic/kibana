@@ -22,8 +22,9 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { getConfig } from '../../legacy/server/path';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
+import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
@@ -143,6 +144,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   set('plugins.paths', _.compact([].concat(
     get('plugins.paths'),
     opts.pluginPath,
+    opts.runExamples ? [
+      // Ideally this would automatically include all plugins in the examples dir
+      fromRoot('examples/demo_search'),
+      fromRoot('examples/search_explorer'),
+    ] : [],
 
     XPACK_INSTALLED && !opts.oss
       ? [XPACK_DIR]
@@ -166,7 +172,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [ getConfig() ]
+      [ getConfigPath() ]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-q, --quiet', 'Prevent all logging except errors')
@@ -200,7 +206,8 @@ export default function (program) {
 
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
-      .option('--oss', 'Start Kibana without X-Pack');
+      .option('--oss', 'Start Kibana without X-Pack')
+      .option('--run-examples', 'Adds plugin paths for all the Kibana example plugins and runs with no base path');
   }
 
   if (CAN_CLUSTER) {
@@ -237,7 +244,12 @@ export default function (program) {
           silent: !!opts.silent,
           watch: !!opts.watch,
           repl: !!opts.repl,
-          basePath: !!opts.basePath,
+          // We want to run without base path when the `--run-examples` flag is given so that we can use local
+          // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+          // We can tell users they only have to run with `yarn start --run-examples` to get those
+          // local links to work.  Similar to what we do for "View in Console" links in our
+          // elastic.co links.
+          basePath: opts.runExamples ? false : !!opts.basePath,
           optimize: !!opts.optimize,
           oss: !!opts.oss
         },

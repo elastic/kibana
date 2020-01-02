@@ -19,12 +19,13 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getServices, subscribeWithScope } from './../kibana_services';
+import { getAngularModule, getServices, subscribeWithScope } from './../kibana_services';
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';
-import { getRootBreadcrumbs } from '../breadcrumbs';
-const { FilterBarQueryFilterProvider, uiRoutes, chrome } = getServices();
+import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
+import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
+const { chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -44,26 +45,33 @@ const k7Breadcrumbs = $route => {
   ];
 };
 
-uiRoutes
-  // deprecated route, kept for compatibility
-  // should be removed in the future
-  .when('/context/:indexPatternId/:type/:id*', {
-    redirectTo: '/context/:indexPatternId/:id',
-  })
-  .when('/context/:indexPatternId/:id*', {
-    controller: ContextAppRouteController,
-    k7Breadcrumbs,
-    controllerAs: 'contextAppRoute',
-    resolve: {
-      indexPattern: function ($route, indexPatterns) {
-        return indexPatterns.get($route.current.params.indexPatternId);
+getAngularModule().config($routeProvider => {
+  $routeProvider
+    // deprecated route, kept for compatibility
+    // should be removed in the future
+    .when('/discover/context/:indexPatternId/:type/:id*', {
+      redirectTo: '/discover/context/:indexPatternId/:id',
+    })
+    .when('/discover/context/:indexPatternId/:id*', {
+      controller: ContextAppRouteController,
+      k7Breadcrumbs,
+      controllerAs: 'contextAppRoute',
+      resolve: {
+        indexPattern: ($route, Promise) => {
+          const indexPattern = getServices().indexPatterns.get(
+            $route.current.params.indexPatternId
+          );
+          return Promise.props({ ip: indexPattern });
+        },
       },
-    },
-    template: contextAppRouteTemplate,
-  });
+      template: contextAppRouteTemplate,
+    });
+});
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern, Private) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+function ContextAppRouteController($routeParams, $scope, AppState, config, $route, getAppState, globalState) {
+  const filterManager = getServices().filterManager;
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
+  const indexPattern = $route.current.locals.indexPattern.ip;
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));
   this.state.save(true);
@@ -77,19 +85,20 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
     () => this.state.save(true)
   );
 
-  const updateSubsciption = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+  const updateSubsciption = subscribeWithScope($scope, filterManager.getUpdates$(), {
     next: () => {
-      this.filters = _.cloneDeep(queryFilter.getFilters());
+      this.filters = _.cloneDeep(filterManager.getFilters());
     },
   });
 
-  $scope.$on('$destroy', function () {
+  $scope.$on('$destroy', () => {
+    filterStateManager.destroy();
     updateSubsciption.unsubscribe();
   });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
-  this.filters = _.cloneDeep(queryFilter.getFilters());
+  this.filters = _.cloneDeep(filterManager.getFilters());
 }
 
 function createDefaultAppState(config, indexPattern) {

@@ -30,7 +30,7 @@ describe('DraggableWrapper', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DraggableWrapper'))).toMatchSnapshot();
     });
 
     test('it renders the children passed to the render prop', () => {

@@ -76,7 +76,8 @@ export default function ({ getService, getPageObjects }) {
       expect(isInstalled).to.be(true);
     });
 
-    describe('dashboard', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/40670
+    describe.skip('dashboard', () => {
       afterEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();

@@ -6,11 +6,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled, { createGlobalStyle } from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
@@ -48,7 +46,7 @@ interface Props {
   filterQueryDraft: KueryFilterQuery;
   from: number;
   fromStr: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
@@ -85,7 +83,7 @@ const ModeFlexItem = styled(EuiFlexItem)`
 
 ModeFlexItem.displayName = 'ModeFlexItem';
 
-export const SearchOrFilter = pure<Props>(
+export const SearchOrFilter = React.memo<Props>(
   ({
     applyKqlFilterQuery,
     browserFields,

@@ -70,7 +70,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   componentDidMount() {
     this.subscription = getServices()
       .eui_utils.getChartsTheme$()
-      .subscribe(chartsTheme => this.setState({ chartsTheme }));
+      .subscribe((chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme }));
   }
 
   componentWillUnmount() {

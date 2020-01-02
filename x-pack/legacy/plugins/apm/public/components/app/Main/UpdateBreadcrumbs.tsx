@@ -9,8 +9,11 @@ import React from 'react';
 import { LegacyCoreStart } from 'src/core/public';
 import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
-import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
-import { routes } from './route_config';
+import {
+  Breadcrumb,
+  ProvideBreadcrumbs,
+  BreadcrumbRoute
+} from './ProvideBreadcrumbs';
 
 interface Props {
   location: Location;
@@ -49,7 +52,11 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   }
 }
 
-export function UpdateBreadcrumbs() {
+interface UpdateBreadcrumbsProps {
+  routes: BreadcrumbRoute[];
+}
+
+export function UpdateBreadcrumbs({ routes }: UpdateBreadcrumbsProps) {
   const core = useKibanaCore();
   return (
     <ProvideBreadcrumbs

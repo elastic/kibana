@@ -9,5 +9,5 @@ Register a route handler for `POST` request.
 <b>Signature:</b>
 
 ```typescript
-post: RouteRegistrar;
+post: RouteRegistrar<'post'>;
 ```

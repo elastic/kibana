@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { delay } from 'bluebird';
 import _ from 'lodash';
 
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import * as legacyElasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
@@ -36,7 +33,6 @@ jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
 describe('SavedObjectsRepository', () => {
   let callAdminCluster;
-  let onBeforeWrite;
   let savedObjectsRepository;
   let migrator;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
@@ -254,7 +250,6 @@ describe('SavedObjectsRepository', () => {
 
   beforeEach(() => {
     callAdminCluster = jest.fn();
-    onBeforeWrite = jest.fn();
     migrator = {
       migrateDocument: jest.fn(doc => doc),
       runMigrations: async () => ({ status: 'skipped' }),
@@ -272,7 +267,6 @@ describe('SavedObjectsRepository', () => {
       schema,
       serializer,
       allowedTypes,
-      onBeforeWrite,
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
@@ -350,7 +344,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('index', expect.any(Object));
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should use default index', async () => {
@@ -359,8 +352,8 @@ describe('SavedObjectsRepository', () => {
         title: 'Logstash',
       });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledWith(
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
         'index',
         expect.objectContaining({
           index: '.kibana-test',
@@ -374,8 +367,8 @@ describe('SavedObjectsRepository', () => {
         title: 'Logstash',
       });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledWith(
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
         'index',
         expect.objectContaining({
           index: 'beats',
@@ -447,7 +440,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('create', expect.any(Object));
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('allows for id to be provided', async () => {
@@ -466,8 +458,6 @@ describe('SavedObjectsRepository', () => {
           id: 'index-pattern:logstash-*',
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('self-generates an ID', async () => {
@@ -482,8 +472,6 @@ describe('SavedObjectsRepository', () => {
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
@@ -510,7 +498,6 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -535,7 +522,6 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -561,7 +547,6 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('defaults to empty references array if none are provided', async () => {
@@ -658,8 +643,6 @@ describe('SavedObjectsRepository', () => {
           references: [{ name: 'ref_0', type: 'test', id: '2' }],
         },
       ]);
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('defaults to a refresh setting of `wait_for`', async () => {
@@ -821,10 +804,7 @@ describe('SavedObjectsRepository', () => {
         })
       );
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-
       callAdminCluster.mockReset();
-      onBeforeWrite.mockReset();
 
       callAdminCluster.mockReturnValue({
         items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }],
@@ -844,8 +824,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('mockReturnValue document errors', async () => {
@@ -997,7 +975,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -1044,7 +1021,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -1072,7 +1048,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should return objects in the same order regardless of type', () => { });
@@ -1116,8 +1091,6 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id when providing no namespace for namespaced type`, async () => {
@@ -1131,8 +1104,6 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
@@ -1148,8 +1119,6 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('defaults to a refresh setting of `wait_for`', async () => {
@@ -1180,7 +1149,6 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
       expect(savedObjectsRepository.deleteByNamespace()).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('requires namespace to be a string', async () => {
@@ -1189,7 +1157,6 @@ describe('SavedObjectsRepository', () => {
         savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
@@ -1198,7 +1165,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(result).toEqual(deleteByQueryResults);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
 
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
         namespace: 'my-namespace',
@@ -1247,7 +1213,6 @@ describe('SavedObjectsRepository', () => {
     it('requires type to be defined', async () => {
       await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('requires searchFields be an array if defined', async () => {
@@ -1257,7 +1222,6 @@ describe('SavedObjectsRepository', () => {
         throw new Error('expected find() to reject');
       } catch (error) {
         expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(onBeforeWrite).not.toHaveBeenCalled();
         expect(error.message).toMatch('must be an array');
       }
     });
@@ -1269,7 +1233,6 @@ describe('SavedObjectsRepository', () => {
         throw new Error('expected find() to reject');
       } catch (error) {
         expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(onBeforeWrite).not.toHaveBeenCalled();
         expect(error.message).toMatch('must be an array');
       }
     });
@@ -1371,7 +1334,6 @@ describe('SavedObjectsRepository', () => {
       getSearchDslNS.getSearchDsl.mockReturnValue({ query: 1, aggregations: 2 });
       await savedObjectsRepository.find({ type: 'foo' });
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({
@@ -1440,8 +1402,6 @@ describe('SavedObjectsRepository', () => {
           from: 50,
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('can filter by fields', async () => {
@@ -1463,8 +1423,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('should set rest_total_hits_as_int to true on a request', async () => {
@@ -1516,7 +1474,6 @@ describe('SavedObjectsRepository', () => {
     it('formats Elasticsearch response when there is no namespace', async () => {
       callAdminCluster.mockResolvedValue(noNamespaceResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
         id: 'logstash-*',
         type: 'index-pattern',
@@ -1532,7 +1489,6 @@ describe('SavedObjectsRepository', () => {
     it('formats Elasticsearch response when there are namespaces', async () => {
       callAdminCluster.mockResolvedValue(namespacedResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
         id: 'logstash-*',
         type: 'index-pattern',
@@ -1551,7 +1507,6 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
       });
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1565,7 +1520,6 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue(noNamespaceResult);
       await savedObjectsRepository.get('index-pattern', 'logstash-*');
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1581,7 +1535,6 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
       });
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1630,8 +1583,6 @@ describe('SavedObjectsRepository', () => {
           },
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('prepends namespace and type appropriately to id when getting objects when there is a namespace', async () => {
@@ -1661,8 +1612,6 @@ describe('SavedObjectsRepository', () => {
           },
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('mockReturnValue early for empty objects argument', async () => {
@@ -1672,7 +1621,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(response.saved_objects).toHaveLength(0);
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('handles missing ids gracefully', async () => {
@@ -1723,7 +1671,6 @@ describe('SavedObjectsRepository', () => {
         { id: 'bad', type: 'config' },
       ]);
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
       expect(savedObjects).toHaveLength(2);
@@ -1991,8 +1938,6 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -2033,8 +1978,6 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -2076,8 +2019,6 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('defaults to a refresh setting of `wait_for`', async () => {
@@ -2504,8 +2445,6 @@ describe('SavedObjectsRepository', () => {
           },
         ],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -2562,8 +2501,6 @@ describe('SavedObjectsRepository', () => {
           },
         ],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -2723,8 +2660,6 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('config');
       expect(requestDoc.body.upsert.type).toBe('config');
       expect(requestDoc).toHaveProperty('body.upsert.config');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -2737,8 +2672,6 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('config');
       expect(requestDoc.body.upsert.type).toBe('config');
       expect(requestDoc).toHaveProperty('body.upsert.config');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -2769,8 +2702,6 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('globaltype');
       expect(requestDoc.body.upsert.type).toBe('globaltype');
       expect(requestDoc).toHaveProperty('body.upsert.globaltype');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should assert that the "type" and "counterFieldName" arguments are strings', () => {
@@ -2816,39 +2747,6 @@ describe('SavedObjectsRepository', () => {
           }
         )
       ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
-    });
-  });
-
-  describe('onBeforeWrite', () => {
-    it('blocks calls to callCluster of requests', async () => {
-      onBeforeWrite.mockReturnValue(delay(500));
-      callAdminCluster.mockReturnValue({ result: 'deleted', found: true });
-
-      const deletePromise = savedObjectsRepository.delete('foo', 'id');
-      await delay(100);
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).not.toHaveBeenCalled();
-      await deletePromise;
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-    });
-
-    it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
-      expect.assertions(4);
-
-      const es401 = new legacyElasticsearch.errors[401]();
-      expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
-      onBeforeWrite.mockImplementation(() => {
-        throw es401;
-      });
-
-      try {
-        await savedObjectsRepository.delete('foo', 'id');
-      } catch (error) {
-        expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-        expect(error).toBe(es401);
-        expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
-      }
     });
   });
 

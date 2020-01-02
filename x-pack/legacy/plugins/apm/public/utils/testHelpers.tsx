@@ -11,13 +11,19 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React from 'react';
-import { render, waitForElement } from 'react-testing-library';
+import React, { FunctionComponent, ReactNode } from 'react';
+import { render, waitForElement } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { ESFilter } from '../../typings/elasticsearch';
+import {
+  PluginsContext,
+  ConfigSchema,
+  ApmPluginStartDeps
+} from '../new-platform/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -52,7 +58,6 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
     </MemoryRouter>
   );
 
-  await tick();
   await waitForElement(() => el.container.querySelector('a'));
 
   const a = el.container.querySelector('a');
@@ -67,9 +72,6 @@ export function mockNow(date: string | number | Date) {
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Await this when you need to "flush" promises to immediately resolve or throw in tests
-export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
 
 export function expectTextsNotInDocument(output: any, texts: string[]) {
   texts.forEach(text => {
@@ -178,3 +180,23 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+export const MockPluginContextWrapper: FunctionComponent<{}> = ({
+  children
+}: {
+  children?: ReactNode;
+}) => {
+  return (
+    <PluginsContext.Provider
+      value={
+        {
+          apm: { config: {} as ConfigSchema, stackVersion: '0' }
+        } as ApmPluginStartDeps & {
+          apm: { config: ConfigSchema; stackVersion: string };
+        }
+      }
+    >
+      {children}
+    </PluginsContext.Provider>
+  );
+};

@@ -24,13 +24,6 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { IndexPattern } from '../../../../../data/public';
-import { QueryBarTopRow } from '../../../query';
-import { SavedQuery, SavedQueryAttributes } from '../index';
-import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
-import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
-import { SavedQueryService } from '../lib/saved_query_service';
-import { createSavedQueryService } from '../lib/saved_query_service';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -40,8 +33,15 @@ import {
   TimeRange,
   Query,
   esFilters,
+  IIndexPattern,
   TimeHistoryContract,
   FilterBar,
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryMeta,
+  SaveQueryForm,
+  SavedQueryManagementComponent,
+  QueryBarTopRow,
 } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
@@ -61,7 +61,7 @@ interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: IIndexPattern[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -110,8 +110,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showAutoRefreshOnly: false,
   };
 
-  private savedQueryService!: SavedQueryService;
   private services = this.props.kibana.services;
+  private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -365,9 +365,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.filterBarRef) {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
-    }
-    if (this.services.savedObjects) {
-      this.savedQueryService = createSavedQueryService(this.services.savedObjects.client);
     }
   }
 

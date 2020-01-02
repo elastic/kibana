@@ -103,7 +103,6 @@ describe.skip('<PolicyAdd />', () => {
         test('should require at least one index', async () => {
           const { find, form, component } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle', false);
@@ -187,7 +186,6 @@ describe.skip('<PolicyAdd />', () => {
       it('should send the correct payload', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -223,7 +221,6 @@ describe.skip('<PolicyAdd />', () => {
 
         httpRequestsMockHelpers.setAddPolicyResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

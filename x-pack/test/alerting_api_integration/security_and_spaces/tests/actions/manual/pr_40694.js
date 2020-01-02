@@ -17,7 +17,7 @@ async function main() {
 
   response = await httpPost('api/action', {
     actionTypeId: '.email',
-    description: 'an email action',
+    name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
       host: 'localhost',
@@ -37,7 +37,7 @@ async function main() {
   console.log(`action after create: ${JSON.stringify(response, null, 4)}`);
 
   response = await httpPut(`api/action/${actionId}`, {
-    description: 'an email action',
+    name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
       service: '__json',

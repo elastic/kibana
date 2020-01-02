@@ -142,7 +142,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.

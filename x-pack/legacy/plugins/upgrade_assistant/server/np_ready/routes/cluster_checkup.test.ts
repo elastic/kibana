@@ -29,26 +29,27 @@ describe('cluster checkup API', () => {
   let mockRouter: MockRouter;
   let serverShim: any;
   let ctxMock: any;
+  let mockPluginsSetup: any;
 
   beforeEach(() => {
     mockRouter = createMockRouter();
+    mockPluginsSetup = {
+      cloud: {
+        isCloudEnabled: true,
+      },
+    };
     ctxMock = {
       core: {},
     };
     serverShim = {
       router: mockRouter,
       plugins: {
-        cloud: {
-          config: {
-            isCloudEnabled: true,
-          },
-        },
         elasticsearch: {
           getCluster: () => ({ callWithRequest: jest.fn() } as any),
         } as any,
       },
     };
-    registerClusterCheckupRoutes(serverShim);
+    registerClusterCheckupRoutes(serverShim, mockPluginsSetup);
   });
 
   describe('with cloud enabled', () => {

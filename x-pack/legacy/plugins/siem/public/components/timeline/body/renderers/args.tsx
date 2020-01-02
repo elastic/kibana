@@ -16,7 +16,7 @@ interface Props {
   processTitle: string | null | undefined;
 }
 
-export const Args = React.memo<Props>(({ args, contextId, eventId, processTitle }) => {
+export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props) => {
   if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
     return null;
   }
@@ -47,6 +47,10 @@ export const Args = React.memo<Props>(({ args, contextId, eventId, processTitle 
       )}
     </>
   );
-});
+};
+
+ArgsComponent.displayName = 'ArgsComponent';
+
+export const Args = React.memo(ArgsComponent);
 
 Args.displayName = 'Args';

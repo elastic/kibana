@@ -81,7 +81,7 @@ export class AdvancedSettings extends Component {
     }, {});
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { config } = nextProps;
     const { query } = this.state;
 

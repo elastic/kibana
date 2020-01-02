@@ -21,7 +21,7 @@ import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { esFilters, utils, IIndexPattern } from '../..';
@@ -34,7 +34,7 @@ interface Props {
   onUpdate: (filter: esFilters.Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 interface State {

@@ -27,6 +27,7 @@ import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
+import { useTimelineTypeContext } from '../timeline_context';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -80,9 +81,11 @@ export const Body = React.memo<BodyProps>(
     toggleColumn,
     updateNote,
   }) => {
+    const timelineTypeContext = useTimelineTypeContext();
+
     const columnWidths = columnHeaders.reduce(
       (totalWidth, header) => totalWidth + header.width,
-      getActionsColumnWidth(isEventViewer)
+      getActionsColumnWidth(isEventViewer, timelineTypeContext.showCheckboxes)
     );
 
     return (
@@ -94,7 +97,10 @@ export const Body = React.memo<BodyProps>(
             style={{ minWidth: columnWidths + 'px' }}
           >
             <ColumnHeaders
-              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+              actionsColumnWidth={getActionsColumnWidth(
+                isEventViewer,
+                timelineTypeContext.showCheckboxes
+              )}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
@@ -110,7 +116,10 @@ export const Body = React.memo<BodyProps>(
             />
 
             <Events
-              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+              actionsColumnWidth={getActionsColumnWidth(
+                isEventViewer,
+                timelineTypeContext.showCheckboxes
+              )}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}

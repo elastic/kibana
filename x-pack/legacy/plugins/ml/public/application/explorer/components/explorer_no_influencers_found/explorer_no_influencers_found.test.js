@@ -11,7 +11,7 @@ import { ExplorerNoInfluencersFound } from './explorer_no_influencers_found';
 describe('ExplorerNoInfluencersFound', () => {
 
   test('snapshot', () => {
-    const wrapper = shallow(<ExplorerNoInfluencersFound swimlaneViewByFieldName="field_name" />);
+    const wrapper = shallow(<ExplorerNoInfluencersFound viewBySwimlaneFieldName="field_name" />);
     expect(wrapper).toMatchSnapshot();
   });
 

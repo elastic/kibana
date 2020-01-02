@@ -18,18 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Vis } from 'ui/vis';
-// @ts-ignore
-
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-// @ts-ignore
-import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
-import { AggGroupNames } from 'ui/vis/editors/default';
+import { AggGroupNames, Schemas } from './legacy_imports';
+import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';
+import { TableVisualizationController } from './vis_controller';
 
 export const tableVisTypeDefinition = {
   type: 'table',
@@ -41,7 +36,7 @@ export const tableVisTypeDefinition = {
   description: i18n.translate('visTypeTable.tableVisDescription', {
     defaultMessage: 'Display values in a table',
   }),
-  visualization: AngularVisController,
+  visualization: TableVisualizationController,
   visConfig: {
     defaults: {
       perPage: 10,

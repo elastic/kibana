@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 
 export async function sassMixin(kbnServer, server, config) {
   if (process.env.kbnWorkerType === 'optmzr') {

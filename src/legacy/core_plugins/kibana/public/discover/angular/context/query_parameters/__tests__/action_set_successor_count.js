@@ -19,19 +19,22 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 
 import { createStateStub } from './_utils';
-import { QueryParameterActionsProvider } from '../actions';
+import { getQueryParameterActions } from '../actions';
 
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(ngMock.module('app/discover'));
 
   describe('action setSuccessorCount', function () {
     let setSuccessorCount;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      setSuccessorCount = Private(QueryParameterActionsProvider).setSuccessorCount;
+    beforeEach(ngMock.inject(function createPrivateStubs() {
+      setSuccessorCount = getQueryParameterActions().setSuccessorCount;
     }));
 
     it('should set the successorCount to the given value', function () {

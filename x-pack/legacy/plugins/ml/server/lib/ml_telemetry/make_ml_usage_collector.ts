@@ -16,9 +16,13 @@ import {
 import { UsageInitialization } from '../../new_platform/plugin';
 
 export function makeMlUsageCollector(
-  usageCollection: UsageCollectionSetup,
+  usageCollection: UsageCollectionSetup | undefined,
   { elasticsearchPlugin, savedObjects }: UsageInitialization
 ): void {
+  if (!usageCollection) {
+    return;
+  }
+
   const mlUsageCollector = usageCollection.makeUsageCollector({
     type: 'ml',
     isReady: () => true,

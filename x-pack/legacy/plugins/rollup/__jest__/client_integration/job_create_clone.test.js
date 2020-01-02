@@ -8,7 +8,6 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

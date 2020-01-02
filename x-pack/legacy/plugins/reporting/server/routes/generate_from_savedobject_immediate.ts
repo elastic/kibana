@@ -12,7 +12,6 @@ import {
   ResponseFacade,
   ReportingResponseToolkit,
   Logger,
-  JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
@@ -57,11 +56,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(
-        null as JobIDForImmediate,
-        jobDocPayload,
-        request
-      );
+      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

@@ -23,9 +23,8 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 ## Usage
 
-1. Enable the alerting plugin in the `kibana.yml` by setting `xpack.alerting.enabled: true`.
-2. Develop and register an alert type (see alert types -> example).
-3. Create an alert using the RESTful API (see alerts -> create).
+1. Develop and register an alert type (see alert types -> example).
+2. Create an alert using the RESTful API (see alerts -> create).
 
 ## Limitations
 

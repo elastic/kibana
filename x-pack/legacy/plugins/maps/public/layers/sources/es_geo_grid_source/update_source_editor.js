@@ -8,13 +8,13 @@ import React, { Fragment, Component } from 'react';
 
 import { RENDER_AS } from './render_as';
 import { MetricsEditor } from '../../../components/metrics_editor';
-import { METRIC_TYPE } from '../../../../common/constants';
 import { indexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
+import { isMetricCountable } from '../../util/is_metric_countable';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -72,7 +72,7 @@ export class UpdateSourceEditor extends Component {
       this.props.renderAs === RENDER_AS.HEATMAP
         ? metric => {
           //these are countable metrics, where blending heatmap color blobs make sense
-          return [METRIC_TYPE.COUNT, METRIC_TYPE.SUM, METRIC_TYPE.UNIQUE_COUNT].includes(metric.value);
+          return isMetricCountable(metric.value);
         }
         : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;

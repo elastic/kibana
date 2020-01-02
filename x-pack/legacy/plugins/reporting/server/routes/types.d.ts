@@ -15,11 +15,11 @@ export type HandlerFunction = (
 
 export type HandlerErrorFunction = (exportType: string, err: Error) => any;
 
-export interface QueuedJobPayload {
+export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;
   source: {
     job: {
-      payload: JobDocPayload;
+      payload: JobDocPayload<JobParamsType>;
     };
   };
 }

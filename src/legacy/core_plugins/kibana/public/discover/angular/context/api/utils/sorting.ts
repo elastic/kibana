@@ -17,8 +17,12 @@
  * under the License.
  */
 
-import { SortDirection } from '../../../../../../../../ui/public/courier';
 import { IndexPattern } from '../../../../kibana_services';
+
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
 
 /**
  * The list of field names that are allowed for sorting, but not included in

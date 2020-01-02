@@ -5,11 +5,11 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
-import * as I18n from './translations';
+import * as CreateRuleI18n from '../../translations';
 
 interface AddItemProps {
   addText: string;
@@ -21,33 +21,56 @@ interface AddItemProps {
 
 export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const [items, setItems] = useState(['']);
-  const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(false);
+  // const [items, setItems] = useState(['']);
+  const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
 
-  const lastInputRef = useRef<HTMLInputElement | null>(null);
+  const inputsRef = useRef<HTMLInputElement[]>([]);
 
   const removeItem = useCallback(
     (index: number) => {
       const values = field.value as string[];
       field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+      inputsRef.current = [
+        ...inputsRef.current.slice(0, index),
+        ...inputsRef.current.slice(index + 1),
+      ];
+      inputsRef.current = inputsRef.current.map((ref, i) => {
+        if (i >= index && inputsRef.current[index] != null) {
+          ref.value = 're-render';
+        }
+        return ref;
+      });
     },
     [field]
   );
 
   const addItem = useCallback(() => {
     const values = field.value as string[];
-    if (!isEmpty(values[values.length - 1])) {
+    if (!isEmpty(values) && values[values.length - 1]) {
       field.setValue([...values, '']);
+    } else if (isEmpty(values)) {
+      field.setValue(['']);
     }
   }, [field]);
 
   const updateItem = useCallback(
     (event: ChangeEvent<HTMLInputElement>, index: number) => {
+      event.persist();
       const values = field.value as string[];
       const value = event.target.value;
       if (isEmpty(value)) {
-        setHaveBeenKeyboardDeleted(true);
         field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+        inputsRef.current = [
+          ...inputsRef.current.slice(0, index),
+          ...inputsRef.current.slice(index + 1),
+        ];
+        setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
+        inputsRef.current = inputsRef.current.map((ref, i) => {
+          if (i >= index && inputsRef.current[index] != null) {
+            ref.value = 're-render';
+          }
+          return ref;
+        });
       } else {
         field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
       }
@@ -56,31 +79,30 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
   );
 
   const handleLastInputRef = useCallback(
-    (element: HTMLInputElement | null) => {
-      lastInputRef.current = element;
+    (index: number, element: HTMLInputElement | null) => {
+      if (element != null) {
+        inputsRef.current = [
+          ...inputsRef.current.slice(0, index),
+          element,
+          ...inputsRef.current.slice(index + 1),
+        ];
+      }
     },
-    [lastInputRef]
+    [inputsRef]
   );
 
   useEffect(() => {
-    if (!isEqual(field.value, items)) {
-      setItems(
-        isEmpty(field.value)
-          ? ['']
-          : haveBeenKeyboardDeleted
-          ? [...(field.value as string[]), '']
-          : (field.value as string[])
-      );
-      setHaveBeenKeyboardDeleted(false);
+    if (
+      haveBeenKeyboardDeleted !== -1 &&
+      !isEmpty(inputsRef.current) &&
+      inputsRef.current[haveBeenKeyboardDeleted] != null
+    ) {
+      inputsRef.current[haveBeenKeyboardDeleted].focus();
+      setHaveBeenKeyboardDeleted(-1);
     }
-  }, [field.value]);
+  }, [haveBeenKeyboardDeleted, inputsRef.current]);
 
-  useEffect(() => {
-    if (!haveBeenKeyboardDeleted && lastInputRef != null && lastInputRef.current != null) {
-      lastInputRef.current.focus();
-    }
-  }, [haveBeenKeyboardDeleted, lastInputRef]);
-
+  const values = field.value as string[];
   return (
     <EuiFormRow
       label={field.label}
@@ -92,10 +114,16 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
       describedByIds={idAria ? [idAria] : undefined}
     >
       <>
-        {items.map((item, index) => {
+        {values.map((item, index) => {
           const euiFieldProps = {
             disabled: isDisabled,
-            ...(index === items.length - 1 ? { inputRef: handleLastInputRef } : {}),
+            ...(index === values.length - 1
+              ? { inputRef: handleLastInputRef.bind(null, index) }
+              : {}),
+            ...((inputsRef.current[index] != null && inputsRef.current[index].value !== item) ||
+            inputsRef.current[index] == null
+              ? { value: item }
+              : {}),
           };
           return (
             <div key={index}>
@@ -106,16 +134,15 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
                     iconType="trash"
                     isDisabled={isDisabled}
                     onClick={() => removeItem(index)}
-                    aria-label={I18n.DELETE}
+                    aria-label={CreateRuleI18n.DELETE}
                   />
                 }
-                value={item}
                 onChange={e => updateItem(e, index)}
                 compressed
                 fullWidth
                 {...euiFieldProps}
               />
-              {items.length - 1 !== index && <EuiSpacer size="s" />}
+              {values.length - 1 !== index && <EuiSpacer size="s" />}
             </div>
           );
         })}

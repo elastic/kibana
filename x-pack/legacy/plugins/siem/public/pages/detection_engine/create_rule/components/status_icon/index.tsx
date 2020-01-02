@@ -9,8 +9,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import { useEuiTheme } from '../../../../../lib/theme/use_eui_theme';
-
-export type RuleStatusType = 'passive' | 'active' | 'valid';
+import { RuleStatusType } from '../../types';
 
 export interface RuleStatusIconProps {
   name: string;
@@ -32,7 +31,7 @@ export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" />
-      {type === 'valid' ? <EuiIcon type="check" color="white" size="l" /> : null}
+      {type === 'valid' ? <EuiIcon type="check" color={theme.euiColorEmptyShade} size="l" /> : null}
     </RuleStatusIconStyled>
   );
 });

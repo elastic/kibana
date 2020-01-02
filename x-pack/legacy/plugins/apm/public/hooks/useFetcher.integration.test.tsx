@@ -5,21 +5,11 @@
  */
 
 import React from 'react';
-import { render } from 'react-testing-library';
-import { delay, tick } from '../utils/testHelpers';
+import { render, wait } from '@testing-library/react';
+import { delay } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
 import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
 import { LegacyCoreStart } from 'kibana/public';
-
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
 
 // Wrap the hook with a provider so it can useKibanaCore
 const wrapper = ({ children }: { children?: React.ReactNode }) => (
@@ -86,7 +76,8 @@ describe('when simulating race condition', () => {
 
   it('should render "Hello from Peter" after 200ms', async () => {
     jest.advanceTimersByTime(200);
-    await tick();
+
+    await wait();
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -97,7 +88,7 @@ describe('when simulating race condition', () => {
 
   it('should render "Hello from Peter" after 600ms', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -108,7 +99,7 @@ describe('when simulating race condition', () => {
 
   it('should should NOT have rendered "Hello from John" at any point', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(renderSpy).not.toHaveBeenCalledWith({
       data: 'Hello from John',
@@ -119,7 +110,7 @@ describe('when simulating race condition', () => {
 
   it('should send and receive calls in the right order', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(requestCallOrder).toEqual([
       ['request', 'John', 500],

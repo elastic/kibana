@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { StaticIndexPattern, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 
@@ -31,7 +30,13 @@ import {
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import { TimeRange, Query, esFilters } from '../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  TimeRange,
+  Query,
+  esFilters,
+  SavedQuery,
+} from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
@@ -54,7 +59,7 @@ export interface DashboardAppScope extends ng.IScope {
   savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
-  indexPatterns: StaticIndexPattern[];
+  indexPatterns: IIndexPattern[];
   $evalAsync: any;
   dashboardViewMode: ViewMode;
   expandedPanel?: string;
@@ -113,6 +118,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           AppStateClass: AppState,
           config,
           confirmModal,
+          indexPatterns: deps.npDataStart.indexPatterns,
           ...deps,
         }),
     };

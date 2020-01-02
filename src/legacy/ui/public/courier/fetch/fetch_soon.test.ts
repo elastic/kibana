@@ -19,14 +19,14 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 import { FetchHandlers, FetchOptions } from './types';
 import { SearchRequest, SearchResponse } from '../types';
 
 function getConfigStub(config: any = {}) {
   return {
     get: key => config[key],
-  } as UiSettingsClientContract;
+  } as IUiSettingsClient;
 }
 
 const mockResponses: Record<string, SearchResponse> = {

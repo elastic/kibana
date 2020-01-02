@@ -255,6 +255,7 @@ export class CoreSystem {
         i18n,
         notifications,
         overlays,
+        savedObjects,
         uiSettings,
         injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));

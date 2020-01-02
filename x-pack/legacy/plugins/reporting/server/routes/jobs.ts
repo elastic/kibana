@@ -6,7 +6,13 @@
 
 import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import {
+  ServerFacade,
+  RequestFacade,
+  ReportingResponseToolkit,
+  JobDocOutput,
+  JobSource,
+} from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -65,8 +71,7 @@ export function registerJobs(server: ServerFacade) {
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        (doc: any): JobDoc => {
-          const job = doc._source;
+        ({ _source: job }: JobSource<any>): JobDocOutput => {
           if (!job) {
             throw boom.notFound();
           }
@@ -90,9 +95,9 @@ export function registerJobs(server: ServerFacade) {
     handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then(
-        (doc: any): JobDoc => {
-          const job: JobDoc = doc._source;
+      return jobsQuery
+        .get(request.pre.user, docId)
+        .then(({ _source: job }: JobSource<any>): JobSource<any>['_source'] => {
           if (!job) {
             throw boom.notFound();
           }
@@ -103,14 +108,13 @@ export function registerJobs(server: ServerFacade) {
           }
 
           return {
-            ...doc._source,
+            ...job,
             payload: {
               ...payload,
               headers: undefined,
             },
           };
-        }
-      );
+        });
     },
   });
 

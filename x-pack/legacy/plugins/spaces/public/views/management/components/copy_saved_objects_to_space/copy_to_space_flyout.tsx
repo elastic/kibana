@@ -21,12 +21,12 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  SavedObjectsManagementRecord,
-  processImportResponse,
-  ProcessedImportResponse,
-} from 'ui/management/saved_objects_management';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { SavedObjectsManagementRecord } from '../../../../../../../../../src/legacy/core_plugins/management/public';
+import {
+  ProcessedImportResponse,
+  processImportResponse,
+} from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';

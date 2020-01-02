@@ -29,6 +29,7 @@ import {
 } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
+import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 
@@ -86,6 +87,33 @@ export const internals = Joi.extend([
       }
 
       return value;
+    },
+    rules: [anyCustomRule],
+  },
+  {
+    name: 'binary',
+
+    base: Joi.binary(),
+    coerce(value: any, state: State, options: ValidationOptions) {
+      // If value isn't defined, let Joi handle default value if it's defined.
+      if (value !== undefined && !(typeof value === 'object' && Buffer.isBuffer(value))) {
+        return this.createError('binary.base', { value }, state, options);
+      }
+
+      return value;
+    },
+    rules: [anyCustomRule],
+  },
+  {
+    name: 'stream',
+
+    pre(value: any, state: State, options: ValidationOptions) {
+      // If value isn't defined, let Joi handle default value if it's defined.
+      if (value instanceof Stream) {
+        return value as any;
+      }
+
+      return this.createError('stream.base', { value }, state, options);
     },
     rules: [anyCustomRule],
   },

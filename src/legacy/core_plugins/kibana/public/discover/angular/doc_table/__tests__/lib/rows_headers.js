@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
 import $ from 'jquery';
-import 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Doc Table', function () {
@@ -37,8 +37,9 @@ describe('Doc Table', function () {
 
   let fakeRowVals;
   let stubFieldFormatConverter;
-
-  beforeEach(ngMock.module('kibana', 'apps/discover'));
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.inject(function (_config_, $rootScope, Private) {
       config = _config_;

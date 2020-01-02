@@ -25,8 +25,9 @@ import {
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 import { LoggerFactory } from '../../logging';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { Config } from '../../config';
+import { LegacyConfig } from '../config';
 
 export interface LegacyPluginPack {
   getPath(): string;
@@ -39,7 +40,7 @@ export interface LegacyPluginSpec {
 }
 
 export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
-  const configToMutate: Config = defaultConfig(settings);
+  const configToMutate: LegacyConfig = defaultConfig(settings);
   const {
     pack$,
     invalidDirectoryError$,

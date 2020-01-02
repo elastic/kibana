@@ -20,7 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
+import { SavedObjectsClientProviderOptions, CoreSetup, CoreStart } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -36,18 +36,16 @@ import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/serve
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LegacyConfig } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { Capabilities } from '../../core/public';
+import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
-export interface KibanaConfig {
-  get<T>(key: string): T;
-  has(key: string): boolean;
-}
+export type KibanaConfig = LegacyConfig;
 
 export interface UiApp {
   getId(): string;
@@ -69,7 +67,6 @@ declare module 'hapi' {
     savedObjects: SavedObjectsLegacyService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
@@ -90,7 +87,6 @@ declare module 'hapi' {
     getBasePath(): string;
     getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
-    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {
@@ -127,13 +123,10 @@ export default class KbnServer {
       plugins: PluginsSetup;
     };
     start: {
-      core: CoreSetup;
+      core: CoreStart;
       plugins: Record<string, object>;
     };
     stop: null;
-    params: {
-      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
-    };
   };
   public server: Server;
   public inject: Server['inject'];

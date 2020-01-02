@@ -63,7 +63,8 @@ export interface AppMountContext {
         i18n: I18nStart;
         notifications: NotificationsStart;
         overlays: OverlayStart;
-        uiSettings: UiSettingsClientContract;
+        savedObjects: SavedObjectsStart;
+        uiSettings: IUiSettingsClient;
         injectedMetadata: {
             getInjectedVar: (name: string, defaultValue?: any) => unknown;
         };
@@ -250,6 +251,7 @@ export interface ChromeStart {
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+    setHelpSupportUrl(url: string): void;
     setIsCollapsed(isCollapsed: boolean): void;
     setIsVisible(isVisible: boolean): void;
 }
@@ -289,7 +291,7 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    uiSettings: UiSettingsClientContract;
+    uiSettings: IUiSettingsClient;
 }
 
 // @public
@@ -315,7 +317,7 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
-    uiSettings: UiSettingsClientContract;
+    uiSettings: IUiSettingsClient;
 }
 
 // @internal
@@ -463,9 +465,6 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public (undocumented)
-export type HttpBody = BodyInit | null | any;
-
-// @public (undocumented)
 export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
@@ -474,13 +473,14 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse extends IHttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
 }
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
+    asResponse?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -493,7 +493,14 @@ export interface HttpFetchQuery {
 }
 
 // @public
-export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+export interface HttpHandler {
+    // (undocumented)
+    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+        asResponse: true;
+    }): Promise<IHttpResponse<TResponseBody>>;
+    // (undocumented)
+    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+}
 
 // @public (undocumented)
 export interface HttpHeadersInit {
@@ -505,8 +512,8 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 }
 
 // @public
@@ -525,12 +532,6 @@ export interface HttpRequestInit {
     referrerPolicy?: ReferrerPolicy;
     signal?: AbortSignal | null;
     window?: null;
-}
-
-// @public (undocumented)
-export interface HttpResponse extends InterceptedHttpResponse {
-    // (undocumented)
-    request: Readonly<Request>;
 }
 
 // @public (undocumented)
@@ -611,15 +612,45 @@ export interface IHttpInterceptController {
 }
 
 // @public (undocumented)
-export interface InterceptedHttpResponse {
-    // (undocumented)
-    body?: HttpBody;
-    // (undocumented)
-    response?: Response;
+export interface IHttpResponse<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly request: Readonly<Request>;
+    readonly response?: Readonly<Response>;
+}
+
+// @public
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly response?: Readonly<Response>;
 }
 
 // @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+
+// @public
+export interface IUiSettingsClient {
+    get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
+    get: <T = any>(key: string, defaultOverride?: T) => T;
+    getAll: () => Readonly<Record<string, UiSettingsParams_2 & UserProvidedValues_2>>;
+    getSaved$: <T = any>() => Observable<{
+        key: string;
+        newValue: T;
+        oldValue: T;
+    }>;
+    getUpdate$: <T = any>() => Observable<{
+        key: string;
+        newValue: T;
+        oldValue: T;
+    }>;
+    getUpdateErrors$: () => Observable<Error>;
+    isCustom: (key: string) => boolean;
+    isDeclared: (key: string) => boolean;
+    isDefault: (key: string) => boolean;
+    isOverridden: (key: string) => boolean;
+    overrideLocalDefault: (key: string, newDefault: any) => void;
+    remove: (key: string) => Promise<boolean>;
+    set: (key: string, value: any) => Promise<boolean>;
+}
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup {
@@ -846,7 +877,7 @@ export class SavedObjectsClient {
     bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "fields" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "fields" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "perPage">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -968,7 +999,7 @@ export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGl
 // @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
-        uiSettings: UiSettingsClientContract;
+        uiSettings: IUiSettingsClient;
     });
     add(toastOrTitle: ToastInput): Toast;
     addDanger(toastOrTitle: ToastInput): Toast;
@@ -989,37 +1020,6 @@ export type ToastsSetup = IToasts;
 
 // @public (undocumented)
 export type ToastsStart = IToasts;
-
-// @public (undocumented)
-export class UiSettingsClient {
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
-    constructor(params: UiSettingsClientParams);
-    get$(key: string, defaultOverride?: any): Rx.Observable<any>;
-    get(key: string, defaultOverride?: any): any;
-    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
-    getSaved$(): Rx.Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    getUpdate$(): Rx.Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    getUpdateErrors$(): Rx.Observable<Error>;
-    isCustom(key: string): boolean;
-    isDeclared(key: string): boolean;
-    isDefault(key: string): boolean;
-    isOverridden(key: string): boolean;
-    overrideLocalDefault(key: string, newDefault: any): void;
-    remove(key: string): Promise<boolean>;
-    set(key: string, val: any): Promise<boolean>;
-    stop(): void;
-    }
-
-// @public
-export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {

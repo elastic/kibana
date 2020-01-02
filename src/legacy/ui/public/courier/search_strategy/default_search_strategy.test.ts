@@ -18,7 +18,7 @@
  */
 
 import { defaultSearchStrategy } from './default_search_strategy';
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 import { SearchStrategySearchParams } from './types';
 
 const { search } = defaultSearchStrategy;
@@ -26,7 +26,7 @@ const { search } = defaultSearchStrategy;
 function getConfigStub(config: any = {}) {
   return {
     get: key => config[key],
-  } as UiSettingsClientContract;
+  } as IUiSettingsClient;
 }
 
 const msearchMockResponse: any = Promise.resolve([]);

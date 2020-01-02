@@ -40,7 +40,8 @@ export function taskManager(kibana: any) {
           .default(3000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
-          .default('.kibana_task_manager'),
+          .default('.kibana_task_manager')
+          .invalid(['.tasks']),
         max_workers: Joi.number()
           .description(
             'The maximum number of tasks that this Kibana instance will run simultaneously.'

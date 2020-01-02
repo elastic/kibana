@@ -9,8 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-
-jest.mock('ui/new_platform');
+import { getRoutes } from '../route_config';
 
 const coreMock = {
   chrome: {
@@ -20,10 +19,12 @@ const coreMock = {
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
+const routes = getRoutes({ serviceMapEnabled: true });
+
 function expectBreadcrumbToMatchSnapshot(route, params = '') {
   mount(
     <MemoryRouter initialEntries={[`${route}?kuery=myKuery&${params}`]}>
-      <UpdateBreadcrumbs />
+      <UpdateBreadcrumbs routes={routes} />
     </MemoryRouter>
   );
   expect(coreMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);

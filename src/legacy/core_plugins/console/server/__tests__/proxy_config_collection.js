@@ -28,7 +28,7 @@ import { ProxyConfigCollection } from '../proxy_config_collection';
 
 describe('ProxyConfigCollection', function () {
   beforeEach(function () {
-    sinon.stub(fs, 'readFileSync').callsFake(() => new Buffer(0));
+    sinon.stub(fs, 'readFileSync').callsFake(() => Buffer.alloc(0));
   });
 
   afterEach(function () {

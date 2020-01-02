@@ -181,7 +181,7 @@ describe('url state', () => {
     cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
   });
 
-  it.skip('sets the url state when kql is set and check if href reflect this change', () => {
+  it('sets the url state when kql is set and check if href reflect this change', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.get(NAVIGATION_HOSTS)
@@ -194,7 +194,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
+  it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlHost);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
     cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })

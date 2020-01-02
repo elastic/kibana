@@ -65,7 +65,7 @@ export class CreateIndexPatternWizard extends Component {
     };
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     this.fetchData();
   }
 

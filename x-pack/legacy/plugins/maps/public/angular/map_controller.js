@@ -53,11 +53,10 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 

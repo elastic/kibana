@@ -7,6 +7,7 @@
 
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
+import { META_ID_ORIGIN_SUFFIX } from '../../../common/constants';
 
 export class InnerJoin {
 
@@ -36,8 +37,12 @@ export class InnerJoin {
   // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
   // Elasticsearch sources have a static and unique id so that requests can be modified in the inspector.
   // Using the right source id as the source request id because it meets the above criteria.
-  getSourceId() {
+  getSourceDataRequestId() {
     return `join_source_${this._rightSource.getId()}`;
+  }
+
+  getSourceMetaDataRequestId() {
+    return `${this.getSourceDataRequestId()}_${META_ID_ORIGIN_SUFFIX}`;
   }
 
   getLeftField() {

@@ -241,10 +241,17 @@ export class ESSearchSource extends AbstractESSource {
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
+      totalEntities: {
+        cardinality: {
+          field: topHitsSplitField,
+          precision_threshold: 1,
+        }
+      },
       entitySplit: {
         terms: {
           field: topHitsSplitField,
-          size: ES_SIZE_LIMIT
+          size: ES_SIZE_LIMIT,
+          shard_size: ES_SIZE_LIMIT,
         },
         aggs: {
           entityHits: {
@@ -254,26 +261,37 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document top hits request',
+    });
 
-    let hasTrimmedResults = false;
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
+    const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
+    // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
+    const areEntitiesTrimmed = entityBuckets.length >= ES_SIZE_LIMIT;
+    let areTopHitsTrimmed = false;
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
-        hasTrimmedResults = true;
+        areTopHitsTrimmed = true;
       }
     });
 
     return {
       hits: allHits,
       meta: {
-        areResultsTrimmed: hasTrimmedResults,
+        areResultsTrimmed: areEntitiesTrimmed || areTopHitsTrimmed, // used to force re-fetch when zooming in
+        areEntitiesTrimmed,
         entityCount: entityBuckets.length,
+        totalEntities,
       }
     };
   }
@@ -310,7 +328,13 @@ export class ESSearchSource extends AbstractESSource {
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document request',
+    });
 
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
@@ -459,24 +483,28 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     if (this._isTopHits()) {
-      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
-        defaultMessage: `Found {entityCount} entities.`,
-        values: { entityCount: meta.entityCount }
-      });
-      if (meta.areResultsTrimmed) {
-        const trimmedMsg = i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
-          defaultMessage: `Results limited to most recent {topHitsSize} documents per entity.`,
-          values: { topHitsSize: this._descriptor.topHitsSize }
+      const entitiesFoundMsg = meta.areEntitiesTrimmed
+        ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
+          values: {
+            entityCount: meta.entityCount,
+            totalEntities: meta.totalEntities,
+          }
+        })
+        : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
+          defaultMessage: `Found {entityCount} entities.`,
+          values: { entityCount: meta.entityCount }
         });
-        return {
-          tooltipContent: `${entitiesFoundMsg} ${trimmedMsg}`,
-          areResultsTrimmed: false
-        };
-      }
+      const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
+        defaultMessage: `Showing top {topHitsSize} documents per entity.`,
+        values: { topHitsSize: this._descriptor.topHitsSize }
+      });
 
       return {
-        tooltipContent: entitiesFoundMsg,
-        areResultsTrimmed: false
+        tooltipContent: `${entitiesFoundMsg} ${docsPerEntityMsg}`,
+        // Used to show trimmed icon in legend
+        // user only needs to be notified of trimmed results when entities are trimmed
+        areResultsTrimmed: meta.areEntitiesTrimmed
       };
     }
 

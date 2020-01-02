@@ -42,7 +42,7 @@ export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefi
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
-          authz.getApplicationName(),
+          authz.applicationName,
           rawRoles[name] ? rawRoles[name].applications : []
         );
 

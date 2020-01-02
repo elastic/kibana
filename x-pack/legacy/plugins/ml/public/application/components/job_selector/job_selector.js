@@ -73,7 +73,7 @@ const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 export function JobSelector({
   dateFormatTz,
   globalState,
-  jobSelectService,
+  jobSelectService$,
   selectedJobIds,
   selectedGroups,
   singleSelection,
@@ -93,7 +93,7 @@ export function JobSelector({
 
   useEffect(() => {
     // listen for update from Single Metric Viewer
-    const subscription = jobSelectService.subscribe(({ selection, resetSelection }) => {
+    const subscription = jobSelectService$.subscribe(({ selection, resetSelection }) => {
       if (resetSelection === true) {
         setSelectedIds(selection);
       }
@@ -405,7 +405,7 @@ export function JobSelector({
 
 JobSelector.propTypes = {
   globalState: PropTypes.object,
-  jobSelectService: PropTypes.object,
+  jobSelectService$: PropTypes.object,
   selectedJobIds: PropTypes.array,
   singleSelection: PropTypes.bool,
   timeseriesOnly: PropTypes.bool

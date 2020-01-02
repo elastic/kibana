@@ -78,12 +78,20 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    let mockSessVal: any;
     beforeEach(() => {
       mockOptions = getMockOptions({
         authc: { providers: ['basic'], oidc: {}, saml: {} },
       });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      mockSessVal = {
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        state: { authorization: 'Basic xxx' },
+        provider: 'basic',
+        path: mockOptions.basePath.serverBasePath,
+      };
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -159,10 +167,8 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
+        ...mockSessVal,
         state: { authorization },
-        provider: 'basic',
       });
     });
 
@@ -176,18 +182,12 @@ describe('Authenticator', () => {
     });
 
     it('clears session if it belongs to a different provider.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const user = mockAuthenticatedUser();
       const credentials = { username: 'user', password: 'password' };
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'token',
-      });
+      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
 
       const authenticationResult = await authenticator.login(request, {
         provider: 'basic',
@@ -299,12 +299,20 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    let mockSessVal: any;
     beforeEach(() => {
       mockOptions = getMockOptions({
         authc: { providers: ['basic'], oidc: {}, saml: {} },
       });
       mockSessionStorage = sessionStorageMock.create<ProviderSession>();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      mockSessVal = {
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        state: { authorization: 'Basic xxx' },
+        provider: 'basic',
+        path: mockOptions.basePath.serverBasePath,
+      };
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -360,10 +368,8 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
+        ...mockSessVal,
         state: { authorization },
-        provider: 'basic',
       });
     });
 
@@ -383,28 +389,20 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
+        ...mockSessVal,
         state: { authorization },
-        provider: 'basic',
       });
     });
 
     it('does not extend session for system API calls.', async () => {
       const user = mockAuthenticatedUser();
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
@@ -416,37 +414,25 @@ describe('Authenticator', () => {
 
     it('extends session for non-system API calls.', async () => {
       const user = mockAuthenticatedUser();
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      expect(mockSessionStorage.set).toHaveBeenCalledWith(mockSessVal);
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
     it('properly extends session expiration if it is defined.', async () => {
       const user = mockAuthenticatedUser();
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
       const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
 
@@ -460,12 +446,7 @@ describe('Authenticator', () => {
       });
 
       mockSessionStorage = sessionStorageMock.create();
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 
       authenticator = new Authenticator(mockOptions);
@@ -482,17 +463,14 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...mockSessVal,
         idleTimeoutExpiration: currentDate + 3600 * 24,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
       });
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
     it('does not extend session lifespan expiration.', async () => {
       const user = mockAuthenticatedUser();
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
       const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
       const hr = 1000 * 60 * 60;
@@ -508,12 +486,11 @@ describe('Authenticator', () => {
 
       mockSessionStorage = sessionStorageMock.create();
       mockSessionStorage.get.mockResolvedValue({
+        ...mockSessVal,
         // this session was created 6.5 hrs ago (and has 1.5 hrs left in its lifespan)
         // it was last extended 1 hour ago, which means it will expire in 1 hour
         idleTimeoutExpiration: currentDate + hr * 1,
         lifespanExpiration: currentDate + hr * 1.5,
-        state,
-        provider: 'basic',
       });
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 
@@ -531,25 +508,26 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...mockSessVal,
         idleTimeoutExpiration: currentDate + hr * 2,
         lifespanExpiration: currentDate + hr * 1.5,
-        state,
-        provider: 'basic',
       });
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
-    it('only updates the session lifespan expiration if it does not match the current server config.', async () => {
-      const user = mockAuthenticatedUser();
-      const state = { authorization: 'Basic xxx' };
-      const request = httpServerMock.createKibanaRequest();
+    describe('conditionally updates the session lifespan expiration', () => {
       const hr = 1000 * 60 * 60;
+      const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
 
       async function createAndUpdateSession(
         lifespan: number | null,
         oldExpiration: number | null,
         newExpiration: number | null
       ) {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+        jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
+
         mockOptions = getMockOptions({
           session: {
             idleTimeout: null,
@@ -560,10 +538,9 @@ describe('Authenticator', () => {
 
         mockSessionStorage = sessionStorageMock.create();
         mockSessionStorage.get.mockResolvedValue({
-          idleTimeoutExpiration: 1,
+          ...mockSessVal,
+          idleTimeoutExpiration: null,
           lifespanExpiration: oldExpiration,
-          state,
-          provider: 'basic',
         });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
 
@@ -579,35 +556,35 @@ describe('Authenticator', () => {
 
         expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
         expect(mockSessionStorage.set).toHaveBeenCalledWith({
-          idleTimeoutExpiration: 1,
+          ...mockSessVal,
+          idleTimeoutExpiration: null,
           lifespanExpiration: newExpiration,
-          state,
-          provider: 'basic',
         });
         expect(mockSessionStorage.clear).not.toHaveBeenCalled();
       }
-      // do not change max expiration
-      createAndUpdateSession(hr * 8, 1234, 1234);
-      createAndUpdateSession(null, null, null);
-      // change max expiration
-      createAndUpdateSession(null, 1234, null);
-      createAndUpdateSession(hr * 8, null, hr * 8);
+
+      it('does not change a non-null lifespan expiration when configured to non-null value.', async () => {
+        await createAndUpdateSession(hr * 8, 1234, 1234);
+      });
+      it('does not change a null lifespan expiration when configured to null value.', async () => {
+        await createAndUpdateSession(null, null, null);
+      });
+      it('does change a non-null lifespan expiration when configured to null value.', async () => {
+        await createAndUpdateSession(null, 1234, null);
+      });
+      it('does change a null lifespan expiration when configured to non-null value', async () => {
+        await createAndUpdateSession(hr * 8, null, currentDate + hr * 8);
+      });
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(new Error('some error'))
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
@@ -617,19 +594,13 @@ describe('Authenticator', () => {
     });
 
     it('does not touch session for non-system API calls if authentication fails with non-401 reason.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(new Error('some error'))
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
@@ -640,7 +611,6 @@ describe('Authenticator', () => {
 
     it('replaces existing session with the one returned by authentication provider for system API requests', async () => {
       const user = mockAuthenticatedUser();
-      const existingState = { authorization: 'Basic xxx' };
       const newState = { authorization: 'Basic yyy' };
       const request = httpServerMock.createKibanaRequest();
 
@@ -648,12 +618,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state: existingState,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
@@ -661,17 +626,14 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
+        ...mockSessVal,
         state: newState,
-        provider: 'basic',
       });
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
       const user = mockAuthenticatedUser();
-      const existingState = { authorization: 'Basic xxx' };
       const newState = { authorization: 'Basic yyy' };
       const request = httpServerMock.createKibanaRequest();
 
@@ -679,12 +641,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state: existingState,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
@@ -692,28 +649,20 @@ describe('Authenticator', () => {
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
+        ...mockSessVal,
         state: newState,
-        provider: 'basic',
       });
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(Boom.unauthorized())
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
@@ -723,19 +672,13 @@ describe('Authenticator', () => {
     });
 
     it('clears session if provider failed to authenticate non-system API request with 401 with active session.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(Boom.unauthorized())
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
@@ -745,18 +688,12 @@ describe('Authenticator', () => {
     });
 
     it('clears session if provider requested it via setting state to `null`.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.redirectTo('some-url', { state: null })
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.redirected()).toBe(true);
@@ -766,19 +703,13 @@ describe('Authenticator', () => {
     });
 
     it('does not clear session if provider can not handle system API request authentication with active session.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.notHandled()).toBe(true);
@@ -788,19 +719,13 @@ describe('Authenticator', () => {
     });
 
     it('does not clear session if provider can not handle non-system API request authentication with active session.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.notHandled()).toBe(true);
@@ -810,19 +735,13 @@ describe('Authenticator', () => {
     });
 
     it('clears session for system API request if it belongs to not configured provider.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'token',
-      });
+      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.notHandled()).toBe(true);
@@ -832,19 +751,13 @@ describe('Authenticator', () => {
     });
 
     it('clears session for non-system API request if it belongs to not configured provider.', async () => {
-      const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.isSystemAPIRequest.mockReturnValue(false);
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'token',
-      });
+      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
 
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.notHandled()).toBe(true);
@@ -858,12 +771,20 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    let mockSessVal: any;
     beforeEach(() => {
       mockOptions = getMockOptions({
         authc: { providers: ['basic'], oidc: {}, saml: {} },
       });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      mockSessVal = {
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        state: { authorization: 'Basic xxx' },
+        provider: 'basic',
+        path: mockOptions.basePath.serverBasePath,
+      };
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -886,16 +807,10 @@ describe('Authenticator', () => {
 
     it('clears session and returns whatever authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      const state = { authorization: 'Basic xxx' };
       mockBasicAuthenticationProvider.logout.mockResolvedValue(
         DeauthenticationResult.redirectTo('some-url')
       );
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'basic',
-      });
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
 
       const deauthenticationResult = await authenticator.logout(request);
 
@@ -934,12 +849,7 @@ describe('Authenticator', () => {
     it('only clears session if it belongs to not configured provider.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const state = { authorization: 'Bearer xxx' };
-      mockSessionStorage.get.mockResolvedValue({
-        idleTimeoutExpiration: null,
-        lifespanExpiration: null,
-        state,
-        provider: 'token',
-      });
+      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, state, provider: 'token' });
 
       const deauthenticationResult = await authenticator.logout(request);
 
@@ -978,6 +888,7 @@ describe('Authenticator', () => {
         lifespanExpiration: mockInfo.lifespanExpiration,
         state,
         provider: mockInfo.provider,
+        path: mockOptions.basePath.serverBasePath,
       });
       jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
 

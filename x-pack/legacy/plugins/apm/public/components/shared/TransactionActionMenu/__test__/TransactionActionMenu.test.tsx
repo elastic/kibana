@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, cleanup } from 'react-testing-library';
-import 'react-testing-library/cleanup-after-each';
+import { render, fireEvent } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
@@ -38,7 +37,6 @@ describe('TransactionActionMenu component', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    cleanup();
   });
 
   it('should always render the discover link', async () => {

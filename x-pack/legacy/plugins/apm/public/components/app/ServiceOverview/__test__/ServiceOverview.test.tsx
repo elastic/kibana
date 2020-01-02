@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { render, wait, waitForElement } from 'react-testing-library';
-import 'react-testing-library/cleanup-after-each';
+import { render, wait, waitForElement } from '@testing-library/react';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
@@ -59,16 +58,6 @@ describe('Service Overview -> View', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
   });
 
   it('should render services, when list is not empty', async () => {

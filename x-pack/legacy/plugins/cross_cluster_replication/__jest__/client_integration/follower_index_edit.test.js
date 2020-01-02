@@ -10,7 +10,6 @@ import { FollowerIndexForm } from '../../public/app/components/follower_index_fo
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;
