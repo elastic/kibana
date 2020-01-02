@@ -308,6 +308,7 @@ describe('Lens App', () => {
         docId?: string;
         docStorage: SavedObjectStore;
         redirectTo: (id?: string) => void;
+        addToDashboardMode?: boolean;
       }>;
 
       beforeEach(() => {
@@ -560,6 +561,7 @@ describe('Lens App', () => {
         });
 
         expect(args.docStorage.save).toHaveBeenCalledWith({
+          expression: 'kibana 3',
           id: undefined,
           title: 'hello there',
         });
