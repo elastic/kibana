@@ -84,11 +84,11 @@ export const ActionConnectorForm = ({
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
     const errors = {
-      description: new Array<string>(),
+      name: new Array<string>(),
     };
     validationResult.errors = errors;
     if (!actionObject.name) {
-      errors.description.push(
+      errors.name.push(
         i18n.translate(
           'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
           {
