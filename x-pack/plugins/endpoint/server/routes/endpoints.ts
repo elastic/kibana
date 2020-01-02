@@ -15,9 +15,13 @@ interface HitSource {
 }
 
 export interface EndpointResultList {
+  // the endpoint restricted by the page size
   endpoints: EndpointData[];
+  // the total number of unique endpoints in the index
   total: number;
+  // the page size requested
   requestPageSize: number;
+  // the index requested
   requestIndex: number;
 }
 
@@ -27,7 +31,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       path: '/api/endpoint/endpoints',
       validate: {
         query: schema.object({
+          // the number of results to return for this request per page
           pageSize: schema.number({ defaultValue: 10, min: 1 }),
+          // the index of the page to return
           pageIndex: schema.number({ defaultValue: 0, min: 0 }),
         }),
       },
@@ -43,7 +49,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           'search',
           queryParams
         )) as SearchResponse<EndpointData>;
-        return res.ok({ body: await mapToEndpointResultList(queryParams, response) });
+        return res.ok({ body: mapToEndpointResultList(queryParams, response) });
       } catch (err) {
         return res.internalError({ body: err });
       }

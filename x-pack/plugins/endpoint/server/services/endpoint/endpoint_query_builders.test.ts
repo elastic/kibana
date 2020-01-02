@@ -9,7 +9,7 @@ import { AllEndpointsQueryBuilder } from './endpoint_query_builders';
 
 describe('test query builder', () => {
   describe('test query builder request processing', () => {
-    it('test query with no filter defaults', async () => {
+    it('test default query params for all endpoints when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });

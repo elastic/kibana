@@ -55,7 +55,7 @@ export class AllEndpointsQueryBuilder {
     };
   }
 
-  async paging() {
+  private async paging() {
     const config = await this.endpointAppContext.config();
     return {
       pageSize: this.request.query.pageSize || config.endpointResultListDefaultPageSize,
