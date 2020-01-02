@@ -14,7 +14,7 @@ import {
   EuiCheckboxGroup,
   EuiCheckboxGroupOption,
 } from '@elastic/eui';
-import { FormState } from './add_data_source_form';
+import { FormState, isError } from './add_data_source_form';
 
 interface AddDataSourceFormProps {
   formState: FormState;
@@ -46,11 +46,17 @@ export const StepOne = ({
             </Fragment>
           }
         >
-          <EuiFormRow label="Data source name" describedByIds={['data-source-name']}>
+          <EuiFormRow
+            label="Data source name"
+            describedByIds={['data-source-name']}
+            isInvalid={isError(formState.errors.datasourceName)}
+            error={formState.errors.datasourceName}
+          >
             <EuiFieldText
               name="datasourceName"
               value={formState.datasourceName}
               onChange={onNameChange}
+              onBlur={onNameChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -62,7 +68,11 @@ export const StepOne = ({
             <Fragment>Select the data you want to send to your Elastic Search cluster.</Fragment>
           }
         >
-          <EuiFormRow describedByIds={['select-inputs']}>
+          <EuiFormRow
+            describedByIds={['select-inputs']}
+            isInvalid={isError(formState.errors.datasets)}
+            error={formState.errors.datasets}
+          >
             <EuiCheckboxGroup
               options={datasetCheckboxes}
               idToSelectedMap={formState.datasets}
@@ -80,7 +90,12 @@ export const StepOne = ({
             </Fragment>
           }
         >
-          <EuiFormRow label="Policy name" describedByIds={['policy-name']}>
+          <EuiFormRow
+            label="Policy name"
+            describedByIds={['policy-name']}
+            isInvalid={isError(formState.errors.policies)}
+            error={formState.errors.policies}
+          >
             <EuiComboBox
               placeholder="Select a policy"
               options={policyOptions}
