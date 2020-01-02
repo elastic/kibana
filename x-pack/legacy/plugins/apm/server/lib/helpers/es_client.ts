@@ -128,14 +128,16 @@ export function getESClient(
     : callAsCurrentUser;
 
   const debug = context.params.query._debug;
-  const log = console.log.bind(console, uniqueId());
 
-  function withTime<T>(fn: () => Promise<T>): Promise<T> {
+  function withTime<T>(
+    fn: (log: typeof console.log) => Promise<T>
+  ): Promise<T> {
+    const log = console.log.bind(console, uniqueId());
     if (!debug) {
-      return fn();
+      return fn(log);
     }
     const time = process.hrtime();
-    return fn().then(data => {
+    return fn(log).then(data => {
       const now = process.hrtime(time);
       log(`took: ${Math.round(now[0] * 1000 + now[1] / 1e6)}ms`);
       return data;
@@ -156,19 +158,20 @@ export function getESClient(
         apmOptions
       );
 
-      if (context.params.query._debug) {
-        log(`--DEBUG ES QUERY--`);
-        log(`${request.url.pathname} ${JSON.stringify(context.params.query)}`);
-        log(`GET ${nextParams.index}/_search`);
-        log(JSON.stringify(nextParams.body, null, 2));
-      }
+      return withTime(log => {
+        if (context.params.query._debug) {
+          log(`--DEBUG ES QUERY--`);
+          log(
+            `${request.url.pathname} ${JSON.stringify(context.params.query)}`
+          );
+          log(`GET ${nextParams.index}/_search`);
+          log(JSON.stringify(nextParams.body, null, 2));
+        }
 
-      return withTime(
-        () =>
-          (callMethod('search', nextParams) as unknown) as Promise<
-            ESSearchResponse<TDocument, TSearchRequest>
-          >
-      );
+        return (callMethod('search', nextParams) as unknown) as Promise<
+          ESSearchResponse<TDocument, TSearchRequest>
+        >;
+      });
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return withTime(() => callMethod('index', params));
