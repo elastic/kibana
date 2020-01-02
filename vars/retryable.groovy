@@ -1,9 +1,16 @@
-MAX_GLOBAL_RETRIES = 1
-CURRENT_GLOBAL_RETRIES = 0
-FLAKY_FAILURES = []
+import groovy.transform.Field
+
+@Field GLOBAL_RETRIES_ENABLED = false
+@Field MAX_GLOBAL_RETRIES = 1
+@Field CURRENT_GLOBAL_RETRIES = 0
+@Field FLAKY_FAILURES = []
 
 def setMax(max) {
   MAX_GLOBAL_RETRIES = max
+}
+
+def enable() {
+  GLOBAL_RETRIES_ENABLED = true
 }
 
 def haveReachedMaxRetries() {
@@ -15,6 +22,11 @@ def getFlakyFailures() {
 }
 
 def call(label, Closure closure) {
+  if (!GLOBAL_RETRIES_ENABLED) {
+    closure()
+    return
+  }
+
   try {
     closure()
   } catch (ex) {
@@ -24,7 +36,7 @@ def call(label, Closure closure) {
     }
 
     CURRENT_GLOBAL_RETRIES++
-    print ex.toString()
+    print ex.toString() // TODO replace with unsandboxed hudson.Functions.printThrowable(ex)
     unstable "${label} failed but is retryable, trying a second time..."
 
     closure()
