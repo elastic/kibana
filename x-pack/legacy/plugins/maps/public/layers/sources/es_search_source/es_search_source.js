@@ -424,7 +424,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, indexSettings },
+      meta,
     };
   }
 

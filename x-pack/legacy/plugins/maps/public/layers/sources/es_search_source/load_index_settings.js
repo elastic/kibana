@@ -10,7 +10,10 @@ import {
   INDEX_SETTINGS_API_PATH,
 } from '../../../../common/constants';
 import { kfetch } from 'ui/kfetch';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
+let toastDisplayed = false;
 const indexSettings = new Map();
 
 export async function loadIndexSettings(indexPatternTitle) {
@@ -33,8 +36,20 @@ async function fetchIndexSettings(indexPatternTitle) {
     });
     return indexSettings;
   } catch (err) {
-    console.warn(`Unable to fetch index settings for index pattern '${indexPatternTitle}'.
-      Ensure user has 'view_index_metadata' role.`);
+    const warningMsg = i18n.translate('xpack.maps.indexSettings.fetchErrorMsg', {
+      defaultMessage: `Unable to fetch index settings for index pattern '{indexPatternTitle}'.
+      Ensure you have '{viewIndexMetaRole}' role.`,
+      values: {
+        indexPattern: indexPatternTitle,
+        viewIndexMetaRole: 'view_index_metadata',
+      },
+    });
+    if (!toastDisplayed) {
+      // Only show toast for first failure to avoid flooding user with warnings
+      toastDisplayed = true;
+      toastNotifications.addWarning(warningMsg);
+    }
+    console.warn(warningMsg);
     return {
       maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
       maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
