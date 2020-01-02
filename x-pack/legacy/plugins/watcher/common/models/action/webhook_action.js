@@ -16,6 +16,7 @@ export class WebhookAction extends BaseAction {
     this.method = props.method;
     this.host = props.host;
     this.port = props.port;
+    this.scheme = props.scheme;
     this.path = props.path;
     this.body = props.body;
     this.contentType = props.contentType;
@@ -30,6 +31,7 @@ export class WebhookAction extends BaseAction {
       method: this.method,
       host: this.host,
       port: this.port,
+      scheme: this.scheme,
       path: this.path,
       body: this.body,
       contentType: this.contentType,
@@ -47,6 +49,7 @@ export class WebhookAction extends BaseAction {
       method: json.method,
       host: json.host,
       port: json.port,
+      scheme: json.scheme,
       path: json.path,
       body: json.body,
       contentType: json.contentType,
@@ -70,6 +73,10 @@ export class WebhookAction extends BaseAction {
 
     if (this.method) {
       optionalFields.method = this.method;
+    }
+
+    if (this.scheme) {
+      optionalFields.scheme = this.scheme;
     }
 
     if (this.body) {
@@ -108,7 +115,7 @@ export class WebhookAction extends BaseAction {
     const webhookJson = json && json.actionJson && json.actionJson.webhook;
     const { errors } = this.validateJson(json.actionJson);
 
-    const { path, method, body, auth, headers } = webhookJson;
+    const { path, method, scheme, body, auth, headers } = webhookJson;
 
     const optionalFields = {};
 
@@ -118,6 +125,10 @@ export class WebhookAction extends BaseAction {
 
     if (method) {
       optionalFields.method = method;
+    }
+
+    if (scheme) {
+      optionalFields.scheme = scheme;
     }
 
     if (body) {

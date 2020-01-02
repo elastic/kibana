@@ -487,6 +487,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           const METHOD = 'put';
           const HOST = 'localhost';
           const PORT = '9200';
+          const SCHEME = 'http';
           const PATH = '/test';
           const USERNAME = 'test_user';
           const PASSWORD = 'test_password';
@@ -510,6 +511,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('webhookMethodSelect', METHOD);
           form.setInputValue('webhookHostInput', HOST);
           form.setInputValue('webhookPortInput', PORT);
+          form.setInputValue('webhookSchemeSelect', SCHEME);
           form.setInputValue('webhookPathInput', PATH);
           form.setInputValue('webhookUsernameInput', USERNAME);
           form.setInputValue('webhookPasswordInput', PASSWORD);
@@ -534,6 +536,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
                 method: METHOD,
                 host: HOST,
                 port: Number(PORT),
+                scheme: SCHEME,
                 path: PATH,
                 body:
                   '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
