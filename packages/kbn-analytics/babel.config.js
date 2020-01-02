@@ -22,7 +22,7 @@ module.exports = {
   plugins: ['@babel/plugin-proposal-class-properties'],
   env: {
     web: {
-      presets: ['@kbn/babel-preset/webpack_preset']
+      presets: ['@kbn/babel-preset/webpack_preset'],
     },
     node: {
       presets: ['@kbn/babel-preset/node_preset'],

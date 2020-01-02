@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
+import { PluginsSetup } from '../../plugin';
+
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
@@ -31,9 +33,14 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
+import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
 
-export function compose(core: CoreSetup, env: PluginInitializerContext['env']): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, env);
+export function compose(
+  core: CoreSetup,
+  plugins: PluginsSetup,
+  env: PluginInitializerContext['env']
+): AppBackendLibs {
+  const framework = new KibanaBackendFrameworkAdapter(core, plugins, env);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
@@ -42,6 +49,7 @@ export function compose(core: CoreSetup, env: PluginInitializerContext['env']): 
   const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
+    alerts: new Alerts(new ElasticsearchAlertsAdapter(framework)),
     anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),

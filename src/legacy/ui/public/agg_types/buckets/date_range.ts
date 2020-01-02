@@ -86,7 +86,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       default: undefined,
       // Implimentation method is the same as that of date_histogram
       serialize: () => undefined,
-      write: (agg: IBucketAggConfig, output: Record<string, any>) => {
+      write: (agg, output) => {
         const field = agg.getParam('field');
         let tz = agg.getParam('time_zone');
 

@@ -32,7 +32,7 @@ import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { IndexPattern } from '../../../core_plugins/data/public';
-import { SearchSourceContract, FetchOptions } from '../courier/types';
+import { ISearchSource, FetchOptions } from '../courier/types';
 
 type Schemas = Record<string, any>;
 
@@ -126,7 +126,10 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig(params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) {
+  createAggConfig<T extends AggConfig = AggConfig>(
+    params: AggConfig | AggConfigOptions,
+    { addToAggConfigs = true } = {}
+  ) {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -137,7 +140,7 @@ export class AggConfigs {
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
-    return aggConfig;
+    return aggConfig as T;
   }
 
   /**
@@ -303,7 +306,7 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
     return Promise.all(
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))

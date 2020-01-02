@@ -14,7 +14,7 @@ interface CreateExecutionHandlerOptions {
   executeAction: ActionsPluginStartContract['execute'];
   actions: AlertAction[];
   spaceId: string;
-  apiKey?: string;
+  apiKey: string | null;
   alertType: AlertType;
   logger: Logger;
 }

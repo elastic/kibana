@@ -5,6 +5,7 @@
  */
 import {
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -14,12 +15,12 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback, ComponentType } from 'react';
 import styled from 'styled-components';
 
-import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
@@ -226,13 +227,15 @@ export const PaginatedTable = memo<SiemTables>(
         </EuiContextMenuItem>
       ));
     const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
       <Panel
         data-test-subj={`${dataTestSubj}-loading-${loading}`}
         loading={loading}
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
+        onMouseEnter={handleOnMouseEnter}
+        onMouseLeave={handleOnMouseLeave}
       >
         <HeaderSection
           id={id}
@@ -251,20 +254,25 @@ export const PaginatedTable = memo<SiemTables>(
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
+            {
+              // @ts-ignore avoid some type mismatches
+            }
             <BasicTable
+              // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
               compressed
               items={pageOfItems}
               onChange={onChange}
+              // @ts-ignore TS complains sorting.field is type `never`
               sorting={
                 sorting
                   ? {
                       sort: {
-                        field: sorting.field,
+                        field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                         direction: sorting.direction,
                       },
                     }
-                  : null
+                  : undefined
               }
             />
             <FooterAction>
@@ -304,7 +312,10 @@ export const PaginatedTable = memo<SiemTables>(
 
 PaginatedTable.displayName = 'PaginatedTable';
 
-const BasicTable = styled(EuiBasicTable)`
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(
+  EuiBasicTable as BasicTableType
+)`
   tbody {
     th,
     td {
@@ -315,7 +326,7 @@ const BasicTable = styled(EuiBasicTable)`
       display: block;
     }
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BasicTable.displayName = 'BasicTable';
 

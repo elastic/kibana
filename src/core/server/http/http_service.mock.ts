@@ -18,7 +18,9 @@
  */
 
 import { Server } from 'hapi';
+import { CspConfig } from '../csp';
 import { mockRouter } from './router/router.mock';
+import { configMock } from '../config/config.mock';
 import { InternalHttpServiceSetup } from './types';
 import { HttpService } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
@@ -27,13 +29,14 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 
+type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 export type HttpServiceSetupMock = jest.Mocked<InternalHttpServiceSetup> & {
-  basePath: jest.Mocked<InternalHttpServiceSetup['basePath']>;
+  basePath: BasePathMocked;
 };
 
-const createBasePathMock = (): jest.Mocked<InternalHttpServiceSetup['basePath']> => ({
-  serverBasePath: '/mock-server-basepath',
-  get: jest.fn(),
+const createBasePathMock = (serverBasePath = '/mock-server-basepath'): BasePathMocked => ({
+  serverBasePath,
+  get: jest.fn().mockReturnValue(serverBasePath),
   set: jest.fn(),
   prepend: jest.fn(),
   remove: jest.fn(),
@@ -43,9 +46,12 @@ const createSetupContractMock = () => {
   const setupContract: HttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
     server: ({
+      name: 'http-server-test',
+      version: 'kibana',
       route: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
+      config: jest.fn().mockReturnValue(configMock.create()),
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
@@ -55,6 +61,7 @@ const createSetupContractMock = () => {
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     basePath: createBasePathMock(),
+    csp: CspConfig.DEFAULT,
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
