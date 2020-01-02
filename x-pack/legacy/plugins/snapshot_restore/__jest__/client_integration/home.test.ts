@@ -39,6 +39,8 @@ describe('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
 
+  moment.tz.setDefault('America/New_York');
+
   afterAll(() => {
     server.restore();
   });
@@ -453,12 +455,11 @@ describe('<SnapshotRestoreHome />', () => {
 
       test('should list them in the table', async () => {
         const { table } = testBed;
-
         const { tableCellsValues } = table.getMetaData('snapshotTable');
+
         tableCellsValues.forEach((row, i) => {
           const snapshot = snapshots[i];
           const startTime = moment(new Date(snapshot.startTimeInMillis));
-          const timezone = moment.tz.guess();
 
           expect(row).toEqual([
             '', // Checkbox
@@ -467,7 +468,7 @@ describe('<SnapshotRestoreHome />', () => {
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
             snapshot.shards.failed.toString(), // Failed shards
-            startTime.tz(timezone).format('MMMM D, YYYY h:mm A z'), // Start time
+            startTime.format('MMMM D, YYYY h:mm A z'), // Start time
             `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             '',
           ]);
@@ -607,7 +608,6 @@ describe('<SnapshotRestoreHome />', () => {
                 const { find } = testBed;
                 const startTime = moment(new Date(startTimeInMillis));
                 const endTime = moment(new Date(endTimeInMillis));
-                const timezone = moment.tz.guess();
 
                 expect(find('snapshotDetail.version.value').text()).toBe(
                   `${version} / ${versionId}`
@@ -622,10 +622,10 @@ describe('<SnapshotRestoreHome />', () => {
                   indices.splice(0, 10).join('')
                 );
                 expect(find('snapshotDetail.startTime.value').text()).toBe(
-                  startTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
+                  startTime.format('MMMM D, YYYY h:mm A z')
                 );
                 expect(find('snapshotDetail.endTime.value').text()).toBe(
-                  endTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
+                  endTime.format('MMMM D, YYYY h:mm A z')
                 );
               });
 
