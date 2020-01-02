@@ -6,7 +6,7 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';

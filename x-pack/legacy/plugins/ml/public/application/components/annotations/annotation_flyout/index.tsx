@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment, FC, ReactNode } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 
 import {

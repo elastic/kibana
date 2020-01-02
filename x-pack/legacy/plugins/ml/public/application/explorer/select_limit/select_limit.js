@@ -9,7 +9,7 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
 import { EuiSelect } from '@elastic/eui';

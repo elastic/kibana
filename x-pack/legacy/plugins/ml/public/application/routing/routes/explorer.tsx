@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import React, { FC, useEffect } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { merge, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
