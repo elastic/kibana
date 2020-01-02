@@ -24,7 +24,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
-  describe('Newsfeed', () => {
+  // Failing: https://github.com/elastic/kibana/issues/53860
+  describe.skip('Newsfeed', () => {
     before(async () => {
       await PageObjects.newsfeed.resetPage();
     });
