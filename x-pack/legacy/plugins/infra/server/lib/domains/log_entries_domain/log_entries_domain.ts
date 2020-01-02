@@ -40,6 +40,7 @@ export interface LogEntriesParams {
   size?: number;
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
+  highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
   startDate: number;
@@ -47,6 +48,7 @@ export interface LogEntriesAroundParams {
   size?: number;
   center: LogEntriesCursor;
   query?: JsonObject;
+  highlightTerm?: string;
 }
 
 export const LOG_ENTRIES_PAGE_SIZE = 200;
@@ -64,7 +66,7 @@ export class InfraLogEntriesDomain {
     sourceId: string,
     params: LogEntriesAroundParams
   ) {
-    const { startDate, endDate, center, query, size } = params;
+    const { startDate, endDate, center, query, size, highlightTerm } = params;
 
     /*
      * For odd sizes we will round this value down for the first half, and up
@@ -82,6 +84,7 @@ export class InfraLogEntriesDomain {
       query,
       cursor: { before: center },
       size: Math.floor(halfSize),
+      highlightTerm,
     });
 
     /*
@@ -102,6 +105,7 @@ export class InfraLogEntriesDomain {
       query,
       cursor: { after: cursorAfter },
       size: Math.ceil(halfSize),
+      highlightTerm,
     });
 
     return [...entriesBefore, ...entriesAfter];
@@ -258,6 +262,7 @@ export class InfraLogEntriesDomain {
     return entries;
   }
 
+  /** @deprecated */
   public async getLogEntryHighlights(
     requestContext: RequestHandlerContext,
     sourceId: string,

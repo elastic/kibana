@@ -8,6 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
+import { compact } from 'lodash';
 import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
@@ -90,9 +91,31 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     params: LogEntriesParams
   ): Promise<LogEntryDocument[]> {
-    const { startDate, endDate, query, cursor, size } = params;
+    const { startDate, endDate, query, cursor, size, highlightTerm } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
+
+    const highlightQuery = createHighlightQuery(highlightTerm, fields);
+
+    const highlightClause = highlightQuery
+      ? {
+          highlight: {
+            boundary_scanner: 'word',
+            fields: fields.reduce(
+              (highlightFieldConfigs, fieldName) => ({
+                ...highlightFieldConfigs,
+                [fieldName]: {},
+              }),
+              {}
+            ),
+            fragment_size: 1,
+            number_of_fragments: 100,
+            post_tags: [''],
+            pre_tags: [''],
+            highlight_query: highlightQuery,
+          },
+        }
+      : {};
 
     const sort = {
       [sourceConfiguration.fields.timestamp]: sortDirection,
@@ -106,10 +129,11 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       body: {
         size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
         track_total_hits: false,
+        _source: fields,
         query: {
           bool: {
             filter: [
-              ...createQueryFilterClauses(query),
+              ...createFilterClauses(query, highlightQuery),
               {
                 range: {
                   [sourceConfiguration.fields.timestamp]: {
@@ -123,15 +147,17 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
           },
         },
         sort,
+        ...highlightClause,
         ...searchAfterClause,
       },
     };
 
-    const esResult = await this.framework.callWithRequest<LogItemHit>(
+    const esResult = await this.framework.callWithRequest<SortedSearchHit>(
       requestContext,
       'search',
       esQuery
     );
+
     const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
     return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
   }
@@ -375,7 +401,7 @@ function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[nu
 }
 
 function mapHitsToLogEntryDocuments(
-  hits: LogItemHit[],
+  hits: SortedSearchHit[],
   timestampField: string,
   fields: string[]
 ): LogEntryDocument[] {
@@ -396,7 +422,7 @@ function mapHitsToLogEntryDocuments(
       // FIXME s/key/cursor/g
       key: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
-      highlights: {},
+      highlights: hit.highlight || {},
     };
   });
 }
@@ -434,6 +460,33 @@ const convertDateRangeBucketToSummaryBucket = (
     time: hit.sort[0],
   })),
 });
+
+const createHighlightQuery = (
+  highlightTerm: string | undefined,
+  fields: string[]
+): LogEntryQuery | undefined => {
+  if (highlightTerm) {
+    return {
+      multi_match: {
+        fields,
+        lenient: true,
+        query: highlightTerm,
+        type: 'phrase',
+      },
+    };
+  }
+};
+
+const createFilterClauses = (
+  filterQuery?: LogEntryQuery,
+  highlightQuery?: LogEntryQuery
+): LogEntryQuery[] => {
+  if (filterQuery && highlightQuery) {
+    return [{ bool: { filter: [filterQuery, highlightQuery] } }];
+  }
+
+  return compact([filterQuery, highlightQuery]) as LogEntryQuery[];
+};
 
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
