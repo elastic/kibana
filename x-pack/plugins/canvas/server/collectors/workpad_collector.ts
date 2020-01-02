@@ -7,7 +7,7 @@
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { CANVAS_TYPE } from '../../common/lib/constants';
+import { CANVAS_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { ExpressionAST, TelemetryCollector, CanvasWorkpad } from '../../types';
 
