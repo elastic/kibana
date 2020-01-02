@@ -24,6 +24,9 @@ export interface SignalsStatusParams {
 export interface SignalQueryParams {
   query: object | undefined | null;
   aggs: object | undefined | null;
+  _source: string[] | undefined | null;
+  size: number | undefined | null;
+  track_total_hits: boolean | undefined | null;
 }
 
 export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {

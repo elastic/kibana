@@ -6,8 +6,14 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  AlertUtils,
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
@@ -43,6 +49,14 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       } catch (e) {
         expect(e.status).to.eql(404);
       }
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest: supertestWithoutAuth,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdAlert.id,
+      });
     });
 
     it(`shouldn't disable alert from another space`, async () => {

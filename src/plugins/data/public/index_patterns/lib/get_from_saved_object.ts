@@ -18,8 +18,9 @@
  */
 
 import { get } from 'lodash';
+import { IIndexPattern } from '../..';
 
-export function getFromSavedObject(savedObject: any) {
+export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
   if (get(savedObject, 'attributes.fields') === undefined) {
     return;
   }
