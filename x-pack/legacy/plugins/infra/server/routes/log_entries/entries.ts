@@ -20,6 +20,7 @@ import {
   logEntriesResponseRT,
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
@@ -39,13 +40,6 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
 
         const { startDate, endDate, sourceId, query, size } = payload;
 
-        let cursor;
-        if ('before' in payload) {
-          cursor = { before: payload.before };
-        } else if ('after' in payload) {
-          cursor = { after: payload.after };
-        }
-
         let entries;
         if ('center' in payload) {
           entries = await logEntries.getLogEntriesAround__new(requestContext, sourceId, {
@@ -56,6 +50,13 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
             size,
           });
         } else {
+          let cursor: LogEntriesParams['cursor'];
+          if ('before' in payload) {
+            cursor = { before: payload.before };
+          } else if ('after' in payload) {
+            cursor = { after: payload.after };
+          }
+
           entries = await logEntries.getLogEntries(requestContext, sourceId, {
             startDate,
             endDate,

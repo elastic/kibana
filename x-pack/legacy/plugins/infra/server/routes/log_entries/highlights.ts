@@ -20,6 +20,7 @@ import {
   logEntriesHighlightsResponseRT,
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
@@ -55,7 +56,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
             )
           );
         } else {
-          let cursor;
+          let cursor: LogEntriesParams['cursor'];
           if ('before' in payload) {
             cursor = { before: payload.before };
           } else if ('after' in payload) {
