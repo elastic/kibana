@@ -68,7 +68,7 @@ xpack.security.authc.providers: [pki]
 --------------------------------------------------------------------------------
 
 NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your Kibana server certificate/key using
-`server.ssl.keystore.path`, or in a separate trust store using `server.ssl.truststore.path`.
+`server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
 
 PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and Basic authentication for the same {kib} instance:
 

@@ -4,12 +4,13 @@
 <titleabbrev>Encrypting communications</titleabbrev>
 ++++
 
-{kib} supports Transport Layer Security (TLS/SSL) encryption for all forms of data-in-transit. Browsers will send traffic to {kib}, and
-{kib} will send traffic to {es}. These are configured separately.
+{kib} supports Transport Layer Security (TLS/SSL) encryption for all forms of data-in-transit. Browsers send traffic to {kib} and {kib}
+sends traffic to {es}. These communications are configured separately.
 
+[[configuring-tls-browser-kib]]
 ==== Encrypting traffic between the browser and {kib}
 
-NOTE: You do not need to enable {security} for this type of encryption. 
+NOTE: You do not need to enable {security-features} for this type of encryption. 
 
 . Obtain a server certificate and private key for {kib}.
 +
@@ -31,7 +32,7 @@ generate a certificate authority (CA), you would generate a certificate/key for 
 bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 --name kibana --dns localhost
 --------------------------------------------------------------------------------
 
-This will generate a certificate/key contained PKCS #12 keystore named `kibana.p12`.
+This will generate a certificate and private key in a PKCS #12 keystore named `kibana.p12`.
 
 --
 
@@ -47,7 +48,7 @@ server.ssl.enabled: true
 . Specify your server certificate and private key in `kibana.yml`:
 +
 --
-If your certificate/key are contained in a PKCS #12 keystore, specify it like so:
+If your certificate and private key are in a PKCS #12 keystore, specify it like so:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -70,6 +71,7 @@ https://localhost:5601.
 For more information, see <<settings,{kib} configuration settings>>.
 --
 
+[[configuring-tls-kib-es]]
 ==== Encrypting traffic between {kib} and {es}
 
 NOTE: To perform this step, you must 
@@ -111,6 +113,6 @@ elasticsearch.ssl.certificateAuthorities: ["/path/to/your/cacert1.pem", "/path/t
 
 --
 
-(Optional) If the Elastic {monitor-features} are enabled, configure {kib} to connect to the {es} monitoring cluster via HTTPS. The steps are
-the same as above, but each setting is prefixed by `xpack.monitoring.` -- e.g., `xpack.monitoring.elasticsearch.hosts`,
+. (Optional) If the Elastic {monitor-features} are enabled, configure {kib} to connect to the {es} monitoring cluster via HTTPS. The steps
+are the same as above, but each setting is prefixed by `xpack.monitoring.`. For example, `xpack.monitoring.elasticsearch.hosts`,
 `xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.
