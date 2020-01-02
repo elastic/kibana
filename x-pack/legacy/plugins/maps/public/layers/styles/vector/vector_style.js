@@ -27,7 +27,7 @@ import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
-import { getComputedFieldName, isOnlySingleFeatureType, scaleValue } from './style_util';
+import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -81,7 +81,8 @@ export class VectorStyle extends AbstractStyle {
     );
     this._iconSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
-      VECTOR_STYLES.ICON_SIZE
+      VECTOR_STYLES.ICON_SIZE,
+      this._descriptor.properties[VECTOR_STYLES.SYMBOL].options.symbolizeAs === SYMBOLIZE_AS_ICON
     );
     this._iconOrientationProperty = this._makeOrientationProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
@@ -443,37 +444,6 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  _getFeatureStyleParams() {
-    return this.getDynamicPropertiesArray().map(styleProperty => {
-      // "feature-state" data expressions are not supported with layout properties.
-      // To work around this limitation, some styling values must fall back to geojson property values.
-      let supportsFeatureState;
-      let isScaled;
-      // TODO move first check into DynamicSizeProperty.supportsFeatureState
-      if (
-        styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE &&
-        this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON
-      ) {
-        supportsFeatureState = false;
-        isScaled = true;
-      } else {
-        supportsFeatureState = styleProperty.supportsFeatureState();
-        isScaled = styleProperty.isScaled();
-      }
-
-      const field = styleProperty.getField();
-      return {
-        supportsFeatureState,
-        isScaled,
-        isOrdinal: styleProperty.isOrdinal(),
-        name: field.getName(),
-        meta: this._getFieldMeta(field.getName()),
-        formatter: this._getFieldFormatter(field.getName()),
-        computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
-      };
-    });
-  }
-
   clearFeatureState(featureCollection, mbMap, sourceId) {
     const tmpFeatureIdentifier = {
       source: null,
@@ -487,27 +457,13 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  _getOrdinalValue(value, isScaled, range) {
-    const valueAsFloat = parseFloat(value);
-
-    if (isScaled) {
-      return scaleValue(valueAsFloat, range);
-    }
-
-    if (isNaN(valueAsFloat)) {
-      return 0;
-    }
-
-    return valueAsFloat;
-  }
-
   setFeatureStateAndStyleProps(featureCollection, mbMap, mbSourceId) {
     if (!featureCollection) {
       return;
     }
 
-    const featureStateParams = this._getFeatureStyleParams();
-    if (featureStateParams.length === 0) {
+    const dynamicStyleProps = this.getDynamicPropertiesArray();
+    if (dynamicStyleProps.length === 0) {
       return;
     }
 
@@ -517,31 +473,15 @@ export class VectorStyle extends AbstractStyle {
     };
     const tmpFeatureState = {};
 
-    //scale to [0,1] domain
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
 
-      for (let j = 0; j < featureStateParams.length; j++) {
-        const {
-          supportsFeatureState,
-          isScaled,
-          isOrdinal,
-          name,
-          meta: range,
-          formatter,
-          computedName,
-        } = featureStateParams[j];
-
-        let styleValue;
-        if (isOrdinal) {
-          styleValue = this._getOrdinalValue(feature.properties[name], isScaled, range);
-        } else if (formatter) {
-          styleValue = formatter(feature.properties[name]);
-        } else {
-          styleValue = feature.properties[name];
-        }
-
-        if (supportsFeatureState) {
+      for (let j = 0; j < dynamicStyleProps.length; j++) {
+        const dynamicStyleProp = dynamicStyleProps[j];
+        const name = dynamicStyleProp.getField().getName();
+        const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
+        const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
+        if (dynamicStyleProp.supportsFeatureState()) {
           tmpFeatureState[computedName] = styleValue;
         } else {
           feature.properties[computedName] = styleValue;
@@ -556,7 +496,7 @@ export class VectorStyle extends AbstractStyle {
     //this return-value is used in an optimization for style-updates with mapbox-gl.
     //`true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     //`false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return featureStateParams.some(({ supportsFeatureState }) => !supportsFeatureState);
+    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsFeatureState());
   }
 
   arePointsSymbolizedAsCircles() {
@@ -623,7 +563,7 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  _makeSizeProperty(descriptor, styleName) {
+  _makeSizeProperty(descriptor, styleName, isSymbolizedAsIcon) {
     if (!descriptor || !descriptor.options) {
       return new StaticSizeProperty({ size: 0 }, styleName);
     } else if (descriptor.type === StaticStyleProperty.type) {
@@ -635,7 +575,8 @@ export class VectorStyle extends AbstractStyle {
         styleName,
         field,
         this._getFieldMeta,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        isSymbolizedAsIcon
       );
     } else {
       throw new Error(`${descriptor} not implemented`);

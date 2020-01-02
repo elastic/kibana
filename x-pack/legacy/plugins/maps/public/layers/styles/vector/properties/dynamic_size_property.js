@@ -43,8 +43,23 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
+    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+    this._isSymbolizedAsIcon = isSymbolizedAsIcon;
+  }
+
   supportsFeatureState() {
-    return this.getStyleName() !== VECTOR_STYLES.LABEL_SIZE;
+    // mb style "icon-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
+      return false;
+    }
+
+    // mb style "text-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.LABEL_SIZE) {
+      return false;
+    }
+
+    return true;
   }
 
   syncHaloWidthWithMb(mbLayerId, mbMap) {

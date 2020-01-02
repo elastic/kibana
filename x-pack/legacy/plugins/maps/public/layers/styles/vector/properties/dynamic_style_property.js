@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
+import { scaleValue } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -149,6 +150,21 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     } else {
       return value;
     }
+  }
+
+  getMbValue(value) {
+    if (!this.isOrdinal()) {
+      return this.formatField(value);
+    }
+
+    const valueAsFloat = parseFloat(value);
+    if (this.isScaled()) {
+      return scaleValue(valueAsFloat, this.getFieldMeta());
+    }
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+    return valueAsFloat;
   }
 
   renderBreakedLegend() {
