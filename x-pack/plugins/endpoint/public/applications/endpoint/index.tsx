@@ -27,7 +27,7 @@ interface RouterProps {
   basename: string;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({basename}) => (
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename }) => (
   <I18nProvider>
     <BrowserRouter basename={basename}>
       <Switch>
