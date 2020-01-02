@@ -11,6 +11,10 @@ export interface EndpointAppContext {
   config(): Promise<EndpointConfigType>;
 }
 
+export class EndpointAppConstants {
+  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
+}
+
 export interface EndpointData {
   machine_id: string;
   created_at: Date;
@@ -34,7 +38,7 @@ export interface EndpointData {
       updated_at?: Date;
     };
     isolation: {
-      status: false;
+      status: boolean;
       request_status?: string | boolean;
       updated_at?: Date;
     };
@@ -43,7 +47,7 @@ export interface EndpointData {
       id: string;
     };
     sensor: {
-      persistence: true;
+      persistence: boolean;
       status: object;
     };
   };

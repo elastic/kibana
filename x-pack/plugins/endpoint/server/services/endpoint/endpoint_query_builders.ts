@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
+import { EndpointAppConstants, EndpointAppContext } from '../../types';
 
 export class AllEndpointsQueryBuilder {
   private readonly request: KibanaRequest<any, any, any>;
@@ -45,7 +45,7 @@ export class AllEndpointsQueryBuilder {
       },
       from: paging.pageIndex * paging.pageSize,
       size: paging.pageSize,
-      index: 'endpoint-agent*',
+      index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
     };
   }
 

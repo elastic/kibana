@@ -27,8 +27,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       path: '/api/endpoint/endpoints',
       validate: {
         query: schema.object({
-          pageSize: schema.number({ defaultValue: 10 }),
-          pageIndex: schema.number({ defaultValue: 0 }),
+          pageSize: schema.number({ defaultValue: 10, min: 1 }),
+          pageIndex: schema.number({ defaultValue: 0, min: 0 }),
         }),
       },
       options: { authRequired: true },
