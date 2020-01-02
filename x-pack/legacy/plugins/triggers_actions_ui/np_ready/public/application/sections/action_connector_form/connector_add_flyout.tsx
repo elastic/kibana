@@ -24,13 +24,10 @@ export const ConnectorAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();
   const { addFlyoutVisible, setAddFlyoutVisibility } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const closeFlyout = useCallback(() => setAddFlyoutVisibility(false), [setAddFlyoutVisibility]);
-
-  useEffect(() => {
-    if (addFlyoutVisible) {
-      setActionType(undefined);
-    }
-  }, [addFlyoutVisible]);
+  const closeFlyout = useCallback(() => {
+    setAddFlyoutVisibility(false);
+    setActionType(undefined);
+  }, [setAddFlyoutVisibility, setActionType]);
 
   if (!addFlyoutVisible) {
     return null;
@@ -56,7 +53,7 @@ export const ConnectorAddFlyout = () => {
       <ActionConnectorForm
         actionTypeName={actionType.name}
         initialConnector={initialConnector}
-        setFlyoutVisibility={setAddFlyoutVisibility}
+        setFlyoutVisibility={closeFlyout}
       />
     );
   }
