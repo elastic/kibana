@@ -19,10 +19,9 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SharePageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function SharePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['visualize', 'common']);
   const log = getService('log');
 
   class SharePage {
