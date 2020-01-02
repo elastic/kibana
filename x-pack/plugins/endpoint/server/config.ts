@@ -13,8 +13,8 @@ export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observ
 
 export const EndpointConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  searchResultDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  searchResultDefaultPageSize: schema.number({ defaultValue: 10 }),
+  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
+  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

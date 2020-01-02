@@ -58,8 +58,8 @@ export class AllEndpointsQueryBuilder {
   async paging() {
     const config = await this.endpointAppContext.config();
     return {
-      pageSize: this.request.query.pageSize || config.searchResultDefaultPageSize,
-      pageIndex: this.request.query.pageIndex || config.searchResultDefaultFirstPageIndex,
+      pageSize: this.request.query.pageSize || config.endpointResultListDefaultPageSize,
+      pageIndex: this.request.query.pageIndex || config.endpointResultListDefaultFirstPageIndex,
     };
   }
 }
