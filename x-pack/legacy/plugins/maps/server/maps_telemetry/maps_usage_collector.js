@@ -20,7 +20,7 @@ async function isTaskManagerReady(server) {
 
 async function fetch(server) {
   let docs;
-  const taskManager = server.plugins.task_manager;
+  const taskManager = server.newPlatform.start.plugins.kibanaTaskManager;
 
   if (!taskManager) {
     return null;

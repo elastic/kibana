@@ -9,7 +9,10 @@ import { range, chunk } from 'lodash';
 
 const scope = 'perf-testing';
 export function initRoutes(server, performanceState) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = {
+    ...server.newPlatform.setup.plugins.kibanaTaskManager,
+    ...server.newPlatform.start.plugins.kibanaTaskManager,
+  };
 
   server.route({
     path: '/api/perf_tasks',
