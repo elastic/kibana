@@ -53,7 +53,7 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate(
 );
 
 export const NO_INDEX_TITLE = i18n.translate('xpack.siem.detectionEngine.noIndexTitle', {
-  defaultMessage: 'Let’s setup your detection engine',
+  defaultMessage: 'Let’s set up your detection engine',
 });
 
 export const NO_INDEX_MSG_BODY = i18n.translate('xpack.siem.detectionEngine.noIndexMsgBody', {
