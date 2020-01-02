@@ -19,7 +19,7 @@ import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/kibana');
 
 describe('StatefulOpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

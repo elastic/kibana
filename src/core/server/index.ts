@@ -41,6 +41,7 @@
 
 import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
 import { HttpServiceSetup } from './http';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
@@ -134,15 +135,22 @@ export {
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
+export { RenderingServiceSetup, IRenderOptions, LegacyRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -223,12 +231,21 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+export {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyUiExports,
+  LegacyInternals,
+} from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients:
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
@@ -242,6 +259,7 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  */
 export interface RequestHandlerContext {
   core: {
+    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
     };
@@ -295,6 +313,7 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,

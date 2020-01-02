@@ -7,12 +7,10 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
   />
   <EuiPage
     className="mlCalendarList"
-    restrictWidth={false}
   >
     <EuiPageContent
       className="mlCalendarList__content"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <CalendarsListHeader

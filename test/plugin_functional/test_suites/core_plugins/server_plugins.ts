@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,6 +29,40 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         .get('/core_plugin_b')
         .expect(200)
         .expect('Pong via plugin A: true');
+    });
+
+    it('extend request handler context with validation', async () => {
+      await supertest
+        .post('/core_plugin_b')
+        .set('kbn-xsrf', 'anything')
+        .query({ id: 'TEST' })
+        .send({ bar: 'hi!', baz: 'hi!' })
+        .expect(200)
+        .expect('ID: TEST - HI!');
+    });
+
+    it('extend request handler context with validation (400)', async () => {
+      await supertest
+        .post('/core_plugin_b')
+        .set('kbn-xsrf', 'anything')
+        .query({ id: 'TEST' })
+        .send({ bar: 'hi!', baz: 1234 })
+        .expect(400)
+        .expect({
+          error: 'Bad Request',
+          message: '[request body]: bar: hi! !== baz: 1234 or they are not string',
+          statusCode: 400,
+        });
+    });
+
+    it('renders core application explicitly', async () => {
+      await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
+    });
+
+    it('renders legacy application', async () => {
+      await supertest
+        .get('/requestcontext/render/core_plugin_legacy')
+        .expect(200, /app:core_plugin_legacy/);
     });
   });
 }
