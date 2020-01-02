@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiBasicTable: React.FC<any>;
-}
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -17,7 +12,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import {
-  EuiBasicTable as EuiBasicTableTyped,
+  EuiBasicTable,
   EuiButtonIcon,
   EuiPageContent,
   EuiSpacer,
@@ -297,7 +292,7 @@ class ReportListingUi extends Component<Props, State> {
     };
 
     return (
-      <EuiBasicTableTyped
+      <EuiBasicTable
         itemId={'id'}
         items={this.state.jobs}
         loading={this.state.isLoading}

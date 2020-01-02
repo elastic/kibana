@@ -156,7 +156,10 @@ export function App({
     }
   }, [docId]);
 
-  const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>

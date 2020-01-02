@@ -179,10 +179,11 @@ export class AlertUtils {
     const response = await request.send({
       enabled: true,
       name: 'abc',
-      interval: '1m',
+      schedule: { interval: '1m' },
       throttle: '1m',
       tags: [],
       alertTypeId: 'test.always-firing',
+      consumer: 'bar',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,

@@ -5,9 +5,10 @@
  */
 
 import { parseDuration } from './parse_duration';
+import { IntervalSchedule } from '../types';
 
-export function getNextRunAt(currentRunAt: Date, interval: string) {
-  let nextRunAt = currentRunAt.getTime() + parseDuration(interval);
+export function getNextRunAt(currentRunAt: Date, schedule: IntervalSchedule) {
+  let nextRunAt = currentRunAt.getTime() + parseDuration(schedule.interval);
   if (nextRunAt < Date.now()) {
     // To prevent returning dates in the past, we'll return now instead
     nextRunAt = Date.now();

@@ -13,8 +13,9 @@ import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
+  LogEntriesItem,
 } from '../../../../common/http_api';
-import { InfraLogEntry, InfraLogItem, InfraLogMessageSegment } from '../../../graphql/types';
+import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -282,7 +283,7 @@ export class InfraLogEntriesDomain {
     requestContext: RequestHandlerContext,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
-  ): Promise<InfraLogItem> {
+  ): Promise<LogEntriesItem> {
     const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
       { field: '_index', value: document._index },
