@@ -25,7 +25,7 @@ export const getMockCallWithInternal = (hits = defaultMockSavedObjects) => {
 export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
   return () => Promise.resolve({ docs });
 };
-
+//server?.newPlatform?.start?.plugins?.kibanaTaskManager
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
   mockTaskFetch = getMockTaskFetch()
@@ -37,10 +37,16 @@ export const getMockKbnServer = (
       }),
     },
     xpack_main: {},
-    task_manager: {
-      registerTaskDefinitions: () => undefined,
-      schedule: () => Promise.resolve(),
-      fetch: mockTaskFetch,
+  },
+  newPlatform: {
+    start: {
+      plugins: {
+        kibanaTaskManager: {
+          registerTaskDefinitions: () => undefined,
+          schedule: () => Promise.resolve(),
+          fetch: mockTaskFetch,
+        },
+      },
     },
   },
   config: () => ({ get: () => '' }),
