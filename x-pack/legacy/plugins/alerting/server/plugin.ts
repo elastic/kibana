@@ -71,7 +71,7 @@ export class Plugin {
       attributesToEncrypt: new Set(['apiKey']),
       attributesToExcludeFromAAD: new Set([
         'scheduledTaskId',
-        'muted',
+        'muteAll',
         'mutedInstanceIds',
         'updatedBy',
       ]),

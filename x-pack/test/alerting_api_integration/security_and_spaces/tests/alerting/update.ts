@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -86,6 +86,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
