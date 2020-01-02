@@ -77,9 +77,13 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     };
 
     if (field.source.type !== previousField.source.type) {
-      const aliasesOnField = aliases[field.id];
+      // Array of all the aliases pointing to the current field beeing updated
+      const aliasesOnField = aliases[field.id] || [];
+
+      // Array of all the aliases pointing to the current field + all its possible children
       const aliasesOnFieldAndDescendants = getAllDescendantAliases(field, fields);
-      const doSomeAliasPointsOnCurrentField = aliasesOnField && Boolean(aliasesOnField.length);
+
+      const isReferencedByAlias = aliasesOnField && Boolean(aliasesOnField.length);
       const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
         field.source.type
       );
@@ -90,14 +94,14 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       let requiresConfirmation: boolean;
       let aliasesToDelete: string[] = [];
 
-      if (doSomeAliasPointsOnCurrentField && !nextTypeCanHaveAlias) {
+      if (isReferencedByAlias && !nextTypeCanHaveAlias) {
         aliasesToDelete = aliasesOnFieldAndDescendants;
         requiresConfirmation = true;
       } else {
         requiresConfirmation = willDeleteChildFields(previousField.source.type, field.source.type);
         if (requiresConfirmation) {
-          // We will only delete aliases that points to possible children (fields or multi-fields)
           aliasesToDelete = aliasesOnFieldAndDescendants.filter(
+            // We will only delete aliases that points to possible children, *NOT* the field itself
             id => aliasesOnField.includes(id) === false
           );
         }
