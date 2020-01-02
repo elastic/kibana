@@ -26,6 +26,13 @@ export class OrdinalLegend extends React.Component {
     }
   }
 
+  _formatValue(value) {
+    if (value === EMPTY_VALUE) {
+      return value;
+    }
+    return this.props.style.formatField(value);
+  }
+
   componentDidUpdate() {
     this._loadParams();
   }
@@ -45,13 +52,13 @@ export class OrdinalLegend extends React.Component {
     let maxLabel = EMPTY_VALUE;
     if (fieldMeta) {
       const range = { min: fieldMeta.min, max: fieldMeta.max };
-      const min = this.props.style.formatField(_.get(range, 'min', EMPTY_VALUE));
+      const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
       minLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange
           ? `< ${min}`
           : min;
 
-      const max = this.props.style.formatField(_.get(range, 'max', EMPTY_VALUE));
+      const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
       maxLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange
           ? `> ${max}`

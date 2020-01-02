@@ -13,8 +13,6 @@ import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
 
-const EMPTY_VALUE = '';
-
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
@@ -139,10 +137,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   formatField(value) {
-    if (value === EMPTY_VALUE) {
-      return value;
-    }
-
     if (this.getField()) {
       const fieldName = this.getField().getName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
