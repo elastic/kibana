@@ -26,6 +26,56 @@ export const transformError = (err: Error & { statusCode?: number }) => {
   }
 };
 
+export interface BulkError {
+  id: string;
+  error: {
+    statusCode: number;
+    message: string;
+  };
+}
+export const createBulkErrorObject = ({
+  ruleId,
+  statusCode,
+  message,
+}: {
+  ruleId: string;
+  statusCode: number;
+  message: string;
+}): BulkError => {
+  return {
+    id: ruleId,
+    error: {
+      statusCode,
+      message,
+    },
+  };
+};
+
+export const transformBulkError = (
+  ruleId: string,
+  err: Error & { statusCode?: number }
+): BulkError => {
+  if (Boom.isBoom(err)) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.output.statusCode,
+      message: err.message,
+    });
+  } else if (err instanceof TypeError) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 400,
+      message: err.message,
+    });
+  } else {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.statusCode ?? 500,
+      message: err.message,
+    });
+  }
+};
+
 export const getIndex = (request: RequestFacade, server: ServerFacade): string => {
   const spaceId = server.plugins.spaces.getSpaceId(request);
   const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);

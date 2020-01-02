@@ -62,7 +62,18 @@ describe('VegaVisualizations', () => {
       vegaVisualizationDependencies = {
         es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
-        uiSettings: $injector.get('config'),
+        core: {
+          uiSettings: $injector.get('config'),
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {},
+              },
+            },
+          },
+        },
       };
 
       if (!visRegComplete) {
