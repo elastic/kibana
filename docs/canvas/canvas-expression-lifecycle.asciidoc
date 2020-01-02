@@ -8,7 +8,7 @@ Elements in Canvas are all created using an *expression language* that defines h
 [[canvas-expressions-always-start-with-a-function]]
 === Expressions always start with a function
 
-Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some kind of output. That output can then be inserted into another function, and another after that, until it produces the output you need. 
+Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some output value. That output can then be inserted into another function, and another after that, until it produces the output you need. 
 
 To use demo dataset available in Canvas to produce a table, run the following expression:
 
@@ -30,7 +30,7 @@ The filtered <<demodata_fn, demo data>> becomes the _context_ of the next functi
 
 Let’s look at another expression, which uses the same <<demodata_fn, demodata>> function, but instead produces a pie chart.
 
-image::images/canvas-functions-can-take-arguments-pie-chart.png[Pie Chart]
+image::images/canvas-functions-can-take-arguments-pie-chart.png[Pie Chart, scaledwidth="50%"]
 [source,text]
 ----
 filters
@@ -47,7 +47,7 @@ If the expression stopped there, it would produce a `pointseries` data type as t
 The end result is a simple pie chart that uses the default color palette, but the <<pie_fn, pie>> function can take additional arguments that control how it gets rendered. For example, you can provide a `hole` argument to turn your pie chart into a donut chart by changing the expression to:
 
 
-image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart]
+image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart, scaledwidth="50%"]
 [source,text]
 ----
 filters
@@ -83,7 +83,7 @@ You can substitute one function for another to change the output. For example, y
 
 Let’s change that last pie chart into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Switching the functions will work, but it won’t produce a useful visualization on its own since you don’t have the x-axis and y-axis defined. You will also need to modify the <<pointseries_fn, pointseries>> function to change its output. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the `@timestamp` field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
 
-image::images/canvas-change-your-expression-chart.png[Bubble Chart]
+image::images/canvas-change-your-expression-chart.png[Bubble Chart, scaledwidth="50%"]
 [source,text]
 ----
 filters
@@ -186,6 +186,7 @@ NOTE: The examples in this section can’t be copy and pasted directly, since th
 Here, the expression to use for the value of the `condition` argument, `getCell price | gte 100`, runs first since it is nested deeper.
 
 The expression does the following:
+
 * Retrieves the value from the *price* column in the first row of the `demodata` data table
 * Inputs the value to the `gte` function
 * Compares the value to `100`
