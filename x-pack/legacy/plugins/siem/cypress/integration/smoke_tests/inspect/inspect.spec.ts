@@ -26,9 +26,13 @@ describe('Inspect', () => {
         loginAndWaitForPage(table.url);
         cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
         if (table.altInspectId) {
-          cy.get(table.altInspectId).trigger('click', { force: true });
+          cy.get(table.altInspectId, { timeout: DEFAULT_TIMEOUT }).trigger('click', {
+            force: true,
+          });
         } else {
-          cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+          cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`, {
+            timeout: DEFAULT_TIMEOUT,
+          }).trigger('click', { force: true });
         }
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
       })
