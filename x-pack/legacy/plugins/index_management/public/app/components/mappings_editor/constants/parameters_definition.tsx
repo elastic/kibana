@@ -23,7 +23,7 @@ import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
 
 const { toInt } = fieldFormatters;
-const { emptyField, containsCharsField } = fieldValidators;
+const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
 
 const commonErrorMessages = {
   smallerThanZero: i18n.translate(
@@ -84,6 +84,27 @@ const indexOptionsConfig = {
     />
   ),
   type: FIELD_TYPES.SUPER_SELECT,
+};
+
+const fielddataFrequencyFilterParam = {
+  fieldConfig: { defaultValue: {} }, // Needed for "FieldParams" type
+  props: {
+    min_segment_size: {
+      fieldConfig: {
+        type: FIELD_TYPES.NUMBER,
+        label: i18n.translate('xpack.idxMgmt.mappingsEditor.minSegmentSizeFieldLabel', {
+          defaultMessage: 'Minimum segment size',
+        }),
+        defaultValue: 50,
+        formatters: [toInt],
+      },
+    },
+  },
+  schema: Joi.object().keys({
+    min: Joi.number(),
+    max: Joi.number(),
+    min_segment_size: Joi.number(),
+  }),
 };
 
 const analyzerValidations = [
@@ -209,8 +230,9 @@ export const PARAMETERS_DEFINITION = {
     },
     schema: Joi.boolean().strict(),
   },
-  fielddata_frequency_filter: {
-    fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
+  fielddata_frequency_filter: fielddataFrequencyFilterParam,
+  fielddata_frequency_filter_percentage: {
+    ...fielddataFrequencyFilterParam,
     props: {
       min: {
         fieldConfig: {
@@ -226,22 +248,50 @@ export const PARAMETERS_DEFINITION = {
           deserializer: value => Math.round(value * 100),
         } as FieldConfig,
       },
-      min_segment_size: {
+    },
+  },
+  fielddata_frequency_filter_absolute: {
+    ...fielddataFrequencyFilterParam,
+    props: {
+      min: {
         fieldConfig: {
-          type: FIELD_TYPES.NUMBER,
-          label: i18n.translate('xpack.idxMgmt.mappingsEditor.minSegmentSizeFieldLabel', {
-            defaultMessage: 'Minimum segment size',
-          }),
-          defaultValue: 50,
+          defaultValue: 2,
+          validations: [
+            {
+              validator: numberGreaterThanField({
+                than: 1,
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.fieldDataFrequency.numberGreaterThanOneErrorMessage',
+                  {
+                    defaultMessage: 'Value must be greater than one.',
+                  }
+                ),
+              }),
+            },
+          ],
           formatters: [toInt],
-        },
+        } as FieldConfig,
+      },
+      max: {
+        fieldConfig: {
+          defaultValue: 5,
+          validations: [
+            {
+              validator: numberGreaterThanField({
+                than: 1,
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.fieldDataFrequency.numberGreaterThanOneErrorMessage',
+                  {
+                    defaultMessage: 'Value must be greater than one.',
+                  }
+                ),
+              }),
+            },
+          ],
+          formatters: [toInt],
+        } as FieldConfig,
       },
     },
-    schema: Joi.object().keys({
-      min: Joi.number(),
-      max: Joi.number(),
-      min_segment_size: Joi.number(),
-    }),
   },
   coerce: {
     fieldConfig: {

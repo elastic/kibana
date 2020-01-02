@@ -232,7 +232,10 @@ export const TextType = React.memo(({ field }: Props) => {
           defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
         />
 
-        <FieldDataParameter defaultToggleValue={getDefaultToggleValue('fielddata', field.source)} />
+        <FieldDataParameter
+          field={field}
+          defaultToggleValue={getDefaultToggleValue('fielddata', field.source)}
+        />
 
         <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 

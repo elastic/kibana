@@ -80,6 +80,8 @@ export type ParameterName =
   | 'index'
   | 'fielddata'
   | 'fielddata_frequency_filter'
+  | 'fielddata_frequency_filter_percentage'
+  | 'fielddata_frequency_filter_absolute'
   | 'doc_values'
   | 'doc_values_binary'
   | 'coerce'
