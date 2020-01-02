@@ -18,23 +18,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 
 export function getPainlessError(error: Error) {
-  const rootCause: Array<{ lang: string; script: string }> | undefined = get(
-    error,
-    'resp.error.root_cause'
-  );
-
-  if (!rootCause) {
+  const errorBody = (error as any).body;
+  if (!errorBody || errorBody.statusCode !== 400) {
     return;
   }
 
-  const [{ lang, script }] = rootCause;
-
-  if (lang !== 'painless') {
+  // The response from the new endpoint does not contain a rootCause.
+  // What would be the proper way to handle this?
+  if (!errorBody.message.startsWith('[script_exception]')) {
     return;
   }
+
+  const lang = 'painless';
+  const script = '';
 
   return {
     lang,
