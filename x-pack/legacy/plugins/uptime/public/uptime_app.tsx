@@ -111,7 +111,7 @@ const Application = (props: UptimeAppProps) => {
           }
         : undefined
     );
-  }, []);
+  }, [canSave, renderGlobalHelpControls, setBadge]);
 
   const refreshApp = () => {
     const refreshTime = Date.now();
