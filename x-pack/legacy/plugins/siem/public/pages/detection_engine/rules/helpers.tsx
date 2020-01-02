@@ -26,36 +26,36 @@ export const getStepsData = ({
   const defineRuleData: DefineStepRule | null =
     rule != null
       ? {
-        isNew: false,
-        index: rule.index,
-        queryBar: {
-          query: { query: rule.query as string, language: rule.language },
-          filters: rule.filters as esFilters.Filter[],
-          saved_id: rule.saved_id ?? null,
-        },
-      }
+          isNew: false,
+          index: rule.index,
+          queryBar: {
+            query: { query: rule.query as string, language: rule.language },
+            filters: rule.filters as esFilters.Filter[],
+            saved_id: rule.saved_id ?? null,
+          },
+        }
       : null;
   const aboutRuleData: AboutStepRule | null =
     rule != null
       ? {
-        isNew: false,
-        ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
-        ...(detailsView ? { name: '' } : {}),
-        threats: rule.threats as IMitreEnterpriseAttack[],
-        falsePositives: rule.false_positives,
-        riskScore: rule.risk_score,
-      }
+          isNew: false,
+          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
+          ...(detailsView ? { name: '' } : {}),
+          threats: rule.threats as IMitreEnterpriseAttack[],
+          falsePositives: rule.false_positives,
+          riskScore: rule.risk_score,
+        }
       : null;
   const scheduleRuleData: ScheduleStepRule | null =
     rule != null
       ? {
-        isNew: false,
-        ...pick(['enabled', 'interval'], rule),
-        from:
-          rule?.meta?.from != null
-            ? rule.meta.from.replace('now-', '')
-            : rule.from.replace('now-', ''),
-      }
+          isNew: false,
+          ...pick(['enabled', 'interval'], rule),
+          from:
+            rule?.meta?.from != null
+              ? rule.meta.from.replace('now-', '')
+              : rule.from.replace('now-', ''),
+        }
       : null;
 
   return { aboutRuleData, defineRuleData, scheduleRuleData };

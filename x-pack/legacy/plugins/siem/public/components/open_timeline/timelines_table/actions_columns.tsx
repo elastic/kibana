@@ -10,19 +10,24 @@ import * as React from 'react';
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
 import * as i18n from '../translations';
-import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
+import {
+  ActionTimelineToShow,
+  DeleteTimelines,
+  OnOpenTimeline,
+  OpenTimelineResult,
+} from '../types';
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
 export const getActionsColumns = ({
+  actionTimelineToShow,
   onOpenTimeline,
   deleteTimelines,
-  showDeleteAction,
 }: {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   onOpenTimeline: OnOpenTimeline;
-  showDeleteAction: boolean;
 }) => {
   const openAsDuplicateColumn = {
     align: 'center',
@@ -65,7 +70,10 @@ export const getActionsColumns = ({
     width: ACTION_COLUMN_WIDTH,
   };
 
-  return showDeleteAction && deleteTimelines != null
-    ? [openAsDuplicateColumn, deleteTimelineColumn]
-    : [openAsDuplicateColumn];
+  return [
+    actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
+    actionTimelineToShow.includes('delete') && deleteTimelines != null
+      ? deleteTimelineColumn
+      : null,
+  ].filter(action => action != null);
 };

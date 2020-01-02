@@ -48,3 +48,10 @@ export const RESET_DEFAULT_INDEX = i18n.translate(
     defaultMessage: 'Reset to default index patterns',
   }
 );
+
+export const IMPORT_TIMELINE_QUERY = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton',
+  {
+    defaultMessage: 'Import query from saved timeline',
+  }
+);

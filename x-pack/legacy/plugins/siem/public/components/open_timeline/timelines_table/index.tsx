@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import * as i18n from '../translations';
 import {
+  ActionTimelineToShow,
   DeleteTimelines,
   OnOpenTimeline,
   OnSelectionChange,
@@ -36,8 +37,8 @@ const BasicTable = styled(EuiBasicTable)`
 `;
 BasicTable.displayName = 'BasicTable';
 
-const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
-  showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
+const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
+  showExtendedColumns ? [...getExtendedColumns()] : [];
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -46,34 +47,36 @@ const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
  * `Timelines` page
  */
 const getTimelinesTableColumns = ({
+  actionTimelineToShow,
   deleteTimelines,
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
+  showExtendedColumns,
 }: {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
+  showExtendedColumns: boolean;
 }) => [
   ...getCommonColumns({
     itemIdToExpandedNotesRowMap,
     onOpenTimeline,
     onToggleShowNotes,
-    showExtendedColumnsAndActions,
   }),
-  ...getExtendedColumnsIfEnabled(showExtendedColumnsAndActions),
+  ...getExtendedColumnsIfEnabled(showExtendedColumns),
   ...getIconHeaderColumns(),
   ...getActionsColumns({
     deleteTimelines,
     onOpenTimeline,
-    showDeleteAction: showExtendedColumnsAndActions,
+    actionTimelineToShow,
   }),
 ];
 
 export interface TimelinesTableProps {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   defaultPageSize: number;
   loading: boolean;
@@ -85,7 +88,7 @@ export interface TimelinesTableProps {
   pageIndex: number;
   pageSize: number;
   searchResults: OpenTimelineResult[];
-  showExtendedColumnsAndActions: boolean;
+  showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
   totalSearchResultsCount: number;
@@ -97,6 +100,7 @@ export interface TimelinesTableProps {
  */
 export const TimelinesTable = React.memo<TimelinesTableProps>(
   ({
+    actionTimelineToShow,
     deleteTimelines,
     defaultPageSize,
     loading: isLoading,
@@ -108,13 +112,13 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     pageIndex,
     pageSize,
     searchResults,
-    showExtendedColumnsAndActions,
+    showExtendedColumns,
     sortField,
     sortDirection,
     totalSearchResultsCount,
   }) => {
     const pagination = {
-      hidePerPageOptions: !showExtendedColumnsAndActions,
+      hidePerPageOptions: !showExtendedColumns,
       pageIndex,
       pageSize,
       pageSizeOptions: [
@@ -142,16 +146,17 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     return (
       <BasicTable
         columns={getTimelinesTableColumns({
+          actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
           onOpenTimeline,
           onToggleShowNotes,
-          showExtendedColumnsAndActions,
+          showExtendedColumns,
         })}
         compressed
         data-test-subj="timelines-table"
         isExpandable={true}
-        isSelectable={showExtendedColumnsAndActions}
+        isSelectable={actionTimelineToShow.includes('selectable')}
         itemId="savedObjectId"
         itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
         items={searchResults}
@@ -159,7 +164,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
         onChange={onTableChange}
         pagination={pagination}
-        selection={showExtendedColumnsAndActions ? selection : undefined}
+        selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
         sorting={sorting}
       />
     );

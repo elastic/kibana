@@ -181,6 +181,7 @@ export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate: boolean;
   timelineId: string;
+  onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
@@ -190,6 +191,7 @@ export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
   timelineId,
+  onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
   updateTimeline,
@@ -209,7 +211,9 @@ export const queryTimelineById = <TCache>({
         );
 
         const { timeline, notes } = formatTimelineResultToModel(timelineToOpen, duplicate);
-        if (updateTimeline) {
+        if (onOpenTimeline != null) {
+          onOpenTimeline(timeline);
+        } else if (updateTimeline) {
           updateTimeline({
             duplicate,
             from: getOr(getDefaultFromValue(), 'dateRange.start', timeline),

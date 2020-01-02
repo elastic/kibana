@@ -36,6 +36,7 @@ interface QueryBarDefineRuleProps {
   idAria: string;
   isLoading: boolean;
   indexPattern: IIndexPattern;
+  openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
 }
 
@@ -61,9 +62,11 @@ export const QueryBarDefineRule = ({
   idAria,
   indexPattern,
   isLoading = false,
+  openTimelineSearch = false,
   resizeParentContainer,
 }: QueryBarDefineRuleProps) => {
   const [originalHeight, setOriginalHeight] = useState(-1);
+  const [localOpenSearchTimeline, setLocalOpenSearchTimeline] = useState(openTimelineSearch);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
   const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -130,6 +133,12 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
     };
   }, [field.value]);
+
+  useEffect(() => {
+    if (localOpenSearchTimeline !== openTimelineSearch) {
+      setLocalOpenSearchTimeline(openTimelineSearch);
+    }
+  }, [localOpenSearchTimeline, openTimelineSearch]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {

@@ -70,6 +70,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
     setForm,
     setStepData,
   }) => {
+    const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
     const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
     const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
     const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
@@ -128,6 +129,10 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
       indexField.setValue(indicesConfig);
     }, [indicesConfig]);
 
+    const handleOpenTimelineSearch = useCallback(() => {
+      setOpenTimelineSearch(true);
+    }, [openTimelineSearch]);
+
     return isReadOnlyView && myStepData != null ? (
       <StepRuleDescription
         direction={descriptionDirection}
@@ -160,6 +165,14 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
           />
           <UseField
             path="queryBar"
+            config={{
+              ...schema.index,
+              labelAppend: !localUseIndicesConfig ? (
+                <EuiButtonEmpty size="xs" onClick={handleOpenTimelineSearch}>
+                  {i18n.IMPORT_TIMELINE_QUERY}
+                </EuiButtonEmpty>
+              ) : null,
+            }}
             component={QueryBarDefineRule}
             componentProps={{
               loading: indexPatternLoadingQueryBar,
@@ -168,6 +181,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               isDisabled: isLoading,
               isLoading: indexPatternLoadingQueryBar,
               dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+              openTimelineSearch,
               resizeParentContainer,
             }}
           />

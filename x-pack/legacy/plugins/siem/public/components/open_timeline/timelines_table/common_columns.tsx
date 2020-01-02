@@ -25,11 +25,9 @@ export const getCommonColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
 }: {
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
 }) => [
   {

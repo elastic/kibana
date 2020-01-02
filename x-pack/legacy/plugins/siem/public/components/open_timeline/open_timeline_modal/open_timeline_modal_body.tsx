@@ -5,10 +5,10 @@
  */
 
 import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
-import * as React from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { OpenTimelineProps } from '../types';
+import { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';
@@ -19,10 +19,11 @@ export const HeaderContainer = styled.div`
 
 HeaderContainer.displayName = 'HeaderContainer';
 
-export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
+export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
     onAddTimelinesToFavorites,
@@ -43,51 +44,61 @@ export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
     sortField,
     title,
     totalSearchResultsCount,
-  }) => (
-    <>
-      <EuiModalHeader>
-        <HeaderContainer>
-          <TitleRow
-            data-test-subj="title-row"
-            onDeleteSelected={onDeleteSelected}
-            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-            selectedTimelinesCount={selectedItems.length}
-            title={title}
-          />
+  }) => {
+    const actionsToShow = useMemo(() => {
+      const actions: ActionTimelineToShow[] =
+        onDeleteSelected != null && deleteTimelines != null
+          ? ['delete', 'duplicate']
+          : ['duplicate'];
+      return actions.filter(action => !hideActions.includes(action));
+    }, [onDeleteSelected, deleteTimelines, hideActions]);
+    return (
+      <>
+        <EuiModalHeader>
+          <HeaderContainer>
+            <TitleRow
+              data-test-subj="title-row"
+              onDeleteSelected={onDeleteSelected}
+              onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+              selectedTimelinesCount={selectedItems.length}
+              title={title}
+            />
 
-          <SearchRow
-            data-test-subj="search-row"
-            onlyFavorites={onlyFavorites}
-            onQueryChange={onQueryChange}
-            onToggleOnlyFavorites={onToggleOnlyFavorites}
-            query={query}
+            <SearchRow
+              data-test-subj="search-row"
+              onlyFavorites={onlyFavorites}
+              onQueryChange={onQueryChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              query={query}
+              totalSearchResultsCount={totalSearchResultsCount}
+            />
+          </HeaderContainer>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <TimelinesTable
+            actionTimelineToShow={actionsToShow}
+            data-test-subj="timelines-table"
+            deleteTimelines={deleteTimelines}
+            defaultPageSize={defaultPageSize}
+            loading={isLoading}
+            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+            onOpenTimeline={onOpenTimeline}
+            onSelectionChange={onSelectionChange}
+            onTableChange={onTableChange}
+            onToggleShowNotes={onToggleShowNotes}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            searchResults={searchResults}
+            showExtendedColumns={false}
+            sortDirection={sortDirection}
+            sortField={sortField}
             totalSearchResultsCount={totalSearchResultsCount}
           />
-        </HeaderContainer>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <TimelinesTable
-          data-test-subj="timelines-table"
-          deleteTimelines={deleteTimelines}
-          defaultPageSize={defaultPageSize}
-          loading={isLoading}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={onOpenTimeline}
-          onSelectionChange={onSelectionChange}
-          onTableChange={onTableChange}
-          onToggleShowNotes={onToggleShowNotes}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          searchResults={searchResults}
-          showExtendedColumnsAndActions={onDeleteSelected != null && deleteTimelines != null}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          totalSearchResultsCount={totalSearchResultsCount}
-        />
-      </EuiModalBody>
-    </>
-  )
+        </EuiModalBody>
+      </>
+    );
+  }
 );
 
 OpenTimelineModalBody.displayName = 'OpenTimelineModalBody';
