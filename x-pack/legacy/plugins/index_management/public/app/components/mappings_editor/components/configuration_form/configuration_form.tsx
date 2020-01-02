@@ -10,6 +10,7 @@ import { useForm, Form, SerializerFunc } from '../../shared_imports';
 import { Types, useDispatch } from '../../mappings_state';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
+import { MetaFieldSection } from './meta_field_section';
 import { configurationFormSchema } from './configuration_form_schema';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
@@ -17,6 +18,9 @@ type MappingsConfiguration = Types['MappingsConfiguration'];
 interface Props {
   defaultValue?: MappingsConfiguration;
 }
+
+const stringifyJson = (json: { [key: string]: any }) =>
+  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
 const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
   const {
@@ -28,9 +32,17 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
       dynamic_date_formats,
     },
     sourceField,
+    metaField,
   } = formData;
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
+
+  let parsedMeta;
+  try {
+    parsedMeta = JSON.parse(metaField);
+  } catch {
+    parsedMeta = {};
+  }
 
   return {
     dynamic,
@@ -38,6 +50,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
     date_detection,
     dynamic_date_formats,
     _source: { ...sourceField },
+    _meta: parsedMeta,
   };
 };
 
@@ -48,6 +61,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
     date_detection,
     dynamic_date_formats,
     _source: { enabled, includes, excludes },
+    _meta,
   } = formData;
 
   return {
@@ -63,6 +77,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
       includes,
       excludes,
     },
+    metaField: stringifyJson(_meta),
   };
 };
 
@@ -79,7 +94,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     const subscription = form.subscribe(updatedConfiguration => {
-      dispatch({ type: 'configuration.update', value: updatedConfiguration });
+      dispatch({ type: 'configuration.update', value: { ...updatedConfiguration, form } });
     });
     return subscription.unsubscribe;
   }, [form]);
@@ -103,8 +118,10 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, []);
 
   return (
-    <Form form={form}>
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
       <DynamicMappingSection />
+      <EuiSpacer size="xl" />
+      <MetaFieldSection />
       <EuiSpacer size="xl" />
       <SourceFieldSection />
     </Form>
