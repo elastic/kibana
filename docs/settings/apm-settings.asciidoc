@@ -5,21 +5,23 @@
 <titleabbrev>APM settings</titleabbrev>
 ++++
 
+You do not need to configure any settings to use the APM app. It is enabled by default.
+
+[float]
+[[apm-indices-settings-kb]]
+==== APM Indices
+
 // This content is reused in the APM app documentation.
 // Any changes made in this file will be seen there as well.
-// tag::general-apm-settings-overview[]
+// tag::apm-indices-settings[]
 
-You do not need to configure any settings to use the APM app. It is enabled by default.
-If you'd like to change any of the default values,
-copy and paste the relevant settings below into your `kibana.yml` configuration file.
-Index defaults can can also be changed on the settings page in the APM app:
+Index defaults can be changed in Kibana. Navigate to *APM* > *Settings* > *Indices*.
+Index settings in the APM app take precedence over those set in `kibana.yml`.
 
 [role="screenshot"]
 image::settings/images/apm-settings.png[APM app settings in Kibana]
 
-Index settings in the APM app take precedence over those set in `kibana.yml`.
-
-// end::general-apm-settings-overview[]
+// end::apm-indices-settings[]
 
 [float]
 [[general-apm-settings-kb]]
@@ -28,6 +30,9 @@ Index settings in the APM app take precedence over those set in `kibana.yml`.
 // This content is reused in the APM app documentation.
 // Any changes made in this file will be seen there as well.
 // tag::general-apm-settings[]
+
+If you'd like to change any of the default values,
+copy and paste the relevant settings below into your `kibana.yml` configuration file.
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
