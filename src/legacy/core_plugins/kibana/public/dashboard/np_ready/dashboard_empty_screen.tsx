@@ -48,7 +48,7 @@ export function DashboardEmptyScreen({
 }: DashboardEmptyScreenProps) {
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
-    ? '/plugins/kibana/home/assets/welcome_graphic_light_2x.png'
+    ? '/plugins/kibana/home/assets/welcome_graphic_dark_2x.png'
     : '/plugins/kibana/home/assets/welcome_graphic_light_2x.png';
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
@@ -99,19 +99,20 @@ export function DashboardEmptyScreen({
     constants.addExistingVisualizationLinkAriaLabel
   );
   const viewMode = (
-    <EuiPage className="dshStartScreen" restrictWidth="36em">
+    <EuiPage className="dshStartScreen" restrictWidth="500px">
       <EuiPageBody>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiImage
-            style={{ width: 480 }}
-            url={http.basePath.prepend(emptyStateGraphicURL)}
-            alt=""
-          />
+        <EuiPageContent
+          verticalPosition="center"
+          horizontalPosition="center"
+          paddingSize="none"
+          className="dshStartScreen__pageContent"
+        >
+          <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
           <EuiText size="m">
             <p style={{ fontWeight: 'bold' }}>{constants.fillDashboardTitle}</p>
           </EuiText>
           <EuiSpacer size="m" />
-          {enterEditModeParagraph}
+          <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -119,7 +120,7 @@ export function DashboardEmptyScreen({
   const editMode = (
     <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
       {enterViewModeParagraph}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {linkToVisualizeParagraph}
     </div>
   );

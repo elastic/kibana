@@ -32,7 +32,7 @@ export const howToStartWorkingOnNewDashboardDescription1: string = i18n.translat
 export const howToStartWorkingOnNewDashboardDescription2: string = i18n.translate(
   'kbn.dashboard.howToStartWorkingOnNewDashboardDescription2',
   {
-    defaultMessage: 'button in the menu bar above to start working on your new dashboard.',
+    defaultMessage: 'in the menu bar above to start adding panels.',
   }
 );
 export const howToStartWorkingOnNewDashboardEditLinkText: string = i18n.translate(
@@ -63,7 +63,7 @@ export const addExistingVisualizationLinkAriaLabel: string = i18n.translate(
 export const addNewVisualizationDescription: string = i18n.translate(
   'kbn.dashboard.addNewVisualizationText',
   {
-    defaultMessage: 'or a new object to this dashboard',
+    defaultMessage: 'or new object to this dashboard',
   }
 );
 export const createNewVisualizationButton: string = i18n.translate(

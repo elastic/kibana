@@ -6,13 +6,23 @@
 
 .dshStartScreen {
   text-align: center;
-  padding: $euiSizeS;
+}
+
+.dshStartScreen__pageContent {
+  padding: $euiSizeXXL;
+}
+
+.dshStartScreen__panelDesc {
+  max-width: 260px;
+  margin: 0 auto;
 }
 
 .dshEmptyWidget {
-  border: 2px dashed $euiColorLightShade;
-  padding: 4 * $euiSize;
-  max-width: 20em;
-  margin-left: 10px;
+  border: $euiBorderThin;
+  border-style:  dashed;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeXXL * 2;
+  max-width: 400px;
+  margin-left: $euiSizeS;
   text-align: center;
 }
