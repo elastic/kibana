@@ -547,7 +547,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
       await find.clickByCssSelector(aceEditorCssSelector);
       for (let i = 0; i < 1000; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
