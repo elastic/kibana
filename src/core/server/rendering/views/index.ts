@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { mergeVariables } from './merge_variables';
+export { Template } from './template';
