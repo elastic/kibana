@@ -11,7 +11,7 @@ import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
-import { TlsEdges, TlsSortField, TlsFields } from '../../../../graphql/types';
+import { TlsEdges, TlsSortField, TlsFields, Direction } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 import { getTlsColumns } from './columns';
@@ -105,7 +105,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
           const splitField = criteria.sort.field.split('.');
           const newTlsSort: TlsSortField = {
             field: getSortFromString(splitField[splitField.length - 1]),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (!isEqual(newTlsSort, sort)) {
             updateNetworkTable({

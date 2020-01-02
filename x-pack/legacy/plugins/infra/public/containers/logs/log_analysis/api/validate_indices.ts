@@ -7,8 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from 'ui/new_platform';
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   ValidationIndicesFieldSpecification,
@@ -22,9 +21,8 @@ export const callValidateIndicesAPI = async (
   indices: string[],
   fields: ValidationIndicesFieldSpecification[]
 ) => {
-  const response = await kfetch({
+  const response = await npStart.core.http.fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',
-    pathname: LOG_ANALYSIS_VALIDATE_INDICES_PATH,
     body: JSON.stringify(validationIndicesRequestPayloadRT.encode({ data: { indices, fields } })),
   });
 
