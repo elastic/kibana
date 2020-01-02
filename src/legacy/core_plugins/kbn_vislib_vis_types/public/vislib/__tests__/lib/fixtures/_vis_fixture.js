@@ -19,7 +19,23 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+
 import { Vis } from '../../../vis';
+
+// TODO: remove legacy imports when/of converting tests to jest
+import {
+  setHierarchicalTooltipFormatter,
+  getHierarchicalTooltipFormatter,
+} from 'ui/vis/components/tooltip/_hierarchical_tooltip_formatter';
+import {
+  setPointSeriesTooltipFormatter,
+  getPointSeriesTooltipFormatter,
+} from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
+import {
+  vislibSeriesResponseHandlerProvider,
+  vislibSlicesResponseHandlerProvider,
+} from 'ui/vis/response_handlers/vislib';
+import { vislibColor } from 'ui/vis/components/color/color';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -52,10 +68,25 @@ afterEach(function() {
   count = 0;
 });
 
-export default function VislibFixtures() {
-  return function(visLibParams) {
+const getDeps = () => {
+  const uiSettings = new Map();
+  return {
+    uiSettings,
+    vislibColor,
+    getHierarchicalTooltipFormatter,
+    getPointSeriesTooltipFormatter,
+    vislibSeriesResponseHandlerProvider,
+    vislibSlicesResponseHandlerProvider,
+  };
+};
+
+export default function getVislibFixtures(Private) {
+  setHierarchicalTooltipFormatter(Private);
+  setPointSeriesTooltipFormatter(Private);
+
+  return function(visLibParams, element) {
     return new Vis(
-      $visCanvas.new(),
+      element || $visCanvas.new(),
       _.defaults({}, visLibParams || {}, {
         addTooltip: true,
         addLegend: true,
@@ -63,7 +94,8 @@ export default function VislibFixtures() {
         setYExtents: false,
         yAxis: {},
         type: 'histogram',
-      })
+      }),
+      getDeps()
     );
   };
 }

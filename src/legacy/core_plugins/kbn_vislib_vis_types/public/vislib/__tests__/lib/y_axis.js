@@ -21,6 +21,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+import 'ui/persisted_state';
 import $ from 'jquery';
 import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';
@@ -96,7 +97,8 @@ function createData(seriesData) {
       },
       data,
       persistedState,
-      node
+      node,
+      () => undefined
     );
     return new YAxis(
       visConfig,

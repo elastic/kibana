@@ -20,8 +20,11 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
+import 'ui/persisted_state';
+
 import expect from '@kbn/expect';
 import $ from 'jquery';
+
 import { Axis } from '../../../lib/axis';
 import { VisConfig } from '../../../lib/vis_config';
 
@@ -118,7 +121,8 @@ describe('Vislib Axis Class Test Suite', function() {
         },
         data,
         persistedState,
-        $('.x-axis-div')[0]
+        $('.x-axis-div')[0],
+        () => undefined
       );
       yAxis = new Axis(visConfig, {
         type: 'value',

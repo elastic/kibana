@@ -18,20 +18,20 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import $ from 'jquery';
 
+import expect from '@kbn/expect';
+// TODO: Remove ui imports once converting to jest
+import 'ui/persisted_state';
+import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import {
-  Vis,
-  tabifyAggResponse,
-  vislibSlicesResponseHandlerProvider,
-} from '../../../legacy_imports';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { Vis, tabifyAggResponse } from '../../../legacy_imports';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -132,7 +132,8 @@ describe('No global chart settings', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function(Private, $injector) {
-      chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
+      const getVis = getFixturesVislibVisFixtureProvider(Private);
+      chart1 = getVis(visLibParams1);
       persistedState = new ($injector.get('PersistedState'))();
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       responseHandler = vislibSlicesResponseHandlerProvider().handler;
@@ -166,7 +167,7 @@ describe('No global chart settings', function() {
   });
 
   it('should render chart titles for all charts', function() {
-    expect($(chart1.el).find('.visAxis__splitTitles--y').length).to.be(1);
+    expect($(chart1.element).find('.visAxis__splitTitles--y').length).to.be(1);
   });
 
   describe('_validatePieData method', function() {
@@ -224,7 +225,8 @@ describe('Vislib PieChart Class Test Suite', function() {
       beforeEach(ngMock.module('kibana'));
       beforeEach(
         ngMock.inject(function(Private, $injector) {
-          vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+          const getVis = getFixturesVislibVisFixtureProvider(Private);
+          vis = getVis(visLibParams);
           persistedState = new ($injector.get('PersistedState'))();
           indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
           responseHandler = vislibSlicesResponseHandlerProvider().handler;

@@ -20,7 +20,10 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import $ from 'jquery';
 import _ from 'lodash';
+
+import 'ui/persisted_state';
 
 // Data
 import seriesPos from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -29,8 +32,7 @@ import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import histogramColumns from '../lib/fixtures/mock_data/histogram/_columns';
 import rangeRows from '../lib/fixtures/mock_data/range/_rows';
 import termSeries from '../lib/fixtures/mock_data/terms/_series';
-import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 const dataTypes = [
   ['series pos', seriesPos],
@@ -53,6 +55,7 @@ describe('Vislib Line Chart', function() {
       beforeEach(ngMock.module('kibana'));
       beforeEach(
         ngMock.inject(function(Private, $injector) {
+          const getVis = getFixturesVislibVisFixtureProvider(Private);
           const visLibParams = {
             type: 'line',
             addLegend: true,
@@ -60,10 +63,10 @@ describe('Vislib Line Chart', function() {
             drawLinesBetweenPoints: true,
           };
 
-          vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+          vis = getVis(visLibParams);
           persistedState = new ($injector.get('PersistedState'))();
-          vis.on('brush', _.noop);
           vis.render(data, persistedState);
+          vis.on('brush', _.noop);
         })
       );
 

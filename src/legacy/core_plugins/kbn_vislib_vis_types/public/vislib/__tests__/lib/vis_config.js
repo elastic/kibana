@@ -20,6 +20,7 @@
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+import 'ui/persisted_state';
 import { VisConfig } from '../../lib/vis_config';
 
 describe('Vislib VisConfig Class Test Suite', function() {
@@ -100,7 +101,8 @@ describe('Vislib VisConfig Class Test Suite', function() {
         },
         data,
         new PersistedState(),
-        el
+        el,
+        () => undefined
       );
     })
   );

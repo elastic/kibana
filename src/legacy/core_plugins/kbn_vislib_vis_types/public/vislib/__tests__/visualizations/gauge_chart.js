@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import _ from 'lodash';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
+
 import data from '../lib/fixtures/mock_data/terms/_seriesMultiple';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 describe('Vislib Gauge Chart Test Suite', function() {
   let PersistedState;
@@ -88,7 +91,7 @@ describe('Vislib Gauge Chart Test Suite', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function(Private, $injector) {
-      vislibVis = Private(FixturesVislibVisFixtureProvider);
+      vislibVis = getFixturesVislibVisFixtureProvider(Private);
       PersistedState = $injector.get('PersistedState');
       generateVis();
     })

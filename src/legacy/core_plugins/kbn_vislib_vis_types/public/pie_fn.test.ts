@@ -20,12 +20,13 @@
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { createPieVisFn } from './pie_fn';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
 jest.mock('ui/new_platform');
-jest.mock('./legacy_imports.ts', () => ({
-  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-}));
 
+const deps: KbnVislibVisTypesDependencies = {
+  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+} as any;
 const mockResponseHandler = jest.fn().mockReturnValue(
   Promise.resolve({
     hits: 1,
@@ -44,7 +45,7 @@ const mockResponseHandler = jest.fn().mockReturnValue(
 );
 
 describe('interpreter/functions#pie', () => {
-  const fn = functionWrapper(createPieVisFn);
+  const fn = functionWrapper(createPieVisFn(deps));
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

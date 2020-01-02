@@ -26,7 +26,9 @@ import columns from '../fixtures/mock_data/date_histogram/_columns';
 import rows from '../fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
+import 'ui/persisted_state';
+
+import getFixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
@@ -39,7 +41,8 @@ dateHistogramArray.forEach(function(data, i) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(
       ngMock.inject(function(Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)();
+        const getVis = getFixturesVislibVisFixtureProvider(Private);
+        vis = getVis();
         persistedState = new ($injector.get('PersistedState'))();
         vis.render(data, persistedState);
       })
@@ -105,12 +108,12 @@ dateHistogramArray.forEach(function(data, i) {
     describe('removeAll Method', function() {
       beforeEach(function() {
         ngMock.inject(function() {
-          vis.handler.removeAll(vis.el);
+          vis.handler.removeAll(vis.element);
         });
       });
 
       it('should remove all DOM elements from the el', function() {
-        expect($(vis.el).children().length).to.be(0);
+        expect($(vis.element).children().length).to.be(0);
       });
     });
 
@@ -120,7 +123,7 @@ dateHistogramArray.forEach(function(data, i) {
       });
 
       it('should return an error classed DOM element with a text message', function() {
-        expect($(vis.el).find('.error').length).to.be(1);
+        expect($(vis.element).find('.error').length).to.be(1);
         expect($('.error h4').html()).to.be('This is an error!');
       });
     });

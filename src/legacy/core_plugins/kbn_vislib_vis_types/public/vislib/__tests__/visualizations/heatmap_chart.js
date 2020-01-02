@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 // Data
 import series from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -29,7 +31,7 @@ import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
 import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -73,7 +75,7 @@ describe('Vislib Heatmap Chart Test Suite', function() {
       beforeEach(ngMock.module('kibana'));
       beforeEach(
         ngMock.inject(function(Private, $injector) {
-          vislibVis = Private(FixturesVislibVisFixtureProvider);
+          vislibVis = getFixturesVislibVisFixtureProvider(Private);
           PersistedState = $injector.get('PersistedState');
           generateVis();
         })

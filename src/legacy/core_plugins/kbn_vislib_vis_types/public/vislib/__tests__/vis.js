@@ -18,15 +18,17 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import $ from 'jquery';
 import ngMock from 'ng_mock';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 import series from './lib/fixtures/mock_data/date_histogram/_series';
 import columns from './lib/fixtures/mock_data/date_histogram/_columns';
 import rows from './lib/fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from './lib/fixtures/mock_data/date_histogram/_stacked_series';
-import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from './lib/fixtures/_vis_fixture';
+import getFixturesVislibVisFixtureProvider from './lib/fixtures/_vis_fixture';
 
 const dataArray = [series, columns, rows, stackedSeries];
 
@@ -44,9 +46,10 @@ dataArray.forEach(function(data, i) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(
       ngMock.inject(function(Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)();
+        const getVis = getFixturesVislibVisFixtureProvider(Private);
+        vis = getVis();
         persistedState = new ($injector.get('PersistedState'))();
-        secondVis = Private(FixturesVislibVisFixtureProvider)();
+        secondVis = getVis();
       })
     );
 
@@ -98,7 +101,7 @@ dataArray.forEach(function(data, i) {
       });
 
       it('should not remove visualizations that have not been destroyed', function() {
-        expect($(vis.el).find('.visWrapper').length).to.be(1);
+        expect($(vis.element).find('.visWrapper').length).to.be(1);
       });
     });
 

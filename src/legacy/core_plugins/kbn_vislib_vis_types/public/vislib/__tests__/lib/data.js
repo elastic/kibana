@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 import { Data } from '../../lib/data';
 
@@ -167,7 +168,7 @@ describe('Vislib Data Class Test Suite', function() {
     });
 
     it('should return an object', function() {
-      const rowIn = new Data(rowsData, persistedState);
+      const rowIn = new Data(rowsData, persistedState, () => undefined);
       expect(_.isObject(rowIn)).to.be(true);
     });
   });
@@ -181,7 +182,7 @@ describe('Vislib Data Class Test Suite', function() {
     };
 
     beforeEach(function() {
-      data = new Data(pieData, persistedState);
+      data = new Data(pieData, persistedState, () => undefined);
     });
 
     it('should remove zero values', function() {
@@ -195,7 +196,7 @@ describe('Vislib Data Class Test Suite', function() {
     let serOut;
 
     beforeEach(function() {
-      serIn = new Data(seriesData, persistedState);
+      serIn = new Data(seriesData, persistedState, () => undefined);
       serOut = serIn.flatten();
     });
 
@@ -209,7 +210,7 @@ describe('Vislib Data Class Test Suite', function() {
 
     function testLength(inputData) {
       return function() {
-        const data = new Data(inputData, persistedState);
+        const data = new Data(inputData, persistedState, () => undefined);
         const len = _.reduce(
           data.chartData(),
           function(sum, chart) {
@@ -265,7 +266,7 @@ describe('Vislib Data Class Test Suite', function() {
     };
 
     beforeEach(function() {
-      data = new Data(geohashGridData, persistedState);
+      data = new Data(geohashGridData, persistedState, () => undefined);
     });
 
     describe('getVisData', function() {
@@ -286,7 +287,7 @@ describe('Vislib Data Class Test Suite', function() {
 
   describe('null value check', function() {
     it('should return false', function() {
-      const data = new Data(rowsData, persistedState);
+      const data = new Data(rowsData, persistedState, () => undefined);
       expect(data.hasNullValues()).to.be(false);
     });
 
@@ -306,7 +307,7 @@ describe('Vislib Data Class Test Suite', function() {
         ],
       });
 
-      const data = new Data(nullRowData, persistedState);
+      const data = new Data(nullRowData, persistedState, () => undefined);
       expect(data.hasNullValues()).to.be(true);
     });
   });

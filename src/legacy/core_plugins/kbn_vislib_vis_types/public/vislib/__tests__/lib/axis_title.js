@@ -23,6 +23,7 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 
 import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 import { AxisTitle } from '../../lib/axis/axis_title';
 import { AxisConfig } from '../../lib/axis/axis_config';
@@ -119,14 +120,15 @@ describe('Vislib AxisTitle Class Test Suite', function() {
         .style('height', '20px')
         .style('width', '20px');
 
-      dataObj = new Data(data, new PersistedState());
+      dataObj = new Data(data, new PersistedState(), () => undefined);
       visConfig = new VisConfig(
         {
           type: 'histogram',
         },
         data,
         new PersistedState(),
-        el.node()
+        el.node(),
+        () => undefined
       );
       const xAxisConfig = new AxisConfig(visConfig, {
         position: 'bottom',

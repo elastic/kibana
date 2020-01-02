@@ -18,10 +18,13 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { Vis } from '../../vis';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
+
 import { Chart } from '../../visualizations/_chart';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 describe('Vislib _chart Test Suite', function() {
   let persistedState;
@@ -108,7 +111,8 @@ describe('Vislib _chart Test Suite', function() {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function(_, $injector) {
+    ngMock.inject(function(Private, $injector) {
+      const getVis = getFixturesVislibVisFixtureProvider(Private);
       persistedState = new ($injector.get('PersistedState'))();
 
       el = d3
@@ -123,7 +127,7 @@ describe('Vislib _chart Test Suite', function() {
         zeroFill: true,
       };
 
-      vis = new Vis(el[0][0], config);
+      vis = getVis(config, el[0][0]);
       vis.render(data, persistedState);
 
       myChart = vis.handler.charts[0];

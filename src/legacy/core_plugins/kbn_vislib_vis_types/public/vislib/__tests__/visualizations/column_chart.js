@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 // Data
 import series from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -33,7 +35,7 @@ import { seriesMonthlyInterval } from '../lib/fixtures/mock_data/date_histogram/
 import { rowsSeriesWithHoles } from '../lib/fixtures/mock_data/date_histogram/_rows_series_with_holes';
 import rowsWithZeros from '../lib/fixtures/mock_data/date_histogram/_rows';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -68,7 +70,8 @@ dataTypesArray.forEach(function(dataType) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(
       ngMock.inject(function(Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+        const getVis = getFixturesVislibVisFixtureProvider(Private);
+        vis = getVis(visLibParams);
         persistedState = new ($injector.get('PersistedState'))();
         vis.on('brush', _.noop);
         vis.render(data, persistedState);
@@ -256,7 +259,8 @@ describe('stackData method - data set with zeros in percentage mode', function()
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function(Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      const getVis = getFixturesVislibVisFixtureProvider(Private);
+      vis = getVis(visLibParams);
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
     })
@@ -306,7 +310,8 @@ describe('datumWidth - split chart data set with holes', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function(Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      const getVis = getFixturesVislibVisFixtureProvider(Private);
+      vis = getVis(visLibParams);
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(rowsSeriesWithHoles, persistedState);
@@ -343,7 +348,8 @@ describe('datumWidth - monthly interval', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function(Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      const getVis = getFixturesVislibVisFixtureProvider(Private);
+      vis = getVis(visLibParams);
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(seriesMonthlyInterval, persistedState);

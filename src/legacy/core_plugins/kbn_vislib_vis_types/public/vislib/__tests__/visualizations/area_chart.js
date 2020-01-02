@@ -18,12 +18,14 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+
+import expect from '@kbn/expect';
+import 'ui/persisted_state';
+
+import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
 
 const dataTypesArray = {
   'series pos': require('../lib/fixtures/mock_data/date_histogram/_series'),
@@ -49,7 +51,8 @@ _.forOwn(dataTypesArray, function(dataType, dataTypeName) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(
       ngMock.inject(function(Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+        const getVis = getFixturesVislibVisFixtureProvider(Private);
+        vis = getVis(visLibParams);
         persistedState = new ($injector.get('PersistedState'))();
         vis.on('brush', _.noop);
         vis.render(dataType, persistedState);
