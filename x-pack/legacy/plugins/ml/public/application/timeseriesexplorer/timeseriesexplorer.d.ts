@@ -11,6 +11,9 @@ declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
   dateFormatTz: string;
   selectedJobIds: string[];
+  selectedDetectorIndex: number;
+  selectedEntities: any[];
+  selectedForecastId: string;
   setGlobalState: (arg: any) => void;
   tableInterval: string;
   tableSeverity: number;

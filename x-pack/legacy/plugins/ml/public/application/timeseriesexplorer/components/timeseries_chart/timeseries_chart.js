@@ -11,8 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { useObservable } from 'react-use';
-
+import useObservable from 'react-use/lib/useObservable';
 import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
@@ -101,7 +100,7 @@ const TimeseriesChartIntl = injectI18n(
       contextChartData: PropTypes.array,
       contextForecastData: PropTypes.array,
       contextChartSelected: PropTypes.func.isRequired,
-      detectorIndex: PropTypes.string,
+      detectorIndex: PropTypes.number,
       focusAggregationInterval: PropTypes.object,
       focusAnnotationData: PropTypes.array,
       focusChartData: PropTypes.array,

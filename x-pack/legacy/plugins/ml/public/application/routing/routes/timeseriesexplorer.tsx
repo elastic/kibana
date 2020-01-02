@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import moment from 'moment';
 
 // @ts-ignore
 import queryString from 'query-string';
+
 import { timefilter } from 'ui/timefilter';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
@@ -37,7 +40,7 @@ export const timeSeriesExplorerRoute: MlRoute = {
   ],
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   const { context } = useResolver('', undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
@@ -64,47 +67,47 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   }, [JSON.stringify(globalState?.time)]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
+  const selectedDetectorIndex = appState?.mlTimeSeriesExplorer?.detectorIndex;
+  const selectedEntities = appState?.mlTimeSeriesExplorer?.entities;
+  const selectedForecastId = appState?.mlTimeSeriesExplorer?.forecastId;
+  const zoom = appState?.mlTimeSeriesExplorer?.zoom;
 
-  const appStateHandler = (action: string, payload: any) => {
-    const mlTimeSeriesExplorer =
-      appState?.mlTimeSeriesExplorer !== undefined ? appState.mlTimeSeriesExplorer : {};
-    switch (action) {
-      case APP_STATE_ACTION.CLEAR:
-        delete mlTimeSeriesExplorer.detectorIndex;
-        delete mlTimeSeriesExplorer.entities;
-        delete mlTimeSeriesExplorer.forecastId;
-        break;
+  const appStateHandler = useCallback(
+    (action: string, payload: any) => {
+      const mlTimeSeriesExplorer =
+        appState?.mlTimeSeriesExplorer !== undefined ? { ...appState.mlTimeSeriesExplorer } : {};
 
-      case APP_STATE_ACTION.GET_DETECTOR_INDEX:
-        return mlTimeSeriesExplorer.detectorIndex;
-      case APP_STATE_ACTION.SET_DETECTOR_INDEX:
-        mlTimeSeriesExplorer.detectorIndex = payload;
-        break;
+      switch (action) {
+        case APP_STATE_ACTION.CLEAR:
+          delete mlTimeSeriesExplorer.detectorIndex;
+          delete mlTimeSeriesExplorer.entities;
+          delete mlTimeSeriesExplorer.forecastId;
+          break;
 
-      case APP_STATE_ACTION.GET_ENTITIES:
-        return mlTimeSeriesExplorer.entities;
-      case APP_STATE_ACTION.SET_ENTITIES:
-        mlTimeSeriesExplorer.entities = payload;
-        break;
+        case APP_STATE_ACTION.SET_DETECTOR_INDEX:
+          mlTimeSeriesExplorer.detectorIndex = payload;
+          break;
 
-      case APP_STATE_ACTION.GET_FORECAST_ID:
-        return mlTimeSeriesExplorer.forecastId;
-      case APP_STATE_ACTION.SET_FORECAST_ID:
-        mlTimeSeriesExplorer.forecastId = payload;
-        break;
+        case APP_STATE_ACTION.SET_ENTITIES:
+          mlTimeSeriesExplorer.entities = payload;
+          break;
 
-      case APP_STATE_ACTION.GET_ZOOM:
-        return mlTimeSeriesExplorer.zoom;
-      case APP_STATE_ACTION.SET_ZOOM:
-        mlTimeSeriesExplorer.zoom = payload;
-        break;
-      case APP_STATE_ACTION.UNSET_ZOOM:
-        delete mlTimeSeriesExplorer.zoom;
-        break;
-    }
+        case APP_STATE_ACTION.SET_FORECAST_ID:
+          mlTimeSeriesExplorer.forecastId = payload;
+          break;
 
-    setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
-  };
+        case APP_STATE_ACTION.SET_ZOOM:
+          mlTimeSeriesExplorer.zoom = payload;
+          break;
+        case APP_STATE_ACTION.UNSET_ZOOM:
+          delete mlTimeSeriesExplorer.zoom;
+          break;
+      }
+
+      setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
+    },
+    [JSON.stringify(appState)]
+  );
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
@@ -118,10 +121,14 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
         appStateHandler,
         dateFormatTz,
         selectedJobIds,
+        selectedDetectorIndex: +selectedDetectorIndex || 0,
+        selectedEntities,
+        selectedForecastId,
         setGlobalState,
-        tableInterval,
+        tableInterval: tableInterval.val,
         tableSeverity: tableSeverity.val,
         timefilter,
+        zoom,
       }}
     />
   );
