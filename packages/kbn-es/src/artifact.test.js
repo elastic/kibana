@@ -32,7 +32,7 @@ const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
 
-const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots';
+const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOT_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 

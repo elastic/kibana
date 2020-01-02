@@ -56,7 +56,7 @@ timeout(time: 120, unit: 'MINUTES') {
               return [
                 filename: filename,
                 checksum: filename + '.sha512',
-                url: "https://storage.googleapis.com/kibana-ci-es-snapshots/${DESTINATION}/${filename}".toString(),
+                url: "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${DESTINATION}/${filename}".toString(),
                 version: parts[1],
                 platform: parts.size() >= 5 ? parts[3] : 'no-jdk',
                 architecture: parts.size() >= 5 ? parts[4].split('\\.')[0] : '',
@@ -68,7 +68,7 @@ timeout(time: 120, unit: 'MINUTES') {
 
             // TODO remove all currently unused params?
             def manifest = [
-              bucket: "kibana-ci-es-snapshots/${DESTINATION}".toString(),
+              bucket: "kibana-ci-es-snapshots-daily/${DESTINATION}".toString(),
               branch: ES_BRANCH,
               sha: GIT_COMMIT,
               sha_short: GIT_COMMIT_SHORT,
@@ -135,7 +135,7 @@ def checkoutEs(branch) {
 def upload(destination, pattern) {
   return googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
-    bucket: "gs://kibana-ci-es-snapshots/${destination}",
+    bucket: "gs://kibana-ci-es-snapshots-daily/${destination}",
     pattern: pattern,
     sharedPublicly: false,
     showInline: false,

@@ -17,7 +17,7 @@ if (!SNAPSHOT_ID) {
 currentBuild.displayName += " - ${SNAPSHOT_VERSION}"
 currentBuild.description = "ES: ${SNAPSHOT_VERSION}<br />Kibana: ${params.branch_specifier}"
 
-def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
+def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
 
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {

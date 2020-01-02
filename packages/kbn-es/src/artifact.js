@@ -27,7 +27,7 @@ const { createHash } = require('crypto');
 const path = require('path');
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots';
+const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 

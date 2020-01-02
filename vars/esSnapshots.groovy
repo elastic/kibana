@@ -1,6 +1,6 @@
 def promote(snapshotVersion, snapshotId) {
   def snapshotDestination = "${snapshotVersion}/archives/${snapshotId}"
-  def MANIFEST_URL = "https://storage.googleapis.com/kibana-ci-es-snapshots/${snapshotDestination}/manifest.json"
+  def MANIFEST_URL = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${snapshotDestination}/manifest.json"
 
   dir('verified-manifest') {
     def verifiedSnapshotFilename = 'manifest-latest-verified.json'
@@ -12,7 +12,7 @@ def promote(snapshotVersion, snapshotId) {
 
     googleStorageUpload(
       credentialsId: 'kibana-ci-gcs-plugin',
-      bucket: "gs://kibana-ci-es-snapshots/${snapshotVersion}",
+      bucket: "gs://kibana-ci-es-snapshots-daily/${snapshotVersion}",
       pattern: verifiedSnapshotFilename,
       sharedPublicly: false,
       showInline: false,
@@ -24,7 +24,7 @@ def promote(snapshotVersion, snapshotId) {
   dir('transfer-to-permanent') {
     googleStorageDownload(
       credentialsId: 'kibana-ci-gcs-plugin',
-      bucketUri: "gs://kibana-ci-es-snapshots/${snapshotDestination}/*",
+      bucketUri: "gs://kibana-ci-es-snapshots-daily/${snapshotDestination}/*",
       localDirectory: '.',
       pathPrefix: snapshotDestination,
     )
@@ -32,7 +32,7 @@ def promote(snapshotVersion, snapshotId) {
     def manifestJson = readFile file: 'manifest.json'
     writeFile(
       file: 'manifest.json',
-      text: manifestJson.replace("kibana-ci-es-snapshots/${snapshotDestination}", "kibana-ci-es-snapshots-permanent/${snapshotVersion}")
+      text: manifestJson.replace("kibana-ci-es-snapshots-daily/${snapshotDestination}", "kibana-ci-es-snapshots-permanent/${snapshotVersion}")
     )
 
     // Ideally we would have some delete logic here before uploading,
