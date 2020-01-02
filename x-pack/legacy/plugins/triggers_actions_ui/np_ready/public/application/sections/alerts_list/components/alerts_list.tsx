@@ -208,6 +208,7 @@ export const AlertsList: React.FunctionComponent = () => {
         .sort((a, b) => a.name.localeCompare(b.name))}
     />,
     <ActionTypeFilter
+      key="action-type-filter"
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
@@ -268,8 +269,10 @@ export const AlertsList: React.FunctionComponent = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
-                {toolsRight.map(tool => (
-                  <EuiFlexItem grow={false}>{tool}</EuiFlexItem>
+                {toolsRight.map((tool, index: number) => (
+                  <EuiFlexItem key={index} grow={false}>
+                    {tool}
+                  </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
