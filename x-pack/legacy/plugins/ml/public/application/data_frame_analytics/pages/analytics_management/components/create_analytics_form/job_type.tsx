@@ -64,7 +64,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
           hasNoInitialSelection={true}
           onChange={e => {
             const value = e.target.value as AnalyticsJobType;
-            setFormState({ jobType: value });
+            setFormState({ previousJobType: type, jobType: value });
           }}
           data-test-subj="mlAnalyticsCreateJobFlyoutJobTypeSelect"
         />

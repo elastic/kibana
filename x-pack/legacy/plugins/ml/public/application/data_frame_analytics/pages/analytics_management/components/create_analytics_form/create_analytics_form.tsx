@@ -25,7 +25,6 @@ import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_pattern
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -45,22 +44,18 @@ import {
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
 
-const NUMERICAL_FIELD_TYPES = new Set([
+const CATEGORICAL_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.LONG,
   ES_FIELD_TYPES.INTEGER,
   ES_FIELD_TYPES.SHORT,
   ES_FIELD_TYPES.BYTE,
+]);
+
+const NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.DOUBLE,
   ES_FIELD_TYPES.FLOAT,
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
-]);
-
-const SUPPORTED_ANALYSIS_FIELD_TYPES = new Set([
-  ES_FIELD_TYPES.BOOLEAN,
-  ES_FIELD_TYPES.TEXT,
-  ES_FIELD_TYPES.KEYWORD,
-  ES_FIELD_TYPES.IP,
 ]);
 
 // List of system fields we want to ignore for the numeric field check.
@@ -84,15 +79,19 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     destinationIndexPatternTitleExists,
     excludes,
     excludesOptions,
+    fieldOptionsFetchFail,
     jobId,
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
     jobIdInvalidMaxLength,
     jobType,
+    loadingDepVarOptions,
     loadingFieldOptions,
     modelMemoryLimit,
     modelMemoryLimitUnitValid,
+    previousJobType,
+    previousSourceIndex,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -101,6 +100,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     trainingPercent,
   } = form;
   const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
+
+  const isJobTypeWithDepVar =
+    jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
@@ -124,27 +126,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  // Regression and Classification support numeric, boolean, text, keyword, and ip types
-  // Outlier detection supports numeric or boolean types
-  const shouldAddAsAnalyzedFieldsOption = (field: Field) => {
-    if (field.id === EVENT_RATE_FIELD_ID) return false;
-
-    const isNumerical = NUMERICAL_FIELD_TYPES.has(field.type);
-
-    if (jobType === JOB_TYPES.OUTLIER_DETECTION)
-      return isNumerical || field.type === ES_FIELD_TYPES.BOOLEAN;
-    if (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION)
-      return isNumerical || SUPPORTED_ANALYSIS_FIELD_TYPES.has(field.type);
-  };
-
-  // Regression supports numeric fields. Classification supports numeric and boolean.
+  // Regression supports numeric fields. Classification supports categorical numeric and boolean.
   const shouldAddAsDepVarOption = (field: Field) => {
     if (field.id === EVENT_RATE_FIELD_ID) return false;
 
-    const isNumerical = NUMERICAL_FIELD_TYPES.has(field.type);
-    const isSupportedByClassification = isNumerical || field.type === ES_FIELD_TYPES.BOOLEAN;
+    const isCategoricalNumerical = CATEGORICAL_NUMERICAL_TYPES.has(field.type);
 
-    if (jobType === JOB_TYPES.REGRESSION) return isNumerical;
+    const isSupportedByClassification =
+      isCategoricalNumerical || field.type === ES_FIELD_TYPES.BOOLEAN;
+
+    if (jobType === JOB_TYPES.REGRESSION) {
+      return isCategoricalNumerical || NUMERICAL_TYPES.has(field.type);
+    }
     if (jobType === JOB_TYPES.CLASSIFICATION) return isSupportedByClassification;
   };
 
@@ -170,17 +163,53 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  const debouncedMmlEstimateLoad = debounce(async () => {
+  const debouncedGetExplainData = debounce(async () => {
+    // Reset if sourceIndex or jobType changes (jobType requires dependent_variable to be set -
+    // which won't be the case if switching from outlier detection)
+    if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+      setFormState({
+        loadingFieldOptions: true,
+        // excludesOptions: [],
+        // excludes: [],
+      });
+    }
+
     try {
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
+      delete jobConfig.analyzed_fields;
       const resp = await ml.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
-      setFormState({
-        modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
-      });
+
+      // If sourceIndex has changed load analysis field options again
+      if (previousSourceIndex !== sourceIndex) {
+        const analyzedFieldsOptions: Array<{ label: string }> = [];
+
+        if (resp.field_selection) {
+          resp.field_selection.forEach((selectedField: any) => {
+            // TODO: update type
+            if (selectedField.is_included === true && selectedField.name !== dependentVariable) {
+              analyzedFieldsOptions.push({ label: selectedField.name });
+            }
+          });
+        }
+
+        setFormState({
+          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+          excludesOptions: analyzedFieldsOptions,
+          excludes: [],
+          loadingFieldOptions: false,
+          dependentVariableFetchFail: false,
+        });
+      } else {
+        setFormState({
+          modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
+        });
+      }
     } catch (e) {
       setFormState({
+        fieldOptionsFetchFail: true,
+        loadingFieldOptions: false,
         modelMemoryLimit:
           jobType !== undefined
             ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
@@ -189,13 +218,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   }, 500);
 
-  const loadFieldOptions = async () => {
+  const loadDepVarOptions = async () => {
     setFormState({
-      loadingFieldOptions: true,
+      loadingDepVarOptions: true,
       // clear when the source index changes
       dependentVariable: '',
-      excludes: [],
-      // Reset outlier detection sourceIndex checks to default values if we've switched to regression
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
     });
@@ -203,8 +230,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
         indexPatternsMap[sourceIndex].value
       );
-      const shouldPrepDepVarOptions =
-        jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
@@ -212,34 +237,21 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         const { fields } = newJobCapsService;
 
         const depVarOptions: Array<{ label: string }> = [];
-        const analyzedFieldsOptions: Array<{ label: string }> = [];
 
         fields.forEach((field: Field) => {
-          if (shouldPrepDepVarOptions && shouldAddAsDepVarOption(field)) {
+          if (shouldAddAsDepVarOption(field)) {
             depVarOptions.push({ label: field.id });
-          }
-          if (shouldAddAsAnalyzedFieldsOption(field)) {
-            analyzedFieldsOptions.push({ label: field.id });
           }
         });
 
-        if (shouldPrepDepVarOptions) {
-          setFormState({
-            dependentVariableOptions: depVarOptions,
-            excludesOptions: analyzedFieldsOptions,
-            loadingFieldOptions: false,
-            dependentVariableFetchFail: false,
-          });
-        } else {
-          setFormState({
-            excludesOptions: analyzedFieldsOptions,
-            loadingFieldOptions: false,
-            dependentVariableFetchFail: false,
-          });
-        }
+        setFormState({
+          dependentVariableOptions: depVarOptions,
+          loadingDepVarOptions: false,
+          dependentVariableFetchFail: false,
+        });
       }
     } catch (e) {
-      setFormState({ loadingFieldOptions: false, dependentVariableFetchFail: true });
+      setFormState({ loadingDepVarOptions: false, dependentVariableFetchFail: true });
     }
   };
 
@@ -272,9 +284,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   useEffect(() => {
-    if (jobType !== undefined && sourceIndexNameEmpty === false) {
-      loadFieldOptions();
+    if (isJobTypeWithDepVar && sourceIndexNameEmpty === false) {
+      loadDepVarOptions();
     }
+
     if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
       validateSourceIndexFields();
     }
@@ -283,21 +296,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   useEffect(() => {
     const hasBasicRequiredFields =
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
-    const jobTypesWithDepVar =
-      jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
     const hasRequiredAnalysisFields =
-      (jobTypesWithDepVar && dependentVariable !== '' && trainingPercent !== undefined) ||
-      jobType === JOB_TYPES.OUTLIER_DETECTION;
+      (isJobTypeWithDepVar && dependentVariable !== '') || jobType === JOB_TYPES.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
-      debouncedMmlEstimateLoad();
+      debouncedGetExplainData();
     }
 
     return () => {
-      debouncedMmlEstimateLoad.cancel();
+      debouncedGetExplainData.cancel();
     };
-  }, [jobType, sourceIndex, dependentVariable, trainingPercent]);
+  }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -414,9 +424,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   selectedOptions={
                     indexPatternsMap[sourceIndex] !== undefined ? [{ label: sourceIndex }] : []
                   }
-                  onChange={selectedOptions =>
-                    setFormState({ sourceIndex: selectedOptions[0].label || '' })
-                  }
+                  onChange={selectedOptions => {
+                    setFormState({
+                      excludes: [],
+                      excludesOptions: [],
+                      previousSourceIndex: sourceIndex,
+                      sourceIndex: selectedOptions[0].label || '',
+                    });
+                  }}
                   isClearable={false}
                   data-test-subj="mlAnalyticsCreateJobFlyoutSourceIndexSelect"
                 />
@@ -488,36 +503,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
-              defaultMessage: 'Excluded fields',
-            })}
-            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
-              defaultMessage:
-                'Optionally select fields to be excluded from analysis. All other supported fields will be included',
-            })}
-          >
-            <EuiComboBox
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.excludesInputAriaLabel',
-                {
-                  defaultMessage: 'Optional. Enter or select field to be excluded.',
-                }
-              )}
-              isDisabled={isJobCreated}
-              isLoading={loadingFieldOptions}
-              options={excludesOptions}
-              selectedOptions={excludes.map(field => ({
-                label: field,
-              }))}
-              onCreateOption={onCreateOption}
-              onChange={selectedOptions =>
-                setFormState({ excludes: selectedOptions.map(option => option.label) })
-              }
-              isClearable={true}
-              data-test-subj="mlAnalyticsCreateJobFlyoutExcludesSelect"
-            />
-          </EuiFormRow>
           {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
@@ -566,12 +551,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )}
                   isDisabled={isJobCreated}
-                  isLoading={loadingFieldOptions}
+                  isLoading={loadingDepVarOptions}
                   singleSelection={true}
                   options={dependentVariableOptions}
                   selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
                   onChange={selectedOptions =>
-                    setFormState({ dependentVariable: selectedOptions[0].label || '' })
+                    setFormState({
+                      dependentVariable: selectedOptions[0].label || '',
+                    })
                   }
                   isClearable={false}
                   isInvalid={dependentVariable === ''}
@@ -598,6 +585,49 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               </EuiFormRow>
             </Fragment>
           )}
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
+              defaultMessage: 'Excluded fields',
+            })}
+            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
+              defaultMessage:
+                'Optionally select fields to be excluded from analysis. All other supported fields will be included',
+            })}
+            error={
+              excludesOptions.length === 0 &&
+              fieldOptionsFetchFail === false &&
+              !sourceIndexNameEmpty && [
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
+                  {
+                    defaultMessage:
+                      'No supported analysis fields were found for this index pattern.',
+                  }
+                ),
+              ]
+            }
+          >
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.excludesInputAriaLabel',
+                {
+                  defaultMessage: 'Optional. Enter or select field to be excluded.',
+                }
+              )}
+              isDisabled={isJobCreated}
+              isLoading={loadingFieldOptions}
+              options={excludesOptions}
+              selectedOptions={excludes.map(field => ({
+                label: field,
+              }))}
+              onCreateOption={onCreateOption}
+              onChange={selectedOptions =>
+                setFormState({ excludes: selectedOptions.map(option => option.label) })
+              }
+              isClearable={true}
+              data-test-subj="mlAnalyticsCreateJobFlyoutExcludesSelect"
+            />
+          </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',

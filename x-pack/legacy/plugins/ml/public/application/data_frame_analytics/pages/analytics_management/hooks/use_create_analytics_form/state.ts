@@ -58,15 +58,19 @@ export interface State {
     destinationIndexPatternTitleExists: boolean;
     excludes: string[];
     excludesOptions: Option[];
+    fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
+    loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
+    previousJobType: null | AnalyticsJobType;
+    previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -103,6 +107,7 @@ export const getInitialState = (): State => ({
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
     excludes: [],
+    fieldOptionsFetchFail: false,
     excludesOptions: [],
     jobId: '',
     jobIdExists: false,
@@ -110,9 +115,12 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
+    loadingDepVarOptions: false,
     loadingFieldOptions: false,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
+    previousJobType: null,
+    previousSourceIndex: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
