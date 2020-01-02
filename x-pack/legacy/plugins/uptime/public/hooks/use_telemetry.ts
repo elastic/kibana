@@ -11,15 +11,17 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 export enum UptimePage {
   Overview = '/api/uptime/logOverview',
   Monitor = '/api/uptime/logMonitor',
-  NotFound = '',
+  NotFound = '__not-found__',
 }
 
-const getApiPath = (page: UptimePage) => {
-  if (page === '') throw new Error('Telemetry logging for this page not yet implemented');
+const getApiPath = (page?: UptimePage) => {
+  if (!page) throw new Error('Telemetry logging for this page not yet implemented');
+  if (page === '__not-found__')
+    throw new Error('Telemetry logging for 404 page not yet implemented');
   return page.valueOf();
 };
 
-const logPageLoad = async (fetch: HttpHandler, page: UptimePage) => {
+const logPageLoad = async (fetch: HttpHandler, page?: UptimePage) => {
   try {
     await fetch(getApiPath(page), {
       method: 'POST',
@@ -29,11 +31,11 @@ const logPageLoad = async (fetch: HttpHandler, page: UptimePage) => {
   }
 };
 
-export const useUptimeTelemetry = (page: UptimePage) => {
+export const useUptimeTelemetry = (page?: UptimePage) => {
   const kibana = useKibana();
   const fetch = kibana.services.http?.fetch;
   useEffect(() => {
     if (!fetch) throw new Error('Core http services are not defined');
     logPageLoad(fetch, page);
-  }, []);
+  }, [fetch, page]);
 };
