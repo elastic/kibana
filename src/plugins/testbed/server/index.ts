@@ -23,6 +23,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   CoreSetup,
   CoreStart,
+  LegacyRenderOptions,
   Logger,
   PluginInitializerContext,
   PluginConfigDescriptor,
@@ -41,6 +42,11 @@ export const config: PluginConfigDescriptor = {
     uiProp: true,
   },
   schema: configSchema,
+  deprecations: ({ rename, unused, renameFromRoot }) => [
+    rename('securityKey', 'secret'),
+    renameFromRoot('oldtestbed.uiProp', 'testbed.uiProp'),
+    unused('deprecatedProperty'),
+  ],
 };
 
 class Plugin {
@@ -69,6 +75,29 @@ class Plugin {
       async (context, req, res) => {
         const response = await context.core.savedObjects.client.find({ type: 'TYPE' });
         return res.ok({ body: `SavedObjects client: ${JSON.stringify(response)}` });
+      }
+    );
+
+    router.get(
+      {
+        path: '/requestcontext/render/{id}',
+        validate: {
+          params: schema.object({
+            id: schema.maybe(schema.string()),
+          }),
+        },
+      },
+      async (context, req, res) => {
+        const { id } = req.params;
+        const options: Partial<LegacyRenderOptions> = { app: { getId: () => id! } };
+        const body = await context.core.rendering.render(options);
+
+        return res.ok({
+          body,
+          headers: {
+            'content-securty-policy': core.http.csp.header,
+          },
+        });
       }
     );
 

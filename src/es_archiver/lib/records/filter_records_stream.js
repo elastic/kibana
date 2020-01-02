@@ -30,6 +30,6 @@ export function createFilterRecordsStream(type) {
       } else {
         callback();
       }
-    }
+    },
   });
 }

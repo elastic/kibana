@@ -21,12 +21,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import {
-  EuiKeyboardAccessible
-} from '@elastic/eui';
+import { EuiKeyboardAccessible } from '@elastic/eui';
 
 class MetricVisValue extends Component {
-
   onClick = () => {
     this.props.onFilter(this.props.metric);
   };
@@ -42,7 +39,7 @@ class MetricVisValue extends Component {
 
     const containerClassName = classNames('mtrVis__container', {
       'mtrVis__container--light': metric.lightText,
-      'mtrVis__container-isfilterable': hasFilter
+      'mtrVis__container-isfilterable': hasFilter,
     });
 
     const metricComponent = (
@@ -66,14 +63,12 @@ class MetricVisValue extends Component {
            */
           dangerouslySetInnerHTML={{ __html: metric.value }} //eslint-disable-line react/no-danger
         />
-        { showLabel &&
-          <div>{metric.label}</div>
-        }
+        {showLabel && <div>{metric.label}</div>}
       </div>
     );
 
     if (hasFilter) {
-      return (<EuiKeyboardAccessible>{metricComponent}</EuiKeyboardAccessible>);
+      return <EuiKeyboardAccessible>{metricComponent}</EuiKeyboardAccessible>;
     }
 
     return metricComponent;

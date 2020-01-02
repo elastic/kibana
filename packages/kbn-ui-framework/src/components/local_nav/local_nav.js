@@ -25,7 +25,7 @@ export function KuiLocalNav({ className, children, ...rest }) {
   const classes = classnames('kuiLocalNav', className);
   return (
     <div className={classes} {...rest}>
-      { children }
+      {children}
     </div>
   );
 }

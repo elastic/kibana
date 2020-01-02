@@ -18,6 +18,7 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 
 // @public
 export interface App extends AppBase {
+    appRoute?: string;
     chromeless?: boolean;
     mount: AppMount | AppMountDeprecated;
 }
@@ -544,8 +545,8 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpServiceBase {
-    addLoadingCount(countSource$: Observable<number>): void;
+export interface HttpSetup {
+    addLoadingCountSource(countSource$: Observable<number>): void;
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
@@ -558,16 +559,10 @@ export interface HttpServiceBase {
     patch: HttpHandler;
     post: HttpHandler;
     put: HttpHandler;
-    removeAllInterceptors(): void;
-    // @internal (undocumented)
-    stop(): void;
 }
 
 // @public
-export type HttpSetup = HttpServiceBase;
-
-// @public
-export type HttpStart = HttpServiceBase;
+export type HttpStart = HttpSetup;
 
 // @public
 export interface I18nStart {
@@ -877,7 +872,7 @@ export interface SavedObjectsBulkUpdateOptions {
 // @public
 export class SavedObjectsClient {
     // @internal
-    constructor(http: HttpServiceBase);
+    constructor(http: HttpSetup);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     bulkGet: (objects?: {
         id: string;
@@ -886,7 +881,7 @@ export class SavedObjectsClient {
     bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "fields" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "perPage">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -937,6 +932,82 @@ export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes 
     perPage: number;
     // (undocumented)
     total: number;
+}
+
+// @public
+export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    type: 'conflict';
+}
+
+// @public
+export interface SavedObjectsImportError {
+    // (undocumented)
+    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportMissingReferencesError {
+    // (undocumented)
+    blocking: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    references: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    type: 'missing_references';
+}
+
+// @public
+export interface SavedObjectsImportResponse {
+    // (undocumented)
+    errors?: SavedObjectsImportError[];
+    // (undocumented)
+    success: boolean;
+    // (undocumented)
+    successCount: number;
+}
+
+// @public
+export interface SavedObjectsImportRetry {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+    }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportUnknownError {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
+    // (undocumented)
+    type: 'unknown';
+}
+
+// @public
+export interface SavedObjectsImportUnsupportedTypeError {
+    // (undocumented)
+    type: 'unsupported_type';
 }
 
 // @public

@@ -19,29 +19,32 @@ describe('watch_history_item', () => {
         watchHistoryItemJson: {
           status: {
             state: {
-              active: true
-            }
+              active: true,
+            },
           },
           state: 'throttled',
           result: {
             execution_time: '2017-01-05T21:49:27.000Z',
-            actions: [{
-              id: 'test-log',
-              type: 'logging',
-              status: 'success',
-              logging: {
-                logged_text: 'hello there, i am a test log',
+            actions: [
+              {
+                id: 'test-log',
+                type: 'logging',
+                status: 'success',
+                logging: {
+                  logged_text: 'hello there, i am a test log',
+                },
               },
-            }, {
-              id: 'throttled-log',
-              type: 'logging',
-              status: 'throttled',
-              logging: {
-                logged_text: 'action [throttled-log] was acked at [2017-01-04T21:29:27.000Z]',
+              {
+                id: 'throttled-log',
+                type: 'logging',
+                status: 'throttled',
+                logging: {
+                  logged_text: 'action [throttled-log] was acked at [2017-01-04T21:29:27.000Z]',
+                },
               },
-            }],
-          }
-        }
+            ],
+          },
+        },
       };
     });
 
@@ -71,13 +74,12 @@ describe('watch_history_item', () => {
           watchState: upstreamJson.watchHistoryItemJson.state,
           watchStatusJson: {
             state: {
-              active: upstreamJson.watchHistoryItemJson.status.state.active
-            }
+              active: upstreamJson.watchHistoryItemJson.status.state.active,
+            },
           },
-          watchErrors: {}
+          watchErrors: {},
         });
       });
-
     });
 
     describe('downstreamJson getter method', () => {
@@ -96,8 +98,8 @@ describe('watch_history_item', () => {
             lastChecked: null,
             lastMetCondition: null,
             lastFired: undefined,
-            state: 'OK'
-          }
+            state: 'OK',
+          },
         };
         expect(watchHistoryItem.downstreamJson).to.eql(expected);
       });

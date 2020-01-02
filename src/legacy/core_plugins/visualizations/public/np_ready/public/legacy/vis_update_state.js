@@ -26,7 +26,8 @@ import _ from 'lodash';
  * So that those earlier created heatmaps will still use the manual specified color.
  */
 function convertHeatmapLabelColor(visState) {
-  const hasOverwriteColorParam = _.get(visState, 'params.valueAxes[0].labels.overwriteColor') !== undefined;
+  const hasOverwriteColorParam =
+    _.get(visState, 'params.valueAxes[0].labels.overwriteColor') !== undefined;
   if (visState.type === 'heatmap' && visState.params && !hasOverwriteColorParam) {
     const showLabels = _.get(visState, 'params.valueAxes[0].labels.show', false);
     const color = _.get(visState, 'params.valueAxes[0].labels.color', '#555');
@@ -60,7 +61,12 @@ function convertPropertyNames(visState) {
 function convertDateHistogramScaleMetrics(visState) {
   if (visState.aggs) {
     visState.aggs.forEach(agg => {
-      if (agg.type === 'date_histogram' && agg.params && agg.params.interval !== 'auto' && agg.params.scaleMetricValues === undefined) {
+      if (
+        agg.type === 'date_histogram' &&
+        agg.params &&
+        agg.params.interval !== 'auto' &&
+        agg.params.scaleMetricValues === undefined
+      ) {
         // Set scaleMetricValues to true for existing date histograms, that haven't had it defined and used an interval that's not equal auto,
         // so that we keep the previous metric scaling example for existing visualizations that might be effected.
         agg.params.scaleMetricValues = true;
@@ -76,7 +82,7 @@ function convertDateHistogramScaleMetrics(visState) {
  * It will return the updated version as Kibana would expect it. It does not modify
  * the passed state.
  */
-export const updateOldState = (visState) => {
+export const updateOldState = visState => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 
@@ -91,7 +97,10 @@ export const updateOldState = (visState) => {
 
   // update old metric to the new one
   // Changed from 6.0 -> 6.1
-  if (['gauge', 'metric'].includes(visState.type) && _.get(visState.params, 'gauge.gaugeType', null) === 'Metric') {
+  if (
+    ['gauge', 'metric'].includes(visState.type) &&
+    _.get(visState.params, 'gauge.gaugeType', null) === 'Metric'
+  ) {
     newState.type = 'metric';
     newState.params.addLegend = false;
     newState.params.type = 'metric';
@@ -107,7 +116,10 @@ export const updateOldState = (visState) => {
     delete newState.params.metric.autoExtend;
     newState.params.metric.metricColorMode = newState.params.metric.gaugeColorMode;
     delete newState.params.metric.gaugeColorMode;
-  } else if(visState.type === 'metric' && _.get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric') {
+  } else if (
+    visState.type === 'metric' &&
+    _.get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric'
+  ) {
     newState.type = 'gauge';
     newState.params.type = 'gauge';
   }

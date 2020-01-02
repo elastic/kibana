@@ -29,4 +29,3 @@ export class SimpleParamComponent extends SharedComponent {
     return result;
   }
 }
-

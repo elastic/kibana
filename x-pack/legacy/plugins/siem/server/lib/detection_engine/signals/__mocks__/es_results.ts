@@ -6,6 +6,7 @@
 
 import { SignalSourceHit, SignalSearchResponse } from '../types';
 import { Logger } from 'kibana/server';
+import { loggingServiceMock } from '../../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
 
 export const sampleRuleAlertParams = (
@@ -29,8 +30,12 @@ export const sampleRuleAlertParams = (
   maxSignals: maxSignals ? maxSignals : 10000,
   filters: undefined,
   savedId: undefined,
+  timelineId: undefined,
   meta: undefined,
   threats: undefined,
+  version: 1,
+  updatedAt: '2019-12-17T15:04:25.343Z',
+  createdAt: '2019-12-17T15:04:37.105Z',
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
@@ -279,12 +284,4 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
   };
 };
 
-export const mockLogger: Logger = {
-  log: jest.fn(),
-  trace: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-};
+export const mockLogger: Logger = loggingServiceMock.createLogger();
