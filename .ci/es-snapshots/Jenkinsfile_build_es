@@ -21,6 +21,8 @@ if (!ES_BRANCH) {
 currentBuild.displayName += " - ${params.ES_BRANCH}"
 currentBuild.description = "ES: ${params.ES_BRANCH}<br />Kibana: ${params.branch_specifier}"
 
+def PROMOTE_WITHOUT_VERIFY = !!params.PROMOTE_WITHOUT_VERIFICATION
+
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
@@ -79,21 +81,33 @@ timeout(time: 120, unit: 'MINUTES') {
 
             upload(DESTINATION, '*.*')
 
-            // Remove this? I like that there's an easy way to use it without having to look it up
+            // TODO Remove this? I like that there's an easy way to use it without having to look it up
             sh "cp manifest.json manifest-latest.json"
             upload(VERSION, 'manifest-latest.json')
           }
 
-          build(
-            propagate: false,
-            wait: false,
-            job: 'elasticsearch+snapshots+verify',
-            parameters: [
-              string(name: 'branch_specifier', value: branch_specifier),
-              string(name: 'SNAPSHOT_VERSION', value: VERSION),
-              string(name: 'SNAPSHOT_ID', value: SNAPSHOT_ID),
-            ]
-          )
+          if (PROMOTE_WITHOUT_VERIFY) {
+            esSnapshots.promote(VERSION, SNAPSHOT_ID)
+
+            emailext(
+              // to: 'build-kibana@elastic.co',
+              to: 'brian.seeders@elastic.co', // TODO change this back
+              subject: "ES snapshot promoted without verification: ${params.ES_BRANCH}",
+              body: '${SCRIPT,template="groovy-html.template"}',
+              mimeType: 'text/html',
+            )
+          } else {
+            build(
+              propagate: false,
+              wait: false,
+              job: 'elasticsearch+snapshots+verify',
+              parameters: [
+                string(name: 'branch_specifier', value: branch_specifier),
+                string(name: 'SNAPSHOT_VERSION', value: VERSION),
+                string(name: 'SNAPSHOT_ID', value: SNAPSHOT_ID),
+              ]
+            )
+          }
         }
 
         kibanaPipeline.sendMail()
