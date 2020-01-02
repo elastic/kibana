@@ -175,7 +175,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
+      const resp = await ml.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
       setFormState({
         modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
       });
@@ -192,7 +192,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const loadFieldOptions = async () => {
     setFormState({
       loadingFieldOptions: true,
+      // clear when the source index changes
       dependentVariable: '',
+      excludes: [],
       // Reset outlier detection sourceIndex checks to default values if we've switched to regression
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
