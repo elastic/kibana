@@ -7,15 +7,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Chrome } from 'ui/chrome';
-import { IModule } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
 // @ts-ignore: Untyped Local
-import { initStateManagement, initLocationProvider } from './angular/config';
-import { CanvasRootControllerFactory } from './angular/controllers';
-// @ts-ignore: Untypled Local
-import { initStore } from './angular/services';
+import { AngularStrings } from '../i18n';
+const { CanvasRootController: strings } = AngularStrings;
+
+import { createStore } from './store';
+
 // @ts-ignore: untyped local component
 import { HelpMenu } from './components/help_menu/help_menu';
 // @ts-ignore: untyped local
@@ -43,9 +43,6 @@ export interface CanvasStartDeps {
     setRootController: Chrome['setRootController'];
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
-    uiModules: {
-      get: (module: string) => IModule;
-    };
   };
 }
 
@@ -67,6 +64,22 @@ export class CanvasPlugin
     // Things like registering functions to the interpreter that need
     // to be available everywhere, not just in Canvas
 
+    core.application.register({
+      id: 'canvas',
+      title: 'Canvas App',
+      async mount(context, params) {
+        // Load application bundle
+        const { renderApp } = await import('./application/canvas');
+
+        // Setup our store
+        const canvasStore = await createStore(core);
+
+        // Get start services
+        const [coreStart, depsStart] = await core.getStartServices();
+
+        return renderApp(coreStart, depsStart, params, canvasStore);
+      },
+    });
     return {};
   }
 
@@ -74,14 +87,19 @@ export class CanvasPlugin
     loadExpressionTypes();
     loadTransitions();
 
-    initStateManagement(core, plugins);
-    initLocationProvider(core, plugins);
-    initStore(core, plugins);
     initClipboard(plugins.__LEGACY.storage);
     initLoadingIndicator(core.http.addLoadingCountSource);
 
-    const CanvasRootController = CanvasRootControllerFactory(core, plugins);
-    plugins.__LEGACY.setRootController('canvas', CanvasRootController);
+    core.chrome.setBadge(
+      core.application.capabilities.canvas.save
+        ? undefined
+        : {
+            text: strings.getReadOnlyBadgeText(),
+            tooltip: strings.getReadOnlyBadgeTooltip(),
+            iconType: 'glasses',
+          }
+    );
+
     core.chrome.setHelpExtension({
       appName: i18n.translate('xpack.canvas.helpMenu.appName', {
         defaultMessage: 'Canvas',
