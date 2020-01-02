@@ -35,7 +35,7 @@ def withDefaultPrComments(closure) {
     def message = getNextCommentMessage(info)
     postComment(message)
 
-    if (lastComment) {
+    if (lastComment && lastComment.user.login == 'kibanamachine') {
       deleteComment(lastComment.id)
     }
   }
@@ -49,7 +49,7 @@ def isPr() {
 def getLatestBuildComment() {
   return getComments()
     .reverse()
-    .find { it.user.login == 'elasticmachine' && it.body =~ /<!--PIPELINE/ }
+    .find { (it.user.login == 'elasticmachine' || it.user.login == 'kibanamachine') && it.body =~ /<!--PIPELINE/ }
 }
 
 def getBuildInfoFromComment(commentText) {
