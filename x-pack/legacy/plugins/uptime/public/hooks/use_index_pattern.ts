@@ -5,22 +5,16 @@
  */
 
 import { useEffect, Dispatch } from 'react';
-import { HttpHandler } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-
-const getIndexPattern = async (fetch: HttpHandler): Promise<any> => {
-  return await fetch('/api/uptime/index_pattern', { method: 'GET' });
-};
 
 export const useIndexPattern = <T>(setIndexPattern: Dispatch<T>) => {
   const core = useKibana();
   useEffect(() => {
     const fetch = core.services.http?.fetch;
-    if (!fetch) throw new Error('Http core services are not defined');
-    getIndexPattern(fetch)
-      .then(indexPattern => setIndexPattern(indexPattern))
-      .catch(e => {
-        throw e;
-      });
+    async function getIndexPattern() {
+      if (!fetch) throw new Error('Http core services are not defined');
+      setIndexPattern(await fetch('/api/uptime/index_pattern', { method: 'GET' }));
+    }
+    getIndexPattern();
   }, []);
 };
