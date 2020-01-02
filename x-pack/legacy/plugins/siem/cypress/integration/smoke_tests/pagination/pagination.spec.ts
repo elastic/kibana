@@ -48,7 +48,7 @@ describe('Pagination', () => {
     cy.get(getPageButtonSelector(1)).should('have.class', 'euiPaginationButton-isActive');
   });
 
-  it('pagination keeps track of page results when tabs change', () => {
+  it.skip('pagination keeps track of page results when tabs change', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
 
