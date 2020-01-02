@@ -484,6 +484,31 @@ function migrateSubTypeAndParentFieldProperties(doc) {
   };
 }
 
+function migrateNumeralFieldFormatters(doc) {
+  if (!doc.attributes.fieldFormatMap) return doc;
+
+  const fieldFormatMap = doc.attributes.fieldFormatMap;
+  const fieldFormats = JSON.parse(fieldFormatMap);
+  // const migratedFields = fields.map(field => {
+  //   if (field.subType === 'multi') {
+  //     return {
+  //       ...omit(field, 'parent'),
+  //       subType: { multi: { parent: field.parent } },
+  //     };
+  //   }
+
+  //   return field;
+  // });
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      fieldFormatMap: JSON.stringify(fieldFormats),
+    },
+  };
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -508,7 +533,7 @@ export const migrations = {
       doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
       return doc;
     },
-    '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
+    '7.6.0': flow(migrateSubTypeAndParentFieldProperties, migrateNumeralFieldFormatters),
   },
   visualization: {
     /**

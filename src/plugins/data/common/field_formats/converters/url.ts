@@ -51,7 +51,9 @@ const DEFAULT_URL_TYPE = 'a';
 
 export class UrlFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.URL;
-  static title = 'Url';
+  static title = i18n.translate('data.common.fieldFormats.url.title', {
+    defaultMessage: 'Url',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
     KBN_FIELD_TYPES.BOOLEAN,

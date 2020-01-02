@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { NumberFormatEditor } from './number';
+export { CustomNumberFormatEditor } from './number';

@@ -167,7 +167,9 @@ function parseInputAsDuration(val: number, inputFormat: string) {
 
 export class DurationFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DURATION;
-  static title = 'Duration';
+  static title = i18n.translate('data.common.fieldFormats.duration.title', {
+    defaultMessage: 'Duration',
+  });
   static fieldType = KBN_FIELD_TYPES.NUMBER;
   static inputFormats = inputFormats;
   static outputFormats = outputFormats;
@@ -188,7 +190,12 @@ export class DurationFormat extends FieldFormat {
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
     const human = this.isHuman();
-    const prefix = val < 0 && human ? 'minus ' : '';
+    const prefix =
+      val < 0 && human
+        ? i18n.translate('data.common.fieldFormats.duration.negativeLabel', {
+            defaultMessage: 'minus',
+          }) + ' '
+        : '';
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = duration[outputFormat]();
     const precise = human ? formatted : formatted.toFixed(outputPrecision);

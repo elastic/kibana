@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NumberFormat } from './number';
+import { CustomNumberFormat } from './number';
 
 describe('NumberFormat', () => {
   const config: Record<string, any> = {};
@@ -27,13 +27,13 @@ describe('NumberFormat', () => {
   const getConfig = (key: string) => config[key];
 
   test('default pattern', () => {
-    const formatter = new NumberFormat({}, getConfig);
+    const formatter = new CustomNumberFormat({}, getConfig);
 
     expect(formatter.convert(12.345678)).toBe('12.346');
   });
 
   test('custom pattern', () => {
-    const formatter = new NumberFormat({ pattern: '0,0' }, getConfig);
+    const formatter = new CustomNumberFormat({ pattern: '0,0' }, getConfig);
 
     expect(formatter.convert('12.345678')).toBe('12');
   });

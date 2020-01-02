@@ -19,12 +19,15 @@
 
 export { UrlFormat } from './url';
 export { BytesFormat } from './bytes';
+export { CurrencyFormat } from './currency';
+export { CustomNumberFormat } from './number';
+export { DefaultNumberFormat } from './default_number';
 export { DateFormat } from './date_server';
 export { DateNanosFormat } from './date_nanos';
 export { RelativeDateFormat } from './relative_date';
 export { DurationFormat } from './duration';
 export { IpFormat } from './ip';
-export { NumberFormat } from './number';
+export { LargeNumberFormat } from './large_number';
 export { PercentFormat } from './percent';
 export { StringFormat } from './string';
 export { SourceFormat } from './source';

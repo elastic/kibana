@@ -18,15 +18,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NumeralFormat } from './numeral';
-import { FIELD_FORMAT_IDS } from '../types';
 
-export class BytesFormat extends NumeralFormat {
-  static id = FIELD_FORMAT_IDS.BYTES;
-  static title = i18n.translate('data.common.fieldFormats.bytes.title', {
-    defaultMessage: 'Bytes',
+import { FIELD_FORMAT_IDS } from '../types';
+import { IntlNumberFormat } from './intl_number_format';
+
+export class DefaultNumberFormat extends IntlNumberFormat {
+  static id = FIELD_FORMAT_IDS.DEFAULT_NUMBER;
+  static title = i18n.translate('data.common.fieldFormats.default_number.title', {
+    defaultMessage: 'Default number format',
   });
 
-  id = BytesFormat.id;
-  title = BytesFormat.title;
+  id = DefaultNumberFormat.id;
+  title = DefaultNumberFormat.title;
+
+  getParamDefaults = () => ({
+    localeOverride: false,
+    minDecimals: 0,
+    maxDecimals: 3,
+  });
+
+  getArguments = () => ({
+    style: 'decimal',
+    minimumFractionDigits: this.param('minDecimals'),
+    maximumFractionDigits: this.param('maxDecimals'),
+  });
 }

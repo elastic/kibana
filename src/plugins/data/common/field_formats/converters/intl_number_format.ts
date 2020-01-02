@@ -17,32 +17,25 @@
  * under the License.
  */
 
-// @ts-ignore
-import numeral from '@elastic/numeral';
-// @ts-ignore
-import numeralLanguages from '@elastic/numeral/languages';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+// import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '../field_format';
+// import { FIELD_FORMAT_IDS } from '../types';
 import { TextContextTypeConvert } from '../types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 
-const numeralInst = numeral();
-
-numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
-  numeral.language(numeralLanguage.id, numeralLanguage.lang);
-});
-
-export abstract class NumeralFormat extends FieldFormat {
+export abstract class IntlNumberFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
 
   abstract id: string;
   abstract title: string;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
     localeOverride: false,
   });
 
-  protected getConvertedValue(val: any, pattern?: string): string {
+  abstract getArguments: () => Record<string, unknown>;
+
+  protected getConvertedValue(val: any): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val !== 'number') {
@@ -51,20 +44,14 @@ export abstract class NumeralFormat extends FieldFormat {
 
     if (isNaN(val)) return '';
 
-    const previousLocale = numeral.language();
-    if (this.param('localeOverride')) {
-      numeral.language(this.param('localeOverride'));
-    } else {
-      const defaultLocale =
-        (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-      numeral.language(defaultLocale);
-    }
+    const locale =
+      this.param('localeOverride') ||
+      (this.getConfig && this.getConfig('format:number:defaultLocale')) ||
+      'en';
 
-    const formatted = numeralInst.set(val).format(pattern || this.param('pattern'));
+    const inst = new Intl.NumberFormat(locale, this.getArguments());
 
-    numeral.language(previousLocale);
-
-    return formatted;
+    return inst.format(val);
   }
 
   textConvert: TextContextTypeConvert = val => {

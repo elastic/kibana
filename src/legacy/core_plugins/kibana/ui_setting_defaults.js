@@ -702,7 +702,7 @@ export function getUiSettingDefaults() {
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
-  "number": { "id": "number", "params": {} },
+  "number": { "id": "default_number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }

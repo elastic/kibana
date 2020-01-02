@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { NumberFormatEditor } from '../number';
+import React, { Fragment } from 'react';
+import { DefaultNumberFormatEditor } from '../default_number';
+import { FormatEditorSamples } from '../../samples';
 
-export class PercentFormatEditor extends NumberFormatEditor {
+export class PercentFormatEditor extends DefaultNumberFormatEditor {
   static formatId = 'percent';
 
   constructor(props) {
@@ -29,5 +31,17 @@ export class PercentFormatEditor extends NumberFormatEditor {
       ...this.state,
       sampleInputs: [0.1, 0.99999, 1, 100, 1000],
     };
+  }
+
+  render() {
+    const { samples } = this.state;
+
+    return (
+      <Fragment>
+        {this.renderLocaleOverride()}
+
+        <FormatEditorSamples samples={samples} />
+      </Fragment>
+    );
   }
 }

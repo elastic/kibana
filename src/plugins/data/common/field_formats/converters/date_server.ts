@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
@@ -25,7 +26,9 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
-  static title = 'Date';
+  static title = i18n.translate('data.common.fieldFormats.date.title', {
+    defaultMessage: 'Date',
+  });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
   private memoizedConverter: Function = noop;

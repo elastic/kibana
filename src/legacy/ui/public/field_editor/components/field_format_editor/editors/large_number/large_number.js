@@ -17,16 +17,31 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { NumeralFormat } from './numeral';
-import { FIELD_FORMAT_IDS } from '../types';
+import React, { Fragment } from 'react';
+import { DefaultNumberFormatEditor } from '../default_number';
+import { FormatEditorSamples } from '../../samples';
 
-export class BytesFormat extends NumeralFormat {
-  static id = FIELD_FORMAT_IDS.BYTES;
-  static title = i18n.translate('data.common.fieldFormats.bytes.title', {
-    defaultMessage: 'Bytes',
-  });
+export class LargeNumberFormatEditor extends DefaultNumberFormatEditor {
+  static formatId = 'large_number';
 
-  id = BytesFormat.id;
-  title = BytesFormat.title;
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ...this.state,
+      sampleInputs: [1234, 99.9999, 5150000.0001, 0.00005, 199000000],
+    };
+  }
+
+  render() {
+    const { samples } = this.state;
+
+    return (
+      <Fragment>
+        {this.renderLocaleOverride()}
+
+        <FormatEditorSamples samples={samples} />
+      </Fragment>
+    );
+  }
 }

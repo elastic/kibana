@@ -17,16 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { NumeralFormat } from './numeral';
-import { FIELD_FORMAT_IDS } from '../types';
-
-export class BytesFormat extends NumeralFormat {
-  static id = FIELD_FORMAT_IDS.BYTES;
-  static title = i18n.translate('data.common.fieldFormats.bytes.title', {
-    defaultMessage: 'Bytes',
-  });
-
-  id = BytesFormat.id;
-  title = BytesFormat.title;
-}
+export { CurrencyFormatEditor } from './currency';

@@ -72,7 +72,9 @@ const DEFAULT_TRANSFORM_OPTION = false;
 
 export class StringFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.STRING;
-  static title = 'String';
+  static title = i18n.translate('data.common.fieldFormats.string.title', {
+    defaultMessage: 'String',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
     KBN_FIELD_TYPES.BOOLEAN,

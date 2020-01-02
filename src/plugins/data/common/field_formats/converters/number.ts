@@ -17,13 +17,16 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
 import { FIELD_FORMAT_IDS } from '../types';
 
-export class NumberFormat extends NumeralFormat {
-  static id = FIELD_FORMAT_IDS.NUMBER;
-  static title = 'Number';
+export class CustomNumberFormat extends NumeralFormat {
+  static id = FIELD_FORMAT_IDS.CUSTOM_NUMBER;
+  static title = i18n.translate('data.common.fieldFormats.number.title', {
+    defaultMessage: 'Custom numeral.js format string',
+  });
 
-  id = NumberFormat.id;
-  title = NumberFormat.title;
+  id = CustomNumberFormat.id;
+  title = CustomNumberFormat.title;
 }

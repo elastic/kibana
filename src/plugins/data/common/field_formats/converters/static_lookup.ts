@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
@@ -33,7 +34,9 @@ function convertLookupEntriesToMap(lookupEntries: any[]) {
 
 export class StaticLookupFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.STATIC_LOOKUP;
-  static title = 'Static Lookup';
+  static title = i18n.translate('data.common.fieldFormats.static_lookup.title', {
+    defaultMessage: 'Static lookup',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.STRING,
     KBN_FIELD_TYPES.NUMBER,

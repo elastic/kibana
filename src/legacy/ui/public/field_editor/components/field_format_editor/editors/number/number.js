@@ -17,9 +17,23 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 
-import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+// @ts-ignore
+import numeralLanguages from '@elastic/numeral/languages';
+
+import {
+  EuiCode,
+  EuiText,
+  EuiFieldText,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
+  EuiSelect,
+  EuiSwitch,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { DefaultFormatEditor } from '../default';
 
@@ -27,18 +41,28 @@ import { FormatEditorSamples } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class NumberFormatEditor extends DefaultFormatEditor {
+export class CustomNumberFormatEditor extends DefaultFormatEditor {
   static formatId = 'number';
 
   constructor(props) {
     super(props);
-    this.state.sampleInputs = [10000, 12.345678, -1, -999, 0.52];
+    this.state.sampleInputs = [
+      10000,
+      12.345678,
+      -1,
+      -999,
+      0.52,
+      0.00000000000000123456789,
+      19900000000000000000000,
+    ];
   }
 
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
     const defaultPattern = format.getParamDefaults().pattern;
+    const overrideLocale = formatParams.localeOverride;
+    const locale = format.getConfig('format:number:defaultLocale');
 
     return (
       <Fragment>
@@ -74,6 +98,64 @@ export class NumberFormatEditor extends DefaultFormatEditor {
             isInvalid={!!error}
           />
         </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.number.overrideLocaleLabel"
+              defaultMessage="Override locale"
+            />
+          }
+        >
+          <>
+            <EuiText size="s">
+              {i18n.translate('common.ui.fieldEditor.numberLocaleLabel', {
+                defaultMessage:
+                  'Number formatting is set to ({locale}) by the Kibana advanced setting "format:number:defaultLocale".',
+                values: { locale },
+              })}
+            </EuiText>
+
+            <EuiSpacer />
+
+            <EuiSwitch
+              checked={!!overrideLocale}
+              label={i18n.translate('common.ui.fieldEditor.number.useLocaleOverride', {
+                defaultMessage: 'Number formatting locale for this field',
+              })}
+              onChange={e => {
+                if (e.target.checked) {
+                  this.onChange({ localeOverride: locale });
+                } else {
+                  this.onChange({ localeOverride: false });
+                }
+              }}
+            />
+          </>
+        </EuiFormRow>
+
+        {overrideLocale ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="common.ui.fieldEditor.number.localeSelection"
+                defaultMessage="Select locale to override with"
+              />
+            }
+          >
+            <EuiSelect
+              options={numeralLanguages.map(lang => ({
+                value: lang.id,
+                text: lang.name || lang.id,
+              }))}
+              onChange={e => {
+                this.onChange({ localeOverride: e.target.value });
+              }}
+              value={overrideLocale}
+            />
+          </EuiFormRow>
+        ) : null}
+
         <FormatEditorSamples samples={samples} />
       </Fragment>
     );

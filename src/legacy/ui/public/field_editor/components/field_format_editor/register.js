@@ -18,26 +18,6 @@
  */
 
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { BytesFormatEditor } from './editors/bytes';
-import { ColorFormatEditor } from './editors/color';
-import { DateFormatEditor } from './editors/date';
-import { DateNanosFormatEditor } from './editors/date_nanos';
-import { DurationFormatEditor } from './editors/duration';
-import { NumberFormatEditor } from './editors/number';
-import { PercentFormatEditor } from './editors/percent';
-import { StaticLookupFormatEditor } from './editors/static_lookup';
-import { StringFormatEditor } from './editors/string';
-import { TruncateFormatEditor } from './editors/truncate';
-import { UrlFormatEditor } from './editors/url/url';
+import { editors } from './get_editors';
 
-RegistryFieldFormatEditorsProvider.register(() => BytesFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => ColorFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => DateFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => DateNanosFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => DurationFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => NumberFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => PercentFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => StaticLookupFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => StringFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => TruncateFormatEditor);
-RegistryFieldFormatEditorsProvider.register(() => UrlFormatEditor);
+editors.forEach(editor => RegistryFieldFormatEditorsProvider.register(() => editor));
