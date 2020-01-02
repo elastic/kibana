@@ -29,7 +29,9 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
 export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'POST',
   path: '/api/uptime/dynamic_settings',
-  validate: schema.object({}, { allowUnknowns: true }),
+  validate: {
+    body: schema.object({}, { allowUnknowns: true }),
+  },
   options: {
     tags: ['access:uptime'],
   },
