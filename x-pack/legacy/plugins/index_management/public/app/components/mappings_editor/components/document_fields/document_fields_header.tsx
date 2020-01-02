@@ -16,7 +16,7 @@ interface Props {
 
 export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }: Props) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiText size="s" color="subdued">
           <FormattedMessage
@@ -35,8 +35,9 @@ export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }:
         </EuiText>
       </EuiFlexItem>
 
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFieldSearch
+          style={{ minWidth: '350px' }}
           placeholder="Search fields"
           value={searchValue}
           onChange={e => onSearchChange(e.target.value)}
