@@ -78,8 +78,10 @@ export function KueryBar({ autocomplete }: Props) {
   useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
 
   useEffect(() => {
-    setIsLoadingIndexPattern(false);
-  }, []);
+    if (indexPattern !== undefined) {
+      setIsLoadingIndexPattern(false);
+    }
+  }, [indexPattern]);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 

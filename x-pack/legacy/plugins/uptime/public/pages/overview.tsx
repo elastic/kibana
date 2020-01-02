@@ -78,7 +78,7 @@ export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) 
         })
       );
     }
-  }, []);
+  }, [basePath, setBreadcrumbs, setHeadingText]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });

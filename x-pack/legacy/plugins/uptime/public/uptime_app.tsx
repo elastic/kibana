@@ -110,7 +110,7 @@ const Application = (props: UptimeAppProps) => {
           }
         : undefined
     );
-  }, []);
+  }, [canSave, renderGlobalHelpControls, setBadge]);
 
   useEffect(() => {
     document.title = getTitle();
