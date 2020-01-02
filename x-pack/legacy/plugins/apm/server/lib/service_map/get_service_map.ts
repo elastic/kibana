@@ -58,12 +58,11 @@ export async function getServiceMap({
 
   let processorEvents = ['span', 'transaction'];
 
-  let rangeQuery = { range: rangeFilter(start, end) };
+  const rangeQuery = { range: rangeFilter(start, end) };
 
   if (isTop) {
     sampleIndices = [indices['apm_oss.transactionIndices']];
     processorEvents = ['transaction'];
-    rangeQuery = { range: rangeFilter(end - 60 * 60 * 1000, end) };
   }
 
   const query = {

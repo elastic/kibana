@@ -14,7 +14,7 @@ const layout = {
 };
 
 function isDatabaseOrExternal(agentName: string) {
-  return agentName === 'database' || agentName === 'external';
+  return !agentName;
 }
 
 const style: cytoscape.Stylesheet[] = [
