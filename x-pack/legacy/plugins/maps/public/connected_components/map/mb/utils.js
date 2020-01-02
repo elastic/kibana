@@ -110,7 +110,9 @@ function getImageData(img) {
 export async function loadSpriteSheetImageData(imgUrl) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.crossOrigin = 'Anonymous';
+    if (isCrossOriginUrl(imgUrl)) {
+      image.crossOrigin = 'Anonymous';
+    }
     image.onload = el => {
       const imgData = getImageData(el.currentTarget);
       resolve(imgData);
@@ -141,4 +143,12 @@ export function addSpriteSheetToMapFromImageData(json, imgData, mbMap) {
 export async function addSpritesheetToMap(json, imgUrl, mbMap) {
   const imgData = await loadSpriteSheetImageData(imgUrl);
   addSpriteSheetToMapFromImageData(json, imgData, mbMap);
+}
+
+function isCrossOriginUrl(url) {
+  const a = window.document.createElement('a');
+  a.href = url;
+  return (
+    a.protocol !== window.document.location.protocol || a.host !== window.document.location.host
+  );
 }
