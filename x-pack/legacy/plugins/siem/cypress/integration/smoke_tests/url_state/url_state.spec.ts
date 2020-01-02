@@ -266,7 +266,9 @@ describe('url state', () => {
     cy.get(TIMELINE_TITLE, { timeout: 5000 }).type(bestTimelineName);
     cy.url().should('include', 'timeline=');
     cy.visit(
-      `/app/siem#/timelines?timerange=(global:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)))`
+      `${
+        Cypress.config().baseUrl
+      }/app/siem#/timelines?timerange=(global:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)))`
     ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
   });
 });
