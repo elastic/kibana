@@ -27,5 +27,14 @@ export const loginAndWaitForPage = (url: string) => {
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
 
+export const loginAndWaitForPageUrlState = (url: string) => {
+  login();
+
+  cy.visit(`${Cypress.config().baseUrl}${url}`);
+  cy.viewport('macbook-15');
+
+  cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
+};
+
 export const waitForTableLoad = (dataTestSubj: string) =>
   cy.get(dataTestSubj, { timeout: DEFAULT_TIMEOUT });

@@ -14,7 +14,6 @@ import {
   NAVIGATION_AUTHENTICATIONS,
   NAVIGATION_UNCOMMON_PROCESSES,
   NUMBERED_PAGINATION,
-  ROWS_PER_PAGE,
   SUPER_DATE_PICKER_APPLY_BUTTON,
   UNCOMMON_PROCESSES_TABLE,
 } from '../../lib/pagination/selectors';
@@ -29,17 +28,13 @@ describe('Pagination', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
 
-    cy.get(ROWS_PER_PAGE).click({ force: true });
-    cy.get(FIVE_ROWS).click();
-    waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
-
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
     cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .then(text1 => {
-        cy.get(getPageButtonSelector(2)).click({ force: true });
+        cy.get(getPageButtonSelector(1)).click({ force: true });
         // wait for table to be done loading
         waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
         cy.get(getDraggableField('process.name'))
@@ -50,15 +45,11 @@ describe('Pagination', () => {
           });
       });
     cy.get(getPageButtonSelector(0)).should('not.have.class', 'euiPaginationButton-isActive');
-    cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(1)).should('have.class', 'euiPaginationButton-isActive');
   });
 
   it('pagination keeps track of page results when tabs change', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-    waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
-
-    cy.get(ROWS_PER_PAGE).click({ force: true });
-    cy.get(FIVE_ROWS).click();
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
 
     cy.get(getPageButtonSelector(0), { timeout: DEFAULT_TIMEOUT }).should(
@@ -66,7 +57,7 @@ describe('Pagination', () => {
       'euiPaginationButton-isActive'
     );
     let thirdPageResult: string;
-    cy.get(getPageButtonSelector(2)).click({ force: true });
+    cy.get(getPageButtonSelector(1)).click({ force: true });
     // wait for table to be done loading
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
 
@@ -86,8 +77,7 @@ describe('Pagination', () => {
 
     cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
-    // check uncommon processes table picks up at 3
-    cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(1)).should('have.class', 'euiPaginationButton-isActive');
     cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
@@ -102,9 +92,6 @@ describe('Pagination', () => {
    */
   it('pagination resets results and page number to first page when refresh is clicked', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-
-    cy.get(ROWS_PER_PAGE).click({ force: true });
-    cy.get(FIVE_ROWS).click();
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
     cy.get(NUMBERED_PAGINATION, { timeout: DEFAULT_TIMEOUT });
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
@@ -115,14 +102,14 @@ describe('Pagination', () => {
     //   .then(text1 => {
     //     firstResult = `${text1}`;
     //   });
-    cy.get(getPageButtonSelector(2)).click({ force: true });
+    cy.get(getPageButtonSelector(1)).click({ force: true });
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('not.have.class', 'euiPaginationButton-isActive');
     cy.get(SUPER_DATE_PICKER_APPLY_BUTTON)
       .last()
       .click({ force: true });
     waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
-    cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(1)).should('have.class', 'euiPaginationButton-isActive');
     // cy.get(getDraggableField('user.name'))
     //   .first()
     //   .invoke('text')

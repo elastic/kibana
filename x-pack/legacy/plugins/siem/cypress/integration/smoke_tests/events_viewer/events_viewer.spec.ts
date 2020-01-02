@@ -101,7 +101,7 @@ describe('Events Viewer', () => {
   });
 
   it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
-    const filterInput = Cypress.env('filterInput'); // this will never match real data
+    const filterInput = '7acf7544187fc6b28c4b0eea41eed573673c1c49'; // this will never match real data
 
     cy.get(HEADER_SUBTITLE)
       .invoke('text')
