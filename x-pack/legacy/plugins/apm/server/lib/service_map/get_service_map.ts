@@ -14,7 +14,10 @@ import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { SERVICE_AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_AGENT_NAME,
+  SERVICE_NAME
+} from '../../../common/elasticsearch_fieldnames';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange & SetupUIFilters;
@@ -53,7 +56,7 @@ async function getConnectionData({
 
 async function getServicesData(options: IEnvOptions) {
   // only return services on the first request for the global service map
-  if (options.serviceName || options.after) {
+  if (options.after) {
     return [];
   }
 
@@ -61,9 +64,23 @@ async function getServicesData(options: IEnvOptions) {
 
   const projection = getServicesProjection({ setup });
 
+  const { filter } = projection.body.query.bool;
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
+      query: {
+        bool: {
+          ...projection.body.query.bool,
+          filter: options.serviceName
+            ? filter.concat({
+                term: {
+                  [SERVICE_NAME]: options.serviceName
+                }
+              })
+            : filter
+        }
+      },
       aggs: {
         services: {
           terms: {
