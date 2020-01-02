@@ -148,11 +148,18 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   };
 
   const loadJson = () => {
-    const isValidJson = jsonContent.current!.validate();
+    if (jsonContent.current === undefined) {
+      // No changes have been made in the JSON, this is probably a "reset()" for the user
+      onJson({});
+      closeModal();
+      return;
+    }
+
+    const isValidJson = jsonContent.current.validate();
 
     if (isValidJson) {
       // Parse and validate the JSON to make sure it won't break the UI
-      const unparsed = jsonContent.current!.data.format();
+      const unparsed = jsonContent.current.data.format();
       const { value: parsed, errors } = validateMappings(unparsed);
 
       if (errors) {
