@@ -20,14 +20,30 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH =
  * request
  */
 
+const logEntryCategoriesHistogramParametersRT = rt.type({
+  id: rt.string,
+  timeRange: timeRangeRT,
+  bucketCount: rt.number,
+});
+
+export type LogEntryCategoriesHistogramParameters = rt.TypeOf<
+  typeof logEntryCategoriesHistogramParametersRT
+>;
+
 export const getLogEntryCategoriesRequestPayloadRT = rt.type({
   data: rt.intersection([
     rt.type({
+      // the number of categories to fetch
       categoryCount: rt.number,
+      // the id of the source configuration
       sourceId: rt.string,
+      // the time range to fetch the categories from
       timeRange: timeRangeRT,
+      // a list of histograms to create
+      histograms: rt.array(logEntryCategoriesHistogramParametersRT),
     }),
     rt.partial({
+      // the datasets to filter for (optional, unfiltered if not present)
       datasets: rt.array(rt.string),
     }),
   ]),
@@ -47,10 +63,19 @@ export const logEntryCategoryHistogramBucketRT = rt.type({
   logEntryCount: rt.number,
 });
 
+export type LogEntryCategoryHistogramBucket = rt.TypeOf<typeof logEntryCategoryHistogramBucketRT>;
+
+export const logEntryCategoryHistogramRT = rt.type({
+  histogramId: rt.string,
+  buckets: rt.array(logEntryCategoryHistogramBucketRT),
+});
+
+export type LogEntryCategoryHistogram = rt.TypeOf<typeof logEntryCategoryHistogramRT>;
+
 export const logEntryCategoryRT = rt.type({
   categoryId: rt.number,
   datasets: rt.array(rt.string),
-  histogramBuckets: rt.array(logEntryCategoryHistogramBucketRT),
+  histograms: rt.array(logEntryCategoryHistogramRT),
   logEntryCount: rt.number,
   regularExpression: rt.string,
 });

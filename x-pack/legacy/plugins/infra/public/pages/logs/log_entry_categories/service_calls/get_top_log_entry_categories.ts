@@ -22,6 +22,8 @@ export const callGetTopLogEntryCategoriesAPI = async (
   endTime: number,
   categoryCount: number
 ) => {
+  const intervalDuration = endTime - startTime;
+
   const response = await kfetch({
     method: 'POST',
     pathname: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
@@ -34,6 +36,24 @@ export const callGetTopLogEntryCategoriesAPI = async (
             endTime,
           },
           categoryCount,
+          histograms: [
+            {
+              id: 'history',
+              timeRange: {
+                startTime: startTime - intervalDuration,
+                endTime,
+              },
+              bucketCount: 10,
+            },
+            {
+              id: 'reference',
+              timeRange: {
+                startTime: startTime - intervalDuration,
+                endTime: startTime,
+              },
+              bucketCount: 1,
+            },
+          ],
         },
       })
     ),

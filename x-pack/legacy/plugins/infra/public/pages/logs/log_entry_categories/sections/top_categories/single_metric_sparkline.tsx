@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, LineSeries, AreaSeries } from '@elastic/charts';
+import { Chart, Settings, AreaSeries } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
@@ -15,7 +15,7 @@ import {
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
-interface TimeSeries {
+interface TimeSeriesPoint {
   timestamp: number;
   value: number;
 }
@@ -24,11 +24,11 @@ const timestampAccessor = 'timestamp';
 const valueAccessor = ['value'];
 const sparklineSize = {
   height: 20,
-  width: 160,
+  width: 100,
 };
 
 export const SingleMetricSparkline: React.FunctionComponent<{
-  metric: TimeSeries[];
+  metric: TimeSeriesPoint[];
   timeRange: TimeRange;
 }> = ({ metric, timeRange }) => {
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
@@ -45,7 +45,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   const xDomain = useMemo(
     () => ({
       max: timeRange.endTime,
-      min: timeRange.startTime - (timeRange.endTime - timeRange.startTime),
+      min: timeRange.startTime,
     }),
     [timeRange]
   );

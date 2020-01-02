@@ -17,9 +17,8 @@ import {
   LogEntryCategoryHit,
 } from './queries/log_entry_categories';
 import {
-  logEntryCategoryHistogramsResponseRT,
   createLogEntryCategoryHistogramsQuery,
-  LogEntryCategoryFilterBucket,
+  logEntryCategoryHistogramsResponseRT,
 } from './queries/log_entry_category_histograms';
 
 export class LogEntryCategoriesAnalysis {
@@ -35,7 +34,8 @@ export class LogEntryCategoriesAnalysis {
     sourceId: string,
     startTime: number,
     endTime: number,
-    categoryCount: number
+    categoryCount: number,
+    histograms: HistogramParameters[]
   ) {
     const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
 
@@ -44,9 +44,6 @@ export class LogEntryCategoriesAnalysis {
       sourceId,
       logEntryCategoriesJobTypes[0]
     );
-
-    const timeIntervalDuration = endTime - startTime;
-    const bucketDuration = Math.round(timeIntervalDuration / 5);
 
     const {
       topLogEntryCategories,
@@ -77,9 +74,7 @@ export class LogEntryCategoriesAnalysis {
       requestContext,
       logEntryCategoriesCountJobId,
       categoryIds,
-      startTime - timeIntervalDuration,
-      endTime,
-      bucketDuration
+      histograms
     );
 
     const topLogEntryCategoriesSpan = finalizeTopLogEntryCategoriesSpan();
@@ -88,14 +83,7 @@ export class LogEntryCategoriesAnalysis {
       data: topLogEntryCategories.map(topCategory => ({
         ...topCategory,
         regularExpression: logEntryCategoriesById[topCategory.categoryId]?._source.regex ?? '',
-        histogramBuckets:
-          categoryHistogramsById[topCategory.categoryId]?.date_histogram_timestamp.buckets.map(
-            bucket => ({
-              bucketDuration,
-              logEntryCount: bucket.sum_actual.value,
-              startTime: bucket.key,
-            })
-          ) ?? [],
+        histograms: categoryHistogramsById[topCategory.categoryId] ?? [],
       })),
       timing: {
         spans: [
@@ -200,11 +188,9 @@ export class LogEntryCategoriesAnalysis {
     requestContext: RequestHandlerContext,
     logEntryCategoriesCountJobId: string,
     categoryIds: number[],
-    startTime: number,
-    endTime: number,
-    bucketDuration: number
+    histograms: HistogramParameters[]
   ) {
-    if (categoryIds.length === 0) {
+    if (categoryIds.length === 0 || histograms.length === 0) {
       return {
         categoryHistogramsById: {},
         timing: { spans: [] },
@@ -213,29 +199,64 @@ export class LogEntryCategoriesAnalysis {
 
     const finalizeEsSearchSpan = startTracingSpan('Fetch category histograms from ES');
 
-    const categoryHistogramsReponse = decodeOrThrow(logEntryCategoryHistogramsResponseRT)(
-      await this.libs.framework.callWithRequest(
-        requestContext,
-        'search',
-        createLogEntryCategoryHistogramsQuery(
-          logEntryCategoriesCountJobId,
-          categoryIds,
-          startTime,
-          endTime,
-          bucketDuration
-        )
+    const categoryHistogramsReponses = await Promise.all(
+      histograms.map(({ bucketCount, endTime, id: histogramId, startTime }) =>
+        this.libs.framework
+          .callWithRequest(
+            requestContext,
+            'search',
+            createLogEntryCategoryHistogramsQuery(
+              logEntryCategoriesCountJobId,
+              categoryIds,
+              startTime,
+              endTime,
+              bucketCount
+            )
+          )
+          .then(decodeOrThrow(logEntryCategoryHistogramsResponseRT))
+          .then(response => ({
+            histogramId,
+            histogramBuckets: response.aggregations.filters_categories.buckets,
+          }))
       )
     );
 
     const esSearchSpan = finalizeEsSearchSpan();
 
-    const categoryHistogramsById = Object.entries(
-      categoryHistogramsReponse.aggregations.filters_categories.buckets
-    ).reduce<Record<number, LogEntryCategoryFilterBucket>>(
-      (accumulatedHistogramsById, [categoryBucketKey, categoryBucket]) => ({
-        ...accumulatedHistogramsById,
-        [parseCategoryId(categoryBucketKey)]: categoryBucket,
-      }),
+    const categoryHistogramsById = Object.values(categoryHistogramsReponses).reduce<
+      Record<
+        number,
+        Array<{
+          histogramId: string;
+          buckets: Array<{
+            bucketDuration: number;
+            logEntryCount: number;
+            startTime: number;
+          }>;
+        }>
+      >
+    >(
+      (outerAccumulatedHistograms, { histogramId, histogramBuckets }) =>
+        Object.entries(histogramBuckets).reduce(
+          (innerAccumulatedHistograms, [categoryBucketKey, categoryBucket]) => {
+            const categoryId = parseCategoryId(categoryBucketKey);
+            return {
+              ...innerAccumulatedHistograms,
+              [categoryId]: [
+                ...(innerAccumulatedHistograms[categoryId] ?? []),
+                {
+                  histogramId,
+                  buckets: categoryBucket.histogram_timestamp.buckets.map(bucket => ({
+                    bucketDuration: categoryBucket.histogram_timestamp.meta.bucketDuration,
+                    logEntryCount: bucket.sum_actual.value,
+                    startTime: bucket.key,
+                  })),
+                },
+              ],
+            };
+          },
+          outerAccumulatedHistograms
+        ),
       {}
     );
 
@@ -249,3 +270,10 @@ export class LogEntryCategoriesAnalysis {
 }
 
 const parseCategoryId = (rawCategoryId: string) => parseInt(rawCategoryId, 10);
+
+interface HistogramParameters {
+  id: string;
+  startTime: number;
+  endTime: number;
+  bucketCount: number;
+}

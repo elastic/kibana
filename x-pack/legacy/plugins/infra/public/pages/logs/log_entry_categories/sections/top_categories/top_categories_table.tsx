@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis';
+import {
+  LogEntryCategory,
+  LogEntryCategoryHistogram,
+} from '../../../../../../common/http_api/log_analysis';
+import { TimeRange } from '../../../../../../common/http_api/shared';
 import { RegularExpressionRepresentation } from './category_expression';
 import { DatasetsList } from './datasets_list';
-import { SingleMetricSparkline } from './single_metric_sparkline';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { LogEntryCountSparkline } from './log_entry_count_sparkline';
 
 export const TopCategoriesTable = euiStyled(
   ({
@@ -33,64 +29,7 @@ export const TopCategoriesTable = euiStyled(
     timeRange: TimeRange;
     topCategories: LogEntryCategory[];
   }) => {
-    const columns: Array<EuiBasicTableColumn<LogEntryCategory>> = useMemo(
-      () => [
-        {
-          field: 'logEntryCount',
-          name: i18n.translate('xpack.infra.logs.logEntryCategories.countColumnTitle', {
-            defaultMessage: 'Message count',
-          }),
-          width: '300px',
-          render: (logEntryCount, item) => {
-            return (
-              <EuiFlexGroup>
-                <RightAlignedFlexItem>{numeral(logEntryCount).format('0,0')}</RightAlignedFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SingleMetricSparkline
-                    metric={item.histogramBuckets.map(
-                      ({ startTime: timestamp, logEntryCount: value }) => ({
-                        timestamp,
-                        value,
-                      })
-                    )}
-                    timeRange={timeRange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          },
-        },
-        {
-          field: 'regularExpression',
-          name: i18n.translate('xpack.infra.logs.logEntryCategories.categoryColumnTitle', {
-            defaultMessage: 'Category',
-          }),
-          truncateText: true,
-          render: (regularExpression: string) => (
-            <RegularExpressionRepresentation regularExpression={regularExpression} />
-          ),
-        },
-        {
-          field: 'datasets',
-          name: i18n.translate('xpack.infra.logs.logEntryCategories.datasetColumnTitle', {
-            defaultMessage: 'Data sets',
-          }),
-          render: (datasets: string[]) => <DatasetsList datasets={datasets} />,
-          width: '200px',
-        },
-        {
-          field: 'maximumAnomalyScore',
-          name: i18n.translate(
-            'xpack.infra.logs.logEntryCategories.maximumAnomalyScoreColumnTitle',
-            {
-              defaultMessage: 'Maximum anomaly score',
-            }
-          ),
-          width: '200px',
-        },
-      ],
-      [timeRange]
-    );
+    const columns = useMemo(() => createColumns(timeRange), [timeRange]);
 
     const datasetFilterPlaceholder = i18n.translate(
       'xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder',
@@ -116,6 +55,57 @@ export const TopCategoriesTable = euiStyled(
   }
 `;
 
-const RightAlignedFlexItem = euiStyled(EuiFlexItem)`
-  text-align: right;
-`;
+const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntryCategory>> => [
+  {
+    align: 'right',
+    field: 'logEntryCount',
+    name: i18n.translate('xpack.infra.logs.logEntryCategories.countColumnTitle', {
+      defaultMessage: 'Message count',
+    }),
+    width: '120px',
+    render: (logEntryCount: number) => {
+      return numeral(logEntryCount).format('0,0');
+    },
+  },
+  {
+    field: 'histograms',
+    name: i18n.translate('xpack.infra.logs.logEntryCategories.trendColumnTitle', {
+      defaultMessage: 'Trend',
+    }),
+    width: '200px',
+    render: (histograms: LogEntryCategoryHistogram[], item) => {
+      return (
+        <LogEntryCountSparkline
+          currentCount={item.logEntryCount}
+          histograms={histograms}
+          timeRange={timeRange}
+        />
+      );
+    },
+  },
+  {
+    field: 'regularExpression',
+    name: i18n.translate('xpack.infra.logs.logEntryCategories.categoryColumnTitle', {
+      defaultMessage: 'Category',
+    }),
+    truncateText: true,
+    render: (regularExpression: string) => (
+      <RegularExpressionRepresentation regularExpression={regularExpression} />
+    ),
+  },
+  {
+    field: 'datasets',
+    name: i18n.translate('xpack.infra.logs.logEntryCategories.datasetColumnTitle', {
+      defaultMessage: 'Data sets',
+    }),
+    render: (datasets: string[]) => <DatasetsList datasets={datasets} />,
+    width: '200px',
+  },
+  {
+    field: 'maximumAnomalyScore',
+    name: i18n.translate('xpack.infra.logs.logEntryCategories.maximumAnomalyScoreColumnTitle', {
+      defaultMessage: 'Maximum anomaly score',
+    }),
+    width: '200px',
+  },
+];

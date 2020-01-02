@@ -14,21 +14,14 @@ export const createLogEntryCategoryHistogramsQuery = (
   categoryIds: number[],
   startTime: number,
   endTime: number,
-  bucketDuration: number
+  bucketCount: number
 ) => ({
   ...defaultRequestParameters,
   body: {
     query: {
       bool: {
         filter: [
-          {
-            range: {
-              timestamp: {
-                gte: startTime,
-                lte: endTime,
-              },
-            },
-          },
+          ...createTimeRangeFilters(startTime, endTime),
           {
             term: {
               result_type: {
@@ -36,43 +29,15 @@ export const createLogEntryCategoryHistogramsQuery = (
               },
             },
           },
-          {
-            terms: {
-              by_field_value: categoryIds,
-            },
-          },
+          ...createCategoryFilters(categoryIds),
         ],
       },
     },
     aggs: {
       filters_categories: {
-        filters: {
-          filters: categoryIds.reduce<Record<string, { term: { by_field_value: number } }>>(
-            (categoryFilters, categoryId) => ({
-              ...categoryFilters,
-              [`${categoryId}`]: {
-                term: {
-                  by_field_value: categoryId,
-                },
-              },
-            }),
-            {}
-          ),
-        },
+        filters: createCategoryFiltersAggregation(categoryIds),
         aggs: {
-          date_histogram_timestamp: {
-            date_histogram: {
-              field: 'timestamp',
-              fixed_interval: `${bucketDuration}ms`,
-            },
-            aggs: {
-              sum_actual: {
-                sum: {
-                  field: 'actual',
-                },
-              },
-            },
-          },
+          histogram_timestamp: createHistogramAggregation(startTime, endTime, bucketCount),
         },
       },
     },
@@ -81,9 +46,67 @@ export const createLogEntryCategoryHistogramsQuery = (
   size: 0,
 });
 
+const createTimeRangeFilters = (startTime: number, endTime: number) => [
+  {
+    range: {
+      timestamp: {
+        gte: startTime,
+        lte: endTime,
+      },
+    },
+  },
+];
+
+const createCategoryFilters = (categoryIds: number[]) => [
+  {
+    terms: {
+      by_field_value: categoryIds,
+    },
+  },
+];
+
+const createCategoryFiltersAggregation = (categoryIds: number[]) => ({
+  filters: categoryIds.reduce<Record<string, { term: { by_field_value: number } }>>(
+    (categoryFilters, categoryId) => ({
+      ...categoryFilters,
+      [`${categoryId}`]: {
+        term: {
+          by_field_value: categoryId,
+        },
+      },
+    }),
+    {}
+  ),
+});
+
+const createHistogramAggregation = (startTime: number, endTime: number, bucketCount: number) => {
+  const bucketDuration = Math.round((endTime - startTime) / bucketCount);
+
+  return {
+    histogram: {
+      field: 'timestamp',
+      interval: bucketDuration,
+      offset: startTime,
+    },
+    meta: {
+      bucketDuration,
+    },
+    aggs: {
+      sum_actual: {
+        sum: {
+          field: 'actual',
+        },
+      },
+    },
+  };
+};
+
 export const logEntryCategoryFilterBucketRT = rt.type({
   doc_count: rt.number,
-  date_histogram_timestamp: rt.type({
+  histogram_timestamp: rt.type({
+    meta: rt.type({
+      bucketDuration: rt.number,
+    }),
     buckets: rt.array(
       rt.type({
         key: rt.number,

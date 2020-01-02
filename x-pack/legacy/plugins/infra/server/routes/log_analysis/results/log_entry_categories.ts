@@ -38,6 +38,7 @@ export const initGetLogEntryCategoriesRoute = ({
       const {
         data: {
           categoryCount,
+          histograms,
           sourceId,
           timeRange: { startTime, endTime },
           // datasets,
@@ -57,13 +58,18 @@ export const initGetLogEntryCategoriesRoute = ({
           sourceId,
           startTime,
           endTime,
-          categoryCount
+          categoryCount,
+          histograms.map(histogram => ({
+            bucketCount: histogram.bucketCount,
+            endTime: histogram.timeRange.endTime,
+            id: histogram.id,
+            startTime: histogram.timeRange.startTime,
+          }))
         );
 
         return response.ok({
           body: getLogEntryCategoriesSuccessReponsePayloadRT.encode({
             data: {
-              // bucketDuration,
               categories: topLogEntryCategories,
             },
             timing,
