@@ -20,17 +20,12 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import {
-  CUSTOM_LEGEND_VIS_TYPES,
-  VisLegend,
-  Vis,
-  VisParams,
-  mountReactNode,
-} from './legacy_imports';
+import { CUSTOM_LEGEND_VIS_TYPES, VisLegend, Vis, VisParams } from './legacy_imports';
 // @ts-ignore
 import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
 import { KbnVislibVisTypesDependencies } from './plugin';
+import { mountReactNode } from '../../../../core/public/utils';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -81,8 +76,8 @@ export const createVislibVisController = (deps: KbnVislibVisTypesDependencies) =
           return resolve();
         }
 
-        await deps.setHierarchicalTooltipFormatter();
-        await deps.setPointSeriesTooltipFormatter();
+        await deps.initializeHierarchicalTooltipFormatter();
+        await deps.initializePointSeriesTooltipFormatter();
 
         this.vislibVis = new Vislib(this.chartEl, visParams, deps);
         this.vislibVis.on('brush', this.vis.API.events.brush);

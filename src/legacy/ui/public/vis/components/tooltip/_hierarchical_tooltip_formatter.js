@@ -71,8 +71,12 @@ export const getHierarchicalTooltipFormatter = () => {
   return _tooltipFormatter;
 };
 
-export const setHierarchicalTooltipFormatter = async () => {
+export const initializeHierarchicalTooltipFormatter = async () => {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const Private = $injector.get('Private');
+  _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+};
+
+export const setHierarchicalTooltipFormatter = Private => {
   _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
 };

@@ -71,11 +71,11 @@ export class Alerts {
     const alerts = this.alerts;
     const vis = this.vis;
 
-    $(vis.el)
+    $(vis.element)
       .find('.visWrapper__alerts')
       .append($('<div>').addClass('visAlerts__tray'));
     if (!alerts.size()) return;
-    $(vis.el)
+    $(vis.element)
       .find('.visAlerts__tray')
       .append(alerts.value());
   }
@@ -89,13 +89,13 @@ export class Alerts {
     };
     if (this.alertDefs.find(alertDef => alertDef.msg === alert.msg)) return;
     this.alertDefs.push(alert);
-    $(vis.el)
+    $(vis.element)
       .find('.visAlerts__tray')
       .append(this._addAlert(alert));
   }
 
   destroy() {
-    $(this.vis.el)
+    $(this.vis.element)
       .find('.visWrapper__alerts')
       .remove();
   }

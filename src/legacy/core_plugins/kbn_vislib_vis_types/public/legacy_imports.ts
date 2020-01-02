@@ -30,25 +30,6 @@ export { Tooltip } from 'ui/vis/components/tooltip';
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore
 export { Binder } from 'ui/binder';
-
-// TODO: Migrate to top-level imports
-// @ts-ignore
-export { vislibColor } from 'ui/vis/components/color/color';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
-// @ts-ignore
-export { mappedColors } from 'ui/vis/components/color/mapped_colors';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { mountReactNode } from '../../../../core/public/utils';
-export { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
-/* eslint-disable prettier/prettier */
-export {
-  setPointSeriesTooltipFormatter,
-  getPointSeriesTooltipFormatter,
-  // @ts-ignore
-} from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
-export {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-  // @ts-ignore
-} from 'ui/vis/response_handlers/vislib';

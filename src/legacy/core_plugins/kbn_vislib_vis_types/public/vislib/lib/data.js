@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';
-import { vislibColor, getFormat } from '../../legacy_imports';
+import { getFormat } from '../../legacy_imports';
 
 /**
  * Provides an API for pulling values off the data
@@ -35,8 +35,9 @@ import { vislibColor, getFormat } from '../../legacy_imports';
  * @param attr {Object|*} Visualization options
  */
 export class Data {
-  constructor(data, uiState) {
+  constructor(data, uiState, vislibColor) {
     this.uiState = uiState;
+    this.vislibColor = vislibColor;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
     this._cleanVisData();
@@ -472,7 +473,7 @@ export class Data {
     const defaultColors = this.uiState.get('vis.defaultColors');
     const overwriteColors = this.uiState.get('vis.colors');
     const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
-    return vislibColor(this.getLabels(), colors);
+    return this.vislibColor(this.getLabels(), colors);
   }
 
   /**
@@ -482,7 +483,7 @@ export class Data {
    * @returns {Function} Performs lookup on string and returns hex color
    */
   getPieColorFunc() {
-    return vislibColor(
+    return this.vislibColor(
       this.pieNames(this.getVisData()).map(function(d) {
         return d.label;
       }),

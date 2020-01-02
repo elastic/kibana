@@ -202,7 +202,7 @@ export const vislibPointSeriesTypes = {
           'Positive and negative values are not accurately represented by stacked ' +
           'area charts. Either changing the chart mode to "overlap" or using a ' +
           'bar chart is recommended.',
-        test: function(vis, data) {
+        test: function(_, data) {
           if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
 
           const hasPos = data.getYMax(data._getY) > 0;
@@ -216,7 +216,7 @@ export const vislibPointSeriesTypes = {
           'Parts of or the entire area chart might not be displayed due to null ' +
           'values in the data. A line chart is recommended when displaying data ' +
           'with null values.',
-        test: function(vis, data) {
+        test: function(_, data) {
           return data.hasNullValues();
         },
       },

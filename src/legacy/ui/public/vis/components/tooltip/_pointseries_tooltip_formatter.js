@@ -78,8 +78,12 @@ export const getPointSeriesTooltipFormatter = () => {
   return _tooltipFormatter;
 };
 
-export const setPointSeriesTooltipFormatter = async () => {
+export const initializePointSeriesTooltipFormatter = async () => {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const Private = $injector.get('Private');
+  _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
+};
+
+export const setPointSeriesTooltipFormatter = Private => {
   _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
 };

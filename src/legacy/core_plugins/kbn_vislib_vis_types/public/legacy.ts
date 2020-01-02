@@ -22,12 +22,12 @@ import { PluginInitializerContext } from 'kibana/public';
 
 /* eslint-disable prettier/prettier */
 import {
-  setHierarchicalTooltipFormatter,
+  initializeHierarchicalTooltipFormatter,
   getHierarchicalTooltipFormatter,
   // @ts-ignore
 } from 'ui/vis/components/tooltip/_hierarchical_tooltip_formatter';
 import {
-  setPointSeriesTooltipFormatter,
+  initializePointSeriesTooltipFormatter,
   getPointSeriesTooltipFormatter,
   // @ts-ignore
 } from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
@@ -36,6 +36,8 @@ import {
   vislibSlicesResponseHandlerProvider,
   // @ts-ignore
 } from 'ui/vis/response_handlers/vislib';
+// @ts-ignore
+import { vislibColor } from 'ui/vis/components/color/color';
 
 import { plugin } from '.';
 import {
@@ -51,12 +53,13 @@ const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
   __LEGACY: {
-    setHierarchicalTooltipFormatter,
+    initializeHierarchicalTooltipFormatter,
     getHierarchicalTooltipFormatter,
-    setPointSeriesTooltipFormatter,
+    initializePointSeriesTooltipFormatter,
     getPointSeriesTooltipFormatter,
     vislibSeriesResponseHandlerProvider,
     vislibSlicesResponseHandlerProvider,
+    vislibColor,
   },
 };
 

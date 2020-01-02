@@ -50,7 +50,13 @@ export class Vis extends EventEmitter {
   initVisConfig(data, uiState) {
     this.data = data;
     this.uiState = uiState;
-    this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.element);
+    this.visConfig = new VisConfig(
+      this.visConfigArgs,
+      this.data,
+      this.uiState,
+      this.element,
+      this.deps.vislibColor
+    );
   }
 
   /**
