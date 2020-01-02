@@ -8,8 +8,7 @@ import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { applyMatrix3 } from '../lib/vector2';
-import { ResolverState, ResolverAction, Vector2 } from '../types';
+import { ResolverState, ResolverAction } from '../types';
 import * as selectors from '../store/selectors';
 import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
 import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
@@ -148,7 +147,12 @@ const Diagnostic = styled(
     useNonPassiveWheelHandler(handleWheel, ref);
 
     return (
-      <div className={className} ref={refCallback} onMouseDown={handleMouseDown}>
+      <div
+        data-test-subj="resolverEmbeddable"
+        className={className}
+        ref={refCallback}
+        onMouseDown={handleMouseDown}
+      >
         {dotPositions.map((worldPosition, index) => (
           <DiagnosticDot key={index} worldPosition={worldPosition} />
         ))}

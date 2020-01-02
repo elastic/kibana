@@ -7,6 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import { Vector2 } from '../types';
 import { applyMatrix3 } from '../lib/vector2';
 import * as selectors from '../store/selectors';
 

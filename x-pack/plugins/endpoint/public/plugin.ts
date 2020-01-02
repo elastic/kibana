@@ -38,7 +38,7 @@ export class EndpointPlugin
       },
     });
 
-    const resolverEmbeddableFactory = new ResolverEmbeddableFactory(core.http);
+    const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
 
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,

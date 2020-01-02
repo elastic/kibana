@@ -6,15 +6,29 @@
 
 import { createStore, StoreEnhancer } from 'redux';
 import { ResolverAction } from '../types';
-import { HttpSetup } from '../../../../../../../src/core/public';
 import { resolverReducer } from './reducer';
 
-export const storeFactory = (_dependencies: { httpService: HttpSetup }) => {
+export const storeFactory = () => {
+  /**
+   * Redux Devtools extension exposes itself via a property on the global object.
+   * This interface can be used to cast `window` to a type that may expose Redux Devtools.
+   */
   interface SomethingThatMightHaveReduxDevTools {
-    __REDUX_DEVTOOLS_EXTENSION__?: (options?: {
-      name?: string;
-      actionsBlacklist: readonly string[];
-    }) => StoreEnhancer;
+    __REDUX_DEVTOOLS_EXTENSION__?: (options?: PartialReduxDevToolsOptions) => StoreEnhancer;
+  }
+
+  /**
+   * Some of the options that can be passed when configuring Redux Devtools.
+   */
+  interface PartialReduxDevToolsOptions {
+    /**
+     * A name for this store
+     */
+    name?: string;
+    /**
+     * A list of action types to ignore. This is used to ignore high frequency events created by a mousemove handler
+     */
+    actionsBlacklist?: readonly string[];
   }
   const windowWhichMightHaveReduxDevTools = window as SomethingThatMightHaveReduxDevTools;
   // Make sure blacklisted action types are valid

@@ -8,37 +8,18 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { AppRoot } from './view';
 import { storeFactory } from './store';
-import {
-  EmbeddableInput,
-  IContainer,
-  Embeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { HttpSetup } from '../../../../../../src/core/public';
+import { Embeddable } from '../../../../../../src/plugins/embeddable/public';
 
 export class ResolverEmbeddable extends Embeddable {
   public readonly type = 'resolver';
-  private httpService: HttpSetup;
   private lastRenderTarget?: Element;
-  constructor(initialInput: EmbeddableInput, httpService: HttpSetup, parent?: IContainer) {
-    super(
-      // Input state is irrelevant to this embeddable, just pass it along.
-      initialInput,
-      // Initial output state - this embeddable does not do anything with output, so just
-      // pass along an empty object.
-      {},
-      // Optional parent component, this embeddable can optionally be rendered inside a container.
-      parent
-    );
-    this.httpService = httpService;
-  }
 
   public render(node: HTMLElement) {
     if (this.lastRenderTarget !== undefined) {
       ReactDOM.unmountComponentAtNode(this.lastRenderTarget);
     }
     this.lastRenderTarget = node;
-    // TODO, figure out how to destroy middleware
-    const { store } = storeFactory({ httpService: this.httpService });
+    const { store } = storeFactory();
     ReactDOM.render(<AppRoot store={store} />, node);
   }
 
