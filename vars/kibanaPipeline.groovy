@@ -70,7 +70,9 @@ def getOssCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
-      runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+      retryable("kibana-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+      }
     }
   })
 }
@@ -81,7 +83,9 @@ def getXpackCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
-      runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
+      retryable("xpack-kibana-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
+      }
     }
   })
 }
