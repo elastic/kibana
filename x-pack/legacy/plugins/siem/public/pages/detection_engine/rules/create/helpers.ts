@@ -40,7 +40,7 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, useIndicesConfig, isNew, ...rest } = defineStepData;
+  const { queryBar, isNew, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,

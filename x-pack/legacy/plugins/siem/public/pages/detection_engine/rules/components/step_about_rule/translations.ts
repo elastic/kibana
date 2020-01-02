@@ -54,3 +54,10 @@ export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
     defaultMessage: 'At least one Technique is required with a Tactic.',
   }
 );
+
+export const URL_FORMAT_INVALID = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
+  {
+    defaultMessage: 'Url is invalid format',
+  }
+);

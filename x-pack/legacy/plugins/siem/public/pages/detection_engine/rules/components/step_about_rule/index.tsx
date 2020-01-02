@@ -11,14 +11,16 @@ import styled from 'styled-components';
 
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
-import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { AddItem } from '../add_item_form';
-import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
-import { stepAboutDefaultValue } from './default_value';
-import { schema } from './schema';
-import * as I18n from './translations';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreThreat } from '../mitre';
+import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
+
+import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
+import { stepAboutDefaultValue } from './default_value';
+import { isUrlInvalid } from './helpers';
+import { schema } from './schema';
+import * as I18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -147,6 +149,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               idAria: 'detectionEngineStepAboutRuleReferenceUrls',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
+              validate: isUrlInvalid,
             }}
           />
           <UseField

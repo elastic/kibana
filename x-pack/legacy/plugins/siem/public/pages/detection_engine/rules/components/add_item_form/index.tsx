@@ -26,6 +26,7 @@ interface AddItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
+  validate?: (args: unknown) => boolean;
 }
 
 const MyEuiFormRow = styled(EuiFormRow)`
@@ -36,7 +37,14 @@ const MyEuiFormRow = styled(EuiFormRow)`
   }
 `;
 
-export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
+export const AddItem = ({
+  addText,
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  validate,
+}: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   // const [items, setItems] = useState(['']);
   const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
@@ -141,6 +149,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
             inputsRef.current[index] == null
               ? { value: item }
               : {}),
+            isInvalid: validate == null ? false : validate(item),
           };
           return (
             <div key={index}>

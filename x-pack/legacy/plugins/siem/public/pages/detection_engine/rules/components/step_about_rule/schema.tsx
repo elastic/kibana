@@ -18,6 +18,7 @@ import {
   ERROR_CODE,
 } from '../shared_imports';
 import { isMitreAttackInvalid } from '../mitre/helpers';
+import { isUrlInvalid } from './helpers';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -100,6 +101,28 @@ export const schema: FormSchema = {
       }
     ),
     labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          let hasError = false;
+          (value as string[]).forEach(url => {
+            if (isUrlInvalid(url)) {
+              hasError = true;
+            }
+          });
+          return hasError
+            ? {
+                code: 'ERR_FIELD_FORMAT',
+                path,
+                message: I18n.URL_FORMAT_INVALID,
+              }
+            : undefined;
+        },
+      },
+    ],
   },
   falsePositives: {
     label: i18n.translate(
