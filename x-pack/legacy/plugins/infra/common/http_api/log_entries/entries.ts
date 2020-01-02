@@ -45,12 +45,41 @@ export const logEntriesRequestRT = rt.union([
 
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 
+// JSON value
+const valueRT = rt.union([rt.string, rt.number, rt.boolean, rt.object, rt.null, rt.undefined]);
+
+export const logMessagePartRT = rt.union([
+  rt.type({
+    constant: rt.string,
+  }),
+  rt.type({
+    field: rt.string,
+    value: valueRT,
+    highlights: rt.array(rt.string),
+  }),
+]);
+
+export const logColumnRT = rt.union([
+  rt.type({ columnId: rt.string, timestamp: rt.number }),
+  rt.type({
+    columnId: rt.string,
+    field: rt.string,
+    value: valueRT,
+  }),
+  rt.type({
+    columnId: rt.string,
+    message: rt.array(logMessagePartRT),
+  }),
+]);
+
 export const logEntryRT = rt.type({
   id: rt.string,
   cursor: logEntriesCursorRT,
-  columns: rt.array(rt.any),
+  columns: rt.array(logColumnRT),
 });
 
+export type LogMessagepart = rt.TypeOf<typeof logMessagePartRT>;
+export type LogColumn = rt.TypeOf<typeof logColumnRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntriesResponseRT = rt.type({

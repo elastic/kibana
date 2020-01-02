@@ -16,6 +16,7 @@ import {
   LogEntry,
   LogEntriesItem,
   LogEntriesCursor,
+  LogColumn,
 } from '../../../../common/http_api';
 import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
@@ -203,27 +204,27 @@ export class InfraLogEntriesDomain {
       return {
         id: doc.gid,
         cursor: doc.key,
-        columns: configuration.logColumns.map(column => {
-          if ('timestampColumn' in column) {
-            return {
-              columnId: column.timestampColumn.id,
-              timestamp: doc.key.time,
-            };
+        columns: configuration.logColumns.map(
+          (column): LogColumn => {
+            if ('timestampColumn' in column) {
+              return {
+                columnId: column.timestampColumn.id,
+                timestamp: doc.key.time,
+              };
+            } else if ('messageColumn' in column) {
+              return {
+                columnId: column.messageColumn.id,
+                message: messageFormattingRules.format(doc.fields, doc.highlights),
+              };
+            } else {
+              return {
+                columnId: column.fieldColumn.id,
+                field: column.fieldColumn.field,
+                value: doc.fields[column.fieldColumn.field],
+              };
+            }
           }
-          if ('messageColumn' in column) {
-            return {
-              columnId: column.messageColumn.id,
-              message: messageFormattingRules.format(doc.fields, doc.highlights),
-            };
-          }
-          if ('fieldColumn' in column) {
-            return {
-              columnId: column.fieldColumn.id,
-              field: column.fieldColumn.field,
-              value: doc.fields[column.fieldColumn.field],
-            };
-          }
-        }),
+        ),
       };
     });
 
