@@ -806,7 +806,7 @@ function discoverController(
       .then(onResults)
       .catch(error => {
         // If the request was aborted then no need to surface this error in the UI
-        if (error instanceof Error && error.name === 'AbortError') return;
+        if (error instanceof Error && error.message === 'The user aborted a request.') return;
 
         const fetchError = getPainlessError(error);
 
