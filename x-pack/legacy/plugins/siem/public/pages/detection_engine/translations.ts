@@ -58,7 +58,7 @@ export const NO_INDEX_TITLE = i18n.translate('xpack.siem.detectionEngine.noIndex
 
 export const NO_INDEX_MSG_BODY = i18n.translate('xpack.siem.detectionEngine.noIndexMsgBody', {
   defaultMessage:
-    'To begin using the detection engine, a user with permission must first access this page to create the necessary Elasticsearch index. Doing so will automatically generate the required index and allow users to begin generating signals from rules. As you currently don’t have these permissions, please contact your administrator for further assistance.',
+    'To use the detection engine, a user with the required cluster and index privileges must first access this page. For more help, contact your administrator.',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(
@@ -79,6 +79,6 @@ export const USER_UNAUTHENTICATED_MSG_BODY = i18n.translate(
   'xpack.siem.detectionEngine.userUnauthenticatedMsgBody',
   {
     defaultMessage:
-      'You are currently missing the required permissions to view the detection engine. Please contact your administrator for further assistance.',
+      'You do not have the required permissions for viewing the detection engine. For more help, contact your administrator.',
   }
 );
