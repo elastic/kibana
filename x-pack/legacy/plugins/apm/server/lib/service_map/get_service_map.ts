@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { uniq, find, isEqual, take } from 'lodash';
+import { uniq, take, sortBy } from 'lodash';
 import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import {
@@ -21,14 +21,11 @@ import {
   TRANSACTION_NAME,
   SPAN_TYPE,
   SPAN_SUBTYPE,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
 import { ESFilter } from '../../../typings/elasticsearch';
-import {
-  Connection,
-  ServiceConnectionNode,
-  ConnectionNode
-} from '../../../common/service_map';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange & SetupUIFilters;
@@ -49,27 +46,25 @@ export async function getServiceMap({
   const isTop = !after;
   const isAll = !serviceName;
 
-  const { indices, start, end, client } = setup;
+  const { indices, start, end, client, uiFiltersES } = setup;
 
-  let sampleIndices = [
-    indices['apm_oss.spanIndices'],
-    indices['apm_oss.transactionIndices']
-  ];
+  let sampleIndices = [indices['apm_oss.spanIndices']];
 
-  let processorEvents = ['span', 'transaction'];
+  let processorEvent = 'span';
 
   const rangeQuery = { range: rangeFilter(start, end) };
 
   if (isTop) {
     sampleIndices = [indices['apm_oss.transactionIndices']];
-    processorEvents = ['transaction'];
+    processorEvent = 'transaction';
   }
 
   const query = {
     bool: {
       filter: [
-        { terms: { [PROCESSOR_EVENT]: processorEvents } },
-        rangeQuery
+        { term: { [PROCESSOR_EVENT]: processorEvent } },
+        rangeQuery,
+        ...uiFiltersES
       ] as ESFilter[]
     }
   } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
@@ -84,6 +79,10 @@ export async function getServiceMap({
 
   if (isTop && isAll) {
     query.bool.must_not = { exists: { field: PARENT_ID } };
+  }
+
+  if (processorEvent === 'transaction') {
+    query.bool.filter.push({ term: { [TRANSACTION_SAMPLED]: true } });
   }
 
   const afterObj =
@@ -136,10 +135,25 @@ export async function getServiceMap({
             ]
           },
           aggs: {
-            trace_ids: {
-              terms: {
-                field: 'trace.id',
-                execution_hint: 'map' as const
+            trace_id_samples: {
+              diversified_sampler: {
+                shard_size: 20,
+                ...(processorEvent === 'transaction'
+                  ? { field: TRACE_ID }
+                  : {
+                      script: {
+                        lang: 'painless',
+                        source: `(int)doc['span.duration.us'].value/100000`
+                      }
+                    })
+              },
+              aggs: {
+                sample_documents: {
+                  top_hits: {
+                    size: 20,
+                    _source: ['trace.id']
+                  }
+                }
               }
             }
           }
@@ -148,183 +162,10 @@ export async function getServiceMap({
     }
   };
 
-  const tracesSampleResponse = await client.search(params);
-
-  const traceIds =
-    tracesSampleResponse.aggregations?.connections.buckets.flatMap(bucket =>
-      bucket.trace_ids.buckets.map(traceBucket => traceBucket.key as string)
-    ) || [];
-
-  const serviceMapParams = {
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices']
-    ],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: uniq(take(traceIds, MAX_TRACES_TO_INSPECT))
-              }
-            }
-          ]
-        }
-      },
-      aggs: {
-        service_map: {
-          scripted_metric: {
-            init_script: {
-              lang: 'painless',
-              source: `state.eventsById = new HashMap();
-                state.connectionsById = new HashMap();
-
-                String[] fieldsToCopy = new String[] {
-                  'parent.id',
-                  'service.name',
-                  'service.environment',
-                  'destination.address',
-                  'trace.id',
-                  'agent.name',
-                  'processor.event'
-                };
-                state.fieldsToCopy = fieldsToCopy;`
-            },
-            map_script: {
-              lang: 'painless',
-              source: `def id;
-                if (!doc['span.id'].empty) {  
-                  id = doc['span.id'].value;
-                } else {
-                  id = doc['transaction.id'].value;
-                }
-
-                def copy = new HashMap();
-                copy.id = id;
-
-                for(key in state.fieldsToCopy) {
-                  if (!doc[key].empty) {
-                    copy[key] = doc[key].value;
-                  }
-                }
-
-                state.eventsById[id] = copy`
-            },
-            combine_script: {
-              lang: 'painless',
-              source: `return state.eventsById;`
-            },
-            reduce_script: {
-              lang: 'painless',
-              source: `def processAndReturnEvent(def context, def eventId) {
-                if (context.processedEvents[eventId] != null) {
-                  return context.processedEvents[eventId];
-                }
-                
-                def event = context.eventsById[eventId];
-
-                if (event == null) {
-                  return null;
-                }
-
-                def service = new HashMap();
-                service['service.name'] = event['service.name'];
-                service['service.environment'] = event['service.environment'];
-                service['agent.name'] = event['agent.name'];
-
-                def basePath = new ArrayList();
-
-                def parentId = event['parent.id'];
-                def parent;
-
-                if (parentId != null && parentId != event['id']) {
-                  parent = processAndReturnEvent(context, parentId);
-                  if (parent != null) {
-                    /* copy the path from the parent */
-                    basePath.addAll(parent.path);
-                    /* flag parent path for removal, as it has children */
-                    context.locationsToRemove.add(parent.path.hashCode());
-
-                    /* if the parent has 'destination.address' set, and the service is different,
-                    we've discovered a service */
-
-                    if (parent['destination.address'] != null
-                      && parent['destination.address'] != ""
-                      && (parent['service.name'] != event['service.name']
-                        || parent['service.environment'] != event['service.environment']
-                      )
-                    ) {
-                      context.externalToServiceMap[parent['destination.address']] = service;
-                    }
-                  }
-                }
-
-                def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
-
-                def currentLocation = new HashMap(service);
-
-                /* only add the current location to the path if it's different from the last one*/
-                if (lastLocation == null || !lastLocation.equals(currentLocation)) {
-                  basePath.add(currentLocation);
-                }
-
-                /* if there is an outgoing span, create a new path */
-                if (event['destination.address'] != null && event['destination.address'] != '') {
-                  def outgoingLocation = new HashMap();
-                  outgoingLocation['destination.address'] = event['destination.address'];
-                  def outgoingPath = new ArrayList(basePath);
-                  outgoingPath.add(outgoingLocation);
-                  context.paths.add(outgoingPath);
-                }
-
-                event.path = basePath;
-                
-                context.paths.add(event.path);
-
-                context.processedEvents[eventId] = event;
-                return event;
-              }
-
-              def context = new HashMap();
-
-              context.processedEvents = new HashMap();
-              context.eventsById = new HashMap();
-              
-              context.paths = new HashSet();
-              context.externalToServiceMap = new HashMap();
-              context.locationsToRemove = new HashSet();
-
-              for (state in states) {
-                context.eventsById.putAll(state);
-              }
-
-              for (entry in context.eventsById.entrySet()) {
-                processAndReturnEvent(context, entry.getKey());
-              }
-
-              def paths = new HashSet();
-
-              for(foundPath in context.paths) {
-                if (!context.locationsToRemove.contains(foundPath.hashCode())) {  
-                  paths.add(foundPath); 
-                }
-              }
-
-              def response = new HashMap();
-              response.paths = paths;
-              response.externalToServiceMap = context.externalToServiceMap;
-              
-              return response;`
-            }
-          }
-        }
-      }
-    }
-  };
-
-  const serviceMapResponse = await client.search(serviceMapParams);
+  const tracesSampleResponse = await client.search<
+    { trace: { id: string } },
+    typeof params
+  >(params);
 
   let nextAfter: string | undefined;
 
@@ -339,55 +180,34 @@ export async function getServiceMap({
     );
   }
 
-  const scriptResponse = serviceMapResponse.aggregations?.service_map.value as {
-    paths: ConnectionNode[][];
-    externalToServiceMap: Record<string, ServiceConnectionNode>;
-  };
+  // make sure at least one trace per composite/connection bucket
+  // is queried
+  const traceIdsWithPriority =
+    tracesSampleResponse.aggregations?.connections.buckets.flatMap(bucket =>
+      bucket.trace_id_samples.sample_documents.hits.hits.map((hit, index) => ({
+        traceId: hit._source.trace.id,
+        priority: index
+      }))
+    ) || [];
 
-  let paths = scriptResponse.paths;
-
-  if (serviceName || environment) {
-    paths = paths.filter(path => {
-      return path.some(node => {
-        let matches = true;
-        if (serviceName) {
-          matches =
-            matches &&
-            'service.name' in node &&
-            node['service.name'] === serviceName;
-        }
-        if (environment) {
-          matches =
-            matches &&
-            'service.environment' in node &&
-            node['service.environment'] === environment;
-        }
-        return matches;
-      });
-    });
-  }
-
-  const connections = uniq(
-    paths.flatMap(path => {
-      return path.reduce((conns, location, index) => {
-        const prev = path[index - 1];
-        if (prev && !isEqual(prev, location)) {
-          return conns.concat({
-            source: prev,
-            destination: location
-          });
-        }
-        return conns;
-      }, [] as Connection[]);
-    }, [] as Connection[]),
-    (value, index, array) => {
-      return find(array, value);
-    }
+  const traceIds = take(
+    uniq(
+      sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)
+    ),
+    MAX_TRACES_TO_INSPECT
   );
 
+  const serviceMapData = traceIds.length
+    ? await getServiceMapFromTraceIds({
+        setup,
+        serviceName,
+        environment,
+        traceIds
+      })
+    : { connections: [], destinationMap: {} };
+
   return {
-    connections,
-    destinationMap: scriptResponse.externalToServiceMap,
-    after: nextAfter
+    after: nextAfter,
+    ...serviceMapData
   };
 }
