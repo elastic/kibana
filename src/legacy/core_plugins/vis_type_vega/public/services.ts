@@ -17,21 +17,17 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
+import { SavedObjectsStart } from 'kibana/public';
+import { NotificationsStart } from 'src/core/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 
-declare global {
-  interface Window {
-    uiSettingsPlugin?: Record<string, any>;
-    uiSettingsPluginValue?: string;
-  }
-}
+export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
-export class UiSettingsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
-    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
-  }
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
 
-  public start() {}
-  public stop() {}
-}
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
+);
