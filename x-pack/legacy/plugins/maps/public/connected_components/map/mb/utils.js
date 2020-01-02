@@ -149,6 +149,6 @@ function isCrossOriginUrl(url) {
   const a = window.document.createElement('a');
   a.href = url;
   return (
-    a.protocol !== window.document.location.protocol || a.host !== window.document.location.host
+    a.protocol !== window.document.location.protocol || a.host !== window.document.location.host || a.port !== window.document.location.port
   );
 }
