@@ -5,9 +5,10 @@
  */
 
 // see: https://en.wikipedia.org/wiki/Unicode_control_characters
-const CONTROL_CHAR_PATTERN = /[\x00-\x1F]|[\x7F-\x9F]|[\u2028-\u2029]/g;
+// but don't include tabs (0x09), they're fine
+const CONTROL_CHAR_PATTERN = /[\x00-\x08]|[\x0A-\x1F]|[\x7F-\x9F]|[\u2028-\u2029]/g;
 
-// replaces control characters in string with ;
+// replaces control characters in string with ;, but leaves tabs
 export function withoutControlCharacters(s: string): string {
   return s.replace(CONTROL_CHAR_PATTERN, ';');
 }

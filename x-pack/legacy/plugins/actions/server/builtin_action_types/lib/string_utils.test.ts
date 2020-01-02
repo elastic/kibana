@@ -19,9 +19,13 @@ describe('ensureSingleLineString()', () => {
     expect(withoutControlCharacters('\r \n')).toEqual('; ;');
   });
 
-  test('works with /00-/1F', () => {
+  test('works with /00-/1F, except tab', () => {
     for (let c = 0; c <= 0x1f; c++) {
-      expect(withoutControlCharacters(String.fromCharCode(c))).toEqual(';');
+      if (c === 0x09) {
+        expect(withoutControlCharacters(String.fromCharCode(c))).toEqual('\t');
+      } else {
+        expect(withoutControlCharacters(String.fromCharCode(c))).toEqual(';');
+      }
     }
     expect(withoutControlCharacters(String.fromCharCode(0x20))).toEqual(' ');
   });
