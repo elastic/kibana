@@ -11,10 +11,7 @@ import { getColorRampStops } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
-import { LineIcon } from '../components/legend/line_icon';
-import { PolygonIcon } from '../components/legend/polygon_icon';
-import { CircleIcon } from '../components/legend/circle_icon';
-import { SymbolIcon } from '../components/legend/symbol_icon';
+import { VectorIcon } from '../components/legend/vector_icon';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
@@ -149,39 +146,29 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       );
     }
 
-    if (isLinesOnly && this.getStyleName() === VECTOR_STYLES.LINE_COLOR) {
-      const style = {
-        stroke: color,
-        strokeWidth: '4px',
-      };
-      return <LineIcon style={style} />;
-    }
+    const loadIsLinesOnly = () => {
+      return isLinesOnly;
+    };
 
-    const style = {};
+    const loadIsPointsOnly = () => {
+      return isPointsOnly;
+    };
 
-    if (this.getStyleName() === VECTOR_STYLES.FILL_COLOR) {
-      style.fill = color;
-      style.strokeWidth = '0px';
-    } else if (this.getStyleName() === VECTOR_STYLES.LINE_COLOR) {
-      style.fill = 'rgba(255,255,255,0)';
-      style.stroke = color;
-      style.strokeWidth = '1px';
-    }
+    const getColorForProperty = (styleProperty, isLinesOnly) => {
+      if (isLinesOnly) {
+        return color;
+      }
 
-    if (!isPointsOnly) {
-      return <PolygonIcon style={style} />;
-    }
+      return this.getStyleName() === styleProperty ? color : 'none';
+    };
 
-    if (!symbolId) {
-      return <CircleIcon style={style} />;
-    }
-
-    const fillColor =
-      this.getStyleName() === VECTOR_STYLES.FILL_COLOR ? color : 'rgba(255,255,255,0)';
-    const strokeColor =
-      this.getStyleName() === VECTOR_STYLES.LINE_COLOR ? color : 'rgba(255,255,255,0)';
     return (
-      <SymbolIcon symbolId={symbolId} fill={fillColor} stroke={strokeColor} strokeWidth={'1px'} />
+      <VectorIcon
+        symbolId={symbolId}
+        loadIsPointsOnly={loadIsPointsOnly}
+        loadIsLinesOnly={loadIsLinesOnly}
+        getColorForProperty={getColorForProperty}
+      />
     );
   }
 

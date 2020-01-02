@@ -38,6 +38,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -395,13 +396,26 @@ export class VectorStyle extends AbstractStyle {
   getIcon = () => {
     const styles = this.getRawProperties();
     const symbolId = this._getSymbolId();
+    const getColorForProperty = (styleProperty, isLinesOnly) => {
+      if (isLinesOnly) {
+        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
+      }
+
+      if (styleProperty === VECTOR_STYLES.LINE_COLOR) {
+        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'none');
+      } else if (styleProperty === VECTOR_STYLES.FILL_COLOR) {
+        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
+      } else {
+        //unexpected
+        console.error('Cannot return color for properties other then line or fill color');
+      }
+    };
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
-        fillColor={styles[VECTOR_STYLES.FILL_COLOR]}
-        lineColor={styles[VECTOR_STYLES.LINE_COLOR]}
         symbolId={symbolId}
+        getColorForProperty={getColorForProperty}
       />
     );
   };
