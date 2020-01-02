@@ -11,6 +11,8 @@ import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
+jest.mock('../../lib/kibana');
+
 const customHeight = '100px';
 const customWidth = '120px';
 const chartDataSets = [

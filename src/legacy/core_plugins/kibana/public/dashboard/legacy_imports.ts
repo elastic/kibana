@@ -32,7 +32,6 @@ export { AppState } from 'ui/state_management/app_state';
 export { AppStateClass } from 'ui/state_management/app_state';
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { IPrivate } from 'ui/private';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
@@ -65,5 +64,6 @@ export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_mon
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
+export { SavedObjectLoader } from 'ui/saved_objects';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

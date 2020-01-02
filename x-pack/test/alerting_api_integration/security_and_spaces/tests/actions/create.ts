@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,6 +52,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'action');
               expect(response.body).to.eql({
                 id: response.body.id,
                 name: 'My action',
@@ -61,7 +62,13 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 },
               });
               expect(typeof response.body.id).to.be('string');
-              objectRemover.add(space.id, response.body.id, 'action');
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'action',
+                id: response.body.id,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
