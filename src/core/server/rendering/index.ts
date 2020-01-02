@@ -17,8 +17,5 @@
  * under the License.
  */
 
-import { useEffect } from 'react';
-
-export function useUnmount(fn: () => void): void {
-  useEffect(() => fn, []);
-}
+export { RenderingService } from './rendering_service';
+export * from './types';

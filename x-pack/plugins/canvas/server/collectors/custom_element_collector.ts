@@ -8,8 +8,12 @@ import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { collectFns } from './collector_helpers';
-import { TelemetryCollector } from '../../types';
-import { ExpressionAST, TelemetryCustomElement, TelemetryCustomElementDocument } from '../../types';
+import {
+  ExpressionAST,
+  TelemetryCollector,
+  TelemetryCustomElement,
+  TelemetryCustomElementDocument,
+} from '../../types';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {

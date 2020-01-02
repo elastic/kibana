@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { UiNavLink } from './ui_nav_link';
+import { LegacyVars } from './types';
 
-export function uiNavLinksMixin(kbnServer, server) {
-  const uiApps = server.getAllUiApps();
+const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
 
-  const { navLinkSpecs = [] } = kbnServer.uiExports;
-
-  const fromSpecs = navLinkSpecs.map(navLinkSpec => new UiNavLink(navLinkSpec));
-
-  const fromApps = uiApps.map(app => app.getNavLink()).filter(Boolean);
-
-  const uiNavLinks = fromSpecs.concat(fromApps).sort((a, b) => a.getOrder() - b.getOrder());
-
-  server.decorate('server', 'getUiNavLinks', () => uiNavLinks.slice(0));
+export function mergeVars(...sources: LegacyVars[]): LegacyVars {
+  return Object.assign(
+    {},
+    ...sources,
+    ...ELIGIBLE_FLAT_MERGE_KEYS.flatMap(key =>
+      sources.some(source => key in source)
+        ? [{ [key]: Object.assign({}, ...sources.map(source => source[key] || {})) }]
+        : []
+    )
+  );
 }

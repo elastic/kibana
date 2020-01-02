@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import { useLayoutEffect, useState } from 'react';
-import { Observable } from 'rxjs';
+import { mockCoreContext } from '../../core_context.mock';
+import { httpServiceMock } from '../../http/http_service.mock';
+import { pluginServiceMock } from '../../plugins/plugins_service.mock';
+import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 
-export function useObservable<T>(observable$: Observable<T>): T | undefined;
-export function useObservable<T>(observable$: Observable<T>, initialValue: T): T;
-export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
-  const [value, update] = useState<T | undefined>(initialValue);
+const context = mockCoreContext.create();
+const http = httpServiceMock.createSetupContract();
+const plugins = pluginServiceMock.createSetupContract();
+const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
-  useLayoutEffect(() => {
-    const s = observable$.subscribe(update);
-    return () => s.unsubscribe();
-  }, [observable$]);
-
-  return value;
-}
+export const mockRenderingServiceParams = context;
+export const mockRenderingSetupDeps = {
+  http,
+  legacyPlugins,
+  plugins,
+};
