@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskRunnerFactory } from './lib';
+import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 

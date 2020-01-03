@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseDuration } from './parse_duration';
+import { parseDuration } from '../lib';
 import { IntervalSchedule } from '../types';
 
 export function getNextRunAt(currentRunAt: Date, schedule: IntervalSchedule) {
