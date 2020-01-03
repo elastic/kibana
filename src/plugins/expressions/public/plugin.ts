@@ -153,13 +153,8 @@ export class ExpressionsPublicPlugin
       if (!cached) {
         cached = (async () => {
           const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
+          const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fns` });
           const { serialize } = serializeProvider(types.toJS());
-          const batch = batchedFetch({
-            fetchStreaming: bfetch.fetchStreaming,
-            serialize,
-          });
-
-          // const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fff` });
 
           // For every sever-side function, register a client-side
           // function that matches its definition, but which simply
@@ -168,7 +163,7 @@ export class ExpressionsPublicPlugin
             const fn = () => ({
               ...serverFunctionList[functionName],
               fn: (context: any, args: any) => {
-                return batch({ functionName, args, context });
+                return batchedFunction({ functionName, args, context: serialize(context) });
               },
             });
             registerFunction(fn);

@@ -22,9 +22,6 @@
 // @ts-ignore
 import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
-// @ts-ignore
-import { routes } from './server/routes';
-
 import { Legacy } from '../../../../kibana';
 
 export async function init(server: Legacy.Server /* options */) {
@@ -52,6 +49,4 @@ export async function init(server: Legacy.Server /* options */) {
   // Expose server.plugins.interpreter.register(specs) and
   // server.plugins.interpreter.registries() (a getter).
   server.expose((server.newPlatform.setup.plugins.expressions as any).__LEGACY);
-
-  routes(server);
 }

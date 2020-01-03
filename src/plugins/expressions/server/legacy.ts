@@ -102,7 +102,8 @@ export const createLegacyServerEndpoints = (
     const { deserialize } = serializeProvider(registries.types.toJS());
     const fnDef = registries.serverFunctions.toJS()[functionName];
     if (!fnDef) throw Boom.notFound(`Function "${functionName}" could not be found.`);
-    const result = fnDef.fn(deserialize(context), args, handlers);
+    const deserialized = deserialize(context);
+    const result = fnDef.fn(deserialized, args, handlers);
     return result;
   }
 
@@ -111,7 +112,11 @@ export const createLegacyServerEndpoints = (
     client = newClient;
   });
 
-  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fff`, request => {
+  /**
+   * Register the endpoint that executes a batch of functions, and sends the
+   * result back as a single response.
+   */
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
     const scopedClient = client.asScoped(request);
     const handlers = {
       environment: 'server',

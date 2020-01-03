@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { filter } from 'rxjs/operators';
 import { defer, Defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
