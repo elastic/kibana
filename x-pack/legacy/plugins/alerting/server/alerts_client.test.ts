@@ -976,6 +976,41 @@ describe('enable()', () => {
       scope: ['alerting'],
     });
   });
+
+  test('swallows error when invalidate API key throws', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: false,
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      version: '123',
+      references: [],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      state: {},
+      params: {},
+      taskType: '',
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+    });
+
+    await alertsClient.enable({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to invalidate API Key: Fail'
+    );
+  });
 });
 
 describe('disable()', () => {
@@ -1430,6 +1465,48 @@ describe('delete()', () => {
                                                                                                                     "task-123",
                                                                                                                   ]
                                                                             `);
+  });
+
+  test('swallows error when invalidate API key throws', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        scheduledTaskId: 'task-123',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    savedObjectsClient.delete.mockResolvedValueOnce({
+      success: true,
+    });
+
+    await alertsClient.delete({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to invalidate API Key: Fail'
+    );
   });
 });
 
@@ -1968,7 +2045,7 @@ describe('update()', () => {
     );
   });
 
-  it('swallows error when invalidating API key throws', async () => {
+  it('swallows error when invalidate API key throws', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
     alertTypeRegistry.get.mockReturnValueOnce({
@@ -2310,6 +2387,32 @@ describe('updateApiKey()', () => {
         updatedBy: 'elastic',
       },
       { version: '123' }
+    );
+  });
+
+  test('swallows error when invalidate API key throws', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertsClientParams.invalidateAPIKey.mockRejectedValue(new Error('Fail'));
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      version: '123',
+      references: [],
+    });
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', api_key: 'abc' },
+    });
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to invalidate API Key: Fail'
     );
   });
 });
