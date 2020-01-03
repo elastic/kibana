@@ -112,9 +112,6 @@ export function updateSidebar(items, id) {
 
   const npSections = npStart.plugins.management.sections.getAllSections();
 
-  //todo iterate over new platform, then iterate over old interface
-  // tests
-
   render(
     <I18nContext>
       <SidebarNav

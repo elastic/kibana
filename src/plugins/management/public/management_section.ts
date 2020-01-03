@@ -60,4 +60,7 @@ export class ManagementSection {
     this.apps.push(app);
     return app;
   }
+  getAppsEnabled() {
+    return this.apps.filter(app => app.enabled);
+  }
 }
