@@ -40,7 +40,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
-  const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
@@ -208,7 +207,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   const table = (
     <EuiInMemoryTable
-      loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
+      loading={isLoadingActions || isLoadingActionTypes}
       items={data}
       sorting={true}
       itemId="id"
@@ -350,7 +349,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       <DeleteConnectorsModal
         callback={(deleted?: string[]) => {
           if (deleted) {
-            if (selectedItems.length === deleted.length) {
+            if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
               const updatedActions = actions.filter(
                 action => action.id && !connectorsToDelete.includes(action.id)
               );

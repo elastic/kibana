@@ -73,11 +73,13 @@ export async function deleteActions({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`))).then(function(
-    values
-  ) {
-    errors.push(...values.filter(v => v.state === 'rejected'));
-    successes.push(...values.filter(v => v.state === 'fulfilled'));
-  });
+  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`))).then(
+    function(fulfilled) {
+      successes.push(...fulfilled);
+    },
+    function(rejected) {
+      errors.push(...rejected);
+    }
+  );
   return { successes, errors };
 }
