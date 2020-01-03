@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiFormRow, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiCallOut, EuiLink, EuiSwitch } from '@elastic/eui';
 
 import {
   UseField,
@@ -64,38 +64,6 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
     setValueType(nextValueType);
   };
 
-  const getLabel = (min: FieldHook, max: FieldHook) => {
-    return valueType === 'percentage' ? (
-      <FormattedMessage
-        id="xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterPercentageFieldLabel"
-        defaultMessage="Min/max frequency percentage ({useAbsoluteValuesLink})"
-        values={{
-          useAbsoluteValuesLink: (
-            <EuiLink onClick={switchType(min, max)}>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddata.useAbsoluteValuesLink', {
-                defaultMessage: 'use absolute values',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterAbsoluteFieldLabel"
-        defaultMessage="Min/max frequency absolute ({usePercentageValuesLink})"
-        values={{
-          usePercentageValuesLink: (
-            <EuiLink onClick={switchType(min, max)}>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddata.usePercentageValuesLink', {
-                defaultMessage: 'use percentage values',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-    );
-  };
-
   return (
     <EditFieldFormRow
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddata.fielddataFormRowTitle', {
@@ -132,13 +100,36 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
       >
         {({ min, max }) => {
           return (
-            <EuiFormRow label={getLabel(min, max)} fullWidth>
+            <>
               {valueType === 'percentage' ? (
                 <FielddataFrequencyFilterPercentage min={min} max={max} />
               ) : (
                 <FielddataFrequencyFilterAbsolute min={min} max={max} />
               )}
-            </EuiFormRow>
+
+              <EuiSpacer size="s" />
+
+              <EuiSwitch
+                label={
+                  valueType === 'percentage'
+                    ? i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.fielddata.useAbsoluteValuesFieldLabel',
+                        {
+                          defaultMessage: 'Use absolute values',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.fielddata.usePercentageValuesFieldLabel',
+                        {
+                          defaultMessage: 'Use percentage values',
+                        }
+                      )
+                }
+                checked={valueType === 'percentage'}
+                onChange={switchType(min, max)}
+                data-test-subj="input"
+              />
+            </>
           );
         }}
       </UseMultiFields>
@@ -155,7 +146,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
         {({ fielddata }) =>
           fielddata === true ? (
             <>
-              <EuiSpacer size="s" />
+              <EuiSpacer />
               <EuiCallOut color="warning">
                 <p>
                   <FormattedMessage
