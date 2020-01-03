@@ -34,7 +34,6 @@ import { EventsProvider } from '../events';
 import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
-import { callEach } from '../utils/function';
 import {
   hashedItemStore,
   isStateHash,
@@ -66,7 +65,7 @@ export function StateProvider(
     this._hashedItemStore = _hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
-    this._cleanUpListeners = _.partial(callEach, [
+    this._cleanUpListeners = [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
         this.fetch();
@@ -85,7 +84,7 @@ export function StateProvider(
           this.fetch();
         }
       }),
-    ]);
+    ];
 
     // Initialize the State with fetch
     this.fetch();
@@ -242,7 +241,9 @@ export function StateProvider(
    */
   State.prototype.destroy = function() {
     this.off(); // removes all listeners
-    this._cleanUpListeners(); // Removes the $routeUpdate listener
+
+    // Removes the $routeUpdate listener
+    this._cleanUpListeners.forEach(listener => listener(this));
   };
 
   State.prototype.setDefaults = function(defaults) {
