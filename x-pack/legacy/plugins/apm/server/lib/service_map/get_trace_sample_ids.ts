@@ -15,8 +15,6 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  PARENT_ID,
-  TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
   SPAN_TYPE,
@@ -39,25 +37,18 @@ export async function getTraceSampleIds({
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const isTop = !after;
-  const isAll = !serviceName;
 
-  const { indices, start, end, client, uiFiltersES } = setup;
+  const { start, end, client, indices, uiFiltersES } = setup;
 
-  let sampleIndices = [indices['apm_oss.spanIndices']];
+  const rangeEnd = end;
+  const rangeStart = isTop ? Math.max(rangeEnd - 60 * 1000 * 60) : start;
 
-  let processorEvent = 'span';
-
-  const rangeQuery = { range: rangeFilter(start, end) };
-
-  if (isTop) {
-    sampleIndices = [indices['apm_oss.transactionIndices']];
-    processorEvent = 'transaction';
-  }
+  const rangeQuery = { range: rangeFilter(rangeStart, rangeEnd) };
 
   const query = {
     bool: {
       filter: [
-        { term: { [PROCESSOR_EVENT]: processorEvent } },
+        { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
         rangeQuery,
         ...uiFiltersES
       ] as ESFilter[]
@@ -72,21 +63,16 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
   }
 
-  if (isTop && isAll) {
-    query.bool.must_not = { exists: { field: PARENT_ID } };
-  }
-
-  if (processorEvent === 'transaction') {
-    query.bool.filter.push({ term: { [TRANSACTION_SAMPLED]: true } });
-  }
-
   const afterObj =
     after && after !== 'top'
       ? { after: JSON.parse(Buffer.from(after, 'base64').toString()) }
       : {};
 
   const params = {
-    index: sampleIndices,
+    index: [
+      indices['apm_oss.spanIndices'],
+      indices['apm_oss.transactionIndices']
+    ],
     body: {
       size: 0,
       query,
@@ -132,20 +118,13 @@ export async function getTraceSampleIds({
           aggs: {
             trace_id_samples: {
               diversified_sampler: {
-                shard_size: 20,
-                ...(processorEvent === 'transaction'
-                  ? { field: TRACE_ID }
-                  : {
-                      script: {
-                        lang: 'painless',
-                        source: `(int)doc['span.duration.us'].value/100000`
-                      }
-                    })
+                shard_size: 10,
+                field: TRACE_ID
               },
               aggs: {
                 sample_documents: {
                   top_hits: {
-                    size: 20,
+                    size: 10,
                     _source: ['trace.id']
                   }
                 }
