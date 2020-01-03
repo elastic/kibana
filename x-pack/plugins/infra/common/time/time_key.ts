@@ -5,7 +5,7 @@
  */
 
 import { ascending, bisector } from 'd3-array';
-import pick from 'lodash/fp/pick';
+import { pick } from 'lodash';
 
 export interface TimeKey {
   time: number;
@@ -27,7 +27,7 @@ export const isTimeKey = (value: any): value is TimeKey =>
   typeof value.tiebreaker === 'number';
 
 export const pickTimeKey = <T extends TimeKey>(value: T): TimeKey =>
-  pick(['time', 'tiebreaker'], value);
+  pick(value, ['time', 'tiebreaker']);
 
 export function compareTimeKeys(
   firstKey: TimeKey,

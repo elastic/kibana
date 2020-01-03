@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from '../../public/graphql/types';
+import { InfraSourceConfiguration } from '../../common/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -12,7 +12,7 @@ import { InfraLogAnalysis } from './log_analysis/log_analysis';
 import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
-import { InfraConfig } from '../../../../../plugins/infra/server';
+import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
 // NP_TODO: We shouldn't need this context anymore but I am

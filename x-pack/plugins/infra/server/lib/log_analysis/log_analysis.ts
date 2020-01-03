@@ -17,7 +17,7 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../src/core/server';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
