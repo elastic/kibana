@@ -17,8 +17,8 @@ interface Props {
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
   isDimmed: boolean;
-  addField(): void;
-  editField(): void;
+  // addField(): void;
+  // editField(): void;
 }
 
 export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent({
@@ -26,10 +26,8 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
   areActionButtonsVisible,
   isHighlighted,
   isDimmed,
-  addField,
-  editField,
 }: Props) {
-  const { source, isMultiField, canHaveChildFields, hasChildFields, hasMultiFields } = field;
+  const { source, isMultiField, hasChildFields, hasMultiFields } = field;
 
   const renderActionButtons = () => {
     if (!areActionButtonsVisible) {
@@ -38,7 +36,7 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
 
     return (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-        {canHaveChildFields && (
+        {/* {canHaveChildFields && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={addField} data-test-subj="addChildButton">
               {i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
@@ -46,9 +44,9 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-        )}
+        )} */}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
+          <EuiButtonEmpty onClick={() => undefined} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
               defaultMessage: 'Edit',
             })}

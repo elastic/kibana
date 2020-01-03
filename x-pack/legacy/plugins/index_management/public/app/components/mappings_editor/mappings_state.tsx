@@ -14,8 +14,8 @@ import {
   State,
   Dispatch,
 } from './reducer';
-import { Field, FieldsEditor } from './types';
-import { normalize, deNormalize, canUseMappingsEditor } from './lib';
+import { Field, FieldsEditor, NormalizedField } from './types';
+import { normalize, deNormalize, canUseMappingsEditor, getUniqueId } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
@@ -49,6 +49,27 @@ export interface Props {
   onUpdate: OnUpdateHandler;
 }
 
+const getRandomField = (): NormalizedField => ({
+  canHaveChildFields: false,
+  canHaveMultiFields: true,
+  childFieldsName: 'fields',
+  hasChildFields: false,
+  hasMultiFields: false,
+  id: getUniqueId(),
+  isExpanded: false,
+  isMultiField: false,
+  nestedDepth: 1,
+  path: 'some.field.path',
+  source: {
+    type: 'text',
+    analyzer: 'standard',
+  } as any,
+});
+
+const generateDummyResult = (total = 500): NormalizedField[] => {
+  return new Array(total).fill('').map(getRandomField);
+};
+
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
   const didMountRef = useRef(false);
 
@@ -80,8 +101,8 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       isValid: true,
     },
     search: {
-      term: '',
-      result: [],
+      term: 'temp',
+      result: generateDummyResult(),
     },
   };
 

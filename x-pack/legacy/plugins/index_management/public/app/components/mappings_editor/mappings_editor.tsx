@@ -94,7 +94,11 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                   onSearchChange={value => dispatch({ type: 'search:update', value })}
                 />
                 <EuiSpacer size="m" />
-                {state.search.term.trim() !== '' ? <SearchResult /> : editor}
+                {state.search.term.trim() !== '' ? (
+                  <SearchResult fields={state.search.result} />
+                ) : (
+                  editor
+                )}
               </>
             ) : (
               <ConfigurationForm defaultValue={state.configuration.defaultValue} />
