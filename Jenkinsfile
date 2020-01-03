@@ -10,19 +10,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
         githubPr.withDefaultPrComments {
           catchError {
             retryable.enable()
-            def tries = 1
-            def tries2 = 1
-
             parallel([
               'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
               'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
               'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
                 'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', {
                   retryable('kibana-firefoxSmoke') {
-                    if (tries == 1) {
-                      tries++
-                      error "Fake Error"
-                    }
                     runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke')
                   }
                 }),
@@ -40,18 +33,17 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
                 'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', {
                   retryable('kibana-accessibility') {
-                    if (tries2 == 1) {
-                      tries2++
-                      error "Fake error"
-                    }
                     runbld('./test/scripts/jenkins_accessibility.sh', 'Execute kibana-accessibility')
                   }
                 }),
-
                 // 'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
               ]),
               'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
-                'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') }),
+                'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', {
+                  retryable('xpack-firefoxSmoke') {
+                    runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke')
+                  }
+                }),
                 'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
                 'xpack-ciGroup2': kibanaPipeline.getXpackCiGroupWorker(2),
                 'xpack-ciGroup3': kibanaPipeline.getXpackCiGroupWorker(3),
@@ -62,7 +54,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'xpack-ciGroup8': kibanaPipeline.getXpackCiGroupWorker(8),
                 'xpack-ciGroup9': kibanaPipeline.getXpackCiGroupWorker(9),
                 'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
-                'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') }),
+                'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', {
+                  retryable('xpack-accessibility') {
+                    runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility')
+                  }
+                }),
                 // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
               ]),
             ])

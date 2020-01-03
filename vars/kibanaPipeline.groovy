@@ -14,7 +14,7 @@ def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
             return {
               // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
               def delay = (workerNumber-1)*20
-              // sleep(delay)
+              sleep(delay)
 
               workerClosure(workerNumber)
             }
@@ -143,12 +143,7 @@ def jobRunner(label, useRamDisk, closure) {
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
     retry(8) {
       try {
-        // scmVars = checkout scm
-        scmVars = [
-          GIT_BRANCH: 'retry-flaky-tests',
-        ]
-
-        print "No-Op: checkout scm"
+        scmVars = checkout scm
       } catch (ex) {
         sleep 15
         throw ex
@@ -181,9 +176,6 @@ def jobRunner(label, useRamDisk, closure) {
 // TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
-  print "No-Op: gcsUpload"
-  return
-
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
     bucket: "gs://${uploadPrefix}",
@@ -264,9 +256,6 @@ def sendKibanaMail() {
 }
 
 def bash(script, label) {
-  print "No-Op: [${label}] ${script}"
-  return
-
   sh(
     script: "#!/bin/bash\n${script}",
     label: label
