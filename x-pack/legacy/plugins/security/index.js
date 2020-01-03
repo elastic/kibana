@@ -31,6 +31,7 @@ export const security = kibana =>
         session: HANDLED_IN_NEW_PLATFORM,
         secureCookies: HANDLED_IN_NEW_PLATFORM,
         loginAssistanceMessage: HANDLED_IN_NEW_PLATFORM,
+        authorization: HANDLED_IN_NEW_PLATFORM,
         audit: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),

@@ -14,7 +14,7 @@ import { AuthenticationServiceSetup } from '../authentication';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
-  getCurrentUser: AuthenticationServiceSetup['getCurrentUser'];
+  authc: AuthenticationServiceSetup;
 }
 
 interface StartDeps {
@@ -23,15 +23,15 @@ interface StartDeps {
 
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
-  private getCurrentUser!: AuthenticationServiceSetup['getCurrentUser'];
+  private authc!: AuthenticationServiceSetup;
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense, getCurrentUser }: SetupDeps) {
+  public setup({ securityLicense, authc }: SetupDeps) {
     this.securityLicense = securityLicense;
-    this.getCurrentUser = getCurrentUser;
+    this.authc = authc;
   }
 
   public start({ core }: StartDeps) {
@@ -59,7 +59,7 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(
     core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'application'>
   ) {
-    const currentUserPromise = this.getCurrentUser();
+    const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (el: HTMLElement) => {

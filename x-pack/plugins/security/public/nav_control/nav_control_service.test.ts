@@ -37,7 +37,7 @@ describe('SecurityNavControlService', () => {
     );
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      getCurrentUser: mockSecuritySetup.authc.getCurrentUser,
+      authc: mockSecuritySetup.authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -99,7 +99,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      getCurrentUser: securityMock.createSetup().authc.getCurrentUser,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -118,7 +118,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      getCurrentUser: securityMock.createSetup().authc.getCurrentUser,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -134,7 +134,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      getCurrentUser: securityMock.createSetup().authc.getCurrentUser,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -155,7 +155,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      getCurrentUser: securityMock.createSetup().authc.getCurrentUser,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();

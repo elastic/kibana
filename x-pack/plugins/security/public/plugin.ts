@@ -49,7 +49,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
     this.navControlService.setup({
       securityLicense: license,
-      getCurrentUser: authc.getCurrentUser,
+      authc,
     });
 
     return {
