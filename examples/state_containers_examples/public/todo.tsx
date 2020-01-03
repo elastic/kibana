@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Link, Route, Router, Switch } from 'react-router-dom';
+import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
 import { History } from 'history';
 import {
   EuiButton,
@@ -85,20 +85,21 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
     if (filter === 'not-completed') return !todo.completed;
     return true;
   });
+  const location = useLocation();
   return (
     <>
       <div>
-        <Link to={'/'}>
+        <Link to={{ ...location, pathname: '/' }}>
           <EuiButton size={'s'} color={!filter ? 'primary' : 'secondary'}>
             All
           </EuiButton>
         </Link>
-        <Link to={'/completed'}>
+        <Link to={{ ...location, pathname: '/completed' }}>
           <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'secondary'}>
             Completed
           </EuiButton>
         </Link>
-        <Link to={'/not-completed'}>
+        <Link to={{ ...location, pathname: '/not-completed' }}>
           <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'secondary'}>
             Not Completed
           </EuiButton>
