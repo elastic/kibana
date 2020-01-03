@@ -13,10 +13,12 @@ export let savedObjectsClient;
 export let basePath;
 export let apiBasePath;
 export let kbnVersion;
+export let kbnFetch;
 
 export const initServicesAndConstants = ({ savedObjects, http, injectedMetadata }) => {
   savedObjectsClient = savedObjects.client;
   basePath = http.basePath.basePath;
   apiBasePath = http.basePath.prepend('/api');
   kbnVersion = injectedMetadata.getKibanaVersion(DEFAULT_KBN_VERSION);
+  kbnFetch = http.fetch;
 };

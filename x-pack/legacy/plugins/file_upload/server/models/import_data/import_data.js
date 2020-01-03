@@ -16,7 +16,7 @@ export function importDataProvider(callWithRequest) {
     try {
       const { id: pipelineId, pipeline } = ingestPipeline;
 
-      if (id === undefined) {
+      if (!id) {
         // first chunk of data, create the index and id to return
         id = uuid.v1();
 

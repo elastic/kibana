@@ -7,8 +7,6 @@
 import { initRoutes } from './routes/file_upload';
 import { registerFileUploadUsageCollector } from './telemetry';
 
-export const IMPORT_ROUTE = '/api/fileupload/import';
-
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
     const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;

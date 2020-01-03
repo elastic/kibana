@@ -8,7 +8,7 @@
 
 import { addSystemApiHeader } from 'ui/system_api';
 import { i18n } from '@kbn/i18n';
-import { kbnVersion } from '../kibana_services';
+import { kbnVersion, kbnFetch } from '../kibana_services';
 
 export async function http(options) {
   if (!(options && options.url)) {
@@ -40,8 +40,7 @@ export async function http(options) {
 
 async function doFetch(url, payload) {
   try {
-    const resp = await fetch(url, payload);
-    return resp.json();
+    return await kbnFetch(url, payload);
   } catch (err) {
     return {
       failures: [

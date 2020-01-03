@@ -5,7 +5,7 @@
  */
 
 import { http as httpService } from './http_service';
-import { indexPatternService, apiBasePath, savedObjectsClient } from '../kibana_services';
+import { indexPatternService, savedObjectsClient } from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 import { i18n } from '@kbn/i18n';
@@ -37,11 +37,9 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     data: [],
     index: indexName,
   });
-  let id;
+  const id = createdIndex && createdIndex.id;
   try {
-    if (createdIndex && createdIndex.id) {
-      id = createdIndex.id;
-    } else {
+    if (!id) {
       throw i18n.translate('xpack.fileUpload.indexingService.errorCreatingIndex', {
         defaultMessage: 'Error creating index',
       });
@@ -121,7 +119,7 @@ async function writeToIndex(indexingDetails) {
   const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
   return await httpService({
-    url: `${apiBasePath}/fileupload/import${paramString}`,
+    url: `/api/fileupload/import${paramString}`,
     method: 'POST',
     data: {
       index,
@@ -227,7 +225,7 @@ async function getIndexPatternId(name) {
 
 export const getExistingIndexNames = async () => {
   const indexes = await httpService({
-    url: `${apiBasePath}/index_management/indices`,
+    url: `/api/index_management/indices`,
     method: 'GET',
   });
   return indexes ? indexes.map(({ name }) => name) : [];
