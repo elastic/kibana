@@ -10,7 +10,6 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
-
 import { SavedObjectsClientContract, SavedObjectsSerializer } from '../../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 import { TaskManagerConfig } from '../../../../plugins/kibana_task_manager/server';
