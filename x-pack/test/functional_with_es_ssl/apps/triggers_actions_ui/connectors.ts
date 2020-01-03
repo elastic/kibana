@@ -113,7 +113,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should delete a connector', async () => {
+    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
+    it.skip('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
@@ -147,7 +148,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
-    it('should bulk delete connectors', async () => {
+    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
+    it.skip('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
