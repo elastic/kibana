@@ -16,26 +16,17 @@ interface Token {
   position: number;
 }
 
+type CategoryId = number;
+
 interface Category {
   job_id: string;
-  category_id: number;
+  category_id: CategoryId;
   terms: string;
   regex: string;
   max_matching_length: number;
   examples: string[];
   grok_pattern: string;
 }
-
-// const testCat: Category = {
-//   job_id: 'dasdasdd',
-//   category_id: 100,
-//   terms: 'HEAD projects xdotool HTTP IrssiUrlLog',
-//   regex: '.*?HEAD.+?projects.+?xdotool.+?HTTP.+?IrssiUrlLog.*',
-//   max_matching_length: 119,
-//   examples: [''],
-//   grok_pattern:
-//     '.*?%{IP:ipaddress}.+?%{HTTPDATE:timestamp}.+?HEAD.+?%{PATH:path}.*?projects.*?%{PATH:path2}.*?xdotool.*?%{PATH:path3}.+?HTTP.*?%{PATH:path4}.*?%{QUOTEDSTRING:field}.+?%{QUOTEDSTRING:field2}.*?IrssiUrlLog.*?%{PATH:path5}.*',
-// };
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
   async function categorizationExamples(
@@ -162,13 +153,6 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     };
   }
 
-  async function getCategories(
-    jobId: string,
-    categoryId: number
-  ): Promise<{ categories: Category[] }> {
-    return callWithRequest('ml.categories', { jobId, categoryId });
-  }
-
   async function getTotalCategories(jobId: string): Promise<{ total: number }> {
     const totalResp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
@@ -183,31 +167,19 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
                 },
               },
               {
-                term: {
-                  result_type: 'model_plot',
-                },
-              },
-              {
-                term: {
-                  by_field_name: 'mlcategory',
+                exists: {
+                  field: 'category_id',
                 },
               },
             ],
           },
         },
-        aggs: {
-          cat_count: {
-            cardinality: {
-              field: 'by_field_value',
-            },
-          },
-        },
       },
     });
-    return totalResp?.aggregations?.cat_count?.value ?? 0;
+    return totalResp?.hits?.total?.value ?? 0;
   }
 
-  async function topCategories(jobId: string, numberOfCategories: number) {
+  async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
     const top = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
@@ -245,29 +217,56 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     });
 
     const catCounts: Array<{
-      id: number;
+      id: CategoryId;
       count: number;
     }> = top.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
     }));
+    return catCounts;
+  }
 
-    const tempCategories = await Promise.all(catCounts.map(({ id }) => getCategories(jobId, id)));
-    const categories = tempCategories
-      .map((t: any) => {
-        if (t.categories === undefined || t.categories.length === 0) {
-          return null;
-        }
-        return t.categories[0];
-      })
-      .filter(t => t !== null);
+  async function getCategories(jobId: string, catIds: CategoryId[]): Promise<Category[]> {
+    const result = await callWithRequest('search', {
+      index: ML_RESULTS_INDEX_PATTERN,
+      size: catIds.length,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
+                },
+              },
+              {
+                terms: {
+                  category_id: catIds,
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    return result.hits.hits?.map((c: { _source: Category }) => c._source) || [];
+  }
+
+  async function topCategories(jobId: string, numberOfCategories: number) {
+    const catCounts = await getTopCategoryCounts(jobId, numberOfCategories);
+    const categories = await getCategories(
+      jobId,
+      catCounts.map(c => c.id)
+    );
 
     const catsById = categories.reduce((p, c) => {
       p[c.category_id] = c;
       return p;
-    }, {} as Record<number, any>);
+    }, {} as { [id: number]: Category });
 
     const total = await getTotalCategories(jobId);
+
     return {
       total,
       categories: catCounts.map(({ id, count }) => {
