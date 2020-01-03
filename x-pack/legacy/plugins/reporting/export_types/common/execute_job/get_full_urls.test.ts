@@ -28,7 +28,7 @@ test(`fails if no URL is passed`, async () => {
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
-    `[Error: No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`]`
+    `[Error: No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\`]`
   );
 });
 

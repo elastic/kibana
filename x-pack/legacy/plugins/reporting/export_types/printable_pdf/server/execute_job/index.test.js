@@ -27,7 +27,8 @@ beforeEach(() => {
     'server.port': 5601,
   };
   mockServer = {
-    expose: () => {},
+    expose: jest.fn(),
+    log: jest.fn(),
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -71,7 +72,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const browserTimezone = 'UTC';
   await executeJob(
     'pdfJobId',
-    { objects: [], browserTimezone, headers: encryptedHeaders },
+    { relativeUrls: [], browserTimezone, headers: encryptedHeaders },
     cancellationToken
   );
 

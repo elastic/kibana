@@ -51,7 +51,7 @@ export async function getFullUrls<JobDocPayloadType>({
     relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
     );
   }
 
