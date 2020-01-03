@@ -16,5 +16,5 @@ export const useIndexPattern = <T>(setIndexPattern: Dispatch<T>) => {
       setIndexPattern(await fetch('/api/uptime/index_pattern', { method: 'GET' }));
     }
     getIndexPattern();
-  }, []);
+  }, [core.services.http, setIndexPattern]);
 };
