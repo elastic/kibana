@@ -12,7 +12,7 @@ import * as i18n from './translations';
 
 export const DetectionEngineUserUnauthenticated = React.memo(() => (
   <EmptyPage
-    actionPrimaryIcon="gear"
+    actionPrimaryIcon="documents"
     actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
     actionPrimaryUrl={documentationLinks.siem}
     actionPrimaryTarget="_blank"

@@ -51,7 +51,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
           signalsIndex={signalIndexName}
         />
       </Route>
-      {(isSignalIndexExists || isAuthenticated) && (
+      {isSignalIndexExists && isAuthenticated && (
         <>
           <Route exact path={`${detectionEnginePath}/rules`}>
             <RulesComponent />
