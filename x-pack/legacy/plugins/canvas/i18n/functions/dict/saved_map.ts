@@ -14,6 +14,17 @@ export const help: FunctionHelp<FunctionFactory<typeof savedMap>> = {
     defaultMessage: `Returns an embeddable for a saved map object`,
   }),
   args: {
-    id: 'The id of the saved map object',
+    id: i18n.translate('xpack.canvas.functions.savedMap.args.idHelpText', {
+      defaultMessage: `The ID of the Saved Map Object`,
+    }),
+    center: i18n.translate('xpack.canvas.functions.savedMap.args.centerHelpText', {
+      defaultMessage: `The center and zoom level the map should have`,
+    }),
+    timerange: i18n.translate('xpack.canvas.functions.savedMap.args.timerangeHelpText', {
+      defaultMessage: `The timerange of data that should be included`,
+    }),
+    title: i18n.translate('xpack.canvas.functions.savedMap.args.titleHelpText', {
+      defaultMessage: `The title for the map`,
+    }),
   },
 };

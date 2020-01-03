@@ -10,31 +10,26 @@ import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
 import {
   IEmbeddable,
+  EmbeddableFactory,
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
-  EmbeddableInput,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { EmbeddableExpression } from '../expression_types/embeddable';
-import { RendererStrings } from '../../i18n';
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { RendererStrings } from '../../../i18n';
 import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 const { embeddable: strings } = RendererStrings;
+import { embeddableInputToExpression } from './embeddable_input_to_expression';
+import { EmbeddableInput } from '../../expression_types';
+import { RendererHandlers } from '../../../types';
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
 } = {};
-
-interface Handlers {
-  setFilter: (text: string) => void;
-  getFilter: () => string | null;
-  done: () => void;
-  onResize: (fn: () => void) => void;
-  onDestroy: (fn: () => void) => void;
-}
 
 const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
   const SavedObjectFinder = (props: SavedObjectFinderProps) => (
@@ -73,12 +68,12 @@ const embeddable = () => ({
   render: async (
     domNode: HTMLElement,
     { input, embeddableType }: EmbeddableExpression<EmbeddableInput>,
-    handlers: Handlers
+    handlers: RendererHandlers
   ) => {
     if (!embeddablesRegistry[input.id]) {
       const factory = Array.from(start.getEmbeddableFactories()).find(
         embeddableFactory => embeddableFactory.type === embeddableType
-      );
+      ) as EmbeddableFactory<EmbeddableInput>;
 
       if (!factory) {
         handlers.done();
@@ -86,8 +81,13 @@ const embeddable = () => ({
       }
 
       const embeddableObject = await factory.createFromSavedObject(input.id, input);
-      embeddablesRegistry[input.id] = embeddableObject;
 
+      embeddablesRegistry[input.id] = embeddableObject;
+      ReactDOM.unmountComponentAtNode(domNode);
+
+      const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
+        handlers.onEmbeddableInputChange(embeddableInputToExpression(updatedInput, embeddableType));
+      });
       ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () => handlers.done());
 
       handlers.onResize(() => {
@@ -97,7 +97,11 @@ const embeddable = () => ({
       });
 
       handlers.onDestroy(() => {
+        subscription.unsubscribe();
+        handlers.onEmbeddableDestroyed();
+
         delete embeddablesRegistry[input.id];
+
         return ReactDOM.unmountComponentAtNode(domNode);
       });
     } else {

@@ -192,3 +192,16 @@ export interface AxisConfig {
  */
 export const isAxisConfig = (axisConfig: any): axisConfig is AxisConfig =>
   !!axisConfig && axisConfig.type === 'axisConfig';
+
+export interface MapCenter {
+  type: 'mapCenter';
+  lat: number;
+  lon: number;
+  zoom: number;
+}
+
+export interface TimeRange {
+  type: 'timerange';
+  from: string;
+  to: string;
+}

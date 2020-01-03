@@ -6,6 +6,10 @@
 
 import { isEqual } from 'lodash';
 import { setFilter } from '../../../state/actions/elements';
+import {
+  updateEmbeddableExpression,
+  fetchEmbeddableRenderable,
+} from '../../../state/actions/embeddable';
 
 export const createHandlers = dispatch => {
   let isComplete = false;
@@ -30,6 +34,14 @@ export const createHandlers = dispatch => {
 
       onComplete(fn) {
         completeFn = fn;
+      },
+
+      onEmbeddableInputChange(embeddableExpression) {
+        dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
+      },
+
+      onEmbeddableDestroyed() {
+        dispatch(fetchEmbeddableRenderable(element.id));
       },
 
       done() {

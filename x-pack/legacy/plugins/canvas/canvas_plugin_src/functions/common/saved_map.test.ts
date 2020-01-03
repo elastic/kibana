@@ -5,7 +5,7 @@
  */
 jest.mock('ui/new_platform');
 import { savedMap } from './saved_map';
-import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
 
 const filterContext = {
   and: [
@@ -24,20 +24,21 @@ describe('savedMap', () => {
   const fn = savedMap().fn;
   const args = {
     id: 'some-id',
+    center: null,
+    title: null,
+    timerange: null,
   };
 
   it('accepts null context', () => {
     const expression = fn(null, args, {});
 
     expect(expression.input.filters).toEqual([]);
-    expect(expression.input.timeRange).toBeUndefined();
   });
 
   it('accepts filter context', () => {
     const expression = fn(filterContext, args, {});
-    const embeddableFilters = buildEmbeddableFilters(filterContext.and);
+    const embeddableFilters = getQueryFilters(filterContext.and);
 
-    expect(expression.input.filters).toEqual(embeddableFilters.filters);
-    expect(expression.input.timeRange).toEqual(embeddableFilters.timeRange);
+    expect(expression.input.filters).toEqual(embeddableFilters);
   });
 });

@@ -137,7 +137,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                   onClick={this.inheritFromParent}
                   color="danger"
                   data-test-subj="removePerPanelTimeRangeButton"
-                  disabled={this.state.inheritTimeRange}
+                  disabled={!this.props.embeddable.parent || this.state.inheritTimeRange}
                   flush="left"
                 >
                   {i18n.translate(

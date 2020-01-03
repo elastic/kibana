@@ -21,12 +21,13 @@ const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
     return `filters | savedMap id="${id}" | render`;
   },
-  [EmbeddableTypes.visualization]: (id: string) => {
+  // FIX: Only currently allow Map embeddables
+  /* [EmbeddableTypes.visualization]: (id: string) => {
     return `filters | savedVisualization id="${id}" | render`;
   },
   [EmbeddableTypes.search]: (id: string) => {
     return `filters | savedSearch id="${id}" | render`;
-  },
+  },*/
 };
 
 interface StateProps {

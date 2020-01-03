@@ -73,6 +73,32 @@ function closest(s) {
   return null;
 }
 
+// If you interact with an embeddable panel, only the header should be draggable
+// This function will determine if an element is an embeddable body or not
+const isEmbeddableBody = element => {
+  const hasClosest = typeof element.closest === 'function';
+
+  if (hasClosest) {
+    return element.closest('.embeddable') && !element.closest('.embPanel__header');
+  } else {
+    return closest.call(element, '.embeddable') && !closest.call(element, '.embPanel__header');
+  }
+};
+
+// Some elements in an embeddable may be portaled out of the embeddable container.
+// We do not want clicks on those to trigger drags, etc, in the workpad. This function
+// will check to make sure the clicked item is actually in the container
+const isInWorkpad = element => {
+  const hasClosest = typeof element.closest === 'function';
+  const workpadContainerSelector = '.canvasWorkpadContainer';
+
+  if (hasClosest) {
+    return !!element.closest(workpadContainerSelector);
+  } else {
+    return !!closest.call(element, workpadContainerSelector);
+  }
+};
+
 const componentLayoutState = ({
   aeroStore,
   setAeroStore,
@@ -209,6 +235,8 @@ export const InteractivePage = compose(
   withProps((...props) => ({
     ...props,
     canDragElement: element => {
+      return !isEmbeddableBody(element) && isInWorkpad(element);
+
       const hasClosest = typeof element.closest === 'function';
 
       if (hasClosest) {

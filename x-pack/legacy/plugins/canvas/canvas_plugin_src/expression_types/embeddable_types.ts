@@ -9,7 +9,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize_embeddable/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
 
-export const EmbeddableTypes = {
+export const EmbeddableTypes: Record<string, string> = {
   map: MAP_SAVED_OBJECT_TYPE,
   search: SEARCH_EMBEDDABLE_TYPE,
   visualization: VISUALIZE_EMBEDDABLE_TYPE,

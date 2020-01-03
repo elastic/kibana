@@ -5,11 +5,11 @@
  */
 
 import { ExpressionType } from 'src/plugins/expressions/public';
-import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { EmbeddableInput } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
-export { EmbeddableTypes };
+export { EmbeddableTypes, EmbeddableInput };
 
 export interface EmbeddableExpression<Input extends EmbeddableInput> {
   type: typeof EmbeddableExpressionType;
