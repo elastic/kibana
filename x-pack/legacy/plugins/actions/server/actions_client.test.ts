@@ -10,7 +10,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { configUtilsMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 

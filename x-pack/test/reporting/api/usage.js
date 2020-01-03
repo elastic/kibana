@@ -46,7 +46,7 @@ export default function({ getService }) {
 
     describe('from archive data', () => {
       it('generated from 6.2', async () => {
-        await esArchiver.load('bwc/6_2');
+        await esArchiver.load('reporting/bwc/6_2');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
@@ -64,10 +64,12 @@ export default function({ getService }) {
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 0);
+
+        await esArchiver.unload('reporting/bwc/6_2');
       });
 
       it('generated from 6.3', async () => {
-        await esArchiver.load('bwc/6_3');
+        await esArchiver.load('reporting/bwc/6_3');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
@@ -83,6 +85,8 @@ export default function({ getService }) {
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 3);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 3);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 3);
+
+        await esArchiver.unload('reporting/bwc/6_3');
       });
     });
 
