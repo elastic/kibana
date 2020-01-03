@@ -18,7 +18,6 @@
  */
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
@@ -32,9 +31,5 @@ export const pluginInstance = plugin({} as PluginInitializerContext);
   pluginInstance.setup(npSetup.core, npSetup.plugins);
   pluginInstance.start(npStart.core, npStart.plugins);
 })();
-
-SavedObjectRegistryProvider.register((savedSearches: any) => {
-  return savedSearches;
-});
 
 export { createSavedSearchesService } from './saved_searches/saved_searches';
