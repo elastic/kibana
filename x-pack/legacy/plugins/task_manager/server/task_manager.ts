@@ -7,13 +7,10 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
-// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
-// be moved under task_manager/server/
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { SavedObjectsClientContract, SavedObjectsSerializer } from '../../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 
 import { Logger } from './types';
