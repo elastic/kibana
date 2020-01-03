@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
 
@@ -45,23 +45,6 @@ export function EuiMonitoringSSPTable({
     return column;
   });
 
-  let footerContent = null;
-  if (setupMode && setupMode.enabled) {
-    footerContent = (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
-          {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
-            defaultMessage: 'Set up monitoring for new {identifier}',
-            values: {
-              identifier: getIdentifier(productName),
-            },
-          })}
-        </EuiButton>
-      </Fragment>
-    );
-  }
-
   const onChange = async ({ page, sort }) => {
     setPage(page);
     setSort({ sort });
@@ -79,6 +62,50 @@ export function EuiMonitoringSSPTable({
     await fetchMoreData({ page: newPage, sort, queryText });
     setIsLoading(false);
   };
+
+  let footerContent = null;
+  if (setupMode && setupMode.enabled) {
+    footerContent = (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+          {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
+            defaultMessage: 'Set up monitoring for new {identifier}',
+            values: {
+              identifier: getIdentifier(productName),
+            },
+          })}
+        </EuiButton>
+      </Fragment>
+    );
+  }
+
+  if (items.length === 0 && pagination && pagination.pageIndex > 0) {
+    footerContent = (
+      <Fragment>
+        {footerContent}
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate('xpack.monitoring.euiSSPTable.resetPaginationTitle', {
+            defaultMessage:
+              'No items found, but we noticed you were using page settings. Try resetting these to find items.',
+          })}
+          color="warning"
+          iconType="help"
+          size="s"
+        >
+          <EuiButton
+            size="s"
+            onClick={() => onChange({ page: { ...page, index: 0 }, sort: sort.sort })}
+          >
+            {i18n.translate('xpack.monitoring.euiSSPTable.resetPaginationButtonLabel', {
+              defaultMessage: 'Reset page settings',
+            })}
+          </EuiButton>
+        </EuiCallOut>
+      </Fragment>
+    );
+  }
 
   return (
     <div data-test-subj={`${props.className}Container`}>

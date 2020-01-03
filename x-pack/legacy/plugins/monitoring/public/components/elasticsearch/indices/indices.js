@@ -10,7 +10,7 @@ import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/
 import { formatMetric } from '../../../lib/format_number';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { ClusterStatus } from '../cluster_status';
-import { EuiMonitoringTable } from '../../table';
+import { EuiMonitoringSSPTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
@@ -121,11 +121,9 @@ const getNoDataMessage = () => {
 export const ElasticsearchIndices = ({
   clusterStatus,
   indices,
-  sorting,
-  pagination,
-  onTableChange,
   toggleShowSystemIndices,
   showSystemIndices,
+  ...tableProps
 }) => {
   return (
     <EuiPage>
@@ -146,16 +144,14 @@ export const ElasticsearchIndices = ({
             onChange={e => toggleShowSystemIndices(e.target.checked)}
           />
           <EuiSpacer size="m" />
-          <EuiMonitoringTable
+          <EuiMonitoringSSPTable
             className="elasticsearchIndicesTable"
             rows={indices}
             columns={columns}
-            sorting={sorting}
-            pagination={pagination}
             message={getNoDataMessage()}
             search={{
               box: {
-                incremental: true,
+                incremental: false,
                 placeholder: i18n.translate(
                   'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
                   {
@@ -164,10 +160,7 @@ export const ElasticsearchIndices = ({
                 ),
               },
             }}
-            onTableChange={onTableChange}
-            executeQueryOptions={{
-              defaultFields: ['name'],
-            }}
+            {...tableProps}
           />
         </EuiPageContent>
       </EuiPageBody>

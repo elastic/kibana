@@ -7,7 +7,7 @@
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
 
-export function getPageData($injector, api) {
+export function getPageData($injector, api, routeOptions = {}) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const timeBounds = timefilter.getBounds();
@@ -19,6 +19,7 @@ export function getPageData($injector, api) {
         min: timeBounds.min.toISOString(),
         max: timeBounds.max.toISOString(),
       },
+      ...routeOptions,
     })
     .then(response => response.data)
     .catch(err => {

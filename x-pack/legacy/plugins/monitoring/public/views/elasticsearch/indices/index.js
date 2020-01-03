@@ -48,6 +48,7 @@ uiRoutes.when('/elasticsearch/indices', {
         $injector,
         $scope,
         $injector,
+        fetchDataImmediately: false, // We want to apply pagination before sending the first request
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
@@ -69,7 +70,12 @@ uiRoutes.when('/elasticsearch/indices', {
         }
       );
 
-      this.renderReact = ({ clusterStatus, indices }) => {
+      this.renderReact = ({ clusterStatus, indices, totalIndexCount }) => {
+        const pagination = {
+          ...this.pagination,
+          totalItemCount: totalIndexCount,
+        };
+
         super.renderReact(
           <I18nContext>
             <ElasticsearchIndices
@@ -77,9 +83,7 @@ uiRoutes.when('/elasticsearch/indices', {
               indices={indices}
               showSystemIndices={showSystemIndices}
               toggleShowSystemIndices={toggleShowSystemIndices}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
+              {...this.getPaginationTableProps(pagination)}
             />
           </I18nContext>
         );

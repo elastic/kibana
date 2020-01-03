@@ -9,6 +9,7 @@ import { euiTableStorageGetter, euiTableStorageSetter } from 'plugins/monitoring
 import { EUI_SORT_ASCENDING } from '../../common/constants';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+const DEFAULT_PAGE_SIZE = 20;
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -44,8 +45,8 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     const { page, sort } = getLocalStorageData(storage);
 
     this.pagination = {
-      pageSize: 20,
-      initialPageSize: 20,
+      pageSize: DEFAULT_PAGE_SIZE,
+      initialPageSize: DEFAULT_PAGE_SIZE,
       pageIndex: 0,
       initialPageIndex: 0,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
@@ -53,7 +54,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
 
     if (page) {
       if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
-        page.size = 20;
+        page.size = DEFAULT_PAGE_SIZE;
       }
       this.setPagination(page);
     }

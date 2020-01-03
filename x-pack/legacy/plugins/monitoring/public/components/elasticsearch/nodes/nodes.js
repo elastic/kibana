@@ -412,7 +412,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             productName={ELASTICSEARCH_SYSTEM_ID}
             search={{
               box: {
-                incremental: true,
+                incremental: false,
                 placeholder: i18n.translate(
                   'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
                   {

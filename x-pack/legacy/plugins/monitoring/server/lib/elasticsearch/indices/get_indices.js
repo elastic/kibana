@@ -4,43 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 import { checkParam } from '../../error_missing_required';
 import { ElasticsearchMetric } from '../../metrics';
 import { createQuery } from '../../create_query';
-import { calculateRate } from '../../calculate_rate';
+import { paginate } from '../../pagination/paginate';
 import { getUnassignedShards } from '../shards';
+import { sortIndices } from './sort_indices';
 import { i18n } from '@kbn/i18n';
+import { getIndicesAggs } from './get_indices_aggs';
 
-export function handleResponse(resp, min, max, shardStats) {
-  // map the hits
-  const hits = get(resp, 'hits.hits', []);
-  return hits.map(hit => {
-    const stats = get(hit, '_source.index_stats');
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.index_stats');
+export function handleResponse(resp, shardStats) {
+  return get(resp, 'aggregations.composite_data.buckets', []).map(hit => {
+    const index = hit.key.name;
 
-    const rateOptions = {
-      hitTimestamp: get(hit, '_source.timestamp'),
-      earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
-      timeWindowMin: min,
-      timeWindowMax: max,
-    };
-
-    const earliestIndexingHit = get(earliestStats, 'primaries.indexing');
-    const { rate: indexRate } = calculateRate({
-      latestTotal: get(stats, 'primaries.indexing.index_total'),
-      earliestTotal: get(earliestIndexingHit, 'index_total'),
-      ...rateOptions,
-    });
-
-    const earliestSearchHit = get(earliestStats, 'total.search');
-    const { rate: searchRate } = calculateRate({
-      latestTotal: get(stats, 'total.search.query_total'),
-      earliestTotal: get(earliestSearchHit, 'query_total'),
-      ...rateOptions,
-    });
-
-    const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
+    const shardStatsForIndex = get(shardStats, ['indices', index]);
 
     let status;
     let statusSort;
@@ -65,22 +43,47 @@ export function handleResponse(resp, min, max, shardStats) {
     }
 
     return {
-      name: stats.index,
+      name: index,
       status,
-      doc_count: get(stats, 'primaries.docs.count'),
-      data_size: get(stats, 'total.store.size_in_bytes'),
-      index_rate: indexRate,
-      search_rate: searchRate,
+      doc_count: get(hit, 'doc_count.value'),
+      data_size: get(hit, 'data_size.value'),
+      index_rate: get(hit, 'index_rate.value'),
+      search_rate: get(hit, 'search_rate.value'),
       unassigned_shards: unassignedShards,
       status_sort: statusSort,
     };
   });
 }
 
-export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
+async function getResults(req, params, shardStats) {
+  const results = [];
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response = await callWithRequest(req, 'search', params);
+  results.push(...handleResponse(response, shardStats));
+
+  const after = get(response, 'aggregations.composite_data.after_key');
+  if (!after) {
+    return results;
+  }
+
+  const newParams = set(params, 'body.aggs.composite_data.composite.after', after);
+  return [...results, ...(await getResults(req, newParams, shardStats))];
+}
+
+export async function getIndices(
+  req,
+  esIndexPattern,
+  showSystemIndices = false,
+  shardStats,
+  pagination,
+  sort,
+  queryText
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
 
   const { min, max } = req.payload.timeRange;
+  const config = req.server.config();
+  const size = config.get('xpack.monitoring.max_bucket_size');
 
   const filters = [];
   if (!showSystemIndices) {
@@ -90,31 +93,23 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
       },
     });
   }
+  if (queryText) {
+    const wildcardQuery = queryText.includes('*') ? queryText : `${queryText}*`;
+    filters.push({
+      wildcard: {
+        'index_stats.index': {
+          value: wildcardQuery,
+        },
+      },
+    });
+  }
 
   const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
-  const config = req.server.config();
   const params = {
     index: esIndexPattern,
-    // TODO: composite aggregation
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: 0,
     ignoreUnavailable: true,
-    filterPath: [
-      // only filter path can filter for inner_hits
-      'hits.hits._source.index_stats.index',
-      'hits.hits._source.index_stats.primaries.docs.count',
-      'hits.hits._source.index_stats.total.store.size_in_bytes',
-
-      // latest hits for calculating metrics
-      'hits.hits._source.timestamp',
-      'hits.hits._source.index_stats.primaries.indexing.index_total',
-      'hits.hits._source.index_stats.total.search.query_total',
-
-      // earliest hits for calculating metrics
-      'hits.hits.inner_hits.earliest.hits.hits._source.timestamp',
-      'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.primaries.indexing.index_total',
-      'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.total.search.query_total',
-    ],
     body: {
       query: createQuery({
         type: 'index_stats',
@@ -124,20 +119,37 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
         metric: metricFields,
         filters,
       }),
-      collapse: {
-        field: 'index_stats.index',
-        inner_hits: {
-          name: 'earliest',
-          size: 1,
-          sort: [{ timestamp: 'asc' }],
+      aggs: {
+        composite_data: {
+          composite: {
+            size,
+            sources: [
+              {
+                name: {
+                  terms: {
+                    field: 'index_stats.index',
+                    order: 'asc',
+                  },
+                },
+              },
+            ],
+          },
+          aggs: getIndicesAggs(),
         },
       },
-      sort: [{ timestamp: { order: 'desc' } }],
     },
   };
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp =>
-    handleResponse(resp, min, max, shardStats)
-  );
+  const totalIndices = await getResults(req, params, shardStats);
+  const totalIndexCount = totalIndices.length;
+
+  // Manually apply pagination/sorting concerns
+
+  // Sorting
+  const sortedNodes = sortIndices(totalIndices, sort);
+
+  // Pagination
+  const indices = paginate(pagination, sortedNodes);
+
+  return { indices, totalIndexCount };
 }

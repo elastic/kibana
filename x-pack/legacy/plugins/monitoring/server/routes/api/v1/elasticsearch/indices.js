@@ -31,6 +31,18 @@ export function esIndicesRoute(server) {
             min: Joi.date().required(),
             max: Joi.date().required(),
           }).required(),
+          pagination: Joi.object({
+            index: Joi.number().required(),
+            size: Joi.number().required(),
+          }).required(),
+          sort: Joi.object({
+            field: Joi.string().required(),
+            direction: Joi.string().required(),
+          }).optional(),
+          queryText: Joi.string()
+            .default('')
+            .allow('')
+            .optional(),
         }),
       },
     },
@@ -38,7 +50,7 @@ export function esIndicesRoute(server) {
       const config = server.config();
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;
-      const { ccs } = req.payload;
+      const { ccs, pagination, sort, queryText } = req.payload;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
@@ -46,11 +58,20 @@ export function esIndicesRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, {
           includeIndices: true,
         });
-        const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
+        const { indices, totalIndexCount } = await getIndices(
+          req,
+          esIndexPattern,
+          showSystemIndices,
+          shardStats,
+          pagination,
+          sort,
+          queryText
+        );
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           indices,
+          totalIndexCount,
         };
       } catch (err) {
         throw handleError(err, req);
