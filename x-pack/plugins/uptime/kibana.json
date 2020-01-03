@@ -2,7 +2,7 @@
   "configPath": ["xpack"],
   "id": "uptime",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["licensing", "usageCollection"],
+  "requiredPlugins": ["features", "licensing", "usageCollection"],
   "server": true,
   "ui": false,
   "version": "8.0.0"

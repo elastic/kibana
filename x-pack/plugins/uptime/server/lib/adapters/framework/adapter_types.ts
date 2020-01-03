@@ -14,6 +14,7 @@ import {
 } from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
 import { UMKibanaRoute } from '../../../rest_api';
+import { PluginSetupContract } from '../../../../../features/server';
 
 export interface UMFrameworkRouteOptions<
   P extends ObjectType,
@@ -47,6 +48,7 @@ export interface UptimeCoreSetup {
 }
 
 export interface UptimeCorePlugins {
+  features: PluginSetupContract;
   usageCollection: UsageCollectionSetup;
 }
 

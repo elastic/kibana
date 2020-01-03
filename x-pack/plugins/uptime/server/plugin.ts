@@ -6,22 +6,21 @@
 
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/server';
 import { initServerWithKibana } from './kibana.index';
+import { PluginSetupContract } from '../../features/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 
 interface UptimePluginsSetup {
-  usageCollection: any;
+  features: PluginSetupContract;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class UptimePlugin implements Plugin {
   public async setup(coreSetup: CoreSetup, plugins: UptimePluginsSetup) {
-    const { usageCollection } = plugins;
-
     initServerWithKibana(
       {
         router: coreSetup.http.createRouter(),
       },
-      {
-        usageCollection,
-      }
+      plugins
     );
   }
 
