@@ -14,8 +14,10 @@ export class AllEndpointsQueryBuilder {
     this.request = request;
     this.endpointAppContext = endpointAppContext;
   }
-
-  async toQueryParams(): Promise<Record<string, unknown>> {
+  /* aggregating by endpoint machine id and retrieving the latest of each group of events
+      related to an endpoint by machine id using elastic search collapse functionality
+   */
+  async toQueryParams(): Promise<Record<string, any>> {
     const paging = await this.paging();
     return {
       body: {

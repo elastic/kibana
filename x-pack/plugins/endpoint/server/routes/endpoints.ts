@@ -58,13 +58,13 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 }
 
 function mapToEndpointResultList(
-  queryParams: Record<string, unknown>,
+  queryParams: Record<string, any>,
   searchResponse: SearchResponse<EndpointData>
 ): EndpointResultList {
   if (searchResponse.hits.hits.length > 0) {
     return {
-      requestPageSize: queryParams.size as number,
-      requestIndex: queryParams.from as number,
+      requestPageSize: queryParams.size,
+      requestIndex: queryParams.from,
       endpoints: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
@@ -73,8 +73,8 @@ function mapToEndpointResultList(
     };
   } else {
     return {
-      requestPageSize: queryParams.size as number,
-      requestIndex: queryParams.from as number,
+      requestPageSize: queryParams.size,
+      requestIndex: queryParams.from,
       total: 0,
       endpoints: [],
     };
