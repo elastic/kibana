@@ -13,7 +13,7 @@ import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
 
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../i18n/components';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
