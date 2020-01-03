@@ -7,6 +7,7 @@
 import React from 'react';
 import { configure, addDecorator, addParameters } from '@storybook/react';
 import { withKnobs } from '@storybook/addon-knobs/react';
+import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -16,6 +17,21 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 if (process.env.NODE_ENV === 'test') {
   require('babel-plugin-require-context-hook/register')();
 } else {
+  // Customize the info for each story.
+  addDecorator(
+    withInfo({
+      inline: true,
+      styles: {
+        infoBody: {
+          margin: 20,
+        },
+        infoStory: {
+          margin: '40px 60px',
+        },
+      },
+    })
+  );
+
   // Add optional knobs to customize each story.
   addDecorator(withKnobs);
 }
