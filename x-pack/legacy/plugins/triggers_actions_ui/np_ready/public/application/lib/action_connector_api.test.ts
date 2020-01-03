@@ -117,7 +117,7 @@ describe('deleteActions', () => {
     const ids = ['1', '2', '3'];
 
     const result = await deleteActions({ ids, http });
-    expect(result).toEqual(undefined);
+    expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
