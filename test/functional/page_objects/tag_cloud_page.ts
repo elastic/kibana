@@ -26,18 +26,18 @@ export function TagCloudPageProvider({ getService, getPageObjects }: FtrProvider
   const { header, visChart } = getPageObjects(['header', 'visChart']);
 
   class TagCloudPage {
-    async selectTagCloudTag(tagDisplayText: string) {
+    public async selectTagCloudTag(tagDisplayText: string) {
       await testSubjects.click(tagDisplayText);
       await header.waitUntilLoadingHasFinished();
     }
 
-    async getTextTag() {
+    public async getTextTag() {
       await visChart.waitForVisualization();
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    async getTextSizes() {
+    public async getTextSizes() {
       const tags = await find.allByCssSelector('text');
       async function returnTagSize(tag: WebElementWrapper) {
         const style = await tag.getAttribute('style');

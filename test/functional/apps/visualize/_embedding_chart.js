@@ -47,7 +47,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('Split rows');
         await PageObjects.visEditor.selectAggregation('Histogram');
         await PageObjects.visEditor.selectField('bytes');
-        await PageObjects.visEditor.setNumericInterval('2000', undefined, 3);
+        await PageObjects.visEditor.setInterval('2000', { type: 'numeric', aggNth: 3 });
         await PageObjects.visEditor.clickGo();
       });
 

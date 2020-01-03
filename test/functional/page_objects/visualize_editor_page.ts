@@ -29,6 +29,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
   const comboBox = getService('comboBox');
   const { common, header, visChart } = getPageObjects(['common', 'header', 'visChart']);
 
+  interface IntervalOptions {
+    type: 'default' | 'numeric' | 'custom';
+    aggNth: number;
+    append: boolean;
+  }
+
   class VisualizeEditorPage {
     public async clickDataTab() {
       await testSubjects.click('visualizeEditDataLink');
@@ -396,24 +402,26 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
-    public async setInterval(newValue: string) {
-      await comboBox.set('visEditorInterval', newValue);
+    public async setInterval(
+      newValue: string,
+      { type = 'default', aggNth = 2, append = false }: IntervalOptions
+    ) {
+      log.debug(`visEditor.setInterval(${newValue}, {${type}, ${aggNth}, ${append}})`);
+      if (type === 'default') {
+        await comboBox.set('visEditorInterval', newValue);
+      } else if (type === 'custom') {
+        await comboBox.setCustom('visEditorInterval', newValue);
+      } else {
+        if (append) {
+          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
+        } else {
+          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValue));
+        }
+      }
     }
 
     public async getInterval() {
       return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
-    }
-
-    public async setCustomInterval(newValue: string) {
-      await comboBox.setCustom('visEditorInterval', newValue);
-    }
-
-    public async setNumericInterval(newValue: string, options = { append: false }, agg = 2) {
-      if (options.append) {
-        await testSubjects.append(`visEditorInterval${agg}`, String(newValue));
-      } else {
-        await testSubjects.setValue(`visEditorInterval${agg}`, String(newValue));
-      }
     }
 
     public async getNumericInterval(agg = 2) {

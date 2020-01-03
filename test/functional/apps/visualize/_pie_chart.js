@@ -52,7 +52,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1003);
       log.debug('setNumericInterval 4000');
-      await PageObjects.visEditor.setNumericInterval('40000');
+      await PageObjects.visEditor.setInterval('40000', { type: 'numeric' });
       log.debug('clickGo');
       await PageObjects.visEditor.clickGo();
     });
@@ -343,7 +343,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.sleep(1003);
         log.debug('setNumericInterval 4000');
-        await PageObjects.visEditor.setNumericInterval('40000');
+        await PageObjects.visEditor.setInterval('40000', { type: 'numeric' });
         log.debug('Toggle previous editor');
         await PageObjects.visEditor.toggleAggregationEditor(2);
         log.debug('select bucket Split slices');
