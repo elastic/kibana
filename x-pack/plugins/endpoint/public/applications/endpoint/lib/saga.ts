@@ -28,7 +28,7 @@ type StoreActionsAndState = AsyncIterableIterator<QueuedAction>;
 
 export interface SagaContext {
   /**
-   * A generator function that will `yield` a `Promise` that resolves with a `QueuedAction`
+   * A generator function that will `yield` `Promise`s that resolve with a `QueuedAction`
    */
   actionsAndState: () => StoreActionsAndState;
   dispatch: Dispatch;
