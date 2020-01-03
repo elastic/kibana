@@ -17,18 +17,19 @@
  * under the License.
  */
 
-export const findLegacyPluginSpecsMock = jest
-  .fn()
-  .mockImplementation((settings: Record<string, any>) => ({
-    pluginSpecs: [],
-    pluginExtendedConfig: {
-      has: jest.fn(),
-      get: jest.fn(() => settings),
-      set: jest.fn(),
-    },
-    disabledPluginSpecs: [],
-    uiExports: [],
-  }));
+import { LegacyVars } from './types';
+
+export const findLegacyPluginSpecsMock = jest.fn().mockImplementation((settings: LegacyVars) => ({
+  pluginSpecs: [],
+  pluginExtendedConfig: {
+    has: jest.fn(),
+    get: jest.fn().mockReturnValue(settings),
+    set: jest.fn(),
+  },
+  disabledPluginSpecs: [],
+  uiExports: {},
+  navLinks: [],
+}));
 jest.doMock('./plugins/find_legacy_plugin_specs.ts', () => ({
   findLegacyPluginSpecs: findLegacyPluginSpecsMock,
 }));

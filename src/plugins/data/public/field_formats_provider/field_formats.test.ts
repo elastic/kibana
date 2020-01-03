@@ -20,12 +20,13 @@ import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 
 import { FieldFormatRegisty } from './field_formats';
 import {
+  BoolFormat,
   IFieldFormatType,
   PercentFormat,
-  BoolFormat,
   StringFormat,
 } from '../../common/field_formats';
 import { coreMock } from '../../../../core/public/mocks';
+import { KBN_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
 const getUiSettingsMock = (data: any): IUiSettingsClient['get'] => () => data;
@@ -115,12 +116,12 @@ describe('FieldFormatRegisty', () => {
     test('should set meta params for all instances of FieldFormats', () => {
       fieldFormatRegisty.register([StringFormat]);
 
-      const ConcreteFormat = fieldFormatRegisty.getType(StringFormat.id);
+      const DecoratedStingFormat = fieldFormatRegisty.getType(StringFormat.id);
 
-      expect(ConcreteFormat).toBeDefined();
+      expect(DecoratedStingFormat).toBeDefined();
 
-      if (ConcreteFormat) {
-        const stringFormat = new ConcreteFormat({
+      if (DecoratedStingFormat) {
+        const stringFormat = new DecoratedStingFormat({
           foo: 'foo',
         });
         const params = getValueOfPrivateField(stringFormat, '_params');
@@ -131,6 +132,40 @@ describe('FieldFormatRegisty', () => {
         expect(params.parsedUrl).toHaveProperty('pathname');
         expect(params.parsedUrl).toHaveProperty('basePath');
       }
+    });
+
+    test('should decorate static fields', () => {
+      fieldFormatRegisty.register([BoolFormat]);
+
+      const DecoratedBoolFormat = fieldFormatRegisty.getType(BoolFormat.id);
+
+      expect(DecoratedBoolFormat).toBeDefined();
+
+      if (DecoratedBoolFormat) {
+        expect(DecoratedBoolFormat.id).toBe(BoolFormat.id);
+        expect(DecoratedBoolFormat.fieldType).toBe(BoolFormat.fieldType);
+      }
+    });
+  });
+
+  describe('getByFieldType', () => {
+    test('should provide an public "getByFieldType" method', () => {
+      expect(fieldFormatRegisty.getByFieldType).toBeDefined();
+      expect(typeof fieldFormatRegisty.getByFieldType).toBe('function');
+    });
+
+    test('should decorate returns types', () => {
+      fieldFormatRegisty.register([StringFormat, BoolFormat]);
+
+      const [DecoratedStringFormat] = fieldFormatRegisty.getByFieldType(KBN_FIELD_TYPES.STRING);
+
+      expect(DecoratedStringFormat).toBeDefined();
+
+      const stingFormat = new DecoratedStringFormat({ foo: 'foo' });
+      const params = getValueOfPrivateField(stingFormat, '_params');
+
+      expect(params).toHaveProperty('foo');
+      expect(params).toHaveProperty('parsedUrl');
     });
   });
 });
