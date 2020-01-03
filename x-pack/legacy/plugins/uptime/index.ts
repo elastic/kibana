@@ -6,9 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
-import { KibanaServer, plugin } from './server';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -32,22 +30,5 @@ export const uptime = (kibana: any) =>
         url: '/app/uptime#/',
       },
       home: ['plugins/uptime/register_feature'],
-    },
-    init(server: KibanaServer) {
-      const initializerContext = {} as PluginInitializerContext;
-      const { savedObjects } = server;
-      const { xpack_main } = server.plugins;
-      const { usageCollection } = server.newPlatform.setup.plugins;
-
-      plugin(initializerContext).setup(
-        {
-          route: server.newPlatform.setup.core.http.createRouter(),
-        },
-        {
-          savedObjects,
-          usageCollection,
-          xpack: xpack_main,
-        }
-      );
     },
   });

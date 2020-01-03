@@ -7,7 +7,7 @@
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { assertCloseTo } from '../../../../../legacy/plugins/uptime/server/lib/helper';
+import { assertCloseTo } from '../../../../../plugins/uptime/server/lib/helper';
 
 export default function({ getService }: FtrProviderContext) {
   describe('snapshotHistogram', () => {
