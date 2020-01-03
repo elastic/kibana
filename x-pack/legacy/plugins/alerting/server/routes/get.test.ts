@@ -53,8 +53,10 @@ test('calls get with proper parameters', async () => {
   alertsClient.get.mockResolvedValueOnce(mockedAlert);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
-  const { createdAt, ...response } = JSON.parse(payload);
-  expect({ createdAt: new Date(createdAt), ...response }).toEqual(mockedAlert);
+  const { createdAt, updatedAt, ...response } = JSON.parse(payload);
+  expect({ createdAt: new Date(createdAt), updatedAt: new Date(updatedAt), ...response }).toEqual(
+    mockedAlert
+  );
   expect(alertsClient.get).toHaveBeenCalledTimes(1);
   expect(alertsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

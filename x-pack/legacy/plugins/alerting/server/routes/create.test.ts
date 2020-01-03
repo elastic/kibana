@@ -20,6 +20,7 @@ const mockedAlert = {
   params: {
     bar: true,
   },
+  throttle: '30s',
   actions: [
     {
       group: 'default',
@@ -29,17 +30,6 @@ const mockedAlert = {
       },
     },
   ],
-};
-
-const mockedAlertComputerFields = {
-  enabled: true,
-  muteAll: false,
-  createdBy: '',
-  updatedBy: '',
-  apiKey: '',
-  apiKeyOwner: '',
-  throttle: '30s',
-  mutedInstanceIds: [],
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -55,7 +45,13 @@ test('creates an alert with proper parameters', async () => {
   const updatedAt = new Date();
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
-    ...mockedAlertComputerFields,
+    enabled: true,
+    muteAll: false,
+    createdBy: '',
+    updatedBy: '',
+    apiKey: '',
+    apiKeyOwner: '',
+    mutedInstanceIds: [],
     createdAt,
     updatedAt,
     id: '123',
@@ -70,7 +66,7 @@ test('creates an alert with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(new Date(response.createdAt)).toEqual(createdAt);
-  expect(omit(response, 'createdAt')).toMatchInlineSnapshot(`
+  expect(omit(response, 'createdAt', 'updatedAt')).toMatchInlineSnapshot(`
     Object {
       "actions": Array [
         Object {
@@ -102,7 +98,6 @@ test('creates an alert with proper parameters', async () => {
         "foo",
       ],
       "throttle": "30s",
-      "updatedAt": null,
       "updatedBy": "",
     }
   `);
@@ -133,7 +128,7 @@ test('creates an alert with proper parameters', async () => {
           "tags": Array [
             "foo",
           ],
-          "throttle": null,
+          "throttle": "30s",
         },
       },
     ]
