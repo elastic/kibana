@@ -11,7 +11,7 @@ import { getAutocompleteSuggestions, getFnArgDefAtPosition } from './autocomplet
 
 describe('autocomplete', () => {
   describe('getFnArgDefAtPosition', () => {
-    it('should return blank object for empty string', () => {
+    it('should return function definition for plot', () => {
       const expression = 'plot ';
       const def = getFnArgDefAtPosition(functionSpecs, expression, expression.length);
       const plotFn = functionSpecs.find(spec => spec.name === 'plot');
