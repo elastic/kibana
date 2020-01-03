@@ -8,12 +8,12 @@ import moment from 'moment';
 import { SavedObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
 import {
-  EnrollmentApiKey,
   EnrollmentApiKeysRepository as EnrollmentApiKeysRepositoryType,
   SAVED_OBJECT_TYPE,
 } from './types';
 import { EncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
+import { EnrollmentApiKey } from '../../../common/types/domain_data';
 
 function getFirstOrNull<T>(list: T[]): T | null {
   return list.length > 0 ? list[0] : null;

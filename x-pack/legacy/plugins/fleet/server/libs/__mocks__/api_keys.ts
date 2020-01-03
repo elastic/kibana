@@ -7,12 +7,14 @@
 import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
 import {
   AccessApiKeyVerificationResponse,
-  EnrollmentApiKey,
   EnrollmentApiKeyVerificationResponse,
-  EnrollmentRule,
-  EnrollmentRuleData,
 } from '../../repositories/enrollment_api_keys/types';
 import { ApiKeyLib as ApiKeyLibType } from '../api_keys';
+import {
+  EnrollmentApiKey,
+  EnrollmentRuleData,
+  EnrollmentRule,
+} from '../../../common/types/domain_data';
 
 type Interface<T> = {
   [P in keyof T]: T[P];

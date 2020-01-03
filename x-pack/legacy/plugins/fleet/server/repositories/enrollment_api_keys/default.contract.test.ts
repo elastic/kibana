@@ -10,10 +10,11 @@ import { EnrollmentApiKeysRepository } from './default';
 import { SODatabaseAdapter as SODatabaseAdapterType } from '../../adapters/saved_objects_database/adapter_types';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../../adapters/saved_objects_database/memorize_adapter';
-import { EnrollmentApiKey, SAVED_OBJECT_TYPE } from './types';
+import { SAVED_OBJECT_TYPE } from './types';
 import { EncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/default';
 import { MemorizeEncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/memorize_adapter';
 import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
+import { EnrollmentApiKey } from '../../../common/types/domain_data';
 
 describe('Enrollment api key Repository', () => {
   let adapter: EnrollmentApiKeysRepository;

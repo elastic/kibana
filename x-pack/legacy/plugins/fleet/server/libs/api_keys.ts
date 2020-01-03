@@ -9,16 +9,18 @@ import Boom from 'boom';
 import uuid from 'uuid/v4';
 import {
   EnrollmentApiKeyVerificationResponse,
-  EnrollmentApiKey,
-  EnrollmentRuleData,
   EnrollmentApiKeysRepository,
   AccessApiKeyVerificationResponse,
-  EnrollmentRule,
 } from '../repositories/enrollment_api_keys/types';
 import { FrameworkLib } from './framework';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { ElasticsearchAdapter } from '../adapters/elasticsearch/adapter_types';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
+import {
+  EnrollmentApiKey,
+  EnrollmentRuleData,
+  EnrollmentRule,
+} from '../../common/types/domain_data';
 
 export class ApiKeyLib {
   constructor(
