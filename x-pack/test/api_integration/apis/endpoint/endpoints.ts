@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('`endpoint` test endpoints api', () => {
+  describe('test endpoints api', () => {
     before(() => esArchiver.load('endpoint/endpoints'));
     after(() => esArchiver.unload('endpoint/endpoints'));
     describe('GET /api/endpoint/endpoints', () => {
