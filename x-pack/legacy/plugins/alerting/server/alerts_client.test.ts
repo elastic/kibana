@@ -100,6 +100,7 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
             group: 'default',
@@ -160,6 +161,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -168,6 +170,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -189,6 +192,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyOwner": null,
         "consumer": "bar",
+        "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
         "muteAll": false,
@@ -311,6 +315,7 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -407,6 +412,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -415,6 +421,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -460,6 +467,7 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -493,6 +501,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
         "params": Object {
@@ -501,6 +510,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -806,6 +816,7 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: true,
         schedule: { interval: '10s' },
@@ -1248,6 +1259,7 @@ describe('get()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -1255,6 +1267,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -1347,6 +1360,7 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "123",
+            "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
             "params": Object {
               "bar": true,
@@ -1354,6 +1368,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
         "page": 1,
@@ -1476,7 +1491,9 @@ describe('update()', () => {
           },
         ],
         scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1517,6 +1534,7 @@ describe('update()', () => {
             },
           },
         ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1526,6 +1544,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -1624,6 +1643,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1652,6 +1672,7 @@ describe('update()', () => {
         ],
         scheduledTaskId: 'task-123',
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1732,6 +1753,7 @@ describe('update()', () => {
             },
           },
         ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1741,6 +1763,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -1799,6 +1822,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1812,6 +1836,7 @@ describe('update()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         scheduledTaskId: 'task-123',
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1853,6 +1878,7 @@ describe('update()', () => {
           },
         ],
         "apiKey": "MTIzOmFiYw==",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1862,6 +1888,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
