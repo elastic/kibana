@@ -10,7 +10,7 @@ import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
-import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogEntriesState } from '../../../containers/logs/log_entries';
 
 import { Source } from '../../../containers/source';
@@ -19,7 +19,10 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
   return (
-    <LogFilterState.Provider indexPattern={derivedIndexPattern}>{children}</LogFilterState.Provider>
+    <LogFilterState.Provider indexPattern={derivedIndexPattern}>
+      <WithLogFilterUrlState />
+      {children}
+    </LogFilterState.Provider>
   );
 };
 
