@@ -51,6 +51,9 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
   loading = false,
   height,
 }: Props) => {
+  const {
+    colors: { danger, gray },
+  } = useContext(UptimeSettingsContext);
   if (!data || !data.queryResult)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
@@ -93,10 +96,6 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
   const {
     queryResult: { histogram, interval },
   } = data;
-
-  const {
-    colors: { danger, gray },
-  } = useContext(UptimeSettingsContext);
 
   const downMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { IndexPattern } from 'ui/index_patterns';
 import { FullTimeRangeSelector } from './index';
 import { Query } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 // Create a mock for the setFullTimeRange function in the service.
 // The mock is hoisted to the top, so need to prefix the mock function
