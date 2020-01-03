@@ -7,12 +7,12 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'ui/index_patterns';
 import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface TimeRange {
   from: number;
