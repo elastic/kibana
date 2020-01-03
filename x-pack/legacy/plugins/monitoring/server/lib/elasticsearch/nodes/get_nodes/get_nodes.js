@@ -5,61 +5,66 @@
  */
 
 import moment from 'moment';
+import { get, set, isEqual } from 'lodash';
 import { checkParam } from '../../../error_missing_required';
 import { createQuery } from '../../../create_query';
-import { calculateAuto } from '../../../calculate_auto';
 import { ElasticsearchMetric } from '../../../metrics';
-import { getMetricAggs } from './get_metric_aggs';
-import { handleResponse } from './handle_response';
-import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
+import { getNodesAggs } from './get_nodes_aggs';
+import { sortNodes } from './sort_nodes';
+import { paginate } from '../../../pagination/paginate';
+import { mapNodesInfo } from './map_nodes_info';
 
-/* Run an aggregation on node_stats to get stat data for the selected time
- * range for all the active nodes.  Every option is a key to a configuration
- * value in server/lib/metrics. Those options are used to build up a query with
- * a bunch of date histograms.
- *
- * Returns array of objects for every node, it has a Node Name, Node Transport
- * Address, the Data and Master Attributes for each node The Node IDs are used
- * only for determining if the node is a Master node. Time-based metric data is
- * included that adds information such as CPU and JVM stats.
- *
- * @param {Object} req: server request object
- * @param {String} esIndexPattern: index pattern for elasticsearch data in monitoring indices
- * @param {Object} clusterStats: cluster stats from cluster state document
- * @param {Object} shardStats: per-node information about shards
- * @return {Array} node info combined with metrics for each node from handle_response
- */
-export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats) {
+async function getResults(req, params, clusterStats, shardStats) {
+  const results = [];
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response = await callWithRequest(req, 'search', params);
+  const buckets = get(response, 'aggregations.composite_data.buckets', []);
+  results.push(...mapNodesInfo(buckets, clusterStats, shardStats));
+
+  const after = get(response, 'aggregations.composite_data.after_key');
+  const last = get(buckets[buckets.length - 1], 'key');
+  if (!after || isEqual(after, last)) {
+    return results;
+  }
+
+  const newParams = set(params, 'body.aggs.composite_data.composite.after', after);
+  return [...results, ...(await getResults(req, newParams, shardStats))];
+}
+
+export async function getNodes(
+  req,
+  esIndexPattern,
+  clusterUuid,
+  pagination,
+  sort,
+  queryText,
+  { clusterStats, shardStats }
+) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
-  const orgStart = start;
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const max = end;
-  const duration = moment.duration(max - orgStart, 'ms');
 
   const config = req.server.config();
-  const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
-  const min = start;
 
-  const bucketSize = Math.max(
-    config.get('xpack.monitoring.min_interval_seconds'),
-    calculateAuto(100, duration).asSeconds()
-  );
+  const size = config.get('xpack.monitoring.max_bucket_size');
 
-  const uuidsToInclude = pageOfNodes.map(node => node.uuid);
-  const filters = [
-    {
-      terms: {
-        'source_node.uuid': uuidsToInclude,
+  const filters = [];
+  if (queryText && queryText.length) {
+    const wildcardQuery = queryText.includes('*') ? queryText : `*${queryText}*`;
+    filters.push({
+      wildcard: {
+        'source_node.name': {
+          value: wildcardQuery,
+        },
       },
-    },
-  ];
+    });
+  }
 
   const params = {
     index: esIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: 0,
     ignoreUnavailable: true,
     body: {
       query: createQuery({
@@ -70,39 +75,37 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
         filters,
         metric: metricFields,
       }),
-      collapse: {
-        field: 'source_node.uuid',
-      },
       aggs: {
-        nodes: {
-          terms: {
-            field: `source_node.uuid`,
-            include: uuidsToInclude,
-            size: config.get('xpack.monitoring.max_bucket_size'),
-          },
-          aggs: {
-            by_date: {
-              date_histogram: {
-                field: 'timestamp',
-                min_doc_count: 1,
-                fixed_interval: bucketSize + 's',
+        composite_data: {
+          composite: {
+            size,
+            sources: [
+              {
+                name: {
+                  terms: {
+                    field: 'source_node.name',
+                    order: 'asc',
+                  },
+                },
               },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize),
-            },
+            ],
           },
+          aggs: getNodesAggs(),
         },
       },
-      sort: [{ timestamp: { order: 'desc' } }],
     },
-    filterPath: [
-      'hits.hits._source.source_node',
-      'aggregations.nodes.buckets.key',
-      ...LISTING_METRICS_PATHS,
-    ],
   };
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
+  const totalNodes = await getResults(req, params, clusterStats, shardStats);
+  const totalNodeCount = totalNodes.length;
 
-  return handleResponse(response, clusterStats, shardStats, pageOfNodes, { min, max, bucketSize });
+  // Manually apply pagination/sorting concerns
+
+  // Sorting
+  const sortedNodes = sortNodes(totalNodes, sort);
+
+  // Pagination
+  const nodes = paginate(pagination, sortedNodes);
+
+  return { nodes, totalNodeCount };
 }

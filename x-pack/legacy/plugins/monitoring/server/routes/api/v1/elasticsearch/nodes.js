@@ -12,8 +12,6 @@ import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
-import { getPaginatedNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_paginated_nodes';
-import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_nodes/nodes_listing_metrics';
 
 export function esNodesRoute(server) {
   server.route({
@@ -58,22 +56,15 @@ export function esNodesRoute(server) {
         });
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
 
-        const metricSet = LISTING_METRICS_NAMES;
-        const { pageOfNodes, totalNodeCount } = await getPaginatedNodes(
+        const { nodes, totalNodeCount } = await getNodes(
           req,
           esIndexPattern,
           { clusterUuid },
-          metricSet,
           pagination,
           sort,
           queryText,
-          {
-            clusterStats,
-            shardStats,
-          }
+          { clusterStats, shardStats }
         );
-
-        const nodes = await getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats);
         return { clusterStatus, nodes, totalNodeCount };
       } catch (err) {
         throw handleError(err, req);

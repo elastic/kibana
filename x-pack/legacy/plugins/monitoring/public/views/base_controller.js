@@ -133,7 +133,8 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
+      const options = this.getPaginationRouteOptions();
+      const promises = [_getPageData($injector, _api, options)];
       const setupMode = getSetupModeState();
       if (setupMode.enabled) {
         promises.push(updateSetupModeData());

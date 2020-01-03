@@ -93,8 +93,8 @@ export async function getIndices(
       },
     });
   }
-  if (queryText) {
-    const wildcardQuery = queryText.includes('*') ? queryText : `${queryText}*`;
+  if (queryText && queryText.length) {
+    const wildcardQuery = queryText.includes('*') ? queryText : `*${queryText}*`;
     filters.push({
       wildcard: {
         'index_stats.index': {
@@ -146,10 +146,10 @@ export async function getIndices(
   // Manually apply pagination/sorting concerns
 
   // Sorting
-  const sortedNodes = sortIndices(totalIndices, sort);
+  const sortedIndices = sortIndices(totalIndices, sort);
 
   // Pagination
-  const indices = paginate(pagination, sortedNodes);
+  const indices = paginate(pagination, sortedIndices);
 
   return { indices, totalIndexCount };
 }

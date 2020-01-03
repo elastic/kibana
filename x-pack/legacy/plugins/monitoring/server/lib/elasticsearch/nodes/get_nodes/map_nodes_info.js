@@ -6,18 +6,22 @@
 
 import { get, isUndefined } from 'lodash';
 import { calculateNodeType, getNodeTypeClassLabel } from '../';
+import { metrics } from '../../../metrics/elasticsearch/metrics';
 
-/**
- * @param {Array} nodeHits: info about each node from the hits in the get_nodes query
- * @param {Object} clusterStats: cluster stats from cluster state document
- * @param {Object} shardStats: per-node information about shards
- * @return {Object} summarized info about each node keyed by nodeId
- */
+const METRICS = [
+  'node_cpu_utilization',
+  'node_load_average',
+  'node_jvm_mem_percent',
+  'node_free_space',
+];
+
 export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
 
-  return nodeHits.reduce((prev, node) => {
-    const sourceNode = get(node, '_source.source_node');
+  return nodeHits.map(node => {
+    const latest = get(node, 'latest.hits.hits[0]._source');
+    const earliest = get(node, 'earliest.hits.hits[0]._source');
+    const sourceNode = get(latest, 'source_node');
 
     const calculatedNodeType = calculateNodeType(sourceNode, get(clusterState, 'master_node'));
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
@@ -27,16 +31,26 @@ export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
     const isOnline = !isUndefined(get(clusterState, ['nodes', sourceNode.uuid]));
 
     return {
-      ...prev,
-      [sourceNode.uuid]: {
-        name: sourceNode.name,
-        transport_address: sourceNode.transport_address,
-        type: nodeType,
-        isOnline,
-        nodeTypeLabel: nodeTypeLabel,
-        nodeTypeClass: nodeTypeClass,
-        shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, 0),
-      },
+      name: sourceNode.name,
+      transport_address: sourceNode.transport_address,
+      type: nodeType,
+      isOnline,
+      nodeTypeLabel: nodeTypeLabel,
+      nodeTypeClass: nodeTypeClass,
+      shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, 0),
+      ...METRICS.reduce((fields, metricName) => {
+        const metric = metrics[metricName];
+        fields[metricName] = {
+          metric,
+          summary: {
+            minVal: get(node, `${metricName}_min.value`),
+            maxVal: get(node, `${metricName}_max.value`),
+            lastVal: get(latest, metric.field),
+            slope: get(latest, metric.field) - get(earliest, metric.field) > 0 ? 1 : 1,
+          },
+        };
+        return fields;
+      }, {}),
     };
-  }, {});
+  });
 }
