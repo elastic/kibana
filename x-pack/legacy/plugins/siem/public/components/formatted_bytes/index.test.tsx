@@ -17,43 +17,39 @@ const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 
 const bytes = '2806422';
 
-describe('formatted_bytes', () => {
-  describe('PreferenceFormattedBytes', () => {
-    describe('rendering', () => {
-      test('renders correctly against snapshot', () => {
-        mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
-        const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
+describe('PreferenceFormattedBytes', () => {
+  test('renders correctly against snapshot', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
+    const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
 
-        expect(toJson(wrapper)).toMatchSnapshot();
-      });
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
-      test('it renders bytes to hardcoded format when no configuration exists', () => {
-        mockUseUiSetting$.mockImplementation(() => [null]);
-        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+  test('it renders bytes to hardcoded format when no configuration exists', () => {
+    mockUseUiSetting$.mockImplementation(() => [null]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
 
-      test('it renders bytes according to the default format', () => {
-        mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
-        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+  test('it renders bytes according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
 
-      test('it renders bytes supplied as a number according to the default format', () => {
-        mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
-        const wrapper = mount(<PreferenceFormattedBytesComponent value={+bytes} />);
+  test('it renders bytes supplied as a number according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0,0.[0]b']);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={+bytes} />);
 
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
 
-      test('it renders bytes according to new format', () => {
-        mockUseUiSetting$.mockImplementation(() => ['0b']);
-        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+  test('it renders bytes according to new format', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0b']);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-        expect(wrapper.text()).toEqual('3MB');
-      });
-    });
+    expect(wrapper.text()).toEqual('3MB');
   });
 });
