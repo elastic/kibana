@@ -37,4 +37,4 @@ export function ConnectedLinkComponent({
   );
 }
 
-export const ConnectedLink = withRouter<any>(ConnectedLinkComponent);
+export const ConnectedLink = withRouter<any, typeof ConnectedLinkComponent>(ConnectedLinkComponent);

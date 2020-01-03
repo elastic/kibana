@@ -85,4 +85,4 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     });
   };
 }
-export const WithUrlState = withRouter(WithURLStateComponent);
+export const WithUrlState = withRouter<any, typeof WithURLStateComponent>(WithURLStateComponent);
