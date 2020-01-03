@@ -7,7 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-core: InternalCoreSetup & {
-        plugins: PluginsServiceSetup;
-    };
+core: LegacyCoreSetup;
 ```

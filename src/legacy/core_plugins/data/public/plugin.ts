@@ -21,8 +21,13 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchStart } from './search';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../plugins/data/public/services';
+import {
+  setFieldFormats,
+  setNotifications,
+  setIndexPatterns,
+  setQueryService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -57,6 +62,10 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setNotifications(core.notifications);
 
     return {
       search: this.search.start(core),

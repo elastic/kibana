@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { IndexPattern } from 'ui/index_patterns';
 import { AggConfig, VisState } from '../../..';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
+import { IndexPattern } from '../../../../../../../plugins/data/public';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
