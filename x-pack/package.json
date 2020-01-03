@@ -32,7 +32,6 @@
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-helpers": "9.0.2",
-    "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
     "@mattapperson/slapshot": "1.4.0",
