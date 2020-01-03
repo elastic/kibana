@@ -23,7 +23,9 @@ import { stringify, ParsedUrlQuery } from 'querystring';
 // the browser. We use it to generate the same urls the browser would
 export const stringifyQueryString = (query: ParsedUrlQuery) =>
   stringify(query, undefined, undefined, {
-    encodeURIComponent: encodeUriQuery,
+    // encode spaces with %20 is needed to produce the same queries as angular does
+    // https://github.com/angular/angular.js/blob/51c516e7d4f2d10b0aaa4487bd0b52772022207a/src/Angular.js#L1377
+    encodeURIComponent: (val: string) => encodeUriQuery(val, true),
   });
 
 /**

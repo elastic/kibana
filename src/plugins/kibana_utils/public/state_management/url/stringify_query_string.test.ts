@@ -31,7 +31,7 @@ describe('stringifyQueryString', () => {
         g: 'null',
       })
     ).toMatchInlineSnapshot(
-      `"a=asdf1234asdf&b=-_.!~*'()+-_.!~*'()&c=:@$,+:@$,&d=%26;%3D%2B%23+%26;%3D%2B%23'&f=+&g=null"`
+      `"a=asdf1234asdf&b=-_.!~*'()%20-_.!~*'()&c=:@$,%20:@$,&d=%26;%3D%2B%23%20%26;%3D%2B%23'&f=%20&g=null"`
     );
   });
 });
