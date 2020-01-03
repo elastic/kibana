@@ -56,13 +56,26 @@ click the share icon image:user/reporting/images/canvas-share-button.png["Canvas
 A notification appears when the report is complete.
 
 [float]
+[[reporting-layout-sizing]]
+== Layout and Sizing
+The layout and size of the PDF or PNG image depends on the Kibana app that the Reporting plugin is integrated with. For Canvas, the
+worksheet's dimensions determine the size for Reporting. In other apps, the dimensions are generally taken on the fly by looking at
+the size of the visualization elements or panels on the page. The size dimensions are part of the reporting job parameters. Therefore to
+make the report output larger or smaller, you can change the size of the browser to resize the shareable container before generating the
+report, so the desired dimenions are passed in the job parameters.
+
+Here is what a simple Kibana Dashboard might look like. The highlighted area is what is determined to be the shareable container:
+[role="screenshot"]
+image::user/reporting/images/shareable-container.png["Shareable Container"]
+
+The size of the shareable container is captured when you click the "Generate" or "Copy POST URL" button, so it may take some trial and error
+before you're satisfied with the layout and dimensions in the result PNG or PDF image.
+
+[float]
 [[optimize-pdf]]
 == Optimize PDF for print&mdash;dashboard only
 
-By default, {kib} creates a PDF  
-using the existing layout and size of the dashboard. To create a 
-printer-friendly PDF with multiple A4 portrait pages and two visualizations 
-per page, turn on *Optimize for printing*.
+To create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page, turn on *Optimize for printing*.
 
 [role="screenshot"]
 image::user/reporting/images/preserve-layout-switch.png["Share"]

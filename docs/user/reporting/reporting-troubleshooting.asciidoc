@@ -12,7 +12,7 @@ Having trouble? Here are solutions to common problems you might encounter while 
 === System dependencies
 Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
 project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
-dependencies for Chromium.
+dependencies to run the Chromium executable.
 
 Make sure Kibana server OS has the appropriate packages installed for the distribution.
 
@@ -32,6 +32,14 @@ If you are using Ubuntu/Debian systems, install the following packages:
 
 * `fonts-liberation`
 * `libfontconfig1`
+
+If the system is missing dependencies, then Reporting will fail in a non-deterministic way. Kibana runs a self-test at server startup, and
+if it encouters errors they will logged in the Kibana console. Unfortunately, the error message of this test won't include very much
+information about why Chromium failed to run. For example, the most common error message here is `Error: connect ECONNREFUSED`. It indicates
+that when Kibana tried to connect to the Chromium process, it couldn't.
+
+To troubleshoot the problem you can start the Kibana server with environment variables that tell Chromium to print verbose logs. See the
+<<_puppeteer_debug_logs, Puppeteer debug method>> for more information.
 
 [float]
 === Text is rendered incorrectly in generated reports
@@ -114,3 +122,12 @@ The internal DevTools protocol traffic will be logged via the `debug` module und
 
 
 The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.
+
+=== System requirements
+In Elastic cloud, the Kibana instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
+Kibana Reporting when the dashboard or visualization is relatively simple: for example, a single pie chart visualization or a dashboard with
+a few visualizations. However, certain visualization types incur more load than others, for example TSVB panel incurs a lot of network
+requests to render.
+
+If the Kibana instance doesn't have enough memory to run the report, the report will fail with an error such as `Error: Page crashed!` in
+the message. In those cases, try increasing the memory for the Kibana instance to 2GB.
