@@ -58,34 +58,7 @@ test('creates an alert with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(new Date(response.createdAt)).toEqual(createdAt);
-  expect(omit(response, 'createdAt')).toMatchInlineSnapshot(`
-    Object {
-      "actions": Array [
-        Object {
-          "actionTypeId": "test",
-          "group": "default",
-          "id": "2",
-          "params": Object {
-            "foo": true,
-          },
-        },
-      ],
-      "alertTypeId": "1",
-      "consumer": "bar",
-      "id": "123",
-      "name": "abc",
-      "params": Object {
-        "bar": true,
-      },
-      "schedule": Object {
-        "interval": "10s",
-      },
-      "tags": Array [
-        "foo",
-      ],
-      "updatedAt": null,
-    }
-  `);
+  expect(omit(response, 'createdAt', 'updatedAt')).toMatchInlineSnapshot();
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
   expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
