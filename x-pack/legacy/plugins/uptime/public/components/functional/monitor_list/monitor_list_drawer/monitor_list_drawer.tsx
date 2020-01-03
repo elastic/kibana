@@ -6,7 +6,6 @@
 
 import React, { useEffect } from 'react';
 import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { get } from 'lodash';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { MonitorSummary } from '../../../../../common/graphql/types';
@@ -57,10 +56,7 @@ export function MonitorListDrawerComponent({
   monitorDetails,
   filters,
 }: MonitorListDrawerProps) {
-  if (!summary || !summary.state.checks) {
-    return null;
-  }
-  const { monitor_id: monitorId } = summary;
+  const monitorId = summary?.monitor_id;
   const [getUrlParams] = useUrlParams();
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
 
@@ -72,11 +68,11 @@ export function MonitorListDrawerComponent({
       monitorId,
       location: location.join(),
     });
-  }, [dateStart, dateEnd, filters]);
+  }, [dateStart, dateEnd, filters, monitorId, loadMonitorDetails]);
 
-  const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
+  const monitorUrl = summary?.state?.url?.full || '';
 
-  return (
+  return summary && summary.state.checks ? (
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
@@ -101,7 +97,7 @@ export function MonitorListDrawerComponent({
         />
       )}
     </ContainerDiv>
-  );
+  ) : null;
 }
 
 const mapStateToProps = (state: AppState, { summary }: any) => ({

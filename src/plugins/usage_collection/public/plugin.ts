@@ -25,7 +25,7 @@ import {
   Plugin,
   CoreSetup,
   CoreStart,
-  HttpServiceBase,
+  HttpSetup,
 } from '../../../core/public';
 
 interface PublicConfigType {
@@ -41,7 +41,7 @@ export interface UsageCollectionSetup {
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
-export function isUnauthenticated(http: HttpServiceBase) {
+export function isUnauthenticated(http: HttpSetup) {
   const { anonymousPaths } = http;
   return anonymousPaths.isAnonymous(window.location.pathname);
 }

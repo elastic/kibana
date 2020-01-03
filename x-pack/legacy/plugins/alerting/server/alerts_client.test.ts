@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { TaskStatus } from '../../task_manager';
+import { TaskStatus } from '../../task_manager/server';
+import { IntervalSchedule } from './types';
+import { resolvable } from './test_utils';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -29,6 +31,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   alertsClientParams.createAPIKey.mockResolvedValue({ created: false });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
+  taskManager.runNow.mockResolvedValue({ id: '' });
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -47,7 +50,8 @@ function getMockData(overwrites: Record<string, any> = {}) {
     name: 'abc',
     tags: ['foo'],
     alertTypeId: '123',
-    interval: '10s',
+    consumer: 'bar',
+    schedule: { interval: '10s' },
     throttle: null,
     params: {
       bar: true,
@@ -92,7 +96,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -157,9 +161,11 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
       }
@@ -180,16 +186,19 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
-        "apiKey": undefined,
-        "apiKeyOwner": undefined,
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "bar",
         "createdBy": "elastic",
         "enabled": true,
-        "interval": "10s",
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "tags": Array [
           "foo",
@@ -298,7 +307,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -399,9 +408,11 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
       }
@@ -445,7 +456,7 @@ describe('create()', () => {
       attributes: {
         enabled: false,
         alertTypeId: '123',
-        interval: 10000,
+        schedule: { interval: 10000 },
         params: {
           bar: true,
         },
@@ -484,9 +495,11 @@ describe('create()', () => {
         "alertTypeId": "123",
         "enabled": false,
         "id": "1",
-        "interval": 10000,
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": 10000,
         },
       }
     `);
@@ -585,7 +598,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -648,7 +661,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -722,7 +735,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -787,6 +800,7 @@ describe('create()', () => {
           },
         ],
         alertTypeId: '123',
+        consumer: 'bar',
         name: 'abc',
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -794,7 +808,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         updatedBy: 'elastic',
         enabled: true,
-        interval: '10s',
+        schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
         mutedInstanceIds: [],
@@ -820,7 +834,7 @@ describe('enable()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: false,
       },
@@ -846,7 +860,7 @@ describe('enable()', () => {
       'alert',
       '1',
       {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -879,7 +893,7 @@ describe('enable()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
       },
@@ -897,7 +911,7 @@ describe('enable()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: false,
       },
@@ -927,7 +941,7 @@ describe('enable()', () => {
       'alert',
       '1',
       {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -962,7 +976,7 @@ describe('disable()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -976,7 +990,7 @@ describe('disable()', () => {
       'alert',
       '1',
       {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         apiKey: null,
         apiKeyOwner: null,
@@ -997,7 +1011,7 @@ describe('disable()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: false,
         scheduledTaskId: 'task-123',
@@ -1060,7 +1074,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1088,7 +1102,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1107,7 +1121,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1129,7 +1143,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1157,7 +1171,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1176,7 +1190,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
@@ -1199,7 +1213,7 @@ describe('get()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1235,9 +1249,11 @@ describe('get()', () => {
         ],
         "alertTypeId": "123",
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
       }
     `);
@@ -1257,7 +1273,7 @@ describe('get()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1292,7 +1308,7 @@ describe('find()', () => {
           type: 'alert',
           attributes: {
             alertTypeId: '123',
-            interval: '10s',
+            schedule: { interval: '10s' },
             params: {
               bar: true,
             },
@@ -1332,9 +1348,11 @@ describe('find()', () => {
             ],
             "alertTypeId": "123",
             "id": "1",
-            "interval": "10s",
             "params": Object {
               "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
             },
           },
         ],
@@ -1362,7 +1380,7 @@ describe('delete()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1443,7 +1461,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1470,7 +1488,7 @@ describe('update()', () => {
     const result = await alertsClient.update({
       id: '1',
       data: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1501,9 +1519,11 @@ describe('update()', () => {
         ],
         "enabled": true,
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
       }
@@ -1528,10 +1548,12 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyOwner": null,
         "enabled": true,
-        "interval": "10s",
         "name": "abc",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1598,7 +1620,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1651,7 +1673,7 @@ describe('update()', () => {
     const result = await alertsClient.update({
       id: '1',
       data: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1712,9 +1734,11 @@ describe('update()', () => {
         ],
         "enabled": true,
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
       }
@@ -1771,7 +1795,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        interval: '10s',
+        schedule: { interval: '10s' },
         params: {
           bar: true,
         },
@@ -1799,7 +1823,7 @@ describe('update()', () => {
     const result = await alertsClient.update({
       id: '1',
       data: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1831,9 +1855,11 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "enabled": true,
         "id": "1",
-        "interval": "10s",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
       }
@@ -1858,10 +1884,12 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyOwner": "elastic",
         "enabled": true,
-        "interval": "10s",
         "name": "abc",
         "params": Object {
           "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1909,7 +1937,7 @@ describe('update()', () => {
       alertsClient.update({
         id: '1',
         data: {
-          interval: '10s',
+          schedule: { interval: '10s' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1930,6 +1958,228 @@ describe('update()', () => {
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
+
+  describe('updating an alert schedule', () => {
+    function mockApiCalls(
+      alertId: string,
+      taskId: string,
+      currentSchedule: IntervalSchedule,
+      updatedSchedule: IntervalSchedule
+    ) {
+      // mock return values from deps
+      alertTypeRegistry.get.mockReturnValueOnce({
+        id: '123',
+        name: 'Test',
+        actionGroups: ['default'],
+        async executor() {},
+      });
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              actionTypeId: 'test',
+            },
+            references: [],
+          },
+        ],
+      });
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: alertId,
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          alertTypeId: '123',
+          schedule: currentSchedule,
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      taskManager.schedule.mockResolvedValueOnce({
+        id: taskId,
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+      });
+      savedObjectsClient.update.mockResolvedValueOnce({
+        id: alertId,
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: updatedSchedule,
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          scheduledTaskId: taskId,
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: alertId,
+          },
+        ],
+      });
+
+      taskManager.runNow.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+    }
+
+    test('updating the alert schedule should rerun the task immediately', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
+
+      await alertsClient.update({
+        id: alertId,
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.runNow).toHaveBeenCalledWith(taskId);
+    });
+
+    test('updating the alert without changing the schedule should not rerun the task', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
+
+      await alertsClient.update({
+        id: alertId,
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.runNow).not.toHaveBeenCalled();
+    });
+
+    test('updating the alert should not wait for the rerun the task to complete', async done => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+
+      const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
+      resolveAfterAlertUpdatedCompletes.then(() => done());
+
+      taskManager.runNow.mockReset();
+      taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
+
+      await alertsClient.update({
+        id: alertId,
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.runNow).toHaveBeenCalled();
+
+      resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
+    });
+
+    test('logs when the rerun of an alerts underlying task fails', async () => {
+      const alertId = uuid.v4();
+      const taskId = uuid.v4();
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+
+      taskManager.runNow.mockReset();
+      taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
+
+      await alertsClient.update({
+        id: alertId,
+        data: {
+          schedule: { interval: '10s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.runNow).toHaveBeenCalled();
+
+      expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+        `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
+      );
+    });
+  });
 });
 
 describe('updateApiKey()', () => {
@@ -1939,7 +2189,7 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
       },
@@ -1956,7 +2206,7 @@ describe('updateApiKey()', () => {
       'alert',
       '1',
       {
-        interval: '10s',
+        schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
         apiKey: Buffer.from('123:abc').toString('base64'),

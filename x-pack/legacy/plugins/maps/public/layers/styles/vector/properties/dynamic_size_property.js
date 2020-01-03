@@ -43,6 +43,25 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
+    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+    this._isSymbolizedAsIcon = isSymbolizedAsIcon;
+  }
+
+  supportsFeatureState() {
+    // mb style "icon-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
+      return false;
+    }
+
+    // mb style "text-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.LABEL_SIZE) {
+      return false;
+    }
+
+    return true;
+  }
+
   syncHaloWidthWithMb(mbLayerId, mbMap) {
     const haloWidth = this._getMbSize();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
@@ -89,6 +108,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
+  syncLabelSizeWithMb(mbLayerId, mbMap) {
+    const lineWidth = this._getMbSize();
+    mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
+  }
+
   _getMbSize() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({
@@ -101,10 +125,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+    const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['feature-state', targetName], 0],
+      ['coalesce', [lookup, targetName], 0],
       0,
       minSize,
       1,
@@ -121,7 +146,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     );
   }
 
-  renderHeader() {
+  renderLegendHeader() {
     let icons;
     if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();

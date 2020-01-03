@@ -17,6 +17,7 @@ export class Plugin {
     const kbnServer = core._kbnServer;
     const config = core.config();
     const usageCollection = plugins.usageCollection;
+    const licensing = plugins.licensing;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -91,17 +92,16 @@ export class Plugin {
       kbnServerVersion: kbnServer.version,
     });
     const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
-    const { info: xpackMainInfo } = xpackMainPlugin;
 
     if (kibanaCollectionEnabled) {
       /*
        * Bulk uploading of Kibana stats
        */
-      xpackMainInfo.onLicenseInfoChange(() => {
+      licensing.license$.subscribe(license => {
         // use updated xpack license info to start/stop bulk upload
-        const mainMonitoring = xpackMainInfo.feature('monitoring');
+        const mainMonitoring = license.getFeature('monitoring');
         const monitoringBulkEnabled =
-          mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+          mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
         if (monitoringBulkEnabled) {
           bulkUploader.start(usageCollection);
         } else {
@@ -115,7 +115,7 @@ export class Plugin {
       );
     }
 
-    core.injectUiAppVars('monitoring', core => {
+    core.injectUiAppVars('monitoring', () => {
       const config = core.config();
       return {
         maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),

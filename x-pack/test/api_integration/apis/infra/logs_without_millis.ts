@@ -8,10 +8,27 @@ import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+
+import {
+  createPlainError,
+  throwErrors,
+} from '../../../../legacy/plugins/infra/common/runtime_types';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
+import {
+  LOG_ENTRIES_SUMMARY_PATH,
+  logEntriesSummaryRequestRT,
+  logEntriesSummaryResponseRT,
+} from '../../../../legacy/plugins/infra/common/http_api/log_entries';
 
+const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
 const KEY_WITHIN_DATA_RANGE = {
   time: new Date('2019-01-06T00:00:00.000Z').valueOf(),
   tiebreaker: 0,
@@ -28,6 +45,7 @@ const LATEST_KEY_WITH_DATA = {
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('logs without epoch_millis format', () => {
     before(() => esArchiver.load('infra/logs_without_epoch_millis'));
@@ -74,26 +92,31 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('logSummaryBetween should return non-empty buckets', async () => {
-      const start = EARLIEST_KEY_WITH_DATA.time;
-      const end = LATEST_KEY_WITH_DATA.time + 1; // the interval end is exclusive
-      const bucketSize = Math.ceil((end - start) / 10);
+      const startDate = EARLIEST_KEY_WITH_DATA.time;
+      const endDate = LATEST_KEY_WITH_DATA.time + 1; // the interval end is exclusive
+      const bucketSize = Math.ceil((endDate - startDate) / 10);
 
-      const {
-        data: {
-          source: { logSummaryBetween },
-        },
-      } = await client.query<any>({
-        query: logSummaryBetweenQuery,
-        variables: {
-          start,
-          end,
-          bucketSize,
-        },
-      });
+      const { body } = await supertest
+        .post(LOG_ENTRIES_SUMMARY_PATH)
+        .set(COMMON_HEADERS)
+        .send(
+          logEntriesSummaryRequestRT.encode({
+            sourceId: 'default',
+            startDate,
+            endDate,
+            bucketSize,
+            query: null,
+          })
+        )
+        .expect(200);
 
-      expect(logSummaryBetween).to.have.property('buckets');
+      const logSummaryResponse = pipe(
+        logEntriesSummaryResponseRT.decode(body),
+        fold(throwErrors(createPlainError), identity)
+      );
+
       expect(
-        logSummaryBetween.buckets.filter((bucket: any) => bucket.entriesCount > 0)
+        logSummaryResponse.data.buckets.filter((bucket: any) => bucket.entriesCount > 0)
       ).to.have.length(2);
     });
   });
@@ -159,34 +182,6 @@ const logEntriesBetweenQuery = gql`
 
   ${sharedFragments.InfraTimeKey}
   ${sharedFragments.InfraLogEntryFields}
-`;
-
-const logSummaryBetweenQuery = gql`
-  query LogSummary(
-    $sourceId: ID = "default"
-    $start: Float!
-    $end: Float!
-    $bucketSize: Float!
-    $filterQuery: String
-  ) {
-    source(id: $sourceId) {
-      id
-      logSummaryBetween(
-        start: $start
-        end: $end
-        bucketSize: $bucketSize
-        filterQuery: $filterQuery
-      ) {
-        start
-        end
-        buckets {
-          start
-          end
-          entriesCount
-        }
-      }
-    }
-  }
 `;
 
 const isSorted = <Value>(comparator: (first: Value, second: Value) => number) => (

@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         state: undefined,
       };
       const expectedSearchString =
-        "logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194))&sourceId=default&_g=()";
+        "logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194))&sourceId=default";
       const expectedRedirect = `/logs/stream?${expectedSearchString}`;
 
       await pageObjects.common.navigateToActualUrl(

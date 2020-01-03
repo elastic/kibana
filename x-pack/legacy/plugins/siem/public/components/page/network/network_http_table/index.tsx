@@ -11,6 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
 import {
+  Direction,
   NetworkHttpEdges,
   NetworkHttpFields,
   NetworkHttpSortField,
@@ -109,7 +110,7 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
             tableType,
             updates: {
               sort: {
-                direction: criteria.sort.direction,
+                direction: criteria.sort.direction as Direction,
               },
             },
           });
