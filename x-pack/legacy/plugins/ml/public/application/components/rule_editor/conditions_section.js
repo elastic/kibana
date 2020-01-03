@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for rendering the form fields for editing the conditions section of a rule.
  */
@@ -12,22 +11,18 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { ConditionExpression } from './condition_expression';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 
 export function ConditionsSection({
   isEnabled,
   conditions,
   addCondition,
   updateCondition,
-  deleteCondition }) {
-
+  deleteCondition,
+}) {
   if (isEnabled === false) {
     return null;
   }
@@ -53,9 +48,7 @@ export function ConditionsSection({
     <React.Fragment>
       {expressions}
       <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        onClick={() => addCondition()}
-      >
+      <EuiButtonEmpty onClick={() => addCondition()}>
         <FormattedMessage
           id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
           defaultMessage="Add new condition"
@@ -63,12 +56,11 @@ export function ConditionsSection({
       </EuiButtonEmpty>
     </React.Fragment>
   );
-
 }
 ConditionsSection.propTypes = {
   isEnabled: PropTypes.bool.isRequired,
   conditions: PropTypes.array,
   addCondition: PropTypes.func.isRequired,
   updateCondition: PropTypes.func.isRequired,
-  deleteCondition: PropTypes.func.isRequired
+  deleteCondition: PropTypes.func.isRequired,
 };

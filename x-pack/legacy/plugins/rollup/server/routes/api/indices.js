@@ -6,11 +6,20 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 
 function isNumericField(fieldCapability) {
-  const numericTypes = ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'];
+  const numericTypes = [
+    'long',
+    'integer',
+    'short',
+    'byte',
+    'double',
+    'float',
+    'half_float',
+    'scaled_float',
+  ];
   return numericTypes.some(numericType => fieldCapability[numericType] != null);
 }
 
@@ -25,22 +34,22 @@ export function registerIndicesRoute(server) {
     path: '/api/rollup/indices',
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         const data = await callWithRequest('rollup.rollupIndexCapabilities', {
-          indexPattern: '_all'
+          indexPattern: '_all',
         });
         return getCapabilitiesForRollupIndices(data);
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
         return wrapUnknownError(err);
       }
-    }
+    },
   });
 
   /**
@@ -53,14 +62,14 @@ export function registerIndicesRoute(server) {
     path: '/api/rollup/index_pattern_validity/{indexPattern}',
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const { indexPattern } = request.params;
-        const [ fieldCapabilities, rollupIndexCapabilities ] = await Promise.all([
+        const [fieldCapabilities, rollupIndexCapabilities] = await Promise.all([
           callWithRequest('rollup.fieldCapabilities', { indexPattern }),
           callWithRequest('rollup.rollupIndexCapabilities', { indexPattern }),
         ]);
@@ -73,7 +82,7 @@ export function registerIndicesRoute(server) {
         const keywordFields = [];
 
         const fieldCapabilitiesEntries = Object.entries(fieldCapabilities.fields);
-        fieldCapabilitiesEntries.forEach(([ fieldName, fieldCapability ]) => {
+        fieldCapabilitiesEntries.forEach(([fieldName, fieldCapability]) => {
           if (fieldCapability.date) {
             dateFields.push(fieldName);
             return;
@@ -96,7 +105,7 @@ export function registerIndicesRoute(server) {
           numericFields,
           keywordFields,
         };
-      } catch(err) {
+      } catch (err) {
         // 404s are still valid results.
         if (err.statusCode === 404) {
           return {
@@ -114,6 +123,6 @@ export function registerIndicesRoute(server) {
 
         return wrapUnknownError(err);
       }
-    }
+    },
   });
 }

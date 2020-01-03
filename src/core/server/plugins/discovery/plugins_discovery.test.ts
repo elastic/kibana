@@ -20,9 +20,9 @@
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
 
 import { resolve } from 'path';
-import { BehaviorSubject } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
+import { ConfigService, Env } from '../../config';
+import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { PluginWrapper } from '../plugin';
@@ -115,9 +115,7 @@ test('properly iterates through plugin search locations', async () => {
     })
   );
   const configService = new ConfigService(
-    new BehaviorSubject<Config>(
-      new ObjectToConfigAdapter({ plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } })
-    ),
+    rawConfigServiceMock.create({ rawConfig: { plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } } }),
     env,
     logger
   );

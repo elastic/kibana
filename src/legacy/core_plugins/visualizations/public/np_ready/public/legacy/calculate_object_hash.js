@@ -35,14 +35,16 @@ function fold(hash, text) {
   }
   for (i = 0, len = text.length; i < len; i++) {
     chr = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
+    hash = (hash << 5) - hash + chr;
     hash |= 0;
   }
   return hash < 0 ? hash * -2 : hash;
 }
 
 function foldObject(hash, o, seen) {
-  return Object.keys(o).sort().reduce(foldKey, hash);
+  return Object.keys(o)
+    .sort()
+    .reduce(foldKey, hash);
   function foldKey(hash, key) {
     return foldValue(hash, o[key], key, seen);
   }

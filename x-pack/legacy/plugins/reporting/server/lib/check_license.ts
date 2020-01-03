@@ -23,7 +23,9 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (exportTypes: Array<ExportTypeDefinition<any, any, any, any>>) => {
+const makeManagementFeature = (
+  exportTypes: Array<ExportTypeDefinition<unknown, unknown, unknown, unknown>>
+) => {
   return {
     id: 'management',
     checkLicense: (license: XPackInfoLicense | null) => {
@@ -56,7 +58,9 @@ const makeManagementFeature = (exportTypes: Array<ExportTypeDefinition<any, any,
   };
 };
 
-const makeExportTypeFeature = (exportType: ExportTypeDefinition<any, any, any, any>) => {
+const makeExportTypeFeature = (
+  exportType: ExportTypeDefinition<unknown, unknown, unknown, unknown>
+) => {
   return {
     id: exportType.id,
     checkLicense: (license: XPackInfoLicense | null) => {

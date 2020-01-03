@@ -5,7 +5,10 @@
  */
 
 import React from 'react';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +31,7 @@ esSection.register('rollup_jobs', {
   url: `#${CRUD_APP_BASE_PATH}/job_list`,
 });
 
-const renderReact = async (elem) => {
+const renderReact = async elem => {
   render(
     <I18nContext>
       <Provider store={rollupJobsStore}>
@@ -77,7 +80,7 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
         });
       });
     }
-  }
+  },
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -90,6 +93,6 @@ FeatureCatalogueRegistryProvider.register(() => {
     icon: 'indexRollupApp',
     path: `#${CRUD_APP_BASE_PATH}/job_list`,
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

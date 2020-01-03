@@ -34,7 +34,6 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
               executeScript={[Function]}
               indexPattern={Object {}}
               lang="painless"
-              name="myScriptedField"
             />,
             "data-test-subj": "testTab",
             "id": "test",

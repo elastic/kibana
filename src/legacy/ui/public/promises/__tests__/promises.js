@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
-describe('Promise service',  () => {
+describe('Promise service', () => {
   let Promise;
   let $rootScope;
 
@@ -34,16 +34,18 @@ describe('Promise service',  () => {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
-    sandbox.useFakeTimers();
+  beforeEach(
+    ngMock.inject($injector => {
+      sandbox.useFakeTimers();
 
-    Promise = $injector.get('Promise');
-    $rootScope = $injector.get('$rootScope');
-  }));
+      Promise = $injector.get('Promise');
+      $rootScope = $injector.get('$rootScope');
+    })
+  );
 
   afterEach(() => sandbox.restore());
 
-  describe('Constructor',  () => {
+  describe('Constructor', () => {
     it('provides resolve and reject function', () => {
       const executor = sinon.stub();
       new Promise(executor);
@@ -63,7 +65,7 @@ describe('Promise service',  () => {
     sinon.assert.calledWithExactly(onResolve, true);
   });
 
-  describe('Promise.fromNode',  () => {
+  describe('Promise.fromNode', () => {
     it('creates a callback that controls a promise', () => {
       const callback = sinon.stub();
       Promise.fromNode(callback);
@@ -105,10 +107,10 @@ describe('Promise service',  () => {
       tick();
 
       sinon.assert.calledOnce(onResolve);
-      sinon.assert.calledWithExactly(
-        onResolve,
-        [sinon.match.same(result1), sinon.match.same(result2)]
-      );
+      sinon.assert.calledWithExactly(onResolve, [
+        sinon.match.same(result1),
+        sinon.match.same(result2),
+      ]);
     });
 
     it('resolves with an array if multiple undefined are received', () => {
@@ -183,7 +185,9 @@ describe('Promise service',  () => {
       it('rejects the promise', () => {
         const football = {};
         const onReject = sinon.stub();
-        Promise.race().catch(() => football).then(onReject);
+        Promise.race()
+          .catch(() => football)
+          .then(onReject);
 
         tick();
 
@@ -208,7 +212,9 @@ describe('Promise service',  () => {
       it('reject the promise', () => {
         const football = {};
         const onReject = sinon.stub();
-        Promise.race({}).catch(() => football).then(onReject);
+        Promise.race({})
+          .catch(() => football)
+          .then(onReject);
 
         tick();
 
@@ -219,7 +225,7 @@ describe('Promise service',  () => {
 
     describe('argument is a generator', () => {
       it('resolves with the first resolved value', () => {
-        function *gen() {
+        function* gen() {
           yield new Promise(resolve => setTimeout(resolve, 100, 1));
           yield new Promise(resolve => setTimeout(resolve, 200, 2));
         }
@@ -234,7 +240,7 @@ describe('Promise service',  () => {
       });
 
       it('resolves with the first non-promise value', () => {
-        function *gen() {
+        function* gen() {
           yield 1;
           yield new Promise(resolve => setTimeout(resolve, 200, 2));
         }
@@ -250,7 +256,7 @@ describe('Promise service',  () => {
 
       it('iterates all values from the generator, even if one is already "resolved"', () => {
         let yieldCount = 0;
-        function *gen() {
+        function* gen() {
           yieldCount += 1;
           yield 1;
           yieldCount += 1;

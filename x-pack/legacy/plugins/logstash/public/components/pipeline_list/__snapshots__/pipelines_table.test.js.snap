@@ -39,7 +39,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     ]
   }
   data-test-subj="pipelineTable"
-  executeQueryOptions={Object {}}
   isSelectable={true}
   itemId="id"
   items={

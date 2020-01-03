@@ -19,20 +19,12 @@
 
 import React from 'react';
 
-import {
-  EuiText,
-  EuiTextColor,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const StatusMessage = ({
-  matchedIndices: {
-    allIndices = [],
-    exactMatchedIndices = [],
-    partialMatchedIndices = []
-  },
+  matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
   isIncludingSystemIndices,
   query,
   showSystemIndicies,
@@ -47,19 +39,17 @@ export const StatusMessage = ({
     statusIcon = null;
     statusColor = 'default';
 
-
     if (allIndicesLength > 1) {
       statusMessage = (
         <span>
           <FormattedMessage
             id="kbn.management.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
             defaultMessage="Your index pattern can match any of your {strongIndices}, below."
-            values={{ strongIndices: (<strong>{allIndicesLength} indices</strong>) }}
+            values={{ strongIndices: <strong>{allIndicesLength} indices</strong> }}
           />
         </span>
       );
-    }
-    else if (!isIncludingSystemIndices && showSystemIndicies) {
+    } else if (!isIncludingSystemIndices && showSystemIndicies) {
       statusMessage = (
         <span>
           <FormattedMessage
@@ -69,8 +59,7 @@ export const StatusMessage = ({
           />
         </span>
       );
-    }
-    else {
+    } else {
       statusMessage = (
         <span>
           <FormattedMessage
@@ -80,8 +69,7 @@ export const StatusMessage = ({
         </span>
       );
     }
-  }
-  else if (exactMatchedIndices.length) {
+  } else if (exactMatchedIndices.length) {
     statusIcon = 'check';
     statusColor = 'secondary';
     statusMessage = (
@@ -97,7 +85,8 @@ export const StatusMessage = ({
                   id="kbn.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
                   defaultMessage="Success!"
                 />
-              </strong>),
+              </strong>
+            ),
             strongIndices: (
               <strong>
                 <FormattedMessage
@@ -105,13 +94,13 @@ export const StatusMessage = ({
                   defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                   values={{ indicesLength: exactMatchedIndices.length }}
                 />
-              </strong>)
+              </strong>
+            ),
           }}
         />
       </span>
     );
-  }
-  else if (partialMatchedIndices.length) {
+  } else if (partialMatchedIndices.length) {
     statusIcon = null;
     statusColor = 'default';
     statusMessage = (
@@ -129,13 +118,13 @@ export const StatusMessage = ({
                   defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
                   values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />
-              </strong>)
+              </strong>
+            ),
           }}
         />
       </span>
     );
-  }
-  else if (allIndicesLength) {
+  } else if (allIndicesLength) {
     statusIcon = null;
     statusColor = 'default';
     statusMessage = (
@@ -152,7 +141,8 @@ export const StatusMessage = ({
                   defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                   values={{ indicesLength: allIndicesLength }}
                 />
-              </strong>),
+              </strong>
+            ),
             indicesLength: allIndicesLength,
           }}
         />
@@ -163,7 +153,7 @@ export const StatusMessage = ({
   return (
     <EuiText size="s" data-test-subj="createIndexPatternStatusMessage">
       <EuiTextColor color={statusColor}>
-        { statusIcon ? <EuiIcon type={statusIcon}/> : null }
+        {statusIcon ? <EuiIcon type={statusIcon} /> : null}
         {statusMessage}
       </EuiTextColor>
     </EuiText>

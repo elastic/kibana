@@ -111,10 +111,16 @@ export {
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from './saved_objects';
 
 export {
-  HttpServiceBase,
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,

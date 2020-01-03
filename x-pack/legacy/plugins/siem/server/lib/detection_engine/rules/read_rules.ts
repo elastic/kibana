@@ -4,66 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-import { RuleAlertType, isAlertTypeArray, ReadRuleParams, ReadRuleByRuleId } from './types';
+import { RuleAlertType, ReadRuleParams, isAlertType } from './types';
 
-export const findRuleInArrayByRuleId = (
-  objects: object[],
-  ruleId: string
-): RuleAlertType | null => {
-  if (isAlertTypeArray(objects)) {
-    const rules: RuleAlertType[] = objects;
-    const rule: RuleAlertType[] = rules.filter(datum => {
-      return datum.params.ruleId === ruleId;
-    });
-    if (rule.length !== 0) {
-      return rule[0];
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
-
-// This an extremely slow and inefficient way of getting a rule by its id.
-// I have to manually query every single record since the rule Params are
-// not indexed and I cannot push in my own _id when I create an alert at the moment.
-// TODO: Once we can directly push in the _id, then we should no longer need this way.
-// TODO: This is meant to be _very_ temporary.
-export const readRuleByRuleId = async ({
+/**
+ * This reads the rules through a cascade try of what is fastest to what is slowest.
+ * @param id - This is the fastest. This is the auto-generated id through the parameter id.
+ * and the id will either be found through `alertsClient.get({ id })` or it will not
+ * be returned as a not-found or a thrown error that is not 404.
+ * @param ruleId - This is a close second to being fast as long as it can find the rule_id from
+ * a filter query against the tags using `alert.attributes.tags: "__internal:${ruleId}"]`
+ */
+export const readRules = async ({
   alertsClient,
+  id,
   ruleId,
-}: ReadRuleByRuleId): Promise<RuleAlertType | null> => {
-  const firstRules = await findRules({ alertsClient, page: 1 });
-  const firstRule = findRuleInArrayByRuleId(firstRules.data, ruleId);
-  if (firstRule != null) {
-    return firstRule;
-  } else {
-    const totalPages = Math.ceil(firstRules.total / firstRules.perPage);
-    return Array(totalPages)
-      .fill({})
-      .map((_, page) => {
-        // page index never starts at zero. It always has to be 1 or greater
-        return findRules({ alertsClient, page: page + 1 });
-      })
-      .reduce<Promise<RuleAlertType | null>>(async (accum, findRule) => {
-        const rules = await findRule;
-        const rule = findRuleInArrayByRuleId(rules.data, ruleId);
-        if (rule != null) {
-          return rule;
-        } else {
-          return accum;
-        }
-      }, Promise.resolve(null));
-  }
-};
-
-export const readRules = async ({ alertsClient, id, ruleId }: ReadRuleParams) => {
+}: ReadRuleParams): Promise<RuleAlertType | null> => {
   if (id != null) {
     try {
-      const output = await alertsClient.get({ id });
-      return output;
+      const rule = await alertsClient.get({ id });
+      if (isAlertType(rule)) {
+        return rule;
+      } else {
+        return null;
+      }
     } catch (err) {
       if (err.output.statusCode === 404) {
         return null;
@@ -73,7 +38,16 @@ export const readRules = async ({ alertsClient, id, ruleId }: ReadRuleParams) =>
       }
     }
   } else if (ruleId != null) {
-    return readRuleByRuleId({ alertsClient, ruleId });
+    const ruleFromFind = await findRules({
+      alertsClient,
+      filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
+      page: 1,
+    });
+    if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
+      return null;
+    } else {
+      return ruleFromFind.data[0];
+    }
   } else {
     // should never get here, and yet here we are.
     return null;

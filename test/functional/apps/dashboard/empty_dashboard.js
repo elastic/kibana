@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -49,7 +49,6 @@ export default function ({ getService, getPageObjects }) {
       expect(addButtonExists).to.be(true);
     });
 
-    // Flaky test: https://github.com/elastic/kibana/issues/48236
     it.skip('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
@@ -57,11 +56,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new visualization from dashboard', async () => {
+      await testSubjects.exists('addVisualizationButton');
       await testSubjects.click('addVisualizationButton');
-      await dashboardVisualizations.createAndAddMarkdown({ name: 'Dashboard Test Markdown', markdown: 'Markdown text' }, false);
+      await dashboardVisualizations.createAndAddMarkdown({
+        name: 'Dashboard Test Markdown',
+        markdown: 'Markdown text',
+      });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
     });
   });
 }
-
