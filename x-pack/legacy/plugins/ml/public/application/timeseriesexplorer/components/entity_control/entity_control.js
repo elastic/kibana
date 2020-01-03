@@ -10,22 +10,13 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiToolTip } from '@elastic/eui';
 
-function getEntityControlOptions(entity) {
-  if (!Array.isArray(entity.fieldValues)) {
-    return [];
-  }
-
-  return entity.fieldValues.map(value => {
-    return { label: value };
-  });
-}
-
 export const EntityControl = injectI18n(
   class EntityControl extends React.Component {
     static propTypes = {
       entity: PropTypes.object.isRequired,
       entityFieldValueChanged: PropTypes.func.isRequired,
       forceSelection: PropTypes.bool.isRequired,
+      options: PropTypes.array.isRequired,
     };
 
     state = {
@@ -74,9 +65,8 @@ export const EntityControl = injectI18n(
     };
 
     render() {
-      const { entity, intl, forceSelection } = this.props;
+      const { entity, intl, forceSelection, options } = this.props;
       const { selectedOptions } = this.state;
-      const options = getEntityControlOptions(entity);
 
       const control = (
         <EuiComboBox

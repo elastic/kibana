@@ -344,6 +344,8 @@ export class Explorer extends React.Component {
       viewBySwimlaneData.laneLabels &&
       viewBySwimlaneData.laneLabels.length > 0;
 
+    const bounds = timefilter.getActiveBounds();
+
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
@@ -571,8 +573,8 @@ export class Explorer extends React.Component {
             </div>
 
             <AnomaliesTable
+              bounds={bounds}
               tableData={tableData}
-              timefilter={timefilter}
               influencerFilter={this.applyFilter}
             />
           </div>

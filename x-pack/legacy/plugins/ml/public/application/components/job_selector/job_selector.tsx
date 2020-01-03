@@ -113,6 +113,11 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
   const flyoutEl = useRef<{ flyout: HTMLElement }>(null);
 
+  // Ensure JobSelectionBar gets updated when selection via globalState changes.
+  useEffect(() => {
+    setSelectedIds(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+  }, [JSON.stringify([selectedJobIds, selectedGroups])]);
+
   // Ensure current selected ids always show up in flyout
   useEffect(() => {
     setNewSelection(selectedIds);

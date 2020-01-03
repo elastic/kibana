@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import moment from 'moment';
+import { Subscription } from 'rxjs';
 
 // @ts-ignore
 import queryString from 'query-string';
 
 import { timefilter } from 'ui/timefilter';
 
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
+import { annotationsRefresh$ } from '../../services/annotations_service';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
 import { useUrlState } from '../../util/url_state';
@@ -41,21 +47,50 @@ export const timeSeriesExplorerRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context } = useResolver('', undefined, config, {
+  const { context, results } = useResolver('', undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
 
   return (
     <PageLoader context={context}>
-      <TimeSeriesExplorerUrlStateManager config={config} />
+      <TimeSeriesExplorerUrlStateManager
+        config={config}
+        jobsWithTimeRange={results.jobsWithTimeRange.jobs}
+      />
     </PageLoader>
   );
 };
 
-const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
+interface TimeSeriesExplorerUrlStateManager {
+  config: any;
+  jobsWithTimeRange: MlJobWithTimeRange[];
+}
+
+const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
+  config,
+  jobsWithTimeRange,
+}) => {
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
+
+  const [lastRefresh, setLastRefresh] = useState(0);
+  const refreshHandler = () => setLastRefresh(Date.now());
+
+  useEffect(() => {
+    timefilter.enableTimeRangeSelector();
+    timefilter.enableAutoRefreshSelector();
+
+    const subscriptions = new Subscription();
+
+    subscriptions.add(annotationsRefresh$.subscribe(refreshHandler));
+    subscriptions.add(mlTimefilterRefresh$.subscribe(refreshHandler));
+
+    subscriptions.add(timefilter.getTimeUpdate$().subscribe(refreshHandler));
+
+    return () => subscriptions.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -65,9 +100,16 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
       });
     }
   }, [JSON.stringify(globalState?.time)]);
+  let bounds;
+  if (globalState?.time !== undefined) {
+    bounds = {
+      min: moment(globalState.time.from),
+      max: moment(globalState.time.to),
+    };
+  }
 
   const selectedJobIds = globalState?.ml?.jobIds;
-  const selectedDetectorIndex = appState?.mlTimeSeriesExplorer?.detectorIndex;
+  const selectedDetectorIndex = +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = appState?.mlTimeSeriesExplorer?.forecastId;
   const zoom = appState?.mlTimeSeriesExplorer?.zoom;
@@ -106,7 +148,7 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
 
       setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
     },
-    [JSON.stringify(appState)]
+    [JSON.stringify([appState, globalState])]
   );
 
   const [tableInterval] = useTableInterval();
@@ -119,9 +161,12 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
     <TimeSeriesExplorer
       {...{
         appStateHandler,
+        bounds,
         dateFormatTz,
+        jobsWithTimeRange,
+        lastRefresh,
         selectedJobIds,
-        selectedDetectorIndex: +selectedDetectorIndex || 0,
+        selectedDetectorIndex,
         selectedEntities,
         selectedForecastId,
         setGlobalState,

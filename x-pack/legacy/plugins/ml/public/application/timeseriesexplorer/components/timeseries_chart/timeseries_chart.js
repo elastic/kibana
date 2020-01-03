@@ -96,6 +96,7 @@ const TimeseriesChartIntl = injectI18n(
     static propTypes = {
       annotation: PropTypes.object,
       autoZoomDuration: PropTypes.number,
+      bounds: PropTypes.object,
       contextAggregationInterval: PropTypes.object,
       contextChartData: PropTypes.array,
       contextForecastData: PropTypes.array,
@@ -112,7 +113,6 @@ const TimeseriesChartIntl = injectI18n(
       showModelBounds: PropTypes.bool.isRequired,
       svgWidth: PropTypes.number.isRequired,
       swimlaneData: PropTypes.array,
-      timefilter: PropTypes.object.isRequired,
       zoomFrom: PropTypes.object,
       zoomTo: PropTypes.object,
       zoomFromFocusLoaded: PropTypes.object,
@@ -883,13 +883,12 @@ const TimeseriesChartIntl = injectI18n(
     }
 
     createZoomInfoElements(zoomGroup, fcsWidth) {
-      const { autoZoomDuration, modelPlotEnabled, timefilter, intl } = this.props;
+      const { autoZoomDuration, bounds, modelPlotEnabled, intl } = this.props;
 
       const setZoomInterval = this.setZoomInterval.bind(this);
 
       // Create zoom duration links applicable for the current time span.
       // Don't add links for any durations which would give a brush extent less than 10px.
-      const bounds = timefilter.getActiveBounds();
       const boundsSecs = bounds.max.unix() - bounds.min.unix();
       const minSecs = (10 / this.vizWidth) * boundsSecs;
 
@@ -964,7 +963,7 @@ const TimeseriesChartIntl = injectI18n(
     }
 
     drawContextElements(cxtGroup, cxtWidth, cxtChartHeight, swlHeight) {
-      const { contextChartData, contextForecastData, modelPlotEnabled, timefilter } = this.props;
+      const { bounds, contextChartData, contextForecastData, modelPlotEnabled } = this.props;
 
       const data = contextChartData;
 
@@ -1030,7 +1029,6 @@ const TimeseriesChartIntl = injectI18n(
         .attr('y2', cxtChartHeight + swlHeight);
 
       // Add x axis.
-      const bounds = timefilter.getActiveBounds();
       const timeBuckets = new TimeBuckets();
       timeBuckets.setInterval('auto');
       timeBuckets.setBounds(bounds);
@@ -1358,13 +1356,12 @@ const TimeseriesChartIntl = injectI18n(
     };
 
     calculateContextXAxisDomain = () => {
-      const { contextAggregationInterval, swimlaneData, timefilter } = this.props;
+      const { bounds, contextAggregationInterval, swimlaneData } = this.props;
       // Calculates the x axis domain for the context elements.
       // Elasticsearch aggregation returns points at start of bucket,
       // so set the x-axis min to the start of the first aggregation interval,
       // and the x-axis max to the end of the last aggregation interval.
       // Context chart and swimlane use the same aggregation interval.
-      const bounds = timefilter.getActiveBounds();
       let earliest = bounds.min.valueOf();
 
       if (swimlaneData !== undefined && swimlaneData.length > 0) {
@@ -1402,9 +1399,8 @@ const TimeseriesChartIntl = injectI18n(
     };
 
     setZoomInterval(ms) {
-      const { timefilter, zoomTo } = this.props;
+      const { bounds, zoomTo } = this.props;
 
-      const bounds = timefilter.getActiveBounds();
       const minBoundsMs = bounds.min.valueOf();
       const maxBoundsMs = bounds.max.valueOf();
 

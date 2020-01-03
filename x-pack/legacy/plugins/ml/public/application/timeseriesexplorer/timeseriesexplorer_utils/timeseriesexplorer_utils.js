@@ -340,14 +340,13 @@ export function calculateDefaultFocusRange(
   return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
 }
 
-export function calculateInitialFocusRange(zoomState, contextAggregationInterval, timefilter) {
+export function calculateInitialFocusRange(zoomState, contextAggregationInterval, bounds) {
   if (zoomState !== undefined) {
     // Check that the zoom times are valid.
     // zoomFrom must be at or after context chart search bounds earliest,
     // zoomTo must be at or before context chart search bounds latest.
     const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
     const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-    const bounds = timefilter.getActiveBounds();
     const searchBounds = getBoundsRoundedToInterval(bounds, contextAggregationInterval, true);
     const earliest = searchBounds.min;
     const latest = searchBounds.max;

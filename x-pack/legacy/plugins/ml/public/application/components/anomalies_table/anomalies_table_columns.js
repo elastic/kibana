@@ -55,7 +55,7 @@ export function getColumns(
   examplesByJobId,
   isAggregatedData,
   interval,
-  timefilter,
+  bounds,
   showViewSeriesLink,
   showRuleEditorFlyout,
   itemIdToExpandedRowMap,
@@ -262,10 +262,10 @@ export function getColumns(
           return (
             <LinksMenu
               anomaly={item}
+              bounds={bounds}
               showViewSeriesLink={showViewSeriesLink}
               isAggregatedData={isAggregatedData}
               interval={interval}
-              timefilter={timefilter}
               showRuleEditorFlyout={showRuleEditorFlyout}
             />
           );
