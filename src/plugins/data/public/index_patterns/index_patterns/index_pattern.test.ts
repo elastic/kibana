@@ -33,8 +33,6 @@ import { setNotifications, setFieldFormats } from '../../services';
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { FieldFormatRegisty } from '../../field_formats_provider';
 
-jest.mock('ui/new_platform');
-
 jest.mock('../../../../kibana_utils/public', () => {
   const originalModule = jest.requireActual('../../../../kibana_utils/public');
 
@@ -47,19 +45,6 @@ jest.mock('../../../../kibana_utils/public', () => {
         _deserialize: jest.fn().mockImplementation(() => []),
       },
     })),
-  };
-});
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
-    addError: jest.fn(),
-  },
-}));
-
-jest.mock('ui/saved_objects', () => {
-  return {
-    findObjectByTitle: jest.fn(),
   };
 });
 

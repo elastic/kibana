@@ -10,7 +10,10 @@ import sinon from 'sinon';
 
 describe('Monitoring Verify License', () => {
   describe('Disabled by Configuration', () => {
-    const get = sinon.stub().withArgs('xpack.monitoring.cluster_alerts.enabled').returns(false);
+    const get = sinon
+      .stub()
+      .withArgs('xpack.monitoring.cluster_alerts.enabled')
+      .returns(false);
     const server = { config: sinon.stub().returns({ get }) };
 
     it('verifyMonitoringLicense returns false without checking the license', () => {
@@ -25,13 +28,21 @@ describe('Monitoring Verify License', () => {
 
   describe('Enabled by Configuration', () => {
     it('verifyMonitoringLicense returns false if enabled by configuration, but not by license', () => {
-      const get = sinon.stub().withArgs('xpack.monitoring.cluster_alerts.enabled').returns(true);
+      const get = sinon
+        .stub()
+        .withArgs('xpack.monitoring.cluster_alerts.enabled')
+        .returns(true);
       const server = {
         config: sinon.stub().returns({ get }),
-        plugins: { monitoring: { info: { } } }
+        plugins: { monitoring: { info: {} } },
       };
-      const getLicenseCheckResults = sinon.stub().returns({ clusterAlerts: { enabled: false }, message: 'failed!!' });
-      const feature = sinon.stub().withArgs('monitoring').returns({ getLicenseCheckResults });
+      const getLicenseCheckResults = sinon
+        .stub()
+        .returns({ clusterAlerts: { enabled: false }, message: 'failed!!' });
+      const feature = sinon
+        .stub()
+        .withArgs('monitoring')
+        .returns({ getLicenseCheckResults });
 
       server.plugins.monitoring.info = { feature };
 
@@ -46,13 +57,19 @@ describe('Monitoring Verify License', () => {
     });
 
     it('verifyMonitoringLicense returns true if enabled by configuration and by license', () => {
-      const get = sinon.stub().withArgs('xpack.monitoring.cluster_alerts.enabled').returns(true);
+      const get = sinon
+        .stub()
+        .withArgs('xpack.monitoring.cluster_alerts.enabled')
+        .returns(true);
       const server = {
         config: sinon.stub().returns({ get }),
-        plugins: { monitoring: { info: { } } }
+        plugins: { monitoring: { info: {} } },
       };
       const getLicenseCheckResults = sinon.stub().returns({ clusterAlerts: { enabled: true } });
-      const feature = sinon.stub().withArgs('monitoring').returns({ getLicenseCheckResults });
+      const feature = sinon
+        .stub()
+        .withArgs('monitoring')
+        .returns({ getLicenseCheckResults });
 
       server.plugins.monitoring.info = { feature };
 
@@ -68,10 +85,13 @@ describe('Monitoring Verify License', () => {
   });
 
   it('Monitoring feature info cannot be determined', () => {
-    const get = sinon.stub().withArgs('xpack.monitoring.cluster_alerts.enabled').returns(true);
+    const get = sinon
+      .stub()
+      .withArgs('xpack.monitoring.cluster_alerts.enabled')
+      .returns(true);
     const server = {
       config: sinon.stub().returns({ get }),
-      plugins: { monitoring: undefined } // simulate race condition
+      plugins: { monitoring: undefined }, // simulate race condition
     };
 
     const verification = verifyMonitoringLicense(server);

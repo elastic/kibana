@@ -8,7 +8,7 @@ import { AbstractVectorSource } from './vector_source';
 import {
   fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
-  SearchSource
+  SearchSource,
 } from '../../kibana_services';
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
@@ -21,14 +21,16 @@ import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
-
   static icon = 'logoElasticsearch';
 
   constructor(descriptor, inspectorAdapters) {
-    super({
-      ...descriptor,
-      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
-    }, inspectorAdapters);
+    super(
+      {
+        ...descriptor,
+        applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+      },
+      inspectorAdapters
+    );
   }
 
   isFieldAware() {
@@ -44,12 +46,12 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
+    return [this._descriptor.indexPatternId];
   }
 
   getQueryableIndexPatternIds() {
     if (this.getApplyGlobalQuery()) {
-      return  [this._descriptor.indexPatternId];
+      return [this._descriptor.indexPatternId];
     }
     return [];
   }
@@ -73,7 +75,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return [];
   }
 
-  async _runEsQuery({ requestId, requestName, requestDescription, searchSource, registerCancelCallback }) {
+  async _runEsQuery({
+    requestId,
+    requestName,
+    requestDescription,
+    searchSource,
+    registerCancelCallback,
+  }) {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
@@ -86,15 +94,17 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription,
         abortSignal: abortController.signal,
       });
-    } catch(error) {
+    } catch (error) {
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
       }
 
-      throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
-        defaultMessage: `Elasticsearch search request failed, error: {message}`,
-        values: { message: error.message }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
+          defaultMessage: `Elasticsearch search request failed, error: {message}`,
+          values: { message: error.message },
+        })
+      );
     }
   }
 
@@ -104,7 +114,8 @@ export class AbstractESSource extends AbstractVectorSource {
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
     const globalFilters = applyGlobalQuery ? searchFilters.filters : [];
     const allFilters = [...globalFilters];
-    if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
+    if (this.isFilterByMapBounds() && searchFilters.buffer) {
+      //buffer can be empty
       const geoField = await this._getGeoField();
       allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
     }
@@ -131,19 +142,23 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async getBoundsForFilters({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }) {
-
-    const searchSource = await this._makeSearchSource({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
+    const searchSource = await this._makeSearchSource(
+      { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
+      0
+    );
     const geoField = await this._getGeoField();
     const indexPattern = await this.getIndexPattern();
 
-    const geoBoundsAgg = [{
-      type: 'geo_bounds',
-      enabled: true,
-      params: {
-        field: geoField
+    const geoBoundsAgg = [
+      {
+        type: 'geo_bounds',
+        enabled: true,
+        params: {
+          field: geoField,
+        },
+        schema: 'metric',
       },
-      schema: 'metric'
-    }];
+    ];
 
     const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
     searchSource.setField('aggs', aggConfigs.toDsl());
@@ -152,16 +167,16 @@ export class AbstractESSource extends AbstractVectorSource {
     try {
       const esResp = await searchSource.fetch();
       esBounds = _.get(esResp, 'aggregations.1.bounds');
-    } catch(error) {
+    } catch (error) {
       esBounds = {
         top_left: {
           lat: 90,
-          lon: -180
+          lon: -180,
         },
         bottom_right: {
           lat: -90,
-          lon: 180
-        }
+          lon: 180,
+        },
       };
     }
 
@@ -169,7 +184,7 @@ export class AbstractESSource extends AbstractVectorSource {
       min_lon: esBounds.top_left.lon,
       max_lon: esBounds.bottom_right.lon,
       min_lat: esBounds.bottom_right.lat,
-      max_lat: esBounds.top_left.lat
+      max_lat: esBounds.top_left.lat,
     };
   }
 
@@ -192,10 +207,12 @@ export class AbstractESSource extends AbstractVectorSource {
       this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
       return this.indexPattern;
     } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
-        defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
-        values: { indexPatternId: this._descriptor.indexPatternId }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
+          defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
+          values: { indexPatternId: this._descriptor.indexPatternId },
+        })
+      );
     }
   }
 
@@ -210,15 +227,16 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-
   async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
-      throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-        defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
-        values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
+          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+          values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField },
+        })
+      );
     }
     return geoField;
   }
@@ -242,11 +260,13 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async getFieldFormatter(fieldName) {
-
     const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
 
     // Do not use field formatters for counting metrics
-    if (metricField && (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)) {
+    if (
+      metricField &&
+      (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)
+    ) {
       return null;
     }
 
@@ -259,7 +279,7 @@ export class AbstractESSource extends AbstractVectorSource {
     let indexPattern;
     try {
       indexPattern = await this.getIndexPattern();
-    } catch(error) {
+    } catch (error) {
       return null;
     }
 
@@ -271,7 +291,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return fieldFromIndexPattern.format.getConverterFor('text');
   }
 
-  async loadStylePropsMeta(layerName, style, dynamicStyleProps, registerCancelCallback, searchFilters) {
+  async loadStylePropsMeta(
+    layerName,
+    style,
+    dynamicStyleProps,
+    registerCancelCallback,
+    searchFilters
+  ) {
     const promises = dynamicStyleProps.map(dynamicStyleProp => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
@@ -289,24 +315,29 @@ export class AbstractESSource extends AbstractVectorSource {
     if (searchFilters.sourceQuery) {
       searchSource.setField('query', searchFilters.sourceQuery);
     }
-    if (style.isTimeAware() && await this.isTimeAware()) {
-      searchSource.setField('filter', [timefilter.createFilter(indexPattern, searchFilters.timeFilters)]);
+    if (style.isTimeAware() && (await this.isTimeAware())) {
+      searchSource.setField('filter', [
+        timefilter.createFilter(indexPattern, searchFilters.timeFilters),
+      ]);
     }
 
     const resp = await this._runEsQuery({
       requestId: `${this.getId()}_styleMeta`,
       requestName: i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
         defaultMessage: '{layerName} - metadata',
-        values: { layerName }
+        values: { layerName },
       }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestDescription', {
-        defaultMessage: 'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
-      }),
+      requestDescription: i18n.translate(
+        'xpack.maps.source.esSource.stylePropsMetaRequestDescription',
+        {
+          defaultMessage:
+            'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
+        }
+      ),
     });
 
     return resp.aggregations;
   }
-
 }

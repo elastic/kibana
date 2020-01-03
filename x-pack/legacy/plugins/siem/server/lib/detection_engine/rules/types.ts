@@ -31,6 +31,10 @@ export interface UpdateRulesRequest extends RequestFacade {
   payload: UpdateRuleAlertParamsRest;
 }
 
+export interface BulkUpdateRulesRequest extends RequestFacade {
+  payload: UpdateRuleAlertParamsRest[];
+}
+
 export type RuleAlertType = Alert & {
   id: string;
   params: RuleTypeParams;
@@ -38,6 +42,18 @@ export type RuleAlertType = Alert & {
 
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
+}
+
+export interface BulkRulesRequest extends RequestFacade {
+  payload: RuleAlertParamsRest[];
+}
+
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
+  query: { id: string | undefined; rule_id: string | undefined };
+};
+
+export interface QueryBulkRequest extends RequestFacade {
+  payload: Array<QueryRequest['query']>;
 }
 
 export interface FindRuleParams {
@@ -84,19 +100,10 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export interface ReadRuleByRuleId {
-  alertsClient: AlertsClient;
-  ruleId: string;
-}
-
 export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
   return obj.every(rule => isAlertType(rule));
 };
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isAlertTypeArray = (objArray: unknown[]): objArray is RuleAlertType[] => {
-  return objArray.length === 0 || isAlertType(objArray[0]);
 };

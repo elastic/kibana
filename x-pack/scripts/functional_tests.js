@@ -37,4 +37,6 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/upgrade_assistant_integration/config'),
   require.resolve('../test/epm_api_integration/config'),
   require.resolve('../test/licensing_plugin/config'),
+  require.resolve('../test/licensing_plugin/config.public'),
+  require.resolve('../test/licensing_plugin/config.legacy'),
 ]);

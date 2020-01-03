@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
+import { ContentType } from '../../../common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -26,14 +27,16 @@ const partialFormattedCache = new WeakMap();
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
 export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
-  function convert(hit: Record<string, any>, val: any, fieldName: string, type: string = 'html') {
+  function convert(
+    hit: Record<string, any>,
+    val: any,
+    fieldName: string,
+    type: ContentType = 'html'
+  ) {
     const field = indexPattern.fields.getByName(fieldName);
-    if (!field) return defaultFormat.convert(val, type);
-    const parsedUrl = {
-      origin: window.location.origin,
-      pathname: window.location.pathname,
-    };
-    return field.format.getConverterFor(type)(val, field, hit, parsedUrl);
+    const format = field ? field.format : defaultFormat;
+
+    return format.convert(val, type, { field, hit });
   }
 
   function formatHit(hit: Record<string, any>, type: string = 'html') {

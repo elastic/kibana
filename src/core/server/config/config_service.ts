@@ -19,12 +19,20 @@
 
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, first, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
 
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 import { hasConfigPathIntersection } from './config';
+import { RawConfigurationProvider } from './raw_config_service';
+import {
+  applyDeprecations,
+  ConfigDeprecationWithContext,
+  ConfigDeprecationProvider,
+  configDeprecationFactory,
+} from './deprecation';
+import { LegacyObjectToConfigAdapter } from '../legacy/config';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -32,6 +40,9 @@ export type IConfigService = PublicMethodsOf<ConfigService>;
 /** @internal */
 export class ConfigService {
   private readonly log: Logger;
+  private readonly deprecationLog: Logger;
+
+  private readonly config$: Observable<Config>;
 
   /**
    * Whenever a config if read at a path, we mark that path as 'handled'. We can
@@ -39,13 +50,23 @@ export class ConfigService {
    */
   private readonly handledPaths: ConfigPath[] = [];
   private readonly schemas = new Map<string, Type<unknown>>();
+  private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
 
   constructor(
-    private readonly config$: Observable<Config>,
+    private readonly rawConfigProvider: RawConfigurationProvider,
     private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+    this.deprecationLog = logger.get('config', 'deprecation');
+
+    this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
+      map(([rawConfig, deprecations]) => {
+        const migrated = applyDeprecations(rawConfig, deprecations);
+        return new LegacyObjectToConfigAdapter(migrated);
+      }),
+      shareReplay(1)
+    );
   }
 
   /**
@@ -58,10 +79,37 @@ export class ConfigService {
     }
 
     this.schemas.set(namespace, schema);
+    this.markAsHandled(path);
+  }
 
-    await this.validateConfig(path)
-      .pipe(first())
-      .toPromise();
+  /**
+   * Register a {@link ConfigDeprecationProvider} to be used when validating and migrating the configuration
+   */
+  public addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider) {
+    const flatPath = pathToString(path);
+    this.deprecations.next([
+      ...this.deprecations.value,
+      ...provider(configDeprecationFactory).map(deprecation => ({
+        deprecation,
+        path: flatPath,
+      })),
+    ]);
+  }
+
+  /**
+   * Validate the whole configuration and log the deprecation warnings.
+   *
+   * This must be done after every schemas and deprecation providers have been registered.
+   */
+  public async validate() {
+    const namespaces = [...this.schemas.keys()];
+    for (let i = 0; i < namespaces.length; i++) {
+      await this.validateConfigAtPath(namespaces[i])
+        .pipe(first())
+        .toPromise();
+    }
+
+    await this.logDeprecation();
   }
 
   /**
@@ -79,7 +127,7 @@ export class ConfigService {
    * @param path - The path to the desired subset of the config.
    */
   public atPath<TSchema>(path: ConfigPath) {
-    return this.validateConfig(path) as Observable<TSchema>;
+    return this.validateConfigAtPath(path) as Observable<TSchema>;
   }
 
   /**
@@ -92,7 +140,7 @@ export class ConfigService {
     return this.getDistinctConfig(path).pipe(
       map(config => {
         if (config === undefined) return undefined;
-        return this.validate(path, config) as TSchema;
+        return this.validateAtPath(path, config) as TSchema;
       })
     );
   }
@@ -148,7 +196,21 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private validate(path: ConfigPath, config: Record<string, unknown>) {
+  private async logDeprecation() {
+    const rawConfig = await this.rawConfigProvider
+      .getConfig$()
+      .pipe(take(1))
+      .toPromise();
+    const deprecations = await this.deprecations.pipe(take(1)).toPromise();
+    const deprecationMessages: string[] = [];
+    const logger = (msg: string) => deprecationMessages.push(msg);
+    applyDeprecations(rawConfig, deprecations, logger);
+    deprecationMessages.forEach(msg => {
+      this.deprecationLog.warn(msg);
+    });
+  }
+
+  private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
@@ -165,8 +227,8 @@ export class ConfigService {
     );
   }
 
-  private validateConfig(path: ConfigPath) {
-    return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
+  private validateConfigAtPath(path: ConfigPath) {
+    return this.getDistinctConfig(path).pipe(map(config => this.validateAtPath(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {

@@ -116,8 +116,7 @@ export default function({ getService }: FtrProviderContext) {
             'maps',
             'uptime',
             'siem',
-            'alerting',
-            'actions',
+            'endpoint',
           ].sort()
         );
       });

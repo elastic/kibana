@@ -1,0 +1,17 @@
+{
+  "rule_id": "4b438734-3793-4fda-bd42-ceeada0be8f9",
+  "risk_score": 50,
+  "description": "EQL - Disable Windows Firewall Rules with Netsh",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Disable Windows Firewall Rules with Netsh",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"netsh.exe\" and process.args:(\"firewall\" and \"set\" and \"disable\") or process.args:(\"advfirewall\" and \"state\" and \"off\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

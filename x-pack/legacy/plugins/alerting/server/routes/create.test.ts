@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash';
 import { createMockServer } from './_mock_server';
 import { createAlertRoute } from './create';
 
@@ -12,8 +13,9 @@ server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',
+  consumer: 'bar',
   name: 'abc',
-  interval: '10s',
+  schedule: { interval: '10s' },
   tags: ['foo'],
   params: {
     bar: true,
@@ -38,8 +40,12 @@ test('creates an alert with proper parameters', async () => {
     payload: mockedAlert,
   };
 
+  const createdAt = new Date();
+  const updatedAt = new Date();
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
+    createdAt,
+    updatedAt,
     id: '123',
     actions: [
       {
@@ -51,7 +57,8 @@ test('creates an alert with proper parameters', async () => {
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toMatchInlineSnapshot(`
+  expect(new Date(response.createdAt)).toEqual(createdAt);
+  expect(omit(response, 'createdAt', 'updatedAt')).toMatchInlineSnapshot(`
     Object {
       "actions": Array [
         Object {
@@ -64,11 +71,14 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
+      "consumer": "bar",
       "id": "123",
-      "interval": "10s",
       "name": "abc",
       "params": Object {
         "bar": true,
+      },
+      "schedule": Object {
+        "interval": "10s",
       },
       "tags": Array [
         "foo",
@@ -90,11 +100,14 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
+          "consumer": "bar",
           "enabled": true,
-          "interval": "10s",
           "name": "abc",
           "params": Object {
             "bar": true,
+          },
+          "schedule": Object {
+            "interval": "10s",
           },
           "tags": Array [
             "foo",

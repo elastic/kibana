@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { cloneJob  } from './clone_job';
-export { detailPanel  } from './detail_panel';
+export { cloneJob } from './clone_job';
+export { detailPanel } from './detail_panel';

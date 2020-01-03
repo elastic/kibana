@@ -35,6 +35,7 @@ interface ClassificationAnalysis {
     dependent_variable: string;
     training_percent?: number;
     num_top_classes?: string;
+    prediction_field_name?: string;
   };
 }
 
@@ -74,13 +75,33 @@ export interface RegressionEvaluateResponse {
   };
 }
 
+export interface PredictedClass {
+  predicted_class: string;
+  count: number;
+}
+
+export interface ConfusionMatrix {
+  actual_class: string;
+  actual_class_doc_count: number;
+  predicted_classes: PredictedClass[];
+  other_predicted_class_doc_count: number;
+}
+
+export interface ClassificationEvaluateResponse {
+  classification: {
+    multiclass_confusion_matrix: {
+      confusion_matrix: ConfusionMatrix[];
+    };
+  };
+}
+
 interface GenericAnalysis {
   [key: string]: Record<string, any>;
 }
 
 interface LoadEvaluateResult {
   success: boolean;
-  eval: RegressionEvaluateResponse | null;
+  eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
 
@@ -109,6 +130,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
 
 export const getDependentVar = (analysis: AnalysisConfig) => {
   let depVar = '';
+
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
   }
@@ -124,17 +146,26 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   let predictionFieldName;
   if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
     predictionFieldName = analysis.regression.prediction_field_name;
+  } else if (
+    isClassificationAnalysis(analysis) &&
+    analysis.classification.prediction_field_name !== undefined
+  ) {
+    predictionFieldName = analysis.classification.prediction_field_name;
   }
   return predictionFieldName;
 };
 
-export const getPredictedFieldName = (resultsField: string, analysis: AnalysisConfig) => {
+export const getPredictedFieldName = (
+  resultsField: string,
+  analysis: AnalysisConfig,
+  forSort?: boolean
+) => {
   // default is 'ml'
   const predictionFieldName = getPredictionFieldName(analysis);
   const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
-  }`;
+  }${isClassificationAnalysis(analysis) && !forSort ? '.keyword' : ''}`;
   return predictedField;
 };
 
@@ -153,11 +184,30 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
-export const isRegressionResultsSearchBoolQuery = (
-  arg: any
-): arg is RegressionResultsSearchBoolQuery => {
+export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
+};
+
+export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluateResponse => {
+  const keys = Object.keys(arg);
+  return (
+    keys.length === 1 &&
+    keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
+    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.r_squared !== undefined
+  );
+};
+
+export const isClassificationEvaluateResponse = (
+  arg: any
+): arg is ClassificationEvaluateResponse => {
+  const keys = Object.keys(arg);
+  return (
+    keys.length === 1 &&
+    keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+    arg?.classification?.multiclass_confusion_matrix !== undefined
+  );
 };
 
 export interface DataFrameAnalyticsConfig {
@@ -254,17 +304,14 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   return { meanSquaredError, rSquared };
 }
-interface RegressionResultsSearchBoolQuery {
+interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;
 }
-interface RegressionResultsSearchTermQuery {
+interface ResultsSearchTermQuery {
   term: Dictionary<any>;
 }
 
-export type RegressionResultsSearchQuery =
-  | RegressionResultsSearchBoolQuery
-  | RegressionResultsSearchTermQuery
-  | SavedSearchQuery;
+export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
 
 export function getEvalQueryBody({
   resultsField,
@@ -274,21 +321,42 @@ export function getEvalQueryBody({
 }: {
   resultsField: string;
   isTraining: boolean;
-  searchQuery?: RegressionResultsSearchQuery;
+  searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query: RegressionResultsSearchQuery = {
+  let query: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
   };
 
   if (searchQuery !== undefined && ignoreDefaultQuery === true) {
     query = searchQuery;
-  } else if (searchQuery !== undefined && isRegressionResultsSearchBoolQuery(searchQuery)) {
+  } else if (searchQuery !== undefined && isResultsSearchBoolQuery(searchQuery)) {
     const searchQueryClone = cloneDeep(searchQuery);
     searchQueryClone.bool.must.push(query);
     query = searchQueryClone;
   }
   return query;
+}
+
+interface EvaluateMetrics {
+  classification: {
+    multiclass_confusion_matrix: object;
+  };
+  regression: {
+    r_squared: object;
+    mean_squared_error: object;
+  };
+}
+
+interface LoadEvalDataConfig {
+  isTraining: boolean;
+  index: string;
+  dependentVariable: string;
+  resultsField: string;
+  predictionFieldName?: string;
+  searchQuery?: ResultsSearchQuery;
+  ignoreDefaultQuery?: boolean;
+  jobType: ANALYSIS_CONFIG_TYPE;
 }
 
 export const loadEvalData = async ({
@@ -299,34 +367,38 @@ export const loadEvalData = async ({
   predictionFieldName,
   searchQuery,
   ignoreDefaultQuery,
-}: {
-  isTraining: boolean;
-  index: string;
-  dependentVariable: string;
-  resultsField: string;
-  predictionFieldName?: string;
-  searchQuery?: RegressionResultsSearchQuery;
-  ignoreDefaultQuery?: boolean;
-}) => {
+  jobType,
+}: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
-  const predictedField = `${resultsField}.${
+  let predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+    predictedField = `${predictedField}.keyword`;
+  }
+
   const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
+
+  const metrics: EvaluateMetrics = {
+    classification: {
+      multiclass_confusion_matrix: {},
+    },
+    regression: {
+      r_squared: {},
+      mean_squared_error: {},
+    },
+  };
 
   const config = {
     index,
     query,
     evaluation: {
-      regression: {
+      [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
-        metrics: {
-          r_squared: {},
-          mean_squared_error: {},
-        },
+        metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },
   };
@@ -339,5 +411,59 @@ export const loadEvalData = async ({
   } catch (e) {
     results.error = getErrorMessage(e);
     return results;
+  }
+};
+
+interface TrackTotalHitsSearchResponse {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: any[];
+  };
+}
+
+interface LoadDocsCountConfig {
+  ignoreDefaultQuery?: boolean;
+  isTraining: boolean;
+  searchQuery: SavedSearchQuery;
+  resultsField: string;
+  destIndex: string;
+}
+
+interface LoadDocsCountResponse {
+  docsCount: number | null;
+  success: boolean;
+}
+
+export const loadDocsCount = async ({
+  ignoreDefaultQuery = true,
+  isTraining,
+  searchQuery,
+  resultsField,
+  destIndex,
+}: LoadDocsCountConfig): Promise<LoadDocsCountResponse> => {
+  const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
+
+  try {
+    const body: SearchQuery = {
+      track_total_hits: true,
+      query,
+    };
+
+    const resp: TrackTotalHitsSearchResponse = await ml.esSearch({
+      index: destIndex,
+      size: 0,
+      body,
+    });
+
+    const docsCount = resp.hits.total && resp.hits.total.value;
+    return { docsCount, success: docsCount !== undefined };
+  } catch (e) {
+    return {
+      docsCount: null,
+      success: false,
+    };
   }
 };
