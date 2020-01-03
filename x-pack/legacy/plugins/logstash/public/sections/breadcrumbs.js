@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { i18n } from '@kbn/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
@@ -13,10 +12,10 @@ export function getPipelineListBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.logstash.pipelines.listBreadcrumb', {
-        defaultMessage: 'Pipelines'
+        defaultMessage: 'Pipelines',
       }),
-      href: '#/management/logstash/pipelines'
-    }
+      href: '#/management/logstash/pipelines',
+    },
   ];
 }
 
@@ -25,8 +24,8 @@ export function getPipelineEditBreadcrumbs($route) {
   return [
     ...getPipelineListBreadcrumbs(),
     {
-      text: pipeline.id
-    }
+      text: pipeline.id,
+    },
   ];
 }
 
@@ -35,8 +34,8 @@ export function getPipelineCreateBreadcrumbs() {
     ...getPipelineListBreadcrumbs(),
     {
       text: i18n.translate('xpack.logstash.pipelines.createBreadcrumb', {
-        defaultMessage: 'Create'
-      })
-    }
+        defaultMessage: 'Create',
+      }),
+    },
   ];
 }

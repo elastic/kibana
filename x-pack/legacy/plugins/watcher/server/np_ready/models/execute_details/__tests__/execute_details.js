@@ -8,11 +8,8 @@ import expect from '@kbn/expect';
 import { ExecuteDetails } from '../execute_details';
 
 describe('execute_details', () => {
-
   describe('ExecuteDetails', () => {
-
     describe('fromDownstreamJson factory method', () => {
-
       let props;
       beforeEach(() => {
         props = {
@@ -20,7 +17,7 @@ describe('execute_details', () => {
           ignoreCondition: 'foo2',
           alternativeInput: 'foo3',
           actionModes: 'foo4',
-          recordExecution: 'foo5'
+          recordExecution: 'foo5',
         };
       });
 
@@ -33,22 +30,20 @@ describe('execute_details', () => {
         expect(executeDetails.actionModes).to.be(props.actionModes);
         expect(executeDetails.recordExecution).to.be(props.recordExecution);
       });
-
     });
 
     describe('upstreamJson getter method', () => {
-
       let props;
       beforeEach(() => {
         props = {
           triggerData: {
             triggeredTime: 'foo1',
-            scheduledTime: 'foo2'
+            scheduledTime: 'foo2',
           },
           ignoreCondition: 'foo3',
           alternativeInput: 'foo4',
           actionModes: 'foo5',
-          recordExecution: 'foo6'
+          recordExecution: 'foo6',
         };
       });
 
@@ -58,12 +53,12 @@ describe('execute_details', () => {
         const expected = {
           trigger_data: {
             triggered_time: executeDetails.triggerData.triggeredTime,
-            scheduled_time: executeDetails.triggerData.scheduledTime
+            scheduled_time: executeDetails.triggerData.scheduledTime,
           },
           ignore_condition: executeDetails.ignoreCondition,
           alternative_input: executeDetails.alternativeInput,
           action_modes: executeDetails.actionModes,
-          record_execution: executeDetails.recordExecution
+          record_execution: executeDetails.recordExecution,
         };
 
         expect(actual).to.eql(expected);
@@ -76,12 +71,12 @@ describe('execute_details', () => {
         const actual = executeDetails.upstreamJson;
         const expected = {
           trigger_data: {
-            scheduled_time: executeDetails.triggerData.scheduledTime
+            scheduled_time: executeDetails.triggerData.scheduledTime,
           },
           ignore_condition: executeDetails.ignoreCondition,
           alternative_input: executeDetails.alternativeInput,
           action_modes: executeDetails.actionModes,
-          record_execution: executeDetails.recordExecution
+          record_execution: executeDetails.recordExecution,
         };
 
         expect(actual).to.eql(expected);
@@ -94,12 +89,12 @@ describe('execute_details', () => {
         const actual = executeDetails.upstreamJson;
         const expected = {
           trigger_data: {
-            triggered_time: executeDetails.triggerData.triggeredTime
+            triggered_time: executeDetails.triggerData.triggeredTime,
           },
           ignore_condition: executeDetails.ignoreCondition,
           alternative_input: executeDetails.alternativeInput,
           action_modes: executeDetails.actionModes,
-          record_execution: executeDetails.recordExecution
+          record_execution: executeDetails.recordExecution,
         };
 
         expect(actual).to.eql(expected);
@@ -116,14 +111,11 @@ describe('execute_details', () => {
           ignore_condition: executeDetails.ignoreCondition,
           alternative_input: executeDetails.alternativeInput,
           action_modes: executeDetails.actionModes,
-          record_execution: executeDetails.recordExecution
+          record_execution: executeDetails.recordExecution,
         };
 
         expect(actual).to.eql(expected);
       });
-
     });
-
   });
-
 });

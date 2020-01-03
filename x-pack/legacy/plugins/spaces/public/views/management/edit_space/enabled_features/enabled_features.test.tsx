@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../plugins/features/public';
 import { Space } from '../../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
@@ -16,12 +16,14 @@ const features: Feature[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
+    icon: 'spacesApp',
     app: [],
     privileges: {},
   },
   {
     id: 'feature-2',
     name: 'Feature 2',
+    icon: 'spacesApp',
     app: [],
     privileges: {},
   },
@@ -33,7 +35,7 @@ const space: Space = {
   disabledFeatures: ['feature-1', 'feature-2'],
 };
 
-const uiCapabilities = {
+const capabilities = {
   navLinks: {},
   management: {},
   catalogue: {},
@@ -49,7 +51,7 @@ describe('EnabledFeatures', () => {
         <EnabledFeatures
           features={features}
           space={space}
-          uiCapabilities={uiCapabilities}
+          capabilities={capabilities}
           intl={null as any}
           onChange={jest.fn()}
         />
@@ -64,7 +66,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        uiCapabilities={uiCapabilities}
+        capabilities={capabilities}
         intl={null as any}
         onChange={changeHandler}
       />
@@ -99,7 +101,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        uiCapabilities={uiCapabilities}
+        capabilities={capabilities}
         intl={null as any}
         onChange={changeHandler}
       />

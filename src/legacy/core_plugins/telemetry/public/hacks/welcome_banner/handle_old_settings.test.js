@@ -32,28 +32,27 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
         return Promise.reject(new Error('something happened'));
       }
       return {};
-    }
+    },
   };
 
   const chrome = {
-    addBasePath: url => url
+    addBasePath: url => url,
   };
   mockInjectedMetadata({ telemetryOptedIn: enabled, allowChangingOptInStatus: true });
 
   const $injector = {
-    get: (key) => {
+    get: key => {
       if (key === '$http') {
         return $http;
       }
       throw new Error(`unexpected mock injector usage for ${key}`);
-    }
+    },
   };
 
   return new TelemetryOptInProvider($injector, chrome, false);
 };
 
 describe('handle_old_settings', () => {
-
   it('re-uses old "allowReport" setting and stays opted in', async () => {
     const config = {
       get: sinon.stub(),
@@ -206,5 +205,4 @@ describe('handle_old_settings', () => {
 
     expect(config.get.calledThrice).toBe(true);
   });
-
 });

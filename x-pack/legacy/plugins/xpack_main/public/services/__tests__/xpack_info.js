@@ -14,22 +14,22 @@ describe('xpack_info service', () => {
     sessionStorage.clear();
   });
 
-  it ('updates the stored xpack info', () => {
+  it('updates the stored xpack info', () => {
     const updatedXPackInfo = {
       foo: {
-        bar: 17
-      }
+        bar: 17,
+      },
     };
     xpackInfo.setAll(updatedXPackInfo);
     expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
     expect(xpackInfo.get('foo.bar')).to.be(17);
   });
 
-  it ('clears the stored xpack info', () => {
+  it('clears the stored xpack info', () => {
     const updatedXPackInfo = {
       foo: {
-        bar: 17
-      }
+        bar: 17,
+      },
     };
     xpackInfo.setAll(updatedXPackInfo);
     expect(xpackInfo.get('foo.bar')).not.to.be(null);
@@ -39,7 +39,7 @@ describe('xpack_info service', () => {
     expect(xpackInfo.get('foo.bar')).to.be(undefined);
   });
 
-  it ('defaults to the provided default value if the requested path is not found', () => {
+  it('defaults to the provided default value if the requested path is not found', () => {
     xpackInfo.setAll({ foo: 'bar' });
     expect(xpackInfo.get('foo.baz', 17)).to.be(17);
   });

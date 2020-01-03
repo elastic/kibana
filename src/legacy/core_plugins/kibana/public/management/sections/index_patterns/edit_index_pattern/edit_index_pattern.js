@@ -27,7 +27,7 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { fieldWildcardMatcher } from 'ui/field_wildcard';
+import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -36,6 +36,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { npStart } from 'ui/new_platform';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -168,7 +169,8 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
   template,
   k7Breadcrumbs: getEditBreadcrumbs,
   resolve: {
-    indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+    indexPattern: function($route, Promise, redirectWhenMissing) {
+      const { indexPatterns } = npStart.plugins.data;
       return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
         redirectWhenMissing('/management/kibana/index_patterns')
       );
@@ -178,11 +180,20 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
 
 uiModules
   .get('apps/management')
-  .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
-    const $state = $scope.state = new AppState();
+  .controller('managementIndexPatternsEdit', function(
+    $scope,
+    $location,
+    $route,
+    Promise,
+    config,
+    Private,
+    AppState,
+    confirmModal
+  ) {
+    const $state = ($scope.state = new AppState());
 
-    $scope.fieldWildcardMatcher = (...args) => fieldWildcardMatcher(...args, config.get('metaFields'));
+    $scope.fieldWildcardMatcher = (...args) =>
+      fieldWildcardMatcher(...args, config.get('metaFields'));
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
@@ -200,7 +211,7 @@ uiModules
       return pattern.id !== $scope.indexPattern.id;
     });
 
-    $scope.$watch('indexPattern.fields', function () {
+    $scope.$watch('indexPattern.fields', function() {
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
@@ -212,7 +223,7 @@ uiModules
       updateScriptedFieldsTable($scope, $state);
     });
 
-    $scope.refreshFilters = function () {
+    $scope.refreshFilters = function() {
       const indexedFieldTypes = [];
       const scriptedFieldLanguages = [];
       $scope.indexPattern.fields.forEach(field => {
@@ -227,11 +238,11 @@ uiModules
       $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
     };
 
-    $scope.changeFilter = function (filter, val) {
+    $scope.changeFilter = function(filter, val) {
       $scope[filter] = val || ''; // null causes filter to check for null explicitly
     };
 
-    $scope.changeTab = function (obj) {
+    $scope.changeTab = function(obj) {
       $state.tab = obj.index;
       updateIndexedFieldsTable($scope, $state);
       updateScriptedFieldsTable($scope, $state);
@@ -239,15 +250,15 @@ uiModules
       $state.save();
     };
 
-    $scope.$watch('state.tab', function (tab) {
+    $scope.$watch('state.tab', function(tab) {
       if (!tab) $scope.changeTab($scope.editSections[0]);
     });
 
-    $scope.$watchCollection('indexPattern.fields', function () {
+    $scope.$watchCollection('indexPattern.fields', function() {
       $scope.conflictFields = $scope.indexPattern.fields.filter(field => field.type === 'conflict');
     });
 
-    $scope.refreshFields = function () {
+    $scope.refreshFields = function() {
       const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
         defaultMessage: 'This action resets the popularity counter of each field.',
       });
@@ -266,7 +277,7 @@ uiModules
       confirmModal(confirmMessage, confirmModalOptions);
     };
 
-    $scope.removePattern = function () {
+    $scope.removePattern = function() {
       function doRemove() {
         if ($scope.indexPattern.id === config.get('defaultIndex')) {
           config.remove('defaultIndex');
@@ -277,7 +288,7 @@ uiModules
         }
 
         Promise.resolve($scope.indexPattern.destroy())
-          .then(function () {
+          .then(function() {
             $location.url('/management/kibana/index_patterns');
           })
           .catch(fatalError);
@@ -295,11 +306,11 @@ uiModules
       confirmModal('', confirmModalOptions);
     };
 
-    $scope.setDefaultPattern = function () {
+    $scope.setDefaultPattern = function() {
       config.set('defaultIndex', $scope.indexPattern.id);
     };
 
-    $scope.setIndexPatternsTimeField = function (field) {
+    $scope.setIndexPatternsTimeField = function(field) {
       if (field.type !== 'date') {
         const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.',

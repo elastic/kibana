@@ -6,12 +6,12 @@
 import { BehaviorSubject } from 'rxjs';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { httpServiceMock, httpServerMock } from '../../../../src/core/server/mocks';
-import { licenseMock } from '../common/license.mock';
+import { licenseMock } from '../common/licensing.mock';
 
 describe('createOnPreResponseHandler', () => {
   it('sets license.signature header immediately for non-error responses', async () => {
     const refresh = jest.fn();
-    const license$ = new BehaviorSubject(licenseMock.create({ signature: 'foo' }));
+    const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
     const interceptor = createOnPreResponseHandler(refresh, license$);
@@ -26,8 +26,8 @@ describe('createOnPreResponseHandler', () => {
     });
   });
   it('sets license.signature header after refresh for non-error responses', async () => {
-    const updatedLicense = licenseMock.create({ signature: 'bar' });
-    const license$ = new BehaviorSubject(licenseMock.create({ signature: 'foo' }));
+    const updatedLicense = licenseMock.createLicense({ signature: 'bar' });
+    const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
     const refresh = jest.fn().mockImplementation(
       () =>
         new Promise(resolve => {

@@ -19,7 +19,7 @@ export default function enterSpaceFunctonalTests({
     after(async () => await esArchiver.unload('spaces/enter_space'));
 
     afterEach(async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     it('allows user to navigate to different spaces, respecting the configured default route', async () => {

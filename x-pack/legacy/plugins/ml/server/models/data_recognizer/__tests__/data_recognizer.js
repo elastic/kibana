@@ -16,6 +16,7 @@ describe('ML - data recognizer', () => {
     'auditbeat_process_docker_ecs',
     'auditbeat_process_hosts_ecs',
     'logs_ui_analysis',
+    'logs_ui_categories',
     'metricbeat_system_ecs',
     'nginx_ecs',
     'sample_data_ecommerce',
@@ -51,16 +52,14 @@ describe('ML - data recognizer', () => {
             config: {
               groups: ['nginx'],
               analysis_config: {
-                bucket_span: '1h'
+                bucket_span: '1h',
               },
               analysis_limits: {
                 model_memory_limit: '256mb',
-                influencers: [
-                  'region'
-                ]
+                influencers: ['region'],
               },
               calendars: ['calendar-1'],
-            }
+            },
           },
         ],
       };
@@ -69,7 +68,7 @@ describe('ML - data recognizer', () => {
           analysis_limits: {
             model_memory_limit: '512mb',
             influencers: [],
-          }
+          },
         },
         {
           job_id: testJobId,
@@ -83,7 +82,7 @@ describe('ML - data recognizer', () => {
         {
           config: {
             analysis_config: {
-              bucket_span: '1h'
+              bucket_span: '1h',
             },
             analysis_limits: {
               model_memory_limit: '512mb',
@@ -92,10 +91,9 @@ describe('ML - data recognizer', () => {
             groups: [],
             calendars: ['calendar-1'],
           },
-          id: 'pre-test-job'
-        }
+          id: 'pre-test-job',
+        },
       ]);
     });
   });
 });
-

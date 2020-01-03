@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import * as GenerationUrls from './generation_urls';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
@@ -68,7 +68,6 @@ export default function ({ getService }) {
         await esArchiver.unload('reporting/bwc/6_2');
       });
 
-
       it('generated from 6.3', async () => {
         await esArchiver.load('reporting/bwc/6_3');
         const usage = await usageAPI.getUsageStats();
@@ -93,9 +92,11 @@ export default function ({ getService }) {
 
     describe('from new jobs posted', () => {
       it('csv', async () => {
-        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
-          reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
-        ]));
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([
+            reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+          ])
+        );
 
         const usage = await usageAPI.getUsageStats();
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);
@@ -107,10 +108,12 @@ export default function ({ getService }) {
       });
 
       it('preserve_layout pdf', async () => {
-        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
-          reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
-          reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3),
-        ]));
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([
+            reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
+            reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3),
+          ])
+        );
 
         const usage = await usageAPI.getUsageStats();
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
@@ -122,10 +125,14 @@ export default function ({ getService }) {
       });
 
       it('print_layout pdf', async () => {
-        await reportingAPI.expectAllJobsToFinishSuccessfully(await Promise.all([
-          reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),
-          reportingAPI.postJob(GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3),
-        ]));
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([
+            reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),
+            reportingAPI.postJob(
+              GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3
+            ),
+          ])
+        );
 
         const usage = await usageAPI.getUsageStats();
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
