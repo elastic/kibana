@@ -9,6 +9,7 @@ import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
 import { DynamicLegendRow } from './components/dynamic_legend_row';
+import { scaleValue } from '../style_util';
 import React from 'react';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
@@ -30,6 +31,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   isDynamic() {
+    return true;
+  }
+
+  isOrdinal() {
     return true;
   }
 
@@ -115,13 +120,28 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   formatField(value) {
-    if (this.getField()) {
-      const fieldName = this.getField().getName();
-      const fieldFormatter = this._getFieldFormatter(fieldName);
-      return fieldFormatter ? fieldFormatter(value) : value;
-    } else {
+    if (!this.getField()) {
       return value;
     }
+
+    const fieldName = this.getField().getName();
+    const fieldFormatter = this._getFieldFormatter(fieldName);
+    return fieldFormatter ? fieldFormatter(value) : value;
+  }
+
+  getMbValue(value) {
+    if (!this.isOrdinal()) {
+      return this.formatField(value);
+    }
+
+    const valueAsFloat = parseFloat(value);
+    if (this.isScaled()) {
+      return scaleValue(valueAsFloat, this.getFieldMeta());
+    }
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+    return valueAsFloat;
   }
 
   renderLegendDetailRow() {

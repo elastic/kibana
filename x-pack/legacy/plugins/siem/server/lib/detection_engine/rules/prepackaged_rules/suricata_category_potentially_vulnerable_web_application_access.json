@@ -1,0 +1,17 @@
+{
+  "rule_id": "0993e926-1a01-4c28-918a-cdd5741a19a8",
+  "risk_score": 50,
+  "description": "Suricata Category - Potentially Vulnerable Web Application Access",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Potentially Vulnerable Web Application Access",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"access to a potentially vulnerable web application\" or rule.category: \"access to a potentially vulnerable web application\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

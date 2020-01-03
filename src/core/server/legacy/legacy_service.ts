@@ -19,24 +19,30 @@
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
+
 import { CoreService } from '../../types';
-import { CoreSetup, CoreStart } from '../';
-import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { SavedObjectsLegacyUiExports } from '../types';
 import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
-import { findLegacyPluginSpecs } from './plugins';
-import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
 import { PathConfigType } from '../path';
-import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
+import { findLegacyPluginSpecs } from './plugins';
+import { convertLegacyDeprecationProvider } from './config';
+import {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyPlugins,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyVars,
+} from './types';
+import { LegacyInternals } from './legacy_internals';
+import { CoreSetup, CoreStart } from '..';
 
 interface LegacyKbnServer {
-  applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
+  applyLoggingConfiguration: (settings: Readonly<LegacyVars>) => void;
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
@@ -53,43 +59,14 @@ function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
 
   return {
     ...rawConfig,
-    path: pathConfig, // We rely heavily in the default value of 'path.data' in the legacy world and, since it has been moved to NP, it won't show up in RawConfig
+    // We rely heavily in the default value of 'path.data' in the legacy world and,
+    // since it has been moved to NP, it won't show up in RawConfig.
+    path: pathConfig,
   };
-}
-
-/**
- * @public
- * @deprecated
- */
-export interface LegacyServiceSetupDeps {
-  core: InternalCoreSetup & {
-    plugins: PluginsServiceSetup;
-  };
-  plugins: Record<string, unknown>;
-}
-
-/**
- * @public
- * @deprecated
- */
-export interface LegacyServiceStartDeps {
-  core: InternalCoreStart & {
-    plugins: PluginsServiceStart;
-  };
-  plugins: Record<string, unknown>;
 }
 
 /** @internal */
-export interface LegacyServiceDiscoverPlugins {
-  pluginSpecs: LegacyPluginSpec[];
-  disabledPluginSpecs: LegacyPluginSpec[];
-  uiExports: SavedObjectsLegacyUiExports;
-  pluginExtendedConfig: LegacyConfig;
-  settings: Record<string, any>;
-}
-
-/** @internal */
-export type ILegacyService = Pick<LegacyService, keyof LegacyService>;
+export type ILegacyService = PublicMethodsOf<LegacyService>;
 
 /** @internal */
 export class LegacyService implements CoreService {
@@ -101,16 +78,10 @@ export class LegacyService implements CoreService {
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
-  private update$: ConnectableObservable<[Config, PathConfigType]> | undefined;
-  private legacyRawConfig: LegacyConfig | undefined;
-  private legacyPlugins:
-    | {
-        pluginSpecs: LegacyPluginSpec[];
-        disabledPluginSpecs: LegacyPluginSpec[];
-        uiExports: SavedObjectsLegacyUiExports;
-      }
-    | undefined;
-  private settings: Record<string, any> | undefined;
+  private update$?: ConnectableObservable<[Config, PathConfigType]>;
+  private legacyRawConfig?: LegacyConfig;
+  private legacyPlugins?: LegacyPlugins;
+  private settings?: LegacyVars;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -153,12 +124,14 @@ export class LegacyService implements CoreService {
       pluginExtendedConfig,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
     } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
 
     this.legacyPlugins = {
       pluginSpecs,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
     };
 
     const deprecationProviders = await pluginSpecs
@@ -188,6 +161,7 @@ export class LegacyService implements CoreService {
       pluginSpecs,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
       pluginExtendedConfig,
       settings: this.settings,
     };
@@ -195,35 +169,37 @@ export class LegacyService implements CoreService {
 
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.log.debug('setting up legacy service');
-    if (!this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
+
+    if (!this.legacyPlugins) {
       throw new Error(
         'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
       );
     }
-    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
 
+    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
     this.setupDeps = setupDeps;
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
-    if (!setupDeps || !this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
+
+    if (!setupDeps || !this.legacyPlugins) {
       throw new Error('Legacy service is not setup yet.');
     }
+
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-
     if (this.coreContext.env.isDevClusterMaster) {
-      await this.createClusterManager(this.legacyRawConfig);
+      await this.createClusterManager(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
-        this.settings,
-        this.legacyRawConfig,
+        this.settings!,
+        this.legacyRawConfig!,
         setupDeps,
         startDeps,
-        this.legacyPlugins
+        this.legacyPlugins!
       );
     }
   }
@@ -263,15 +239,11 @@ export class LegacyService implements CoreService {
   }
 
   private async createKbnServer(
-    settings: Record<string, any>,
+    settings: LegacyVars,
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,
-    legacyPlugins: {
-      pluginSpecs: LegacyPluginSpec[];
-      disabledPluginSpecs: LegacyPluginSpec[];
-      uiExports: SavedObjectsLegacyUiExports;
-    }
+    legacyPlugins: LegacyPlugins
   ) {
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
@@ -312,6 +284,7 @@ export class LegacyService implements CoreService {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -337,8 +310,10 @@ export class LegacyService implements CoreService {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
+          legacy: new LegacyInternals(legacyPlugins.uiExports, config, setupDeps.core.http.server),
         },
         logger: this.coreContext.logger,
       },

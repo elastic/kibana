@@ -1,0 +1,17 @@
+{
+  "rule_id": "59547add-a400-4baa-aa0c-66c72efdb77f",
+  "risk_score": 50,
+  "description": "EQL -Bypass UAC Event Viewer",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL -Bypass UAC Event Viewer",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.parent.name:eventvwr.exe and event.action:\"Process Create (rule: ProcessCreate)\" and not process.executable:(\"C:\\Windows\\System32\\mmc.exe\" or \"C:\\Windows\\SysWOW64\\mmc.exe\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
