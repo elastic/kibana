@@ -83,6 +83,8 @@ interface CreateOptions {
       keyof Alert,
       | 'createdBy'
       | 'updatedBy'
+      | 'createdAt'
+      | 'updatedAt'
       | 'apiKey'
       | 'apiKeyOwner'
       | 'muteAll'
@@ -159,6 +161,7 @@ export class AlertsClient {
       actions,
       createdBy: username,
       updatedBy: username,
+      createdAt: new Date().toISOString(),
       params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
@@ -188,12 +191,17 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw(
+      createdAlert.id,
+      createdAlert.attributes,
+      createdAlert.updated_at,
+      references
+    );
   }
 
   public async get({ id }: { id: string }) {
     const result = await this.savedObjectsClient.get('alert', id);
-    return this.getAlertFromRaw(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
   public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
@@ -203,7 +211,7 @@ export class AlertsClient {
     });
 
     const data = results.saved_objects.map(result =>
-      this.getAlertFromRaw(result.id, result.attributes, result.references)
+      this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references)
     );
 
     return {
@@ -236,7 +244,7 @@ export class AlertsClient {
       updateResult.scheduledTaskId &&
       !isEqual(decryptedAlertSavedObject.attributes.schedule, updateResult.schedule)
     ) {
-      this.taskManager.runNow(updateResult.scheduledTaskId).catch(err => {
+      this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
         this.logger.error(
           `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
         );
@@ -279,7 +287,12 @@ export class AlertsClient {
 
     await this.invalidateApiKey({ apiKey: attributes.apiKey });
 
-    return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+    return this.getAlertFromRaw(
+      id,
+      updatedObject.attributes,
+      updatedObject.updated_at,
+      updatedObject.references
+    );
   }
 
   private apiKeyAsAlertAttributes(
@@ -357,6 +370,7 @@ export class AlertsClient {
           enabled: true,
           ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
+
           scheduledTaskId: scheduledTask.id,
         },
         { version }
@@ -439,6 +453,7 @@ export class AlertsClient {
         alertId,
         {
           updatedBy: await this.getUserName(),
+
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
         { version }
@@ -481,6 +496,7 @@ export class AlertsClient {
   private getAlertFromRaw(
     id: string,
     rawAlert: Partial<RawAlert>,
+    updatedAt: SavedObject['updated_at'],
     references: SavedObjectReference[] | undefined
   ) {
     if (!rawAlert.actions) {
@@ -493,6 +509,8 @@ export class AlertsClient {
     return {
       id,
       ...rawAlert,
+      updatedAt: updatedAt ? new Date(updatedAt) : new Date(rawAlert.createdAt!),
+      createdAt: new Date(rawAlert.createdAt!),
       actions,
     };
   }
