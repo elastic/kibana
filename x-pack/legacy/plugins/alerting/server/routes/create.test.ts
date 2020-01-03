@@ -52,7 +52,7 @@ test('creates an alert with proper parameters', async () => {
   };
 
   const createdAt = new Date();
-  const updatedAt = null;
+  const updatedAt = new Date();
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
     ...mockedAlertComputerFields,

@@ -60,6 +60,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+        Date.parse(response.body.createdAt)
+      );
 
       // Ensure AAD isn't broken
       await checkAAD({

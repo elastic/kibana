@@ -224,7 +224,7 @@ export class AlertsClient {
       updateResult.scheduledTaskId &&
       !isEqual(alert.attributes.schedule, updateResult.schedule)
     ) {
-      this.taskManager.runNow(updateResult.scheduledTaskId).catch(err => {
+      this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
         this.logger.error(
           `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
         );
@@ -462,7 +462,7 @@ export class AlertsClient {
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
-      updatedAt: updatedAt ? new Date(updatedAt) : null,
+      updatedAt: updatedAt ? new Date(updatedAt) : new Date(rawAlert.createdAt!),
       createdAt: new Date(rawAlert.createdAt!),
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(rawAlert.actions, references || [])

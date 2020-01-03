@@ -78,7 +78,7 @@ export interface Alert {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;
-  updatedAt: Date | null;
+  updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;

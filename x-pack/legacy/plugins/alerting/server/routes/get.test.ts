@@ -18,7 +18,7 @@ const mockedAlert = {
     bar: true,
   },
   createdAt: new Date(),
-  updatedAt: null,
+  updatedAt: new Date(),
   actions: [
     {
       group: 'default',
