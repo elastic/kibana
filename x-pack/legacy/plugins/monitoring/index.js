@@ -83,6 +83,6 @@ export const monitoring = kibana =>
     uiExports: getUiExports(),
     postInit(server) {
       const serverConfig = server.config();
-      initInfraSource(serverConfig, server.plugins.infra);
+      initInfraSource(serverConfig, server.newPlatform.setup.plugins.infra);
     },
   });
