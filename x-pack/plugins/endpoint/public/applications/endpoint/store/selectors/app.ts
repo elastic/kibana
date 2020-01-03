@@ -11,3 +11,7 @@ const selectAppState = (state: GlobalState) => state.app;
 export const coreStartServices = (state: GlobalState) => {
   return selectAppState(state).coreStartServices!;
 };
+
+export const appBasePath = (state: GlobalState) => {
+  return selectAppState(state).appBasePath;
+};
