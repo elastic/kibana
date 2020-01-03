@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
+
 import {
   AddRulesProps,
   DeleteRulesProps,
@@ -26,19 +27,16 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
  * @param signal to cancel request
  */
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await npStart.core.http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
     body: JSON.stringify(rule),
+    asResponse: true,
     signal,
   });
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response!);
+  return response.body!;
 };
 
 /**
@@ -75,22 +73,25 @@ export const fetchRules = async ({
 
   const endpoint =
     id != null
-      ? `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id="${id}"`
-      : `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
+      ? `${DETECTION_ENGINE_RULES_URL}?id="${id}"`
+      : `${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
 
-  const response = await fetch(endpoint, {
+  const response = await npStart.core.http.fetch<FetchRulesResponse | Rule[]>(endpoint, {
     method: 'GET',
     signal,
+    asResponse: true,
   });
-  await throwIfNotOk(response);
-  return id != null
+  await throwIfNotOk(response.response!);
+  const body = response.body!;
+
+  return Array.isArray(body)
     ? {
         page: 0,
         perPage: 1,
         total: 1,
-        data: response.json(),
+        data: body,
       }
-    : response.json();
+    : body;
 };
 
 /**
@@ -99,18 +100,15 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+  const response = await npStart.core.http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
     method: 'GET',
     credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': 'true',
-    },
+    asResponse: true,
     signal,
   });
-  await throwIfNotOk(response);
-  const rule: Rule = await response.json();
-  return rule;
+
+  await throwIfNotOk(response.response!);
+  return response.body!;
 };
 
 /**
@@ -120,23 +118,19 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  * @param enabled to enable or disable
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-      body: JSON.stringify({ id, enabled }),
-    })
+  const responses = await Promise.all(
+    ids.map(id =>
+      npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        body: JSON.stringify({ id, enabled }),
+        asResponse: true,
+      })
+    )
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  return responses.map(response => response.body!);
 };
 
 /**
@@ -146,22 +140,18 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> => {
   // TODO: Don't delete if immutable!
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
-      method: 'DELETE',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-    })
+  const responses = await Promise.all(
+    ids.map(id =>
+      npStart.core.http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        asResponse: true,
+      })
+    )
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  return responses.map(response => response.body!);
 };
 
 /**
@@ -170,32 +160,28 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> =>
  * @param rule to duplicate
  */
 export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const requests = rules.map(rule =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-      body: JSON.stringify({
-        ...rule,
-        name: `${rule.name} [Duplicate]`,
-        created_at: undefined,
-        created_by: undefined,
-        id: undefined,
-        rule_id: undefined,
-        updated_at: undefined,
-        updated_by: undefined,
-        enabled: rule.enabled,
-        immutable: false,
-      }),
-    })
+  const responses = await Promise.all(
+    rules.map(rule =>
+      npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          ...rule,
+          name: `${rule.name} [Duplicate]`,
+          created_at: undefined,
+          created_by: undefined,
+          id: undefined,
+          rule_id: undefined,
+          updated_at: undefined,
+          updated_by: undefined,
+          enabled: rule.enabled,
+          immutable: false,
+        }),
+        asResponse: true,
+      })
+    )
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  return responses.map(response => response.body!);
 };

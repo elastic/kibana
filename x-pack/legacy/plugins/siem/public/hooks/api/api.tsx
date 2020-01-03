@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
+import { npStart } from 'ui/new_platform';
 import * as i18n from '../translations';
 import { parseJsonFromBody, ToasterErrors } from '../../components/ml/api/throw_if_not_ok';
 import { IndexPatternResponse, IndexPatternSavedObject } from '../types';
@@ -20,23 +19,22 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  * @param signal
  */
 export const getIndexPatterns = async (signal: AbortSignal): Promise<IndexPatternSavedObject[]> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
+  // TODO (rylnd): refactor to savedObjects client request?
+  const response = await npStart.core.http.fetch<IndexPatternResponse>(
+    '/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000',
     {
       method: 'GET',
       credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-system-api': 'true',
-        'kbn-xsrf': 'true',
-      },
+      headers: { 'kbn-system-api': 'true' },
       signal,
+      asResponse: true,
     }
   );
-  await throwIfNotOk(response);
-  const results: IndexPatternResponse = await response.json();
 
-  if (results.saved_objects && Array.isArray(results.saved_objects)) {
+  await throwIfNotOk(response.response!);
+  const results = response.body!;
+
+  if (Array.isArray(results.saved_objects)) {
     return results.saved_objects;
   } else {
     return emptyIndexPattern;
