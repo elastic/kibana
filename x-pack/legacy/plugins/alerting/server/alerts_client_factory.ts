@@ -6,10 +6,10 @@
 
 import Hapi from 'hapi';
 import uuid from 'uuid';
-import { AlertTypeRegistry } from '../types';
-import { AlertsClient } from '../alerts_client';
-import { SecurityPluginStartContract, TaskManagerStartContract } from '../shim';
-import { KibanaRequest, Logger } from '../../../../../../src/core/server';
+import { AlertTypeRegistry } from './types';
+import { AlertsClient } from './alerts_client';
+import { SecurityPluginStartContract, TaskManagerStartContract } from './shim';
+import { KibanaRequest, Logger } from '../../../../../src/core/server';
 
 export interface ConstructorOpts {
   logger: Logger;

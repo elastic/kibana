@@ -5,5 +5,4 @@
  */
 
 export { AlertInstance } from './alert_instance';
-export { AlertsClientFactory } from './alerts_client_factory';
 export { createAlertInstanceFactory } from './create_alert_instance_factory';
