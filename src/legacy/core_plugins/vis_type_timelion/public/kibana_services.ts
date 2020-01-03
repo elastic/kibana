@@ -27,6 +27,7 @@ export interface TimelionKibanaServices {
   uiSettings: IUiSettingsClient;
   timefilter: TimefilterContract;
 }
+
 let services: TimelionKibanaServices | null = null;
 
 export function setServices(newServices: TimelionKibanaServices) {

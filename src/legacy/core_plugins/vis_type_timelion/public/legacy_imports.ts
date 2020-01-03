@@ -17,16 +17,10 @@
  * under the License.
  */
 
-export { npStart } from 'ui/new_platform';
+export { npSetup, npStart } from 'ui/new_platform';
 
-// @ts-ignore
-export { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
-
-// @ts-ignore
-export { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
-export { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 export { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { VisParams } from 'ui/vis';
+export { VisParams, Vis } from 'ui/vis';

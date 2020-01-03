@@ -30,7 +30,73 @@ import { xaxisFormatterProvider } from './xaxis_formatter';
 import { generateTicksProvider } from './tick_generator';
 import { Series } from './timelion_request_handler';
 
-function buildSeriesData(chart: Series[], options: object) {
+export interface Axis {
+  delta?: number;
+  max?: number;
+  min?: number;
+  mode: string;
+  options?: {
+    units: { prefix: string; suffix: string };
+  };
+  tickSize?: number;
+  ticks: number;
+  tickLength: number;
+  timezone: string;
+  tickDecimals?: number;
+  tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
+  tickGenerator?(axis: Axis): number[];
+  units?: { type: string };
+}
+interface IOptions {
+  colors: string[];
+  crosshair: {
+    color: string;
+    lineWidth: number;
+    mode: string;
+  };
+  grid: {
+    autoHighlight: boolean;
+    borderColor: string | null;
+    borderWidth: number;
+    hoverable: boolean;
+    margin: number;
+    show?: boolean;
+  };
+  legend: {
+    backgroundColor: string;
+    labelBoxBorderColor: string;
+    labelFormatter(label: string, series: { _id: number }): string;
+    position: string;
+  };
+  selection: {
+    color: string;
+    mode: string;
+  };
+  xaxis: Axis;
+  yaxes?: Axis[];
+}
+
+interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
+}
+
+const colors = [
+  '#01A4A4',
+  '#C66',
+  '#D0D102',
+  '#616161',
+  '#00A1CB',
+  '#32742C',
+  '#F18D05',
+  '#113F8C',
+  '#61AE24',
+  '#D70060',
+];
+
+const SERIES_ID_ATTR = 'data-series-id';
+
+function buildSeriesData(chart: Series[], options: IOptions) {
   return chart.map((series: Series, seriesIndex: number) => {
     const newSeries: Series = cloneDeep(
       defaults(series, {
@@ -71,67 +137,6 @@ function buildSeriesData(chart: Series[], options: object) {
     return newSeries;
   });
 }
-
-const SERIES_ID_ATTR = 'data-series-id';
-
-interface IOptions {
-  xaxis: {
-    mode: string;
-    tickLength: number;
-    timezone: string;
-    ticks: number;
-    tickFormatter(val: number): string;
-  };
-  yaxes?: [
-    {
-      units: { type: string };
-      tickFormatter: ((val: number) => string) | ((val: number, axis: any) => string);
-      tickGenerator(axis: any): number[];
-    }
-  ];
-  selection: {
-    mode: string;
-    color: string;
-  };
-  crosshair: {
-    mode: string;
-    color: string;
-    lineWidth: number;
-  };
-  colors: string[];
-  grid: {
-    show?: boolean;
-    borderWidth: number;
-    borderColor: string | null;
-    margin: number;
-    hoverable: boolean;
-    autoHighlight: boolean;
-  };
-  legend: {
-    backgroundColor: string;
-    position: string;
-    labelBoxBorderColor: string;
-    labelFormatter(label: string, series: { _id: number }): string;
-  };
-}
-
-interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
-
-const colors = [
-  '#01A4A4',
-  '#C66',
-  '#D0D102',
-  '#616161',
-  '#00A1CB',
-  '#32742C',
-  '#F18D05',
-  '#113F8C',
-  '#61AE24',
-  '#D70060',
-];
 
 function buildOptions(
   intervalValue: string,

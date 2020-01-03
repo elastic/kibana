@@ -17,15 +17,17 @@
  * under the License.
  */
 
+import { Axis } from './panel_utils';
+
 export function generateTicksProvider() {
-  function floorInBase(n: any, base: any) {
+  function floorInBase(n: number, base: number) {
     return base * Math.floor(n / base);
   }
 
-  function generateTicks(axis: any) {
+  function generateTicks(axis: Axis) {
     const returnTicks = [];
     let tickSize = 2;
-    let delta = axis.delta;
+    let delta = axis.delta || 0;
     let steps = 0;
     let tickVal;
     let tickCount = 0;
@@ -46,16 +48,14 @@ export function generateTicksProvider() {
     axis.tickSize = tickSize * Math.pow(1024, steps);
 
     // Calculate the new ticks
-    const tickMin = floorInBase(axis.min, axis.tickSize);
+    const tickMin = floorInBase(axis.min || 0, axis.tickSize);
     do {
       tickVal = tickMin + tickCount++ * axis.tickSize;
       returnTicks.push(tickVal);
-    } while (tickVal < axis.max);
+    } while (tickVal < (axis.max || 0));
 
     return returnTicks;
   }
 
-  return function(axis: any) {
-    return generateTicks(axis);
-  };
+  return (axis: Axis) => generateTicks(axis);
 }

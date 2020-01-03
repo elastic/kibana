@@ -27,7 +27,7 @@ const name = 'timelion_vis';
 
 interface Arguments {
   expression: string;
-  interval: any;
+  interval: string | null;
 }
 
 export interface RenderValue {

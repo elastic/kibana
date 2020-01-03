@@ -20,14 +20,14 @@
 import React from 'react';
 
 import { IUiSettingsClient } from 'kibana/public';
-import { Vis } from 'ui/vis';
+import { Vis } from '../legacy_imports';
 import { ChartComponent } from './chart';
 import { VisParams } from '../timelion_vis_fn';
 import { TimelionSuccessResponse } from '../helpers/timelion_request_handler';
 
 interface TimelionVisComponentProp {
   config: IUiSettingsClient;
-  renderComplete: () => void;
+  renderComplete(): void;
   updateStatus: object;
   vis: Vis;
   visData: TimelionSuccessResponse;

@@ -266,7 +266,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
         if (y != null && legendValueNumbers) {
           let label = y.toFixed(precision);
           if (series.yaxis.tickFormatter) {
-            label = series.yaxis.tickFormatter(label, series.yaxis);
+            label = series.yaxis.tickFormatter(Number(label), series.yaxis);
           }
           legendValueNumbers.eq(i).text(`(${label})`);
         } else {
@@ -335,7 +335,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     }
   }, [chartElem, plotSelectedHandler, plotHoverHandler, mouseLeaveHandler]);
 
-  const title: string = last(compact(map(chart, '_title'))) || '';
+  const title: string = useMemo(() => last(compact(map(chart, '_title'))) || '', [chart]);
 
   return (
     <div ref={elementRef} className="timChart">

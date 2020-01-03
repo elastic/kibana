@@ -40,7 +40,7 @@ type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies>;
 export interface TimelionVisDependencies {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
-  timelionPanels: Map<string, any>;
+  timelionPanels: Map<string, IPanelWrapper>;
   timefilter: TimefilterContract;
 }
 

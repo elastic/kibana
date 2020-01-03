@@ -18,7 +18,8 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+
+import { npSetup, npStart } from './legacy_imports';
 
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { TimelionVisSetupDependencies } from './plugin';
