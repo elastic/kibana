@@ -15,24 +15,19 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
-
+  cy.viewport('macbook-15');
   cy.visit(
     `${
       Cypress.config().baseUrl
     }${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1576754930819,kind:absolute,to:1576927740792)),timeline:(linkTo:!(global),timerange:(from:1576754930819,kind:absolute,to:1576927740792)))`
   );
-
-  cy.viewport('macbook-15');
-
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
 
 export const loginAndWaitForPageUrlState = (url: string) => {
   login();
-
-  cy.visit(`${Cypress.config().baseUrl}${url}`);
   cy.viewport('macbook-15');
-
+  cy.visit(`${Cypress.config().baseUrl}${url}`);
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
 
