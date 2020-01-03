@@ -7,15 +7,15 @@
 import React from 'react';
 
 import { StylePropEditor } from '../style_prop_editor';
-import { DynamicLabelEditor } from './dynamic_label_editor';
-import { StaticLabelEditor } from './static_label_editor';
+import { DynamicLabelForm } from './dynamic_label_form';
+import { StaticLabelForm } from './static_label_form';
 
 export function VectorStyleLabelEditor(props) {
-  const labelEditor = props.styleProperty.isDynamic() ? (
-    <DynamicLabelEditor {...props} />
+  const labelForm = props.styleProperty.isDynamic() ? (
+    <DynamicLabelForm {...props} />
   ) : (
-    <StaticLabelEditor {...props} />
+    <StaticLabelForm {...props} />
   );
 
-  return <StylePropEditor {...props}>{labelEditor}</StylePropEditor>;
+  return <StylePropEditor {...props}>{labelForm}</StylePropEditor>;
 }

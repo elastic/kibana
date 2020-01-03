@@ -176,7 +176,8 @@ export class VectorStyleEditor extends Component {
   _renderLineWidth() {
     return (
       <VectorStyleSizeEditor
-        handlePropertyChange={this.props.handlePropertyChange}
+        onStaticStyleChange={this._onStaticStyleChange}
+        onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties.lineWidth}
         fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
@@ -188,7 +189,8 @@ export class VectorStyleEditor extends Component {
   _renderSymbolSize() {
     return (
       <VectorStyleSizeEditor
-        handlePropertyChange={this.props.handlePropertyChange}
+        onStaticStyleChange={this._onStaticStyleChange}
+        onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties.iconSize}
         fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
@@ -222,7 +224,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleSizeEditor
-          handlePropertyChange={this.props.handlePropertyChange}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties.labelSize}
           fields={this._getOrdinalFields()}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.labelSize.options}

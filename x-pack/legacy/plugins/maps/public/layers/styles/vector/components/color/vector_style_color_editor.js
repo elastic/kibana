@@ -7,15 +7,15 @@
 import React from 'react';
 
 import { StylePropEditor } from '../style_prop_editor';
-import { DynamicColorEditor } from './dynamic_color_editor';
-import { StaticColorEditor } from './static_color_editor';
+import { DynamicColorForm } from './dynamic_color_form';
+import { StaticColorForm } from './static_color_form';
 import { i18n } from '@kbn/i18n';
 
 export function VectorStyleColorEditor(props) {
-  const colorEditor = props.styleProperty.isDynamic() ? (
-    <DynamicColorEditor {...props} />
+  const colorForm = props.styleProperty.isDynamic() ? (
+    <DynamicColorForm {...props} />
   ) : (
-    <StaticColorEditor {...props} />
+    <StaticColorForm {...props} />
   );
 
   return (
@@ -28,7 +28,7 @@ export function VectorStyleColorEditor(props) {
         }
       )}
     >
-      {colorEditor}
+      {colorForm}
     </StylePropEditor>
   );
 }

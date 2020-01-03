@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function StaticLabelEditor(props) {
+export function StaticLabelForm(props) {
   const onValueChange = event => {
     props.onStaticStyleChange(props.styleProperty.getStyleName(), { value: event.target.value });
   };

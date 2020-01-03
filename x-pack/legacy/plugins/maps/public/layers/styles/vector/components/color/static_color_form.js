@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldSelect } from '../field_select';
+import { EuiColorPicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function DynamicLabelEditor(props) {
-  const styleOptions = props.styleProperty.getOptions();
-
-  const onFieldChange = ({ field }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), { ...styleOptions, field });
+export function StaticColorForm(props) {
+  const onColorChange = color => {
+    props.onStaticStyleChange(props.styleProperty.getStyleName(), { color });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
-        <FieldSelect
-          fields={props.fields}
-          selectedFieldName={_.get(styleOptions, 'field.name')}
-          onChange={onFieldChange}
+        <EuiColorPicker
+          onChange={onColorChange}
+          color={props.styleProperty.getOptions().color}
+          swatches={props.swatches}
           compressed
         />
       </EuiFlexItem>

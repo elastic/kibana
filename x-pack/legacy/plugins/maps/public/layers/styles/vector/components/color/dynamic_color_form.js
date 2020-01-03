@@ -10,7 +10,7 @@ import { FieldSelect } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-export function DynamicColorEditor(props) {
+export function DynamicColorForm(props) {
   const styleOptions = props.styleProperty.getOptions();
 
   const onFieldChange = ({ field }) => {
