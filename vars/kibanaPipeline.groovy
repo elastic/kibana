@@ -144,6 +144,10 @@ def jobRunner(label, useRamDisk, closure) {
     retry(8) {
       try {
         // scmVars = checkout scm
+        scmVars = [
+          GIT_BRANCH: 'retry-flaky-tests',
+        ]
+
         print "No-Op: checkout scm"
       } catch (ex) {
         sleep 15
