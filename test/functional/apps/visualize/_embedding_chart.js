@@ -25,7 +25,6 @@ export default function({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const embedding = getService('embedding');
   const PageObjects = getPageObjects([
-    'common',
     'visualize',
     'visEditor',
     'visChart',

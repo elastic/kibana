@@ -24,13 +24,7 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('metric chart', function() {
     before(async function() {

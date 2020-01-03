@@ -25,7 +25,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
   const retry = getService('retry');
   const log = getService('log');
   const inspector = getService('inspector');
-  const { header } = getPageObjects(['common', 'header']);
+  const { header } = getPageObjects(['header']);
 
   class TileMapPage {
     public async getZoomSelectors(zoomSelector: string) {

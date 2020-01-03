@@ -25,14 +25,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'header',
-    'timePicker',
-    'visEditor',
-    'visChart',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'timePicker', 'visEditor', 'visChart']);
 
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';

@@ -22,13 +22,7 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');

@@ -30,9 +30,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
   const { common, header, visChart } = getPageObjects(['common', 'header', 'visChart']);
 
   interface IntervalOptions {
-    type: 'default' | 'numeric' | 'custom';
-    aggNth: number;
-    append: boolean;
+    type?: 'default' | 'numeric' | 'custom';
+    aggNth?: number;
+    append?: boolean;
   }
 
   class VisualizeEditorPage {
@@ -402,10 +402,8 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
-    public async setInterval(
-      newValue: string,
-      { type = 'default', aggNth = 2, append = false }: IntervalOptions
-    ) {
+    public async setInterval(newValue: string, options: IntervalOptions = {}) {
+      const { type = 'default', aggNth = 2, append = false } = options;
       log.debug(`visEditor.setInterval(${newValue}, {${type}, ${aggNth}, ${append}})`);
       if (type === 'default') {
         await comboBox.set('visEditorInterval', newValue);

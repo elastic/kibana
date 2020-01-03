@@ -39,7 +39,6 @@ import { NewsfeedPageProvider } from './newsfeed_page';
 import { PointSeriesPageProvider } from './point_series_page';
 // @ts-ignore not TS yet
 import { SettingsPageProvider } from './settings_page';
-// @ts-ignore not TS yet
 import { SharePageProvider } from './share_page';
 // @ts-ignore not TS yet
 import { ShieldPageProvider } from './shield_page';
@@ -53,6 +52,7 @@ import { VisualizeEditorPageProvider } from './visualize_editor_page';
 import { VisualizeChartPageProvider } from './visualize_chart_page';
 import { TileMapPageProvider } from './tile_map_page';
 import { TagCloudPageProvider } from './tag_cloud_page';
+import { VegaChartPageProvider } from './vega_chart_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -77,4 +77,5 @@ export const pageObjects = {
   visChart: VisualizeChartPageProvider,
   tileMap: TileMapPageProvider,
   tagCloud: TagCloudPageProvider,
+  vegaChart: VegaChartPageProvider,
 };

@@ -30,7 +30,6 @@ export default function({ getService, getPageObjects }) {
     'visEditor',
     'visChart',
     'header',
-    'settings',
     'timePicker',
   ]);
 

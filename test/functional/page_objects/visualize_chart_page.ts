@@ -324,26 +324,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return element.getVisibleText();
     }
 
-    public async getVegaSpec() {
-      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-      const editor = await testSubjects.find('vega-editor');
-      const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Promise.all(
-        lines.map(async line => {
-          return await line.getVisibleText();
-        })
-      );
-      return linesText.join('\n');
-    }
-
-    public async getVegaViewContainer() {
-      return await find.byCssSelector('div.vgaVis__view');
-    }
-
-    public async getVegaControlContainer() {
-      return await find.byCssSelector('div.vgaVis__controls');
-    }
-
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      */

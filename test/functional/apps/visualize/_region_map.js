@@ -24,13 +24,7 @@ export default function({ getService, getPageObjects }) {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
-    const PageObjects = getPageObjects([
-      'common',
-      'visualize',
-      'visEditor',
-      'timePicker',
-      'settings',
-    ]);
+    const PageObjects = getPageObjects(['visualize', 'visEditor', 'timePicker']);
 
     before(async function() {
       log.debug('navigateToApp visualize');
