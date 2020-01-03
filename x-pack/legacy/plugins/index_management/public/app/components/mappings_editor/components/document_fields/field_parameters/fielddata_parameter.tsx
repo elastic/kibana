@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiFormRow, EuiCallOut, EuiLink, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiLink, EuiSwitch } from '@elastic/eui';
 
 import {
   UseField,
