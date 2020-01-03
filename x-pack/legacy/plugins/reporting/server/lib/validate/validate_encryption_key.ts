@@ -7,11 +7,12 @@
 import crypto from 'crypto';
 import { ServerFacade, Logger } from '../../../types';
 
-export function validateConfig(serverFacade: ServerFacade, logger: Logger) {
+export function validateEncryptionKey(serverFacade: ServerFacade, logger: Logger) {
   const config = serverFacade.config();
 
   const encryptionKey = config.get('xpack.reporting.encryptionKey');
   if (encryptionKey == null) {
+    // TODO this should simply throw an error and let the handler conver it to a warning mesasge. See validateServerHost.
     logger.warning(
       `Generating a random key for xpack.reporting.encryptionKey. To prevent pending reports from failing on restart, please set ` +
         `xpack.reporting.encryptionKey in kibana.yml`

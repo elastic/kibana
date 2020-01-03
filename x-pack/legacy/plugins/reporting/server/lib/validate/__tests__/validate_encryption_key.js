@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { validateConfig } from '../validate_config';
+import { validateEncryptionKey } from '../validate_encryption_key';
 
-// FAILING: https://github.com/elastic/kibana/issues/51373
-describe.skip('Reporting: Validate config', () => {
+describe('Reporting: Validate config', () => {
   const logger = {
     warning: sinon.spy(),
   };
@@ -25,7 +24,7 @@ describe.skip('Reporting: Validate config', () => {
         set: sinon.stub(),
       };
 
-      expect(() => validateConfig(config, logger)).not.to.throwError();
+      expect(() => validateEncryptionKey(config, logger)).not.to.throwError();
 
       sinon.assert.calledWith(config.set, 'xpack.reporting.encryptionKey');
       sinon.assert.calledWithMatch(logger.warning, /Generating a random key/);
