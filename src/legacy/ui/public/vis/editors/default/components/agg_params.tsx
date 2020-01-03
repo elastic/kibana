@@ -20,6 +20,7 @@
 import React, { useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useUnmount from 'react-use/lib/useUnmount';
 
 import { VisState } from 'ui/vis';
 import { aggTypes, AggType, AggParam, AggConfig } from 'ui/agg_types/';
@@ -44,9 +45,6 @@ import {
 } from './agg_params_state';
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
 import { OnAggParamsChange } from './agg_common_props';
 
