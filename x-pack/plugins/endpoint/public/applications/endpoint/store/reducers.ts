@@ -7,6 +7,13 @@
 import { combineReducers } from 'redux';
 import { appReducer } from './app/reducers';
 
+// FIXME: why is `ReturnType<typeof endpointAppReducers>` not working?
+// export type GlobalState = ReturnType<typeof endpointAppReducers>;
+
+export interface GlobalState {
+  app: ReturnType<typeof appReducer>;
+}
+
 export const endpointAppReducers = combineReducers({
   app: appReducer,
 });

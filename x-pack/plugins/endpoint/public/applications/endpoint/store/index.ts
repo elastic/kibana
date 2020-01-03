@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore } from 'redux';
+import { createStore, StoreEnhancer } from 'redux';
 import { endpointAppReducers } from './reducers';
 
-// FIXME: typing below is not correct - shows GlobaState as an unknown
-export type GlobalState = ReturnType<typeof endpointAppReducers>;
+export { GlobalState } from './reducers';
+
+const composeWithReduxDevTools =
+  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || ((enhancer?: StoreEnhancer) => enhancer);
 
 export const appStoreFactory = () => {
-  const store = createStore(endpointAppReducers);
+  const store = createStore(endpointAppReducers, composeWithReduxDevTools());
   return store;
 };
