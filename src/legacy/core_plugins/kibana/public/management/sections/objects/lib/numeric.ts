@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isNaN } from 'lodash';
 
 export function isNumeric(v: any): boolean {
-  return !_.isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !_.isNaN(parseFloat(v))));
+  return !isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !isNaN(parseFloat(v))));
 }
