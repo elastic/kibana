@@ -114,13 +114,13 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Localization
-/src/dev/i18n @elastic/kibana-localization
+/src/dev/i18n/ @elastic/kibana-localization
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry @elastic/pulse
+/x-pack/legacy/plugins/telemetry/ @elastic/pulse
 
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
