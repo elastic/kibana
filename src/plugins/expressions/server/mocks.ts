@@ -21,6 +21,10 @@ import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/server/mocks';
 
+/* eslint-disable */
+import { bfetchPluginMock } from '../../bfetch/server/mocks';
+/* eslint-enable */
+
 export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;
 
@@ -45,7 +49,9 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {});
+  const setup = await plugin.setup(coreSetup, {
+    bfetch: bfetchPluginMock.createSetupContract(),
+  });
 
   return {
     pluginInitializerContext,
@@ -53,7 +59,10 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart, {}),
+    doStart: async () =>
+      await plugin.start(coreStart, {
+        bfetch: bfetchPluginMock.createStartContract(),
+      }),
   };
 };
 
