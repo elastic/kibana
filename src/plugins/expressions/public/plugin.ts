@@ -58,7 +58,6 @@ import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
 import { serializeProvider } from '../common';
-import { batchedFetch } from './batched_fetch';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
