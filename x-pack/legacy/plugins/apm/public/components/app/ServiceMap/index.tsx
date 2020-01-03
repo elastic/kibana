@@ -68,7 +68,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       style={cytoscapeDivStyle}
     >
       <Controls />
-      <Popover />
+      <Popover focusedServiceName={serviceName} />
     </Cytoscape>
   ) : (
     <PlatinumLicensePrompt />

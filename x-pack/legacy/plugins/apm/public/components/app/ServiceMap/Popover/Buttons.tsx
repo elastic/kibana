@@ -11,19 +11,24 @@ import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface ButtonsProps {
-  serviceName: string;
+  focusedServiceName?: string;
+  selectedNodeServiceName: string;
 }
 
-export function Buttons({ serviceName }: ButtonsProps) {
+export function Buttons({
+  focusedServiceName,
+  selectedNodeServiceName
+}: ButtonsProps) {
   const currentSearch = useUrlParams().urlParams.kuery ?? '';
   const detailsUrl = getAPMHref(
-    `/services/${serviceName}/transactions`,
+    `/services/${selectedNodeServiceName}/transactions`,
     currentSearch
   );
   const focusUrl = getAPMHref(
-    `/services/${serviceName}/service-map`,
+    `/services/${selectedNodeServiceName}/service-map`,
     currentSearch
   );
+  const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
 
   return (
     <>
@@ -35,7 +40,18 @@ export function Buttons({ serviceName }: ButtonsProps) {
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton href={focusUrl} color="secondary">
+        <EuiButton
+          isDisabled={isAlreadyFocused}
+          href={focusUrl}
+          color="secondary"
+          title={
+            isAlreadyFocused
+              ? i18n.translate('xpack.apm.serviceMap.alreadyFocusedTitleText', {
+                  defaultMessage: 'Map is already focused'
+                })
+              : undefined
+          }
+        >
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map'
           })}

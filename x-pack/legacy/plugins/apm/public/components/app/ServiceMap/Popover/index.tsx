@@ -14,12 +14,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { CSSProperties, useContext, useEffect, useState } from 'react';
 import { CytoscapeContext } from '../Cytoscape';
 import { Buttons } from './Buttons';
 import { MetricList } from './MetricList';
 
-export function Popover() {
+interface PopoverProps {
+  focusedServiceName?: string;
+}
+
+export function Popover({ focusedServiceName }: PopoverProps) {
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
@@ -30,6 +34,8 @@ export function Popover() {
       setSelectedNode(event.target);
     };
     const unselectHandler: cytoscape.EventHandler = event => {
+      // Set a timeout here so we don't unselect if the selection has changed to
+      // a new node.
       setTimeout(() => {
         if (cy?.$('node:selected').length === 0) {
           setSelectedNode(undefined);
@@ -55,19 +61,19 @@ export function Popover() {
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
   const isOpen = !!selectedNode;
-  const serviceName = selectedNode?.data('id');
+  const selectedNodeServiceName = selectedNode?.data('id');
   const instanceCount = selectedNode?.data('instanceCount');
-
-  const triggerStyle = {
+  const isService = selectedNode?.data('isService');
+  const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
+    position: 'absolute',
     width: renderedWidth
   };
   const trigger = <div className="trigger" style={triggerStyle} />;
 
   const popoverStyle = {
-    transform: `translate(${x - renderedWidth / 2}px, ${y +
-      renderedHeight / 2}px)`
+    transform: `translate(${x}px, ${y + renderedHeight / 2}px)`
   };
 
   return (
@@ -81,7 +87,7 @@ export function Popover() {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h3>{serviceName}</h3>
+            <h3>{selectedNodeServiceName}</h3>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
@@ -102,7 +108,12 @@ export function Popover() {
         <EuiFlexItem>
           <MetricList {...selectedNode?.data()} />
         </EuiFlexItem>
-        <Buttons serviceName={serviceName} />
+        {isService && (
+          <Buttons
+            focusedServiceName={focusedServiceName}
+            selectedNodeServiceName={selectedNodeServiceName}
+          />
+        )}
       </EuiFlexGroup>
     </EuiPopover>
   );
