@@ -43,6 +43,7 @@ export interface ISyncStrategy {
    * Take in a state object, should serialise and persist
    */
   toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<void>;
+
   /**
    * Should retrieve state from the storage and deserialize it
    */
@@ -50,8 +51,22 @@ export interface ISyncStrategy {
     syncKey: string,
     opts?: { isRestoringInitialState: boolean }
   ) => Promise<State | null>;
+
   /**
    * Should notify when the storage has changed
    */
   storageChange$?: <State = unknown>(syncKey: string) => Observable<State | null>;
+
+  /**
+   * Optional helper method - should retrieve state from the storage and deserialize it synchronously
+   */
+  fromStorageSync?: <State = unknown>(
+    syncKey: string,
+    opts?: { isRestoringInitialState: boolean }
+  ) => State | null;
+
+  /**
+   * Optional helper method - take in a state object, should serialise and persist it synchronously
+   */
+  toStorageSync?: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => void;
 }

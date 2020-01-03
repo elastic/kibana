@@ -36,6 +36,13 @@ describe('SessionStorageSyncStrategy', () => {
     expect(storage.getItem('key')).not.toBeNull();
   });
 
+  it('should synchronously sync to storage', () => {
+    const state = { state: 'state' };
+    syncStrategy.toStorageSync!('key', state);
+    expect(syncStrategy.fromStorageSync!('key')).toEqual(state);
+    expect(storage.getItem('key')).not.toBeNull();
+  });
+
   it('should not implement storageChange$', () => {
     expect(syncStrategy.storageChange$).not.toBeDefined();
   });

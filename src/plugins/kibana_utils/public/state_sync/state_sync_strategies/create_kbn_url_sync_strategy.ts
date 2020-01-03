@@ -61,5 +61,15 @@ export const createKbnUrlSyncStrategy = (
         map(() => getStateFromKbnUrl<State>(syncKey)),
         share()
       ),
+
+    // optional helper methods for strategy
+    toStorageSync: <State>(
+      syncKey: string,
+      state: State,
+      { replace = false }: { replace: boolean } = { replace: false }
+    ) => {
+      url.update(setStateToKbnUrl(syncKey, state, { useHash }), replace);
+    },
+    fromStorageSync: syncKey => getStateFromKbnUrl(syncKey),
   };
 };

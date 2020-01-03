@@ -30,6 +30,7 @@ describe('KbnUrlSyncStrategy', () => {
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
+      history.push('/');
       syncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
@@ -39,6 +40,14 @@ describe('KbnUrlSyncStrategy', () => {
       await syncStrategy.toStorage(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
       expect(await syncStrategy.fromStorage(key)).toEqual(state);
+    });
+
+    it('should persist state to url synchronously', () => {
+      const state = { test: 'test', ok: 1 };
+      const key = '_s';
+      syncStrategy.toStorageSync!(key, state);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
+      expect(syncStrategy.fromStorageSync!(key)).toEqual(state);
     });
 
     it('should notify about url changes', async () => {
@@ -66,6 +75,7 @@ describe('KbnUrlSyncStrategy', () => {
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
+      history.push('/');
       syncStrategy = createKbnUrlSyncStrategy({ useHash: true, history });
     });
 
@@ -73,8 +83,16 @@ describe('KbnUrlSyncStrategy', () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
       await syncStrategy.toStorage(key, state);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/?query=test#?some=test&_s=h@487e077"`);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=h@487e077"`);
       expect(await syncStrategy.fromStorage(key)).toEqual(state);
+    });
+
+    it('should persist state to url synchronously', () => {
+      const state = { test: 'test', ok: 1 };
+      const key = '_s';
+      syncStrategy.toStorageSync!(key, state);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=h@487e077"`);
+      expect(syncStrategy.fromStorageSync!(key)).toEqual(state);
     });
 
     it('should notify about url changes', async () => {
