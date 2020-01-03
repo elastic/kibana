@@ -9,6 +9,8 @@ import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, BrowserRouter, Switch } from 'react-router-dom';
+import { appStoreFactory } from './store';
+import { AppDispatch } from './store/app/actions';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -16,10 +18,22 @@ import { Route, BrowserRouter, Switch } from 'react-router-dom';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
+  const store = appStoreFactory();
+  const dispatch: AppDispatch = store.dispatch;
+
+  dispatch({
+    type: 'appWillMount',
+    payload: {
+      coreStartServices: coreStart,
+      appBasePath,
+    },
+  });
+
   ReactDOM.render(<AppRoot basename={appBasePath} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    dispatch({ type: 'appDidUnmount' });
   };
 }
 

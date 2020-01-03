@@ -5,7 +5,7 @@
  */
 
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
-import { GlobalState } from '../types';
+import { GlobalState } from '../store';
 
 interface StoreAction extends AnyAction {
   payload: unknown[];
