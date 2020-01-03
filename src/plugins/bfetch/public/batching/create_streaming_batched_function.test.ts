@@ -22,10 +22,6 @@ import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streami
 import { defer, of } from '../../../kibana_utils/public';
 import { Subject } from 'rxjs';
 
-jest.mock('../streaming', () => ({
-  fetchStreaming: () => ({}),
-}));
-
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
     new Promise<any>(resolve =>
@@ -147,7 +143,9 @@ describe('createStreamingBatchedFunction()', () => {
 
       await new Promise(r => setTimeout(r, 6));
       const { body } = fetchStreaming.mock.calls[0][0];
-      expect(JSON.parse(body)).toEqual([{ payload: { foo: 'bar' } }, { payload: { baz: 'quix' } }]);
+      expect(JSON.parse(body)).toEqual({
+        batch: [{ foo: 'bar' }, { baz: 'quix' }],
+      });
     });
   });
 
@@ -188,11 +186,9 @@ describe('createStreamingBatchedFunction()', () => {
         method: 'POST',
       });
       const { body } = fetchStreaming.mock.calls[0][0];
-      expect(JSON.parse(body)).toEqual([
-        { payload: { a: '1' } },
-        { payload: { b: '2' } },
-        { payload: { c: '3' } },
-      ]);
+      expect(JSON.parse(body)).toEqual({
+        batch: [{ a: '1' }, { b: '2' }, { c: '3' }],
+      });
     });
 
     test('dispatches batch on full buffer and also on timeout', async () => {
@@ -254,7 +250,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 1,
           result: { foo: 'bar' },
-        })
+        }) + '\n'
       );
 
       expect(await isPending(promise1)).toBe(true);
@@ -265,7 +261,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 0,
           result: { foo: 'bar 2' },
-        })
+        }) + '\n'
       );
 
       expect(await isPending(promise1)).toBe(false);
@@ -291,13 +287,13 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 1,
           result: { foo: 'bar' },
-        })
+        }) + '\n'
       );
       stream.next(
         JSON.stringify({
           id: 2,
           result: { foo: 'bar 2' },
-        })
+        }) + '\n'
       );
 
       expect(await isPending(promise1)).toBe(true);
@@ -325,7 +321,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 0,
           error: { message: 'oops' },
-        })
+        }) + '\n'
       );
 
       expect(await isPending(promise)).toBe(false);
@@ -354,7 +350,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 2,
           result: { b: '3' },
-        })
+        }) + '\n'
       );
 
       await new Promise(r => setTimeout(r, 1));
@@ -363,7 +359,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 1,
           error: { b: '2' },
-        })
+        }) + '\n'
       );
 
       await new Promise(r => setTimeout(r, 1));
@@ -372,7 +368,7 @@ describe('createStreamingBatchedFunction()', () => {
         JSON.stringify({
           id: 0,
           result: { b: '1' },
-        })
+        }) + '\n'
       );
 
       await new Promise(r => setTimeout(r, 1));
@@ -435,7 +431,7 @@ describe('createStreamingBatchedFunction()', () => {
           JSON.stringify({
             id: 1,
             result: { b: '1' },
-          })
+          }) + '\n'
         );
         stream.complete();
 
@@ -504,7 +500,7 @@ describe('createStreamingBatchedFunction()', () => {
           JSON.stringify({
             id: 1,
             result: { b: '1' },
-          })
+          }) + '\n'
         );
         stream.error('oops');
 
