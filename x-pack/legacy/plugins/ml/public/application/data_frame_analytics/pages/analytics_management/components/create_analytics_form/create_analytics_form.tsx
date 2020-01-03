@@ -42,11 +42,6 @@ import {
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
 
-// based on code used by `ui/index_patterns` internally
-// remove the space character from the list of illegal characters
-indexPatterns.ILLEGAL_CHARACTERS.pop();
-const characterList = indexPatterns.ILLEGAL_CHARACTERS.join(', ');
-
 const NUMERICAL_FIELD_TYPES = new Set([
   'long',
   'integer',
@@ -66,7 +61,6 @@ const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
   const kibanaContext = useKibanaContext();
-
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
@@ -96,6 +90,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     sourceIndexFieldsCheckFailed,
     trainingPercent,
   } = form;
+  const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
