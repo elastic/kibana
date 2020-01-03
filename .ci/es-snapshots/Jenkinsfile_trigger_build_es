@@ -12,7 +12,7 @@ branches.each { branch ->
     wait: false,
     job: 'elasticsearch+snapshots+build',
     parameters: [
-      string(name: 'branch_specifier', value: 'es-snapshots-automation'), // TODO
+      string(name: 'branch_specifier', value: branch),
       string(name: 'ES_BRANCH', value: branch),
     ]
   )
