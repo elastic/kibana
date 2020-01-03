@@ -50,11 +50,6 @@ timeout(time: 120, unit: 'MINUTES') {
                 // elasticsearch-8.0.0-SNAPSHOT-linux-x86_64.tar.gz
                 def parts = filename.replace("elasticsearch-oss", "oss").split("-")
 
-                // We don't care about the no-jdk artifact
-                if (parts.size() < 5) {
-                  return null
-                }
-
                 VERSION = VERSION ?: parts[1]
                 SNAPSHOT_ID = SNAPSHOT_ID ?: "${date}_${GIT_COMMIT_SHORT}"
                 DESTINATION = DESTINATION ?: "${VERSION}/archives/${SNAPSHOT_ID}"
@@ -69,7 +64,6 @@ timeout(time: 120, unit: 'MINUTES') {
                   license: parts[0] == 'oss' ? 'oss' : 'default',
                 ]
               }
-              .findAll { !!it }
 
             sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
 
@@ -153,7 +147,7 @@ def buildArchives(destination) {
     // Select the correct JDK for this branch
     "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
 
-    // These Jenkins env vars trigger some automation in ES that we don't want
+    // These Jenkins env vars trigger some automation in the elasticsearch repo that we don't want
     "BUILD_NUMBER=",
     "JENKINS_URL=",
     "BUILD_URL=",
@@ -163,7 +157,7 @@ def buildArchives(destination) {
     sh """
       ./gradlew -p distribution/archives assemble --parallel
       mkdir -p ${destination}
-      find distribution/archives -type f \\( -name 'elasticsearch-*-*.tar.gz' -o -name 'elasticsearch-*-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
+      find distribution/archives -type f \\( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
     """
   }
 }
