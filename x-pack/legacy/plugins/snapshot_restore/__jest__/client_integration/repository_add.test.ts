@@ -19,6 +19,8 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
+jest.mock('ui/new_platform');
+
 describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
 
