@@ -72,7 +72,8 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   };
   const trigger = <div className="trigger" style={triggerStyle} />;
 
-  const popoverStyle = {
+  const popoverStyle: CSSProperties = {
+    position: 'absolute',
     transform: `translate(${x}px, ${y + renderedHeight / 2}px)`
   };
 
