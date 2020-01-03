@@ -11,3 +11,5 @@ export * from './serializers';
 export * from './validators';
 
 export * from './mappings_validator';
+
+export * from './search_fields';

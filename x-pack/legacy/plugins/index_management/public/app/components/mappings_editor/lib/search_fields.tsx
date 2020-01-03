@@ -47,8 +47,8 @@ const getJSXdisplayFromMeta = (
   term: string,
   path: string,
   metadata: Omit<SearchMetadata, 'score' | 'display'>
-): JSX.Element | null => {
-  let display: JSX.Element | null = null;
+): JSX.Element => {
+  let display: JSX.Element = <span>{path}</span>;
 
   if (metadata.fullyMatchPath) {
     display = (
@@ -164,8 +164,8 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
     }))
     .filter(({ metadata }) => metadata.score > 0)
     .sort(sortResult)
-    .map(({ field }) => ({
-      display: <span>{field.path}</span>,
+    .map(({ field, metadata: { display } }) => ({
+      display,
       field,
     }));
 };

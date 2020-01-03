@@ -14,6 +14,7 @@ import {
   isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
+  searchFields,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -517,7 +518,7 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         search: {
           term: action.value,
-          result: [],
+          result: searchFields(action.value, state.fields.byId),
         },
       };
     }

@@ -265,5 +265,5 @@ export interface SearchMetadata {
   /**
    * The JSX with <strong> tag wrapping the matched string
    */
-  display: JSX.Element | null;
+  display: JSX.Element;
 }
