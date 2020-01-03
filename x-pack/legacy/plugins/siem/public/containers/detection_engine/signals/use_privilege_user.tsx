@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { getUserPrivilege } from './api';
 
 type Return = [boolean, boolean | null, boolean | null];
@@ -22,7 +22,7 @@ export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
   const [hasWrite, setHasWrite] = useState<boolean | null>(null);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;
