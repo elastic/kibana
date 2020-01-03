@@ -69,7 +69,7 @@ timeout(time: 120, unit: 'MINUTES') {
                   license: parts[0] == 'oss' ? 'oss' : 'default',
                 ]
               }
-              .filter { !!it }
+              .findAll { !!it }
 
             sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
 
