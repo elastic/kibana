@@ -41,11 +41,7 @@ export type TaskManagerPluginStartContract = Omit<
 export class TaskManagerPlugin
   implements Plugin<TaskManagerPluginSetupContract, TaskManagerPluginStartContract> {
   legacySetup$: AsyncSubject<LegacySetup> = new AsyncSubject<LegacySetup>();
-  legacySetupResult: Promise<LegacySetup> = new Promise(resolve => {
-    this.legacySetup$.subscribe(__LEGACY => {
-      resolve(__LEGACY);
-    });
-  });
+  legacySetupResult: Promise<LegacySetup> = resolveOnFirstValue<LegacySetup>(this.legacySetup$);
   currentConfig: TaskManagerConfig;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -84,13 +80,15 @@ export class TaskManagerPlugin
   }
 
   public start(): TaskManagerPluginStartContract {
-    const taskManager = this.legacySetupResult.then(({ legacyPlugin }) => legacyPlugin.start());
+    const legacyTaskManager = this.legacySetupResult.then(({ legacyPlugin }) =>
+      legacyPlugin.start()
+    );
     return {
-      fetch: (...args) => taskManager.then(tm => tm.fetch(...args)),
-      remove: (...args) => taskManager.then(tm => tm.remove(...args)),
-      schedule: (...args) => taskManager.then(tm => tm.schedule(...args)),
-      runNow: (...args) => taskManager.then(tm => tm.runNow(...args)),
-      ensureScheduled: (...args) => taskManager.then(tm => tm.ensureScheduled(...args)),
+      fetch: (...args) => legacyTaskManager.then(tm => tm.fetch(...args)),
+      remove: (...args) => legacyTaskManager.then(tm => tm.remove(...args)),
+      schedule: (...args) => legacyTaskManager.then(tm => tm.schedule(...args)),
+      runNow: (...args) => legacyTaskManager.then(tm => tm.runNow(...args)),
+      ensureScheduled: (...args) => legacyTaskManager.then(tm => tm.ensureScheduled(...args)),
     };
   }
   public stop() {
@@ -98,4 +96,12 @@ export class TaskManagerPlugin
       legacyPlugin.stop();
     });
   }
+}
+
+function resolveOnFirstValue<T>(stream$: AsyncSubject<T>): Promise<T> {
+  return new Promise(resolve => {
+    stream$.subscribe(value => {
+      resolve(value);
+    });
+  });
 }

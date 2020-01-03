@@ -5,6 +5,8 @@
  */
 
 import { Logger, PluginInitializerContext } from 'kibana/server';
+import { Legacy } from 'kibana';
+import { isFunction } from 'lodash';
 import { PLUGIN_ID } from './constants';
 import { OssTelemetryPlugin } from './server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
@@ -16,7 +18,7 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
     require: ['elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.oss_telemetry',
 
-    init(server) {
+    init(server: Legacy.Server) {
       const plugin = new OssTelemetryPlugin({
         logger: {
           get: () =>
@@ -30,10 +32,7 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
       } as PluginInitializerContext);
       plugin.setup(server.newPlatform.setup.core, {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
-        taskManager: {
-          ...server.newPlatform.setup.plugins.kibanaTaskManager,
-          ...server.newPlatform.start.plugins.kibanaTaskManager,
-        } as TaskManager,
+        taskManager: getTaskManager(server),
         __LEGACY: {
           config: server.config(),
           xpackMainStatus: ((server.plugins.xpack_main as unknown) as { status: any }).status
@@ -43,3 +42,11 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
     },
   });
 };
+
+function getTaskManager(server: Legacy.Server) {
+  const taskManager = {
+    ...(server?.newPlatform?.setup?.plugins?.kibanaTaskManager || {}),
+    ...(server?.newPlatform?.start?.plugins?.kibanaTaskManager || {}),
+  } as TaskManager;
+  return isFunction(taskManager.ensureScheduled) ? taskManager : undefined;
+}
