@@ -73,6 +73,7 @@ export const RuntimeFrameworkInfo = t.interface(
         t.literal('basic'),
         t.literal('gold'),
         t.literal('platinum'),
+        t.literal('enterprise'),
       ]),
       expired: t.boolean,
       expiry_date_in_millis: t.number,

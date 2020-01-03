@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageProps, ICON_TYPES } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { DetailViewPanelName } from '../../';
@@ -41,14 +41,14 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
   return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;
 }
 
-type LayoutProps = PackageInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
+type LayoutProps = PackageInfo & Pick<DetailProps, 'panel'> & Pick<EuiPageProps, 'restrictWidth'>;
 export function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth } = props;
   const { theme } = useCore();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
 
   const FullWidthHeader = styled(EuiPage)`
-    border-bottom: ${theme.eui.euiBorderThin}
+    border-bottom: ${theme.eui.euiBorderThin};
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `;
 

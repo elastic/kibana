@@ -190,17 +190,14 @@ export const AssignDatasourcesFlyout: React.FC<Props> = ({
               type: 'field_value_toggle',
               field: 'policies',
               value: 0,
-              name: (
-                <FormattedMessage
-                  id="xpack.fleet.assignDatasources.unassignedFilterButtonLabel"
-                  defaultMessage="Unassigned"
-                />
-              ),
+              name: i18n.translate('xpack.fleet.assignDatasources.unassignedFilterButtonLabel', {
+                defaultMessage: 'Unassigned',
+              }),
             },
           ],
         }}
         selection={{
-          onSelectionChange: (selection: Datasource[]) =>
+          onSelectionChange: (selection: Array<{ id: string }>) =>
             setSelectedDatasources(selection.map(ds => ds.id)),
         }}
         isSelectable={true}

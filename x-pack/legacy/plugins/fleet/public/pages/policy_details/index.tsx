@@ -21,7 +21,6 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
-import { Datasource } from '../../../common/types/domain_data';
 import { Loading, ConnectedLink } from '../../components';
 import { useLibs, sendRequest } from '../../hooks';
 import {
@@ -401,7 +400,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
               },
             }}
             selection={{
-              onSelectionChange: (selection: Datasource[]) =>
+              onSelectionChange: (selection: Array<{ id: string }>) =>
                 setSelectedDatasources(selection.map(ds => ds.id)),
             }}
             isSelectable={true}

@@ -392,7 +392,7 @@ export const AgentListPage: React.FC<{}> = () => {
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
-        <EuiBasicTable
+        <EuiBasicTable<Agent>
           className="fleet__agentList__table"
           loading={isLoading}
           noItemsMessage={

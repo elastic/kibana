@@ -10,9 +10,27 @@ import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink, EuiBadge } from '@ela
 import { Datasource } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks';
 
-interface Props extends EuiInMemoryTableProps {
-  datasources?: Array<Datasource & { policies?: string[] }>;
+type DatasourceWithPolicy = Datasource & { policies?: string[] };
+
+interface InMemoryDatasource {
+  id: string;
+  name: string;
+  streams: number;
+  packageName: string;
+  packageTitle?: string;
+  packageVersion: string;
+  packageDescription?: string;
+  policies: number;
+}
+
+interface Props {
+  datasources?: DatasourceWithPolicy[];
   withPoliciesCount?: boolean;
+  loading?: EuiInMemoryTableProps<InMemoryDatasource>['loading'];
+  message?: EuiInMemoryTableProps<InMemoryDatasource>['message'];
+  search?: EuiInMemoryTableProps<InMemoryDatasource>['search'];
+  selection?: EuiInMemoryTableProps<InMemoryDatasource>['selection'];
+  isSelectable?: EuiInMemoryTableProps<InMemoryDatasource>['isSelectable'];
 }
 
 export const DatasourcesTable: React.FC<Props> = (
@@ -24,31 +42,32 @@ export const DatasourcesTable: React.FC<Props> = (
   const { framework } = useLibs();
 
   // Flatten some values so that they can be searched via in-memory table search
-  const datasources = originalDatasources?.map(
-    ({
-      id,
-      name,
-      streams,
-      package: {
-        name: packageName,
-        title: packageTitle,
-        version: packageVersion,
-        description: packageDescription,
-      },
-      policies,
-    }) => ({
-      id,
-      name,
-      streams: streams.length || 0,
-      packageName,
-      packageTitle,
-      packageVersion,
-      packageDescription,
-      policies: policies?.length || 0,
-    })
-  );
+  const datasources =
+    originalDatasources?.map(
+      ({
+        id,
+        name,
+        streams,
+        package: {
+          name: packageName,
+          title: packageTitle,
+          version: packageVersion,
+          description: packageDescription,
+        },
+        policies,
+      }) => ({
+        id,
+        name,
+        streams: streams.length || 0,
+        packageName,
+        packageTitle,
+        packageVersion,
+        packageDescription,
+        policies: policies?.length || 0,
+      })
+    ) || [];
 
-  const columns: EuiInMemoryTableProps['columns'] = [
+  const columns: EuiInMemoryTableProps<InMemoryDatasource>['columns'] = [
     {
       field: 'name',
       name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.nameColumnTitle', {
@@ -122,13 +141,15 @@ export const DatasourcesTable: React.FC<Props> = (
   }
 
   return (
-    <EuiInMemoryTable
+    <EuiInMemoryTable<InMemoryDatasource>
       itemId="id"
-      items={datasources}
+      items={datasources || ([] as InMemoryDatasource[])}
       columns={columns}
       sorting={{
-        field: 'name',
-        direction: 'asc',
+        sort: {
+          field: 'name',
+          direction: 'asc',
+        },
       }}
       {...rest}
     />

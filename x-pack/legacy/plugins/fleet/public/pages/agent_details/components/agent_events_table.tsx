@@ -187,7 +187,7 @@ export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiBasicTable
+      <EuiBasicTable<AgentEvent>
         onChange={onChange}
         items={list}
         columns={columns}

@@ -11,18 +11,18 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageWidthProps,
   // @ts-ignore
   EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPageProps,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { useCore, useLinks } from '../../hooks';
 
-export type HeaderProps = EuiPageWidthProps & {
+export type HeaderProps = Pick<EuiPageProps, 'restrictWidth'> & {
   onSearch: (userInput: string) => unknown;
 };
 
