@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ComponentStrings, ZIP, CANVAS, HTML } from '../../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n/components';
+import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
 import { OnCloseFn } from '../workpad_export';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
