@@ -48,33 +48,7 @@ const EmbeddedPanel = styled.div`
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeSettingsContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
-
-  useEffect(() => {
-    async function setupEmbeddable() {
-      const mapState = {
-        layerList: getLayerList(upPoints, downPoints, colors),
-        title: i18n.MAP_TITLE,
-      };
-      // @ts-ignore
-      const embeddableObject = await factory.createFromState(mapState, input, undefined);
-
-      setEmbeddable(embeddableObject);
-    }
-    setupEmbeddable();
-  }, []);
-
-  useEffect(() => {
-    if (embeddable) {
-      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
-    }
-  }, [upPoints, downPoints]);
-
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable]);
-
+  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input = {
@@ -94,7 +68,33 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     hideViewControl: true,
   };
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
+  useEffect(() => {
+    async function setupEmbeddable() {
+      const mapState = {
+        layerList: getLayerList(upPoints, downPoints, colors),
+        title: i18n.MAP_TITLE,
+      };
+      // @ts-ignore
+      const embeddableObject = await factory.createFromState(mapState, input, undefined);
+
+      setEmbeddable(embeddableObject);
+    }
+    setupEmbeddable();
+    // we want this effect to execute exactly once after the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (embeddable) {
+      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
+    }
+  }, [upPoints, downPoints, embeddable, colors]);
+
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable, embeddableRoot]);
 
   return (
     <EmbeddedPanel>

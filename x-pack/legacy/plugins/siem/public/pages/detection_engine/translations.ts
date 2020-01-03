@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
 });
 
 export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
-  defaultMessage: 'Last signal:',
+  defaultMessage: 'Last signal',
 });
 
 export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignalTitle', {
@@ -35,7 +35,7 @@ export const PANEL_SUBTITLE_SHOWING = i18n.translate(
 
 export const EMPTY_TITLE = i18n.translate('xpack.siem.detectionEngine.emptyTitle', {
   defaultMessage:
-    'It looks like you don’t have any indices relevant to the detction engine in the SIEM application',
+    'It looks like you don’t have any indices relevant to the detection engine in the SIEM application',
 });
 
 export const EMPTY_ACTION_PRIMARY = i18n.translate(
