@@ -11,7 +11,7 @@ import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 
 const MapPanel = styled.div`
-  height: 330px;
+  height: 240px;
   width: 520px;
   margin-right: 10px;
 `;

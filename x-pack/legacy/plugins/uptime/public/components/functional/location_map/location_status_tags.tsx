@@ -10,7 +10,6 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import { UptimeSettingsContext } from '../../../contexts';
 
 const TextStyle = styled.div`
-  text-transform: uppercase;
   font-weight: 600;
 `;
 

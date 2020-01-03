@@ -60,7 +60,7 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     viewMode: 'view',
     isLayerTOCOpen: false,
     hideFilterActions: true,
-    mapCenter: { lon: 11, lat: 47, zoom: 0 },
+    mapCenter: { lon: 11, lat: 20, zoom: 0 },
     disableInteractive: true,
     disableTooltipControl: true,
     hideToolbarOverlay: true,
