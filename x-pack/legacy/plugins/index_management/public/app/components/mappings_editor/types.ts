@@ -227,3 +227,8 @@ export interface ComboBoxOption {
   label: string;
   value?: unknown;
 }
+
+export interface SearchResult {
+  display: JSX.Element;
+  field: NormalizedField;
+}

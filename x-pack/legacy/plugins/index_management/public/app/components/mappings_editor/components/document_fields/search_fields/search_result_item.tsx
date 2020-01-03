@@ -8,12 +8,12 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField } from '../../../types';
+import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
-import { DeleteFieldProvider } from './delete_field_provider';
+import { DeleteFieldProvider } from '../fields/delete_field_provider';
 
 interface Props {
-  field: NormalizedField;
+  item: SearchResult;
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
   isDimmed: boolean;
@@ -21,8 +21,8 @@ interface Props {
   // editField(): void;
 }
 
-export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent({
-  field,
+export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
+  item: { display, field },
   areActionButtonsVisible,
   isHighlighted,
   isDimmed,
@@ -86,7 +86,7 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
             })}
           >
             <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
-              {source.name}
+              {display}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">

@@ -18,7 +18,7 @@ import { IndexSettings } from './types';
 import { State } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
-import { SearchResult } from './components/document_fields/search_result';
+import { SearchResult } from './components/document_fields/search_fields';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
@@ -95,7 +95,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                 />
                 <EuiSpacer size="m" />
                 {state.search.term.trim() !== '' ? (
-                  <SearchResult fields={state.search.result} />
+                  <SearchResult result={state.search.result} />
                 ) : (
                   editor
                 )}

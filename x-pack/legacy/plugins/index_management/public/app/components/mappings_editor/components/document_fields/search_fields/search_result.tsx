@@ -6,32 +6,32 @@
 import React from 'react';
 import VirtualList from 'react-tiny-virtual-list';
 
-import { NormalizedField } from '../../types';
-import { FieldsListItemFlat } from './fields/fields_list_item_flat';
+import { SearchResult as SearchResultType } from '../../../types';
+import { SearchResultItem } from './search_result_item';
 
 interface Props {
-  fields: NormalizedField[];
+  result: SearchResultType[];
 }
 
 const ITEM_HEIGHT = 64;
 
-export const SearchResult = React.memo(({ fields }: Props) => {
-  const listHeight = Math.min(fields.length * ITEM_HEIGHT, 600);
+export const SearchResult = React.memo(({ result }: Props) => {
+  const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
   return (
     <VirtualList
       width="100%"
       height={listHeight}
-      itemCount={fields.length}
+      itemCount={result.length}
       itemSize={ITEM_HEIGHT}
       overscanCount={4}
       renderItem={({ index, style }) => {
-        const field = fields[index];
+        const item = result[index];
 
         return (
-          <div key={field.id} style={style}>
-            <FieldsListItemFlat
-              field={field}
+          <div key={item.field.id} style={style}>
+            <SearchResultItem
+              item={item}
               areActionButtonsVisible={true}
               isDimmed={false}
               isHighlighted={false}

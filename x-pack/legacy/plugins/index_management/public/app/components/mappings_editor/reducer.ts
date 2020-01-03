@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg, FormHook } from './shared_imports';
-import { Field, NormalizedFields, NormalizedField, FieldsEditor } from './types';
+import { Field, NormalizedFields, NormalizedField, FieldsEditor, SearchResult } from './types';
 import {
   getFieldMeta,
   getUniqueId,
@@ -61,7 +61,7 @@ export interface State {
   };
   search: {
     term: string;
-    result: NormalizedField[];
+    result: SearchResult[];
   };
 }
 

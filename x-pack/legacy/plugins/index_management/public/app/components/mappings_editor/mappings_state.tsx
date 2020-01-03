@@ -5,6 +5,7 @@
  */
 
 import React, { useReducer, useEffect, createContext, useContext, useMemo, useRef } from 'react';
+import { EuiLink } from '@elastic/eui';
 
 import {
   reducer,
@@ -14,7 +15,7 @@ import {
   State,
   Dispatch,
 } from './reducer';
-import { Field, FieldsEditor, NormalizedField } from './types';
+import { Field, FieldsEditor, NormalizedField, SearchResult } from './types';
 import { normalize, deNormalize, canUseMappingsEditor, getUniqueId } from './lib';
 
 type Mappings = MappingsConfiguration & {
@@ -66,8 +67,16 @@ const getRandomField = (): NormalizedField => ({
   } as any,
 });
 
-const generateDummyResult = (total = 500): NormalizedField[] => {
-  return new Array(total).fill('').map(getRandomField);
+const generateDummyResult = (total = 500): SearchResult[] => {
+  return new Array(total).fill('').map(() => ({
+    display: (
+      <span>
+        <EuiLink onClick={() => undefined}>Hello</EuiLink> &gt;{' '}
+        <EuiLink onClick={() => undefined}>world</EuiLink> &gt; <strong>highlighted</strong>
+      </span>
+    ),
+    field: getRandomField(),
+  }));
 };
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
@@ -102,7 +111,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     search: {
       term: 'temp',
-      result: generateDummyResult(),
+      result: generateDummyResult(25),
     },
   };
 
