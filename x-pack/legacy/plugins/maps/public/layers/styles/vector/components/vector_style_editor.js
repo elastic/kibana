@@ -241,7 +241,8 @@ export class VectorStyleEditor extends Component {
     if (this.props.symbolDescriptor.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
       iconOrientation = (
         <OrientationEditor
-          handlePropertyChange={this.props.handlePropertyChange}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties.iconOrientation}
           fields={this.state.numberFields}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
