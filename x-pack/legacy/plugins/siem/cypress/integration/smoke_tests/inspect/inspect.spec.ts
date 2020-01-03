@@ -13,7 +13,7 @@ import {
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
 } from '../../lib/inspect/selectors';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT, loginAndWaitForPageUrlState } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('Inspect', () => {
@@ -23,15 +23,13 @@ describe('Inspect', () => {
     });
     INSPECT_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
-        loginAndWaitForPage(table.url);
-        cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
+        loginAndWaitForPageUrlState(table.url);
+        cy.get(table.id, { timeout: DEFAULT_TIMEOUT }).should('exist');
         if (table.altInspectId) {
-          cy.scrollTo('bottom');
           cy.get(table.altInspectId, { timeout: DEFAULT_TIMEOUT }).trigger('click', {
             force: true,
           });
         } else {
-          cy.scrollTo('bottom');
           cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`, {
             timeout: DEFAULT_TIMEOUT,
           }).trigger('click', { force: true });
@@ -47,7 +45,7 @@ describe('Inspect', () => {
     });
 
     it('inspects the timeline', () => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPageUrlState(HOSTS_PAGE);
       toggleTimelineVisibility();
       executeKQL(hostExistsQuery);
       cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
