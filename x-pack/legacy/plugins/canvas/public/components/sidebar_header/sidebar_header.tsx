@@ -20,7 +20,8 @@ import {
 import { Popover } from '../popover';
 import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ComponentStrings, ShortcutStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
+import { ShortcutStrings } from '../../../i18n/shortcuts';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 

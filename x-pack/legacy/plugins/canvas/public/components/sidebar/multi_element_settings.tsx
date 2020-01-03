@@ -6,7 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
 
 const { MultiElementSettings: strings } = ComponentStrings;
 
