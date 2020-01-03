@@ -38,7 +38,7 @@ export function screenshotsObservableFactory(
       logger
     );
 
-    const foo$ = Rx.from(urls).pipe(
+    return Rx.from(urls).pipe(
       mergeMap(url => {
         return create$.pipe(
           mergeMap(({ driver, exit$ }) => {
@@ -91,7 +91,5 @@ export function screenshotsObservableFactory(
       first(),
       toArray()
     );
-
-    return foo$;
   };
 }
