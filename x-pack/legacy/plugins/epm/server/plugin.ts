@@ -17,7 +17,7 @@ import { routes } from './routes';
 export { createSetupShim } from './shim';
 
 export interface EPMPluginInitializerContext {
-  config: Omit<PluginInitializerContext['config'], 'legacy'>;
+  config: Pick<PluginInitializerContext['config'], 'create' | 'createIfExists'>;
 }
 
 export interface EPMCoreSetup {
