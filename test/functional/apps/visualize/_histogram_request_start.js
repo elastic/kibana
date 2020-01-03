@@ -50,7 +50,7 @@ export default function({ getService, getPageObjects }) {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function() {
         const providedInterval = 2400000000;
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visEditor.setNumericInterval(providedInterval);
+        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
         await PageObjects.visEditor.clickGo();
         await retry.try(async () => {
           const data = await PageObjects.visChart.getTableVisData();
@@ -66,7 +66,7 @@ export default function({ getService, getPageObjects }) {
       it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function() {
         const providedInterval = 100;
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visEditor.setNumericInterval(providedInterval);
+        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
         await PageObjects.visEditor.clickGo();
         await PageObjects.common.sleep(1000); //fix this
         await retry.try(async () => {

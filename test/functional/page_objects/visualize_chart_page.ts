@@ -273,7 +273,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     public async waitForVisualization() {
       await this.waitForVisualizationRenderingStabilized();
-      return await find.byCssSelector('.visualization');
+      await find.byCssSelector('.visualization');
     }
 
     public async getLegendEntries() {

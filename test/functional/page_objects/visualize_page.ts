@@ -30,7 +30,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
   const { common, header, visEditor } = getPageObjects(['common', 'header', 'visEditor']);
 
   class VisualizePage {
-    defaultIndex = {
+    index = {
       LOGSTASH_TIME_BASED: 'logstash-*',
       LOGSTASH_NON_TIME_BASED: 'logstash*',
     };
@@ -144,7 +144,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.saveVisualization(vizName);
     }
 
-    public async clickNewSearch(indexPattern = this.defaultIndex.LOGSTASH_TIME_BASED) {
+    public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
@@ -221,7 +221,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickVisualizationByName(vizName: string) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      return find.clickByPartialLinkText(vizName);
+      await find.clickByPartialLinkText(vizName);
     }
 
     public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
@@ -237,7 +237,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async waitForVisualizationSavedToastGone() {
-      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+      await testSubjects.waitForDeleted('saveVisualizationSuccess');
     }
 
     public async clickLandingPageBreadcrumbLink() {
@@ -251,8 +251,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
-      const exists = await testSubjects.exists('visualizeLandingPage');
-      return exists;
+      return await testSubjects.exists('visualizeLandingPage');
     }
 
     public async gotoLandingPage() {

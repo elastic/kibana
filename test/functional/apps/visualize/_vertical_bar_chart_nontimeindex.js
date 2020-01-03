@@ -44,7 +44,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setCustomInterval('3h');
+      await PageObjects.visEditor.setInterval('3h', { type: 'custom' });
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     };
 

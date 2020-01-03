@@ -52,12 +52,12 @@ export default function({ getService, getPageObjects }) {
       log.debug('Field = bytes');
       await PageObjects.visEditor.selectField('bytes');
       log.debug('Interval = 2000');
-      await PageObjects.visEditor.setNumericInterval('2000');
+      await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
       await PageObjects.visEditor.clickGo();
     });
 
     it('should allow applying changed params', async () => {
-      await PageObjects.visEditor.setNumericInterval('1', { append: true });
+      await PageObjects.visEditor.setInterval('1', { type: 'numeric', append: true });
       const interval = await PageObjects.visEditor.getNumericInterval();
       expect(interval).to.be('20001');
       const isApplyButtonEnabled = await PageObjects.visEditor.isApplyEnabled();

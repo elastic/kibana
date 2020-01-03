@@ -26,7 +26,6 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
   const retry = getService('retry');
   const { common, header } = getPageObjects(['common', 'header']);
 
-  // Currently on Dashboard, Visualize and Settings page
   class ListingTable {
     public async getSearchFilter() {
       const searchFilter = await find.allByCssSelector('.euiFieldSearch');
@@ -38,6 +37,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       await searchFilter.clearValue();
       await searchFilter.click();
     }
+
     public async getAllVisualizationNamesOnCurrentPage(): Promise<string[]> {
       const visualizationNames = [];
       const links = await find.allByCssSelector('.kuiLink');
@@ -48,7 +48,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       return visualizationNames;
     }
 
-    async getItemsCount(appName: 'visualize' | 'dashboard') {
+    public async getItemsCount(appName: 'visualize' | 'dashboard'): Promise<number> {
       const prefixMap = { visualize: 'vis', dashboard: 'dashboard' };
       const elements = await find.allByCssSelector(
         `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
@@ -71,11 +71,11 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
     }
 
-    async clickDeleteSelected() {
+    public async clickDeleteSelected() {
       await testSubjects.click('deleteSelectedItems');
     }
 
-    async checkListingSelectAllCheckbox() {
+    public async checkListingSelectAllCheckbox() {
       const element = await testSubjects.find('checkboxSelectAll');
       const isSelected = await element.isSelected();
       if (!isSelected) {

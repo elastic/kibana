@@ -28,11 +28,11 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
   const { header } = getPageObjects(['common', 'header']);
 
   class TileMapPage {
-    async getZoomSelectors(zoomSelector: string) {
+    public async getZoomSelectors(zoomSelector: string) {
       return await find.allByCssSelector(zoomSelector);
     }
 
-    async clickMapButton(zoomSelector: string, waitForLoading?: boolean) {
+    public async clickMapButton(zoomSelector: string, waitForLoading?: boolean) {
       await retry.try(async () => {
         const zooms = await this.getZoomSelectors(zoomSelector);
         await Promise.all(zooms.map(async zoom => await zoom.click()));
@@ -42,7 +42,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       });
     }
 
-    async getVisualizationRequest() {
+    public async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await inspector.open();
       await testSubjects.click('inspectorViewChooser');
@@ -51,21 +51,21 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       return await testSubjects.getVisibleText('inspectorRequestBody');
     }
 
-    async getMapBounds() {
+    public async getMapBounds(): Promise<object> {
       const request = await this.getVisualizationRequest();
       const requestObject = JSON.parse(request);
       return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
-    async clickMapZoomIn(waitForLoading = true) {
+    public async clickMapZoomIn(waitForLoading = true) {
       await this.clickMapButton('a.leaflet-control-zoom-in', waitForLoading);
     }
 
-    async clickMapZoomOut(waitForLoading = true) {
+    public async clickMapZoomOut(waitForLoading = true) {
       await this.clickMapButton('a.leaflet-control-zoom-out', waitForLoading);
     }
 
-    async getMapZoomEnabled(zoomSelector: string) {
+    public async getMapZoomEnabled(zoomSelector: string): Promise<boolean> {
       const zooms = await this.getZoomSelectors(zoomSelector);
       const classAttributes = await Promise.all(
         zooms.map(async zoom => await zoom.getAttribute('class'))
@@ -73,7 +73,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       return !classAttributes.join('').includes('leaflet-disabled');
     }
 
-    async zoomAllTheWayOut() {
+    public async zoomAllTheWayOut(): Promise<void> {
       // we can tell we're at level 1 because zoom out is disabled
       return await retry.try(async () => {
         await this.clickMapZoomOut();
@@ -85,15 +85,15 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       });
     }
 
-    async getMapZoomInEnabled() {
+    public async getMapZoomInEnabled() {
       return await this.getMapZoomEnabled('a.leaflet-control-zoom-in');
     }
 
-    async getMapZoomOutEnabled() {
+    public async getMapZoomOutEnabled() {
       return await this.getMapZoomEnabled('a.leaflet-control-zoom-out');
     }
 
-    async clickMapFitDataBounds() {
+    public async clickMapFitDataBounds() {
       return await this.clickMapButton('a.fa-crop');
     }
   }
