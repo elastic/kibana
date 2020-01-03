@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getColorsFromPalette } from '../get_colors_from_palette';
+import { getColorsFromPalette } from './get_colors_from_palette';
 import {
   grayscalePalette,
   gradientPalette,
-} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
+} from './../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
 
 describe('getColorsFromPalette', () => {
   it('returns the array of colors from a palette object when gradient is false', () => {

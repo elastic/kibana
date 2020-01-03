@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValidUrl } from '../url';
-import { missingImage } from '../../../common/lib/missing_asset';
+import { isValidUrl } from './url';
+import { missingImage } from './../../common/lib/missing_asset';
 
 describe('resolve_dataurl', () => {
   it('returns valid dataurl', () => {

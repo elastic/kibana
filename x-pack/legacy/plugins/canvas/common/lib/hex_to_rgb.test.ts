@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hexToRgb } from '../hex_to_rgb';
+import { hexToRgb } from './hex_to_rgb';
 
 describe('hexToRgb', () => {
   it('invalid hex', () => {

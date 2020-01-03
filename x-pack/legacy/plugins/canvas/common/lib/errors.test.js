@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RenderError } from '../errors';
+import { RenderError } from './errors';
 
 describe('errors', () => {
   it('creates a test error', () => {

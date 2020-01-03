@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetch, arrayBufferFetch } from '../fetch';
+import { fetch, arrayBufferFetch } from './fetch';
 
 describe('fetch', () => {
   it('test fetch headers', () => {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Handlebars } from '../handlebars';
-import { testTable } from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
+import { Handlebars } from './handlebars';
+import { testTable } from './../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
 
 describe('handlebars', () => {
   it('registers math function and returns argument error', () => {

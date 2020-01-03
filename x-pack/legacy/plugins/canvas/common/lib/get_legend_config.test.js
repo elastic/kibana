@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getLegendConfig } from '../get_legend_config';
+import { getLegendConfig } from './get_legend_config';
 
 describe('getLegendConfig', () => {
   describe('show', () => {

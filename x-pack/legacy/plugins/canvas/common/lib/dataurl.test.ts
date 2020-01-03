@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValidDataUrl, parseDataUrl } from '../dataurl';
+import { isValidDataUrl, parseDataUrl } from './dataurl';
 
 const BASE64_TEXT = 'data:text/plain;charset=utf-8;base64,VGhpcyBpcyBhIHRlc3Q=';
 const BASE64_SVG =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=';
 const BASE64_PIXEL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk8PxfDwADYgHJvQ16TAAAAABJRU5ErkJggg==';
+const INVALID_BASE64_PIXEL =
+  'data:image/png;%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%01%00%00%00%01%08%06%00%00%00%1F%15%C4%89%0';
 
 const RAW_TEXT = 'data:text/plain;charset=utf-8,This%20is%20a%20test';
 const RAW_SVG =
@@ -20,10 +22,13 @@ const RAW_PIXEL =
 
 describe('dataurl', () => {
   describe('isValidDataUrl', () => {
-    test('invalid data url', () => {
+    it('invalid data url', () => {
       expect(isValidDataUrl('somestring')).toBe(false);
     });
-    test('valid data urls', () => {
+    it('empty string returns false', () => {
+      expect(isValidDataUrl('')).toBe(false);
+    });
+    it('valid data urls', () => {
       expect(isValidDataUrl(BASE64_TEXT)).toBe(true);
       expect(isValidDataUrl(BASE64_SVG)).toBe(true);
       expect(isValidDataUrl(BASE64_PIXEL)).toBe(true);
@@ -34,10 +39,13 @@ describe('dataurl', () => {
   });
 
   describe('dataurl.parseDataUrl', () => {
-    test('invalid data url', () => {
+    it('invalid data url', () => {
       expect(parseDataUrl('somestring')).toBeNull();
     });
-    test('text data urls', () => {
+    it('invalid base64 image returns null', () => {
+      expect(parseDataUrl(INVALID_BASE64_PIXEL)).toBeNull();
+    });
+    it('text data urls', () => {
       expect(parseDataUrl(BASE64_TEXT)).toEqual({
         charset: 'utf-8',
         data: null,
@@ -55,7 +63,7 @@ describe('dataurl', () => {
         mimetype: 'text/plain',
       });
     });
-    test('png data urls', () => {
+    it('png data urls', () => {
       expect(parseDataUrl(RAW_PIXEL)).toBeNull();
       expect(parseDataUrl(BASE64_PIXEL)).toEqual({
         charset: undefined,
@@ -66,7 +74,7 @@ describe('dataurl', () => {
         mimetype: 'image/png',
       });
     });
-    test('svg data urls', () => {
+    it('svg data urls', () => {
       expect(parseDataUrl(RAW_SVG)).toEqual({
         charset: undefined,
         data: null,
