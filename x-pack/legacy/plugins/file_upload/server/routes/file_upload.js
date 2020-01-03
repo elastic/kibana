@@ -23,7 +23,6 @@ function importData({ callWithRequest, id, index, settings, mappings, ingestPipe
 
 export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository) {
   return async (con, req, res) => {
-    // console.log(JSON.stringify(Object.keys(req)));
     const requestObj = {
       query: req.query,
       body: req.body,
@@ -96,8 +95,12 @@ export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
       query: schema.object({}, { allowUnknowns: true }),
       body: schema.object({}, { allowUnknowns: true }),
     },
-    //validate: importRouteConfig,
-    // config: importRouteConfig.validate,
+    options: {
+      body: {
+        maxBytes: MAX_BYTES,
+        accepts: ['application/json'],
+      },
+    },
   },
     getImportRouteHandler(esPlugin, getSavedObjectsRepository)
   );
