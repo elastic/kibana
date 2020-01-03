@@ -17,14 +17,13 @@ import {
   TaskLifecycleResult,
 } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
-// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
-// be moved under task_manager/server/
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import {
+  SavedObjectsSerializer,
+  SavedObjectsSchema,
+  SavedObjectAttributes,
+} from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 

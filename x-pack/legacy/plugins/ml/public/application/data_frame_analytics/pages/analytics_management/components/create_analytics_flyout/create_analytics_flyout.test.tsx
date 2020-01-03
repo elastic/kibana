@@ -15,11 +15,6 @@ import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__
 
 import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
 
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS: [],
-}));
-
 const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
