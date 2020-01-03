@@ -16,9 +16,9 @@ export const DetectionEngineUserUnauthenticated = React.memo(() => (
     actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
     actionPrimaryUrl={documentationLinks.siem}
     actionPrimaryTarget="_blank"
-    message={i18n.USER_UNAUTHENTICATED_TITLE}
+    message={i18n.USER_UNAUTHENTICATED_MSG_BODY}
     data-test-subj="no_index"
-    title={i18n.USER_UNAUTHENTICATED_MSG_BODY}
+    title={i18n.USER_UNAUTHENTICATED_TITLE}
   />
 ));
 
