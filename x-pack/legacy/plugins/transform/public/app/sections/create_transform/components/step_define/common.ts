@@ -5,10 +5,10 @@
  */
 import { get } from 'lodash';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
-
-import { IndexPattern } from 'ui/index_patterns';
-
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   PreviewRequestBody,

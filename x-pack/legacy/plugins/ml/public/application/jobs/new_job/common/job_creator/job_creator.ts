@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -24,6 +23,7 @@ import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
