@@ -46,7 +46,7 @@ const style: cytoscape.Stylesheet[] = [
         return theme.euiColorMediumShade;
       },
       'border-width': (el: cytoscape.NodeSingular) => {
-        if (el.hasClass('primary')) {
+        if (el.hasClass('primary') || el.hasClass('hover')) {
           return 4;
         }
         if (el.selected()) {
@@ -77,12 +77,6 @@ const style: cytoscape.Stylesheet[] = [
     }
   },
   {
-    selector: 'node:selected',
-    style: {
-      'border-width': 4
-    }
-  },
-  {
     selector: 'edge',
     style: {
       'curve-style': 'bezier',
@@ -101,8 +95,15 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'edge.hover',
     style: {
-      color: theme.euiColorPrimary,
-      width: 3
+      'line-color': theme.euiColorPrimary,
+      'target-arrow-color': theme.euiColorPrimary,
+      width: 4
+    }
+  },
+  {
+    selector: 'edge.nodeHover',
+    style: {
+      width: 4
     }
   }
 ];

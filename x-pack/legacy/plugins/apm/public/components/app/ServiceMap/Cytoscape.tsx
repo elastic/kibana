@@ -69,8 +69,8 @@ export function Cytoscape({
 
   // Set up cytoscape event handlers
   useEffect(() => {
-    if (cy) {
-      cy.on('data', event => {
+    const dataHandler: cytoscape.EventHandler = event => {
+      if (cy) {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
           cy.getElementById(serviceName).addClass('primary');
@@ -79,8 +79,30 @@ export function Cytoscape({
         if (event.cy.elements().length > 0) {
           cy.layout(cytoscapeOptions.layout as cytoscape.LayoutOptions).run();
         }
-      });
+      }
+    };
+    const mouseoverHandler: cytoscape.EventHandler = event => {
+      event.target.addClass('hover');
+      event.target.connectedEdges().addClass('nodeHover');
+    };
+    const mouseoutHandler: cytoscape.EventHandler = event => {
+      event.target.removeClass('hover');
+      event.target.connectedEdges().removeClass('nodeHover');
+    };
+
+    if (cy) {
+      cy.on('data', dataHandler);
+      cy.on('mouseover', mouseoverHandler);
+      cy.on('mouseout', mouseoutHandler);
     }
+
+    return () => {
+      if (cy) {
+        cy.removeListener('data', undefined, dataHandler);
+        cy.removeListener('mouseover', undefined, mouseoverHandler);
+        cy.removeListener('mouseout', undefined, mouseoutHandler);
+      }
+    };
   }, [cy, serviceName]);
 
   return (
