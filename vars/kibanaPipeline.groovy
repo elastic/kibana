@@ -14,7 +14,7 @@ def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
             return {
               // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
               def delay = (workerNumber-1)*20
-              sleep(delay)
+              // sleep(delay)
 
               workerClosure(workerNumber)
             }

@@ -10,12 +10,21 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
         githubPr.withDefaultPrComments {
           catchError {
             retryable.enable()
+            def tries = 1
 
             parallel([
               'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
               'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
               'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
-                'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') }),
+                'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', {
+                  retryable('kibana-firefoxSmoke') {
+                    if (tries == 1) {
+                      tries++
+                      error "Fake Error"
+                    }
+                    runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke')
+                  }
+                }),
                 'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
                 'oss-ciGroup2': kibanaPipeline.getOssCiGroupWorker(2),
                 'oss-ciGroup3': kibanaPipeline.getOssCiGroupWorker(3),
