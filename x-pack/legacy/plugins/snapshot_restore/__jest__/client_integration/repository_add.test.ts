@@ -19,9 +19,7 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<RepositoryAdd />', () => {
+describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -213,7 +211,7 @@ describe.skip('<RepositoryAdd />', () => {
 
         // Fill step 2
         form.setInputValue('locationInput', repository.settings.location);
-        form.selectCheckBox('compressToggle');
+        form.toggleEuiSwitch('compressToggle');
 
         await act(async () => {
           actions.clickSubmitButton();
@@ -238,7 +236,7 @@ describe.skip('<RepositoryAdd />', () => {
         const { component, form, actions, find, exists } = testBed;
 
         form.setInputValue('locationInput', repository.settings.location);
-        form.selectCheckBox('compressToggle');
+        form.toggleEuiSwitch('compressToggle');
 
         const error = {
           status: 400,
@@ -264,7 +262,7 @@ describe.skip('<RepositoryAdd />', () => {
         // Fill step 1 required fields and go to step 2
         testBed.form.setInputValue('nameInput', repository.name);
         testBed.actions.selectRepositoryType(repository.type);
-        testBed.form.selectCheckBox('sourceOnlyToggle'); // toggle source
+        testBed.form.toggleEuiSwitch('sourceOnlyToggle'); // toggle source
         testBed.actions.clickNextButton();
       });
 
