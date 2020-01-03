@@ -602,14 +602,7 @@ describe('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
-                const {
-                  version,
-                  versionId,
-                  uuid,
-                  indices,
-                  endTimeInMillis,
-                  startTimeInMillis,
-                } = snapshot1;
+                const { version, versionId, uuid, indices } = snapshot1;
 
                 const { find } = testBed;
 
