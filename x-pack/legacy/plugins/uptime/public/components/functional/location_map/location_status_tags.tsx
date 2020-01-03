@@ -19,7 +19,7 @@ const BadgeItem = styled.div`
 
 const TagContainer = styled.div`
   padding: 10px;
-  max-height: 300px;
+  max-height: 200px;
   overflow: hidden;
 `;
 
