@@ -232,3 +232,38 @@ export interface SearchResult {
   display: JSX.Element;
   field: NormalizedField;
 }
+
+export interface SearchMetadata {
+  /**
+   * Whether or not the search term match some part of the field path.
+   */
+  matchPath: boolean;
+  /**
+   * If the search term matches the field type we will give it a higher score.
+   */
+  matchType: boolean;
+  /**
+   * If the search term matches the beginning of the path we will give it a higher score
+   */
+  matchStartOfPath: boolean;
+  /**
+   * If the search term exactly matches the field type
+   */
+  fullyMatchType: boolean;
+  /**
+   * If the search term matches the full field path
+   */
+  fullyMatchPath: boolean;
+  /**
+   * The score of the result that will allow us to sort the list
+   */
+  score: number;
+  /**
+   * For multi word search, return the word that matches the path
+   */
+  wordMatchIndex: number;
+  /**
+   * The JSX with <strong> tag wrapping the matched string
+   */
+  display: JSX.Element | null;
+}
