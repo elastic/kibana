@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';

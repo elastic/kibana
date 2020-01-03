@@ -10,3 +10,4 @@ export { ES_TEST_INDEX_NAME, ESTestIndexTool } from './es_test_index_tool';
 export { getTestAlertData } from './get_test_alert_data';
 export { AlertUtils } from './alert_utils';
 export { TaskManagerUtils } from './task_manager_utils';
+export { checkAAD } from './check_aad';

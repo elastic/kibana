@@ -39,8 +39,13 @@ import {
   unhashUrl,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
-import { FilterStateManager, IndexPattern } from '../../../../data/public';
-import { Query, SavedQuery, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import { FilterStateManager } from '../../../../data/public';
+import {
+  IndexPattern,
+  Query,
+  SavedQuery,
+  IndexPatternsContract,
+} from '../../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
