@@ -10,6 +10,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { withoutControlCharacters } from './lib/string_utils';
+
+const ACTION_NAME = 'server-log';
 
 // params definition
 
@@ -17,23 +20,24 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
 const ParamsSchema = schema.object({
   message: schema.string(),
-  level: schema.oneOf([
-    schema.literal('trace'),
-    schema.literal('debug'),
-    schema.literal('info'),
-    schema.literal('warn'),
-    schema.literal('error'),
-    schema.literal('fatal'),
-  ]),
+  level: schema.oneOf(
+    [
+      schema.literal('trace'),
+      schema.literal('debug'),
+      schema.literal('info'),
+      schema.literal('warn'),
+      schema.literal('error'),
+      schema.literal('fatal'),
+    ],
+    { defaultValue: 'info' }
+  ),
 });
 
 // action type definition
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.server-log',
-    name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
-      defaultMessage: 'Server Log',
-    }),
+    name: ACTION_NAME,
     validate: {
       params: ParamsSchema,
     },
@@ -50,8 +54,9 @@ async function executor(
   const actionId = execOptions.actionId;
   const params = execOptions.params as ActionParamsType;
 
+  const sanitizedMessage = withoutControlCharacters(params.message);
   try {
-    logger[params.level](params.message);
+    logger[params.level](`${ACTION_NAME}: ${sanitizedMessage}`);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error logging message',
