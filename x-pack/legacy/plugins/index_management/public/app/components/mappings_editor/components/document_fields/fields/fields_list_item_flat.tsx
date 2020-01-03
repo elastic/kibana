@@ -68,7 +68,7 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
   };
 
   return (
-    <li className={classNames('mappingsEditor__fieldsListItem')} data-test-subj="fieldsListItem">
+    <div className={classNames('mappingsEditor__fieldsListItem')} data-test-subj="fieldsListItem">
       <div
         className={classNames('mappingsEditor__fieldsListItem__field', {
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
@@ -106,6 +106,6 @@ export const FieldsListItemFlat = React.memo(function FieldListItemFlatComponent
           </EuiFlexGroup>
         </div>
       </div>
-    </li>
+    </div>
   );
 });

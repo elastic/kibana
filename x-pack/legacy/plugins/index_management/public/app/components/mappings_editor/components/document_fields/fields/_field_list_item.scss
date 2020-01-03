@@ -11,6 +11,7 @@
 
 .mappingsEditor__fieldsListItem__field {
   border-bottom: $euiBorderThin;
+  height: $euiSizeXL * 2;
   margin-top: $euiSizeXS; // [1]
 }
 
