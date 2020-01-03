@@ -24,13 +24,7 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {

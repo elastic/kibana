@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'header', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor']);
   const listingTable = getService('listingTable');
 
   // FLAKY: https://github.com/elastic/kibana/issues/40912

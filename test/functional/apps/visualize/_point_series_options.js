@@ -25,7 +25,6 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
-    'common',
     'visualize',
     'header',
     'pointSeries',

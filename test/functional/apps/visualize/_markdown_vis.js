@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'visChart', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'header']);
   const find = getService('find');
   const inspector = getService('inspector');
   const markdown = `

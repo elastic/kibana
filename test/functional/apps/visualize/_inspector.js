@@ -21,13 +21,7 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     this.tags('smoke');

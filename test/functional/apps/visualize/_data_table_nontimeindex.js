@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'header', 'visChart']);
 
   describe.skip('data table with index without time filter', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';

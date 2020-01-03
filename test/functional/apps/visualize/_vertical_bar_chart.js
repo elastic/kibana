@@ -25,14 +25,7 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'visEditor',
-    'visChart',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/22322
   describe('vertical bar chart', function() {
