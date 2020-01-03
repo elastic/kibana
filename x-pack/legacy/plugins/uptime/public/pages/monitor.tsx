@@ -63,7 +63,7 @@ export const MonitorPage = ({
         setHeadingText(heading);
       }
     });
-  }, [params]);
+  }, [monitorId, params, query, setBreadcrumbs, setHeadingText]);
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
 
@@ -76,7 +76,7 @@ export const MonitorPage = ({
 
   useEffect(() => {
     logMonitorPageLoad();
-  }, []);
+  }, [logMonitorPageLoad]);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
@@ -103,10 +103,10 @@ export const MonitorPage = ({
       <PingList
         onPageCountChange={setPingListPageCount}
         onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | undefined) =>
-          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
-        }
-        onUpdateApp={refreshApp}
+        onSelectedStatusChange={(selectedStatus: string | undefined) => {
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' });
+          refreshApp();
+        }}
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
