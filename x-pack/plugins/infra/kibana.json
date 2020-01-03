@@ -2,7 +2,7 @@
   "id": "infra",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["features", "apm", "usageCollection", "spaces"],
+  "requiredPlugins": ["features", "apm", "usageCollection", "spaces", "metrics"],
   "server": true,
   "ui": false
 }
