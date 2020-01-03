@@ -51,6 +51,10 @@ export class ManagementSection {
   }
 
   registerApp({ id, title, order, mount }: RegisterManagementAppArgs) {
+    if (this.apps.find(app => app.id === id)) {
+      throw new Error(`Management app already registered - id: ${id}, title: ${title}`);
+    }
+
     const app = new ManagementApp(
       { id, title, order, mount, basePath: `/management/${this.id}/${id}` },
       this.sections,
