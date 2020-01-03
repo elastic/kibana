@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { concatMap, toArray } from 'rxjs/operators';
+import { first, mergeMap, toArray } from 'rxjs/operators';
 import { ServerFacade, CaptureConfig, HeadlessChromiumDriverFactory } from '../../../../types';
 import { ScreenshotResults, ScreenshotObservableOpts } from './types';
 import { injectCustomCss } from './inject_css';
@@ -38,23 +38,23 @@ export function screenshotsObservableFactory(
       logger
     );
 
-    return Rx.from(urls).pipe(
-      concatMap(url => {
+    const foo$ = Rx.from(urls).pipe(
+      mergeMap(url => {
         return create$.pipe(
-          concatMap(({ driver, exit$ }) => {
+          mergeMap(({ driver, exit$ }) => {
             const screenshot$ = Rx.of(driver).pipe(
-              concatMap(() => openUrl(driver, url, conditionalHeaders, logger)),
-              concatMap(() => skipTelemetry(driver, logger)),
-              concatMap(() => scanPage(driver, layout, logger)),
-              concatMap(() => getNumberOfItems(driver, layout, logger)),
-              concatMap(async itemsCount => {
+              mergeMap(() => openUrl(driver, url, conditionalHeaders, logger)),
+              mergeMap(() => skipTelemetry(driver, logger)),
+              mergeMap(() => scanPage(driver, layout, logger)),
+              mergeMap(() => getNumberOfItems(driver, layout, logger)),
+              mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);
                 await Promise.all([
                   driver.setViewport(viewport, logger),
                   waitForElementsToBeInDOM(driver, itemsCount, layout, logger),
                 ]);
               }),
-              concatMap(async () => {
+              mergeMap(async () => {
                 // Waiting till _after_ elements have rendered before injecting our CSS
                 // allows for them to be displayed properly in many cases
                 await injectCustomCss(driver, layout, logger);
@@ -66,8 +66,8 @@ export function screenshotsObservableFactory(
 
                 await waitForRenderComplete(captureConfig, driver, layout, logger);
               }),
-              concatMap(() => getTimeRange(driver, layout, logger)),
-              concatMap(
+              mergeMap(() => getTimeRange(driver, layout, logger)),
+              mergeMap(
                 async (timeRange): Promise<ScreenshotResults> => {
                   const elementsPositionAndAttributes = await getElementPositionAndAttributes(
                     driver,
@@ -88,7 +88,10 @@ export function screenshotsObservableFactory(
           })
         );
       }),
+      first(),
       toArray()
     );
+
+    return foo$;
   };
 }
