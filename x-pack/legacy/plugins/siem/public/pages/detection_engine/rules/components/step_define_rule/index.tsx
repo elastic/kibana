@@ -77,7 +77,11 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
       defaultValues != null ? defaultValues.index : indicesConfig ?? []
     );
     const [
-      { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
+      {
+        browserFields,
+        indexPatterns: indexPatternQueryBar,
+        isLoading: indexPatternLoadingQueryBar,
+      },
     ] = useFetchIndexPatterns(mylocalIndicesConfig);
     const [myStepData, setMyStepData] = useState<DefineStepRule>(
       getStepDefaultValue(indicesConfig, null)
@@ -131,7 +135,11 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
 
     const handleOpenTimelineSearch = useCallback(() => {
       setOpenTimelineSearch(true);
-    }, [openTimelineSearch]);
+    }, []);
+
+    const handleCloseTimelineSearch = useCallback(() => {
+      setOpenTimelineSearch(false);
+    }, []);
 
     return isReadOnlyView && myStepData != null ? (
       <StepRuleDescription
@@ -166,15 +174,16 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
           <UseField
             path="queryBar"
             config={{
-              ...schema.index,
-              labelAppend: !localUseIndicesConfig ? (
+              ...schema.queryBar,
+              labelAppend: (
                 <EuiButtonEmpty size="xs" onClick={handleOpenTimelineSearch}>
                   {i18n.IMPORT_TIMELINE_QUERY}
                 </EuiButtonEmpty>
-              ) : null,
+              ),
             }}
             component={QueryBarDefineRule}
             componentProps={{
+              browserFields,
               loading: indexPatternLoadingQueryBar,
               idAria: 'detectionEngineStepDefineRuleQueryBar',
               indexPattern: indexPatternQueryBar,
@@ -182,6 +191,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               isLoading: indexPatternLoadingQueryBar,
               dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
               openTimelineSearch,
+              onCloseTimelineSearch: handleCloseTimelineSearch,
               resizeParentContainer,
             }}
           />

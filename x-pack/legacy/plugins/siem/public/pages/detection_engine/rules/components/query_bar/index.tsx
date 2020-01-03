@@ -6,7 +6,7 @@
 
 import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
@@ -19,11 +19,18 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../../../../src/plugins/data/public';
 
+import { BrowserFields } from '../../../../../containers/source';
+import { OpenTimelineModal } from '../../../../../components/open_timeline/open_timeline_modal';
+import { ActionTimelineToShow } from '../../../../../components/open_timeline/types';
 import { QueryBar } from '../../../../../components/query_bar';
+import { buildGlobalQuery } from '../../../../../components/timeline/helpers';
+import { getDataProviderFilter } from '../../../../../components/timeline/query_bar';
+import { convertKueryToElasticSearchQuery } from '../../../../../lib/keury';
 import { useKibana } from '../../../../../lib/kibana';
+import { TimelineModel } from '../../../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
-
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import * as i18n from './translations';
 
 export interface FieldValueQueryBar {
   filters: esFilters.Filter[];
@@ -31,11 +38,13 @@ export interface FieldValueQueryBar {
   saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
+  browserFields: BrowserFields;
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
   indexPattern: IIndexPattern;
+  onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
 }
@@ -57,16 +66,18 @@ const StyledEuiFormRow = styled(EuiFormRow)`
 // TODO need to add disabled in the SearchBar
 
 export const QueryBarDefineRule = ({
+  browserFields,
   dataTestSubj,
   field,
   idAria,
   indexPattern,
   isLoading = false,
+  onCloseTimelineSearch,
   openTimelineSearch = false,
   resizeParentContainer,
 }: QueryBarDefineRuleProps) => {
   const [originalHeight, setOriginalHeight] = useState(-1);
-  const [localOpenSearchTimeline, setLocalOpenSearchTimeline] = useState(openTimelineSearch);
+  const [loadingTimeline, setLoadingTimeline] = useState(false);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
   const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -134,12 +145,6 @@ export const QueryBarDefineRule = ({
     };
   }, [field.value]);
 
-  useEffect(() => {
-    if (localOpenSearchTimeline !== openTimelineSearch) {
-      setLocalOpenSearchTimeline(openTimelineSearch);
-    }
-  }, [localOpenSearchTimeline, openTimelineSearch]);
-
   const onSubmitQuery = useCallback(
     (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
       const { query } = field.value as FieldValueQueryBar;
@@ -177,6 +182,38 @@ export const QueryBarDefineRule = ({
     [field.value]
   );
 
+  const onCloseTimelineModal = useCallback(() => {
+    setLoadingTimeline(true);
+    onCloseTimelineSearch();
+  }, []);
+
+  const onOpenTimeline = useCallback(
+    (timeline: TimelineModel) => {
+      setLoadingTimeline(false);
+      const newQuery = {
+        query: timeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
+        language: timeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
+      };
+      const dataProvidersDsl =
+        timeline.dataProviders != null && timeline.dataProviders.length > 0
+          ? convertKueryToElasticSearchQuery(
+              buildGlobalQuery(timeline.dataProviders, browserFields),
+              indexPattern
+            )
+          : '';
+      const newFilters = timeline.filters ?? [];
+      field.setValue({
+        filters:
+          dataProvidersDsl !== ''
+            ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
+            : newFilters,
+        query: newQuery,
+        saved_id: '',
+      });
+    },
+    [browserFields, indexPattern]
+  );
+
   const onMutation = (event: unknown, observer: unknown) => {
     if (resizeParentContainer != null) {
       const suggestionContainer = document.getElementById('kbnTypeahead__items');
@@ -198,39 +235,51 @@ export const QueryBarDefineRule = ({
     }
   };
 
+  const actionTimelineToHide = useMemo<ActionTimelineToShow[]>(() => ['duplicate'], []);
+
   return (
-    <StyledEuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
-      data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-    >
-      <EuiMutationObserver
-        observerOptions={{ subtree: true, attributes: true, childList: true }}
-        onMutation={onMutation}
+    <>
+      <StyledEuiFormRow
+        label={field.label}
+        labelAppend={field.labelAppend}
+        helpText={field.helpText}
+        error={errorMessage}
+        isInvalid={isInvalid}
+        fullWidth
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
       >
-        {mutationRef => (
-          <div ref={mutationRef}>
-            <QueryBar
-              indexPattern={indexPattern}
-              isLoading={isLoading}
-              isRefreshPaused={false}
-              filterQuery={queryDraft}
-              filterManager={filterManager}
-              filters={filterManager.getFilters() || []}
-              onChangedQuery={onChangedQuery}
-              onSubmitQuery={onSubmitQuery}
-              savedQuery={savedQuery}
-              onSavedQuery={onSavedQuery}
-              hideSavedQuery={false}
-            />
-          </div>
-        )}
-      </EuiMutationObserver>
-    </StyledEuiFormRow>
+        <EuiMutationObserver
+          observerOptions={{ subtree: true, attributes: true, childList: true }}
+          onMutation={onMutation}
+        >
+          {mutationRef => (
+            <div ref={mutationRef}>
+              <QueryBar
+                indexPattern={indexPattern}
+                isLoading={isLoading || loadingTimeline}
+                isRefreshPaused={false}
+                filterQuery={queryDraft}
+                filterManager={filterManager}
+                filters={filterManager.getFilters() || []}
+                onChangedQuery={onChangedQuery}
+                onSubmitQuery={onSubmitQuery}
+                savedQuery={savedQuery}
+                onSavedQuery={onSavedQuery}
+                hideSavedQuery={false}
+              />
+            </div>
+          )}
+        </EuiMutationObserver>
+      </StyledEuiFormRow>
+      {openTimelineSearch ? (
+        <OpenTimelineModal
+          hideActions={actionTimelineToHide}
+          modalTitle={i18n.IMPORT_TIMELINE_MODAL}
+          onClose={onCloseTimelineModal}
+          onOpen={onOpenTimeline}
+        />
+      ) : null}
+    </>
   );
 };

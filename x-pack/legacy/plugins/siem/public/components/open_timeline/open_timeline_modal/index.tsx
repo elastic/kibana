@@ -17,6 +17,7 @@ import { StatefulOpenTimeline } from '..';
 export interface OpenTimelineModalProps {
   onClose: () => void;
   hideActions?: ActionTimelineToShow[];
+  modalTitle?: string;
   onOpen?: (timeline: TimelineModel) => void;
 }
 
@@ -24,7 +25,7 @@ const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 const OPEN_TIMELINE_MODAL_WIDTH = 1000; // px
 
 export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(
-  ({ hideActions = [], onClose, onOpen }) => {
+  ({ hideActions = [], modalTitle, onClose, onOpen }) => {
     const apolloClient = useApolloClient();
 
     if (!apolloClient) return null;
@@ -43,7 +44,7 @@ export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(
             isModal={true}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             onOpenTimeline={onOpen}
-            title={i18n.OPEN_TIMELINE_TITLE}
+            title={modalTitle ?? i18n.OPEN_TIMELINE_TITLE}
           />
         </EuiModal>
       </EuiOverlayMask>
