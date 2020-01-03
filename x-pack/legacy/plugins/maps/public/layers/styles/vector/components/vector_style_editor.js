@@ -201,7 +201,8 @@ export class VectorStyleEditor extends Component {
     return (
       <Fragment>
         <VectorStyleLabelEditor
-          handlePropertyChange={this.props.handlePropertyChange}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties.labelText}
           fields={this.state.fields}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.labelText.options}

@@ -6,16 +6,16 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
-import { DynamicLabelSelector } from './dynamic_label_selector';
-import { StaticLabelSelector } from './static_label_selector';
+import { StylePropEditor } from '../style_prop_editor';
+import { DynamicLabelEditor } from './dynamic_label_editor';
+import { StaticLabelEditor } from './static_label_editor';
 
 export function VectorStyleLabelEditor(props) {
-  return (
-    <StaticDynamicStyleRow
-      {...props}
-      DynamicSelector={DynamicLabelSelector}
-      StaticSelector={StaticLabelSelector}
-    />
+  const labelEditor = props.styleProperty.isDynamic() ? (
+    <DynamicLabelEditor {...props} />
+  ) : (
+    <StaticLabelEditor {...props} />
   );
+
+  return <StylePropEditor {...props}>{labelEditor}</StylePropEditor>;
 }
