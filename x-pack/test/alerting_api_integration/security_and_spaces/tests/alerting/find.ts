@@ -76,6 +76,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(Date.parse(match.createdAt));
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -166,6 +167,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(Date.parse(match.createdAt));
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

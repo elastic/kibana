@@ -222,7 +222,7 @@ export class AlertsClient {
       updateResult.scheduledTaskId &&
       !isEqual(alert.attributes.schedule, updateResult.schedule)
     ) {
-      this.taskManager.runNow(updateResult.scheduledTaskId).catch(err => {
+      this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
         this.logger.error(
           `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
         );
@@ -452,7 +452,7 @@ export class AlertsClient {
     return {
       id,
       ...rawAlert,
-      updatedAt: updatedAt ? new Date(updatedAt) : null,
+      updatedAt: updatedAt ? new Date(updatedAt) : new Date(rawAlert.createdAt!),
       createdAt: new Date(rawAlert.createdAt!),
       actions,
     };

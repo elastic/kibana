@@ -170,7 +170,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
-        "updatedAt": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -421,7 +421,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
-        "updatedAt": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -510,7 +510,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
-        "updatedAt": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -1267,7 +1267,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
-        "updatedAt": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -1368,7 +1368,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
-            "updatedAt": null,
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
         "page": 1,
