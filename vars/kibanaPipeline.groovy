@@ -181,6 +181,9 @@ def jobRunner(label, useRamDisk, closure) {
 // TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
+  print "No-Op: gcsUpload"
+  return
+
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
     bucket: "gs://${uploadPrefix}",
@@ -191,9 +194,6 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 }
 
 def withGcsArtifactUpload(workerName, closure) {
-  print "No-Op: gcsUpload"
-  return
-
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
