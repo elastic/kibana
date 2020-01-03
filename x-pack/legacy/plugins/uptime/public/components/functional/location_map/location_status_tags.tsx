@@ -8,6 +8,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { UptimeSettingsContext } from '../../../contexts';
+import { MonitorLocation } from '../../../../common/runtime_types';
 
 const TextStyle = styled.div`
   font-weight: 600;
@@ -24,10 +25,10 @@ const TagContainer = styled.div`
 `;
 
 interface Props {
-  monitorLocations: any;
+  locations: MonitorLocation[];
 }
 
-export const LocationStatusTags = ({ monitorLocations }: Props) => {
+export const LocationStatusTags = ({ locations }: Props) => {
   const {
     colors: { gray, danger },
   } = useContext(UptimeSettingsContext);
@@ -35,15 +36,14 @@ export const LocationStatusTags = ({ monitorLocations }: Props) => {
   const upLocs: string[] = [];
   const downLocs: string[] = [];
 
-  if (monitorLocations?.locations) {
-    monitorLocations.locations.forEach((item: any) => {
-      if (item.summary.down === 0) {
-        upLocs.push(item.geo.name);
-      } else {
-        downLocs.push(item.geo.name);
-      }
-    });
-  }
+  locations.forEach((item: any) => {
+    if (item.summary.down === 0) {
+      upLocs.push(item.geo.name);
+    } else {
+      downLocs.push(item.geo.name);
+    }
+  });
+
   return (
     <TagContainer>
       <span>

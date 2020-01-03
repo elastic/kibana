@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
+import { MonitorLocations } from '../../../../common/runtime_types';
 
 const MapPanel = styled.div`
   height: 240px;
@@ -17,7 +18,7 @@ const MapPanel = styled.div`
 `;
 
 interface LocationMapProps {
-  monitorLocations: any;
+  monitorLocations: MonitorLocations;
 }
 
 export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
@@ -36,7 +37,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <LocationStatusTags monitorLocations={monitorLocations} />
+        <LocationStatusTags locations={monitorLocations?.locations || []} />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <MapPanel>
