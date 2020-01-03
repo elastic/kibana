@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep, defaults, merge } from 'lodash';
-import moment from 'moment-timezone';
+import moment, { Moment } from 'moment-timezone';
 
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
@@ -82,7 +82,13 @@ interface IOptions {
     ticks: number;
     tickFormatter(val: number): string;
   };
-  yaxes?: [];
+  yaxes?: [
+    {
+      units: { type: string };
+      tickFormatter: ((val: number) => string) | ((val: number, axis: any) => string);
+      tickGenerator(axis: any): number[];
+    }
+  ];
   selection: {
     mode: string;
     color: string;
@@ -137,8 +143,8 @@ function buildOptions(
   // Get the X-axis tick format
   const time: TimeRangeBounds = timefilter.getBounds();
   const interval = calculateInterval(
-    time.min.valueOf(),
-    time.max.valueOf(),
+    time.min && time.min.valueOf(),
+    time.max && time.max.valueOf(),
     uiSettings.get('timelion:target_buckets') || 200,
     intervalValue,
     uiSettings.get('timelion:min_interval') || '1ms'
@@ -186,7 +192,7 @@ function buildOptions(
         const numberSpan = document.createElement('span');
 
         wrapperSpan.setAttribute('class', 'ngLegendValue');
-        wrapperSpan.setAttribute(SERIES_ID_ATTR, series._id);
+        wrapperSpan.setAttribute(SERIES_ID_ATTR, `${series._id}`);
 
         labelSpan.appendChild(document.createTextNode(label));
         numberSpan.setAttribute('class', 'ngLegendValueNumber');
@@ -203,7 +209,7 @@ function buildOptions(
     options.yaxes.forEach(yaxis => {
       if (yaxis && yaxis.units) {
         const formatters = tickFormatters();
-        yaxis.tickFormatter = formatters[yaxis.units.type];
+        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
         const byteModes = ['bytes', 'bytes/s'];
         if (byteModes.includes(yaxis.units.type)) {
           yaxis.tickGenerator = generateTicksProvider();

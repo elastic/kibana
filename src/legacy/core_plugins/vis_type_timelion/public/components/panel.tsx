@@ -187,7 +187,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
 
   useEffect(() => {
-    if (canvasElem) {
+    if (canvasElem && canvasElem.clientWidth > 0 && canvasElem.clientHeight > 0) {
       // @ts-ignore
       setPlot($.plot(canvasElem, compact(updatedSeries), options));
       renderComplete();

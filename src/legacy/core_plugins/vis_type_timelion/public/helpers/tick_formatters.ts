@@ -41,7 +41,7 @@ function baseTickFormatter(value: any, axis: any) {
 }
 
 function unitFormatter(divisor: any, units: any) {
-  return (val: any) => {
+  return (val: number) => {
     let index = 0;
     const isNegative = val < 0;
     val = Math.abs(val);
@@ -55,18 +55,18 @@ function unitFormatter(divisor: any, units: any) {
 }
 
 export function tickFormatters() {
-  const formatters = {
+  return {
     bits: unitFormatter(1000, ['b', 'kb', 'mb', 'gb', 'tb', 'pb']),
     'bits/s': unitFormatter(1000, ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s']),
     bytes: unitFormatter(1024, ['B', 'KB', 'MB', 'GB', 'TB', 'PB']),
     'bytes/s': unitFormatter(1024, ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s']),
-    currency(val: any, axis: any) {
+    currency(val: number, axis: any) {
       return val.toLocaleString('en', {
         style: 'currency',
         currency: axis.options.units.prefix || 'USD',
       });
     },
-    percent(val: any, axis: any) {
+    percent(val: number, axis: any) {
       let precision =
         get(axis, 'tickDecimals', 0) - get(axis, 'options.units.tickDecimalsShift', 0);
       // toFixed only accepts values between 0 and 20
@@ -78,13 +78,11 @@ export function tickFormatters() {
 
       return (val * 100).toFixed(precision) + '%';
     },
-    custom(val: any, axis: any) {
+    custom(val: number, axis: any) {
       const formattedVal = baseTickFormatter(val, axis);
       const prefix = axis.options.units.prefix;
       const suffix = axis.options.units.suffix;
       return prefix + formattedVal + suffix;
     },
   };
-
-  return formatters;
 }
