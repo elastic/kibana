@@ -47,7 +47,7 @@ export const Node = ({
           <h1>
             <FormattedMessage
               id="xpack.monitoring.elasticsearch.node.heading"
-              defaultMessage={`Elasticsearch node ${nodeSummary.name}`}
+              defaultMessage="Elasticsearch node"
             />
           </h1>
         </EuiScreenReaderOnly>
