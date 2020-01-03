@@ -13,6 +13,11 @@ def enable() {
   GLOBAL_RETRIES_ENABLED = true
 }
 
+def enable(max) {
+  enable()
+  setMax(max)
+}
+
 def haveReachedMaxRetries() {
   return CURRENT_GLOBAL_RETRIES >= MAX_GLOBAL_RETRIES
 }

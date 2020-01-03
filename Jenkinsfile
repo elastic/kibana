@@ -11,6 +11,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           catchError {
             retryable.enable()
             def tries = 1
+            def tries2 = 1
 
             parallel([
               'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
@@ -37,7 +38,16 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'oss-ciGroup10': kibanaPipeline.getOssCiGroupWorker(10),
                 'oss-ciGroup11': kibanaPipeline.getOssCiGroupWorker(11),
                 'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
-                'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', { runbld('./test/scripts/jenkins_accessibility.sh', 'Execute kibana-accessibility') }),
+                'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', {
+                  retryable('kibana-accessibility') {
+                    if (tries2 == 1) {
+                      tries2++
+                      error "Fake error"
+                    }
+                    runbld('./test/scripts/jenkins_accessibility.sh', 'Execute kibana-accessibility')
+                  }
+                }),
+
                 // 'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
               ]),
               'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
@@ -58,6 +68,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             ])
           }
         }
+
+        // TODO spit out flaky failures to the console
         kibanaPipeline.sendMail()
       }
     }
