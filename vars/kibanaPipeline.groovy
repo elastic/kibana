@@ -143,7 +143,8 @@ def jobRunner(label, useRamDisk, closure) {
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
     retry(8) {
       try {
-        scmVars = checkout scm
+        // scmVars = checkout scm
+        print "No-Op: checkout scm"
       } catch (ex) {
         sleep 15
         throw ex
@@ -186,6 +187,9 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 }
 
 def withGcsArtifactUpload(workerName, closure) {
+  print "No-Op: gcsUpload"
+  return
+
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
@@ -256,6 +260,9 @@ def sendKibanaMail() {
 }
 
 def bash(script, label) {
+  print "No-Op: [${label}] ${script}"
+  return
+
   sh(
     script: "#!/bin/bash\n${script}",
     label: label
