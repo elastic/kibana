@@ -104,10 +104,17 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   info.builds = previousCommentInfo.builds ?: []
 
   def messages = []
+  def status = buildUtils.getBuildStatus()
 
-  if (buildUtils.getBuildStatus() == 'SUCCESS') {
+  if (status == 'SUCCESS') {
     messages << """
       ## :green_heart: Build Succeeded
+      * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
+      * Commit: ${getCommitHash()}
+    """
+  } else if(status == 'UNSTABLE') {
+    messages << """
+      ## :yellow_heart: Build suceeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
     """
