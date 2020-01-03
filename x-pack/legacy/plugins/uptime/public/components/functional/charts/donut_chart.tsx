@@ -68,7 +68,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         )
         .attr('fill', (d: any) => color(d.data.key));
     }
-  }, [chartElement.current, upCount, down]);
+  }, [danger, down, gray, height, upCount, width]);
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
