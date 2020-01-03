@@ -26,7 +26,7 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   serviceName?: string;
-  style: CSSProperties;
+  style?: CSSProperties;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {

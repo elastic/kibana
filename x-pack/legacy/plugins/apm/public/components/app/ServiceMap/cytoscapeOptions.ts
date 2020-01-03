@@ -77,6 +77,12 @@ const style: cytoscape.Stylesheet[] = [
     }
   },
   {
+    selector: 'node:selected',
+    style: {
+      'border-width': 4
+    }
+  },
+  {
     selector: 'edge',
     style: {
       'curve-style': 'bezier',
