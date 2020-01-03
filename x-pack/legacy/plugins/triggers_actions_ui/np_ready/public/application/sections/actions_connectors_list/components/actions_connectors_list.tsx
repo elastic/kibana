@@ -19,10 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_context';
-import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
+import { loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
+import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -48,6 +49,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<
     ActionConnectorTableItem | undefined
   >(undefined);
+  const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     loadActions();
@@ -122,35 +124,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function deleteItems(items: ActionConnectorTableItem[]) {
-    setIsDeletingActions(true);
-    const ids = items.map(item => (item.id ? item.id : ''));
-    try {
-      await deleteActions({ http, ids });
-      const updatedActions = actions.filter(action => action.id && !ids.includes(action.id));
-      setActions(updatedActions);
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
-          { defaultMessage: 'Failed to delete action(s)' }
-        ),
-      });
-      // Refresh the actions from the server, some actions may have beend deleted
-      loadActions();
-    } finally {
-      setIsDeletingActions(false);
-    }
-  }
-
   async function editItem(connectorTableItem: ActionConnectorTableItem) {
     setEditedConnectorItem(connectorTableItem);
     setEditFlyoutVisibility(true);
-  }
-
-  async function deleteSelectedItems() {
-    await deleteItems(selectedItems);
-    setSelectedItems([]);
   }
 
   const actionsTableColumns = [
@@ -224,7 +200,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'trash',
-          onClick: (item: ActionConnectorTableItem) => deleteItems([item]),
+          onClick: (item: ActionConnectorTableItem) => setConnectorsToDelete([item.id]),
         },
       ],
     },
@@ -276,7 +252,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   iconType="trash"
                   color="danger"
                   data-test-subj="bulkDelete"
-                  onClick={deleteSelectedItems}
+                  onClick={() => {
+                    setConnectorsToDelete(selectedItems.map((selected: any) => selected.id));
+                  }}
                   title={
                     canDelete
                       ? undefined
@@ -369,6 +347,30 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
+      <DeleteConnectorsModal
+        callback={(deleted?: string[]) => {
+          if (deleted) {
+            if (selectedItems.length === deleted.length) {
+              const updatedActions = actions.filter(
+                action => action.id && !connectorsToDelete.includes(action.id)
+              );
+              setActions(updatedActions);
+              setSelectedItems([]);
+            } else {
+              toastNotifications.addDanger({
+                title: i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
+                  { defaultMessage: 'Failed to delete action(s)' }
+                ),
+              });
+              // Refresh the actions from the server, some actions may have beend deleted
+              loadActions();
+            }
+          }
+          setConnectorsToDelete([]);
+        }}
+        connectorsToDelete={connectorsToDelete}
+      />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
       {data.length !== 0 && table}

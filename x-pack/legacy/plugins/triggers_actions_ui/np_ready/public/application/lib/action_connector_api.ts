@@ -70,6 +70,14 @@ export async function deleteActions({
 }: {
   ids: string[];
   http: HttpSetup;
-}): Promise<void> {
-  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`)));
+}): Promise<{ successes: string[]; errors: string[] }> {
+  const successes: string[] = [];
+  const errors: string[] = [];
+  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`))).then(function(
+    values
+  ) {
+    errors.push(...values.filter(v => v.state === 'rejected'));
+    successes.push(...values.filter(v => v.state === 'fulfilled'));
+  });
+  return { successes, errors };
 }
