@@ -16,6 +16,7 @@ export class PostSignalError extends Error {
     this.message = errObj.message ?? '';
     this.statusCode = errObj.statusCode ?? -1;
     this.error = errObj.error ?? '';
+    this.name = 'PostSignalError';
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, PostSignalError.prototype);

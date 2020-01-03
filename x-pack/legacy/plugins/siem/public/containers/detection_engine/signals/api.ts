@@ -23,13 +23,14 @@ import {
   PostSignalError,
   BasicSignals,
 } from './types';
-import { parseJsonFromBody } from '../../../components/ml/api/throw_if_not_ok';
+import { parseJsonFromBody } from '../../../utils/api';
 
 /**
  * Fetch Signals by providing a query
  *
  * @param query String to match a dsl
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
  */
 export const fetchQuerySignals = async <Hit, Aggregations>({
   query,
@@ -58,7 +59,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
  * @param query of signals to update
  * @param status to update to('open' / 'closed')
  * @param kbnVersion current Kibana Version to use for headers
- * @param signal to cancel request
+ * @param signal AbortSignal for cancelling request
  */
 export const updateSignalStatus = async ({
   query,
@@ -86,6 +87,7 @@ export const updateSignalStatus = async ({
  * Fetch Signal Index
  *
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
  */
 export const getSignalIndex = async ({
   kbnVersion,
@@ -116,6 +118,7 @@ export const getSignalIndex = async ({
  * Get User Privileges
  *
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
  */
 export const getUserPrivilege = async ({
   kbnVersion,
@@ -140,6 +143,7 @@ export const getUserPrivilege = async ({
  * Create Signal Index if needed it
  *
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
  */
 export const createSignalIndex = async ({
   kbnVersion,

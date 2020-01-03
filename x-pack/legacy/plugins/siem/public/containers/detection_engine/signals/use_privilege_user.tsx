@@ -15,8 +15,6 @@ type Return = [boolean, boolean | null, boolean | null];
 /**
  * Hook to get user privilege from
  *
- * @param query convert a dsl into string
- *
  */
 export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);

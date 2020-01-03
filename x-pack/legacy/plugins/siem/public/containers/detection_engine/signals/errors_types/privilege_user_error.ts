@@ -16,6 +16,7 @@ export class PrivilegeUserError extends Error {
     this.message = errObj.message ?? '';
     this.statusCode = errObj.statusCode ?? -1;
     this.error = errObj.error ?? '';
+    this.name = 'PrivilegeUserError';
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, PrivilegeUserError.prototype);

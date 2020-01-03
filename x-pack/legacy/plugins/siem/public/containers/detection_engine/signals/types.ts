@@ -43,14 +43,6 @@ export interface UpdateSignalStatusProps {
   signal?: AbortSignal; // TODO: implement cancelling
 }
 
-// export class PostSignalsError extends Error {
-//   constructor(m: string) {
-//     super(m);
-//     // Set the prototype explicitly.
-//     Object.setPrototypeOf(this, SignalsIndexError.prototype);
-//   }
-// }
-
 export interface SignalsIndex {
   name: string;
 }
@@ -105,5 +97,5 @@ export interface Privilege {
       write: boolean;
     };
   };
-  isAuthenticated: true;
+  isAuthenticated: boolean;
 }

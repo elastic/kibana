@@ -16,6 +16,7 @@ export class SignalIndexError extends Error {
     this.message = errObj.message ?? '';
     this.statusCode = errObj.statusCode ?? -1;
     this.error = errObj.error ?? '';
+    this.name = 'SignalIndexError';
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, SignalIndexError.prototype);
