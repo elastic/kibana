@@ -110,22 +110,13 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
               <EuiSpacer size="s" />
 
               <EuiSwitch
-                label={
-                  valueType === 'percentage'
-                    ? i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.fielddata.useAbsoluteValuesFieldLabel',
-                        {
-                          defaultMessage: 'Use absolute values',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.fielddata.usePercentageValuesFieldLabel',
-                        {
-                          defaultMessage: 'Use percentage values',
-                        }
-                      )
-                }
-                checked={valueType === 'percentage'}
+                label={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.fielddata.useAbsoluteValuesFieldLabel',
+                  {
+                    defaultMessage: 'Use absolute values',
+                  }
+                )}
+                checked={valueType === 'absolute'}
                 onChange={switchType(min, max)}
                 data-test-subj="input"
               />
