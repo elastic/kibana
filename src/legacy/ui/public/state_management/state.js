@@ -29,7 +29,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
-import { applyDiff } from '../utils/diff_object';
+import { applyDiff } from './utils/diff_object';
 import { EventsProvider } from '../events';
 import { fatalError, toastNotifications } from '../notify';
 import './config_provider';

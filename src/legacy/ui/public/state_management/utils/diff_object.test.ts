@@ -17,76 +17,88 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import _ from 'lodash';
-import { applyDiff } from '../diff_object';
+import { cloneDeep } from 'lodash';
+import { applyDiff } from './diff_object';
 
-describe('ui/utils/diff_object', function() {
-  it('should list the removed keys', function() {
+describe('diff_object', () => {
+  test('should list the removed keys', () => {
     const target = { test: 'foo' };
     const source = { foo: 'test' };
     const results = applyDiff(target, source);
-    expect(results).to.have.property('removed');
-    expect(results.removed).to.eql(['test']);
+
+    expect(results).toHaveProperty('removed');
+    expect(results.removed).toEqual(['test']);
   });
 
-  it('should list the changed keys', function() {
+  test('should list the changed keys', () => {
     const target = { foo: 'bar' };
     const source = { foo: 'test' };
     const results = applyDiff(target, source);
-    expect(results).to.have.property('changed');
-    expect(results.changed).to.eql(['foo']);
+
+    expect(results).toHaveProperty('changed');
+    expect(results.changed).toEqual(['foo']);
   });
 
-  it('should list the added keys', function() {
+  test('should list the added keys', () => {
     const target = {};
     const source = { foo: 'test' };
     const results = applyDiff(target, source);
-    expect(results).to.have.property('added');
-    expect(results.added).to.eql(['foo']);
+
+    expect(results).toHaveProperty('added');
+    expect(results.added).toEqual(['foo']);
   });
 
-  it('should list all the keys that are change or removed', function() {
+  test('should list all the keys that are change or removed', () => {
     const target = { foo: 'bar', test: 'foo' };
     const source = { foo: 'test' };
     const results = applyDiff(target, source);
-    expect(results).to.have.property('keys');
-    expect(results.keys).to.eql(['foo', 'test']);
+
+    expect(results).toHaveProperty('keys');
+    expect(results.keys).toEqual(['foo', 'test']);
   });
 
-  it('should ignore functions', function() {
+  test('should ignore functions', () => {
     const target = { foo: 'bar', test: 'foo' };
-    const source = { foo: 'test', fn: _.noop };
+    const source = { foo: 'test', fn: () => {} };
+
     applyDiff(target, source);
-    expect(target).to.not.have.property('fn');
+
+    expect(target).not.toHaveProperty('fn');
   });
 
-  it('should ignore underscores', function() {
+  test('should ignore underscores', () => {
     const target = { foo: 'bar', test: 'foo' };
     const source = { foo: 'test', _private: 'foo' };
+
     applyDiff(target, source);
-    expect(target).to.not.have.property('_private');
+
+    expect(target).not.toHaveProperty('_private');
   });
 
-  it('should ignore dollar signs', function() {
+  test('should ignore dollar signs', () => {
     const target = { foo: 'bar', test: 'foo' };
     const source = { foo: 'test', $private: 'foo' };
+
     applyDiff(target, source);
-    expect(target).to.not.have.property('$private');
+
+    expect(target).not.toHaveProperty('$private');
   });
 
-  it('should not list any changes for similar objects', function() {
+  test('should not list any changes for similar objects', () => {
     const target = { foo: 'bar', test: 'foo' };
     const source = { foo: 'bar', test: 'foo', $private: 'foo' };
     const results = applyDiff(target, source);
-    expect(results.changed).to.be.empty();
+
+    expect(results.changed).toEqual([]);
   });
 
-  it('should only change keys that actually changed', function() {
+  test('should only change keys that actually changed', () => {
     const obj = { message: 'foo' };
-    const target = { obj: obj, message: 'foo' };
-    const source = { obj: _.cloneDeep(obj), message: 'test' };
+    const target = { obj, message: 'foo' };
+    const source = { obj: cloneDeep(obj), message: 'test' };
+
     applyDiff(target, source);
-    expect(target.obj).to.be(obj);
+
+    expect(target.obj).toBe(obj);
   });
 });
