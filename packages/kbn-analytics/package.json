@@ -17,6 +17,6 @@
     "@babel/cli": "^7.5.5",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
-    "typescript": "3.7.2"
+    "typescript": "3.7.4"
   }
 }
