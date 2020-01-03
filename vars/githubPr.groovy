@@ -88,6 +88,8 @@ def getHistoryText(builds) {
     .collect { build ->
       if (build.status == "SUCCESS") {
         return "* :green_heart: [Build #${build.number}](${build.url}) succeeded ${build.commit}"
+      } else if(build.status == "UNSTABLE") {
+        return "* :yellow_heart: [Build #${build.number}](${build.url}) was flaky ${build.commit}"
       } else {
         return "* :broken_heart: [Build #${build.number}](${build.url}) failed ${build.commit}"
       }
