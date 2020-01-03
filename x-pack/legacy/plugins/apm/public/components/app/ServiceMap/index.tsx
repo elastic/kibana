@@ -59,11 +59,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
   const isValidPlatinumLicense =
     license?.isActive &&
-<<<<<<< HEAD
     (license?.type === 'platinum' || license?.type === 'trial');
-=======
-    (license?.type === 'trial' || license?.type === 'platinum');
->>>>>>> Start popover
 
   return isValidPlatinumLicense ? (
     <Cytoscape
@@ -72,7 +68,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       style={cytoscapeDivStyle}
     >
       <Controls />
-      <Popover />
+      <Popover serviceName={serviceName} />
     </Cytoscape>
   ) : (
     <PlatinumLicensePrompt />
