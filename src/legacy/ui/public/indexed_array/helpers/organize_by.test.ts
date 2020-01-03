@@ -21,7 +21,7 @@ import { groupBy } from 'lodash';
 import { organizeBy } from './organize_by';
 
 describe('organizeBy', () => {
-  it('it works', () => {
+  test('it works', () => {
     const col = [
       {
         name: 'one',
@@ -52,7 +52,7 @@ describe('organizeBy', () => {
     expect(resp.owner.length).toBe(1);
   });
 
-  it('behaves just like groupBy in normal scenarios', () => {
+  test('behaves just like groupBy in normal scenarios', () => {
     const col = [{ name: 'one' }, { name: 'two' }, { name: 'three' }, { name: 'four' }];
 
     const orgs = organizeBy(col, 'name');

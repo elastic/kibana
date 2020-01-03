@@ -26,6 +26,7 @@ export const cssFilters = (function() {
   const e = document.createElement('img');
   const rules = ['webkitFilter', 'mozFilter', 'msFilter', 'filter'];
   const test = 'grayscale(1)';
+
   rules.forEach(function(rule) {
     e.style[rule] = test;
   });

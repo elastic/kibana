@@ -20,7 +20,7 @@
 import { keysToSnakeCaseShallow } from './case_conversion';
 
 describe('keysToSnakeCaseShallow', () => {
-  it("should convert all of an object's keys to snake case", () => {
+  test("should convert all of an object's keys to snake case", () => {
     const data = {
       camelCase: 'camel_case',
       'kebab-case': 'kebab_case',
