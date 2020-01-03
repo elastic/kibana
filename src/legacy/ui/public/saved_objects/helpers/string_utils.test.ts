@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { StringUtils } from './string_utils';
 
-export class StringUtils {
-  /**
-   * Returns a version of the string with the first letter capitalized.
-   * @param str {string}
-   * @returns {string}
-   */
-  public static upperFirst(str: string): string {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-  }
-}
+describe('StringUtils class', () => {
+  describe('static upperFirst', () => {
+    test('should converts the first character of string to upper case', () => {
+      expect(StringUtils.upperFirst()).toBe('');
+      expect(StringUtils.upperFirst('')).toBe('');
+
+      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
+    });
+  });
+});
