@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
 import { ColorDot } from '../color_dot/color_dot';
 
-import { ComponentStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
 
 const { ColorManager: strings } = ComponentStrings;
 
@@ -74,7 +74,7 @@ export const ColorManager: FunctionComponent<Props> = ({
         <EuiFieldText
           value={value}
           isInvalid={!validColor && value.length > 0}
-          placeholder={strings.getCodePlaceholder()}
+          placeholder={'strings.getCodePlaceholder()'}
           onChange={e => onChange(e.target.value)}
         />
       </EuiFlexItem>
