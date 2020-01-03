@@ -284,17 +284,17 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                     <span>
                        
                     </span>
-                    or a new object to this dashboard
+                    or new object to this dashboard
                   </p>
                 </div>
               </EuiTextColor>
             </div>
           </EuiText>
           <EuiSpacer
-            size="m"
+            size="l"
           >
             <div
-              className="euiSpacer euiSpacer--m"
+              className="euiSpacer euiSpacer--l"
             />
           </EuiSpacer>
           <p
@@ -615,42 +615,35 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
       <PseudoLocaleWrapper>
         <EuiPage
           className="dshStartScreen"
-          restrictWidth="36em"
+          restrictWidth="500px"
         >
           <div
             className="euiPage euiPage--restrictWidth-custom dshStartScreen"
             style={
               Object {
-                "maxWidth": "36em",
+                "maxWidth": "500px",
               }
             }
           >
-            <EuiPageBody
-              component="main"
-              restrictWidth={false}
-            >
+            <EuiPageBody>
               <main
                 className="euiPageBody"
               >
                 <EuiPageContent
+                  className="dshStartScreen__pageContent"
                   horizontalPosition="center"
-                  panelPaddingSize="l"
+                  paddingSize="none"
                   verticalPosition="center"
                 >
                   <EuiPanel
-                    className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-                    paddingSize="l"
+                    className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                    paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""
-                        style={
-                          Object {
-                            "width": 480,
-                          }
-                        }
                         url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
@@ -661,11 +654,6 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                             alt=""
                             className="euiImage__img"
                             src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
-                            style={
-                              Object {
-                                "width": 480,
-                              }
-                            }
                           />
                         </figure>
                       </EuiImage>
@@ -693,49 +681,53 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                           className="euiSpacer euiSpacer--m"
                         />
                       </EuiSpacer>
-                      <EuiText
-                        color="subdued"
-                        size="m"
+                      <div
+                        className="dshStartScreen__panelDesc"
                       >
-                        <div
-                          className="euiText euiText--medium"
+                        <EuiText
+                          color="subdued"
+                          size="m"
                         >
-                          <EuiTextColor
-                            color="subdued"
-                            component="div"
+                          <div
+                            className="euiText euiText--medium"
                           >
-                            <div
-                              className="euiTextColor euiTextColor--subdued"
+                            <EuiTextColor
+                              color="subdued"
+                              component="div"
                             >
-                              <p>
-                                Click
-                                <span>
-                                   
-                                </span>
-                                <EuiLink
-                                  aria-label="Edit dashboard"
-                                  data-test-subj=""
-                                  onClick={[MockFunction]}
-                                >
-                                  <button
+                              <div
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                <p>
+                                  Click
+                                  <span>
+                                     
+                                  </span>
+                                  <EuiLink
                                     aria-label="Edit dashboard"
-                                    className="euiLink euiLink--primary"
                                     data-test-subj=""
                                     onClick={[MockFunction]}
-                                    type="button"
                                   >
-                                    Edit
-                                  </button>
-                                </EuiLink>
-                                <span>
-                                   
-                                </span>
-                                button in the menu bar above to start working on your new dashboard.
-                              </p>
-                            </div>
-                          </EuiTextColor>
-                        </div>
-                      </EuiText>
+                                    <button
+                                      aria-label="Edit dashboard"
+                                      className="euiLink euiLink--primary"
+                                      data-test-subj=""
+                                      onClick={[MockFunction]}
+                                      type="button"
+                                    >
+                                      Edit
+                                    </button>
+                                  </EuiLink>
+                                  <span>
+                                     
+                                  </span>
+                                  in the menu bar above to start adding panels.
+                                </p>
+                              </div>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                      </div>
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
