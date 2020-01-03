@@ -54,7 +54,6 @@ export function Popover() {
   const renderedHeight = selectedNode?.renderedHeight() ?? 0;
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
-  const pan = cy?.pan() ?? { x: 0, y: 0 };
   const isOpen = !!selectedNode;
   const serviceName = selectedNode?.data('id');
   const instanceCount = selectedNode?.data('instanceCount');
