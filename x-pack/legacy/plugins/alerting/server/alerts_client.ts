@@ -325,12 +325,16 @@ export class AlertsClient {
       return;
     }
 
-    const apiKeyId = Buffer.from(apiKey, 'base64')
-      .toString()
-      .split(':')[0];
-    const response = await this.invalidateAPIKey({ id: apiKeyId });
-    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-      this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
+    try {
+      const apiKeyId = Buffer.from(apiKey, 'base64')
+        .toString()
+        .split(':')[0];
+      const response = await this.invalidateAPIKey({ id: apiKeyId });
+      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
+      }
+    } catch (e) {
+      this.logger.error(`Failed to invalidate API Key: ${e.message}`);
     }
   }
 
