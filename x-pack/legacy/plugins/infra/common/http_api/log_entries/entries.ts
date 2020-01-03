@@ -64,7 +64,7 @@ export const logColumnRT = rt.union([
   rt.type({
     columnId: rt.string,
     field: rt.string,
-    value: rt.string,
+    value: rt.union([rt.string, rt.undefined]),
     highlights: rt.array(rt.string),
   }),
   rt.type({
