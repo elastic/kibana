@@ -26,10 +26,12 @@ describe('Inspect', () => {
         loginAndWaitForPage(table.url);
         cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
         if (table.altInspectId) {
+          cy.scrollTo('bottom');
           cy.get(table.altInspectId, { timeout: DEFAULT_TIMEOUT }).trigger('click', {
             force: true,
           });
         } else {
+          cy.scrollTo('bottom');
           cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`, {
             timeout: DEFAULT_TIMEOUT,
           }).trigger('click', { force: true });
