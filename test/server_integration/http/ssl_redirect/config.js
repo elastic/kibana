@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
-import { KibanaSupertestProvider } from '../../services';
+import { createKibanaSupertestProvider } from '../../services';
 
 export default async function({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
@@ -36,8 +37,10 @@ export default async function({ readConfigFile }) {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
-      //eslint-disable-next-line new-cap
-      supertest: arg => KibanaSupertestProvider(arg, supertestOptions),
+      supertest: createKibanaSupertestProvider({
+        certificateAuthorities: [readFileSync(CA_CERT_PATH)],
+        options: supertestOptions,
+      }),
     },
     servers: {
       ...httpConfig.get('servers'),
@@ -56,7 +59,6 @@ export default async function({ readConfigFile }) {
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`, // this is needed for the test runner to trust the server certificate
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.redirectHttpFromPort=${redirectPort}`,
