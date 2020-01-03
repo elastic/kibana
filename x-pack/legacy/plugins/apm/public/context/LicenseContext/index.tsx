@@ -19,6 +19,10 @@ export function LicenseProvider({ children }: { children: React.ReactChild }) {
   const license = useObservable(license$);
   const hasInvalidLicense = !license?.isActive;
 
+  if (!license) {
+    return null;
+  }
+
   // if license is invalid show an error message
   if (hasInvalidLicense) {
     return <InvalidLicenseNotification />;
