@@ -25,7 +25,7 @@ export const getMockCallWithInternal = (hits = defaultMockSavedObjects) => {
 export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
   return () => Promise.resolve({ docs });
 };
-//server?.newPlatform?.start?.plugins?.kibanaTaskManager
+
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
   mockTaskFetch = getMockTaskFetch()

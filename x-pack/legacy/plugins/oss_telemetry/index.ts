@@ -45,8 +45,8 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
 
 function getTaskManager(server: Legacy.Server) {
   const taskManager = {
-    ...(server?.newPlatform?.setup?.plugins?.kibanaTaskManager || {}),
-    ...(server?.newPlatform?.start?.plugins?.kibanaTaskManager || {}),
+    ...(server.newPlatform.setup.plugins.kibanaTaskManager || {}),
+    ...(server.newPlatform.start.plugins.kibanaTaskManager || {}),
   } as TaskManager;
   return isFunction(taskManager.ensureScheduled) ? taskManager : undefined;
 }
