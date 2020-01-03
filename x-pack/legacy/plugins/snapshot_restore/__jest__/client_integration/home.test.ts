@@ -17,14 +17,23 @@ import {
 } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
-import moment from 'moment-timezone';
 
 const { setup } = pageHelpers.home;
 
 jest.mock('ui/new_platform');
+
 jest.mock('ui/i18n', () => {
   const I18nContext = ({ children }: any) => children;
   return { I18nContext };
+});
+
+// Mocking FormattedDate and FormattedTime due to timezone differences on CI
+jest.mock('@kbn/i18n/react', () => {
+  return {
+    ...jest.requireActual('@kbn/i18n/react'),
+    FormattedDate: () => '',
+    FormattedTime: () => '',
+  };
 });
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
@@ -38,8 +47,6 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
 describe('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
-
-  moment.tz.setDefault('America/New_York');
 
   afterAll(() => {
     server.restore();
@@ -459,7 +466,6 @@ describe('<SnapshotRestoreHome />', () => {
 
         tableCellsValues.forEach((row, i) => {
           const snapshot = snapshots[i];
-          const startTime = moment(new Date(snapshot.startTimeInMillis));
 
           expect(row).toEqual([
             '', // Checkbox
@@ -468,7 +474,7 @@ describe('<SnapshotRestoreHome />', () => {
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
             snapshot.shards.failed.toString(), // Failed shards
-            startTime.format('MMMM D, YYYY h:mm A z'), // Start time
+            ' ', // Mocked start time
             `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             '',
           ]);
@@ -606,8 +612,6 @@ describe('<SnapshotRestoreHome />', () => {
                 } = snapshot1;
 
                 const { find } = testBed;
-                const startTime = moment(new Date(startTimeInMillis));
-                const endTime = moment(new Date(endTimeInMillis));
 
                 expect(find('snapshotDetail.version.value').text()).toBe(
                   `${version} / ${versionId}`
@@ -620,12 +624,6 @@ describe('<SnapshotRestoreHome />', () => {
                 );
                 expect(find('snapshotDetail.indices.value').text()).toContain(
                   indices.splice(0, 10).join('')
-                );
-                expect(find('snapshotDetail.startTime.value').text()).toBe(
-                  startTime.format('MMMM D, YYYY h:mm A z')
-                );
-                expect(find('snapshotDetail.endTime.value').text()).toBe(
-                  endTime.format('MMMM D, YYYY h:mm A z')
                 );
               });
 
