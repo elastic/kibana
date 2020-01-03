@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import d3 from 'd3';
-import moment from 'moment';
 import { difference } from 'lodash';
 import { useEffect } from 'react';
 
@@ -15,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { useUrlState } from '../../util/url_state';
+
+import { getTimeRangeFromSelection } from './job_select_service_utils';
 
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.
@@ -59,7 +59,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
   jobSelection.jobIds = validIds;
   jobSelection.selectedGroups = globalState?.ml?.groups || [];
 
-  const jobCheck = () => {
+  useEffect(() => {
     warnAboutInvalidJobIds(invalidIds);
 
     // if there are no valid ids, warn and then select the first job
@@ -74,7 +74,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
         const mlGlobalState = globalState?.ml || {};
         mlGlobalState.jobIds = [jobs[0].job_id];
 
-        const time = getTimeRangeFromSelection(mlGlobalState.jobIds);
+        const time = getTimeRangeFromSelection(jobs, mlGlobalState.jobIds);
 
         setGlobalState({
           ...{ ml: mlGlobalState },
@@ -82,34 +82,6 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
         });
       }
     }
-
-    function getTimeRangeFromSelection(selection: string[]) {
-      if (jobs.length > 0) {
-        const times: number[] = [];
-        jobs.forEach(job => {
-          if (selection.includes(job.job_id)) {
-            if (job.timeRange.from !== undefined) {
-              times.push(job.timeRange.from);
-            }
-            if (job.timeRange.to !== undefined) {
-              times.push(job.timeRange.to);
-            }
-          }
-        });
-        if (times.length) {
-          const extent = d3.extent(times);
-          const selectedTime = {
-            from: moment(extent[0]).toISOString(),
-            to: moment(extent[1]).toISOString(),
-          };
-          return selectedTime;
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    jobCheck();
   }, [jobs, invalidIds, validIds]);
 
   return jobSelection;

@@ -8,7 +8,6 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import d3 from 'd3';
 import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
@@ -51,6 +50,7 @@ import { ChartTooltip } from '../components/chart_tooltip';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { JobSelector } from '../components/job_selector';
+import { getTimeRangeFromSelection } from '../components/job_selector/job_select_service_utils';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
@@ -999,7 +999,7 @@ export class TimeSeriesExplorer extends React.Component {
           // if there are no valid jobs in the group but there are valid jobs
           // in the list of all jobs, select the first
           const jobIds = [jobs[0].id];
-          const time = getTimeRangeFromSelection(jobIds);
+          const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
           setGlobalState({
             ...{ ml: { jobIds } },
             ...(time !== undefined ? { time } : {}),
@@ -1024,7 +1024,7 @@ export class TimeSeriesExplorer extends React.Component {
         // no jobs were loaded from the URL, so add the first job
         // from the full jobs list.
         const jobIds = [jobs[0].id];
-        const time = getTimeRangeFromSelection(jobIds);
+        const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
         setGlobalState({
           ...{ ml: { jobIds } },
           ...(time !== undefined ? { time } : {}),
@@ -1033,30 +1033,6 @@ export class TimeSeriesExplorer extends React.Component {
       } else {
         // Jobs exist, but no time series jobs.
         return false;
-      }
-    }
-
-    function getTimeRangeFromSelection(selection) {
-      if (jobsWithTimeRange.length > 0) {
-        const times = [];
-        jobsWithTimeRange.forEach(job => {
-          if (selection.includes(job.job_id)) {
-            if (job.timeRange.from !== undefined) {
-              times.push(job.timeRange.from);
-            }
-            if (job.timeRange.to !== undefined) {
-              times.push(job.timeRange.to);
-            }
-          }
-        });
-        if (times.length) {
-          const extent = d3.extent(times);
-          const selectedTime = {
-            from: moment(extent[0]).toISOString(),
-            to: moment(extent[1]).toISOString(),
-          };
-          return selectedTime;
-        }
       }
     }
   }

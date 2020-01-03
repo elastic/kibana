@@ -81,6 +81,30 @@ export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
   return { groups: Object.keys(groups).map(g => groups[g]), groupsMap };
 }
 
+export function getTimeRangeFromSelection(jobs: MlJobWithTimeRange[], selection: string[]) {
+  if (jobs.length > 0) {
+    const times: number[] = [];
+    jobs.forEach(job => {
+      if (selection.includes(job.job_id)) {
+        if (job.timeRange.from !== undefined) {
+          times.push(job.timeRange.from);
+        }
+        if (job.timeRange.to !== undefined) {
+          times.push(job.timeRange.to);
+        }
+      }
+    });
+    if (times.length) {
+      const extent = d3.extent(times);
+      const selectedTime = {
+        from: moment(extent[0]).toISOString(),
+        to: moment(extent[1]).toISOString(),
+      };
+      return selectedTime;
+    }
+  }
+}
+
 export function normalizeTimes(
   jobs: MlJobWithTimeRange[],
   dateFormatTz: string,

@@ -6,8 +6,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
-import d3 from 'd3';
 
 import {
   EuiButton,
@@ -36,7 +34,11 @@ import { JobSelectorTable } from './job_selector_table';
 import { IdBadges } from './id_badges';
 // @ts-ignore
 import { NewSelectionIdBadges } from './new_selection_id_badges';
-import { getGroupsFromJobs, normalizeTimes } from './job_select_service_utils';
+import {
+  getGroupsFromJobs,
+  getTimeRangeFromSelection,
+  normalizeTimes,
+} from './job_select_service_utils';
 
 interface GroupObj {
   groupId: string;
@@ -211,7 +213,9 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
 
     closeFlyout();
 
-    const time = applyTimeRange ? getTimeRangeFromSelection(allNewSelectionUnique) : undefined;
+    const time = applyTimeRange
+      ? getTimeRangeFromSelection(jobs, allNewSelectionUnique)
+      : undefined;
 
     setGlobalState({
       ml: {
@@ -220,30 +224,6 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
       },
       ...(time !== undefined ? { time } : {}),
     });
-  }
-
-  function getTimeRangeFromSelection(selection: string[]) {
-    if (jobs.length > 0) {
-      const times: number[] = [];
-      jobs.forEach(job => {
-        if (selection.includes(job.job_id)) {
-          if (job.timeRange.from !== undefined) {
-            times.push(job.timeRange.from);
-          }
-          if (job.timeRange.to !== undefined) {
-            times.push(job.timeRange.to);
-          }
-        }
-      });
-      if (times.length) {
-        const extent = d3.extent(times);
-        const selectedTime = {
-          from: moment(extent[0]).toISOString(),
-          to: moment(extent[1]).toISOString(),
-        };
-        return selectedTime;
-      }
-    }
   }
 
   function toggleTimerangeSwitch() {
