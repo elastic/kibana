@@ -70,9 +70,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
-                Date.parse(response.body.createdAt)
-              );
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
