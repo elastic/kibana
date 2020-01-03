@@ -17,16 +17,16 @@
  * under the License.
  */
 
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { ContextSetup } from './context';
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalPulseService } from './pulse';
 import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { ContextSetup } from './context';
 import {
-  InternalSavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
 } from './saved_objects';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
 
 /** @internal */
