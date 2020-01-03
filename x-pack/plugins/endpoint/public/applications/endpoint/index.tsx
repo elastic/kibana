@@ -10,7 +10,7 @@ import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, BrowserRouter, Switch } from 'react-router-dom';
 import { appStoreFactory } from './store';
-import { AppDispatch } from './store/app/actions';
+import { AppDispatch } from './store/actions/app';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.

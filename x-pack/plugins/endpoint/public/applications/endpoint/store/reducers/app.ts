@@ -5,7 +5,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { AppAction } from './actions';
+import { AppAction } from '../actions/app';
 
 interface AppState {
   coreStartServices: null | CoreStart;
