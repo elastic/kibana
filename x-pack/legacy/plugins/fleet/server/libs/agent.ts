@@ -7,20 +7,12 @@
 import Boom from 'boom';
 import uuid from 'uuid/v4';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
-import {
-  Agent,
-  AgentAction,
-  AgentActionType,
-  AgentsRepository,
-  AgentType,
-  NewAgent,
-  SortOptions,
-} from '../repositories/agents/types';
-import { AgentEvent } from '../repositories/agent_events/types';
+import { Agent, AgentAction, AgentsRepository, SortOptions } from '../repositories/agents/types';
 import { AgentPolicy } from '../repositories/policies/types';
 import { ApiKeyLib } from './api_keys';
 import { AgentStatusHelper } from './agent_status_helper';
 import { AgentEventLib } from './agent_event';
+import { AgentEvent, AgentType, NewAgent, AgentActionType } from '../../common/types/domain_data';
 
 export class AgentLib {
   constructor(

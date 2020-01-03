@@ -17,7 +17,7 @@ import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { FleetServerLib } from './types';
 import { compose } from './compose/memorized';
 import { Agent } from '../repositories/agents/types';
-import { AgentEvent } from '../repositories/agent_events/types';
+import { AgentEvent } from '../../common/types/domain_data';
 
 jest.mock('./framework');
 jest.mock('./policy', () => ({

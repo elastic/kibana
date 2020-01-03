@@ -14,8 +14,8 @@ interface LayoutProps {
   modalClosePath?: string;
 }
 
-export const NoDataLayout: React.FC<LayoutProps> = withRouter<any>(
-  ({ actionSection, title, modalClosePath, children, history }) => {
+export const NoDataLayout: React.FC<LayoutProps> = withRouter<any, React.FC<LayoutProps>>(
+  ({ actionSection, title, modalClosePath, children }) => {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>

@@ -7,12 +7,11 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecurityService } from '../../../common/services';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const users: { [rollName: string]: { username: string; password: string; permissions?: any } } = {
     kibana_basic_user: {
       permissions: {

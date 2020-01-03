@@ -10,7 +10,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeList, ReturnTypeCreate, ReturnTypeDelete } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
-import { RuntimeEnrollmentRuleData } from '../../repositories/enrollment_api_keys/types';
+import { RuntimeEnrollmentRuleData } from '../../../common/types/domain_data';
 
 export const createPostEnrollmentRulesRoute = (libs: FleetServerLib) => ({
   method: 'POST',

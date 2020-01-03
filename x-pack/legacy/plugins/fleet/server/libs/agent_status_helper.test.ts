@@ -12,7 +12,7 @@ import {
 } from '../../common/constants';
 import { Agent } from '../repositories/agents/types';
 import { AgentStatusHelper } from './agent_status_helper';
-import { AgentEvent } from '../repositories/agent_events/types';
+import { AgentEvent } from '../../common/types/domain_data';
 
 describe('AgentStatusHelper', () => {
   describe('getAgentStatus', () => {

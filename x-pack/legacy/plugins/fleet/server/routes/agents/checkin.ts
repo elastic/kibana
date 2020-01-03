@@ -11,8 +11,8 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
-import { RuntimeAgentEvent, AgentEvent } from '../../repositories/agent_events/types';
 import { FleetServerLib } from '../../libs/types';
+import { AgentEvent, RuntimeAgentEvent } from '../../../common/types/domain_data';
 
 type CheckinRequest = FrameworkRequest<{
   payload: {

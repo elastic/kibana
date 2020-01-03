@@ -9,9 +9,9 @@ import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 import {
   AgentEventsRepository as AgentEventsRepositoryType,
-  AgentEvent,
   AgentEventSOAttributes,
 } from './types';
+import { AgentEvent } from '../../../common/types/domain_data';
 
 const SO_TYPE = 'agent_events';
 

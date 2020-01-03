@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpHandler } from 'src/core/public';
+import { HttpHandler, HttpFetchOptions } from 'src/core/public';
 import {
   getCategoriesPath,
   getFilePath,
@@ -26,7 +26,8 @@ import {
 } from '../common/types';
 import { ReturnTypeList } from '../../ingest/common/types/std_return_format';
 
-const defaultClient: HttpHandler = (path, options?) => fetch(path, options).then(res => res.json());
+const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
+  fetch(path, options).then(res => res.json());
 
 let _fetch: HttpHandler = defaultClient;
 

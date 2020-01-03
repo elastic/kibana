@@ -6,8 +6,8 @@
 
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { AgentEventsRepository } from '../repositories/agent_events/default';
-import { AgentEvent } from '../repositories/agent_events/types';
 import { Agent } from '../repositories/agents/types';
+import { AgentEvent } from '../../common/types/domain_data';
 
 /**
  * This is the server lib to manage everything related to policies and agents
