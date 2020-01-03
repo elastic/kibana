@@ -33,7 +33,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     const selectHandler: cytoscape.EventHandler = event => {
       setSelectedNode(event.target);
     };
-    const unselectHandler: cytoscape.EventHandler = event => {
+    const unselectHandler: cytoscape.EventHandler = () => {
       // Set a timeout here so we don't unselect if the selection has changed to
       // a new node.
       setTimeout(() => {
@@ -42,16 +42,24 @@ export function Popover({ focusedServiceName }: PopoverProps) {
         }
       }, 0);
     };
+    const viewportHandler: cytoscape.EventHandler = event => {
+      const selectedNodes = cy?.$('node:selected');
+      if (selectedNodes) {
+        selectedNodes.unselect();
+      }
+    };
 
     if (cy) {
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
+      cy.on('viewport', viewportHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
+        cy.removeListener('viewport', undefined, viewportHandler);
       }
     };
   }, [cy]);
