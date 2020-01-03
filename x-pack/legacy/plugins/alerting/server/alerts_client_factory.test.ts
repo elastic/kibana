@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { AlertsClientFactory, ConstructorOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 
