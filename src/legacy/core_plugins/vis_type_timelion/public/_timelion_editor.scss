@@ -1,0 +1,31 @@
+.visEditor--timelion {
+
+  vis-options-react-wrapper,
+  .visEditorSidebar__options,
+  .visEditorSidebar__timelionOptions,
+  .visEditor__timelionExpressionInput {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .visEditor__sidebar {
+    @include euiBreakpoint('xs', 's', 'm') {
+      width: 100%;
+    }
+  }
+}
+
+.visEditor__timelionExpressionInput {
+  margin-top: $euiSize;
+}
+
+.timelionExpressionInput__editor {
+  @include euiBreakpoint('xs', 's', 'm') {
+    height: $euiSize * 15;
+    max-height: $euiSize * 15;
+  }
+
+  height: 100%;
+  padding-top: $euiSizeS;
+}

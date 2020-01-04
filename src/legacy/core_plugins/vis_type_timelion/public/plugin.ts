@@ -25,6 +25,7 @@ import {
   IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
@@ -33,6 +34,10 @@ import { setServices } from './kibana_services';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
+import {
+  setIndexPatterns,
+  setSavedObjectsClient,
+} from '../../timelion/public/services/plugin_services';
 
 type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies>;
 
@@ -72,7 +77,7 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     this.registerPanels(timelionPanels);
 
     expressions.registerFunction(getTimelionVisualizationConfig);
-    visualizations.types.createReactVisualization(getTimelionVisDefinition());
+    visualizations.types.createReactVisualization(getTimelionVisDefinition(dependencies));
   }
 
   private registerPanels(timelionPanels: Map<string, IPanelWrapper>) {
@@ -81,7 +86,8 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     timelionPanels.set(name, timeChartPanel);
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here
+  public start(core: CoreStart, plugins: PluginsStart) {
+    setIndexPatterns(plugins.data.indexPatterns);
+    setSavedObjectsClient(core.savedObjects.client);
   }
 }

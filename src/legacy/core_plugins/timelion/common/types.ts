@@ -17,19 +17,30 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from '.';
-import { TimelionPluginSetupDependencies } from './plugin';
-import { LegacyDependenciesPlugin } from './shim';
+type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
 
-const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
-};
+interface TimelionFunctionArgsSuggestion {
+  name: string;
+  help: string;
+}
 
-const pluginInstance = plugin({} as PluginInitializerContext);
+export interface TimelionFunctionArgs {
+  name: string;
+  help?: string;
+  multi?: boolean;
+  types: TimelionFunctionArgsTypes[];
+  suggestions?: TimelionFunctionArgsSuggestion[];
+}
 
-export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
+export interface ITimelionFunction {
+  aliases: string[];
+  args: TimelionFunctionArgs[];
+  name: string;
+  help: string;
+  chainable: boolean;
+  extended: boolean;
+  isAlias: boolean;
+  argsByName: {
+    [key: string]: TimelionFunctionArgs[];
+  };
+}

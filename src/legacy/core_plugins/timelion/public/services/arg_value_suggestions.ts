@@ -17,33 +17,51 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { npStart } from 'ui/new_platform';
+import { get } from 'lodash';
+import { TimelionFunctionArgs } from '../../common/types';
+import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 
-export function ArgValueSuggestionsProvider() {
-  const { indexPatterns } = npStart.plugins.data;
-  const { client: savedObjectsClient } = npStart.core.savedObjects;
+export interface Location {
+  min: number;
+  max: number;
+}
 
-  async function getIndexPattern(functionArgs) {
-    const indexPatternArg = functionArgs.find(argument => {
-      return argument.name === 'index';
-    });
+export interface FunctionArg {
+  function: string;
+  location: Location;
+  name: string;
+  text: string;
+  type: string;
+  value: {
+    location: Location;
+    text: string;
+    type: string;
+    value: string;
+  };
+}
+
+export function getArgValueSuggestions() {
+  const indexPatterns = getIndexPatterns();
+  const savedObjectsClient = getSavedObjectsClient();
+
+  async function getIndexPattern(functionArgs: FunctionArg[]) {
+    const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
     if (!indexPatternArg) {
       // index argument not provided
       return;
     }
-    const indexPatternTitle = _.get(indexPatternArg, 'value.text');
+    const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    const resp = await savedObjectsClient.find({
+    const { savedObjects } = await savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title'],
       search: `"${indexPatternTitle}"`,
-      search_fields: ['title'],
+      searchFields: ['title'],
       perPage: 10,
     });
-    const indexPatternSavedObject = resp.savedObjects.find(savedObject => {
-      return savedObject.attributes.title === indexPatternTitle;
-    });
+    const indexPatternSavedObject = savedObjects.find(
+      ({ attributes }) => attributes.title === indexPatternTitle
+    );
     if (!indexPatternSavedObject) {
       // index argument does not match an index pattern
       return;
@@ -52,7 +70,7 @@ export function ArgValueSuggestionsProvider() {
     return await indexPatterns.get(indexPatternSavedObject.id);
   }
 
-  function containsFieldName(partial, field) {
+  function containsFieldName(partial: string, field: { name: string }) {
     if (!partial) {
       return true;
     }
@@ -63,13 +81,13 @@ export function ArgValueSuggestionsProvider() {
   // Could not put with function definition since functions are defined on server
   const customHandlers = {
     es: {
-      index: async function(partial) {
+      async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
         const resp = await savedObjectsClient.find({
           type: 'index-pattern',
           fields: ['title', 'type'],
           search: `${search}`,
-          search_fields: ['title'],
+          searchFields: ['title'],
           perPage: 25,
         });
         return resp.savedObjects
@@ -78,7 +96,7 @@ export function ArgValueSuggestionsProvider() {
             return { name: savedObject.attributes.title };
           });
       },
-      metric: async function(partial, functionArgs) {
+      async metric(partial: string, functionArgs: FunctionArg[]) {
         if (!partial || !partial.includes(':')) {
           return [
             { name: 'avg:' },
@@ -109,7 +127,7 @@ export function ArgValueSuggestionsProvider() {
             return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
           });
       },
-      split: async function(partial, functionArgs) {
+      async split(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -127,7 +145,7 @@ export function ArgValueSuggestionsProvider() {
             return { name: field.name, help: field.type };
           });
       },
-      timefield: async function(partial, functionArgs) {
+      async timefield(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -150,7 +168,10 @@ export function ArgValueSuggestionsProvider() {
      * @param {string} argName - user provided argument name
      * @return {boolean} true when dynamic suggestion handler provided for function argument
      */
-    hasDynamicSuggestionsForArgument: (functionName, argName) => {
+    hasDynamicSuggestionsForArgument: <T extends keyof typeof customHandlers>(
+      functionName: T,
+      argName: keyof typeof customHandlers[T]
+    ) => {
       return customHandlers[functionName] && customHandlers[functionName][argName];
     },
 
@@ -161,12 +182,13 @@ export function ArgValueSuggestionsProvider() {
      * @param {string} partial - user provided argument value
      * @return {array} array of dynamic suggestions matching partial
      */
-    getDynamicSuggestionsForArgument: async (
-      functionName,
-      argName,
-      functionArgs,
+    getDynamicSuggestionsForArgument: async <T extends keyof typeof customHandlers>(
+      functionName: T,
+      argName: keyof typeof customHandlers[T],
+      functionArgs: FunctionArg[],
       partialInput = ''
     ) => {
+      // @ts-ignore
       return await customHandlers[functionName][argName](partialInput, functionArgs);
     },
 
@@ -175,7 +197,10 @@ export function ArgValueSuggestionsProvider() {
      * @param {array} staticSuggestions - argument value suggestions
      * @return {array} array of static suggestions matching partial
      */
-    getStaticSuggestionsForInput: (partialInput = '', staticSuggestions = []) => {
+    getStaticSuggestionsForInput: (
+      partialInput = '',
+      staticSuggestions: TimelionFunctionArgs['suggestions'] = []
+    ) => {
       if (partialInput) {
         return staticSuggestions.filter(suggestion => {
           return suggestion.name.includes(partialInput);
@@ -186,3 +211,5 @@ export function ArgValueSuggestionsProvider() {
     },
   };
 }
+
+export type ArgValueSuggestions = ReturnType<typeof getArgValueSuggestions>;

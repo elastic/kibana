@@ -17,19 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from '.';
-import { TimelionPluginSetupDependencies } from './plugin';
-import { LegacyDependenciesPlugin } from './shim';
-
-const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
+export * from './timelion_expression_input';
+export * from './timelion_interval';

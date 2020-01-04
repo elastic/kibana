@@ -27,7 +27,7 @@ const name = 'timelion_vis';
 
 interface Arguments {
   expression: string;
-  interval: string | null;
+  interval: string;
 }
 
 export interface RenderValue {
@@ -62,7 +62,7 @@ export const getTimelionVisualizationConfig = (): ExpressionFunction<
       help: '',
     },
     interval: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: 'auto',
       help: '',
     },
