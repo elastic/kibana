@@ -313,7 +313,7 @@
     "react-visibility-sensor": "^5.1.1",
     "recompose": "^0.26.0",
     "reduce-reducers": "^1.0.4",
-    "redux": "^4.0.4",
+    "redux": "^4.0.5",
     "redux-actions": "^2.6.5",
     "redux-observable": "^1.2.0",
     "redux-saga": "^0.16.0",
