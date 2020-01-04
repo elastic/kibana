@@ -117,8 +117,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
+    async getChartCanvas() {
+      return await find.byCssSelector('.echChart canvas:last-of-type');
+    }
+
+    async chartCanvasExist() {
+      return await find.existsByCssSelector('.echChart canvas:last-of-type');
+    }
+
     async clickHistogramBar() {
-      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+      const el = await this.getChartCanvas();
 
       await browser
         .getActions()
@@ -128,7 +136,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async brushHistogram() {
-      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+      const el = await this.getChartCanvas();
+
       await browser.dragAndDrop(
         { location: el, offset: { x: 200, y: 20 } },
         { location: el, offset: { x: 400, y: 30 } }
