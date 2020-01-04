@@ -190,7 +190,7 @@ class BasicLoginFormUI extends Component<Props, State> {
 
     const { username, password } = this.state;
 
-    http.post('./api/security/v1/login', { username, password }).then(
+    http.post('./internal/security/login', { username, password }).then(
       () => (window.location.href = next),
       (error: any) => {
         const { statusCode = 500 } = error.data || {};

@@ -15,16 +15,16 @@ import {
 // @ts-ignore
 import routes from 'ui/routes';
 import { setup as managementSetup } from '../../../../../../../src/legacy/core_plugins/management/public/legacy';
-import { SpacesManager } from '../../lib';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
+import { start as spacesNPStart } from '../../legacy';
 import { CopyToSpaceSavedObjectsManagementAction } from '../../lib/copy_saved_objects_to_space';
 
 const MANAGE_SPACES_KEY = 'spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection(activeSpace: any, serverBasePath: string) {
+    spacesManagementSection() {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -48,21 +48,24 @@ routes.defaults(/\/management/, {
         }
 
         // Customize Saved Objects Management
-        const action = new CopyToSpaceSavedObjectsManagementAction(
-          new SpacesManager(serverBasePath),
-          activeSpace.space
-        );
-        // This route resolve function executes any time the management screen is loaded, and we want to ensure
-        // that this action is only registered once.
-        if (!managementSetup.savedObjects.registry.has(action.id)) {
-          managementSetup.savedObjects.registry.register(action);
-        }
+        spacesNPStart.then(({ spacesManager }) => {
+          const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager!);
+          // This route resolve function executes any time the management screen is loaded, and we want to ensure
+          // that this action is only registered once.
+          if (!managementSetup.savedObjects.registry.has(action.id)) {
+            managementSetup.savedObjects.registry.register(action);
+          }
+        });
 
-        // Customize Advanced Settings
-        const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
+        const getActiveSpace = async () => {
+          const { spacesManager } = await spacesNPStart;
+          return spacesManager!.getActiveSpace();
+        };
+
+        const PageTitle = () => <AdvancedSettingsTitle getActiveSpace={getActiveSpace} />;
         registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
 
-        const SubTitle = () => <AdvancedSettingsSubtitle space={activeSpace.space} />;
+        const SubTitle = () => <AdvancedSettingsSubtitle getActiveSpace={getActiveSpace} />;
         registerSettingsComponent(PAGE_SUBTITLE_COMPONENT, SubTitle, true);
       }
 

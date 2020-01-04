@@ -38,11 +38,7 @@ describe('FormatEditorSamples', () => {
   });
 
   it('should render nothing if there are no samples', async () => {
-    const component = shallowWithI18nProvider(
-      <FormatEditorSamples
-        samples={[]}
-      />
-    );
+    const component = shallowWithI18nProvider(<FormatEditorSamples samples={[]} />);
 
     expect(component).toMatchSnapshot();
   });

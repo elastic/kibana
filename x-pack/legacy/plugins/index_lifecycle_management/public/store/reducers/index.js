@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { combineReducers } from 'redux';
 import { nodes } from './nodes';
 import { policies } from './policies';

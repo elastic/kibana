@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { useMemo, useCallback, ReactNode } from 'react';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -69,8 +69,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   const sort = useMemo(() => {
     return {
       sort: {
-        field: sortField,
-        direction: sortDirection
+        field: sortField as keyof T,
+        direction: sortDirection as 'asc' | 'desc'
       }
     };
   }, [sortField, sortDirection]);
@@ -78,7 +78,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort: { field: string; direction: 'asc' | 'desc' };
+      sort?: { field: keyof T; direction: 'asc' | 'desc' };
     }) => {
       history.push({
         ...history.location,
@@ -86,8 +86,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
           ...toQuery(history.location.search),
           page: options.page.index,
           pageSize: options.page.size,
-          sortField: options.sort.field,
-          sortDirection: options.sort.direction
+          sortField: options.sort!.field,
+          sortDirection: options.sort!.direction
         })
       });
     },
@@ -107,7 +107,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     <EuiBasicTable
       noItemsMessage={noItemsMessage}
       items={renderedItems}
-      columns={columns}
+      columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       pagination={pagination}
       sorting={sort}
       onChange={onTableChange}

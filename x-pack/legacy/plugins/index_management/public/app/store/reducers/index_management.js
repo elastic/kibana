@@ -14,5 +14,5 @@ export const indexManagement = combineReducers({
   indices,
   rowStatus,
   tableState,
-  detailPanel
+  detailPanel,
 });

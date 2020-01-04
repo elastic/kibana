@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningCustomUrlsProvider } from './custom_urls';
+import { MlCommon } from './common';
+import { MlCustomUrls } from './custom_urls';
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
-  customUrls: ProvidedType<typeof MachineLearningCustomUrlsProvider>
+  mlCommon: MlCommon,
+  customUrls: MlCustomUrls
 ) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -113,7 +114,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -130,7 +131,9 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { clearWithKeyboard: true });
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobId', jobId, {
+        clearWithKeyboard: true,
+      });
       await this.assertJobIdValue(jobId);
     },
 
@@ -146,7 +149,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobDescription(jobDescription: string) {
-      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
@@ -307,7 +310,7 @@ export function MachineLearningJobWizardCommonProvider(
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await testSubjects.setValue(subj, modelMemoryLimit, { clearWithKeyboard: true });
+      await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
       await this.assertModelMemoryLimitValue(modelMemoryLimit, {
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });

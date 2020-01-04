@@ -23,7 +23,7 @@ const BOOLEAN = {
   __one_of: [true, false],
 };
 
-export default function (api) {
+export default function(api) {
   api.addEndpointDescription('put_mapping', {
     priority: 10, // collides with put doc by id
     data_autocomplete_rules: {
@@ -89,13 +89,7 @@ export default function (api) {
           store: BOOLEAN,
           index: BOOLEAN,
           term_vector: {
-            __one_of: [
-              'no',
-              'yes',
-              'with_offsets',
-              'with_positions',
-              'with_positions_offsets',
-            ],
+            __one_of: ['no', 'yes', 'with_offsets', 'with_positions', 'with_positions_offsets'],
           },
           boost: 1.0,
           null_value: '',
@@ -181,7 +175,7 @@ export default function (api) {
                   'week_date_time',
                   'week_date_time_no_millis',
                 ],
-                function (s) {
+                function(s) {
                   return ['basic_' + s, 'strict_' + s];
                 }
               ),

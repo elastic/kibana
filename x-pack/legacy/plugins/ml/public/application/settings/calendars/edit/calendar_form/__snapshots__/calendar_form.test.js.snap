@@ -181,7 +181,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        href="undefined/app/ml#/settings/calendars_list"
+        href="#/settings/calendars_list"
         isDisabled={false}
       >
         <FormattedMessage

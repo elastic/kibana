@@ -14,6 +14,30 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
       const noopActionType: ActionType = {
         id: 'test.noop',

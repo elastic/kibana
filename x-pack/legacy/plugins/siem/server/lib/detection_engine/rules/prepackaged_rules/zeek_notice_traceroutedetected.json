@@ -1,0 +1,17 @@
+{
+  "rule_id": "aeefe077-f05d-44a7-b757-272fc51c334c",
+  "risk_score": 50,
+  "description": "Indicates that a host was seen running traceroutes.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Traceroute::Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Traceroute::Detected\" or rule.name: \"Traceroute::Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

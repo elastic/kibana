@@ -71,7 +71,9 @@ export function registerFind(server) {
       const searchTypes = request.query.type;
       const savedObjectsClient = request.getSavedObjectsClient();
       const savedObjectsManagement = server.getSavedObjectsManagement();
-      const importAndExportableTypes = searchTypes.filter(type => savedObjectsManagement.isImportAndExportable(type));
+      const importAndExportableTypes = searchTypes.filter(type =>
+        savedObjectsManagement.isImportAndExportable(type)
+      );
 
       // Accumulate "defaultSearchField" attributes from savedObjectsManagement. Unfortunately
       // search fields apply to all types of saved objects, the sum of these fields will
@@ -98,7 +100,7 @@ export function registerFind(server) {
               result.attributes[field] = obj.attributes[field];
             }
             return result;
-          })
+          }),
       };
     },
   });

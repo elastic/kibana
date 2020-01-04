@@ -87,10 +87,10 @@ EventsTrHeader.displayName = 'EventsTrHeader';
 
 export const EventsThGroupActions = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number; justifyContent: string }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
-  justify-content: space-between;
+  justify-content: ${({ justifyContent }) => justifyContent};
   min-width: 0;
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';
@@ -217,7 +217,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
+  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 EventsTdContent.displayName = 'EventsTdContent';
 

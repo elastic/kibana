@@ -12,13 +12,13 @@ import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 export type npCore = typeof npStart.core;
 
 // AppCore/AppPlugins is the set of core features/plugins
 // we pass on via context/hooks to the app and its components.
-export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n'>;
+export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings'>;
 
 export interface AppPlugins {
   management: {

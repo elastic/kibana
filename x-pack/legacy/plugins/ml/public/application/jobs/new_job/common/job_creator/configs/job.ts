@@ -5,7 +5,7 @@
  */
 
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { CREATED_BY_LABEL } from '../util/constants';
+import { CREATED_BY_LABEL } from '../../../../../../../common/constants/new_job';
 
 export type JobId = string;
 export type BucketSpan = string;

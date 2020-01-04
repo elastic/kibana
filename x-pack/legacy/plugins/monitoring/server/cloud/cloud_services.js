@@ -13,4 +13,4 @@ import { GCP } from './gcp';
  *
  * @type {Array}
  */
-export const CLOUD_SERVICES = [ AWS, GCP, AZURE ];
+export const CLOUD_SERVICES = [AWS, GCP, AZURE];

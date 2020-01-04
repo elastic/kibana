@@ -11,21 +11,21 @@ import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
 jest.mock('../../util/time_buckets', () => ({
-  TimeBuckets: function () {
+  TimeBuckets: function() {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();
-  }
+  },
 }));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
-    getFieldFormat: jest.fn()
-  }
+    getFieldFormat: jest.fn(),
+  },
 }));
 jest.mock('ui/chrome', () => ({
-  getBasePath: (path) => path,
+  getBasePath: path => path,
   getUiSettingsClient: () => ({
-    get: () => null
+    get: () => null,
   }),
 }));
 
@@ -39,18 +39,22 @@ describe('ExplorerChart', () => {
   const mlSelectSeverityServiceMock = {
     state: {
       get: () => ({
-        val: ''
-      })
-    }
+        val: '',
+      }),
+    },
   };
 
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
-  beforeEach(() => SVGElement.prototype.getBBox = () => mockedGetBBox);
+  beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
-    const wrapper = mountWithIntl(<ExplorerChartSingleMetric.WrappedComponent mlSelectSeverityService={mlSelectSeverityServiceMock} />);
+    const wrapper = mountWithIntl(
+      <ExplorerChartSingleMetric.WrappedComponent
+        mlSelectSeverityService={mlSelectSeverityServiceMock}
+      />
+    );
 
     // without setting any attributes and corresponding data
     // the directive just ends up being empty.
@@ -61,11 +65,14 @@ describe('ExplorerChart', () => {
 
   test('Loading status active, no chart', () => {
     const config = {
-      loading: true
+      loading: true,
     };
 
     const wrapper = mountWithIntl(
-      <ExplorerChartSingleMetric.WrappedComponent seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
+      <ExplorerChartSingleMetric.WrappedComponent
+        seriesConfig={config}
+        mlSelectSeverityService={mlSelectSeverityServiceMock}
+      />
     );
 
     // test if the loading indicator is shown
@@ -82,13 +89,16 @@ describe('ExplorerChart', () => {
     const config = {
       ...seriesConfig,
       chartData,
-      chartLimits: chartLimits(chartData)
+      chartLimits: chartLimits(chartData),
     };
 
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
       <div style={{ width: '500px' }}>
-        <ExplorerChartSingleMetric.WrappedComponent seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
+        <ExplorerChartSingleMetric.WrappedComponent
+          seriesConfig={config}
+          mlSelectSeverityService={mlSelectSeverityServiceMock}
+        />
       </div>
     );
   }
@@ -120,22 +130,36 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('y')).toBe(2);
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
-    const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
+    const xAxisTicks = wrapper
+      .getDOMNode()
+      .querySelector('.x')
+      .querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(0);
-    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
+    const yAxisTicks = wrapper
+      .getDOMNode()
+      .querySelector('.y')
+      .querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(10);
 
     const paths = wrapper.getDOMNode().querySelectorAll('path');
     expect(paths[0].getAttribute('class')).toBe('domain');
     expect(paths[1].getAttribute('class')).toBe('domain');
     expect(paths[2].getAttribute('class')).toBe('values-line');
-    expect(paths[2].getAttribute('d')).toBe('MNaN,159.33024504444444ZMNaN,9.166257955555556LNaN,169.60736875555557');
+    expect(paths[2].getAttribute('d')).toBe(
+      'MNaN,159.33024504444444ZMNaN,9.166257955555556LNaN,169.60736875555557'
+    );
 
-    const dots = wrapper.getDOMNode().querySelector('.values-dots').querySelectorAll('circle');
+    const dots = wrapper
+      .getDOMNode()
+      .querySelector('.values-dots')
+      .querySelectorAll('circle');
     expect([...dots]).toHaveLength(1);
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
-    const chartMarkers = wrapper.getDOMNode().querySelector('.chart-markers').querySelectorAll('circle');
+    const chartMarkers = wrapper
+      .getDOMNode()
+      .querySelector('.chart-markers')
+      .querySelectorAll('circle');
     expect([...chartMarkers]).toHaveLength(4);
     expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
   });
@@ -144,14 +168,20 @@ describe('ExplorerChart', () => {
     const chartData = [
       {
         date: new Date('2017-02-23T08:00:00.000Z'),
-        value: 228243469, anomalyScore: 63.32916, numberOfCauses: 1,
-        actual: [228243469], typical: [228243469]
-      }
+        value: 228243469,
+        anomalyScore: 63.32916,
+        numberOfCauses: 1,
+        actual: [228243469],
+        typical: [228243469],
+      },
     ];
 
     const wrapper = init(chartData);
 
-    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
+    const yAxisTicks = wrapper
+      .getDOMNode()
+      .querySelector('.y')
+      .querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(13);
   });
 });

@@ -8,7 +8,6 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { FieldType } from 'ui/index_patterns';
 import { timefilter } from 'ui/timefilter';
 
 import {
@@ -22,7 +21,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES, esQuery, esKuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  IFieldType,
+  KBN_FIELD_TYPES,
+  esQuery,
+  esKuery,
+} from '../../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -31,7 +35,7 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { timeBasedIndexCheck } from '../../util/index_utils';
+import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -107,7 +111,7 @@ export const Page: FC = () => {
 
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  const indexPatternFields: FieldType[] = currentIndexPattern.fields;
+  const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach(field => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
@@ -173,9 +177,8 @@ export const Page: FC = () => {
 
   useEffect(() => {
     // Check for a saved search being passed in.
-    const searchSource = currentSavedSearch.searchSource;
-    const query = searchSource.getField('query');
-    if (query !== undefined) {
+    if (currentSavedSearch !== null) {
+      const { query } = getQueryFromSavedSearch(currentSavedSearch);
       const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
       const qryString = query.query;
       let qry;
