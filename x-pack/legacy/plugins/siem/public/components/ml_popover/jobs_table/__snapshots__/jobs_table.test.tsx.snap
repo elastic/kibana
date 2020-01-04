@@ -101,7 +101,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
     ]
   }
   loading={true}
-  noItemsMessage={<Memo(NoItemsMessage) />}
+  noItemsMessage={<UNDEFINED />}
   onChange={[Function]}
   pagination={
     Object {
