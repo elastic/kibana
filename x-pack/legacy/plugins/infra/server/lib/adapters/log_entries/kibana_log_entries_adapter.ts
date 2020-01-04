@@ -8,6 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
+import { compact } from 'lodash';
 import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
@@ -17,12 +18,14 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonObject, JsonValue } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
+  LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
   LogSummaryBucket,
+  LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import { SortedSearchHit } from '../framework';
@@ -82,6 +85,84 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     return direction === 'asc' ? documents : documents.reverse();
   }
 
+  public async getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceConfiguration: InfraSourceConfiguration,
+    fields: string[],
+    params: LogEntriesParams
+  ): Promise<LogEntryDocument[]> {
+    const { startDate, endDate, query, cursor, size, highlightTerm } = params;
+
+    const { sortDirection, searchAfterClause } = processCursor(cursor);
+
+    const highlightQuery = createHighlightQuery(highlightTerm, fields);
+
+    const highlightClause = highlightQuery
+      ? {
+          highlight: {
+            boundary_scanner: 'word',
+            fields: fields.reduce(
+              (highlightFieldConfigs, fieldName) => ({
+                ...highlightFieldConfigs,
+                [fieldName]: {},
+              }),
+              {}
+            ),
+            fragment_size: 1,
+            number_of_fragments: 100,
+            post_tags: [''],
+            pre_tags: [''],
+            highlight_query: highlightQuery,
+          },
+        }
+      : {};
+
+    const sort = {
+      [sourceConfiguration.fields.timestamp]: sortDirection,
+      [sourceConfiguration.fields.tiebreaker]: sortDirection,
+    };
+
+    const esQuery = {
+      allowNoIndices: true,
+      index: sourceConfiguration.logAlias,
+      ignoreUnavailable: true,
+      body: {
+        size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
+        track_total_hits: false,
+        _source: fields,
+        query: {
+          bool: {
+            filter: [
+              ...createFilterClauses(query, highlightQuery),
+              {
+                range: {
+                  [sourceConfiguration.fields.timestamp]: {
+                    gte: startDate,
+                    lte: endDate,
+                    format: TIMESTAMP_FORMAT,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        sort,
+        ...highlightClause,
+        ...searchAfterClause,
+      },
+    };
+
+    const esResult = await this.framework.callWithRequest<SortedSearchHit>(
+      requestContext,
+      'search',
+      esQuery
+    );
+
+    const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
+    return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
+  }
+
+  /** @deprecated */
   public async getContainedLogEntryDocuments(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
@@ -319,6 +400,34 @@ function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[nu
   return intervals;
 }
 
+function mapHitsToLogEntryDocuments(
+  hits: SortedSearchHit[],
+  timestampField: string,
+  fields: string[]
+): LogEntryDocument[] {
+  return hits.map(hit => {
+    const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
+      (flattenedFields, field) => {
+        if (has(field, hit._source)) {
+          flattenedFields[field] = get(field, hit._source);
+        }
+        return flattenedFields;
+      },
+      {}
+    );
+
+    return {
+      gid: hit._id,
+      // timestamp: hit._source[timestampField],
+      // FIXME s/key/cursor/g
+      key: { time: hit.sort[0], tiebreaker: hit.sort[1] },
+      fields: logFields,
+      highlights: hit.highlight || {},
+    };
+  });
+}
+
+/** @deprecated */
 const convertHitToLogEntryDocument = (fields: string[]) => (
   hit: SortedSearchHit
 ): LogEntryDocument => ({
@@ -352,8 +461,61 @@ const convertDateRangeBucketToSummaryBucket = (
   })),
 });
 
+const createHighlightQuery = (
+  highlightTerm: string | undefined,
+  fields: string[]
+): LogEntryQuery | undefined => {
+  if (highlightTerm) {
+    return {
+      multi_match: {
+        fields,
+        lenient: true,
+        query: highlightTerm,
+        type: 'phrase',
+      },
+    };
+  }
+};
+
+const createFilterClauses = (
+  filterQuery?: LogEntryQuery,
+  highlightQuery?: LogEntryQuery
+): LogEntryQuery[] => {
+  if (filterQuery && highlightQuery) {
+    return [{ bool: { filter: [filterQuery, highlightQuery] } }];
+  }
+
+  return compact([filterQuery, highlightQuery]) as LogEntryQuery[];
+};
+
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
+
+function processCursor(
+  cursor: LogEntriesParams['cursor']
+): {
+  sortDirection: 'asc' | 'desc';
+  searchAfterClause: { search_after?: readonly [number, number] };
+} {
+  if (cursor) {
+    if ('before' in cursor) {
+      return {
+        sortDirection: 'desc',
+        searchAfterClause:
+          cursor.before !== 'last'
+            ? { search_after: [cursor.before.time, cursor.before.tiebreaker] as const }
+            : {},
+      };
+    } else if (cursor.after !== 'first') {
+      return {
+        sortDirection: 'asc',
+        searchAfterClause: { search_after: [cursor.after.time, cursor.after.tiebreaker] as const },
+      };
+    }
+  }
+
+  return { sortDirection: 'asc', searchAfterClause: {} };
+}
 
 const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
