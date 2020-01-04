@@ -25,17 +25,17 @@ import {
 import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
-  ${({ theme, width }) => `
-    background-color: ${theme.eui.euiColorLightestShade};
-    border: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorMediumShade};
-    border-radius: ${theme.eui.euiBorderRadius};
-    left: 0;
-    padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m};
-    position: absolute;
-    top: calc(100% + ${theme.eui.euiSize});
-    width: ${width}px;
-    z-index: 9990;
-  `}
+  background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+  border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
+    ${({ theme }) => theme.eui.euiColorMediumShade};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  left: 0;
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  position: absolute;
+  top: ${({ theme }) => `calc(100% + ${theme.eui.euiSize})`};
+  width: ${({ width }) => `${width}px`};
+  z-index: 9990;
 `;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 

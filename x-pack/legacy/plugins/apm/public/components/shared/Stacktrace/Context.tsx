@@ -84,7 +84,7 @@ const LineContainer = styled.div`
 `;
 
 const Line = styled.pre`
-  // Override all styles
+  /* Override all styles */
   margin: 0;
   color: inherit;
   background: inherit;

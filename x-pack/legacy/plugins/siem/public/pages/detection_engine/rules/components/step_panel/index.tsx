@@ -17,7 +17,7 @@ interface StepPanelProps {
 }
 
 const MyPanel = styled(EuiPanel)`
-  poistion: relative;
+  position: relative;
 `;
 
 export const StepPanel = memo<StepPanelProps>(({ children, loading, title }) => {
