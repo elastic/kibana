@@ -136,11 +136,13 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
       tr:hover &:hover,
       tr:hover &:focus {
         background-color: ${({ theme }) => theme.eui.euiColorPrimary};
+
         &,
         & a,
         & a:hover {
           color: ${({ theme }) => theme.eui.euiColorEmptyShade};
         }
+
         &::before {
           background-image: linear-gradient(
               135deg,
