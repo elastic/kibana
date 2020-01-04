@@ -19,19 +19,5 @@
       "nullishCoalescingOperator",
     ]
   }]],
-  "extends": ["stylelint-config-standard", "stylelint-config-prettier", "stylelint-config-styled-components"],
-  "rules": {
-    "font-family-no-missing-generic-family-keyword": null,
-    "no-empty-source": null,
-    "no-descending-specificity": null,
-    "declaration-empty-line-before": null,
-    "declaration-block-trailing-semicolon": null,
-    "function-name-case": null,
-    "function-whitespace-after": null,
-    "declaration-bang-space-before": null,
-    "declaration-bang-space-after": null,
-    "media-feature-range-operator-space-before": null,
-    "media-feature-range-operator-space-after": null,
-    "length-zero-no-unit": null
-  }
+  "extends": ["stylelint-config-standard", "stylelint-config-prettier", "stylelint-config-styled-components"]
 }

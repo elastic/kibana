@@ -44,10 +44,10 @@ const StyledEuiFormRow = styled(EuiFormRow)`
     max-height: 14vh !important;
   }
   .globalQueryBar {
-    padding: 4px 0px 0px 0px;
+    padding: 4px 0 0 0;
     .kbnQueryBar {
       & > div:first-child {
-        margin: 0px 0px 0px 4px;
+        margin: 0 0 0 4px;
       }
     }
   }

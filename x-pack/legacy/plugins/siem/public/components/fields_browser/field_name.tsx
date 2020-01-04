@@ -42,7 +42,7 @@ export const FieldNameContainer = styled.span`
       linear-gradient(-135deg, ${({ theme }) => theme.eui.euiColorMediumShade} 25%, transparent 25%),
       linear-gradient(135deg, transparent 75%, ${({ theme }) => theme.eui.euiColorMediumShade} 75%),
       linear-gradient(-135deg, transparent 75%, ${({ theme }) => theme.eui.euiColorMediumShade} 75%);
-    background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+    background-position: 0 0, 1px 0, 1px -1px, 0 1px;
     background-size: 2px 2px;
     bottom: 2px;
     content: '';

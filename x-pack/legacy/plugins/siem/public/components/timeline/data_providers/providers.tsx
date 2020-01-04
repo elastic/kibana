@@ -49,7 +49,7 @@ const PanelProviders = styled.div`
   display: flex;
   flex-direction: row;
   min-height: 100px;
-  padding: 5px 10px 15px 0px;
+  padding: 5px 10px 15px 0;
   overflow-y: auto;
   align-items: stretch;
   justify-content: flex-start;
@@ -76,7 +76,7 @@ PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
 const PanelProviderGroupContainer = styled(EuiFlexGroup)`
   height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
-  margin: 5px 0px;
+  margin: 5px 0;
 `;
 
 PanelProviderGroupContainer.displayName = 'PanelProviderGroupContainer';
@@ -88,9 +88,9 @@ const PanelProviderItemContainer = styled(EuiFlexItem)`
 PanelProviderItemContainer.displayName = 'PanelProviderItemContainer';
 
 const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
-  padding-top: 0px;
+  padding-top: 0;
   position: absolute;
-  bottom: 0px;
+  bottom: 0;
   left: 5px;
 `;
 

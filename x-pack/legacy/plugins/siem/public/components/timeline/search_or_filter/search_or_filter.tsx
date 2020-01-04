@@ -66,10 +66,10 @@ const SearchOrFilterContainer = styled.div`
   margin: 5px 0 10px 0;
   user-select: none;
   .globalQueryBar {
-    padding: 0px;
+    padding: 0;
     .kbnQueryBar {
       div:first-child {
-        margin-right: 0px;
+        margin-right: 0;
       }
     }
   }

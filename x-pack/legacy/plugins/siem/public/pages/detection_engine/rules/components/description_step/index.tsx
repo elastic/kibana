@@ -51,15 +51,15 @@ const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
 `;
 
 const MyEuiListGroup = styled(EuiListGroup)`
-  padding: 0px;
+  padding: 0;
   .euiListGroupItem__button {
-    padding: 0px;
+    padding: 0;
   }
 `;
 
 const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
   .euiFlexItem {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 `;
 

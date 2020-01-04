@@ -71,7 +71,7 @@ interface SiemSearchBarProps {
 
 const SearchBarContainer = styled.div`
   .globalQueryBar {
-    padding: 0px;
+    padding: 0;
   }
 `;
 

@@ -23,7 +23,6 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
   padding: ${({ theme }) => theme.eui.paddingSizes.m} ${gutterTimeline} ${({ theme }) =>
   theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
-
   ${({ isSticky }) =>
     isSticky &&
     css`

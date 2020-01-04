@@ -63,7 +63,7 @@ const PopoverRowItems = styled((EuiPopover as unknown) as FunctionComponent)<
   }
 >`
   .euiButtonEmpty__content {
-    padding: 0px 0px;
+    padding: 0;
   }
 `;
 

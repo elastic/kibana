@@ -30,11 +30,11 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
     ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   left: 0;
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
+    ${({ theme }) => theme.eui.paddingSizes.m};
   position: absolute;
-  top: ${({ theme }) => `calc(100% + ${theme.eui.euiSize})`};
-  width: ${({ width }) => `${width}px`};
+  top: calc(100% + ${({ theme }) => theme.eui.euiSize});
+  width: ${({ width }) => width}px;
   z-index: 9990;
 `;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';

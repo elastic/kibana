@@ -18,7 +18,6 @@ import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
   padding: ${({ theme }) => theme.eui.paddingSizes.m};
-
   ${({ overlay, overlayBackground, theme }) =>
     overlay &&
     css`

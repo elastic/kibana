@@ -20,7 +20,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     &::after {
       font-style: normal;
       content: '|';
-      padding: 0px 3px;
+      padding: 0 3px;
     }
   }
   &.globalFilterItem {

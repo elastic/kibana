@@ -73,7 +73,7 @@ export const PageContainer = styled.div`
   height: 100%;
   padding: 1rem;
   overflow: hidden;
-  margin: 0px;
+  margin: 0;
 `;
 
 PageContainer.displayName = 'PageContainer';
@@ -99,7 +99,7 @@ export const PageHeader = styled.div`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   display: flex;
   user-select: none;
-  padding: 1rem 1rem 0rem 1rem;
+  padding: 1rem 1rem 0 1rem;
   width: 100vw;
   position: fixed;
 `;

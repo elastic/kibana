@@ -15,7 +15,7 @@ const LegendContainer = styled.div`
   max-width: 260px;
   min-width: 100px;
   @media (max-width: 767px) {
-    min-width: 0px;
+    min-width: 0;
     max-width: 100px;
   }
 `;

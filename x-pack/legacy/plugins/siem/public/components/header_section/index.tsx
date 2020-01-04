@@ -20,7 +20,6 @@ const Header = styled.header.attrs(() => ({
 }))<HeaderProps>`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
   user-select: text;
-
   ${({ border }) =>
     border &&
     css`

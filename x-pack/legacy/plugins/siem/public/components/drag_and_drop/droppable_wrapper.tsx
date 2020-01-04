@@ -27,6 +27,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       background-color: ${props => props.theme.eui.euiFormBackgroundColor};
     }
   }
+
   ${props =>
     props.isDraggingOver
       ? `
