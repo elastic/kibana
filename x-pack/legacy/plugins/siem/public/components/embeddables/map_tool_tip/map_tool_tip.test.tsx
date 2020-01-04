@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MapToolTipComponent } from './map_tool_tip';
 import { MapFeature } from '../types';
@@ -19,7 +18,7 @@ jest.mock('../../search_bar', () => ({
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {
     const wrapper = shallow(<MapToolTipComponent />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('full component renders correctly against snapshot', () => {
@@ -46,6 +45,6 @@ describe('MapToolTip', () => {
         loadFeatureGeometry={loadFeatureGeometry}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

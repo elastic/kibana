@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
@@ -37,7 +36,7 @@ describe('Field Renderers', () => {
         locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when no fields provided', () => {
@@ -61,7 +60,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(dateRenderer(mockData.complete.source!.firstSeen));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
@@ -79,7 +78,7 @@ describe('Field Renderers', () => {
         autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-string field provided', () => {
@@ -111,7 +110,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -154,7 +153,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -188,7 +187,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(whoisRenderer('10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
@@ -196,7 +195,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(<TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>);
 
-      expect(toJson(wrapper.find('DragDropContext'))).toMatchSnapshot();
+      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
     });
   });
 

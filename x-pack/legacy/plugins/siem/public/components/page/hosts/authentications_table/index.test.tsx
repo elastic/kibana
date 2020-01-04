@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -49,7 +48,7 @@ describe('Authentication Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(AuthenticationTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(AuthenticationTableComponent)')).toMatchSnapshot();
     });
   });
 

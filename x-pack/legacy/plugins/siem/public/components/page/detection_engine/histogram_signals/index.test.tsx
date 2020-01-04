@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../../../mock';
@@ -19,6 +18,6 @@ describe('HistogramSignals', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('HistogramSignals'))).toMatchSnapshot();
+    expect(wrapper.find('HistogramSignals')).toMatchSnapshot();
   });
 });

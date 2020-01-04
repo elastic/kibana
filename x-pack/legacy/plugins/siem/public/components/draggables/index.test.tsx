@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -34,7 +33,7 @@ describe('draggables', () => {
           <span>{'A child of this'}</span>
         </DefaultDraggable>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the default Badge', () => {
@@ -50,7 +49,7 @@ describe('draggables', () => {
           <span>{'A child of this'}</span>
         </DraggableBadge>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

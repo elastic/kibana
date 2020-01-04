@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
@@ -20,7 +19,7 @@ describe('Port', () => {
     const wrapper = shallow(
       <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the the ip address', () => {

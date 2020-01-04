@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
@@ -31,7 +30,7 @@ describe('GenericFileDetails', () => {
           timelineId="test"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns auditd if the data does contain auditd data', () => {

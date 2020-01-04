@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -33,7 +32,7 @@ describe('DroppableWrapper', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('DroppableWrapper'))).toMatchSnapshot();
+      expect(wrapper.find('DroppableWrapper')).toMatchSnapshot();
     });
 
     test('it renders the children when a render prop is not provided', () => {

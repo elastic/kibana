@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
@@ -36,7 +35,7 @@ describe('DataProviders', () => {
           show={true}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render a placeholder when there are zero data providers', () => {

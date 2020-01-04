@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
@@ -77,7 +76,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a system datum', () => {
@@ -141,7 +140,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {

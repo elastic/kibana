@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { DEFAULT_PLACEHOLDER, TextFilter } from '.';
@@ -14,7 +13,7 @@ describe('TextFilter', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(<TextFilter columnId="foo" minWidth={100} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     describe('placeholder', () => {

@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -59,7 +58,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
@@ -84,7 +83,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
     });
   });
 

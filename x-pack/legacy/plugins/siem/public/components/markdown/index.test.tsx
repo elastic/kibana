@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Markdown } from '.';
@@ -98,7 +97,7 @@ describe('Markdown', () => {
     test('it renders the expected table content', () => {
       const wrapper = shallow(<Markdown raw={rawTable} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
@@ -152,7 +151,7 @@ describe('Markdown', () => {
     test('it renders the expected content containing a link', () => {
       const wrapper = shallow(<Markdown raw={markdownWithLink} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 });

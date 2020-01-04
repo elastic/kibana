@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 
 import * as React from 'react';
 
@@ -30,7 +29,7 @@ describe('Modal all errors', () => {
       const wrapper = shallow(
         <ModalAllErrors isShowing={true} toast={mockToast} toggle={toggle} />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders null when isShowing is negative', () => {

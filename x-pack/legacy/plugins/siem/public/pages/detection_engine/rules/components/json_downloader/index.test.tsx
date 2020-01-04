@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { JSONDownloaderComponent, jsonToNDJSON, ndjsonToJSON } from './index';
 
@@ -37,7 +36,7 @@ describe('JSONDownloader', () => {
     const wrapper = shallow(
       <JSONDownloaderComponent filename={'export_rules.ndjson'} onExportComplete={jest.fn()} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('jsonToNDJSON', () => {

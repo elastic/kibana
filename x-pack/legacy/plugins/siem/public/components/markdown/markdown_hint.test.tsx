@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { MarkdownHintComponent } from './markdown_hint';
@@ -89,7 +88,7 @@ describe('MarkdownHintComponent ', () => {
     test('it renders the expected hints', () => {
       const wrapper = shallow(<MarkdownHintComponent show={true} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 });

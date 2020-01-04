@@ -5,7 +5,6 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { isChecked, isFailure, isJobLoading, JobSwitchComponent } from './job_switch';
@@ -29,7 +28,7 @@ describe('JobSwitch', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {

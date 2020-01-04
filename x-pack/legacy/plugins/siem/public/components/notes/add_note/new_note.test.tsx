@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import * as i18n from '../translations';
@@ -19,7 +18,7 @@ describe('NewNote', () => {
     const wrapper = shallow(
       <NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a tab labeled "Note"', () => {

@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { AnomalyScoreComponent } from './anomaly_score';
@@ -36,7 +35,7 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should not show a popover on initial render', () => {

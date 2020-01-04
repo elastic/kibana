@@ -6,7 +6,6 @@
 
 import numeral from '@elastic/numeral';
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 
@@ -101,7 +100,7 @@ describe('SourceDestination', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<div>{getSourceDestinationInstance()}</div>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {

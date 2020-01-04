@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
 
@@ -44,7 +43,7 @@ describe('get_column_renderer', () => {
     });
 
     const wrapper = shallow(<span>{row}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render plain row data when it is a non suricata row', () => {

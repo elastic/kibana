@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -23,6 +22,6 @@ describe('HeaderGlobal', () => {
   test('it renders', () => {
     const wrapper = shallow(<HeaderGlobal />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

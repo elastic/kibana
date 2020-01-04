@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { TestProviders } from '../../../../mock';
 
@@ -31,7 +30,7 @@ describe('Host Summary Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('HostOverview'))).toMatchSnapshot();
+      expect(wrapper.find('HostOverview')).toMatchSnapshot();
     });
   });
 });

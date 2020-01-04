@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -28,7 +27,7 @@ describe('DragDropContextWrapper', () => {
           </MockedProvider>
         </TestProviders>
       );
-      expect(toJson(wrapper.find('DragDropContextWrapper'))).toMatchSnapshot();
+      expect(wrapper.find('DragDropContextWrapper')).toMatchSnapshot();
     });
 
     test('it renders the children', () => {

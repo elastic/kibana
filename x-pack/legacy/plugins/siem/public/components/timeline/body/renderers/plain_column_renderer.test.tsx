@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment-timezone';
 import * as React from 'react';
@@ -41,7 +40,7 @@ describe('plain_column_renderer', () => {
         timelineId: 'test',
       });
       const wrapper = shallow(<span>{column}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return isInstance false if source is empty', () => {

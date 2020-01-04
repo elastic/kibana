@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
@@ -54,7 +53,7 @@ describe('ColumnHeaders', () => {
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the field browser', () => {

@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { GroupsFilterPopoverComponent } from './groups_filter_popover';
 import { mockSiemJobs } from '../../__mocks__/api';
@@ -23,7 +22,7 @@ describe('GroupsFilterPopover', () => {
     const wrapper = shallow(
       <GroupsFilterPopoverComponent siemJobs={siemJobs} onSelectedGroupsChanged={jest.fn()} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('when a filter is clicked, it becomes checked ', () => {

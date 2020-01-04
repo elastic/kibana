@@ -6,7 +6,6 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../../mock';
@@ -32,7 +31,7 @@ describe('SessionUserHostWorkingDir', () => {
           />
         </EuiFlexItem>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders with just eventId and contextId', () => {

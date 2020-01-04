@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { AuthSsh } from './auth_ssh';
@@ -21,7 +20,7 @@ describe('AuthSsh', () => {
           sshMethod="[ssh-method]"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns null if sshSignature and sshMethod are both null', () => {

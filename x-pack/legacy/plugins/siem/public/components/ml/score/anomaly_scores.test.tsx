@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { AnomalyScoresComponent, createJobKey } from './anomaly_scores';
@@ -36,7 +35,7 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('renders spinner when isLoading is true is passed', () => {

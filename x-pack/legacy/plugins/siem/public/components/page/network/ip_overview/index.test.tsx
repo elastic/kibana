@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -52,7 +51,7 @@ describe('IP Overview Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('IpOverview'))).toMatchSnapshot();
+      expect(wrapper.find('IpOverview')).toMatchSnapshot();
     });
   });
 });

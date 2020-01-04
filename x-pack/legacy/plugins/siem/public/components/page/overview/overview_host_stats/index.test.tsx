@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { OverviewHostStats } from '.';
@@ -15,7 +14,7 @@ describe('Overview Host Stat Data', () => {
   describe('rendering', () => {
     test('it renders the default OverviewHostStats', () => {
       const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={false} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
   describe('loading', () => {

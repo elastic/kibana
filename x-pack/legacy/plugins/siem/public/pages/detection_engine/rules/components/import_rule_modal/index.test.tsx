@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { ImportRuleModalComponent } from './index';
 
@@ -20,6 +19,6 @@ describe('ImportRuleModal', () => {
         importComplete={jest.fn()}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

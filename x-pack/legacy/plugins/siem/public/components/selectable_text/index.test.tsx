@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { SelectableText } from '.';
@@ -13,7 +12,7 @@ import { SelectableText } from '.';
 describe('SelectableText', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<SelectableText>{'You may select this text'}</SelectableText>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it applies the user-select: text style', () => {

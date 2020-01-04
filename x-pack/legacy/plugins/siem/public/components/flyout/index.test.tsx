@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { set } from 'lodash/fp';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
@@ -35,7 +34,7 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(toJson(wrapper.find('Flyout'))).toMatchSnapshot();
+      expect(wrapper.find('Flyout')).toMatchSnapshot();
     });
 
     test('it renders the default flyout state as a button', () => {

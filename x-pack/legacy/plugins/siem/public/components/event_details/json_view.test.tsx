@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockDetailItemData } from '../../mock';
@@ -16,7 +15,7 @@ describe('JSON View', () => {
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(<JsonView data={mockDetailItemData} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

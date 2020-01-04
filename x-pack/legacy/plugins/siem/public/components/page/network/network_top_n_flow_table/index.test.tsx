@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -59,7 +58,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkTopNFlowTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
     });
 
     test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
@@ -85,7 +84,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkTopNFlowTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
     });
   });
 

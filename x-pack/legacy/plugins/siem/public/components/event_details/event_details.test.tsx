@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
@@ -34,7 +33,7 @@ describe('EventDetails', () => {
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
@@ -17,7 +16,7 @@ describe('Provider', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(<Provider dataProvider={mockDataProviders[0]} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the data provider', () => {

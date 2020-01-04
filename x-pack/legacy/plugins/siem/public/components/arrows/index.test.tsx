@@ -5,7 +5,6 @@
  */
 
 import { mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -20,7 +19,7 @@ describe('arrows', () => {
           <ArrowBody height={3} />
         </TestProviders>
       );
-      expect(toJson(wrapper.find('ArrowBody'))).toMatchSnapshot();
+      expect(wrapper.find('ArrowBody')).toMatchSnapshot();
     });
   });
 

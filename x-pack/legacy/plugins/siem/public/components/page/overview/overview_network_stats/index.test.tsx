@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { OverviewNetworkStats } from '.';
@@ -17,7 +16,7 @@ describe('Overview Network Stat Data', () => {
       const wrapper = shallow(
         <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
   describe('loading', () => {

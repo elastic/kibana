@@ -5,7 +5,6 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSiemJobs } from '../__mocks__/api';
@@ -28,7 +27,7 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render the hyperlink which points specifically to the job id', () => {

@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
@@ -15,6 +14,6 @@ jest.mock('../../lib/kibana');
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<IndexPatternsMissingPromptComponent />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

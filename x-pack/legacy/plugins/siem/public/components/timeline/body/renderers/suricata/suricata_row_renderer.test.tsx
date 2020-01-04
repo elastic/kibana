@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
@@ -35,7 +34,7 @@ describe('suricata_row_renderer', () => {
     });
 
     const wrapper = shallow(<span>{children}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should return false if not a suricata datum', () => {

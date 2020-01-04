@@ -6,7 +6,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -34,7 +33,7 @@ describe('Events', () => {
         value={get('timestamp', mockTimelineData[0].ecs)}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {

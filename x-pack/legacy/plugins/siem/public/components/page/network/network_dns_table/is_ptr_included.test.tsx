@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { FlowDirection } from '../../../../graphql/types';
@@ -19,7 +18,7 @@ describe('NetworkTopNFlow Select direction', () => {
     test('it renders the basic switch to include PTR in table', () => {
       const wrapper = shallow(<IsPtrIncluded isPtrIncluded={true} onChange={mockOnChange} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

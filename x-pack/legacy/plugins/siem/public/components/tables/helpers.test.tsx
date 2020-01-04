@@ -12,7 +12,6 @@ import {
 } from './helpers';
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -29,7 +28,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(toJson(wrapper.find('DraggableWrapper'))).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItem is undefined', () => {
@@ -97,7 +96,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(toJson(wrapper.find('DragDropContext'))).toMatchSnapshot();
+      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItems is undefined', () => {
@@ -193,7 +192,7 @@ describe('Table Helpers', () => {
     test('it returns correctly against snapshot', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
@@ -215,7 +214,7 @@ describe('Table Helpers', () => {
       const wrapper = shallow(
         <OverflowFieldComponent value={overflowString} showToolTip={false} />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {

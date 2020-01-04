@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../../mock';
@@ -26,7 +25,7 @@ describe('UserPrimarySecondary', () => {
           secondary="secondary-1"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should render user name only if that is all that is present', () => {

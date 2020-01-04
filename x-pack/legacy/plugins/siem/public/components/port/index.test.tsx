@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
@@ -20,7 +19,7 @@ describe('Port', () => {
     const wrapper = shallow(
       <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the port', () => {

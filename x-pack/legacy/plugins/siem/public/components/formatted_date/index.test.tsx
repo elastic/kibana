@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
@@ -34,7 +33,7 @@ describe('formatted_date', () => {
       test('renders correctly against snapshot', () => {
         mockUseUiSetting$.mockImplementation(() => [null]);
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
-        expect(toJson(wrapper)).toMatchSnapshot();
+        expect(wrapper).toMatchSnapshot();
       });
 
       test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {

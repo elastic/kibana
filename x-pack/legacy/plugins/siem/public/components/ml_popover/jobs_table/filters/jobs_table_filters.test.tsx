@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
 import { SiemJob } from '../../types';
@@ -23,7 +22,7 @@ describe('JobsTableFilters', () => {
     const wrapper = shallow(
       <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={jest.fn()} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {

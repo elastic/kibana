@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
@@ -89,6 +88,6 @@ describe('HeaderToolTipContent', () => {
   test('it renders the expected table content', () => {
     const wrapper = shallow(<HeaderToolTipContent header={header} />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });
