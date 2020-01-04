@@ -76,6 +76,8 @@ export interface Alert {
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
@@ -95,6 +97,7 @@ export interface RawAlert extends SavedObjectAttributes {
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
+  createdAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
