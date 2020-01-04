@@ -10,9 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import {
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 
 import { listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import {
@@ -28,10 +26,10 @@ export class FollowerIndexAdd extends PureComponent {
     clearApiError: PropTypes.func.isRequired,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
-  }
+  };
 
   componentDidMount() {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb]);
   }
 
   componentWillUnmount() {
@@ -39,20 +37,23 @@ export class FollowerIndexAdd extends PureComponent {
   }
 
   render() {
-    const { saveFollowerIndex, clearApiError, apiStatus, apiError, match: { url: currentUrl }  } = this.props;
+    const {
+      saveFollowerIndex,
+      clearApiError,
+      apiStatus,
+      apiError,
+      match: { url: currentUrl },
+    } = this.props;
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="ccrPageContent"
-      >
+      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
         <FollowerIndexPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndex.addTitle"
               defaultMessage="Add follower index"
             />
-          )}
+          }
         />
 
         <RemoteClustersProvider>
@@ -76,12 +77,12 @@ export class FollowerIndexAdd extends PureComponent {
                 remoteClusters={error ? [] : remoteClusters}
                 saveFollowerIndex={saveFollowerIndex}
                 clearApiError={clearApiError}
-                saveButtonLabel={(
+                saveButtonLabel={
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexCreateForm.saveButtonLabel"
                     defaultMessage="Create"
                   />
-                )}
+                }
               />
             );
           }}

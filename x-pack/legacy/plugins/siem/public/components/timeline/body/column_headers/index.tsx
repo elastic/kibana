@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCheckbox } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';
-import { droppableTimelineColumnsPrefix, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
+import {
+  DRAG_TYPE_FIELD,
+  droppableTimelineColumnsPrefix,
+  getDraggableFieldId,
+} from '../../../drag_and_drop/helpers';
+import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
@@ -17,6 +23,7 @@ import {
   OnColumnResized,
   OnColumnSorted,
   OnFilterChange,
+  OnSelectAll,
   OnUpdateColumns,
 } from '../../events';
 import {
@@ -36,12 +43,15 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   isEventViewer?: boolean;
+  isSelectAllChecked: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
+  onSelectAll: OnSelectAll;
   onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
+  showSelectAllCheckbox: boolean;
   sort: Sort;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
@@ -53,12 +63,15 @@ export const ColumnHeadersComponent = ({
   browserFields,
   columnHeaders,
   isEventViewer = false,
+  isSelectAllChecked,
   onColumnRemoved,
   onColumnResized,
   onColumnSorted,
+  onSelectAll,
   onUpdateColumns,
   onFilterChange = noop,
   showEventsSelect,
+  showSelectAllCheckbox,
   sort,
   timelineId,
   toggleColumn,
@@ -67,6 +80,7 @@ export const ColumnHeadersComponent = ({
     <EventsTrHeader>
       <EventsThGroupActions
         actionsColumnWidth={actionsColumnWidth}
+        justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
         data-test-subj="actions-container"
       >
         {showEventsSelect && (
@@ -76,6 +90,35 @@ export const ColumnHeadersComponent = ({
             </EventsThContent>
           </EventsTh>
         )}
+        {showSelectAllCheckbox && (
+          <EventsTh>
+            <EventsThContent textAlign="center">
+              <EuiCheckbox
+                data-test-subj="select-all-events"
+                id={'select-all-events'}
+                checked={isSelectAllChecked}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  onSelectAll({ isSelected: event.currentTarget.checked });
+                }}
+              />
+            </EventsThContent>
+          </EventsTh>
+        )}
+        <EventsTh>
+          <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
+            <StatefulFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data-test-subj="field-browser"
+              height={FIELD_BROWSER_HEIGHT}
+              isEventViewer={isEventViewer}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+              width={FIELD_BROWSER_WIDTH}
+            />
+          </EventsThContent>
+        </EventsTh>
 
         <EventsTh>
           <EventsThContent textAlign="center">

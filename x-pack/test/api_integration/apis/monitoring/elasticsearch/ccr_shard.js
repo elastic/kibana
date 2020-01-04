@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import ccrShardFixture from './fixtures/ccr_shard';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/ccr';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',
-      max: '2018-09-19T23:59:59.000Z'
+      max: '2018-09-19T23:59:59.000Z',
     };
 
     before('load archive', () => {
@@ -28,7 +28,9 @@ export default function ({ getService }) {
 
     it('should return specific shard details', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr/follower/shard/0')
+        .post(
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr/follower/shard/0'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({
           timeRange,

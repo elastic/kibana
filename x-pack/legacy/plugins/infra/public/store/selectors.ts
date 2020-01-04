@@ -6,7 +6,6 @@
 
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
-  logFilterSelectors as localLogFilterSelectors,
   logPositionSelectors as localLogPositionSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
   waffleOptionsSelectors as localWaffleOptionsSelectors,
@@ -19,7 +18,6 @@ import { State } from './reducer';
 
 const selectLocal = (state: State) => state.local;
 
-export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);

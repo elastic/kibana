@@ -17,10 +17,7 @@
  * under the License.
  */
 
-export {
-  createIndexDocRecordsStream,
-  createGenerateDocRecordsStream,
-} from './docs';
+export { createIndexDocRecordsStream, createGenerateDocRecordsStream } from './docs';
 
 export {
   createCreateIndexStream,
@@ -31,13 +28,9 @@ export {
   createDefaultSpace,
 } from './indices';
 
-export {
-  createFilterRecordsStream,
-} from './records';
+export { createFilterRecordsStream } from './records';
 
-export {
-  createStats,
-} from './stats';
+export { createStats } from './stats';
 
 export {
   isGzip,
@@ -46,10 +39,6 @@ export {
   createFormatArchiveStreams,
 } from './archives';
 
-export {
-  readDirectory
-} from './directory';
+export { readDirectory } from './directory';
 
-export {
-  Progress
-} from './progress';
+export { Progress } from './progress';

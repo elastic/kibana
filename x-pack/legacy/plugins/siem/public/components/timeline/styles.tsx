@@ -87,10 +87,10 @@ EventsTrHeader.displayName = 'EventsTrHeader';
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number; justifyContent: string }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
-  justify-content: space-between;
+  justify-content: ${({ justifyContent }) => justifyContent};
   min-width: 0;
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';

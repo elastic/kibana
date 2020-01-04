@@ -13,7 +13,7 @@ import {
   createSpatialFilterWithBoundingBox,
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
-  roundCoordinates
+  roundCoordinates,
 } from '../../../../elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 
@@ -21,12 +21,11 @@ const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
 
 export class DrawControl extends React.Component {
-
   constructor() {
     super();
     this._mbDrawControl = new MapboxDraw({
       displayControlsDefault: false,
-      modes: mbDrawModes
+      modes: mbDrawModes,
     });
     this._mbDrawControlAdded = false;
   }
@@ -56,7 +55,7 @@ export class DrawControl extends React.Component {
     }
   }, 256);
 
-  _onDraw = (e) => {
+  _onDraw = e => {
     if (!e.features.length) {
       return;
     }
@@ -76,13 +75,13 @@ export class DrawControl extends React.Component {
       };
       const filter = isBoundingBox
         ? createSpatialFilterWithBoundingBox({
-          ...options,
-          geometry: getBoundingBoxGeometry(geometry)
-        })
+            ...options,
+            geometry: getBoundingBoxGeometry(geometry),
+          })
         : createSpatialFilterWithGeometry({
-          ...options,
-          geometry
-        });
+            ...options,
+            geometry,
+          });
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
@@ -110,8 +109,10 @@ export class DrawControl extends React.Component {
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.create', this._onDraw);
     }
-    const mbDrawMode = this.props.drawState.drawType === DRAW_TYPE.POLYGON ?
-      this._mbDrawControl.modes.DRAW_POLYGON : 'draw_rectangle';
+    const mbDrawMode =
+      this.props.drawState.drawType === DRAW_TYPE.POLYGON
+        ? this._mbDrawControl.modes.DRAW_POLYGON
+        : 'draw_rectangle';
     this._mbDrawControl.changeMode(mbDrawMode);
   }
 
@@ -120,11 +121,6 @@ export class DrawControl extends React.Component {
       return null;
     }
 
-    return (
-      <DrawTooltip
-        mbMap={this.props.mbMap}
-        drawState={this.props.drawState}
-      />
-    );
+    return <DrawTooltip mbMap={this.props.mbMap} drawState={this.props.drawState} />;
   }
 }

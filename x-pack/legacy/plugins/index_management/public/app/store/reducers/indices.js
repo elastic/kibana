@@ -14,87 +14,99 @@ import {
   loadIndicesError,
 } from '../actions';
 
-const byId = handleActions({
-  [deleteIndicesSuccess](state, action) {
-    const { indexNames } = action.payload;
+const byId = handleActions(
+  {
+    [deleteIndicesSuccess](state, action) {
+      const { indexNames } = action.payload;
 
-    const newState = {};
-    Object.values(state).forEach(index => {
-      if (!indexNames.includes(index.name)) {
+      const newState = {};
+      Object.values(state).forEach(index => {
+        if (!indexNames.includes(index.name)) {
+          newState[index.name] = index;
+        }
+      });
+
+      return newState;
+    },
+    [loadIndicesSuccess](state, action) {
+      const { indices } = action.payload;
+      const newState = {};
+      indices.forEach(index => {
         newState[index.name] = index;
-      }
-    });
+      });
 
-    return newState;
+      return newState;
+    },
+    [reloadIndicesSuccess](state, action) {
+      const { indices } = action.payload;
+
+      const newState = {};
+      indices.forEach(index => {
+        newState[index.name] = index;
+      });
+
+      return {
+        ...state,
+        ...newState,
+      };
+    },
   },
-  [loadIndicesSuccess](state, action) {
-    const { indices } = action.payload;
-    const newState = {};
-    indices.forEach(index => {
-      newState[index.name] = index;
-    });
+  {}
+);
 
-    return newState;
+const allIds = handleActions(
+  {
+    [deleteIndicesSuccess](state, action) {
+      const { indexNames } = action.payload;
+      const newState = [];
+      state.forEach(indexName => {
+        if (!indexNames.includes(indexName)) {
+          newState.push(indexName);
+        }
+      });
+      return newState;
+    },
+    [loadIndicesSuccess](state, action) {
+      const { indices } = action.payload;
+      return indices.map(index => index.name);
+    },
+    [reloadIndicesSuccess](state) {
+      // the set of IDs should never change when refreshing indexes.
+      return state;
+    },
   },
-  [reloadIndicesSuccess](state, action) {
-    const { indices } = action.payload;
+  []
+);
 
-    const newState = {};
-    indices.forEach(index => {
-      newState[index.name] = index;
-    });
-
-    return {
-      ...state,
-      ...newState
-    };
-  }
-}, {});
-
-const allIds = handleActions({
-  [deleteIndicesSuccess](state, action) {
-    const { indexNames } = action.payload;
-    const newState = [];
-    state.forEach(indexName => {
-      if (!indexNames.includes(indexName)) {
-        newState.push(indexName);
-      }
-    });
-    return newState;
+const loading = handleActions(
+  {
+    [loadIndicesStart]() {
+      return true;
+    },
+    [loadIndicesSuccess]() {
+      return false;
+    },
+    [loadIndicesError]() {
+      return false;
+    },
   },
-  [loadIndicesSuccess](state, action) {
-    const { indices } = action.payload;
-    return indices.map(index => index.name);
-  },
-  [reloadIndicesSuccess](state) {
-    // the set of IDs should never change when refreshing indexes.
-    return state;
-  }
-}, []);
+  true
+);
 
-const loading = handleActions({
-  [loadIndicesStart]() {
-    return true;
+const error = handleActions(
+  {
+    [loadIndicesError](state, action) {
+      const error = action.payload;
+      const newState = { ...error };
+      return newState;
+    },
   },
-  [loadIndicesSuccess]() {
-    return false;
-  },
-  [loadIndicesError]() {
-    return false;
-  }
-}, true);
-
-const error = handleActions({
-  [loadIndicesError](state, action) {
-    const error = action.payload;
-    const newState = { ...error };
-    return newState;
-  }
-}, false);
+  false
+);
 
 export const indices = combineReducers({
   loading,
   error,
   byId,
-  allIds
+  allIds,
 });

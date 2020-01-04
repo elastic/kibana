@@ -23,7 +23,7 @@ import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../plugins/features/public';
 import {
   KibanaPrivileges,
   RawKibanaPrivileges,
@@ -86,7 +86,7 @@ class EditRolePageUI extends Component<Props, State> {
     };
   }
 
-  public UNSAFE_componentWillMount() {
+  public componentDidMount() {
     if (this.props.action === 'clone' && isReservedRole(this.props.role)) {
       this.backToRoleList();
     }

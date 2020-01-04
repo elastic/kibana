@@ -20,16 +20,20 @@ const KNOWN_ERROR_STATUS_CODE = 503;
 
 const mapTypeMessage = {
   ConnectionFault: i18n.translate('xpack.monitoring.errors.connectionFaultErrorMessage', {
-    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.' }),
+    defaultMessage:
+      'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
+  }),
   NoConnections: i18n.translate('xpack.monitoring.errors.noConnectionsErrorMessage', {
-    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.' }),
+    defaultMessage:
+      'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
+  }),
   StatusCodeError: i18n.translate('xpack.monitoring.errors.statusCodeErrorMessage', {
-    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.' }),
+    defaultMessage:
+      'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.',
+  }),
 };
 
-const customErrors = [
-  MonitoringLicenseError
-];
+const customErrors = [MonitoringLicenseError];
 
 export function isKnownError(err) {
   for (const customError of customErrors) {

@@ -11,18 +11,24 @@ import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { InfraNodeType } from '../../graphql/types';
+import { InfraNodeType, SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
+import { findInventoryFields } from '../../../common/inventory_models';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
   nodeType: InfraNodeType;
   sourceId?: string;
 }>;
+
+const getFieldByNodeType = (nodeType: InfraNodeType, fields: SourceConfigurationFields.Fields) => {
+  const inventoryFields = findInventoryFields(nodeType, fields);
+  return inventoryFields.id;
+};
 
 export const RedirectToNodeLogs = ({
   match: {
@@ -50,7 +56,7 @@ export const RedirectToNodeLogs = ({
     return null;
   }
 
-  const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+  const nodeFilter = `${getFieldByNodeType(nodeType, configuration.fields)}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 

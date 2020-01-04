@@ -11,7 +11,7 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
         Object {
           "description": "skip result when actual is less than 1",
           "title": <FormattedMessage
-            defaultMessage="rule"
+            defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
             values={Object {}}
           />,
@@ -40,7 +40,11 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
             conditionValue={1}
             updateConditionValue={[Function]}
           />,
-          "title": "actions",
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
         },
         Object {
           "description": <ForwardRef
@@ -79,7 +83,7 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
         Object {
           "description": "skip model update when airline is not in eu-airlines",
           "title": <FormattedMessage
-            defaultMessage="rule"
+            defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
             values={Object {}}
           />,
@@ -90,7 +94,11 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
             fieldValue="AAL"
             filterId="eu-airlines"
           />,
-          "title": "actions",
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
         },
         Object {
           "description": <ForwardRef
@@ -129,7 +137,7 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
         Object {
           "description": "skip model update when airline is not in eu-airlines",
           "title": <FormattedMessage
-            defaultMessage="rule"
+            defaultMessage="Rule"
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
             values={Object {}}
           />,
@@ -144,7 +152,11 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
               values={Object {}}
             />
           </ForwardRef>,
-          "title": "actions",
+          "title": <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+            values={Object {}}
+          />,
         },
         Object {
           "description": <DeleteRuleModal

@@ -8,24 +8,25 @@ import { RequestHandlerContext } from 'src/core/server';
 
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
+import { findInventoryFields } from '../../../../common/inventory_models';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const hasAPMData = async (
   framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InventoryItemType
 ) => {
   const apmIndices = await framework.plugins.apm.getApmIndices(
     requestContext.core.savedObjects.client
   );
   const apmIndex = apmIndices['apm_oss.transactionIndices'] || 'apm-*';
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
 
   // There is a bug in APM ECS data where host.name is not set.
   // This will fixed with: https://github.com/elastic/apm-server/issues/2502
-  const nodeFieldName =
-    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+  const nodeFieldName = nodeType === 'host' ? 'host.hostname' : fields.id;
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
