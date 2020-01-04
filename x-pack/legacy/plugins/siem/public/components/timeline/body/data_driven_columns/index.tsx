@@ -30,7 +30,7 @@ export const DataDrivenColumns = React.memo<Props>(
     return (
       <EventsTdGroupData data-test-subj="data-driven-columns">
         {columnHeaders.map((header, index) => (
-          <EventsTd key={header.id} style={{ flexBasis: header.width + 'px' }}>
+          <EventsTd key={header.id} style={{ flexBasis: `${header.width}px` }}>
             <EventsTdContent data-test-subj="cell-container">
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,

@@ -746,7 +746,7 @@ module.exports = {
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
         // This style will be turned on after most bugs are fixed
-        // 'prefer-template': 'warn',
+        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/forbid-dom-props': 'error',
