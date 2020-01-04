@@ -168,5 +168,5 @@ export function canSkipFormattersUpdate({ prevDataRequest, nextMeta }) {
     return false;
   }
 
-  return !_.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
+  return _.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
 }

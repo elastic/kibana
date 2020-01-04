@@ -613,7 +613,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT, field);
+      return new DynamicTextProperty(
+        descriptor.options,
+        VECTOR_STYLES.LABEL_TEXT,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
