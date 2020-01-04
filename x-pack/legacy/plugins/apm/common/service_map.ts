@@ -7,7 +7,6 @@
 export interface ServiceConnectionNode {
   'service.name': string;
   'service.environment': string | null;
-  'agent.name': string;
 }
 export interface ExternalConnectionNode {
   'destination.address': string;
