@@ -90,6 +90,7 @@
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/image-diff/gm/debug": "^2.6.9",
     "**/react-dom": "^16.12.0",
+    "**/react": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
     "**/deepmerge": "^4.2.2",
     "**/serialize-javascript": "^2.1.1"
@@ -115,7 +116,7 @@
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
     "@elastic/apm-rum": "^4.6.0",
-    "@elastic/charts": "^14.0.0",
+    "@elastic/charts": "^16.0.2",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "17.3.1",

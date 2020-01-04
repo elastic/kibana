@@ -37,7 +37,7 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
 
     public async getVisualizationRenderingCount(dataTestSubj: string) {
       const chart = await testSubjects.find(dataTestSubj);
-      const visContainer = await chart.findByCssSelector('.echChart');
+      const visContainer = await chart.findByCssSelector('.echChartStatus');
       const renderingCount = await visContainer.getAttribute('data-ech-render-count');
       return Number(renderingCount);
     }
