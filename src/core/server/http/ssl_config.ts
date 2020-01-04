@@ -113,9 +113,7 @@ export class SslConfig {
 
     const addCAs = (ca: string[] | undefined) => {
       if (ca && ca.length) {
-        this.certificateAuthorities = this.certificateAuthorities
-          ? this.certificateAuthorities.concat(ca)
-          : ca;
+        this.certificateAuthorities = [...(this.certificateAuthorities || []), ...ca];
       }
     };
 

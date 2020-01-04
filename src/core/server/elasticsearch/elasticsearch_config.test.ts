@@ -257,6 +257,16 @@ describe('throws when config is invalid', () => {
     );
   });
 
+  it('throws if keystore does not contain a key or certificate', () => {
+    mockReadPkcs12Keystore.mockReturnValueOnce({});
+    const value = { ssl: { keystore: { path: 'some-path' } } };
+    expect(() =>
+      createElasticsearchConfig(config.schema.validate(value))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Did not find key or certificate in Elasticsearch keystore."`
+    );
+  });
+
   it('throws if truststore path is invalid', () => {
     const value = { ssl: { keystore: { path: '/invalid/truststore' } } };
     expect(() =>

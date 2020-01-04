@@ -56,9 +56,9 @@ export const readPkcs12Keystore = (path: string, password?: string): Pkcs12ReadR
   const p12Der = util.decode64(p12base64);
   const p12Asn1 = asn1.fromDer(p12Der);
   const p12 = pkcs12.pkcs12FromAsn1(p12Asn1, password);
-  const { ca, cert } = getCerts(p12);
-  const key = getKey(p12);
-  return { ca, cert, key };
+  const keyObj = getKey(p12);
+  const { ca, cert } = getCerts(p12, keyObj?.publicKeyData);
+  return { ca, cert, key: keyObj?.key };
 };
 
 /**
@@ -82,49 +82,87 @@ export const readPkcs12Truststore = (path: string, password?: string): string[] 
   const p12Der = util.decode64(p12base64);
   const p12Asn1 = asn1.fromDer(p12Der);
   const p12 = pkcs12.pkcs12FromAsn1(p12Asn1, password);
-  const { ca } = getCerts(p12, true);
+  const keyObj = getKey(p12);
+  const { ca } = getCerts(p12, keyObj?.publicKeyData);
   return ca;
 };
 
-const getCerts = (p12: pkcs12.Pkcs12Pfx, combineBags: boolean = false) => {
+// jsbn.BigInteger as described in type definition is wrong, it doesn't include `compareTo`
+interface BigInteger {
+  data: number[];
+  t: number;
+  s: number;
+  toString(): string;
+  compareTo(bn: BigInteger): number;
+}
+
+interface PublicKeyData {
+  n: BigInteger; // modulus
+  e: BigInteger; // public exponent
+}
+
+const doesPubKeyMatch = (a?: PublicKeyData, b?: PublicKeyData) => {
+  if (a && b) {
+    return a.n.compareTo(b.n) === 0 && a.e.compareTo(b.e) === 0;
+  }
+  return false;
+};
+
+const getCerts = (p12: pkcs12.Pkcs12Pfx, pubKey?: PublicKeyData) => {
   // OID 1.2.840.113549.1.12.10.1.3 (certBag)
   const bags = getBags(p12, pki.oids.certBag);
-  let ca: string[] | undefined;
-  let cert: string | undefined;
+  let ca;
+  let cert;
   if (bags && bags.length) {
-    if (!combineBags) {
-      const certBag = bags.shift();
-      if (certBag) cert = convertCert(certBag);
-    }
     if (bags.length) {
-      ca = bags.map(convertCert).filter(x => x !== undefined) as string[];
+      ca = bags.map(convertCert).filter(x => x !== undefined);
     }
+  }
+  if (ca) {
+    cert = ca.find(x => doesPubKeyMatch(x?.publicKeyData, pubKey))?.cert;
+    ca = ca.filter(x => !doesPubKeyMatch(x?.publicKeyData, pubKey)).map(x => x!.cert);
   }
   return { ca, cert };
 };
 
-const convertCert = (bag: pkcs12.Bag | undefined) => {
-  if (bag) {
-    const cert = bag.cert;
-    if (cert) {
-      const pem = pki.certificateToPem(cert);
-      return reformatPem(pem);
-    }
+export const convertCert = (bag: pkcs12.Bag) => {
+  const cert = bag.cert;
+  if (cert) {
+    const pem = pki.certificateToPem(cert);
+    const key = cert.publicKey as pki.rsa.PublicKey;
+    const publicKeyData: PublicKeyData = {
+      n: key.n as BigInteger,
+      e: key.e as BigInteger,
+    };
+    return {
+      cert: pem,
+      publicKeyData,
+    };
   }
   return undefined;
 };
 
 const getKey = (p12: pkcs12.Pkcs12Pfx) => {
   // OID 1.2.840.113549.1.12.10.1.1 (keyBag) || OID 1.2.840.113549.1.12.10.1.2 (pkcs8ShroudedKeyBag)
-  const bags = getBags(p12, pki.oids.keyBag) || getBags(p12, pki.oids.pkcs8ShroudedKeyBag);
+  const bags = [
+    ...(getBags(p12, pki.oids.keyBag) || []),
+    ...(getBags(p12, pki.oids.pkcs8ShroudedKeyBag) || []),
+  ];
   if (bags && bags.length) {
     if (bags.length > 1) {
       throw new Error(`Keystore contains multiple private keys.`);
     }
-    const key = bags[0].key;
+    const key = bags[0].key as pki.rsa.PrivateKey;
     if (key) {
       const pem = pki.privateKeyToPem(key);
-      return reformatPem(pem);
+      const publicKeyData: PublicKeyData = {
+        n: key.n as BigInteger,
+        e: key.e as BigInteger,
+      };
+      return {
+        key: pem,
+        publicKeyData,
+      };
     }
   }
   return undefined;
@@ -137,8 +175,4 @@ const getBags = (p12: pkcs12.Pkcs12Pfx, bagType: string) => {
     return bags;
   }
   return undefined;
-};
-
-const reformatPem = (pem: string) => {
-  return pem.replace(/\r\n/g, '\n').trim();
 };

@@ -88,8 +88,8 @@ including requests that are proxied for end users. Setting this to `true` when E
 lead to proxied requests for end users being executed as the identity tied to the configured certificate.
 
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Paths to a PEM-encoded X.509 certificate and its private key, respectively.
-When `xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required`, the certificate and key are used to prove
-Kibana's identity when it makes an outbound request to your Elasticsearch cluster.
+When `xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required` or `optional`, the certificate and key are used
+to prove Kibana's identity when it makes an outbound request to your Elasticsearch cluster.
 +
 --
 NOTE: These settings cannot be used in conjunction with `elasticsearch.ssl.keystore.path`.
@@ -104,10 +104,10 @@ be specified via `elasticsearch.ssl.keystore.path` and/or `elasticsearch.ssl.tru
 `elasticsearch.ssl.key`. This value is optional, as the key may not be encrypted.
 
 `elasticsearch.ssl.keystore.path:`:: Path to a PKCS #12 file that contains an X.509 certificate with its private key. When
-`xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required`, the certificate and key are used to prove Kibana's
-identity when it makes an outbound request to your Elasticsearch cluster. If the file contains any additional certificates, those will be
-used as a trusted certificate chain for your Elasticsearch cluster. This chain is used to establish trust when Kibana creates an SSL
-connection with your Elasticsearch cluster. In addition to this setting, trusted certificates may be specified via
+`xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required` or `optional`, the certificate and key are used to
+prove Kibana's identity when it makes an outbound request to your Elasticsearch cluster. If the file contains any additional certificates,
+those will be used as a trusted certificate chain for your Elasticsearch cluster. This chain is used to establish trust when Kibana creates
+an SSL connection with your Elasticsearch cluster. In addition to this setting, trusted certificates may be specified via
 `elasticsearch.ssl.certificateAuthorities` and/or `elasticsearch.ssl.truststore.path`.
 +
 --

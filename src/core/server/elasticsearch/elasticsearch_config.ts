@@ -232,23 +232,21 @@ export class ElasticsearchConfig {
     let certificateAuthorities: string[] | undefined;
     const addCAs = (ca: string[] | undefined) => {
       if (ca && ca.length) {
-        certificateAuthorities = certificateAuthorities ? certificateAuthorities.concat(ca) : ca;
+        certificateAuthorities = [...(certificateAuthorities || []), ...ca];
       }
     };
 
     if (rawConfig.ssl.keystore?.path) {
-      const { key: k, cert, ca } = readPkcs12Keystore(
+      const keystore = readPkcs12Keystore(
         rawConfig.ssl.keystore.path,
         rawConfig.ssl.keystore.password
       );
-      if (!k && !cert) {
-        log.warn(
-          `Did not find key or certificate in keystore; mutual TLS authentication is disabled.`
-        );
+      if (!keystore.key && !keystore.cert) {
+        throw new Error(`Did not find key or certificate in Elasticsearch keystore.`);
       }
-      key = k;
-      certificate = cert;
-      addCAs(ca);
+      key = keystore.key;
+      certificate = keystore.cert;
+      addCAs(keystore.ca);
     } else {
       if (rawConfig.ssl.key) {
         key = readFile(rawConfig.ssl.key);
