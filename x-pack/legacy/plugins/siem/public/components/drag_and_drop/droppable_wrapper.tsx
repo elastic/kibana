@@ -27,49 +27,53 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       background-color: ${props => props.theme.eui.euiFormBackgroundColor};
     }
   }
-
-  ${({ isDraggingOver, theme }) =>
-    isDraggingOver &&
-    css`
-      .drop-and-provider-timeline:hover {
-        background-color: ${rgba(theme.eui.euiColorSuccess, 0.3)};
-      }
-      > div.timeline-drop-area-empty {
-        color: ${theme.eui.euiColorSuccess};
-        background-color: ${rgba(theme.eui.euiColorSuccess, 0.2)};
-
-        & .euiTextColor--subdued {
-          color: ${theme.eui.euiColorSuccess};
-        }
-      }
-      > div.timeline-drop-area {
-        background-color: ${rgba(theme.eui.euiColorSuccess, 0.2)};
-        .provider-item-filter-container div:first-child {
-          /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-          transform: none !important;
-        }
-        .drop-and-provider-timeline {
-          display: block !important;
-          + div {
-            display: none;
+  ${props =>
+    props.isDraggingOver
+      ? css`
+          .drop-and-provider-timeline {
+            &:hover {
+              background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
+            }
           }
-        }
+          .drop-and-provider-timeline:hover {
+            background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
+          }
+          > div.timeline-drop-area-empty {
+            color: ${props.theme.eui.euiColorSuccess};
+            background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
-        & .euiFormHelpText {
-          color: ${theme.eui.euiColorSuccess};
-        }
-      }
-      .flyout-overlay {
-        .euiPanel {
-          background-color: ${theme.eui.euiColorLightShade};
-        }
-        + div {
-          /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-          display: none !important;
-        }
-      }
-    `}
+            & .euiTextColor--subdued {
+              color: ${props.theme.eui.euiColorSuccess};
+            }
+          }
+          > div.timeline-drop-area {
+            background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
+            .provider-item-filter-container div:first-child {
+              /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+              transform: none !important;
+            }
+            .drop-and-provider-timeline {
+              display: block !important;
+              + div {
+                display: none;
+              }
+            }
 
+            & .euiFormHelpText {
+              color: ${props.theme.eui.euiColorSuccess};
+            }
+          }
+          .flyout-overlay {
+            .euiPanel {
+              background-color: ${props.theme.eui.euiColorLightShade};
+            }
+            + div {
+              /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+              display: none !important;
+            }
+          }
+        `
+      : ''}
   > div.timeline-drop-area {
     .drop-and-provider-timeline {
       display: none;

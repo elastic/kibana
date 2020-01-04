@@ -49,6 +49,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
     transition: background ${({ theme }) => theme.eui.euiAnimSpeedFast} ease,
       color ${({ theme }) => theme.eui.euiAnimSpeedFast} ease;
   }
+
   ${({ isDragging }) =>
     !isDragging &&
     css`
@@ -57,6 +58,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         padding: 0 4px 0 8px;
         position: relative;
         z-index: ${({ theme }) => theme.eui.euiZLevel0} !important;
+
         &::before {
           background-image: linear-gradient(
               135deg,
@@ -89,6 +91,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
           width: 4px;
         }
       }
+
       &:hover {
         &,
         & .euiBadge,
@@ -97,9 +100,11 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
           cursor: grab;
         }
       }
+
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
         background-color: ${({ theme }) => theme.eui.euiColorLightShade};
+
         &::before {
           background-image: linear-gradient(
               135deg,
@@ -123,6 +128,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
             );
         }
       }
+
       &:hover,
       &:focus,
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
@@ -159,6 +165,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         }
       }
     `}
+
   ${({ isDragging }) =>
     isDragging &&
     css`

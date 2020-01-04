@@ -27,9 +27,7 @@ interface Props {
 }
 
 const Description = styled.span`
-   {
-    white-space: nowrap;
-  }
+  white-space: nowrap;
 `;
 
 const KpiDescription: React.FC<{
