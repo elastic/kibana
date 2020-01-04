@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../../chain.peg';
+import grammar from 'raw-loader!../../../../vis_type_timelion/public/chain.peg';
 import { SUGGESTION_TYPE, suggest } from '../timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../../../../vis_type_timelion/public/helpers/arg_value_suggestions';
 import {
