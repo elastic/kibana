@@ -21,8 +21,11 @@ import expect from '@kbn/expect';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../chain.peg';
 import { SUGGESTION_TYPE, suggest } from '../timelion_expression_input_helpers';
-import { getArgValueSuggestions } from '../../services/arg_value_suggestions';
-import { setIndexPatterns, setSavedObjectsClient } from '../../services/plugin_services';
+import { getArgValueSuggestions } from '../../../../vis_type_timelion/public/helpers/arg_value_suggestions';
+import {
+  setIndexPatterns,
+  setSavedObjectsClient,
+} from '../../../../vis_type_timelion/public/helpers/plugin_services';
 
 describe('Timelion expression suggestions', () => {
   setIndexPatterns({});

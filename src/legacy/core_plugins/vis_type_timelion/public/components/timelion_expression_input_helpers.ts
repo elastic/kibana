@@ -25,8 +25,8 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import grammar from 'raw-loader!../chain.peg';
 
 import { i18n } from '@kbn/i18n';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
-import { ArgValueSuggestions, FunctionArg, Location } from '../services/arg_value_suggestions';
+import { ITimelionFunction, TimelionFunctionArgs } from '../../../timelion/common/types';
+import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
 
 const Parser = PEG.generate(grammar);
 

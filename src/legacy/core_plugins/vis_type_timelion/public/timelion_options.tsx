@@ -22,7 +22,7 @@ import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { VisParams } from './timelion_vis_fn';
-import { TimelionInterval, TimelionExpressionInput } from '../../timelion/public/components';
+import { TimelionInterval, TimelionExpressionInput } from './components';
 
 function TimelionOptions({ stateParams, setValue, setValidity }: VisOptionsProps<VisParams>) {
   const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [

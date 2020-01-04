@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { TimelionFunctionArgs } from '../../common/types';
+import { TimelionFunctionArgs } from '../../../timelion/common/types';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 
 export interface Location {

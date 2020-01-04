@@ -24,7 +24,7 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditorSize } from './legacy_imports';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
-import { TimelionVisComponent } from './components/timelion_vis';
+import { TimelionVisComponent } from './components';
 import { TimelionOptions } from './timelion_options';
 import { VisParams } from './timelion_vis_fn';
 import { TimelionVisDependencies } from './plugin';

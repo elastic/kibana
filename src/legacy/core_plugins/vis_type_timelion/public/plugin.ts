@@ -34,10 +34,7 @@ import { setServices } from './kibana_services';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import {
-  setIndexPatterns,
-  setSavedObjectsClient,
-} from '../../timelion/public/services/plugin_services';
+import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_services';
 
 type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies>;
 

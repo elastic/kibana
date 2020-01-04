@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import React, { ReactElement } from 'react';
-
-import { Panel, PanelProps } from './components';
-
-export type IPanelWrapper = (props: PanelProps) => ReactElement;
-
-function getTimeChart(): [string, IPanelWrapper] {
-  return ['timechart', (props: PanelProps) => <Panel {...props} />];
-}
-
-export { getTimeChart };
+export * from './chart';
+export * from './panel';
+export * from './timelion_expression_input';
+export * from './timelion_expression_input_helpers';
+export * from './timelion_interval';
+export * from './timelion_vis';
