@@ -14,7 +14,7 @@ import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {
-  align?: string;
+  align?: 'left' | 'right' | 'center' | undefined;
   field: string;
   name: string;
   sortable?: boolean;

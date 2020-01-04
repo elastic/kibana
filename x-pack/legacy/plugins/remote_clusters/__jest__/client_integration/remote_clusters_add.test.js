@@ -7,6 +7,8 @@
 import { pageHelpers, nextTick, setupEnvironment } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.remoteClustersAdd;
 
 describe('Create Remote cluster', () => {
@@ -124,7 +126,7 @@ describe('Create Remote cluster', () => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
           expect(form.getErrorsMessages()).toContain(
             `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
-          ); // eslint-disable-line max-len
+          );
         };
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]

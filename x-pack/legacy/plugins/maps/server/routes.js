@@ -17,10 +17,12 @@ import {
   EMS_TILES_VECTOR_TILE_PATH,
   GIS_API_PATH,
   EMS_SPRITES_PATH,
+  INDEX_SETTINGS_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 
 import Boom from 'boom';
 
@@ -300,7 +302,7 @@ export function initRoutes(server, licenseUid) {
 
       const vectorStyle = await tmsService.getVectorStyleSheet();
       const sourceManifest = vectorStyle.sources[request.query.sourceId];
-      // eslint-disable-next-line max-len
+
       const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
       return {
         ...sourceManifest,
@@ -409,6 +411,33 @@ export function initRoutes(server, licenseUid) {
         const { count } = await callWithRequest(request, 'count', { index: query.index });
         return { count };
       } catch (error) {
+        return h.response().code(400);
+      }
+    },
+  });
+
+  server.route({
+    method: 'GET',
+    path: `/${INDEX_SETTINGS_API_PATH}`,
+    handler: async (request, h) => {
+      const { server, query } = request;
+
+      if (!query.indexPatternTitle) {
+        server.log('warning', `Required query parameter 'indexPatternTitle' not provided.`);
+        return h.response().code(400);
+      }
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      try {
+        const resp = await callWithRequest(request, 'indices.getSettings', {
+          index: query.indexPatternTitle,
+        });
+        return getIndexPatternSettings(resp);
+      } catch (error) {
+        server.log(
+          'warning',
+          `Cannot load index settings for index pattern '${query.indexPatternTitle}', error: ${error.message}.`
+        );
         return h.response().code(400);
       }
     },

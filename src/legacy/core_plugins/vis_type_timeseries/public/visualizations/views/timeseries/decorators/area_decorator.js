@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
-import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
+import { ScaleType, AreaSeries } from '@elastic/charts';
+import { getAreaStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
@@ -41,9 +41,9 @@ export function AreaSeriesDecorator({
   useDefaultGroupDomain,
   sortIndex,
 }) {
-  const id = getSpecId(seriesId);
-  const groupId = getGroupId(seriesGroupId);
-  const customSeriesColors = getSeriesColors(color, id);
+  const id = seriesId;
+  const groupId = seriesGroupId;
+  const customSeriesColors = [color];
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
 
   const seriesSettings = {

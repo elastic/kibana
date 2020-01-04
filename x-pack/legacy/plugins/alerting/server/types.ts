@@ -60,19 +60,26 @@ export interface RawAlertAction extends SavedObjectAttributes {
   params: AlertActionParams;
 }
 
+export interface IntervalSchedule extends SavedObjectAttributes {
+  interval: string;
+}
+
 export interface Alert {
   enabled: boolean;
   name: string;
   tags: string[];
   alertTypeId: string;
-  interval: string;
+  consumer: string;
+  schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Record<string, any>;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
@@ -83,14 +90,16 @@ export interface RawAlert extends SavedObjectAttributes {
   name: string;
   tags: string[];
   alertTypeId: string;
-  interval: string;
+  consumer: string;
+  schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  createdAt: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];

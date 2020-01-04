@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { emsRasterTileToEmsVectorTile } from './ems_raster_tile_to_ems_vector_tile';
 
 describe('emsRasterTileToEmsVectorTile', () => {

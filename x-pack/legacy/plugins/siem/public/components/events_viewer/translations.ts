@@ -14,6 +14,13 @@ export const EVENTS = i18n.translate('xpack.siem.eventsViewer.eventsLabel', {
   defaultMessage: 'Events',
 });
 
+export const LOADING_EVENTS = i18n.translate(
+  'xpack.siem.eventsViewer.footer.loadingEventsDataLabel',
+  {
+    defaultMessage: 'Loading Events',
+  }
+);
+
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.eventsViewer.unit', {
     values: { totalCount },

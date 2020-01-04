@@ -8,11 +8,9 @@ import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
-import { IndexPattern } from 'ui/index_patterns';
-
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 
@@ -61,7 +59,11 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
-          <DataRecognizer indexPattern={indexPattern} results={recognizerResults} />
+          <DataRecognizer
+            indexPattern={indexPattern}
+            savedSearch={null}
+            results={recognizerResults}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="l" />
       </div>

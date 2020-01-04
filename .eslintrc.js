@@ -189,13 +189,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
 
     /**
      * Files that require Apache 2.0 headers, settings
@@ -685,8 +678,6 @@ module.exports = {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'arrow-body-style': ['warn', 'as-needed'],
         complexity: 'warn',
         // This will be turned on after bug fixes are mostly completed
         // 'consistent-return': 'warn',
@@ -716,7 +707,6 @@ module.exports = {
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
-        'no-floating-decimal': 'error',
         'no-func-assign': 'error',
         'no-implicit-globals': 'error',
         'no-implied-eval': 'error',
@@ -757,8 +747,6 @@ module.exports = {
         'prefer-spread': 'error',
         // This style will be turned on after most bugs are fixed
         // 'prefer-template': 'warn',
-        // This style will be turned on after most bugs are fixed
-        // quotes: ['warn', 'single', { avoidEscape: true }],
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/forbid-dom-props': 'error',
@@ -794,13 +782,10 @@ module.exports = {
         'react/jsx-sort-default-props': 'error',
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
-        'react/jsx-tag-spacing': 'error',
         // might be introduced after the other warns are fixed
         'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
-        'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',
-        'template-curly-spacing': 'error',
         'vars-on-top': 'error',
       },
     },
@@ -835,8 +820,6 @@ module.exports = {
     {
       files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
       rules: {
-        'block-spacing': ['error', 'always'],
-        curly: ['error', 'all'],
         'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
         'no-else-return': 'error',
       },
@@ -853,7 +836,6 @@ module.exports = {
       files: ['x-pack/legacy/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
-        curly: ['error', 'all'],
 
         // module importing
         'import/order': [
@@ -871,7 +853,6 @@ module.exports = {
         'react/self-closing-comp': 'error',
         'react/sort-comp': 'error',
         'react/jsx-boolean-value': 'error',
-        'react/jsx-wrap-multilines': 'error',
         'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
           'error',
@@ -946,6 +927,18 @@ module.exports = {
       excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
       rules: {
         'import/no-default-export': 'error',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
   ],

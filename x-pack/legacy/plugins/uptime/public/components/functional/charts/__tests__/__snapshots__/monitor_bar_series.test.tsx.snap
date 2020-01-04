@@ -5,6 +5,7 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
   style={
     Object {
       "height": 50,
+      "maxWidth": "1200px",
       "width": "100%",
     }
   }
@@ -12,7 +13,7 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
   <Chart
     renderer="canvas"
   >
-    <inject-SettingsComponent-with-chartStore
+    <Connect(spec)
       xDomain={
         Object {
           "max": 1548700920000,
@@ -20,20 +21,17 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
         }
       }
     />
-    <inject-AxisSpec-with-chartStore
+    <Connect(spec)
       hide={true}
       id="bottom"
       position="bottom"
       tickFormat={[Function]}
     />
-    <inject-BarSeriesSpecComponent-with-chartStore
+    <Connect(spec)
       customSeriesColors={
-        Map {
-          Object {
-            "colorValues": Array [],
-            "specId": "downSeries",
-          } => "A danger color",
-        }
+        Array [
+          "A danger color",
+        ]
       }
       data={
         Array [

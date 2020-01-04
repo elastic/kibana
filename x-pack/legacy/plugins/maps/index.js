@@ -102,11 +102,11 @@ export function maps(kibana) {
       const pluginsSetup = {
         featuresPlugin: newPlatformPlugins.features,
         licensing: newPlatformPlugins.licensing,
+        home: newPlatformPlugins.home,
       };
 
       // legacy dependencies
       const __LEGACY = {
-        pluginRef: this,
         config: server.config,
         mapConfig() {
           return server.config().get('map');
@@ -114,14 +114,10 @@ export function maps(kibana) {
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          xpackMainPlugin: server.plugins.xpack_main,
         },
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
-        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        replacePanelInSampleDatasetDashboard: server.replacePanelInSampleDatasetDashboard,
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars,
       };
