@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`management app can mount and unmount 1`] = `
+<div>
+  <div>
+    Test App - Hello world!
+  </div>
+</div>
+`;
+
+exports[`management app can mount and unmount 2`] = `<div />`;

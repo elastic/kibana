@@ -32,7 +32,7 @@ export class ManagementApp {
   readonly id: string;
   readonly title: string;
   readonly basePath: string;
-  readonly order?: number;
+  readonly order: number;
   readonly mount: ManagementSectionMount;
   readonly sections: ManagementSection[];
   protected enabledStatus: boolean = true;
@@ -40,7 +40,7 @@ export class ManagementApp {
   private readonly getLegacyManagementSections: () => LegacyManagementSection;
 
   constructor(
-    { id, title, basePath, order, mount }: CreateManagementApp,
+    { id, title, basePath, order = 100, mount }: CreateManagementApp,
     sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSections: () => ManagementSection

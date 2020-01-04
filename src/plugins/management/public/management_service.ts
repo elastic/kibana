@@ -57,6 +57,18 @@ export class ManagementService {
     return this.sections;
   }
 
+  private getSectionsEnabled() {
+    return this.sections
+      .filter(section => section.getAppsEnabled().length > 0)
+      .sort((a, b) => a.order - b.order);
+  }
+
+  private sharedInterface = {
+    getSection: this.getSection.bind(this),
+    getSectionsEnabled: this.getSectionsEnabled.bind(this),
+    getAllSections: this.getAllSections.bind(this),
+  };
+
   public setup = (
     kibanaLegacy: KibanaLegacySetup,
     getLegacyManagement: () => LegacyManagementSection
@@ -74,14 +86,12 @@ export class ManagementService {
 
     return {
       register,
-      getSection: this.getSection.bind(this),
-      getAllSections: this.getAllSections.bind(this),
+      ...this.sharedInterface,
     };
   };
 
   public start = (navigateToApp: CoreStart['application']['navigateToApp']) => ({
-    getSection: this.getSection.bind(this),
-    getAllSections: this.getAllSections.bind(this),
     navigateToApp, // apps are currently registered as top level apps but this may change in the future
+    ...this.sharedInterface,
   });
 }

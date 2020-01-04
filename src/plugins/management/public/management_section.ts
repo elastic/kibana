@@ -27,7 +27,7 @@ export class ManagementSection {
   public readonly id: string = '';
   public readonly title: string = '';
   public readonly apps: ManagementApp[] = [];
-  public readonly order?: number;
+  public readonly order: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
   private readonly sections: ManagementSection[];
@@ -35,23 +35,23 @@ export class ManagementSection {
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
 
   constructor(
-    section: CreateSection,
+    { id, title, order = 100, euiIconType, icon }: CreateSection,
     sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSection: () => ManagementSection
   ) {
-    this.id = section.id;
-    this.title = section.title;
-    this.order = section.order;
-    this.euiIconType = section.euiIconType;
-    this.icon = section.icon;
+    this.id = id;
+    this.title = title;
+    this.order = order;
+    this.euiIconType = euiIconType;
+    this.icon = icon;
     this.sections = sections;
     this.registerLegacyApp = registerLegacyApp;
     this.getLegacyManagementSection = getLegacyManagementSection;
   }
 
   registerApp({ id, title, order, mount }: RegisterManagementAppArgs) {
-    if (this.apps.find(app => app.id === id)) {
+    if (this.getApp(id)) {
       throw new Error(`Management app already registered - id: ${id}, title: ${title}`);
     }
 
@@ -64,7 +64,10 @@ export class ManagementSection {
     this.apps.push(app);
     return app;
   }
+  getApp(id: ManagementApp['id']) {
+    return this.apps.find(app => app.id === id);
+  }
   getAppsEnabled() {
-    return this.apps.filter(app => app.enabled);
+    return this.apps.filter(app => app.enabled).sort((a, b) => a.order - b.order);
   }
 }
