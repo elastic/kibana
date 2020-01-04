@@ -157,7 +157,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               ...schema.index,
               labelAppend: !localUseIndicesConfig ? (
                 <EuiButtonEmpty size="xs" onClick={handleResetIndices}>
-                  {i18n.RESET_DEFAULT_INDEX}
+                  <small>{i18n.RESET_DEFAULT_INDEX}</small>
                 </EuiButtonEmpty>
               ) : null,
             }}
@@ -177,7 +177,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               ...schema.queryBar,
               labelAppend: (
                 <EuiButtonEmpty size="xs" onClick={handleOpenTimelineSearch}>
-                  {i18n.IMPORT_TIMELINE_QUERY}
+                  <small>{i18n.IMPORT_TIMELINE_QUERY}</small>
                 </EuiButtonEmpty>
               ),
             }}

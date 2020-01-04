@@ -9,6 +9,7 @@ import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { SearchTimelineSuperSelect } from '../../../../../components/timeline/search_super_select';
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
 import { AddItem } from '../add_item_form';
@@ -141,6 +142,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               },
             }}
           />
+          <SearchTimelineSuperSelect />
           <UseField
             path="references"
             component={AddItem}
