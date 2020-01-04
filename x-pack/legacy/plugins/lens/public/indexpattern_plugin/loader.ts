@@ -6,11 +6,7 @@
 
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  HttpServiceBase,
-} from 'src/core/public';
+import { SavedObjectsClientContract, SavedObjectAttributes, HttpSetup } from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { StateSetter } from '../types';
 import {
@@ -233,7 +229,7 @@ export async function syncExistingFields({
 }: {
   dateRange: DateRange;
   indexPatterns: Array<{ title: string; timeFieldName?: string | null }>;
-  fetchJson: HttpServiceBase['get'];
+  fetchJson: HttpSetup['get'];
   setState: SetState;
 }) {
   const emptinessInfo = await Promise.all(

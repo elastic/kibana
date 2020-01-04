@@ -19,8 +19,6 @@ import { createStore, networkModel, State } from '../../../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-
 jest.mock('../../../search_bar', () => ({
   siemFilterManager: {
     addFilters: jest.fn(),

@@ -25,13 +25,14 @@ import {
   legacyChrome,
   npSetup,
   npStart,
-  SavedObjectRegistryProvider,
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { start as navigation } from '../../../navigation/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+
+export * from './np_ready/visualize_constants';
+export { showNewVisModal } from './np_ready/wizard';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -43,13 +44,10 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const Private = injector.get<IPrivate>('Private');
 
   const editorTypes = Private(VisEditorTypesRegistryProvider);
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
 
   return {
     legacyChrome,
     editorTypes,
-    savedObjectRegistry,
-    savedVisualizations: injector.get('savedVisualizations'),
   };
 }
 
@@ -64,7 +62,8 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   instance.start(npStart.core, {
     ...npStart.plugins,
     embeddables,
-    navigation,
     visualizations,
   });
 })();
+
+export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';

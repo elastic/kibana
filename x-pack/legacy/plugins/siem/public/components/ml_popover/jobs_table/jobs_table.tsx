@@ -83,7 +83,7 @@ const getJobsTableColumns = (
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
-  },
+  } as const,
 ];
 
 const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>

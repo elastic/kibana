@@ -189,13 +189,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
 
     /**
      * Files that require Apache 2.0 headers, settings

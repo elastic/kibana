@@ -26,6 +26,7 @@ export const APP_ICON = 'gisApp';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
@@ -59,6 +60,8 @@ export const FIELD_ORIGIN = {
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
 export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
+export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
+export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
@@ -67,7 +70,9 @@ export const MAX_ZOOM = 24;
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-export const ES_SIZE_LIMIT = 10000;
+export const DEFAULT_MAX_RESULT_WINDOW = 10000;
+export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';

@@ -54,7 +54,7 @@ export const security = kibana =>
     },
 
     uiExports: {
-      chromeNavControls: ['plugins/security/views/nav_control'],
+      chromeNavControls: [],
       managementSections: ['plugins/security/views/management'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       apps: [
@@ -88,6 +88,7 @@ export const security = kibana =>
       hacks: [
         'plugins/security/hacks/on_session_timeout',
         'plugins/security/hacks/on_unauthorized_response',
+        'plugins/security/hacks/register_account_management_app',
       ],
       home: ['plugins/security/register_feature'],
       injectDefaultVars: server => {
@@ -129,7 +130,6 @@ export const security = kibana =>
       const config = server.config();
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
         isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
           server.plugins.kibana.systemApi

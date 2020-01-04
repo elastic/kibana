@@ -23,7 +23,7 @@ import { AggConfig, Vis } from 'ui/vis';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
-import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
+import { IFieldFormatId, FieldFormat, ContentType } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
@@ -129,42 +129,23 @@ export const getFormat: FormatFactory = mapping => {
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
-    const params = mapping.params;
+    const { params } = mapping;
+    const convert = (val: string, type: ContentType) => {
+      const format = getFieldFormat(params.id, mapping.params);
+
+      if (val === '__other__') {
+        return params.otherBucketLabel;
+      }
+      if (val === '__missing__') {
+        return params.missingBucketLabel;
+      }
+
+      return format.convert(val, type);
+    };
+
     return {
-      getConverterFor: (type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        return (val: string) => {
-          if (val === '__other__') {
-            return params.otherBucketLabel;
-          }
-          if (val === '__missing__') {
-            return params.missingBucketLabel;
-          }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: npStart.core.http.basePath,
-          };
-          // @ts-ignore
-          return format.convert(val, undefined, undefined, parsedUrl);
-        };
-      },
-      convert: (val: string, type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        if (val === '__other__') {
-          return params.otherBucketLabel;
-        }
-        if (val === '__missing__') {
-          return params.missingBucketLabel;
-        }
-        const parsedUrl = {
-          origin: window.location.origin,
-          pathname: window.location.pathname,
-          basePath: npStart.core.http.basePath,
-        };
-        // @ts-ignore
-        return format.convert(val, type, undefined, parsedUrl);
-      },
+      convert,
+      getConverterFor: (type: ContentType) => (val: string) => convert(val, type),
     } as FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);

@@ -120,7 +120,7 @@ export const getCategoryColumns = ({
     name: '',
     sortable: true,
     truncateText: false,
-    render: (categoryId: string) => (
+    render: (categoryId: string, _: { categoryId: string }) => (
       <LinkContainer>
         <EuiLink data-test-subj="category-link" onClick={() => onCategorySelected(categoryId)}>
           <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">

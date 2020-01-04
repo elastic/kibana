@@ -96,7 +96,7 @@ export const CALCULATE_DURATION_UNTIL = 'until';
 /**
  * In order to show ML Jobs tab in the Elasticsearch section / tab navigation, license must be supported
  */
-export const ML_SUPPORTED_LICENSES = ['trial', 'platinum'];
+export const ML_SUPPORTED_LICENSES = ['trial', 'platinum', 'enterprise'];
 
 /**
  * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
