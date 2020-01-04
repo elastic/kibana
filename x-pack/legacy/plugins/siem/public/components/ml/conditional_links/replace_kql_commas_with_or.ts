@@ -20,7 +20,7 @@ export const replacement = (match: string, p1: string, p2: string) => {
 };
 
 export const replaceKqlCommasWithOrUsingRegex = (expression: string) => {
-  const myRegexp = /([\w\.\-\[\]]+)\s*:\s*"(([\w\.\-\(\)\[\]]+,[\w\.\-\(\)\[\]]+){1,})"/g;
+  const myRegexp = /([\w.\-[\]]+)\s*:\s*"(([\w.\-()[\]]+,[\w.\-()[\]]+){1,})"/g;
   return expression.replace(myRegexp, replacement);
 };
 

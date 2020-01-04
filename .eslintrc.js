@@ -733,8 +733,7 @@ module.exports = {
         // 'no-useless-catch': 'warn',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-escape': 'warn',
+        'no-useless-escape': 'error',
         'no-useless-rename': 'error',
         // This will be turned on after bug fixes are mostly complete
         // 'no-useless-return': 'warn',
