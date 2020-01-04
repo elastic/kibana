@@ -20,7 +20,8 @@ import {
   SPAN_TYPE,
   SPAN_SUBTYPE,
   DESTINATION_ADDRESS,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
 
 const MAX_TRACES_TO_INSPECT = 1000;
@@ -48,7 +49,30 @@ export async function getTraceSampleIds({
   const query = {
     bool: {
       filter: [
-        { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
+        {
+          bool: {
+            should: [
+              { term: { [PROCESSOR_EVENT]: 'span' } },
+              {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        [PROCESSOR_EVENT]: 'transaction'
+                      }
+                    },
+                    {
+                      term: {
+                        [TRANSACTION_SAMPLED]: true
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        },
         rangeQuery,
         ...uiFiltersES
       ] as ESFilter[]
@@ -116,17 +140,14 @@ export async function getTraceSampleIds({
             ]
           },
           aggs: {
-            trace_id_samples: {
-              diversified_sampler: {
-                shard_size: 10,
-                field: TRACE_ID
-              },
-              aggs: {
-                sample_documents: {
-                  top_hits: {
-                    size: 10,
-                    _source: ['trace.id']
-                  }
+            sample_documents: {
+              terms: {
+                field: TRACE_ID,
+                execution_hint: 'map' as const,
+                // remove bias towards large traces by sorting on trace.id
+                // which will be random-esque
+                order: {
+                  _key: 'desc' as const
                 }
               }
             }
@@ -158,8 +179,8 @@ export async function getTraceSampleIds({
   // is queried
   const traceIdsWithPriority =
     tracesSampleResponse.aggregations?.connections.buckets.flatMap(bucket =>
-      bucket.trace_id_samples.sample_documents.hits.hits.map((hit, index) => ({
-        traceId: hit._source.trace.id,
+      bucket.sample_documents.buckets.map((sampleDocBucket, index) => ({
+        traceId: sampleDocBucket.key as string,
         priority: index
       }))
     ) || [];

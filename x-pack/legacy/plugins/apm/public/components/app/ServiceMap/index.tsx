@@ -163,20 +163,28 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
     return [
       ...(Object.values(nodesById) as ConnectionNode[]).map(node => {
-        const href =
-          'service.name' in node
-            ? getAPMHref(
-                `/services/${node['service.name']}/service-map`,
+        let data = {};
+
+        if ('service.name' in node) {
+          const nodeService = services.find(
+            service => service['service.name'] === node['service.name']
+          );
+          if (nodeService) {
+            data = {
+              href: getAPMHref(
+                `/services/${nodeService['service.name']}/service-map`,
                 search
-              )
-            : undefined;
+              ),
+              agentName: nodeService['agent.name']
+            };
+          }
+        }
 
         return {
           group: 'nodes' as const,
           data: {
             id: getConnectionNodeId(node, destMap),
-            href,
-            ...('agent.name' in node ? { agentName: node['agent.name'] } : {})
+            ...data
           }
         };
       }),
