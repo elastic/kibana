@@ -110,37 +110,5 @@ describe('ColumnHeaders', () => {
         ).toContain(h.id);
       });
     });
-
-    test('it disables dragging during a column resize', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            isSelectAllChecked={false}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
-            showEventsSelect={false}
-            showSelectAllCheckbox={false}
-            sort={sort}
-            timelineId={'test'}
-            toggleColumn={jest.fn()}
-          />
-        </TestProviders>
-      );
-
-      defaultHeaders.forEach(h => {
-        expect(
-          wrapper
-            .find('[data-test-subj="draggable"]')
-            .first()
-            .prop('isDragDisabled')
-        ).toBe(true);
-      });
-    });
   });
 });
