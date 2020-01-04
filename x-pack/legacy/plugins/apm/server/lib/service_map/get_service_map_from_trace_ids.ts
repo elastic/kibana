@@ -57,7 +57,8 @@ export async function getServiceMapFromTraceIds({
                   'destination.address',
                   'trace.id',
                   'processor.event',
-                  'span.type'
+                  'span.type',
+                  'agent.name'
                 };
                 state.fieldsToCopy = fieldsToCopy;`
             },
@@ -101,6 +102,7 @@ export async function getServiceMapFromTraceIds({
                 def service = new HashMap();
                 service['service.name'] = event['service.name'];
                 service['service.environment'] = event['service.environment'];
+                service['agent.name'] = event['agent.name'];
 
                 def basePath = new ArrayList();
 

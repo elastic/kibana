@@ -166,18 +166,13 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         let data = {};
 
         if ('service.name' in node) {
-          const nodeService = services.find(
-            service => service['service.name'] === node['service.name']
-          );
-          if (nodeService) {
-            data = {
-              href: getAPMHref(
-                `/services/${nodeService['service.name']}/service-map`,
-                search
-              ),
-              agentName: nodeService['agent.name']
-            };
-          }
+          data = {
+            href: getAPMHref(
+              `/services/${node['service.name']}/service-map`,
+              search
+            ),
+            agentName: node['agent.name'] || node['agent.name']
+          };
         }
 
         return {
