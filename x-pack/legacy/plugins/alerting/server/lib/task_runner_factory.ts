@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { RunContext } from '../../../task_manager';
+import { RunContext } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
