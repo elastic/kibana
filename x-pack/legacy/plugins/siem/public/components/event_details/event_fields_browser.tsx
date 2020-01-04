@@ -6,7 +6,7 @@
 
 import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';

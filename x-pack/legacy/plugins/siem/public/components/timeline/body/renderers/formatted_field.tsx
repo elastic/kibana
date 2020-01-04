@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { Bytes, BYTES_FORMAT } from '../../../bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';

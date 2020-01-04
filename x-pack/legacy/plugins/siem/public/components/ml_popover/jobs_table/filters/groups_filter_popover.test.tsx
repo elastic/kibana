@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { GroupsFilterPopoverComponent } from './groups_filter_popover';
 import { mockSiemJobs } from '../../__mocks__/api';
 import { SiemJob } from '../../types';

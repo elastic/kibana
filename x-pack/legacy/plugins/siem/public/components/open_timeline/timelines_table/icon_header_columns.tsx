@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
