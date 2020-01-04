@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { coreMock } from '../../../core/public/mocks';
 
 import { ManagementApp } from './management_app';
 // @ts-ignore
@@ -31,7 +32,7 @@ function createTestApp() {
       id: 'test-app',
       title: 'Test App',
       basePath: '',
-      mount(context, params) {
+      mount(params) {
         params.setBreadcrumbs([{ text: 'Test App' }]);
         ReactDOM.render(<div>Test App - Hello world!</div>, params.element);
 
@@ -42,7 +43,8 @@ function createTestApp() {
     },
     [],
     jest.fn(),
-    () => legacySection
+    () => legacySection,
+    coreMock.createSetup().getStartServices
   );
 }
 
@@ -50,9 +52,7 @@ test('Management app can mount and unmount', async () => {
   const testApp = createTestApp();
   const container = document.createElement('div');
   document.body.appendChild(container);
-  // need to use getStartServices instead
-  // @ts-ignore
-  const unmount = testApp.mount({ core: {} }, { element: container, setBreadcrumbs: jest.fn() });
+  const unmount = testApp.mount({ element: container, basePath: '', setBreadcrumbs: jest.fn() });
   expect(container).toMatchSnapshot();
   (await unmount)();
   expect(container).toMatchSnapshot();

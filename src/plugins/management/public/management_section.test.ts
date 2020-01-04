@@ -20,6 +20,7 @@
 import { ManagementSection } from './management_section';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
+import { coreMock } from '../../../core/public/mocks';
 
 function createSection(registerLegacyApp: () => void) {
   const legacySection = new LegacyManagementSection('legacy');
@@ -31,7 +32,8 @@ function createSection(registerLegacyApp: () => void) {
     testSectionConfig,
     managementSections,
     registerLegacyApp,
-    getLegacySection
+    getLegacySection,
+    coreMock.createSetup().getStartServices
   );
 }
 

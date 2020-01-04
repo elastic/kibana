@@ -18,11 +18,16 @@
  */
 
 import { ManagementService } from './management_service';
+import { coreMock } from '../../../core/public/mocks';
 
 const mockKibanaLegacy = { registerLegacyApp: () => {}, forwardApp: () => {} };
 
 test('Provides default sections', () => {
-  const service = new ManagementService().setup(mockKibanaLegacy, () => {});
+  const service = new ManagementService().setup(
+    mockKibanaLegacy,
+    () => {},
+    coreMock.createSetup().getStartServices
+  );
   expect(service.getAllSections().length).toEqual(3);
   expect(service.getSection('kibana')).not.toBeUndefined();
   expect(service.getSection('logstash')).not.toBeUndefined();
@@ -30,7 +35,11 @@ test('Provides default sections', () => {
 });
 
 test('Register section, enable and disable', () => {
-  const service = new ManagementService().setup(mockKibanaLegacy, () => {});
+  const service = new ManagementService().setup(
+    mockKibanaLegacy,
+    () => {},
+    coreMock.createSetup().getStartServices
+  );
   const testSection = service.register({ id: 'test-section', title: 'Test Section' });
   expect(service.getSection('test-section')).not.toBeUndefined();
 

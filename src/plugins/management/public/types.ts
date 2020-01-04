@@ -18,7 +18,6 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { AppMountContext } from 'kibana/public';
 import { ManagementApp } from './management_app';
 import { ManagementSection } from './management_section';
 import { ChromeBreadcrumb, ApplicationStart } from '../../../core/public/';
@@ -72,7 +71,6 @@ interface ManagementAppMountParams {
 }
 
 export type ManagementSectionMount = (
-  context: AppMountContext,
   params: ManagementAppMountParams
 ) => Unmount | Promise<Unmount>;
 

@@ -19,6 +19,7 @@
 
 import { CreateSection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { CoreSetup } from '../../../core/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { ManagementApp } from './management_app';
@@ -33,12 +34,14 @@ export class ManagementSection {
   private readonly sections: ManagementSection[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
+  private readonly getStartServices: CoreSetup['getStartServices'];
 
   constructor(
     { id, title, order = 100, euiIconType, icon }: CreateSection,
     sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
-    getLegacyManagementSection: () => ManagementSection
+    getLegacyManagementSection: () => ManagementSection,
+    getStartServices: CoreSetup['getStartServices']
   ) {
     this.id = id;
     this.title = title;
@@ -48,6 +51,7 @@ export class ManagementSection {
     this.sections = sections;
     this.registerLegacyApp = registerLegacyApp;
     this.getLegacyManagementSection = getLegacyManagementSection;
+    this.getStartServices = getStartServices;
   }
 
   registerApp({ id, title, order, mount }: RegisterManagementAppArgs) {
@@ -59,7 +63,8 @@ export class ManagementSection {
       { id, title, order, mount, basePath: `/management/${this.id}/${id}` },
       this.sections,
       this.registerLegacyApp,
-      this.getLegacyManagementSection
+      this.getLegacyManagementSection,
+      this.getStartServices
     );
     this.apps.push(app);
     return app;

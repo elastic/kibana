@@ -26,7 +26,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { LegacyManagementSection } from './legacy';
 import { ManagementChrome } from './management_chrome';
 import { ManagementSection } from './management_section';
-import { ChromeBreadcrumb } from '../../../core/public/';
+import { ChromeBreadcrumb, CoreSetup } from '../../../core/public/';
 
 export class ManagementApp {
   readonly id: string;
@@ -34,33 +34,29 @@ export class ManagementApp {
   readonly basePath: string;
   readonly order: number;
   readonly mount: ManagementSectionMount;
-  readonly sections: ManagementSection[];
   protected enabledStatus: boolean = true;
-  private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
-  private readonly getLegacyManagementSections: () => LegacyManagementSection;
 
   constructor(
     { id, title, basePath, order = 100, mount }: CreateManagementApp,
     sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
-    getLegacyManagementSections: () => ManagementSection
+    getLegacyManagementSections: () => LegacyManagementSection,
+    getStartServices: CoreSetup['getStartServices']
   ) {
     this.id = id;
     this.title = title;
     this.basePath = basePath;
     this.order = order;
     this.mount = mount;
-    this.sections = sections;
-    this.registerLegacyApp = registerLegacyApp;
-    this.getLegacyManagementSections = getLegacyManagementSections;
 
-    this.registerLegacyApp({
+    registerLegacyApp({
       id: basePath.substr(1), // get rid of initial slash
       title,
-      mount: async (appMountContext, params) => {
+      mount: async ({}, params) => {
         let appUnmount: Unmount;
-        function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
-          appMountContext.core.chrome.setBreadcrumbs([
+        async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
+          const [coreStart] = await getStartServices();
+          coreStart.chrome.setBreadcrumbs([
             {
               text: i18n.translate('management.breadcrumb', {
                 defaultMessage: 'Management',
@@ -73,11 +69,11 @@ export class ManagementApp {
 
         ReactDOM.render(
           <ManagementChrome
-            sections={this.sections}
+            sections={sections}
             selectedId={id}
-            legacySections={this.getLegacyManagementSections().items}
+            legacySections={getLegacyManagementSections().items}
             mountedCallback={async element => {
-              appUnmount = await mount(appMountContext, {
+              appUnmount = await mount({
                 basePath,
                 element,
                 setBreadcrumbs,

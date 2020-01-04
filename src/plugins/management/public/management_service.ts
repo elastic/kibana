@@ -22,7 +22,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { CreateSection } from './types';
-import { CoreStart } from '../../../core/public';
+import { CoreSetup, CoreStart } from '../../../core/public';
 
 export class ManagementService {
   private sections: ManagementSection[] = [];
@@ -32,7 +32,8 @@ export class ManagementService {
 
   private register(
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
-    getLegacyManagement: () => LegacyManagementSection
+    getLegacyManagement: () => LegacyManagementSection,
+    getStartServices: CoreSetup['getStartServices']
   ) {
     return (section: CreateSection) => {
       if (this.getSection(section.id)) {
@@ -43,7 +44,8 @@ export class ManagementService {
         section,
         this.sections,
         registerLegacyApp,
-        getLegacyManagement
+        getLegacyManagement,
+        getStartServices
       );
       this.sections.push(newSection);
       return newSection;
@@ -71,9 +73,14 @@ export class ManagementService {
 
   public setup = (
     kibanaLegacy: KibanaLegacySetup,
-    getLegacyManagement: () => LegacyManagementSection
+    getLegacyManagement: () => LegacyManagementSection,
+    getStartServices: CoreSetup['getStartServices']
   ) => {
-    const register = this.register.bind(this)(kibanaLegacy.registerLegacyApp, getLegacyManagement);
+    const register = this.register.bind(this)(
+      kibanaLegacy.registerLegacyApp,
+      getLegacyManagement,
+      getStartServices
+    );
 
     register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
     register({ id: 'logstash', title: 'Logstash', order: 30, euiIconType: 'logoLogstash' });
