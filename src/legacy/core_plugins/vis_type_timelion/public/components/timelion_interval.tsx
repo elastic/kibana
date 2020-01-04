@@ -21,8 +21,8 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useValidation } from 'ui/vis/editors/default/controls/agg_utils';
 import { isValidEsInterval } from '../../../../core_plugins/data/common';
+import { useValidation } from '../legacy_imports';
 
 const intervalOptions = [
   {

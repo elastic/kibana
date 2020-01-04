@@ -25,9 +25,10 @@ import {
   IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
-import { PluginsStart } from 'ui/new_platform/new_platform';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
+
+import { PluginsStart } from './legacy_imports';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimeChart, IPanelWrapper } from './timechart';
 import { setServices } from './kibana_services';

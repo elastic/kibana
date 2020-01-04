@@ -18,9 +18,12 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
+export { PluginsStart } from 'ui/new_platform/new_platform';
 
 // @ts-ignore
 export { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { VisParams, Vis } from 'ui/vis';
+export { VisOptionsProps } from 'ui/vis/editors/default';
+export { useValidation } from 'ui/vis/editors/default/controls/agg_utils';
