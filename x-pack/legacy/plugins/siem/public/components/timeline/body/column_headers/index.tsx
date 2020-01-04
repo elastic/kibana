@@ -10,12 +10,7 @@ import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';
-import {
-  DRAG_TYPE_FIELD,
-  droppableTimelineColumnsPrefix,
-  getDraggableFieldId,
-} from '../../../drag_and_drop/helpers';
-import { DraggableFieldBadge } from '../../../draggables/field_badge';
+import { DRAG_TYPE_FIELD, droppableTimelineColumnsPrefix } from '../../../drag_and_drop/helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
