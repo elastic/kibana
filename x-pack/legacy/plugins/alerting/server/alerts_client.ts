@@ -5,32 +5,50 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+  SavedObject,
+} from 'src/core/server';
+import {
+  Alert,
+  RawAlert,
+  AlertTypeRegistry,
+  AlertAction,
+  AlertType,
+  IntervalSchedule,
+} from './types';
 import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
-import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
+import {
+  InvalidateAPIKeyParams,
+  CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
+  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+} from '../../../../plugins/security/server';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
 
-interface FailedCreateAPIKeyResult {
-  created: false;
-}
-interface SuccessCreateAPIKeyResult {
-  created: true;
-  result: SecurityPluginCreateAPIKeyResult;
-}
-export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
+export type CreateAPIKeyResult =
+  | { apiKeysEnabled: false }
+  | { apiKeysEnabled: true; result: SecurityPluginCreateAPIKeyResult };
+export type InvalidateAPIKeyResult =
+  | { apiKeysEnabled: false }
+  | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
 
 interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceId?: string;
+  namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
+  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
 }
 
 export interface FindOptions {
@@ -65,6 +83,8 @@ interface CreateOptions {
       keyof Alert,
       | 'createdBy'
       | 'updatedBy'
+      | 'createdAt'
+      | 'updatedAt'
       | 'apiKey'
       | 'apiKeyOwner'
       | 'muteAll'
@@ -82,7 +102,7 @@ interface UpdateOptions {
   data: {
     name: string;
     tags: string[];
-    interval: string;
+    schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Record<string, any>;
   };
@@ -92,10 +112,15 @@ export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
+  private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
+  private readonly invalidateAPIKey: (
+    params: InvalidateAPIKeyParams
+  ) => Promise<InvalidateAPIKeyResult>;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
 
   constructor({
     alertTypeRegistry,
@@ -103,23 +128,28 @@ export class AlertsClient {
     taskManager,
     logger,
     spaceId,
+    namespace,
     getUserName,
     createAPIKey,
+    invalidateAPIKey,
+    encryptedSavedObjectsPlugin,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
     this.spaceId = spaceId;
+    this.namespace = namespace;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.createAPIKey = createAPIKey;
+    this.invalidateAPIKey = invalidateAPIKey;
+    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
   }
 
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
-    const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
 
     this.validateActions(alertType, data.actions);
@@ -127,13 +157,11 @@ export class AlertsClient {
     const { references, actions } = await this.denormalizeActions(data.actions);
     const rawAlert: RawAlert = {
       ...data,
+      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
       actions,
       createdBy: username,
       updatedBy: username,
-      apiKeyOwner: apiKey.created && username ? username : undefined,
-      apiKey: apiKey.created
-        ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-        : undefined,
+      createdAt: new Date().toISOString(),
       params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
@@ -145,11 +173,7 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(
-          createdAlert.id,
-          rawAlert.alertTypeId,
-          rawAlert.interval
-        );
+        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -167,12 +191,17 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw(
+      createdAlert.id,
+      createdAlert.attributes,
+      createdAlert.updated_at,
+      references
+    );
   }
 
   public async get({ id }: { id: string }) {
     const result = await this.savedObjectsClient.get('alert', id);
-    return this.getAlertFromRaw(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
   public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
@@ -182,7 +211,7 @@ export class AlertsClient {
     });
 
     const data = results.saved_objects.map(result =>
-      this.getAlertFromRaw(result.id, result.attributes, result.references)
+      this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references)
     );
 
     return {
@@ -194,18 +223,42 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const alertSavedObject = await this.savedObjectsClient.get('alert', id);
+    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, { namespace: this.namespace });
     const removeResult = await this.savedObjectsClient.delete('alert', id);
-    if (alertSavedObject.attributes.scheduledTaskId) {
-      await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    if (decryptedAlertSavedObject.attributes.scheduledTaskId) {
+      await this.taskManager.remove(decryptedAlertSavedObject.attributes.scheduledTaskId);
     }
+    await this.invalidateApiKey({ apiKey: decryptedAlertSavedObject.attributes.apiKey });
     return removeResult;
   }
 
   public async update({ id, data }: UpdateOptions) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, { namespace: this.namespace });
+    const updateResult = await this.updateAlert({ id, data }, decryptedAlertSavedObject);
+
+    if (
+      updateResult.scheduledTaskId &&
+      !isEqual(decryptedAlertSavedObject.attributes.schedule, updateResult.schedule)
+    ) {
+      this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
+        this.logger.error(
+          `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+        );
+      });
+    }
+
+    return updateResult;
+  }
+
+  private async updateAlert(
+    { id, data }: UpdateOptions,
+    { attributes, version }: SavedObject<RawAlert>
+  ) {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
-    const apiKey = await this.createAPIKey();
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
@@ -213,57 +266,101 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const updatedObject = await this.savedObjectsClient.update(
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+
+    const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',
       id,
       {
         ...attributes,
         ...data,
+        ...apiKeyAttributes,
         params: validatedAlertTypeParams,
         actions,
         updatedBy: username,
-        apiKeyOwner: apiKey.created ? username : null,
-        apiKey: apiKey.created
-          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-          : null,
       },
       {
         version,
         references,
       }
     );
-    return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+
+    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+
+    return this.getAlertFromRaw(
+      id,
+      updatedObject.attributes,
+      updatedObject.updated_at,
+      updatedObject.references
+    );
+  }
+
+  private apiKeyAsAlertAttributes(
+    apiKey: CreateAPIKeyResult,
+    username: string | null
+  ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
+    return apiKey.apiKeysEnabled
+      ? {
+          apiKeyOwner: username,
+          apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+        }
+      : {
+          apiKeyOwner: null,
+          apiKey: null,
+        };
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const { version, attributes } = await this.savedObjectsClient.get('alert', id);
+    const {
+      version,
+      attributes,
+    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
 
-    const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
       'alert',
       id,
       {
         ...attributes,
+        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
         updatedBy: username,
-        apiKeyOwner: apiKey.created ? username : null,
-        apiKey: apiKey.created
-          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-          : null,
       },
       { version }
     );
+
+    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+  }
+
+  private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
+    if (!apiKey) {
+      return;
+    }
+
+    try {
+      const apiKeyId = Buffer.from(apiKey, 'base64')
+        .toString()
+        .split(':')[0];
+      const response = await this.invalidateAPIKey({ id: apiKeyId });
+      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
+      }
+    } catch (e) {
+      this.logger.error(`Failed to invalidate API Key: ${e.message}`);
+    }
   }
 
   public async enable({ id }: { id: string }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const {
+      version,
+      attributes,
+    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
+
     if (attributes.enabled === false) {
-      const apiKey = await this.createAPIKey();
-      const scheduledTask = await this.scheduleAlert(
-        id,
-        attributes.alertTypeId,
-        attributes.interval
-      );
+      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
@@ -271,15 +368,14 @@ export class AlertsClient {
         {
           ...attributes,
           enabled: true,
+          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
-          apiKeyOwner: apiKey.created ? username : null,
+
           scheduledTaskId: scheduledTask.id,
-          apiKey: apiKey.created
-            ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-            : null,
         },
         { version }
       );
+      await this.invalidateApiKey({ apiKey: attributes.apiKey });
     }
   }
 
@@ -357,6 +453,7 @@ export class AlertsClient {
         alertId,
         {
           updatedBy: await this.getUserName(),
+
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
         { version }
@@ -364,7 +461,7 @@ export class AlertsClient {
     }
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
+  private async scheduleAlert(id: string, alertTypeId: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {
@@ -399,6 +496,7 @@ export class AlertsClient {
   private getAlertFromRaw(
     id: string,
     rawAlert: Partial<RawAlert>,
+    updatedAt: SavedObject['updated_at'],
     references: SavedObjectReference[] | undefined
   ) {
     if (!rawAlert.actions) {
@@ -411,6 +509,8 @@ export class AlertsClient {
     return {
       id,
       ...rawAlert,
+      updatedAt: updatedAt ? new Date(updatedAt) : new Date(rawAlert.createdAt!),
+      createdAt: new Date(rawAlert.createdAt!),
       actions,
     };
   }

@@ -6,12 +6,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
+
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 
 import {
   GetHostOverviewQuery,
@@ -42,8 +44,10 @@ export interface OwnProps extends QueryTemplateProps {
   endDate: number;
 }
 
+type HostsOverViewProps = OwnProps & HostOverviewReduxProps & WithKibanaProps;
+
 class HostOverviewByNameComponentQuery extends QueryTemplate<
-  OwnProps & HostOverviewReduxProps,
+  HostsOverViewProps,
   GetHostOverviewQuery.Query,
   GetHostOverviewQuery.Variables
 > {
@@ -53,6 +57,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
       isInspected,
       children,
       hostName,
+      kibana,
       skip,
       sourceId,
       startDate,
@@ -71,7 +76,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -103,6 +108,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostOverviewByNameQuery = connect(makeMapStateToProps)(
-  HostOverviewByNameComponentQuery
-);
+export const HostOverviewByNameQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(HostOverviewByNameComponentQuery);

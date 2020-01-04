@@ -7,12 +7,13 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 
 import {
   GetEventsOverTimeQuery,
@@ -42,7 +43,7 @@ export interface EventsOverTimeComponentReduxProps {
   isInspected: boolean;
 }
 
-type EventsOverTimeProps = OwnProps & EventsOverTimeComponentReduxProps;
+type EventsOverTimeProps = OwnProps & EventsOverTimeComponentReduxProps & WithKibanaProps;
 
 class EventsOverTimeComponentQuery extends QueryTemplate<
   EventsOverTimeProps,
@@ -56,6 +57,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       sourceId,
       startDate,
     } = this.props;
@@ -71,7 +73,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -106,4 +108,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const EventsOverTimeQuery = connect(makeMapStateToProps)(EventsOverTimeComponentQuery);
+export const EventsOverTimeQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(EventsOverTimeComponentQuery);

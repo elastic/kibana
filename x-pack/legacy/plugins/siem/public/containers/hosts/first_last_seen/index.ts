@@ -8,7 +8,7 @@ import { useApolloClient } from '@apollo/client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import chrome from 'ui/chrome';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
@@ -36,6 +36,7 @@ export function useFirstLastSeenHostQuery(hostName: string, sourceId: string) {
   const [lastSeen, updateLastSeen] = useState<Date | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const apolloClient = useApolloClient();
+  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
 
   async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);
@@ -46,7 +47,7 @@ export function useFirstLastSeenHostQuery(hostName: string, sourceId: string) {
         variables: {
           sourceId,
           hostName,
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex,
         },
         context: {
           fetchOptions: {

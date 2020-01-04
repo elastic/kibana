@@ -7,10 +7,10 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQueryComponent, OverviewHostData } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
@@ -49,7 +49,7 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostRe
           to: endDate,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >

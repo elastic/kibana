@@ -8,7 +8,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -19,6 +18,7 @@ import {
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -51,7 +51,7 @@ export interface NetworkHttpComponentReduxProps {
   sort: NetworkHttpSortField;
 }
 
-type NetworkHttpProps = OwnProps & NetworkHttpComponentReduxProps;
+type NetworkHttpProps = OwnProps & NetworkHttpComponentReduxProps & WithKibanaProps;
 
 class NetworkHttpComponentQuery extends QueryTemplatePaginated<
   NetworkHttpProps,
@@ -67,6 +67,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       id = ID,
       ip,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
@@ -74,7 +75,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       startDate,
     } = this.props;
     const variables: GetNetworkHttpQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       inspect: isInspected,
       ip,
@@ -148,5 +149,6 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkHttpQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps)
+  connect(makeMapStateToProps),
+  withKibana
 )(NetworkHttpComponentQuery);

@@ -7,11 +7,11 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQueryComponent, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
@@ -47,7 +47,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >

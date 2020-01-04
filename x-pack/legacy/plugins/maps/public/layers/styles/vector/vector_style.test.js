@@ -96,6 +96,24 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'DYNAMIC',
       },
+      labelText: {
+        options: {
+          value: '',
+        },
+        type: 'STATIC',
+      },
+      labelColor: {
+        options: {
+          color: '#000000',
+        },
+        type: 'STATIC',
+      },
+      labelSize: {
+        options: {
+          size: 14,
+        },
+        type: 'STATIC',
+      },
       lineColor: {
         options: {},
         type: 'DYNAMIC',

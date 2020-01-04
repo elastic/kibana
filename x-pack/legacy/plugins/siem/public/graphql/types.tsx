@@ -30,6 +30,13 @@ export type Scalars = {
   EsValue: any,
 };
 
+export type AlertsOverTimeData = {
+   __typename?: 'AlertsOverTimeData',
+  inspect?: Maybe<Inspect>,
+  alertsOverTimeByModule: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
+};
+
 export type AnomaliesOverTimeData = {
    __typename?: 'AnomaliesOverTimeData',
   inspect?: Maybe<Inspect>,
@@ -1266,6 +1273,7 @@ export type Source = {
   configuration: SourceConfiguration,
   /** The status of the source */
   status: SourceStatus,
+  AlertsHistogram: AlertsOverTimeData,
   AnomaliesOverTime: AnomaliesOverTimeData,
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData,
@@ -1294,6 +1302,13 @@ export type Source = {
   UncommonProcesses: UncommonProcessesData,
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>,
+};
+
+
+export type SourceAlertsHistogramArgs = {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput
 };
 
 
@@ -1967,6 +1982,17 @@ export type ZeekSslData = {
   version?: Maybe<Scalars['ToStringArray']>,
 };
 
+export type GetAlertsOverTimeQueryQueryVariables = {
+  sourceId: Scalars['ID'],
+  timerange: TimerangeInput,
+  defaultIndex: Array<Scalars['String']>,
+  filterQuery?: Maybe<Scalars['String']>,
+  inspect: Scalars['Boolean']
+};
+
+
+export type GetAlertsOverTimeQueryQuery = { __typename?: 'Query', source: { __typename?: 'Source', id: string, AlertsHistogram: { __typename?: 'AlertsOverTimeData', totalCount: number, alertsOverTimeByModule: Array<{ __typename?: 'MatrixOverTimeHistogramData', x: number, y: number, g: string }>, inspect: Maybe<{ __typename?: 'Inspect', dsl: Array<string>, response: Array<string> }> } } };
+
 export type GetAnomaliesOverTimeQueryQueryVariables = {
   sourceId: Scalars['ID'],
   timerange: TimerangeInput,
@@ -2367,6 +2393,61 @@ export const KpiNetworkChartFieldsFragmentDoc = gql`
   y
 }
     `;
+export const GetAlertsOverTimeQueryDocument = gql`
+    query GetAlertsOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
+  source(id: $sourceId) {
+    id
+    AlertsHistogram(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
+      alertsOverTimeByModule {
+        x
+        y
+        g
+      }
+      totalCount
+      inspect @include(if: $inspect) {
+        dsl
+        response
+      }
+    }
+  }
+}
+    `;
+export type GetAlertsOverTimeQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>, 'query'> & ({ variables: GetAlertsOverTimeQueryQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GetAlertsOverTimeQueryComponent = (props: GetAlertsOverTimeQueryComponentProps) => (
+      <ApolloReactComponents.Query<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables> query={GetAlertsOverTimeQueryDocument} {...props} />
+    );
+    
+
+/**
+ * __useGetAlertsOverTimeQueryQuery__
+ *
+ * To run a query within a React component, call `useGetAlertsOverTimeQueryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAlertsOverTimeQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAlertsOverTimeQueryQuery({
+ *   variables: {
+ *      sourceId: // value for 'sourceId'
+ *      timerange: // value for 'timerange'
+ *      defaultIndex: // value for 'defaultIndex'
+ *      filterQuery: // value for 'filterQuery'
+ *      inspect: // value for 'inspect'
+ *   },
+ * });
+ */
+export function useGetAlertsOverTimeQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>(GetAlertsOverTimeQueryDocument, baseOptions);
+      }
+export function useGetAlertsOverTimeQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>(GetAlertsOverTimeQueryDocument, baseOptions);
+        }
+export type GetAlertsOverTimeQueryQueryHookResult = ReturnType<typeof useGetAlertsOverTimeQueryQuery>;
+export type GetAlertsOverTimeQueryLazyQueryHookResult = ReturnType<typeof useGetAlertsOverTimeQueryLazyQuery>;
+export type GetAlertsOverTimeQueryQueryResult = ApolloReactCommon.QueryResult<GetAlertsOverTimeQueryQuery, GetAlertsOverTimeQueryQueryVariables>;
 export const GetAnomaliesOverTimeQueryDocument = gql`
     query GetAnomaliesOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {
   source(id: $sourceId) {
@@ -4875,6 +4956,18 @@ export function useGetUsersQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type GetUsersQueryQueryHookResult = ReturnType<typeof useGetUsersQueryQuery>;
 export type GetUsersQueryLazyQueryHookResult = ReturnType<typeof useGetUsersQueryLazyQuery>;
 export type GetUsersQueryQueryResult = ApolloReactCommon.QueryResult<GetUsersQueryQuery, GetUsersQueryQueryVariables>;
+export namespace GetAlertsOverTimeQuery {
+  export type Variables = GetAlertsOverTimeQueryQueryVariables;
+  export type Query = GetAlertsOverTimeQueryQuery;
+  export type Source = GetAlertsOverTimeQueryQuery['source'];
+  export type AlertsHistogram = GetAlertsOverTimeQueryQuery['source']['AlertsHistogram'];
+  export type AlertsOverTimeByModule = (NonNullable<GetAlertsOverTimeQueryQuery['source']['AlertsHistogram']['alertsOverTimeByModule'][0]>);
+  export type Inspect = (NonNullable<GetAlertsOverTimeQueryQuery['source']['AlertsHistogram']['inspect']>);
+  export const Document = GetAlertsOverTimeQueryDocument;
+  export const Component = GetAlertsOverTimeQueryComponent;
+  export const use = useGetAlertsOverTimeQueryQuery;
+}
+
 export namespace GetAnomaliesOverTimeQuery {
   export type Variables = GetAnomaliesOverTimeQueryQueryVariables;
   export type Query = GetAnomaliesOverTimeQueryQuery;

@@ -12,11 +12,10 @@ import { render, act } from '@testing-library/react';
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
-import '../../../../mock/ui_settings';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/kibana');
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';

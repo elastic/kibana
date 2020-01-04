@@ -80,7 +80,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
         state: '',
       });
     });
@@ -111,7 +111,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
         state: '',
       });
     });
@@ -144,7 +144,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          '?_g=()&timeline=(id:hello_timeline_id,isOpen:!t)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+          '?timeline=(id:hello_timeline_id,isOpen:!t)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         state: '',
       });
     });
@@ -163,7 +163,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             expect(mockHistory.replace.mock.calls[0][0]).toEqual({
               hash: '',
               pathname: examplePath,
-              search: '?_g=()',
+              search: '?',
               state: '',
             });
 
@@ -173,7 +173,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
               hash: '',
               pathname: examplePath,
               search:
-                '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+                '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
               state: '',
             });
           }
@@ -201,7 +201,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
+            '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
           );
 
           wrapper.setProps({ hookProps: updatedProps });
@@ -210,7 +210,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
+            "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
           );
         });
       });

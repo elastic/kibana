@@ -7,8 +7,8 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   AuthenticationsEdges,
@@ -19,6 +19,7 @@ import {
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 const ID = 'authenticationQuery';
@@ -46,7 +47,7 @@ export interface AuthenticationsComponentReduxProps {
   limit: number;
 }
 
-type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
+type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps & WithKibanaProps;
 
 class AuthenticationsComponentQuery extends QueryTemplatePaginated<
   AuthenticationsProps,
@@ -61,6 +62,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
@@ -75,7 +77,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       },
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (
@@ -139,4 +141,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const AuthenticationsQuery = connect(makeMapStateToProps)(AuthenticationsComponentQuery);
+export const AuthenticationsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(AuthenticationsComponentQuery);

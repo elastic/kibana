@@ -15,6 +15,7 @@ import {
   GetTimelineDetailsQuery,
   GetTimelineDetailsQueryComponent,
 } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
@@ -39,7 +40,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
       sourceId,
       indexName,
       eventId,
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
     };
     return executeQuery ? (
       <GetTimelineDetailsQueryComponent

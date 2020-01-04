@@ -28,6 +28,12 @@ export interface Scalars {
   EsValue: any,
 }
 
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>,
+  alertsOverTimeByModule: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
+}
+
 export interface AnomaliesOverTimeData {
   inspect?: Maybe<Inspect>,
   anomaliesOverTime: Array<MatrixOverTimeHistogramData>,
@@ -1165,6 +1171,7 @@ export interface Source {
   configuration: SourceConfiguration,
   /** The status of the source */
   status: SourceStatus,
+  AlertsHistogram: AlertsOverTimeData,
   AnomaliesOverTime: AnomaliesOverTimeData,
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData,
@@ -1193,6 +1200,13 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData,
   /** Just a simple example to get the app name */
   whoAmI?: Maybe<SayMyName>,
+}
+
+
+export interface SourceAlertsHistogramArgs {
+  filterQuery?: Maybe<Scalars['String']>,
+  defaultIndex: Array<Scalars['String']>,
+  timerange: TimerangeInput
 }
 
 
@@ -1909,9 +1923,10 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   IndexField: ResolverTypeWrapper<IndexField>,
   TimerangeInput: TimerangeInput,
-  AnomaliesOverTimeData: ResolverTypeWrapper<AnomaliesOverTimeData>,
+  AlertsOverTimeData: ResolverTypeWrapper<AlertsOverTimeData>,
   Inspect: ResolverTypeWrapper<Inspect>,
   MatrixOverTimeHistogramData: ResolverTypeWrapper<MatrixOverTimeHistogramData>,
+  AnomaliesOverTimeData: ResolverTypeWrapper<AnomaliesOverTimeData>,
   PaginationInputPaginated: PaginationInputPaginated,
   AuthenticationsData: ResolverTypeWrapper<AuthenticationsData>,
   AuthenticationsEdges: ResolverTypeWrapper<AuthenticationsEdges>,
@@ -2111,9 +2126,10 @@ export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'],
   IndexField: IndexField,
   TimerangeInput: TimerangeInput,
-  AnomaliesOverTimeData: AnomaliesOverTimeData,
+  AlertsOverTimeData: AlertsOverTimeData,
   Inspect: Inspect,
   MatrixOverTimeHistogramData: MatrixOverTimeHistogramData,
+  AnomaliesOverTimeData: AnomaliesOverTimeData,
   PaginationInputPaginated: PaginationInputPaginated,
   AuthenticationsData: AuthenticationsData,
   AuthenticationsEdges: AuthenticationsEdges,
@@ -2291,6 +2307,12 @@ export type ResolversParentTypes = ResolversObject<{
   OsFields: OsFields,
   NetworkDirectionEcs: NetworkDirectionEcs,
   NetworkHttpFields: NetworkHttpFields,
+}>;
+
+export type AlertsOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AlertsOverTimeData'] = ResolversParentTypes['AlertsOverTimeData']> = ResolversObject<{
+  inspect?: Resolver<Maybe<ResolversTypes['Inspect']>, ParentType, ContextType>,
+  alertsOverTimeByModule?: Resolver<Array<ResolversTypes['MatrixOverTimeHistogramData']>, ParentType, ContextType>,
+  totalCount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
 }>;
 
 export type AnomaliesOverTimeDataResolvers<ContextType = SiemContext, ParentType extends ResolversParentTypes['AnomaliesOverTimeData'] = ResolversParentTypes['AnomaliesOverTimeData']> = ResolversObject<{
@@ -3075,6 +3097,7 @@ export type SourceResolvers<ContextType = SiemContext, ParentType extends Resolv
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   configuration?: Resolver<ResolversTypes['SourceConfiguration'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['SourceStatus'], ParentType, ContextType>,
+  AlertsHistogram?: Resolver<ResolversTypes['AlertsOverTimeData'], ParentType, ContextType, RequireFields<SourceAlertsHistogramArgs, 'defaultIndex' | 'timerange'>>,
   AnomaliesOverTime?: Resolver<ResolversTypes['AnomaliesOverTimeData'], ParentType, ContextType, RequireFields<SourceAnomaliesOverTimeArgs, 'timerange' | 'defaultIndex'>>,
   Authentications?: Resolver<ResolversTypes['AuthenticationsData'], ParentType, ContextType, RequireFields<SourceAuthenticationsArgs, 'timerange' | 'pagination' | 'defaultIndex'>>,
   AuthenticationsOverTime?: Resolver<ResolversTypes['AuthenticationsOverTimeData'], ParentType, ContextType, RequireFields<SourceAuthenticationsOverTimeArgs, 'timerange' | 'defaultIndex'>>,
@@ -3465,6 +3488,7 @@ export type ZeekSslDataResolvers<ContextType = SiemContext, ParentType extends R
 }>;
 
 export type Resolvers<ContextType = SiemContext> = ResolversObject<{
+  AlertsOverTimeData?: AlertsOverTimeDataResolvers<ContextType>,
   AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers<ContextType>,
   AuditdData?: AuditdDataResolvers<ContextType>,
   AuditdEcsFields?: AuditdEcsFieldsResolvers<ContextType>,

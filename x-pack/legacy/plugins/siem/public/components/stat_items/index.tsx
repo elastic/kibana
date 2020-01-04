@@ -21,7 +21,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { KpiHostsData, KpiHostDetailsData, KpiNetworkData } from '../../graphql/types';
@@ -210,6 +210,8 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     to,
   }) => {
     const [isHover, setIsHover] = useState(false);
+    const handleMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
+    const handleMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -218,9 +220,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart &&
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
+
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
-        <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+        <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
               <EuiTitle size="xxxs">

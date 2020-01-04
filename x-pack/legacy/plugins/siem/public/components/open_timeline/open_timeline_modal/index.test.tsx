@@ -17,7 +17,7 @@ import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 
 import { OpenTimelineModal } from '.';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/kibana');
 
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

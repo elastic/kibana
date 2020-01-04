@@ -18,8 +18,6 @@ import * as i18n from '../translations';
 
 import { OpenTimelineModalButton } from './open_timeline_modal_button';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
 describe('OpenTimelineModalButton', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
