@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`management app can mount and unmount 1`] = `
+exports[`Management app can mount and unmount 1`] = `
 <div>
   <div>
     Test App - Hello world!
@@ -8,4 +8,4 @@ exports[`management app can mount and unmount 1`] = `
 </div>
 `;
 
-exports[`management app can mount and unmount 2`] = `<div />`;
+exports[`Management app can mount and unmount 2`] = `<div />`;
