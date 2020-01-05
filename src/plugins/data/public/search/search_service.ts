@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { BehaviorSubject } from 'rxjs';
 import {
   Plugin,
   CoreSetup,
@@ -74,11 +75,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
   private search?: ISearchGeneric;
+  private readonly loadingCount$ = new BehaviorSubject(0);
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ISearchSetup {
-    const search = (this.search = createAppMountSearchContext(this.searchStrategies).search);
+    core.http.addLoadingCountSource(this.loadingCount$);
+    const search = (this.search = createAppMountSearchContext(
+      this.searchStrategies,
+      this.loadingCount$
+    ).search);
     core.application.registerMountContext<'search'>('search', () => {
       return { search };
     });
