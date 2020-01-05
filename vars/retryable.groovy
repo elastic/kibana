@@ -44,7 +44,7 @@ def call(label, Closure closure) {
     print ex.toString() // TODO replace with unsandboxed hudson.Functions.printThrowable(ex)
     unstable "${label} failed but is retryable, trying a second time..."
 
-    def JOB = env.JOB ? "" : "${env.JOB}-retry"
+    def JOB = env.JOB ? "${env.JOB}-retry" : ""
     withEnv([
       "JOB=${JOB}",
     ]) {
