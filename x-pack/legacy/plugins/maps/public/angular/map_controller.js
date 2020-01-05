@@ -364,10 +364,12 @@ app.controller(
 
       await Promise.all(getIndexPatternPromises);
       // ignore outdated results
-      if (prevIndexPatternIds !== nextIndexPatternIds) {
+      if (!_.isEqual(prevIndexPatternIds, nextIndexPatternIds)) {
         return;
       }
-      $scope.indexPatterns = indexPatterns;
+      $scope.$evalAsync(() => {
+        $scope.indexPatterns = indexPatterns;
+      });
     }
 
     $scope.isFullScreen = false;
@@ -382,7 +384,7 @@ app.controller(
       }
 
       const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-      if (nextIndexPatternIds !== prevIndexPatternIds) {
+      if (!_.isEqual(nextIndexPatternIds, prevIndexPatternIds)) {
         prevIndexPatternIds = nextIndexPatternIds;
         updateIndexPatterns(nextIndexPatternIds);
       }
