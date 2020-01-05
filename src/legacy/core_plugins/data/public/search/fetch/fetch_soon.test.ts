@@ -72,22 +72,6 @@ describe('fetchSoon', () => {
     expect(callClient).toBeCalled();
   });
 
-  test('should delay by 50ms if config is set to batch searches', () => {
-    const config = getConfigStub({
-      'courier:batchSearches': true,
-    });
-    const request = {};
-    const options = {};
-
-    fetchSoon(request, options, { config } as FetchHandlers);
-
-    expect(callClient).not.toBeCalled();
-    jest.advanceTimersByTime(0);
-    expect(callClient).not.toBeCalled();
-    jest.advanceTimersByTime(50);
-    expect(callClient).toBeCalled();
-  });
-
   test('should send a batch of requests to callClient', () => {
     const config = getConfigStub({
       'courier:batchSearches': true,
