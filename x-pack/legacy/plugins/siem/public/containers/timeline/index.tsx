@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import chrome from 'ui/chrome';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';

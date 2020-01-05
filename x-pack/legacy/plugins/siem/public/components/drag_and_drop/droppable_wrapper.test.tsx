@@ -25,7 +25,7 @@ describe('DroppableWrapper', () => {
 
       const wrapper = shallow(
         <TestProviders>
-        <MockedProvider mocks={[]} addTypename={false}>
+          <MockedProvider mocks={[]} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
