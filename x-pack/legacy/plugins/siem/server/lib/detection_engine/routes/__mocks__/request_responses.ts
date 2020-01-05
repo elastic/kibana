@@ -381,4 +381,5 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
+  isAuthenticated: false,
 });

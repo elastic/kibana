@@ -6,23 +6,20 @@
 
 import { useEffect, useState } from 'react';
 
-import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { useUiSetting$ } from '../../../lib/kibana';
+import { getUserPrivilege } from './api';
 
-import { fetchQuerySignals } from './api';
-import { SignalSearchResponse } from './types';
-
-type Return<Hit, Aggs> = [boolean, SignalSearchResponse<Hit, Aggs> | null];
+type Return = [boolean, boolean | null, boolean | null];
 
 /**
- * Hook for using to get a Signals from the Detection Engine API
- *
- * @param query convert a dsl into string
+ * Hook to get user privilege from
  *
  */
-export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => {
-  const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
+export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [hasWrite, setHasWrite] = useState<boolean | null>(null);
   const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
@@ -32,18 +29,22 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
 
     async function fetchData() {
       try {
-        const signalResponse = await fetchQuerySignals<Hit, Aggs>({
-          query,
+        const privilege = await getUserPrivilege({
           kbnVersion,
           signal: abortCtrl.signal,
         });
 
-        if (isSubscribed) {
-          setSignals(signalResponse);
+        if (isSubscribed && privilege != null) {
+          setAuthenticated(privilege.isAuthenticated);
+          if (privilege.index != null && Object.keys(privilege.index).length > 0) {
+            const indexName = Object.keys(privilege.index)[0];
+            setHasWrite(privilege.index[indexName].create_index);
+          }
         }
       } catch (error) {
         if (isSubscribed) {
-          setSignals(null);
+          setAuthenticated(false);
+          setHasWrite(false);
         }
       }
       if (isSubscribed) {
@@ -56,7 +57,7 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query]);
+  }, []);
 
-  return [loading, signals];
+  return [loading, isAuthenticated, hasWrite];
 };
