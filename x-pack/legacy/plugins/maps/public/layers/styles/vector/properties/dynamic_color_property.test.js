@@ -25,8 +25,6 @@ const mockField = {
 };
 
 test('Should render ranged legend', async () => {
-  // configureNotLineOrPointOnly();
-
   const colorStyle = new DynamicColorProperty(
     {
       color: 'Blues',
@@ -61,8 +59,6 @@ test('Should render ranged legend', async () => {
 });
 
 test('Should render categorical legend', async () => {
-  // configureNotLineOrPointOnly();
-
   const colorStyle = new DynamicColorProperty(
     {
       useCustomColorRamp: true,

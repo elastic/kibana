@@ -24,14 +24,10 @@ exports[`Should render categorical legend 1`] = `
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CircleIcon
-            style={
-              Object {
-                "fill": "rgba(255,255,255,0)",
-                "stroke": "#FF0000",
-                "strokeWidth": "1px",
-              }
-            }
+          <VectorIcon
+            getColorForProperty={[Function]}
+            loadIsLinesOnly={[Function]}
+            loadIsPointsOnly={[Function]}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -51,14 +47,10 @@ exports[`Should render categorical legend 1`] = `
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CircleIcon
-            style={
-              Object {
-                "fill": "rgba(255,255,255,0)",
-                "stroke": "#00FF00",
-                "strokeWidth": "1px",
-              }
-            }
+          <VectorIcon
+            getColorForProperty={[Function]}
+            loadIsLinesOnly={[Function]}
+            loadIsPointsOnly={[Function]}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
