@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public/';
 import {
   SerializedNode,
   UrlTemplate,
@@ -25,6 +24,7 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
