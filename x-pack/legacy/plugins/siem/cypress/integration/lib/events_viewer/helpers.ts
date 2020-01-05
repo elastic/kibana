@@ -11,6 +11,7 @@ import { DEFAULT_TIMEOUT } from '../util/helpers';
 
 /** Opens the eventsViewer Field Browser */
 export const openEventsViewerFieldsBrowser = () => {
+  cy.scrollTo('bottom');
   cy.get(EVENTS_VIEWER_FIELDS_BUTTON, { timeout: DEFAULT_TIMEOUT }).click({ force: true });
 
   cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })

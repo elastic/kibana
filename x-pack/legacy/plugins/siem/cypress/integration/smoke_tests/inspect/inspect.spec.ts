@@ -24,8 +24,7 @@ describe('Inspect', () => {
     INSPECT_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
         loginAndWaitForPageUrlState(table.url);
-        cy.scrollTo('bottom');
-        cy.get(table.id, { timeout: DEFAULT_TIMEOUT }).should('exist');
+        // cy.get(table.id, { timeout: DEFAULT_TIMEOUT }).should('exist');
         if (table.altInspectId) {
           cy.get(table.altInspectId, { timeout: DEFAULT_TIMEOUT }).trigger('click', {
             force: true,

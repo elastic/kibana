@@ -151,7 +151,7 @@ describe('url state', () => {
 
     cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
       timeout: DEFAULT_TIMEOUT,
-    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`, { force: true });
+    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`);
 
     cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
 
@@ -163,7 +163,7 @@ describe('url state', () => {
 
     cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
       timeout: DEFAULT_TIMEOUT,
-    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`, { force: true });
+    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`);
 
     cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
 
@@ -204,7 +204,7 @@ describe('url state', () => {
     );
   });
 
-  it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
+  it.skip('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlHost);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
     cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
@@ -263,12 +263,20 @@ describe('url state', () => {
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
     const bestTimelineName = 'The Best Timeline';
-    cy.get(TIMELINE_TITLE, { timeout: 5000 }).type(bestTimelineName);
-    cy.url().should('include', 'timeline=');
-    cy.visit(
-      `${
-        Cypress.config().baseUrl
-      }/app/siem#/timelines?timerange=(global:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1565360777369)))`
-    ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
+    cy.get(TIMELINE_TITLE).type(`${bestTimelineName}{enter}`);
+    cy.url({ timeout: DEFAULT_TIMEOUT }).should('include', 'timeline=(id');
+    cy.hash().then(hash => {
+      const matched = hash.match(/timeline=\(id:'(.+)'/g);
+      const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
+      expect(matched).to.have.lengthOf(1);
+      cy.log('hash', hash);
+      cy.log('matched', matched);
+      cy.log('newTimelineId', newTimelineId);
+      cy.visit(
+        `${
+          Cypress.config().baseUrl
+        }/app/siem#/overview?timeline=(id:'${newTimelineId}',isOpen:!t)&timerange=(global:(linkTo:!(),timerange:(from:1578171649836,fromStr:now-24h,kind:relative,to:1578258049837,toStr:now)),timeline:(linkTo:!(),timerange:(from:1576754930819,kind:absolute,to:1576927740792)))`
+      ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
+    });
   });
 });
