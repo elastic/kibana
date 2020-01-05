@@ -29,6 +29,7 @@ import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming, yarnWorkspacesInfo } from '../utils/scripts';
 import { BootstrapCommand } from './bootstrap';
+import { Kibana } from '../utils/kibana';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
@@ -107,6 +108,7 @@ test('handles dependencies of dependencies', async () => {
     ['bar', bar],
     ['baz', baz],
   ]);
+  const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -115,6 +117,7 @@ test('handles dependencies of dependencies', async () => {
     extraArgs: [],
     options: {},
     rootPath: '',
+    kbn,
   });
 
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
@@ -142,6 +145,7 @@ test('does not run installer if no deps in package', async () => {
     ['kibana', kibana],
     ['bar', bar],
   ]);
+  const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -150,6 +154,7 @@ test('does not run installer if no deps in package', async () => {
     extraArgs: [],
     options: {},
     rootPath: '',
+    kbn,
   });
 
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
@@ -167,6 +172,7 @@ test('handles "frozen-lockfile"', async () => {
   });
 
   const projects = new Map([['kibana', kibana]]);
+  const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
   jest.spyOn(console, 'log').mockImplementation(noop);
@@ -177,6 +183,7 @@ test('handles "frozen-lockfile"', async () => {
       'frozen-lockfile': true,
     },
     rootPath: '',
+    kbn,
   });
 
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
@@ -205,6 +212,7 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
     ['kibana', kibana],
     ['bar', bar],
   ]);
+  const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
   jest.spyOn(console, 'log').mockImplementation(noop);
@@ -213,6 +221,7 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
     extraArgs: [],
     options: {},
     rootPath: '',
+    kbn,
   });
 
   expect(mockLinkProjectExecutables.mock.calls).toMatchSnapshot('link bins');
