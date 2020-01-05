@@ -11,7 +11,11 @@ jest.mock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', (
   },
 }));
 
-import { addEmbeddableToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
+import {
+  addEmbeddableToDashboardUrl,
+  getKibanaBasePathFromDashboardUrl,
+  getDashboardUrlWithoutTime,
+} from './url_helper';
 
 describe('Lens URL Helper', () => {
   it('getKibanaBasePathFromDashboardUrl', () => {
@@ -51,6 +55,31 @@ describe('Lens URL Helper', () => {
       "http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()";
     expect(addEmbeddableToDashboardUrl(url, id, type)).toBe(
       `http://localhost:5601/app/kibana#/dashboard/777182?addEmbeddableType=${type}&addEmbeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()`
+    );
+  });
+
+  it('getDashboardUrlWithoutTime', () => {
+    let url =
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(getDashboardUrlWithoutTime(url)).toEqual(
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()"
+    );
+    url =
+      "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()";
+    expect(getDashboardUrlWithoutTime(url)).toEqual(
+      `http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:\'\',filters:!()`
+    );
+    url =
+      "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(time:(from:now-15m,to:now),refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()";
+    expect(getDashboardUrlWithoutTime(url)).toEqual(
+      `http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:\'\',filters:!()`
+    );
+    url = 'http://notDashboarUrl';
+    expect(getDashboardUrlWithoutTime(url)).toBe('http://notDashboarUrl');
+    url =
+      "http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()";
+    expect(getDashboardUrlWithoutTime(url)).toBe(
+      `http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()`
     );
   });
 });

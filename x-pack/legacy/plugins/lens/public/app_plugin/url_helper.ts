@@ -7,6 +7,8 @@ import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/ki
 
 const EMPTY_DASHBOARD_PATTERN = /(.*#\/dashboard\?)(.*)/;
 const DASHBOARD_WITH_ID_PATTERN = /(.*#\/dashboard\/.*\?)(.*)/;
+const TIME_PATTERN_1 = /(.*)(,time:[^)]+\))(.*)/;
+const TIME_PATTERN_2 = /(.*)(time:[^)]+\),)(.*)/; // same as TIME_PATTERN_1, but comma follows, not preceeds
 
 /** *
  * Returns base path from dashboard url
@@ -55,4 +57,23 @@ export function addEmbeddableToDashboardUrl(
   const base = regex[1];
   const dashboardState = regex[2];
   return `${base}${DashboardConstants.ADD_EMBEDDABLE_TYPE}=${embeddableType}&${DashboardConstants.ADD_EMBEDDABLE_ID}=${embeddableId}&${dashboardState}`;
+}
+
+/**
+ * Returns dashboard URL without time parameter
+ * eg.
+ * input: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
+ * output: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))
+ * @param url dashboard absolute url
+ */
+export function getDashboardUrlWithoutTime(url: string | undefined): string {
+  if (!url) {
+    return null;
+  }
+  let regex = RegExp(TIME_PATTERN_1).exec(url);
+  regex = regex || RegExp(TIME_PATTERN_2).exec(url);
+  if (regex) {
+    return `${regex[1]}${regex[3]}`;
+  }
+  return url;
 }
