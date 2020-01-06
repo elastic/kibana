@@ -118,7 +118,10 @@ export async function getShardStats(
         status = 'red';
       }
 
-      accum[index] = { unassignedReplica, unassignedPrimary, status };
+      accum[index] = {
+        unassigned: { primary: unassignedPrimary, replica: unassignedReplica },
+        status,
+      };
       return accum;
     }, {});
   }
