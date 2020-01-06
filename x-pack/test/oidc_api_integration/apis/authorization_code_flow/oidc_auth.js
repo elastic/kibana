@@ -10,20 +10,21 @@ import url from 'url';
 import { getStateAndNonce } from '../../fixtures/oidc_tools';
 import { delay } from 'bluebird';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
     });
 
     describe('initiating handshake', () => {
       it('should properly set cookie, return all parameters and redirect user', async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
@@ -35,8 +36,13 @@ export default function ({ getService }) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(true);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();
@@ -46,7 +52,9 @@ export default function ({ getService }) {
       });
 
       it('should properly set cookie, return all parameters and redirect user for Third Party initiated', async () => {
-        const handshakeResponse = await supertest.get('/api/security/v1/oidc?iss=https://test-op.elastic.co')
+        const handshakeResponse = await supertest
+          .post('/api/security/oidc/initiate_login')
+          .send({ iss: 'https://test-op.elastic.co' })
           .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
@@ -58,8 +66,13 @@ export default function ({ getService }) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(true);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();
@@ -69,19 +82,21 @@ export default function ({ getService }) {
       });
 
       it('should not allow access to the API with the handshake cookie', async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
       });
 
       it('AJAX requests should not initiate handshake', async () => {
-        const ajaxResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const ajaxResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .set('kbn-xsrf', 'xxx')
           .expect(401);
 
@@ -94,7 +109,8 @@ export default function ({ getService }) {
       let handshakeCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
@@ -108,26 +124,31 @@ export default function ({ getService }) {
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
-        await supertest.get(`/api/security/v1/oidc?code=thisisthecode&state=${stateAndNonce.state}`)
+        await supertest
+          .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .expect(401);
       });
 
       it('should fail if state is not matching', async () => {
-        await supertest.get(`/api/security/v1/oidc?code=thisisthecode&state=someothervalue`)
+        await supertest
+          .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
         // User should be redirected to the URL that initiated handshake.
-        expect(oidcAuthenticationResponse.headers.location).to.be('/abc/xyz/handshake?one=two%20three');
+        expect(oidcAuthenticationResponse.headers.location).to.be(
+          '/abc/xyz/handshake?one=two%20three'
+        );
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
@@ -139,7 +160,7 @@ export default function ({ getService }) {
         expect(sessionCookie.httpOnly).to.be(true);
 
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -160,7 +181,8 @@ export default function ({ getService }) {
 
     describe('Complete third party initiated authentication', () => {
       it('should authenticate a user when a third party initiates the authentication', async () => {
-        const handshakeResponse = await supertest.get('/api/security/v1/oidc?iss=https://test-op.elastic.co')
+        const handshakeResponse = await supertest
+          .get('/api/security/oidc/initiate_login?iss=https://test-op.elastic.co')
           .expect(302);
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
@@ -172,7 +194,8 @@ export default function ({ getService }) {
           .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code2&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code2&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -186,7 +209,7 @@ export default function ({ getService }) {
         expect(sessionCookie.httpOnly).to.be(true);
 
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -210,8 +233,7 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz')
-          .expect(302);
+        const handshakeResponse = await supertest.get('/abc/xyz').expect(302);
 
         sessionCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
         stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
@@ -222,7 +244,8 @@ export default function ({ getService }) {
           .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
@@ -232,7 +255,7 @@ export default function ({ getService }) {
 
       it('should extend cookie on every successful non-system API call', async () => {
         const apiResponseOne = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -244,7 +267,7 @@ export default function ({ getService }) {
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
 
         const apiResponseTwo = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -258,7 +281,7 @@ export default function ({ getService }) {
 
       it('should not extend cookie for system API calls', async () => {
         const systemAPIResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('kbn-system-api', 'true')
           .set('Cookie', sessionCookie.cookieString())
@@ -269,7 +292,7 @@ export default function ({ getService }) {
 
       it('should fail and preserve session cookie if unsupported authentication schema is used', async () => {
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
@@ -283,7 +306,8 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
@@ -295,7 +319,8 @@ export default function ({ getService }) {
           .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -307,15 +332,15 @@ export default function ({ getService }) {
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
-        const logoutResponse = await supertest.get('/api/security/v1/logout')
-          .expect(302);
+        const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/');
       });
 
       it('should redirect to the OPs endsession endpoint to complete logout', async () => {
-        const logoutResponse = await supertest.get('/api/security/v1/logout')
+        const logoutResponse = await supertest
+          .get('/api/security/logout')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -330,13 +355,15 @@ export default function ({ getService }) {
         expect(logoutCookie.maxAge).to.be(0);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)).to.be(true);
+        expect(
+          redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)
+        ).to.be(true);
         expect(redirectURL.query.id_token_hint).to.not.be.empty();
 
         // Tokens that were stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -344,12 +371,13 @@ export default function ({ getService }) {
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
           message: 'Both access and refresh tokens are expired.',
-          statusCode: 400
+          statusCode: 400,
         });
       });
 
       it('should reject AJAX requests', async () => {
-        const ajaxResponse = await supertest.get('/api/security/v1/logout')
+        const ajaxResponse = await supertest
+          .get('/api/security/logout')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
@@ -358,7 +386,7 @@ export default function ({ getService }) {
         expect(ajaxResponse.body).to.eql({
           error: 'Bad Request',
           message: 'Client should be able to process redirect response.',
-          statusCode: 400
+          statusCode: 400,
         });
       });
     });
@@ -367,7 +395,8 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
@@ -379,7 +408,8 @@ export default function ({ getService }) {
           .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -390,7 +420,7 @@ export default function ({ getService }) {
         sessionCookie = request.cookie(cookies[0]);
       });
 
-      const expectNewSessionCookie = (cookie) => {
+      const expectNewSessionCookie = cookie => {
         expect(cookie.key).to.be('sid');
         expect(cookie.value).to.not.be.empty();
         expect(cookie.path).to.be('/');
@@ -398,7 +428,7 @@ export default function ({ getService }) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async function () {
+      it('expired access token should be automatically refreshed', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -408,7 +438,7 @@ export default function ({ getService }) {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -422,7 +452,7 @@ export default function ({ getService }) {
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
         // Returned cookie will contain the same new access and refresh token pairs as the first request
         const secondResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -437,14 +467,14 @@ export default function ({ getService }) {
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', firstNewCookie.cookieString())
           .expect(200);
 
         // The second new cookie with fresh pair of access and refresh tokens should work.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
@@ -455,7 +485,8 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
@@ -467,7 +498,8 @@ export default function ({ getService }) {
           .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -478,7 +510,7 @@ export default function ({ getService }) {
         sessionCookie = request.cookie(cookies[0]);
       });
 
-      it('should properly set cookie and start new OIDC handshake', async function () {
+      it('should properly set cookie and start new OIDC handshake', async function() {
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -487,9 +519,12 @@ export default function ({ getService }) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse)
+          .to.have.property('deleted')
+          .greaterThan(0);
 
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+        const handshakeResponse = await supertest
+          .get('/abc/xyz/handshake?one=two three')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -502,8 +537,13 @@ export default function ({ getService }) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(true);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();

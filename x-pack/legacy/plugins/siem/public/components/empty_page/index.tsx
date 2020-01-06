@@ -6,11 +6,10 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center; // Corrects horizontal centering in IE11
+  align-self: center; /* Corrects horizontal centering in IE11 */
 `;
 
 EmptyPrompt.displayName = 'EmptyPrompt';
@@ -29,7 +28,7 @@ interface EmptyPageProps {
   title: string;
 }
 
-export const EmptyPage = pure<EmptyPageProps>(
+export const EmptyPage = React.memo<EmptyPageProps>(
   ({
     actionPrimaryIcon,
     actionPrimaryLabel,
@@ -47,8 +46,8 @@ export const EmptyPage = pure<EmptyPageProps>(
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               href={actionPrimaryUrl}
@@ -60,7 +59,7 @@ export const EmptyPage = pure<EmptyPageProps>(
           </EuiFlexItem>
 
           {actionSecondaryLabel && actionSecondaryUrl && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 href={actionSecondaryUrl}
                 iconType={actionSecondaryIcon}

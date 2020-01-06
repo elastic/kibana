@@ -15,10 +15,21 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
-export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
+export const validatePolicy = (
+  policy: SlmPolicyPayload,
+  validationHelperData: {
+    managedRepository?: {
+      name: string;
+      policy: string;
+    };
+    isEditing?: boolean;
+    policyName?: string;
+  }
+): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
+  const { managedRepository, isEditing, policyName } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -91,6 +102,22 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Minimum count cannot be greater than maximum count.',
+      })
+    );
+  }
+
+  if (
+    managedRepository &&
+    managedRepository.name === repository &&
+    managedRepository.policy &&
+    !(isEditing && managedRepository.policy === policyName)
+  ) {
+    validation.errors.repository.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
+        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
+        values: {
+          policyName: managedRepository.policy,
+        },
       })
     );
   }

@@ -10,8 +10,13 @@ import { render } from '@testing-library/react';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
+  MockApmPluginContextWrapper
 } from '../../../../../utils/testHelpers';
+
+const renderOptions = {
+  wrapper: MockApmPluginContextWrapper
+};
 
 function getTransaction() {
   return ({
@@ -38,7 +43,10 @@ function getTransaction() {
 describe('TransactionMetadata', () => {
   it('should render a transaction with all sections', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // sections
     expectTextsInDocument(output, [
@@ -57,7 +65,10 @@ describe('TransactionMetadata', () => {
 
   it('should render a transaction with all included dot notation keys', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // included keys
     expectTextsInDocument(output, [
@@ -82,7 +93,10 @@ describe('TransactionMetadata', () => {
 
   it('should render a transaction with all included values', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // included values
     expectTextsInDocument(output, [
@@ -107,7 +121,10 @@ describe('TransactionMetadata', () => {
 
   it('should render a transaction with only the required sections', () => {
     const transaction = {} as Transaction;
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // required sections should be found
     expectTextsInDocument(output, ['Labels', 'User']);

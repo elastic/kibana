@@ -24,7 +24,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { ExpressionFunction, Render } from 'src/plugins/expressions/public';
-import { start as data } from '../../../data/public/legacy';
+import { npStart } from 'ui/new_platform';
 import { start as visualizations } from '../np_ready/public/legacy';
 
 interface Arguments {
@@ -92,7 +92,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private') as any;
-    const { indexPatterns } = data.indexPatterns;
+    const indexPatterns = npStart.plugins.data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};

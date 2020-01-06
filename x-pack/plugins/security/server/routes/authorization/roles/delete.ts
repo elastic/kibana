@@ -7,13 +7,15 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { wrapError } from '../../../errors';
+import { wrapIntoCustomErrorResponse } from '../../../errors';
 
 export function defineDeleteRolesRoutes({ router, clusterClient }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/api/security/role/{name}',
-      validate: { params: schema.object({ name: schema.string({ minLength: 1 }) }) },
+      validate: {
+        params: schema.object({ name: schema.string({ minLength: 1 }) }),
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
@@ -23,11 +25,7 @@ export function defineDeleteRolesRoutes({ router, clusterClient }: RouteDefiniti
 
         return response.noContent();
       } catch (error) {
-        const wrappedError = wrapError(error);
-        return response.customError({
-          body: wrappedError,
-          statusCode: wrappedError.output.statusCode,
-        });
+        return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })
   );

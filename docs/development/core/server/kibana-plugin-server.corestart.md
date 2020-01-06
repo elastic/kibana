@@ -16,5 +16,7 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [capabilities](./kibana-plugin-server.corestart.capabilities.md) | <code>CapabilitiesStart</code> | [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) |
 |  [savedObjects](./kibana-plugin-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) |
+|  [uiSettings](./kibana-plugin-server.corestart.uisettings.md) | <code>UiSettingsServiceStart</code> | [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |
 

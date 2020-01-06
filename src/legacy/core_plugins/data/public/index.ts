@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,17 +27,9 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export { DataSetup, DataStart };
-
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-} from './index_patterns';
-export { QueryStringInput } from './query';
-export { SearchBar, SearchBarProps } from './search';
+export { DataStart };
+export { EsQuerySortValue, FetchOptions, ISearchSource, SortDirection } from './search/types';
+export { SearchSourceFields } from './search/types';
 export {
   SavedQueryAttributes,
   SavedQuery,
@@ -47,4 +39,4 @@ export {
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';

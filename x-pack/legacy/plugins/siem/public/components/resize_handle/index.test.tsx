@@ -98,15 +98,13 @@ describe('Resizeable', () => {
 
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <Resizeable
-          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
-          height="100%"
-          id="test"
-          onResize={jest.fn()}
-          render={() => <></>}
-        />
-      </TestProviders>
+      <Resizeable
+        handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+        height="100%"
+        id="test"
+        onResize={jest.fn()}
+        render={() => <></>}
+      />
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

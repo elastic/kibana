@@ -2427,10 +2427,8 @@ exports[`Field for number setting should render as read only if saving is disabl
       >
         <EuiFieldNumber
           aria-label="number test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2527,10 +2525,8 @@ exports[`Field for number setting should render as read only with help text if o
       >
         <EuiFieldNumber
           aria-label="number test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2606,10 +2602,8 @@ exports[`Field for number setting should render custom setting icon if it is cus
       >
         <EuiFieldNumber
           aria-label="number test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2674,10 +2668,8 @@ exports[`Field for number setting should render default value if there is no use
       >
         <EuiFieldNumber
           aria-label="number test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2781,10 +2773,8 @@ exports[`Field for number setting should render user value if there is user valu
       >
         <EuiFieldNumber
           aria-label="number test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}

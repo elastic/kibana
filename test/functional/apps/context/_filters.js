@@ -25,7 +25,7 @@ const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
@@ -33,13 +33,13 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
-    beforeEach(async function () {
+    beforeEach(async function() {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
     });
 
-    it('should be addable via expanded doc table rows', async function () {
+    it('should be addable via expanded doc table rows', async function() {
       await docTable.toggleRowExpanded({ isAnchorRow: true });
 
       await retry.try(async () => {
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should be toggleable via the filter bar', async function () {
+    it('should be toggleable via the filter bar', async function() {
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter

@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * Panel with a description of a rule and a list of actions that can be performed on the rule.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiDescriptionList,
-  EuiLink,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiLink, EuiPanel } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
 
@@ -29,16 +22,11 @@ import { buildRuleDescription } from '../utils';
 import { ml } from '../../../services/ml_api_service';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 export class RuleActionPanel extends Component {
-
   constructor(props) {
     super(props);
 
-    const {
-      job,
-      anomaly,
-      ruleIndex } = this.props;
+    const { job, anomaly, ruleIndex } = this.props;
 
     const detector = job.analysis_config.detectors[anomaly.detectorIndex];
     const rules = detector.custom_rules;
@@ -60,50 +48,44 @@ export class RuleActionPanel extends Component {
       const partitionFieldName = Object.keys(scope)[0];
       const partitionFieldValue = this.props.anomaly.source[partitionFieldName];
 
-      if (scope[partitionFieldName] !== undefined &&
-          partitionFieldValue !== undefined &&
-          partitionFieldValue.length === 1 &&
-          partitionFieldValue[0].length > 0) {
-
+      if (
+        scope[partitionFieldName] !== undefined &&
+        partitionFieldValue !== undefined &&
+        partitionFieldValue.length === 1 &&
+        partitionFieldValue[0].length > 0
+      ) {
         const filterId = scope[partitionFieldName].filter_id;
-        ml.filters.filters({ filterId })
-          .then((filter) => {
+        ml.filters
+          .filters({ filterId })
+          .then(filter => {
             const filterItems = filter.items;
             if (filterItems.indexOf(partitionFieldValue[0]) === -1) {
               this.setState({ showAddToFilterListLink: true });
             }
           })
-          .catch((resp) => {
+          .catch(resp => {
             console.log(`Error loading filter ${filterId}:`, resp);
           });
       }
-
     }
   }
 
   getEditRuleLink = () => {
     const { ruleIndex, setEditRuleIndex } = this.props;
     return (
-      <EuiLink
-        onClick={() => setEditRuleIndex(ruleIndex)}
-      >
+      <EuiLink onClick={() => setEditRuleIndex(ruleIndex)}>
         <FormattedMessage
           id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
           defaultMessage="Edit rule"
         />
       </EuiLink>
     );
-  }
+  };
 
   getDeleteRuleLink = () => {
     const { ruleIndex, deleteRuleAtIndex } = this.props;
-    return (
-      <DeleteRuleModal
-        ruleIndex={ruleIndex}
-        deleteRuleAtIndex={deleteRuleAtIndex}
-      />
-    );
-  }
+    return <DeleteRuleModal ruleIndex={ruleIndex} deleteRuleAtIndex={deleteRuleAtIndex} />;
+  };
 
   getQuickEditConditionLink = () => {
     // Returns the link to adjust the numeric value of a condition
@@ -123,7 +105,7 @@ export class RuleActionPanel extends Component {
     }
 
     return link;
-  }
+  };
 
   getQuickAddToFilterListLink = () => {
     // Returns the link to add the partitioning field value of the anomaly to the filter
@@ -144,14 +126,10 @@ export class RuleActionPanel extends Component {
         addItemToFilterList={addItemToFilterList}
       />
     );
-  }
+  };
 
   updateConditionValue = (conditionIndex, value) => {
-    const {
-      job,
-      anomaly,
-      ruleIndex,
-      updateRuleAtIndex } = this.props;
+    const { job, anomaly, ruleIndex, updateRuleAtIndex } = this.props;
 
     const detector = job.analysis_config.detectors[anomaly.detectorIndex];
     const editedRule = cloneDeep(detector.custom_rules[ruleIndex]);
@@ -162,7 +140,7 @@ export class RuleActionPanel extends Component {
     }
 
     updateRuleAtIndex(ruleIndex, editedRule);
-  }
+  };
 
   render() {
     if (this.rule === undefined) {
@@ -172,7 +150,12 @@ export class RuleActionPanel extends Component {
     // Add items for the standard Edit and Delete links.
     const descriptionListItems = [
       {
-        title: (<FormattedMessage id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle" defaultMessage="rule" />),
+        title: (
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
+            defaultMessage="Rule"
+          />
+        ),
         description: buildRuleDescription(this.rule, this.props.anomaly),
       },
       {
@@ -181,8 +164,8 @@ export class RuleActionPanel extends Component {
       },
       {
         title: '',
-        description: this.getDeleteRuleLink()
-      }
+        description: this.getDeleteRuleLink(),
+      },
     ];
 
     // Insert links if applicable for quick edits to a numeric condition
@@ -190,25 +173,29 @@ export class RuleActionPanel extends Component {
     const quickConditionLink = this.getQuickEditConditionLink();
     if (quickConditionLink !== null) {
       descriptionListItems.splice(1, 0, {
-        title: '', description: quickConditionLink
+        title: '',
+        description: quickConditionLink,
       });
     }
 
     if (this.state.showAddToFilterListLink === true) {
       const quickAddToFilterListLink = this.getQuickAddToFilterListLink();
       descriptionListItems.splice(descriptionListItems.length - 2, 0, {
-        title: '', description: quickAddToFilterListLink
+        title: '',
+        description: quickAddToFilterListLink,
       });
     }
 
-    descriptionListItems[1].title = 'actions';
+    descriptionListItems[1].title = (
+      <FormattedMessage
+        id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+        defaultMessage="Actions"
+      />
+    );
 
     return (
       <EuiPanel paddingSize="m" className="select-rule-action-panel">
-        <EuiDescriptionList
-          type="column"
-          listItems={descriptionListItems}
-        />
+        <EuiDescriptionList type="column" listItems={descriptionListItems} />
       </EuiPanel>
     );
   }
@@ -222,4 +209,3 @@ RuleActionPanel.propTypes = {
   deleteRuleAtIndex: PropTypes.func.isRequired,
   addItemToFilterList: PropTypes.func.isRequired,
 };
-

@@ -10,8 +10,13 @@ import { render } from '@testing-library/react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
+  MockApmPluginContextWrapper
 } from '../../../../../utils/testHelpers';
+
+const renderOptions = {
+  wrapper: MockApmPluginContextWrapper
+};
 
 function getError() {
   return ({
@@ -38,7 +43,7 @@ function getError() {
 describe('ErrorMetadata', () => {
   it('should render a error with all sections', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // sections
     expectTextsInDocument(output, [
@@ -57,7 +62,7 @@ describe('ErrorMetadata', () => {
 
   it('should render a error with all included dot notation keys', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // included keys
     expectTextsInDocument(output, [
@@ -79,7 +84,7 @@ describe('ErrorMetadata', () => {
 
   it('should render a error with all included values', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // included values
     expectTextsInDocument(output, [
@@ -104,7 +109,7 @@ describe('ErrorMetadata', () => {
 
   it('should render a error with only the required sections', () => {
     const error = {} as APMError;
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // required sections should be found
     expectTextsInDocument(output, ['Labels', 'User']);

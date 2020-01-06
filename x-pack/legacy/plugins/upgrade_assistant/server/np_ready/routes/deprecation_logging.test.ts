@@ -31,11 +31,6 @@ describe('deprecation logging API', () => {
     serverShim = {
       router: mockRouter,
       plugins: {
-        cloud: {
-          config: {
-            isCloudEnabled: true,
-          },
-        },
         elasticsearch: {
           getCluster: () => ({ callWithRequest } as any),
         } as any,

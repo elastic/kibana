@@ -33,6 +33,8 @@ import {
   listActionTypesRoute,
   getExecuteActionRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
+import { LicenseState } from './lib/license_state';
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -54,9 +56,10 @@ export class Plugin {
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private defaultKibanaIndex?: string;
+  private licenseState: LicenseState | null = null;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get('plugins', 'actions');
     this.config$ = initializerContext.config.create();
     this.kibana$ = initializerContext.config.kibana$;
   }
@@ -69,29 +72,7 @@ export class Plugin {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
-    plugins.xpack_main.registerFeature({
-      id: 'actions',
-      name: 'Actions',
-      app: ['actions', 'kibana'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['action', 'action_task_params'],
-            read: [],
-          },
-          ui: [],
-          api: ['actions-read', 'actions-all'],
-        },
-        read: {
-          savedObject: {
-            all: ['action_task_params'],
-            read: ['action'],
-          },
-          ui: [],
-          api: ['actions-read'],
-        },
-      },
-    });
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     // - `secrets` properties will be encrypted
@@ -100,7 +81,7 @@ export class Plugin {
     plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['description']),
+      attributesToExcludeFromAAD: new Set(['name']),
     });
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
@@ -109,9 +90,11 @@ export class Plugin {
 
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.task_manager,
+      actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -121,17 +104,19 @@ export class Plugin {
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
-      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsConfigType),
+      actionsConfigUtils,
     });
 
     // Routes
-    core.http.route(createActionRoute);
-    core.http.route(deleteActionRoute);
-    core.http.route(getActionRoute);
-    core.http.route(findActionRoute);
-    core.http.route(updateActionRoute);
-    core.http.route(listActionTypesRoute);
-    core.http.route(getExecuteActionRoute(actionExecutor));
+    core.http.route(extendRouteWithLicenseCheck(createActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(deleteActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(findActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(listActionTypesRoute, this.licenseState));
+    core.http.route(
+      extendRouteWithLicenseCheck(getExecuteActionRoute(actionExecutor), this.licenseState)
+    );
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
@@ -197,5 +182,11 @@ export class Plugin {
         });
       },
     };
+  }
+
+  public stop() {
+    if (this.licenseState) {
+      this.licenseState.clean();
+    }
   }
 }

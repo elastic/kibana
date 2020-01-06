@@ -45,6 +45,22 @@ describe('#get', () => {
     expect(configAdapter.get('container')).toEqual({ value: 'some' });
   });
 
+  test('correctly handles csp config.', () => {
+    const configAdapter = new LegacyObjectToConfigAdapter({
+      csp: {
+        rules: ['strict'],
+      },
+    });
+
+    expect(configAdapter.get('csp')).toMatchInlineSnapshot(`
+      Object {
+        "rules": Array [
+          "strict",
+        ],
+      }
+    `);
+  });
+
   test('correctly handles silent logging config.', () => {
     const configAdapter = new LegacyObjectToConfigAdapter({
       logging: { silent: true },
@@ -64,9 +80,11 @@ describe('#get', () => {
   test('correctly handles server config.', () => {
     const configAdapter = new LegacyObjectToConfigAdapter({
       server: {
+        name: 'kibana-hostname',
         autoListen: true,
         basePath: '/abc',
         cors: false,
+        customResponseHeaders: { 'custom-header': 'custom-value' },
         host: 'host',
         maxPayloadBytes: 1000,
         keepaliveTimeout: 5000,
@@ -74,15 +92,22 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
+        xsrf: {
+          disableProtection: false,
+          whitelist: [],
+        },
       },
     });
 
     const configAdapterWithDisabledSSL = new LegacyObjectToConfigAdapter({
       server: {
+        name: 'kibana-hostname',
         autoListen: true,
         basePath: '/abc',
         cors: false,
+        customResponseHeaders: { 'custom-header': 'custom-value' },
         host: 'host',
         maxPayloadBytes: 1000,
         keepaliveTimeout: 5000,
@@ -90,7 +115,12 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: false, certificate: 'cert', key: 'key' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
+        xsrf: {
+          disableProtection: false,
+          whitelist: [],
+        },
       },
     });
 

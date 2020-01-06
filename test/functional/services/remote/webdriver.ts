@@ -115,9 +115,9 @@ async function attemptToCreateCommand(
             session,
             logging.Type.BROWSER,
             logPollingMs,
-            lifecycle.cleanup$
+            lifecycle.cleanup.after$
           ).pipe(
-            takeUntil(lifecycle.cleanup$),
+            takeUntil(lifecycle.cleanup.after$),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
               level,
@@ -136,8 +136,22 @@ async function attemptToCreateCommand(
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
         }
+
+        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
+        if (process.platform === 'win32') {
+          const session = await new Builder()
+            .forBrowser(browserType)
+            .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .build();
+          return {
+            session,
+            consoleLog$: Rx.EMPTY,
+          };
+        }
+
         const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.on('cleanup', cleanup);
+        lifecycle.cleanup.add(cleanup);
 
         const session = await new Builder()
           .forBrowser(browserType)

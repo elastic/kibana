@@ -17,10 +17,24 @@
  * under the License.
  */
 
+import { map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import {
+  PluginInitializerContext,
+  PluginManifest,
+  PluginOpaqueId,
+  SharedGlobalConfigKeys,
+} from './types';
+import { PathConfigType, config as pathConfig } from '../path';
+import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
+import {
+  ElasticsearchConfigType,
+  config as elasticsearchConfig,
+} from '../elasticsearch/elasticsearch_config';
+import { pick, deepFreeze } from '../../utils';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -65,6 +79,27 @@ export function createPluginInitializerContext(
      * Core configuration functionality, enables fetching a subset of the config.
      */
     config: {
+      legacy: {
+        /**
+         * Global configuration
+         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
+         * @deprecated
+         */
+        globalConfig$: combineLatest(
+          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
+          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
+        ).pipe(
+          map(([kibana, elasticsearch, path]) =>
+            deepFreeze({
+              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
+              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+              path: pick(path, SharedGlobalConfigKeys.path),
+            })
+          )
+        ),
+      },
+
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
        * manifest and validates it against the schema in the static `schema` on
@@ -102,6 +137,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    capabilities: {
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
+    },
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
@@ -120,7 +159,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
+      registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
     savedObjects: {
@@ -131,6 +172,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       register: deps.uiSettings.register,
+    },
+    uuid: {
+      getInstanceUuid: deps.uuid.getInstanceUuid,
     },
   };
 }
@@ -153,6 +197,14 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
-    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
+    savedObjects: {
+      getScopedClient: deps.savedObjects.getScopedClient,
+    },
+    uiSettings: {
+      asScopedToClient: deps.uiSettings.asScopedToClient,
+    },
   };
 }

@@ -1,23 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`accepts valid hostnames: valid host names 1`] = `
+exports[`accepts valid hostnames 1`] = `
 Object {
-  "host1": "www.example.com",
-  "host2": "8.8.8.8",
-  "host3": "::1",
-  "host4": "localhost",
+  "host": "www.example.com",
+}
+`;
+
+exports[`accepts valid hostnames 2`] = `
+Object {
+  "host": "8.8.8.8",
+}
+`;
+
+exports[`accepts valid hostnames 3`] = `
+Object {
+  "host": "::1",
+}
+`;
+
+exports[`accepts valid hostnames 4`] = `
+Object {
+  "host": "localhost",
 }
 `;
 
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
+  "compression": Object {
+    "enabled": true,
+  },
   "cors": false,
+  "customResponseHeaders": Object {},
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
     "valueInBytes": 1048576,
   },
+  "name": "kibana-hostname",
   "port": 5601,
   "rewriteBasePath": false,
   "socketTimeout": 120000,
@@ -52,6 +72,10 @@ Object {
       "TLSv1.2",
     ],
   },
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
+  },
 }
 `;
 
@@ -82,3 +106,18 @@ exports[`with TLS throws if TLS is enabled but \`certificate\` is not specified 
 exports[`with TLS throws if TLS is enabled but \`key\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;
 
 exports[`with TLS throws if TLS is enabled but \`redirectHttpFromPort\` is equal to \`port\` 1`] = `"Kibana does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."`;
+
+exports[`with compression accepts valid referrer whitelist 1`] = `
+Array [
+  "www.example.com",
+  "8.8.8.8",
+  "::1",
+  "localhost",
+]
+`;
+
+exports[`with compression throws if invalid referrer whitelist 1`] = `"[compression.referrerWhitelist.0]: value is [asdf$%^] but it must be a valid hostname (see RFC 1123)."`;
+
+exports[`with compression throws if invalid referrer whitelist 2`] = `"[compression.referrerWhitelist]: array size is [0], but cannot be smaller than [1]"`;
+
+exports[`with compression throws if referrer whitelist is specified and compression is disabled 1`] = `"cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false"`;

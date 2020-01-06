@@ -33,9 +33,15 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({
-        enableExternalUrls: server.config().get('vega.enableExternalUrls'),
-      }),
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+          enableExternalUrls: serverConfig.get('vega.enableExternalUrls'),
+        };
+      },
     },
     init: (server: Legacy.Server) => ({}),
     config(Joi: any) {

@@ -6,11 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommon } from './common';
 
-export function MachineLearningJobWizardAdvancedProvider({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: MlCommon
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -47,7 +48,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setQueryDelay(queryDelay: string) {
-      await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -64,7 +65,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setFrequency(frequency: string) {
-      await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -81,7 +82,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setScrollSize(scrollSize: string) {
-      await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -141,8 +142,10 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async openCreateDetectorModal() {
-      await testSubjects.click('mlAddDetectorButton');
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click('mlAddDetectorButton');
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async assertCreateDetectorModalExists() {
@@ -258,7 +261,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setDetectorDescription(description: string) {
-      await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
+      await mlCommon.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
       });
       await this.assertDetectorDescriptionValue(description);

@@ -20,3 +20,7 @@
 export function parseCommaSeparatedList(input: string | string[]): string[];
 
 export function formatListAsProse(list: string[], options?: { inclusive?: boolean }): string;
+
+export function getFlattenedObject(rootValue: Record<string, any>): { [key: string]: any };
+
+export function unset(object: object, rawPath: string): void;

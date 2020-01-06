@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/actions';
@@ -82,7 +81,7 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
   }
 };
 
-const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
+const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
     activePage,
     data,
@@ -97,39 +96,49 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     updateTableActivePage,
     updateTableLimit,
     type,
-  }) => (
-    <PaginatedTable
-      activePage={activePage}
-      columns={getUncommonColumnsCurated(type)}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.UNCOMMON_PROCESSES}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={newActivePage => loadPage(newActivePage)}
-      pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={newLimit =>
+  }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
           tableType,
-        })
-      }
-      updateActivePage={newPage =>
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,
           tableType,
-        })
-      }
-    />
-  )
+        }),
+      [type, updateTableActivePage]
+    );
+
+    return (
+      <PaginatedTable
+        activePage={activePage}
+        columns={getUncommonColumnsCurated(type)}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.UNCOMMON_PROCESSES}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    );
+  }
 );
 
 UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
@@ -143,6 +152,8 @@ export const UncommonProcessTable = connect(makeMapStateToProps, {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
 })(UncommonProcessTableComponent);
+
+UncommonProcessTable.displayName = 'UncommonProcessTable';
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {

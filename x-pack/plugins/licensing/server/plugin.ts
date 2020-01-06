@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subject, Subscription, merge, timer } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, Subscription, timer } from 'rxjs';
+import { take } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
@@ -19,7 +19,8 @@ import {
   IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, LicensingPluginSetup, PublicLicense, PublicFeatures } from '../common/types';
+import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
+import { LicensingPluginSetup } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
@@ -28,11 +29,13 @@ import { registerRoutes } from './routes';
 
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
+import { createOnPreResponseHandler } from './on_pre_response_handler';
 
 function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
     uid: license.uid,
     type: license.type,
+    mode: license.mode,
     expiryDateInMillis: license.expiry_date_in_millis,
     status: license.status,
   };
@@ -78,7 +81,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
-  private licenseFetchSubscription?: Subscription;
   private loggingSubscription?: Subscription;
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -89,30 +91,36 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
+    const pollingFrequency = config.api_polling_frequency;
     const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
 
-    const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
+    const { refresh, license$ } = this.createLicensePoller(
+      dataClient,
+      pollingFrequency.asMilliseconds()
+    );
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+
     registerRoutes(core.http.createRouter());
+    core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
 
     return {
       refresh,
       license$,
+      createLicensePoller: this.createLicensePoller.bind(this),
     };
   }
 
   private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
-    const manualRefresh$ = new Subject();
-    const intervalRefresh$ = timer(0, pollingFrequency);
-    const refresh$ = merge(intervalRefresh$, manualRefresh$).pipe(takeUntil(this.stop$));
+    this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
-    const { update$, fetchSubscription } = createLicenseUpdate(refresh$, () =>
+    const intervalRefresh$ = timer(0, pollingFrequency);
+
+    const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
       this.fetchLicense(clusterClient)
     );
 
-    this.licenseFetchSubscription = fetchSubscription;
-    this.loggingSubscription = update$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe(license =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [
@@ -124,11 +132,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     );
 
     return {
-      refresh: () => {
+      refresh: async () => {
         this.logger.debug('Requesting Elasticsearch licensing API');
-        manualRefresh$.next();
+        return await refreshManually();
       },
-      license$: update$,
+      license$,
     };
   }
 
@@ -139,8 +147,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         path: '/_xpack',
       });
 
-      const normalizedLicense = normalizeServerLicense(response.license);
-      const normalizedFeatures = normalizeFeatures(response.features);
+      const normalizedLicense = response.license
+        ? normalizeServerLicense(response.license)
+        : undefined;
+      const normalizedFeatures = response.features
+        ? normalizeFeatures(response.features)
+        : undefined;
+
       const signature = sign({
         license: normalizedLicense,
         features: normalizedFeatures,
@@ -178,11 +191,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   public stop() {
     this.stop$.next();
     this.stop$.complete();
-
-    if (this.licenseFetchSubscription !== undefined) {
-      this.licenseFetchSubscription.unsubscribe();
-      this.licenseFetchSubscription = undefined;
-    }
 
     if (this.loggingSubscription !== undefined) {
       this.loggingSubscription.unsubscribe();

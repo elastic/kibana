@@ -1,0 +1,17 @@
+{
+  "name": "Query which has extra meta data",
+  "description": "Query which has extra meta data",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "user.name: root or user.name: admin",
+  "meta": {
+    "whatever-you-want": {
+      "store-stateful-stuff-for-ui": {
+        "or-anything-else": true
+      }
+    }
+  }
+}

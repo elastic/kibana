@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const remote = getService('remote');
 
   describe('suite3', () => {
     before(async () => {
       process.send({
         name: 'before suite3',
-        size: await remote.getWindowSize()
+        size: await remote.getWindowSize(),
       });
 
       await remote.setWindowSize(800, 800);
@@ -33,7 +33,7 @@ export default function ({ getService, loadTestFile }) {
     it('has the right window size', async () => {
       process.send({
         name: 'in suite3',
-        size: await remote.getWindowSize()
+        size: await remote.getWindowSize(),
       });
     });
 
@@ -42,7 +42,7 @@ export default function ({ getService, loadTestFile }) {
     after(async () => {
       process.send({
         name: 'after suite3',
-        size: await remote.getWindowSize()
+        size: await remote.getWindowSize(),
       });
     });
   });

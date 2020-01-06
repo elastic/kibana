@@ -6,20 +6,18 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
@@ -28,11 +26,13 @@ import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
 import { SpacesService } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service/spaces_service';
+import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
+import { initInternalSpacesApi } from './routes/api/internal';
+
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
@@ -41,9 +41,6 @@ export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
-  };
-  capabilities: {
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
@@ -124,12 +121,28 @@ export class Plugin {
       spacesService,
     });
 
+    const internalRouter = core.http.createRouter();
+    initInternalSpacesApi({
+      internalRouter,
+      spacesService,
+    });
+
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
       getLegacyAPI: this.getLegacyAPI,
       spacesService,
       features: plugins.features,
+    });
+
+    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
+      try {
+        const activeSpace = await spacesService.getActiveSpace(request);
+        const features = plugins.features.getFeatures();
+        return toggleUICapabilities(features, uiCapabilities, activeSpace);
+      } catch (e) {
+        return uiCapabilities;
+      }
     });
 
     if (plugins.security) {
@@ -188,15 +201,6 @@ export class Plugin {
       kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
       features: featuresSetup,
       licensing: licensingSetup,
-    });
-    legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
-        const features = featuresSetup.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
     });
   }
 }

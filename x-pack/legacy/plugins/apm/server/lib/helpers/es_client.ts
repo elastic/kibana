@@ -78,7 +78,10 @@ async function getParamsForSearchRequest(
 ) {
   const { uiSettings } = context.core;
   const [indices, includeFrozen] = await Promise.all([
-    getApmIndices(context),
+    getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config: context.config
+    }),
     uiSettings.client.get('search:includeFrozen')
   ]);
 
@@ -144,7 +147,7 @@ export function getESClient(
           `${request.url.pathname} ${JSON.stringify(context.params.query)}`
         );
         console.log(`GET ${nextParams.index}/_search`);
-        console.log(JSON.stringify(nextParams.body, null, 4));
+        console.log(JSON.stringify(nextParams.body, null, 2));
       }
 
       return (callMethod('search', nextParams) as unknown) as Promise<

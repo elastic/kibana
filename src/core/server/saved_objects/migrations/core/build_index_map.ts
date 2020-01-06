@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Config } from '../../../config';
 import { MappingProperties } from '../../mappings';
 import { SavedObjectsSchema } from '../../schema';
+import { LegacyConfig } from '../../../legacy';
 
 export interface CreateIndexMapOptions {
-  config: Config;
+  config: LegacyConfig;
   kibanaIndexName: string;
   schema: SavedObjectsSchema;
   indexMap: MappingProperties;

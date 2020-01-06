@@ -30,21 +30,23 @@ import { safeMakeLabel } from './controls/agg_utils';
 
 uiModules
   .get('app/visualize')
-  .directive('visOptionsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
-    ['component', { wrapApply: false }],
-    ['aggs', { watchDepth: 'collection' }],
-    ['stateParams', { watchDepth: 'collection' }],
-    ['vis', { watchDepth: 'collection' }],
-    ['uiState', { watchDepth: 'collection' }],
-    ['setValue', { watchDepth: 'reference' }],
-    ['setValidity', { watchDepth: 'reference' }],
-    ['setVisType', { watchDepth: 'reference' }],
-    ['setTouched', { watchDepth: 'reference' }],
-    'hasHistogramAgg',
-    'currentTab',
-    'aggsLabels',
-  ]))
-  .directive('visEditorVisOptions', function ($compile) {
+  .directive('visOptionsReactWrapper', reactDirective =>
+    reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
+      ['component', { wrapApply: false }],
+      ['aggs', { watchDepth: 'collection' }],
+      ['stateParams', { watchDepth: 'collection' }],
+      ['vis', { watchDepth: 'collection' }],
+      ['uiState', { watchDepth: 'collection' }],
+      ['setValue', { watchDepth: 'reference' }],
+      ['setValidity', { watchDepth: 'reference' }],
+      ['setVisType', { watchDepth: 'reference' }],
+      ['setTouched', { watchDepth: 'reference' }],
+      'hasHistogramAgg',
+      'currentTab',
+      'aggsLabels',
+    ])
+  )
+  .directive('visEditorVisOptions', function($compile) {
     return {
       restrict: 'E',
       require: '?^ngModel',
@@ -59,7 +61,7 @@ uiModules
         hasHistogramAgg: '=',
         currentTab: '=',
       },
-      link: function ($scope, $el, attrs, ngModelCtrl) {
+      link: function($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
           $scope.onAggParamsChange($scope.editorState.params, paramName, value);
 
@@ -75,24 +77,30 @@ uiModules
           }
         };
 
-        $scope.setVisType = (type) => {
+        $scope.setVisType = type => {
           $scope.vis.type.type = type;
         };
 
         // since aggs reference isn't changed when an agg is updated, we need somehow to let React component know about it
         $scope.aggsLabels = '';
 
-        $scope.$watch(() => {
-          return $scope.editorState.aggs.aggs.map(agg => {
-            return safeMakeLabel(agg);
-          }).join();
-        }, value => {
-          $scope.aggsLabels = value;
-        });
+        $scope.$watch(
+          () => {
+            return $scope.editorState.aggs.aggs
+              .map(agg => {
+                return safeMakeLabel(agg);
+              })
+              .join();
+          },
+          value => {
+            $scope.aggsLabels = value;
+          }
+        );
 
-        const comp = typeof $scope.editor === 'string' ?
-          $scope.editor :
-          `<vis-options-react-wrapper
+        const comp =
+          typeof $scope.editor === 'string'
+            ? $scope.editor
+            : `<vis-options-react-wrapper
             component="editor"
             aggs="editorState.aggs"
             aggs-labels="aggsLabels"
@@ -108,6 +116,6 @@ uiModules
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
         $el.append($editor);
-      }
+      },
     };
   });

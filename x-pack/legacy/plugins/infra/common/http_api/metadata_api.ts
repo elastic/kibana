@@ -5,17 +5,11 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
-
-export const InfraMetadataNodeTypeRT = rt.keyof({
-  host: null,
-  pod: null,
-  container: null,
-});
+import { ItemTypeRT } from '../../common/inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
-  nodeType: InfraMetadataNodeTypeRT,
+  nodeType: ItemTypeRT,
   sourceId: rt.string,
 });
 
@@ -67,6 +61,7 @@ export const InfraMetadataInfoRT = rt.partial({
 });
 
 const InfraMetadataRequiredRT = rt.type({
+  id: rt.string,
   name: rt.string,
   features: rt.array(InfraMetadataFeatureRT),
 });
@@ -80,8 +75,6 @@ export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMe
 export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
 
 export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
-
-export type InfraMetadataWrappedRequest = InfraWrappableRequest<InfraMetadataRequest>;
 
 export type InfraMetadataFeature = rt.TypeOf<typeof InfraMetadataFeatureRT>;
 
@@ -98,5 +91,3 @@ export type InfraMetadataMachine = rt.TypeOf<typeof InfraMetadataMachineRT>;
 export type InfraMetadataHost = rt.TypeOf<typeof InfraMetadataHostRT>;
 
 export type InfraMetadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;
-
-export type InfraMetadataNodeType = rt.TypeOf<typeof InfraMetadataNodeTypeRT>;

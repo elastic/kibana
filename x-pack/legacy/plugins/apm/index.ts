@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
@@ -31,7 +31,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         order: 8100
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      home: ['plugins/apm/register_feature'],
+      home: ['plugins/apm/legacy_register_feature'],
 
       // TODO: get proper types
       injectDefaultVars(server: Server) {
@@ -43,7 +43,6 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'apm-services-telemetry': {
           isNamespaceAgnostic: true

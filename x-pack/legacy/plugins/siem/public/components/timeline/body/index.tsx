@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useMemo } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
-import { TimelineItem } from '../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
@@ -16,6 +16,8 @@ import {
   OnColumnSorted,
   OnFilterChange,
   OnPinEvent,
+  OnRowSelected,
+  OnSelectAll,
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
@@ -27,6 +29,7 @@ import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
+import { useTimelineTypeContext } from '../timeline_context';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -38,10 +41,14 @@ export interface BodyProps {
   height: number;
   id: string;
   isEventViewer?: boolean;
+  isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
+  onRowSelected: OnRowSelected;
+  onSelectAll: OnSelectAll;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -49,6 +56,8 @@ export interface BodyProps {
   pinnedEventIds: Readonly<Record<string, boolean>>;
   range: string;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
@@ -67,22 +76,38 @@ export const Body = React.memo<BodyProps>(
     height,
     id,
     isEventViewer = false,
+    isSelectAllChecked,
+    loadingEventIds,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
+    onRowSelected,
+    onSelectAll,
     onFilterChange,
     onPinEvent,
     onUpdateColumns,
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    selectedEventIds,
+    showCheckboxes,
     sort,
     toggleColumn,
     updateNote,
   }) => {
-    const columnWidths = columnHeaders.reduce(
-      (totalWidth, header) => totalWidth + header.width,
-      getActionsColumnWidth(isEventViewer)
+    const timelineTypeContext = useTimelineTypeContext();
+    const additionalActionWidth =
+      timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
+
+    const actionsColumnWidth = useMemo(
+      () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
+      [isEventViewer, showCheckboxes, additionalActionWidth]
+    );
+
+    const columnWidths = useMemo(
+      () =>
+        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
+      [actionsColumnWidth, columnHeaders]
     );
 
     return (
@@ -94,23 +119,26 @@ export const Body = React.memo<BodyProps>(
             style={{ minWidth: columnWidths + 'px' }}
           >
             <ColumnHeaders
-              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+              actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
+              isSelectAllChecked={isSelectAllChecked}
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}
               onFilterChange={onFilterChange}
+              onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
               sort={sort}
               timelineId={id}
               toggleColumn={toggleColumn}
             />
 
             <Events
-              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+              actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -120,12 +148,16 @@ export const Body = React.memo<BodyProps>(
               getNotesByIds={getNotesByIds}
               id={id}
               isEventViewer={isEventViewer}
+              loadingEventIds={loadingEventIds}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
+              onRowSelected={onRowSelected}
               onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
+              selectedEventIds={selectedEventIds}
+              showCheckboxes={showCheckboxes}
               toggleColumn={toggleColumn}
               updateNote={updateNote}
             />

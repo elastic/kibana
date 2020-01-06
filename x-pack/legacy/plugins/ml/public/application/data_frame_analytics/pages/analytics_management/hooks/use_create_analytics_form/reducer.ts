@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
-
-import { validateIndexPattern } from 'ui/index_patterns';
-
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
@@ -22,7 +18,12 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
-import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
+import {
+  getDependentVar,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '../../../../common/analytics';
+import { indexPatterns } from '../../../../../../../../../../../src/plugins/data/public';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '
@@ -39,7 +40,7 @@ export const mmlUnitInvalidErrorMessage = i18n.translate(
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
 
-  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  const sourceIndex = jobConfig?.source?.index;
 
   if (typeof sourceIndex === 'string') {
     return sourceIndex;
@@ -63,35 +64,46 @@ export const validateAdvancedEditor = (state: State): State => {
   // general check against Kibana index pattern names, but since this is about the advanced editor
   // with support for arrays in the job config, we also need to check that each individual name
   // doesn't include a comma if index names are supplied as an array.
-  // `validateIndexPattern()` returns a map of messages, we're only interested here if it's valid or not.
+  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
   // If there are no messages, it means the index pattern is valid.
-  let sourceIndexNameValid = Object.keys(validateIndexPattern(sourceIndexName)).length === 0;
-  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
+  const sourceIndex = jobConfig?.source?.index;
   if (sourceIndexNameValid) {
     if (typeof sourceIndex === 'string') {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d.includes(','));
+      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
     }
   }
 
-  const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
+  const destinationIndexName = jobConfig?.dest?.index ?? '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
   const mml = jobConfig.model_memory_limit;
-  const modelMemoryLimitEmpty = mml === '';
+  const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
     const { valid } = validateModelMemoryLimitUnits(mml);
     state.form.modelMemoryLimitUnitValid = valid;
   }
 
   let dependentVariableEmpty = false;
-  if (isRegressionAnalysis(jobConfig.analysis)) {
+
+  if (
+    jobConfig.analysis === undefined &&
+    (jobType === JOB_TYPES.CLASSIFICATION || jobType === JOB_TYPES.REGRESSION)
+  ) {
+    dependentVariableEmpty = true;
+  }
+
+  if (
+    jobConfig.analysis !== undefined &&
+    (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
+  ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
-    dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariableName === '';
+    dependentVariableEmpty = dependentVariableName === '';
   }
 
   if (sourceIndexNameEmpty) {
@@ -201,7 +213,10 @@ const validateForm = (state: State): State => {
     modelMemoryLimit,
   } = state.form;
 
-  const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
+  const jobTypeEmpty = jobType === undefined;
+  const dependentVariableEmpty =
+    (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
+    dependentVariable === '';
   const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
   if (!modelMemoryLimitEmpty && modelMemoryLimit !== undefined) {
@@ -210,6 +225,7 @@ const validateForm = (state: State): State => {
   }
 
   state.isValid =
+    !jobTypeEmpty &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -275,7 +291,7 @@ export function reducer(state: State, action: Action): State {
 
       if (action.payload.sourceIndex !== undefined) {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
-        const validationMessages = validateIndexPattern(newFormState.sourceIndex);
+        const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
       }
 
