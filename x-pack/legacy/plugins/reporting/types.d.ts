@@ -64,9 +64,6 @@ interface GenerateQuery {
 interface GenerateExportTypePayload {
   jobParams: string;
 }
-interface DownloadParams {
-  docId: string;
-}
 
 /*
  * Legacy System
@@ -79,6 +76,7 @@ type LegacyPlugins = Legacy.Server['plugins'];
 export interface ServerFacade {
   config: Legacy.Server['config'];
   info: Legacy.Server['info'];
+  log: Legacy.Server['log'];
   newPlatform: Legacy.Server['newPlatform'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
@@ -91,18 +89,6 @@ export interface ServerFacade {
   uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
 }
 
-interface ReportingRequest {
-  query: ListQuery & GenerateQuery;
-  params: DownloadParams;
-  payload: GenerateExportTypePayload;
-  pre: {
-    management: {
-      jobTypes: any;
-    };
-    user: any;
-  };
-}
-
 export type EnqueueJobFn = <JobParamsType>(
   parentLogger: LevelLogger,
   exportTypeId: string,
@@ -112,7 +98,20 @@ export type EnqueueJobFn = <JobParamsType>(
   request: RequestFacade
 ) => Promise<Job>;
 
-export type RequestFacade = ReportingRequest & Legacy.Request;
+export interface RequestFacade {
+  getBasePath: Legacy.Request['getBasePath'];
+  getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
+  headers: Legacy.Request['headers'];
+  params: Legacy.Request['params'];
+  query: ListQuery & GenerateQuery;
+  payload: JobParamPostPayload | GenerateExportTypePayload;
+  pre: {
+    management: {
+      jobTypes: any;
+    };
+    user: any;
+  };
+}
 
 export type ResponseFacade = ResponseObject & {
   isBoom: boolean;
