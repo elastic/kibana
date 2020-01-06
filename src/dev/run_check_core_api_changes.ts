@@ -35,6 +35,7 @@ import getopts from 'getopts';
 
 const apiExtractorConfig = (folder: string): ExtractorConfig => {
   const config: IConfigFile = {
+    newlineKind: 'lf',
     compiler: {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
