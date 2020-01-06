@@ -28,9 +28,7 @@ export default function({ getService, getPageObjects }) {
   ]);
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45499
-  // FLAKY: https://github.com/elastic/kibana/issues/48721
-  describe.skip('Reporting', () => {
+  describe('Reporting', () => {
     before('initialize tests', async () => {
       await PageObjects.reporting.initTests();
     });
@@ -67,7 +65,9 @@ export default function({ getService, getPageObjects }) {
 
     const getBaselineReportPath = (fileName, reportExt = 'pdf') => {
       const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-      return path.resolve(baselineFolder, `${fileName}.${reportExt}`);
+      const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
+      log.debug(`getBaselineReportPath (${fullPath})`);
+      return fullPath;
     };
 
     describe('Dashboard', () => {
@@ -82,39 +82,33 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mypdfdash');
+          await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
         });
       });
 
-      describe.skip('Print Layout', () => {
+      describe('Print Layout', () => {
         it('matches baseline report', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
+          this.timeout(300000);
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
-          // There is a current issue causing reports with tilemaps to timeout:
-          // https://github.com/elastic/kibana/issues/14136. Once that is resolved, add the tilemap visualization
-          // back in!
           const tileMapIndex = visualizations.indexOf('Visualization TileMap');
           visualizations.splice(tileMapIndex, 1);
+
           await PageObjects.dashboard.addVisualizations(visualizations);
-
           await PageObjects.dashboard.saveDashboard('report test');
-
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
+          const url = await PageObjects.reporting.getReportURL(60000);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
@@ -131,7 +125,7 @@ export default function({ getService, getPageObjects }) {
         it('matches same baseline report with margins turned on', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
+          this.timeout(300000);
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
@@ -140,12 +134,9 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
+          const url = await PageObjects.reporting.getReportURL(60000);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          await PageObjects.reporting.closeTab(1);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
           const percentSimilar = await checkIfPdfsMatch(
@@ -159,26 +150,18 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
+      describe('Preserve Layout', () => {
         it('matches baseline report', async function() {
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
+          this.timeout(300000);
 
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
+          const url = await PageObjects.reporting.getReportURL(60000);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
           const reportFileName = 'dashboard_preserve_layout';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
 
@@ -192,8 +175,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/43131
-      describe.skip('Print PNG button', () => {
+      describe('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
@@ -202,45 +184,32 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mypngdash');
+          await PageObjects.dashboard.saveDashboard('My PNG Dash');
           await PageObjects.reporting.openPngReportingPanel();
           await expectEnabledGenerateReportButton();
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
+      describe('Preserve Layout', () => {
         it('matches baseline report', async function() {
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins.
-          this.timeout(360000);
+          this.timeout(300000);
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
-          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
-          // There is a current issue causing reports with tilemaps to timeout:
-          // https://github.com/elastic/kibana/issues/14136. Once that is resolved, add the tilemap visualization
-          // back in!
+          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
           const tileMapIndex = visualizations.indexOf('Visualization TileMap');
           visualizations.splice(tileMapIndex, 1);
+
           await PageObjects.dashboard.addVisualizations(visualizations);
-
           await PageObjects.dashboard.saveDashboard('PNG report test');
-
           await PageObjects.reporting.openPngReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
+          const url = await PageObjects.reporting.getReportURL(60000);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
           const reportFileName = 'dashboard_preserve_layout';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
           const percentSimilar = await checkIfPngsMatch(
@@ -249,14 +218,14 @@ export default function({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
+
           expect(percentSimilar).to.be.lessThan(0.05);
         });
       });
     });
 
     describe('Discover', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/31379
-      describe.skip('Generate CSV button', () => {
+      describe('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {
@@ -306,22 +275,16 @@ export default function({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        // TODO Re-enable the tests after removing Phantom:
-        // https://github.com/elastic/kibana/issues/21485
-        it.skip('matches baseline report', async function() {
+        it('matches baseline report', async function() {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
 
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
 
-          const url = await PageObjects.reporting.getUrlOfTab(1);
+          const url = await PageObjects.reporting.getReportURL(60000);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          await PageObjects.reporting.closeTab(1);
           const reportFileName = 'visualize_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
           const percentSimilar = await checkIfPdfsMatch(
@@ -330,6 +293,7 @@ export default function({ getService, getPageObjects }) {
             config.get('screenshots.directory'),
             log
           );
+
           expect(percentSimilar).to.be.lessThan(0.05);
         });
       });

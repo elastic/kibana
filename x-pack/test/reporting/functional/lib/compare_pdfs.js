@@ -45,7 +45,7 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   log.debug(`writeFileSync: ${actualCopyPath}`);
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
-  const convertOptions = {};
+  const convertOptions = { graphicsMagick: true };
 
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });

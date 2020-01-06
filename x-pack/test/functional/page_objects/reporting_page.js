@@ -37,40 +37,29 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 850);
     }
 
-    async getUrlOfTab(tabIndex) {
-      return await retry.try(async () => {
-        log.debug(`reportingPage.getUrlOfTab(${tabIndex}`);
-        const handles = await browser.getAllWindowHandles();
-        log.debug(`Switching to window ${handles[tabIndex]}`);
-        await browser.switchToWindow(handles[tabIndex]);
-
-        const url = await browser.getCurrentUrl();
-        if (!url || url === 'about:blank') {
-          throw new Error('url is blank');
-        }
-
-        await browser.switchToWindow(handles[0]);
-        return url;
-      });
-    }
-
-    async closeTab(tabIndex) {
-      return await retry.try(async () => {
-        log.debug(`reportingPage.closeTab(${tabIndex}`);
-        const handles = await browser.getAllWindowHandles();
-        log.debug(`Switching to window ${handles[tabIndex]}`);
-        await browser.switchToWindow(handles[tabIndex]);
-        await browser.closeCurrentWindow();
-        await browser.switchToWindow(handles[0]);
-      });
-    }
-
     async forceSharedItemsContainerSize({ width }) {
       await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex="none";
         el.style.width="${width}px";
       `);
+    }
+
+    async getReportURL(timeout) {
+      const host = PageObjects.common.getHostPort();
+
+      log.debug('getReportURL');
+
+      const url = await testSubjects.getAttribute(
+        'downloadCompletedReportButton',
+        'data-report-url',
+        timeout
+      );
+      const fullUrl = `${host}${url}`;
+
+      log.debug(`getReportURL got url: ${fullUrl}`);
+
+      return fullUrl;
     }
 
     async removeForceSharedItemsContainerSize() {
