@@ -25,6 +25,7 @@ export function ingest(kibana: any) {
     config: () => config,
     configPrefix: CONFIG_PREFIX,
     uiExports: {
+      managementSections: ['plugins/ingest/legacy_management'],
       savedObjectSchemas: {
         policies: {
           isNamespaceAgnostic: true,
