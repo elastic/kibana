@@ -39,8 +39,13 @@ import {
   unhashUrl,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
-import { FilterStateManager, IndexPattern } from '../../../../data/public';
-import { Query, SavedQuery, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import { FilterStateManager } from '../../../../data/public';
+import {
+  IndexPattern,
+  Query,
+  SavedQuery,
+  IndexPatternsContract,
+} from '../../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -118,7 +123,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -192,6 +197,8 @@ export class DashboardAppController {
       const emptyScreenProps: DashboardEmptyScreenProps = {
         onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
         showLinkToVisualize: shouldShowEditHelp,
+        uiSettings,
+        http,
       };
       if (shouldShowEditHelp) {
         emptyScreenProps.onVisualizeClick = addVisualization;
