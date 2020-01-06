@@ -186,7 +186,7 @@ test('properly iterates through plugin search locations', async () => {
   ]);
 });
 
-test('logs a warning about --plugin-paths when used in development', async () => {
+test('logs a warning about --plugin-path when used in development', async () => {
   mockPackage.raw = {
     branch: 'master',
     version: '1.2.3',
@@ -228,7 +228,7 @@ test('logs a warning about --plugin-paths when used in development', async () =>
   ]);
 });
 
-test('does not log a warning about --plugin-paths when used in production', async () => {
+test('does not log a warning about --plugin-path when used in production', async () => {
   mockPackage.raw = {
     branch: 'master',
     version: '1.2.3',
