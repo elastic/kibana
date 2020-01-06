@@ -5,10 +5,15 @@
  */
 
 import _ from 'lodash';
-import { EMS_FILE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  EMS_FILE,
+  MAP_SAVED_OBJECT_TYPE,
+  TELEMETRY_TYPE,
+} from '../../common/constants';
 
-function getSavedObjectsClient(server, callCluster) {
+function getSavedObjectsClient(server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const internalRepository = getSavedObjectsRepository(callCluster);
   return new SavedObjectsClient(internalRepository);
 }
@@ -62,7 +67,7 @@ export function buildMapsTelemetry(savedObjects) {
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
-    timeCaptured: new Date(),
+    timeCaptured: new Date().toISOString(),
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
@@ -101,8 +106,8 @@ export async function getMapsTelemetry(server, callCluster) {
   const savedObjects = await getSavedObjects(savedObjectsClient);
   const mapsTelemetry = buildMapsTelemetry(savedObjects);
 
-  return await savedObjectsClient.create('maps-telemetry', mapsTelemetry, {
-    id: 'maps-telemetry',
+  return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {
+    id: TELEMETRY_TYPE,
     overwrite: true,
   });
 }
