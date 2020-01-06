@@ -114,7 +114,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     """
   } else if(status == 'UNSTABLE') {
     messages << """
-      ## :yellow_heart: Build suceeded, but was flaky
+      ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
     """
