@@ -16,7 +16,13 @@ import { Plugin, PluginSetupContract, PluginSetupDependencies } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export { AuthenticationResult, DeauthenticationResult, CreateAPIKeyResult } from './authentication';
+export {
+  AuthenticationResult,
+  DeauthenticationResult,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyParams,
+  InvalidateAPIKeyResult,
+} from './authentication';
 export { PluginSetupContract };
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {

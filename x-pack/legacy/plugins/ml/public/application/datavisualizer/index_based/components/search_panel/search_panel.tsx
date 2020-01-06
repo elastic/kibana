@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
 import { SavedSearchQuery } from '../../../../contexts/kibana';
