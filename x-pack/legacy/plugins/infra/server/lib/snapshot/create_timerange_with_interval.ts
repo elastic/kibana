@@ -12,6 +12,7 @@ import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
 import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
 
 export const createTimeRangeWithInterval = async (
   framework: KibanaFramework,
@@ -19,7 +20,7 @@ export const createTimeRangeWithInterval = async (
   options: InfraSnapshotRequestOptions
 ): Promise<InfraTimerangeInput> => {
   const aggregations = getMetricsAggregations(options);
-  const modules = aggregationsToModules(aggregations);
+  const modules = await aggregationsToModules(framework, requestContext, aggregations, options);
   const interval =
     (await calculateMetricInterval(
       framework,
@@ -39,21 +40,30 @@ export const createTimeRangeWithInterval = async (
   };
 };
 
-const aggregationsToModules = (aggregations: SnapshotModel): string[] => {
-  return uniq(
-    Object.values(aggregations)
-      .reduce((modules, agg) => {
-        if (SnapshotModelMetricAggRT.is(agg)) {
-          return modules.concat(Object.values(agg).map(a => a?.field));
-        }
-        return modules;
-      }, [] as Array<string | undefined>)
-      .filter(v => v)
-      .map(field =>
-        field!
-          .split(/\./)
-          .slice(0, 2)
-          .join('.')
-      )
-  ) as string[];
+const aggregationsToModules = async (
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
+  aggregations: SnapshotModel,
+  options: InfraSnapshotRequestOptions
+): Promise<string[]> => {
+  const uniqueFields = Object.values(aggregations)
+    .reduce<Array<string | undefined>>((fields, agg) => {
+      if (SnapshotModelMetricAggRT.is(agg)) {
+        return uniq(fields.concat(Object.values(agg).map(a => a?.field)));
+      }
+      return fields;
+    }, [])
+    .filter(v => v) as string[];
+  const fields = await Promise.all(
+    uniqueFields.map(
+      async field =>
+        await getDatasetForField(
+          framework,
+          requestContext,
+          field as string,
+          options.sourceConfiguration.metricAlias
+        )
+    )
+  );
+  return fields.filter(f => f) as string[];
 };
