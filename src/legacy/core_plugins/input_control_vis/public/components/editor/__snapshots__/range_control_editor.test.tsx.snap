@@ -33,10 +33,7 @@ exports[`renders RangeControlEditor 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="rangeControlSizeInput0"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value={1}
     />
@@ -58,10 +55,7 @@ exports[`renders RangeControlEditor 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="rangeControlDecimalPlacesInput0"
-      fullWidth={false}
-      isLoading={false}
       min={0}
       onChange={[Function]}
       value={0}

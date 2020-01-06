@@ -5,7 +5,7 @@
  */
 
 import { newJobCapsService } from './new_job_capabilities_service';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.

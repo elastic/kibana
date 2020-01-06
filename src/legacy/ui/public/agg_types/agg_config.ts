@@ -27,7 +27,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { SearchSourceContract, FetchOptions } from '../courier/types';
+import { ISearchSource, FetchOptions } from '../courier/types';
 import { AggType } from './agg_type';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
@@ -236,7 +236,7 @@ export class AggConfig {
    *  @param {Courier.FetchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }

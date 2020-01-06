@@ -18,7 +18,7 @@
  */
 import { AggType } from '../../../agg_types';
 import { aggTypeFilters, propFilter } from '../../../agg_types/filter';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 import { AggConfig } from '../../../vis';
 
 const filterByName = propFilter('name');

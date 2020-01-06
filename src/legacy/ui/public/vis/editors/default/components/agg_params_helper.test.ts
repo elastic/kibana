@@ -19,7 +19,6 @@
 
 import { AggConfig, VisState } from '../../..';
 import { AggType } from 'ui/agg_types';
-import { IndexPattern, Field } from 'ui/index_patterns';
 import { IndexedArray } from 'ui/indexed_array';
 import {
   getAggParamsToRender,
@@ -28,6 +27,7 @@ import {
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { EditorConfig } from '../../config/types';
+import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {
