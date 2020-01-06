@@ -146,7 +146,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     );
   }
 
-  renderLegendHeader() {
+  renderRangeLegendHeader() {
     let icons;
     if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();
@@ -157,7 +157,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
 
     return (
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
         {icons.map((icon, index) => {
           const isLast = index === icons.length - 1;
           let spacer;
