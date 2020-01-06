@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
-import { TaskManager } from '../../task_manager';
+import { TaskManager } from '../../task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import {
