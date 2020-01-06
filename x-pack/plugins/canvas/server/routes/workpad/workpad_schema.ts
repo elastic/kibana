@@ -24,11 +24,13 @@ export const WorkpadElementSchema = schema.object({
 
 export const WorkpadPageSchema = schema.object({
   elements: schema.arrayOf(WorkpadElementSchema),
-  groups: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      position: PositionSchema,
-    })
+  groups: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        position: PositionSchema,
+      })
+    )
   ),
   id: schema.string(),
   style: schema.recordOf(schema.string(), schema.string()),
