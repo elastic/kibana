@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
-import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
@@ -44,11 +43,6 @@ import {
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
 import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
-
-// based on code used by `ui/index_patterns` internally
-// remove the space character from the list of illegal characters
-INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
-const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
 const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.LONG,
@@ -166,7 +160,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     // Create the option if it doesn't exist.
     if (
       flattenedOptions.some(
-        (option: { label: string }) => option.label.trim().toLowerCase() === normalizedSearchValue
+        (option: EuiComboBoxOptionProps) =>
+          option.label.trim().toLowerCase() === normalizedSearchValue
       )
     ) {
       excludesOptions.push(newOption);
@@ -194,7 +189,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
-        const analyzedFieldsOptions: Array<{ label: string }> = [];
+        const analyzedFieldsOptions: EuiComboBoxOptionProps[] = [];
 
         if (resp.field_selection) {
           resp.field_selection.forEach((selectedField: FieldSelectionItem) => {
@@ -257,7 +252,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
-        const depVarOptions: Array<{ label: string }> = [];
+        const depVarOptions: EuiComboBoxOptionProps[] = [];
 
         fields.forEach((field: Field) => {
           if (shouldAddAsDepVarOption(field)) {
