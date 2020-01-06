@@ -267,20 +267,30 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleColorEditor
           swatches={DEFAULT_LINE_COLORS}
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleProperty={this.props.styleProperties.labelBorderColor}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
           fields={this._getOrdinalFields()}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelBorderColor.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelBorderColor.options}
+          defaultStaticStyleOptions={
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+          }
+          defaultDynamicStyleOptions={
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+          }
         />
         <EuiSpacer size="m" />
 
         <VectorStyleSizeEditor
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleProperty={this.props.styleProperties.labelBorderWidth}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_WIDTH]}
           fields={this._getOrdinalFields()}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelBorderWidth.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelBorderWidth.options}
+          defaultStaticStyleOptions={
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_WIDTH].options
+          }
+          defaultDynamicStyleOptions={
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_BORDER_WIDTH].options
+          }
         />
         <EuiSpacer size="m" />
       </Fragment>
