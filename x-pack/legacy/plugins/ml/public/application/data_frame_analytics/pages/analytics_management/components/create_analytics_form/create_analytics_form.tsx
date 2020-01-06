@@ -44,19 +44,21 @@ import {
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
 
-const CATEGORICAL_NUMERICAL_TYPES = new Set([
+const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.LONG,
   ES_FIELD_TYPES.INTEGER,
   ES_FIELD_TYPES.SHORT,
   ES_FIELD_TYPES.BYTE,
 ]);
 
-const NUMERICAL_TYPES = new Set([
+const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.DOUBLE,
   ES_FIELD_TYPES.FLOAT,
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
+
+const CATEGORICAL_TYPES = new Set(['ip', 'keyword', 'text']);
 
 // List of system fields we want to ignore for the numeric field check.
 const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
@@ -88,6 +90,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobType,
     loadingDepVarOptions,
     loadingFieldOptions,
+    maxDistinctValuesError,
     modelMemoryLimit,
     modelMemoryLimitUnitValid,
     previousJobType,
@@ -126,17 +129,19 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  // Regression supports numeric fields. Classification supports categorical numeric and boolean.
+  // Regression supports numeric fields. Classification supports categorical, numeric, and boolean.
   const shouldAddAsDepVarOption = (field: Field) => {
     if (field.id === EVENT_RATE_FIELD_ID) return false;
 
-    const isCategoricalNumerical = CATEGORICAL_NUMERICAL_TYPES.has(field.type);
+    const isBasicNumerical = BASIC_NUMERICAL_TYPES.has(field.type);
 
     const isSupportedByClassification =
-      isCategoricalNumerical || field.type === ES_FIELD_TYPES.BOOLEAN;
+      isBasicNumerical ||
+      CATEGORICAL_TYPES.has(field.type) ||
+      field.type === ES_FIELD_TYPES.BOOLEAN;
 
     if (jobType === JOB_TYPES.REGRESSION) {
-      return isCategoricalNumerical || NUMERICAL_TYPES.has(field.type);
+      return isBasicNumerical || EXTENDED_NUMERICAL_TYPES.has(field.type);
     }
     if (jobType === JOB_TYPES.CLASSIFICATION) return isSupportedByClassification;
   };
@@ -169,8 +174,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
       setFormState({
         loadingFieldOptions: true,
-        // excludesOptions: [],
-        // excludes: [],
       });
     }
 
@@ -182,7 +185,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const resp = await ml.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
 
       // If sourceIndex has changed load analysis field options again
-      if (previousSourceIndex !== sourceIndex) {
+      if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
         const analyzedFieldsOptions: Array<{ label: string }> = [];
 
         if (resp.field_selection) {
@@ -197,9 +200,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         setFormState({
           modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
           excludesOptions: analyzedFieldsOptions,
-          excludes: [],
           loadingFieldOptions: false,
-          dependentVariableFetchFail: false,
+          fieldOptionsFetchFail: false,
+          maxDistinctValuesError: undefined,
         });
       } else {
         setFormState({
@@ -207,8 +210,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       }
     } catch (e) {
+      let errorMessage;
+      if (
+        jobType === JOB_TYPES.CLASSIFICATION &&
+        e.message !== undefined &&
+        e.message.includes('status_exception') &&
+        e.message.includes('must have at most')
+      ) {
+        errorMessage = e.message;
+      }
       setFormState({
         fieldOptionsFetchFail: true,
+        maxDistinctValuesError: errorMessage,
         loadingFieldOptions: false,
         modelMemoryLimit:
           jobType !== undefined
@@ -216,13 +229,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
       });
     }
-  }, 500);
+  }, 400);
 
   const loadDepVarOptions = async () => {
     setFormState({
       loadingDepVarOptions: true,
       // clear when the source index changes
       dependentVariable: '',
+      maxDistinctValuesError: undefined,
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
     });
@@ -506,6 +520,27 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
+                fullWidth
+                isInvalid={maxDistinctValuesError !== undefined}
+                error={[
+                  ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+                            {
+                              defaultMessage: 'Invalid. {message}',
+                              values: { message: maxDistinctValuesError },
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
+              >
+                <Fragment />
+              </EuiFormRow>
+              <EuiFormRow
                 label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
                   {
@@ -523,19 +558,22 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )
                 }
-                error={
-                  dependentVariableFetchFail === true && [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
-                        {
-                          defaultMessage:
-                            'There was a problem fetching fields. Please refresh the page and try again.',
-                        }
-                      )}
-                    </Fragment>,
-                  ]
-                }
+                isInvalid={maxDistinctValuesError !== undefined}
+                error={[
+                  ...(dependentVariableFetchFail === true
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                            {
+                              defaultMessage:
+                                'There was a problem fetching fields. Please refresh the page and try again.',
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
               >
                 <EuiComboBox
                   aria-label={i18n.translate(

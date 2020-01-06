@@ -67,6 +67,7 @@ export interface State {
     jobType: AnalyticsJobType;
     loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
+    maxDistinctValuesError: string | undefined;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     previousJobType: null | AnalyticsJobType;
@@ -117,6 +118,7 @@ export const getInitialState = (): State => ({
     jobType: undefined,
     loadingDepVarOptions: false,
     loadingFieldOptions: false,
+    maxDistinctValuesError: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     previousJobType: null,
