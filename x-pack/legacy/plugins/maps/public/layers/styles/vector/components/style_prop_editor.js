@@ -12,28 +12,27 @@ import { VectorStyle } from '../vector_style';
 import { i18n } from '@kbn/i18n';
 
 export class StylePropEditor extends Component {
-  prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
-  prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
+  _prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
+  _prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
 
   _onTypeToggle = () => {
     if (this.props.styleProperty.isDynamic()) {
       // preserve current dynmaic style
-      this.prevDynamicStyleOptions = this.props.styleProperty.getOptions();
+      this._prevDynamicStyleOptions = this.props.styleProperty.getOptions();
       // toggle to static style
       this.props.onStaticStyleChange(
         this.props.styleProperty.getStyleName(),
-        this.prevStaticStyleOptions
+        this._prevStaticStyleOptions
       );
-      return;
+    } else {
+      // preserve current static style
+      this._prevStaticStyleOptions = this.props.styleProperty.getOptions();
+      // toggle to dynamic style
+      this.props.onDynamicStyleChange(
+        this.props.styleProperty.getStyleName(),
+        this._prevDynamicStyleOptions
+      );
     }
-
-    // preserve current static style
-    this.prevStaticStyleOptions = this.props.styleProperty.getOptions();
-    // toggle to dynamic style
-    this.props.onDynamicStyleChange(
-      this.props.styleProperty.getStyleName(),
-      this.prevDynamicStyleOptions
-    );
   };
 
   _onFieldMetaOptionsChange = fieldMetaOptions => {
