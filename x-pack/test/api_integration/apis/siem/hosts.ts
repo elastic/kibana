@@ -105,6 +105,10 @@ export default function({ getService }: FtrProviderContext) {
     it('Make sure that we get Host Overview data', () => {
       const expectedHost: GetHostOverviewQuery.HostOverview = {
         _id: 'zeek-sensor-san-francisco',
+        inspect: {
+          dsl: [],
+          response: [],
+        },
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
