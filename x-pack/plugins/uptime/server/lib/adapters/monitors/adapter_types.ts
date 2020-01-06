@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MonitorChart,
-  MonitorPageTitle,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
 import { UMElasticsearchQueryFn } from '../framework';
 import {
+  MonitorChart,
   MonitorDetails,
   MonitorLocations,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+  MonitorPageTitle,
+} from '../../../../common';
 
 export interface GetMonitorChartsDataParams {
   /** @member monitorId ID value for the selected monitor */

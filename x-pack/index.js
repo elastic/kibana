@@ -33,7 +33,7 @@ import { siem } from './legacy/plugins/siem';
 import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { crossClusterReplication } from './legacy/plugins/cross_cluster_replication';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
-import { uptime } from './legacy/plugins/uptime';
+// import { uptime } from './legacy/plugins/uptime';
 import { ossTelemetry } from './legacy/plugins/oss_telemetry';
 import { fileUpload } from './legacy/plugins/file_upload';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
@@ -75,7 +75,7 @@ module.exports = function(kibana) {
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
-    uptime(kibana),
+    // uptime(kibana),
     ossTelemetry(kibana),
     fileUpload(kibana),
     encryptedSavedObjects(kibana),

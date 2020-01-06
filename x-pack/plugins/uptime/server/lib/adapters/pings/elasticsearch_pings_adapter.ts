@@ -5,12 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
-import {
-  HttpBody,
-  Ping,
-  PingResults,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { HttpBody, Ping, PingResults, INDEX_NAMES } from '../../../../common';
 import { parseFilterQuery, getFilterClause, getHistogramIntervalFormatted } from '../../helper';
 import { UMPingsAdapter, HistogramQueryResult } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';

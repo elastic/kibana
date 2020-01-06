@@ -7,11 +7,11 @@
 import {
   MonitorSummary,
   CursorDirection,
+  Snapshot,
   SortOrder,
   StatesIndexStatus,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../common';
 import { UMElasticsearchQueryFn } from '../framework';
-import { Snapshot } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface MonitorStatesParams {
   dateRangeStart: string;

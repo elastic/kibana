@@ -5,17 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorChart,
   Ping,
   LocationDurationLine,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
-import { getHistogramIntervalFormatted } from '../../helper';
-import {
   MonitorError,
   MonitorLocation,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+  INDEX_NAMES,
+} from '../../../../common';
+import { getHistogramIntervalFormatted } from '../../helper';
 import { UMMonitorsAdapter } from './adapter_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {

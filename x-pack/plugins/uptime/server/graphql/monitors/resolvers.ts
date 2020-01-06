@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange } from '../../../../../legacy/plugins/uptime/common/domain_types';
-import { UMResolver } from '../../../../../legacy/plugins/uptime/common/graphql/resolver_types';
 import {
   FilterBar,
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
   GetMonitorPageTitleQueryArgs,
+  GetSnapshotHistogramQueryArgs,
+  HistogramResult,
   MonitorChart,
   MonitorPageTitle,
   Ping,
-  GetSnapshotHistogramQueryArgs,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+  UMGqlRange,
+  UMResolver,
+} from '../../../common';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
-import { HistogramResult } from '../../../../../legacy/plugins/uptime/common/domain_types';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
 

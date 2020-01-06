@@ -7,12 +7,7 @@
 import { flatten } from 'lodash';
 import { CursorPagination } from '../adapter_types';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { QUERY } from '../../../../../../../legacy/plugins/uptime/common/constants';
-import {
-  CursorDirection,
-  MonitorSummary,
-  SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection, MonitorSummary, SortOrder, QUERY } from '../../../../../common';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 

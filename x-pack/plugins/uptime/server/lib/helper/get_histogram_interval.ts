@@ -5,7 +5,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY } from '../../../common';
 
 export const getHistogramInterval = (
   dateRangeStart: string,

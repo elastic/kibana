@@ -12,7 +12,7 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
-import { MonitorSummary } from '../../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { MonitorSummary } from '../../../../../../common';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [

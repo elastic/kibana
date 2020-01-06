@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '../../features/server';
-import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
+import { PLUGIN } from '../common';
 
 export const registerFeature = (features: PluginSetupContract) => {
   features.registerFeature({

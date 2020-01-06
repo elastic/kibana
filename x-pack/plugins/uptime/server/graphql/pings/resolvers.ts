@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMResolver } from '../../../../../legacy/plugins/uptime/common/graphql/resolver_types';
-import {
-  AllPingsQueryArgs,
-  DocCount,
-  PingResults,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { AllPingsQueryArgs, DocCount, PingResults, UMResolver } from '../../../common';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';

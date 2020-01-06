@@ -7,14 +7,15 @@
 import { get, sortBy } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { getHistogramIntervalFormatted } from '../../../helper';
-import { INDEX_NAMES, STATES } from '../../../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorSummary,
   SummaryHistogram,
   Check,
   CursorDirection,
   SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+  INDEX_NAMES,
+  STATES,
+} from '../../../../../common';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (

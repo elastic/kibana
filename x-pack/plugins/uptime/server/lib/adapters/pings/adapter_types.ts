@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DocCount,
-  Ping,
-  PingResults,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
-import { HistogramResult } from '../../../../../../legacy/plugins/uptime/common/domain_types';
+import { DocCount, HistogramResult, Ping, PingResults } from '../../../../common';
 import { UMElasticsearchQueryFn } from '../framework';
 
 export interface GetAllParams {

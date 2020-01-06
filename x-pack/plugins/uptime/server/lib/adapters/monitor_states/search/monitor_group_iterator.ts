@@ -7,7 +7,7 @@
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorPagination } from '../adapter_types';
 import { fetchChunk } from './fetch_chunk';
-import { CursorDirection } from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection } from '../../../../../common';
 import { MonitorGroups } from './fetch_page';
 
 // Hardcoded chunk size for how many monitors to fetch at a time when querying

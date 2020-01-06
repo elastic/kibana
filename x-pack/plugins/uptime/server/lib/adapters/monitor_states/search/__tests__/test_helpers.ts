@@ -5,10 +5,7 @@
  */
 
 import { CursorPagination } from '../../adapter_types';
-import {
-  CursorDirection,
-  SortOrder,
-} from '../../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection, SortOrder } from '../../../../../../common';
 import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
 
 export const prevPagination = (key: any): CursorPagination => {

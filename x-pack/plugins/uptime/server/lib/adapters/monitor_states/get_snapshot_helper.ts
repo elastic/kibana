@@ -5,7 +5,7 @@
  */
 
 import { MonitorGroups, MonitorGroupIterator } from './search';
-import { Snapshot } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { Snapshot } from '../../../../common';
 
 const reduceItemsToCounts = (items: MonitorGroups[]) => {
   let down = 0;

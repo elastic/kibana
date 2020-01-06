@@ -5,10 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter, CursorPagination } from './adapter_types';
-import {
-  INDEX_NAMES,
-  CONTEXT_DEFAULTS,
-} from '../../../../../../legacy/plugins/uptime/common/constants';
+import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common';
 import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { getSnapshotCountHelper } from './get_snapshot_helper';

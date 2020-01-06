@@ -6,8 +6,7 @@
 
 import { get, set } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { CursorDirection } from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../../../legacy/plugins/uptime/common/constants';
+import { CursorDirection, INDEX_NAMES } from '../../../../../common';
 import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.

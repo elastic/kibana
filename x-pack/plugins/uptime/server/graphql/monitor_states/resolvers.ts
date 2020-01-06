@@ -6,13 +6,13 @@
 
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
 import { UMServerLibs } from '../../lib/lib';
-import { UMResolver } from '../../../../../legacy/plugins/uptime/common/graphql/resolver_types';
 import {
   GetMonitorStatesQueryArgs,
   MonitorSummaryResult,
   StatesIndexStatus,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants/context_defaults';
+  UMResolver,
+} from '../../../common';
+import { CONTEXT_DEFAULTS } from '../../../common/constants/context_defaults';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,

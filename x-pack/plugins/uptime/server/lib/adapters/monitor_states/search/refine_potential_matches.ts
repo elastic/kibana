@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_NAMES } from '../../../../../../../legacy/plugins/uptime/common/constants';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { CursorDirection } from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection, INDEX_NAMES } from '../../../../../common';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';
 
