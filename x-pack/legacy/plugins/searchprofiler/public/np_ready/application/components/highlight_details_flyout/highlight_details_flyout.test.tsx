@@ -11,14 +11,7 @@ describe('Highlight Details Flyout', () => {
   it('renders', async () => {
     const props: Props = {
       onClose: () => {},
-      shard: {
-        aggregations: [],
-        id: ['test', 'test', 'test'],
-        searches: [],
-        color: '#fff',
-        time: 123,
-        relative: 100,
-      },
+      shardName: '[test][test]',
       operation: {
         parent: null,
         breakdown: [
@@ -48,7 +41,6 @@ describe('Highlight Details Flyout', () => {
         query_type: 'test',
         selfTime: 100,
         time: 100,
-        children: [],
         timePercentage: '100',
         hasChildren: false,
         visible: true,

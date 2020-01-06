@@ -30,7 +30,19 @@ export const reducer: Reducer<State, Action> = (state, action) =>
     }
 
     if (action.type === 'setHighlightDetails') {
-      draft.highlightDetails = action.value;
+      if (action.value) {
+        const value = action.value;
+        // Exclude children to avoid unnecessary work copying a recursive structure.
+        const { children, ...restOfOperation } = value.operation;
+        draft.highlightDetails = {
+          indexName: value.indexName,
+          operation: restOfOperation,
+          // prettier-ignore
+          shardName: `[${/* shard id */value.shard.id[0]}][${/* shard number */value.shard.id[2] }]`
+        };
+      } else {
+        draft.highlightDetails = null;
+      }
       return;
     }
 

@@ -47,6 +47,7 @@ export function mutateSearchTimesTree(shard: Shard) {
     shardTime += totalTime;
     initTree(search.query!, totalTime);
     search.treeRoot = search.query![0];
+    // Remove this object.
     search.query = null as any;
   }
   shard.time = shardTime;

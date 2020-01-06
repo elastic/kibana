@@ -17,11 +17,11 @@ import {
 
 import { msToPretty } from '../../utils';
 import { HighlightDetailsTable } from './highlight_details_table';
-import { Operation, Shard } from '../../types';
+import { Operation } from '../../types';
 
 export interface Props {
-  operation: Operation;
-  shard: Shard;
+  operation: Omit<Operation, 'children'>;
+  shardName: string;
   indexName: string;
   onClose: () => void;
 }
@@ -39,14 +39,12 @@ const FlyoutEntry = ({
   </>
 );
 
-export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }: Props) => {
+export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClose }: Props) => {
   return (
     <EuiFlyout className="prfDevTool__details" onClose={() => onClose()}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiText size="s">{indexName}</EuiText>
-        <EuiText>
-          [{/* shard id */ shard.id[0]}][{/* shard number */ shard.id[2]}]
-        </EuiText>
+        <EuiText>{shardName}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>

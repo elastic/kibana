@@ -5,13 +5,20 @@
  */
 import { useReducer } from 'react';
 import { reducer } from './reducer';
-import { ShardSerialized, Targets } from '../types';
-import { OnHighlightChangeArgs } from '../components/profile_tree';
+import { Operation, ShardSerialized, Targets } from '../types';
+
+type OperationNoChildren = Omit<Operation, 'children'>;
+
+interface HighlightDetails {
+  indexName: string;
+  operation: OperationNoChildren;
+  shardName: string;
+}
 
 export interface State {
   profiling: boolean;
   pristine: boolean;
-  highlightDetails: OnHighlightChangeArgs | null;
+  highlightDetails: HighlightDetails | null;
   activeTab: Targets | null;
   currentResponse: ShardSerialized[] | null;
 }
