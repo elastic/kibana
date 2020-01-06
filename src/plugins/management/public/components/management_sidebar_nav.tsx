@@ -32,36 +32,46 @@ import { ManagementSection } from '../management_section';
 
 interface NavApp {
   [key: string]: unknown;
+  order: number; // only needed while merging platform and legacy
 }
 
 interface NavSection extends NavApp {
   items: NavApp[];
+  order: number; // only needed while merging platform and legacy
 }
 
-interface SidebarNavProps {
-  sections: ManagementSection[];
+interface ManagementSidebarNavProps {
+  getSections: () => ManagementSection[];
   legacySections: LegacySection[];
   selectedId: string;
 }
 
-interface SidebarNavState {
+interface ManagementSidebarNavState {
   isSideNavOpenOnMobile: boolean;
 }
 
 const managementSectionOrAppToNav = (appOrSection: ManagementApp | ManagementSection) => ({
   id: appOrSection.id,
-  name: appOrSection.title,
+  name: `${appOrSection.title} ${appOrSection.order}`,
   'data-test-subj': appOrSection.id,
+  order: appOrSection.order,
 });
 
 const managementSectionToNavSection = (section: ManagementSection) => {
-  let icon = section.icon ? <img src={section.icon} alt={section.title} /> : null;
+  if (section.icon) {
+    return {
+      icon: <EuiIcon type={section.icon} size="m" />,
+      ...managementSectionOrAppToNav(section),
+    };
+  }
   // euiIconType takes precedence
-  icon = section.euiIconType ? <EuiIcon type={section.euiIconType} /> : icon;
-  return {
-    icon,
-    ...managementSectionOrAppToNav(section),
-  };
+  if (section.euiIconType) {
+    return {
+      icon: <EuiIcon type={section.euiIconType} size="m" />,
+      ...managementSectionOrAppToNav(section),
+    };
+  }
+  return { ...managementSectionOrAppToNav(section) };
 };
 
 const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
@@ -73,29 +83,30 @@ const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
 });
 
 const legacySectionToNavSection = (section: LegacySection) => ({
-  name: section.display,
+  name: `${section.display} ${section.order}`,
   id: section.id,
   icon: section.icon ? <EuiIcon type={section.icon} /> : null,
   items: [],
   'data-test-subj': section.id,
+  // @ts-ignore
+  order: section.order,
 });
 
 const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
   isSelected: selectedId === app.id,
-  name: app.display,
+  name: `${app.display} ${app.order}`,
   id: app.id,
   href: app.url,
   'data-test-subj': app.id,
+  // @ts-ignore
+  order: app.order,
 });
 
 const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
 
 export const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
   sections.map(section => ({
-    // todo review
-    items: section.apps
-      .filter(app => app.enabled)
-      .map(managementAppToNavItem(selectedId, section.id)),
+    items: section.getAppsEnabled().map(managementAppToNavItem(selectedId, section.id)),
     ...managementSectionToNavSection(section),
   }));
 
@@ -107,6 +118,7 @@ const findOrAddSection = (navItems: NavSection[], legacySection: LegacySection):
   } else {
     const newSection = legacySectionToNavSection(legacySection);
     navItems.push(newSection);
+    navItems.sort((a: NavSection, b: NavSection) => a.order - b.order); // only needed while merging platform and legacy
     return newSection;
   }
 };
@@ -116,16 +128,16 @@ export const mergeLegacyItems = (
   legacySections: LegacySection[],
   selectedId: string
 ) => {
-  // todo make sure filtering disabled apps
   const filteredLegacySections = legacySections
     .filter(sectionVisible)
     .filter(section => section.visibleItems.filter(sectionVisible).length);
 
   filteredLegacySections.forEach(legacySection => {
     const section = findOrAddSection(navItems, legacySection);
-    legacySection.visibleItems.forEach(app =>
-      section.items.push(legacyAppToNavItem(app, selectedId))
-    );
+    legacySection.visibleItems.forEach(app => {
+      section.items.push(legacyAppToNavItem(app, selectedId));
+      return section.items.sort((a, b) => a.order - b.order);
+    });
   });
 
   return navItems;
@@ -140,8 +152,11 @@ const sectionsToItems = (
   return mergeLegacyItems(navItems, legacySections, selectedId);
 };
 
-export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState> {
-  constructor(props: SidebarNavProps) {
+export class ManagementSidebarNav extends React.Component<
+  ManagementSidebarNavProps,
+  ManagementSidebarNavState
+> {
+  constructor(props: ManagementSidebarNavProps) {
     super(props);
     this.state = {
       isSideNavOpenOnMobile: false,
@@ -167,7 +182,7 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
           toggleOpenOnMobile={this.toggleOpenOnMobile}
           // @ts-ignore
           items={sectionsToItems(
-            this.props.sections,
+            this.props.getSections(),
             this.props.legacySections,
             this.props.selectedId
           )}

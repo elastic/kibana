@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SidebarNav } from './sidebar_nav';
+export { ManagementSidebarNav } from './management_sidebar_nav';

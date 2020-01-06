@@ -25,12 +25,12 @@ import { coreMock } from '../../../core/public/mocks';
 function createSection(registerLegacyApp: () => void) {
   const legacySection = new LegacyManagementSection('legacy');
   const getLegacySection = () => legacySection;
-  const managementSections: ManagementSection[] = [];
+  const getManagementSections: () => ManagementSection[] = () => [];
 
   const testSectionConfig = { id: 'test-section', title: 'Test Section' };
   return new ManagementSection(
     testSectionConfig,
-    managementSections,
+    getManagementSections,
     registerLegacyApp,
     getLegacySection,
     coreMock.createSetup().getStartServices

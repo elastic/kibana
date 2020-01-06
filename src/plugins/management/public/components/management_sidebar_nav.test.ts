@@ -18,7 +18,7 @@
  */
 
 import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
-import { mergeLegacyItems } from '../components/sidebar_nav';
+import { mergeLegacyItems } from '../components/management_sidebar_nav';
 
 const toIndexedArray = (initialSet: any[]) =>
   new IndexedArray({
@@ -35,24 +35,28 @@ const visibleItem = { display: 'item', id: 'item', ...activeProps };
 const notVisibleSection = {
   display: 'Not visible',
   id: 'not-visible',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...notVisibleProps,
 };
 const disabledSection = {
   display: 'Disabled',
   id: 'disabled',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...disabledProps,
 };
 const noItemsSection = {
   display: 'No items',
   id: 'no-items',
+  order: 10,
   visibleItems: toIndexedArray([]),
   ...activeProps,
 };
 const noActiveItemsSection = {
   display: 'No active items',
   id: 'no-active-items',
+  order: 10,
   visibleItems: toIndexedArray([
     { display: 'disabled', id: 'disabled', ...disabledProps },
     { display: 'notVisible', id: 'notVisible', ...notVisibleProps },
@@ -62,6 +66,7 @@ const noActiveItemsSection = {
 const activeSection = {
   display: 'activeSection',
   id: 'activeSection',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...activeProps,
 };

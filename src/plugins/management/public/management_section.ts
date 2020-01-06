@@ -31,14 +31,14 @@ export class ManagementSection {
   public readonly order: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
-  private readonly sections: ManagementSection[];
+  private readonly getSections: () => ManagementSection[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
   private readonly getStartServices: CoreSetup['getStartServices'];
 
   constructor(
     { id, title, order = 100, euiIconType, icon }: CreateSection,
-    sections: ManagementSection[],
+    getSections: () => ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSection: () => ManagementSection,
     getStartServices: CoreSetup['getStartServices']
@@ -48,7 +48,7 @@ export class ManagementSection {
     this.order = order;
     this.euiIconType = euiIconType;
     this.icon = icon;
-    this.sections = sections;
+    this.getSections = getSections;
     this.registerLegacyApp = registerLegacyApp;
     this.getLegacyManagementSection = getLegacyManagementSection;
     this.getStartServices = getStartServices;
@@ -61,7 +61,7 @@ export class ManagementSection {
 
     const app = new ManagementApp(
       { id, title, order, mount, basePath: `/management/${this.id}/${id}` },
-      this.sections,
+      this.getSections,
       this.registerLegacyApp,
       this.getLegacyManagementSection,
       this.getStartServices

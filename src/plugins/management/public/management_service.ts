@@ -42,7 +42,7 @@ export class ManagementService {
 
       const newSection = new ManagementSection(
         section,
-        this.sections,
+        this.getSectionsEnabled.bind(this),
         registerLegacyApp,
         getLegacyManagement,
         getStartServices

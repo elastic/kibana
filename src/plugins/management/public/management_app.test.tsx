@@ -41,7 +41,7 @@ function createTestApp() {
         };
       },
     },
-    [],
+    () => [],
     jest.fn(),
     () => legacySection,
     coreMock.createSetup().getStartServices

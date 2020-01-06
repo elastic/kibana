@@ -38,7 +38,7 @@ export class ManagementApp {
 
   constructor(
     { id, title, basePath, order = 100, mount }: CreateManagementApp,
-    sections: ManagementSection[],
+    getSections: () => ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSections: () => LegacyManagementSection,
     getStartServices: CoreSetup['getStartServices']
@@ -69,7 +69,7 @@ export class ManagementApp {
 
         ReactDOM.render(
           <ManagementChrome
-            sections={sections}
+            getSections={getSections}
             selectedId={id}
             legacySections={getLegacyManagementSections().items}
             mountedCallback={async element => {

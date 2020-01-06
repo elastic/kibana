@@ -29,7 +29,7 @@ import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { SidebarNav } from '../../../../../plugins/management/public';
+import { ManagementSidebarNav } from '../../../../../plugins/management/public';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
@@ -104,19 +104,17 @@ export function updateLandingPage(version) {
   );
 }
 
-export function updateSidebar(items, id) {
+export function updateSidebar(legacySections, id) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
     return;
   }
 
-  const npSections = npStart.plugins.management.sections.getAllSections();
-
   render(
     <I18nContext>
-      <SidebarNav
-        sections={npSections}
-        legacySections={items}
+      <ManagementSidebarNav
+        getSections={npStart.plugins.management.sections.getAllSections}
+        legacySections={legacySections}
         selectedId={id}
         className="mgtSideNav"
       />

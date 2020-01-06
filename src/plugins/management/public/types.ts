@@ -94,4 +94,5 @@ export interface LegacyApp {
   url?: string;
   euiIconType?: IconType;
   icon?: string;
+  order: number;
 }

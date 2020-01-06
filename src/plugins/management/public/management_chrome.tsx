@@ -20,12 +20,12 @@
 import * as React from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { SidebarNav } from './components';
+import { ManagementSidebarNav } from './components';
 import { LegacySection } from './types';
 import { ManagementSection } from './management_section';
 
 interface Props {
-  sections: ManagementSection[];
+  getSections: () => ManagementSection[];
   legacySections: LegacySection[];
   selectedId: string;
   mountedCallback: (element: HTMLDivElement) => void;
@@ -42,8 +42,8 @@ export class ManagementChrome extends React.Component<Props> {
     return (
       <I18nProvider>
         <EuiPage>
-          <SidebarNav
-            sections={this.props.sections}
+          <ManagementSidebarNav
+            getSections={this.props.getSections}
             legacySections={this.props.legacySections}
             selectedId={this.props.selectedId}
           />
