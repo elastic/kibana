@@ -6,7 +6,7 @@
 
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { RunContext } from '../../../task_manager';
+import { RunContext } from '../../../task_manager/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 

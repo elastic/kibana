@@ -18,15 +18,12 @@
  */
 
 import { handleResponse } from './handle_response';
-import { toastNotifications } from 'ui/notify/toasts';
 
-jest.mock('ui/notify/toasts', () => {
-  return {
-    toastNotifications: {
-      addWarning: jest.fn(),
-    },
-  };
-});
+// Temporary disable eslint, will be removed after moving to new platform folder
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setNotifications } from '../../../../../../plugins/data/public/services';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -37,8 +34,11 @@ jest.mock('@kbn/i18n', () => {
 });
 
 describe('handleResponse', () => {
+  const notifications = notificationServiceMock.createStartContract();
+
   beforeEach(() => {
-    (toastNotifications.addWarning as jest.Mock).mockReset();
+    setNotifications(notifications);
+    (notifications.toasts.addWarning as jest.Mock).mockReset();
   });
 
   test('should notify if timed out', () => {
@@ -48,8 +48,8 @@ describe('handleResponse', () => {
     };
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(toastNotifications.addWarning).toBeCalled();
-    expect((toastNotifications.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
+    expect(notifications.toasts.addWarning).toBeCalled();
+    expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'request timed out'
     );
   });
@@ -63,8 +63,8 @@ describe('handleResponse', () => {
     };
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(toastNotifications.addWarning).toBeCalled();
-    expect((toastNotifications.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
+    expect(notifications.toasts.addWarning).toBeCalled();
+    expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'shards failed'
     );
   });
