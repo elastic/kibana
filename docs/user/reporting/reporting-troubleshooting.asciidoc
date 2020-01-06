@@ -7,6 +7,14 @@
 
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
+* <<reporting-troubleshooting-system-dependencies>>
+* <<reporting-troubleshooting-text-incorrect>>
+* <<reporting-troubleshooting-missing-data>>
+* <<reporting-troubleshooting-file-permissions>>
+* <<reporting-troubleshooting-error-messages>>
+* <<reporting-troubleshooting-puppeteer-debug-logs>>
+* <<reporting-troubleshooting-system-requirements>>
+
 [float]
 [[reporting-troubleshooting-system-dependencies]]
 === System dependencies
@@ -33,27 +41,30 @@ If you are using Ubuntu/Debian systems, install the following packages:
 * `fonts-liberation`
 * `libfontconfig1`
 
-If the system is missing dependencies, then Reporting will fail in a non-deterministic way. Kibana runs a self-test at server startup, and
-if it encouters errors they will logged in the Kibana console. Unfortunately, the error message of this test won't include very much
-information about why Chromium failed to run. For example, the most common error message here is `Error: connect ECONNREFUSED`. It indicates
-that when Kibana tried to connect to the Chromium process, it couldn't.
+If the system is missing dependencies, then Reporting will fail in a non-deterministic way. {kib} runs a self-test at server startup, and
+if it encounters errors, logs them in the Console. Unfortunately, the error message does not include
+information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
+that {kib} could not connect to the Chromium process.
 
-To troubleshoot the problem you can start the Kibana server with environment variables that tell Chromium to print verbose logs. See the
-<<_puppeteer_debug_logs, Puppeteer debug method>> for more information.
+To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
+<<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
 
 [float]
-=== Text is rendered incorrectly in generated reports
+[[reporting-troubleshooting-text-incorrect]]
+=== Text rendered incorrectly in generated reports
 
 If a report label is rendered as an empty rectangle, no system fonts are available. Install at least one font package on the system.
 
 If the report is missing certain Chinese, Japanese or Korean characters, ensure that a system font with those characters is installed.
 
 [float]
+[[reporting-troubleshooting-missing-data]]
 === Missing data in PDF report of data table visualization
 There is currently a known limitation with the Data Table visualization that only the first page of data rows, which are the only data
 visible on the screen, are shown in PDF reports.
 
 [float]
+[[reporting-troubleshooting-file-permissions]]
 === File permissions
 Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
 user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
@@ -71,25 +82,25 @@ Whenever possible, a Reporting error message tries to be as self-explanatory as 
 along with the solution.
 
 [float]
-==== "Max attempts reached"
+==== Max attempts reached
 There are two primary causes of this error:
 
-. You're creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the `xpack.reporting.queue.timeout`
+* You're creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the `xpack.reporting.queue.timeout`
 
-. Kibana is hosted behind a reverse-proxy, and the <<reporting-kibana-server-settings, Kibana server settings>> are not configured correctly
+* Kibana is hosted behind a reverse-proxy, and the <<reporting-kibana-server-settings, Kibana server settings>> are not configured correctly
 
 Create a Markdown visualization and then create a PDF report. If this succeeds, increase the `xpack.reporting.queue.timeout` setting. If the
 PDF report fails with "Max attempts reached," check your <<reporting-kibana-server-settings, Kibana server settings>>.
 
 [float]
 [[reporting-troubleshooting-nss-dependency]]
-==== "You must install nss for Reporting to work"
+==== You must install nss for Reporting to work
 Reporting using the Chromium browser relies on the Network Security Service libraries (NSS). Install the appropriate nss package for your
 distribution.
 
 [float]
 [[reporting-troubleshooting-sandbox-dependency]]
-==== "Unable to use Chromium sandbox"
+==== Unable to use Chromium sandbox
 Chromium uses sandboxing techniques that are built on top of operating system primitives. The Linux sandbox depends on user namespaces,
 which were introduced with the 3.8 Linux kernel. However, many distributions don't have user namespaces enabled by default, or they require
 the CAP_SYS_ADMIN capability.
@@ -98,6 +109,7 @@ Elastic recommends that you research the feasibility of enabling unprivileged us
 is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
 
 [float]
+[[reporting-troubleshooting-verbose-logs]]
 === Verbose logs
 {kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
 all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
@@ -109,10 +121,12 @@ logging.verbose: true
 
 For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
 
+[float]
+[[reporting-troubleshooting-puppeteer-debug-logs]]
 === Puppeteer debug logs
 The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
 has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is
-caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips
+caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips[debugging tips].
 
 Using Puppeteer's debug method when launching Kibana would look like:
 ```
@@ -123,11 +137,13 @@ The internal DevTools protocol traffic will be logged via the `debug` module und
 
 The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.
 
+[float]
+[[reporting-troubleshooting-system-requirements]]
 === System requirements
-In Elastic cloud, the Kibana instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
-Kibana Reporting when the dashboard or visualization is relatively simple: for example, a single pie chart visualization or a dashboard with
-a few visualizations. However, certain visualization types incur more load than others, for example TSVB panel incurs a lot of network
+In Elastic Cloud, the {kib} instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
+{kib} Reporting when the visualization or dashboard is relatively simple, such as a single pie chart or a dashboard with
+a few visualizations. However, certain visualization types incur more load than others. For example, a TSVB panel has a lot of network
 requests to render.
 
-If the Kibana instance doesn't have enough memory to run the report, the report will fail with an error such as `Error: Page crashed!` in
-the message. In those cases, try increasing the memory for the Kibana instance to 2GB.
+If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
+In this case, try increasing the memory for the {kib} instance to 2GB.

@@ -6,11 +6,11 @@
 
 --
 
-You can generate a report that contains a {kib} dashboard, visualization, 
-saved search, or Canvas workpad. Depending on the object type, you can export the data as 
+You can generate a report that contains a {kib} dashboard, visualization,
+saved search, or Canvas workpad. Depending on the object type, you can export the data as
 a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
-Reporting is available from the *Share* menu 
+Reporting is available from the *Share* menu
 in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
@@ -40,9 +40,9 @@ for an example.
 [[manually-generate-reports]]
 == Generate a report manually
 
-. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report. 
+. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report.
 
-. In the {kib} toolbar, click *Share*.  If you are working in Canvas, 
+. In the {kib} toolbar, click *Share*.  If you are working in Canvas,
 click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
 
 . Select the option appropriate for your object. You can export:
@@ -57,19 +57,28 @@ A notification appears when the report is complete.
 
 [float]
 [[reporting-layout-sizing]]
-== Layout and Sizing
-The layout and size of the PDF or PNG image depends on the Kibana app that the Reporting plugin is integrated with. For Canvas, the
-worksheet's dimensions determine the size for Reporting. In other apps, the dimensions are generally taken on the fly by looking at
-the size of the visualization elements or panels on the page. The size dimensions are part of the reporting job parameters. Therefore to
-make the report output larger or smaller, you can change the size of the browser to resize the shareable container before generating the
-report, so the desired dimenions are passed in the job parameters.
+== Layout and sizing
+The layout and size of the PDF or PNG image depends on the {kib} app
+with which the Reporting plugin is integrated. For Canvas, the
+worksheet dimensions determine the size for Reporting. In other apps,
+the dimensions are taken on the fly by looking at
+the size of the visualization elements or panels on the page.
 
-Here is what a simple Kibana Dashboard might look like. The highlighted area is what is determined to be the shareable container:
+The size dimensions are part of the reporting job parameters. Therefore, to
+make the report output larger or smaller, you can change the size of the browser.
+This resizes the shareable container before generating the
+report, so the desired dimensions are passed in the job parameters.
+
+In the following {kib} dashboard, the shareable container is highlighted.
+The shareable container is captured when you click the
+*Generate* or *Copy POST URL* button. It might take some trial and error
+before you're satisfied with the layout and dimensions in the resulting
+PNG or PDF image.
+
 [role="screenshot"]
 image::user/reporting/images/shareable-container.png["Shareable Container"]
 
-The size of the shareable container is captured when you click the "Generate" or "Copy POST URL" button, so it may take some trial and error
-before you're satisfied with the layout and dimensions in the result PNG or PDF image.
+
 
 [float]
 [[optimize-pdf]]
@@ -85,8 +94,8 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 [[manage-report-history]]
 == View and manage report history
 
-For a list of your reports, go to *Management > Reporting*.  
-From this view, you can monitor the generation of a report and 
+For a list of your reports, go to *Management > Reporting*.
+From this view, you can monitor the generation of a report and
 download reports that you previously generated.
 
 [float]
