@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
@@ -17,15 +16,6 @@ import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../lib/kibana');
-
-jest.mock('../../../containers/source', () => ({
-  indicesExistOrDataTemporarilyUnavailable: () => true,
-  WithSource: ({
-    children,
-  }: {
-    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
-  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
-}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
