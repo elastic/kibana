@@ -12,6 +12,10 @@ Describes the set of required and optional properties plugin can define in its m
 export interface PluginManifest 
 ```
 
+## Remarks
+
+Should never be used in code outside of Core but is exported for documentation purposes.
+
 ## Properties
 
 |  Property | Type | Description |
@@ -24,8 +28,4 @@ export interface PluginManifest
 |  [server](./kibana-plugin-server.pluginmanifest.server.md) | <code>boolean</code> | Specifies whether plugin includes some server-side specific functionality. |
 |  [ui](./kibana-plugin-server.pluginmanifest.ui.md) | <code>boolean</code> | Specifies whether plugin includes some client/browser specific functionality that should be included into client bundle via <code>public/ui_plugin.js</code> file. |
 |  [version](./kibana-plugin-server.pluginmanifest.version.md) | <code>string</code> | Version of the plugin. |
-
-## Remarks
-
-Should never be used in code outside of Core but is exported for documentation purposes.
 

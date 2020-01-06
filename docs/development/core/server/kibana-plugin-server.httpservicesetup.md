@@ -12,21 +12,6 @@ Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins d
 export interface HttpServiceSetup 
 ```
 
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [basePath](./kibana-plugin-server.httpservicesetup.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-server.ibasepath.md)<!-- -->. |
-|  [createCookieSessionStorageFactory](./kibana-plugin-server.httpservicesetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) |
-|  [createRouter](./kibana-plugin-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |
-|  [csp](./kibana-plugin-server.httpservicesetup.csp.md) | <code>ICspConfig</code> | The CSP config used for Kibana. |
-|  [isTlsEnabled](./kibana-plugin-server.httpservicesetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
-|  [registerAuth](./kibana-plugin-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
-|  [registerOnPostAuth](./kibana-plugin-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
-|  [registerOnPreAuth](./kibana-plugin-server.httpservicesetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
-|  [registerOnPreResponse](./kibana-plugin-server.httpservicesetup.registeronpreresponse.md) | <code>(handler: OnPreResponseHandler) =&gt; void</code> | To define custom logic to perform for the server response. |
-|  [registerRouteHandlerContext](./kibana-plugin-server.httpservicesetup.registerroutehandlercontext.md) | <code>&lt;T extends keyof RequestHandlerContext&gt;(contextName: T, provider: RequestHandlerContextProvider&lt;T&gt;) =&gt; RequestHandlerContextContainer</code> | Register a context provider for a route handler. |
-
 ## Example
 
 To handle an incoming request in your plugin you should: - Create a `Router` instance.
@@ -91,4 +76,19 @@ async (context, request, response) => {
 });
 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [basePath](./kibana-plugin-server.httpservicesetup.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-server.ibasepath.md)<!-- -->. |
+|  [createCookieSessionStorageFactory](./kibana-plugin-server.httpservicesetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) |
+|  [createRouter](./kibana-plugin-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |
+|  [csp](./kibana-plugin-server.httpservicesetup.csp.md) | <code>ICspConfig</code> | The CSP config used for Kibana. |
+|  [isTlsEnabled](./kibana-plugin-server.httpservicesetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
+|  [registerAuth](./kibana-plugin-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
+|  [registerOnPostAuth](./kibana-plugin-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
+|  [registerOnPreAuth](./kibana-plugin-server.httpservicesetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
+|  [registerOnPreResponse](./kibana-plugin-server.httpservicesetup.registeronpreresponse.md) | <code>(handler: OnPreResponseHandler) =&gt; void</code> | To define custom logic to perform for the server response. |
+|  [registerRouteHandlerContext](./kibana-plugin-server.httpservicesetup.registerroutehandlercontext.md) | <code>&lt;T extends keyof RequestHandlerContext&gt;(contextName: T, provider: RequestHandlerContextProvider&lt;T&gt;) =&gt; RequestHandlerContextContainer</code> | Register a context provider for a route handler. |
 

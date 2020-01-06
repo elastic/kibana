@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { RunContext } from '../../../task_manager';
+import { RunContext } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
@@ -20,6 +20,7 @@ import {
   GetServicesFunction,
   RawAlert,
   SpaceIdToNamespaceFunction,
+  IntervalSchedule,
 } from '../types';
 
 export interface TaskRunnerContext {
@@ -94,7 +95,7 @@ export class TaskRunnerFactory {
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { params, actions, interval, throttle, muteAll, mutedInstanceIds },
+          attributes: { params, actions, schedule, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
@@ -167,7 +168,13 @@ export class TaskRunnerFactory {
           })
         );
 
-        const nextRunAt = getNextRunAt(new Date(taskInstance.startedAt!), interval);
+        const nextRunAt = getNextRunAt(
+          new Date(taskInstance.startedAt!),
+          // we do not currently have a good way of returning the type
+          // from SavedObjectsClient, and as we currenrtly require a schedule
+          // and we only support `interval`, we can cast this safely
+          schedule as IntervalSchedule
+        );
 
         return {
           state: {

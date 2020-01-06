@@ -64,7 +64,7 @@ export const AlertsTable = React.memo(
     const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
     return (
       <StatefulEventsViewer
-        defaultFilters={alertsFilter}
+        pageFilters={alertsFilter}
         defaultModel={alertsDefaultModel}
         end={endDate}
         id={ALERTS_TABLE_ID}
@@ -73,8 +73,6 @@ export const AlertsTable = React.memo(
           () => ({
             documentType: i18n.ALERTS_DOCUMENT_TYPE,
             footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-            showCheckboxes: false,
-            showRowRenderers: false,
             title: i18n.ALERTS_TABLE_TITLE,
           }),
           []

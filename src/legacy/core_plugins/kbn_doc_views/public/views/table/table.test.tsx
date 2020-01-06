@@ -18,11 +18,13 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { flattenHitWrapper } from '../../../../data/public/';
 import { DocViewTable } from './table';
+
+import { IndexPattern, indexPatterns } from '../../../../../../plugins/data/public';
+
+jest.mock('ui/new_platform');
 
 // @ts-ignore
 const indexPattern = {
@@ -68,7 +70,7 @@ const indexPattern = {
   formatHit: jest.fn(hit => hit._source),
 } as IndexPattern;
 
-indexPattern.flattenHit = flattenHitWrapper(indexPattern, indexPattern.metaFields);
+indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
 describe('DocViewTable at Discover', () => {
   // At Discover's main view, all buttons are rendered

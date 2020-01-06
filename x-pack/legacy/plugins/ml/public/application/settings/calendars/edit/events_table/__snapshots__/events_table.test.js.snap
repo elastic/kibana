@@ -33,7 +33,6 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         },
       ]
     }
-    executeQueryOptions={Object {}}
     itemId="event_id"
     items={
       Array [
@@ -101,7 +100,6 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         },
       ]
     }
-    executeQueryOptions={Object {}}
     itemId="event_id"
     items={
       Array [

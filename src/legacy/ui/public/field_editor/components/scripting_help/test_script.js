@@ -31,6 +31,13 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
+
+const { uiSettings } = npStart.core;
+
+import { esQuery } from '../../../../../../plugins/data/public';
+
 export class TestScript extends Component {
   state = {
     isLoading: false,
@@ -43,7 +50,7 @@ export class TestScript extends Component {
     }
   }
 
-  previewScript = async () => {
+  previewScript = async searchContext => {
     const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
@@ -54,11 +61,23 @@ export class TestScript extends Component {
       isLoading: true,
     });
 
+    let query;
+    if (searchContext) {
+      const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+      query = esQuery.buildEsQuery(
+        this.props.indexPattern,
+        searchContext.query,
+        null,
+        esQueryConfigs
+      );
+    }
+
     const scriptResponse = await executeScript({
       name,
       lang,
       script,
       indexPatternTitle: indexPattern.title,
+      query,
       additionalFields: this.state.additionalFields.map(option => {
         return option.value;
       }),
@@ -161,24 +180,36 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow label="Additional fields">
+        <EuiFormRow label="Additional fields" fullWidth>
           <EuiComboBox
             placeholder="Select..."
             options={fields}
             selectedOptions={this.state.additionalFields}
             onChange={this.onAdditionalFieldsChange}
             data-test-subj="additionalFieldsSelect"
+            fullWidth
           />
         </EuiFormRow>
 
-        <EuiButton
-          onClick={this.previewScript}
-          disabled={this.props.script ? false : true}
-          isLoading={this.state.isLoading}
-          data-test-subj="runScriptButton"
-        >
-          Run script
-        </EuiButton>
+        <div className="testScript__searchBar">
+          <SearchBar
+            showFilterBar={false}
+            showDatePicker={false}
+            showQueryInput={true}
+            query={{ language: uiSettings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this.previewScript}
+            indexPatterns={[this.props.indexPattern]}
+            customSubmitButton={
+              <EuiButton
+                disabled={this.props.script ? false : true}
+                isLoading={this.state.isLoading}
+                data-test-subj="runScriptButton"
+              >
+                Run script
+              </EuiButton>
+            }
+          />
+        </div>
       </Fragment>
     );
   }
@@ -191,7 +222,8 @@ export class TestScript extends Component {
           <h3>Preview results</h3>
           <p>
             Run your script to preview the first 10 results. You can also select some additional
-            fields to include in your results to gain more context.
+            fields to include in your results to gain more context or add a query to filter on
+            specific documents.
           </p>
         </EuiText>
         <EuiSpacer />

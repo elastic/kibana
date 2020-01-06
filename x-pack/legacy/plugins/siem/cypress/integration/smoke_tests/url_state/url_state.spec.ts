@@ -60,11 +60,14 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: DEFAULT_TIMEOUT })
+      .click({ force: true })
+      .invoke('text')
+      .should('not.equal', 'Updating');
 
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -72,11 +75,14 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: DEFAULT_TIMEOUT })
+      .click({ force: true })
+      .invoke('text')
+      .should('not.equal', 'Updating');
 
     cy.url().should(
       'include',

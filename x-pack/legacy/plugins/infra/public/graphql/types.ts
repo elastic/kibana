@@ -37,7 +37,6 @@ export interface InfraSource {
   /** Sequences of log entries matching sets of highlighting queries within an interval */
   logEntryHighlights: InfraLogEntryInterval[];
 
-  logItem: InfraLogItem;
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
 
@@ -205,24 +204,6 @@ export interface InfraLogEntryFieldColumn {
   value: string;
   /** A list of highlighted substrings of the value */
   highlights: string[];
-}
-
-export interface InfraLogItem {
-  /** The ID of the document */
-  id: string;
-  /** The index where the document was found */
-  index: string;
-  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
-  key: InfraTimeKey;
-  /** An array of flattened fields and values */
-  fields: InfraLogItemField[];
-}
-
-export interface InfraLogItemField {
-  /** The flattened field name */
-  field: string;
-  /** The value for the Field as a string */
-  value: string;
 }
 
 export interface InfraSnapshotResponse {
@@ -426,9 +407,6 @@ export interface LogEntryHighlightsInfraSourceArgs {
   /** The highlighting to apply to the log entries */
   highlights: InfraLogEntryHighlightInput[];
 }
-export interface LogItemInfraSourceArgs {
-  id: string;
-}
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
@@ -601,49 +579,6 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // ====================================================
 // Documents
 // ====================================================
-
-export namespace FlyoutItemQuery {
-  export type Variables = {
-    sourceId: string;
-    itemId: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logItem: LogItem;
-  };
-
-  export type LogItem = {
-    __typename?: 'InfraLogItem';
-
-    id: string;
-
-    index: string;
-
-    key: Key;
-
-    fields: Fields[];
-  };
-
-  export type Key = InfraTimeKeyFields.Fragment;
-
-  export type Fields = {
-    __typename?: 'InfraLogItemField';
-
-    field: string;
-
-    value: string;
-  };
-}
 
 export namespace LogEntryHighlightsQuery {
   export type Variables = {
