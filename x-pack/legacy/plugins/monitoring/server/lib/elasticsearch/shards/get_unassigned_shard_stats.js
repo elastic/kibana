@@ -51,7 +51,7 @@ async function getShardCountPerNode(req, esIndexPattern, cluster) {
   return await callWithRequest(req, 'search', params);
 }
 
-async function getUnassignedShardStats(req, esIndexPattern, cluster) {
+async function getUnassignedShardData(req, esIndexPattern, cluster) {
   const config = req.server.config();
   const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
 
@@ -87,7 +87,7 @@ async function getUnassignedShardStats(req, esIndexPattern, cluster) {
   return await callWithRequest(req, 'search', params);
 }
 
-export async function getShardStats(
+export async function getUnassignedShardStats(
   req,
   esIndexPattern,
   cluster,
@@ -99,7 +99,7 @@ export async function getShardStats(
   let nodes;
 
   if (includeIndices) {
-    const response = await getUnassignedShardStats(req, esIndexPattern, cluster);
+    const response = await getUnassignedShardData(req, esIndexPattern, cluster);
     indices = get(response, 'aggregations.indices.buckets', []).reduce((accum, bucket) => {
       const index = bucket.key;
       const states = get(bucket, 'state.primary.buckets', []);

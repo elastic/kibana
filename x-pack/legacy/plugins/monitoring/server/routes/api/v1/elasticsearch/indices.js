@@ -8,7 +8,7 @@ import Joi from 'joi';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getIndices } from '../../../../lib/elasticsearch/indices';
-import { getShardStats } from '../../../../lib/elasticsearch/shards/get_shard_stats_v2';
+import { getUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_unassigned_shard_stats';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
@@ -43,7 +43,7 @@ export function esIndicesRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats, {
+        const shardStats = await getUnassignedShardStats(req, esIndexPattern, clusterStats, {
           includeIndices: true,
         });
         const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
