@@ -47,18 +47,14 @@ export const PageDoubleIntegers: React.FC<Props> = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContent>
-        <EuiPageContentBody>
+        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
           <EuiText>
             Below is a list of numbers in milliseconds. They are sent as a batch to the server. For
-            each number server waits given number of milliseconds than doubles the number and
+            each number server waits given number of milliseconds then doubles the number and
             streams it back.
           </EuiText>
           <br />
-          <EuiPanel
-            data-test-subj="helloWorldEmbeddableFromFactory"
-            paddingSize="none"
-            role="figure"
-          >
+          <EuiPanel paddingSize="l">
             <DoubleIntegers double={explorer.double} />
           </EuiPanel>
         </EuiPageContentBody>

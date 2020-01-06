@@ -36,7 +36,7 @@ export interface BfetchExplorerStartPlugins {
 export class BfetchExplorerPlugin implements Plugin {
   public setup(core: CoreSetup<BfetchExplorerStartPlugins>, plugins: BfetchExplorerSetupPlugins) {
     const double = plugins.bfetch.batchedFunction<{ num: number }, { num: number }>({
-      url: '/bfetch/double',
+      url: '/bfetch_explorer/double',
     });
 
     const explorer: ExplorerService = {

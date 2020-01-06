@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
@@ -25,22 +25,20 @@ import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
 
 export const App: React.FC = () => {
-  const { appBasePath, plugins } = useDeps();
-  const double = useMemo(
-    () =>
-      plugins.bfetch.batchedFunction<{ num: number }, { num: number; delay: number }>({
-        url: '/bfetch_explorer/double',
-      }),
-    [plugins.bfetch]
-  );
+  const { appBasePath } = useDeps();
+
+  const routeElements: React.ReactElement[] = [];
+  for (const { items } of routes) {
+    for (const { id, component } of items) {
+      routeElements.push(<Route key={id} path={`/${id}`} render={props => component} />);
+    }
+  }
 
   return (
     <Router basename={appBasePath}>
       <EuiPage>
         <Sidebar />
-        {routes.map(({ id, component }) => (
-          <Route key={id} path={`/${id}`} render={props => component} />
-        ))}
+        {routeElements}
       </EuiPage>
     </Router>
   );

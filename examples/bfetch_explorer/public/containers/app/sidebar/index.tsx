@@ -35,13 +35,18 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       <EuiSideNav
         items={[
           {
-            name: 'Embeddable explorer',
+            name: 'bfetch explorer',
             id: 'home',
-            items: routes.map(({ id, title }) => ({
+            items: routes.map(({ id, title, items }) => ({
               id,
               name: title,
-              onClick: () => history.push(`/${id}`),
-              'data-test-subj': id,
+              isSelected: true,
+              items: items.map(route => ({
+                id: route.id,
+                name: route.title,
+                onClick: () => history.push(`/${route.id}`),
+                'data-test-subj': route.id,
+              })),
             })),
           },
         ]}

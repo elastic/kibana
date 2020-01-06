@@ -20,26 +20,39 @@
 import React from 'react';
 import { PageDoubleIntegers } from './containers/app/pages/page_double_integers';
 
+interface RouteSectionDef {
+  title: string;
+  id: string;
+  items: RouteDef[];
+}
+
 interface RouteDef {
   title: string;
   id: string;
   component: React.ReactNode;
 }
 
-export const routes: RouteDef[] = [
+export const routes: RouteSectionDef[] = [
   {
-    title: 'Double integeters',
-    id: 'double-integers',
-    component: <PageDoubleIntegers />,
+    title: 'fetchStreaming',
+    id: 'fetchStreaming',
+    items: [
+      {
+        title: 'Stream smth',
+        id: 'stream-smth',
+        component: <div>stream</div>,
+      },
+    ],
   },
   {
-    title: 'Todo embeddable',
-    id: 'todoEmbeddableSection',
-    component: <div>todo</div>,
-  },
-  {
-    title: 'List container embeddable',
-    id: 'listContainerSection',
-    component: <div>list</div>,
+    title: 'batchedFunction',
+    id: 'batchedFunction',
+    items: [
+      {
+        title: 'Double integers',
+        id: 'double-integers',
+        component: <PageDoubleIntegers />,
+      },
+    ],
   },
 ];
