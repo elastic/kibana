@@ -18,6 +18,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 import { RegularExpressionRepresentation } from './category_expression';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
+import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
 
 export const TopCategoriesTable = euiStyled(
   ({
@@ -62,17 +63,16 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
     name: i18n.translate('xpack.infra.logs.logEntryCategories.countColumnTitle', {
       defaultMessage: 'Message count',
     }),
-    width: '120px',
     render: (logEntryCount: number) => {
       return numeral(logEntryCount).format('0,0');
     },
+    width: '120px',
   },
   {
     field: 'histograms',
     name: i18n.translate('xpack.infra.logs.logEntryCategories.trendColumnTitle', {
       defaultMessage: 'Trend',
     }),
-    width: '200px',
     render: (histograms: LogEntryCategoryHistogram[], item) => {
       return (
         <LogEntryCountSparkline
@@ -82,6 +82,7 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
         />
       );
     },
+    width: '200px',
   },
   {
     field: 'regularExpression',
@@ -102,10 +103,14 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
     width: '200px',
   },
   {
+    align: 'right',
     field: 'maximumAnomalyScore',
     name: i18n.translate('xpack.infra.logs.logEntryCategories.maximumAnomalyScoreColumnTitle', {
       defaultMessage: 'Maximum anomaly score',
     }),
+    render: (maximumAnomalyScore: number) => (
+      <AnomalySeverityIndicator anomalyScore={maximumAnomalyScore} />
+    ),
     width: '200px',
   },
 ];
