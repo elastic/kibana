@@ -22,7 +22,7 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
   const [lastSignals, setLastSignals] = useState<React.ReactElement | null>(
     <EuiLoadingSpinner size="m" />
   );
-  const [totalSignals, setTotalSignals] = useState<React.ReactElement>(
+  const [totalSignals, setTotalSignals] = useState<React.ReactElement | null>(
     <EuiLoadingSpinner size="m" />
   );
 
@@ -33,7 +33,7 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
     query = '';
   }
 
-  const [, signals] = useQuerySignals<unknown, Aggs>(query);
+  const [loading, signals] = useQuerySignals<unknown, Aggs>(query);
 
   useEffect(() => {
     if (signals != null) {
@@ -46,8 +46,11 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
         ) : null
       );
       setTotalSignals(<>{mySignals.hits.total.value}</>);
+    } else {
+      setLastSignals(null);
+      setTotalSignals(null);
     }
-  }, [signals]);
+  }, [loading, signals]);
 
   return [lastSignals, totalSignals];
 };
