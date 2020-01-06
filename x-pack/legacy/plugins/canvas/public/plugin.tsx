@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
 // @ts-ignore: Untyped Local
-import { AngularStrings } from '../i18n';
+import { CapabilitiesStrings } from '../i18n';
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 import { createStore } from './store';
