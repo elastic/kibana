@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -15,8 +15,11 @@ import { CategorizationDetector } from '../categorization_detector';
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import { CategoryExample } from '../../../../../common/results_loader';
-import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
+import { LoadingWrapper } from '../../../charts/loading_wrapper';
+// import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 // import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
+
+const LOADING_PLACEHOLDER_HEIGHT = '200x';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -87,16 +90,23 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   }, [examplesValid]);
 
   return (
-    <Fragment>
+    <>
       <CategorizationDetector />
       <CategorizationField />
-      <FieldExamples fieldExamples={fieldExamples} />
-      {fieldExamples !== null && (
+      {loadingData === true && (
+        <LoadingWrapper height={LOADING_PLACEHOLDER_HEIGHT} hasData={false} loading={true}>
+          <div style={{ height: LOADING_PLACEHOLDER_HEIGHT }} />
+        </LoadingWrapper>
+      )}
+      {fieldExamples !== null && loadingData === false && (
         <>
-          <ExamplesValidCallout examplesValid={examplesValid} />
-          <EditCategorizationAnalyzerFlyout />
+          <ExamplesValidCallout
+            examplesValid={examplesValid}
+            categorizationAnalyzer={jobCreator.categorizationAnalyzer}
+          />
+          <FieldExamples fieldExamples={fieldExamples} />
         </>
       )}
-    </Fragment>
+    </>
   );
 };

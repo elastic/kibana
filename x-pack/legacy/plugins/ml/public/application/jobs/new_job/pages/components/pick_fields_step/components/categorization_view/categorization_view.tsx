@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { CategorizationDetectors } from './metric_selection';
@@ -27,20 +27,20 @@ export const CategorizationView: FC<Props> = ({ isActive, setCanProceed }) => {
   }, [categoryFieldValid, settingsValid]);
 
   return (
-    <Fragment>
+    <>
       {isActive === false ? (
         <CategorizationDetectorsSummary />
       ) : (
-        <Fragment>
+        <>
           <CategorizationDetectors setIsValid={setCategoryFieldValid} />
           {categoryFieldValid && (
-            <Fragment>
+            <>
               <EuiHorizontalRule margin="l" />
               <CategorizationSettings setIsValid={setSettingsValid} />
-            </Fragment>
+            </>
           )}
-        </Fragment>
+        </>
       )}
-    </Fragment>
+    </>
   );
 };

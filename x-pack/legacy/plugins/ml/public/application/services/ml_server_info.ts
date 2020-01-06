@@ -18,8 +18,9 @@ export interface MlServerDefaults {
 
 export interface CategorizationAnalyzer {
   char_filter?: any[];
-  tokenizer: string;
-  filter: any[];
+  tokenizer?: string;
+  filter?: any[];
+  analyzer?: string;
 }
 
 export interface MlServerLimits {

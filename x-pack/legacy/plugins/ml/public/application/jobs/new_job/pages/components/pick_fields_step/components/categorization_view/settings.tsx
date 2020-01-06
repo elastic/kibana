@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
@@ -16,7 +16,7 @@ interface Props {
 
 export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <BucketSpan setIsValid={setIsValid} />
@@ -25,6 +25,6 @@ export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
           <SparseDataSwitch />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Fragment>
+    </>
   );
 };

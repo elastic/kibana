@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results, Anomaly } from '../../../../../common/results_loader';
@@ -62,7 +62,7 @@ export const CategorizationDetectorsSummary: FC = () => {
   }
 
   return (
-    <Fragment>
+    <>
       <EventRateChart
         eventRateChartData={eventRateChartData}
         anomalyData={anomalyData}
@@ -73,6 +73,6 @@ export const CategorizationDetectorsSummary: FC = () => {
         fadeChart={jobIsRunning}
       />
       <TopCategories />
-    </Fragment>
+    </>
   );
 };

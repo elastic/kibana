@@ -4,35 +4,100 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import React, { FC } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { CategorizationAnalyzer } from '../../../../../../../services/ml_server_info';
+import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
+
+type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
 
 interface Props {
   examplesValid: number;
+  categorizationAnalyzer: CategorizationAnalyzerType;
 }
 
-export const ExamplesValidCallout: FC<Props> = ({ examplesValid }) => {
-  function getCallOut() {
-    if (examplesValid < 0.2) {
-      return (
-        <EuiCallOut color="danger">
-          {Math.floor(examplesValid * 100)}% of field values tested contain valid tokens
-        </EuiCallOut>
-      );
-    } else if (examplesValid < 0.75) {
-      return (
-        <EuiCallOut color="warning">
-          {Math.floor(examplesValid * 100)}% of field values tested contain valid tokens
-        </EuiCallOut>
-      );
-    } else {
-      return (
-        <EuiCallOut color="success">
-          {Math.floor(examplesValid * 100)}% of field values tested contain valid tokens
-        </EuiCallOut>
-      );
+export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationAnalyzer }) => {
+  const percentageText = <PercentageText examplesValid={examplesValid} />;
+  const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
+
+  let color: 'success' | 'danger' | 'warning' = 'success';
+  let title = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.valid',
+    {
+      defaultMessage: 'Selected category field is valid',
+    }
+  );
+
+  if (examplesValid < 0.2) {
+    color = 'danger';
+    title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.invalid',
+      {
+        defaultMessage: 'Selected category field is invalid',
+      }
+    );
+  } else if (examplesValid < 0.75) {
+    color = 'warning';
+    title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.possiblyInvalid',
+      {
+        defaultMessage: 'Selected category field is possibly invalid',
+      }
+    );
+  }
+
+  return (
+    <EuiCallOut color={color} title={title}>
+      {percentageText}
+      <EuiSpacer size="s" />
+      {analyzerUsed}
+    </EuiCallOut>
+  );
+};
+
+const PercentageText: FC<{ examplesValid: number }> = ({ examplesValid }) => (
+  <div>
+    <FormattedMessage
+      id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldPercentage"
+      defaultMessage="{percentage}% of field values tested contain valid tokens."
+      values={{ percentage: Math.floor(examplesValid * 100) }}
+    />
+  </div>
+);
+
+const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzerType }> = ({
+  categorizationAnalyzer,
+}) => {
+  let analyzer = '';
+  if (typeof categorizationAnalyzer === null) {
+    return null;
+  }
+
+  if (typeof categorizationAnalyzer === 'string') {
+    analyzer = categorizationAnalyzer;
+  } else {
+    if (categorizationAnalyzer?.tokenizer !== undefined) {
+      analyzer = categorizationAnalyzer?.tokenizer!;
+    } else if (categorizationAnalyzer?.analyzer !== undefined) {
+      analyzer = categorizationAnalyzer?.analyzer!;
     }
   }
 
-  return <Fragment>{getCallOut()}</Fragment>;
+  return (
+    <>
+      <div>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldAnalyzer"
+          defaultMessage="Analyzer used: {analyzer}"
+          values={{ analyzer }}
+        />
+      </div>
+      <div>
+        <EditCategorizationAnalyzerFlyout />
+      </div>
+    </>
+  );
 };

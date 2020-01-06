@@ -6,31 +6,16 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
 
-const DTR_IDX = 0;
-
-interface Category {
-  // MOVE!!!!!!!
-  job_id: string;
-  category_id: number;
-  terms: string;
-  regex: string;
-  max_matching_length: number;
-  examples: string[];
-  grok_pattern: string;
-}
-
 export const TopCategories: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 
-  const [categories, setCategories] = useState<Category[]>([]);
   const [tableRow, setTableRow] = useState<Array<{ count: number; example: string }>>([]);
   const [totalCategories, setTotalCategories] = useState(0);
 
@@ -40,7 +25,6 @@ export const TopCategories: FC = () => {
 
   async function loadTopCats() {
     const results = await ml.jobs.topCategories(jobCreator.jobId, 5);
-    setCategories(results.categories);
     setTableRow(
       results.categories.map(c => ({
         count: c.count,
@@ -48,7 +32,6 @@ export const TopCategories: FC = () => {
       }))
     );
     setTotalCategories(results.total);
-    // console.log(topCats.total);
   }
 
   useEffect(() => {
@@ -85,7 +68,13 @@ export const TopCategories: FC = () => {
     <>
       {totalCategories > 0 && (
         <>
-          <div>Total categories: {totalCategories}</div>
+          <div>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationTotalCategories"
+              defaultMessage="Total categories: {totalCategories}"
+              values={{ totalCategories }}
+            />
+          </div>
           <EuiBasicTable columns={columns} items={tableRow} />
         </>
       )}

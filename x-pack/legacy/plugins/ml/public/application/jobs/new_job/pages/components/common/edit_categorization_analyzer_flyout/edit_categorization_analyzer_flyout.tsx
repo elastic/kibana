@@ -75,7 +75,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
             <Contents
               onChange={onJSONChange}
               title={i18n.translate('xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.title', {
-                defaultMessage: 'Edit categorization analyzer JSON',
+                defaultMessage: 'Edit categorization  JSON',
               })}
               value={categorizationAnalyzerString}
             />
@@ -121,7 +121,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
 
 const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
   return (
-    <EuiButtonEmpty onClick={onClick} data-test-subj="mlJobWizardButtonPreviewJobJson">
+    <EuiButtonEmpty onClick={onClick} flush="left" data-test-subj="mlJobWizardButtonPreviewJobJson">
       <FormattedMessage
         id="xpack.ml.newJob.wizard.editCategorizationAnalyzerFlyoutButton"
         defaultMessage="Edit categorization analyzer"
