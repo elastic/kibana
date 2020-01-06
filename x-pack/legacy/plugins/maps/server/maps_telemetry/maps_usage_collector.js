@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMapsTelemetry, TELEMETRY_TYPE } from './maps_telemetry';
+import { getMapsTelemetry } from './maps_telemetry';
+import { TELEMETRY_TYPE } from '../../common/constants';
 
 export function initTelemetryCollection(usageCollection, server) {
   if (!usageCollection) {

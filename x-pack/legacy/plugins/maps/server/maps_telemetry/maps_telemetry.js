@@ -6,8 +6,7 @@
 
 import _ from 'lodash';
 import { EMS_FILE, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-
-export const TELEMETRY_TYPE = 'maps-telemetry';
+import { TELEMETRY_TYPE } from '../../common/constants';
 
 function getSavedObjectsClient(server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
