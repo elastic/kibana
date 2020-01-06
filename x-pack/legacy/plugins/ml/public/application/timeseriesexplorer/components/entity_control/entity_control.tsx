@@ -39,13 +39,13 @@ interface EntityControlProps {
   forceSelection: boolean;
 }
 
-interface EntityContolState {
+interface EntityControlState {
   selectedOptions: EuiComboBoxOptionProps[] | undefined;
   isLoading: boolean;
   options: EuiComboBoxOptionProps[] | undefined;
 }
 
-export class EntityControl extends Component<EntityControlProps, EntityContolState> {
+export class EntityControl extends Component<EntityControlProps, EntityControlState> {
   inputRef: any;
 
   state = {
@@ -53,10 +53,6 @@ export class EntityControl extends Component<EntityControlProps, EntityContolSta
     options: undefined,
     isLoading: false,
   };
-
-  constructor(props: EntityControlProps) {
-    super(props);
-  }
 
   componentDidUpdate(prevProps: EntityControlProps) {
     const { entity, forceSelection } = this.props;
