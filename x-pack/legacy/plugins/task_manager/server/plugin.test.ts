@@ -22,26 +22,26 @@ describe('Task Manager Plugin', () => {
     uuid,
   } as CoreSetup;
 
-  const mockLegacyDeps: LegacyDeps = {
+  const getMockLegacyDeps = (): LegacyDeps => ({
     config: {},
     serializer: {},
     elasticsearch: {
-      getCluster: jest.fn(),
+      callAsInternalUser: jest.fn(),
     },
     savedObjects: {
       getSavedObjectsRepository: jest.fn(),
     },
     logger: mockLogger(),
-  };
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockLegacyDeps.elasticsearch.getCluster.mockReturnValue({ callWithInternalUser: jest.fn() });
     plugin = new Plugin();
   });
 
   describe('setup()', () => {
     test('exposes the underlying TaskManager', async () => {
+      const mockLegacyDeps = getMockLegacyDeps();
       const setupResult = plugin.setup(mockCoreSetup, mockLegacyDeps);
       expect(setupResult).toMatchInlineSnapshot(`
         TaskManager {
@@ -64,6 +64,7 @@ describe('Task Manager Plugin', () => {
 
   describe('start()', () => {
     test('properly starts up the task manager', async () => {
+      const mockLegacyDeps = getMockLegacyDeps();
       plugin.setup(mockCoreSetup, mockLegacyDeps);
       plugin.start();
       const taskManager = (TaskManager as any).mock.instances[0];
@@ -73,6 +74,7 @@ describe('Task Manager Plugin', () => {
 
   describe('stop()', () => {
     test('properly stops up the task manager', async () => {
+      const mockLegacyDeps = getMockLegacyDeps();
       plugin.setup(mockCoreSetup, mockLegacyDeps);
       plugin.stop();
       const taskManager = (TaskManager as any).mock.instances[0];

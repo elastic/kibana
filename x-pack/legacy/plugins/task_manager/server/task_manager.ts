@@ -10,7 +10,11 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
-import { SavedObjectsClientContract, SavedObjectsSerializer } from '../../../../../src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsSerializer,
+  IScopedClusterClient,
+} from '../../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 import { TaskManagerConfig } from '../../../../plugins/kibana_task_manager/server';
 
@@ -58,7 +62,7 @@ const VERSION_CONFLICT_STATUS = 409;
 export interface TaskManagerOpts {
   logger: Logger;
   config: TaskManagerConfig;
-  callWithInternalUser: any;
+  callAsInternalUser: IScopedClusterClient['callAsInternalUser'];
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
   taskManagerId: string;
@@ -128,7 +132,7 @@ export class TaskManager {
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: opts.callWithInternalUser,
+      callCluster: opts.callAsInternalUser,
       index: opts.config.index,
       maxAttempts: opts.config.max_attempts,
       definitions: this.definitions,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup, IClusterClient } from 'kibana/server';
 import { Logger } from './types';
 import { TaskManager } from './task_manager';
 
@@ -21,7 +21,7 @@ export interface PluginContract {
 export interface LegacyDeps {
   config: any;
   serializer: any;
-  elasticsearch: any;
+  elasticsearch: Pick<IClusterClient, 'callAsInternalUser'>;
   savedObjects: any;
   logger: Logger;
 }
@@ -34,10 +34,9 @@ export class Plugin {
   // TODO: Make asynchronous like new platform
   public setup(
     core: CoreSetup,
-    { logger, config, serializer, elasticsearch, savedObjects }: LegacyDeps
+    { logger, config, serializer, elasticsearch: { callAsInternalUser }, savedObjects }: LegacyDeps
   ): PluginContract {
-    const { callWithInternalUser } = elasticsearch.getCluster('admin');
-    const savedObjectsRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser, [
+    const savedObjectsRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser, [
       'task',
     ]);
 
@@ -46,7 +45,7 @@ export class Plugin {
       config,
       savedObjectsRepository,
       serializer,
-      callWithInternalUser,
+      callAsInternalUser,
       logger,
     });
 

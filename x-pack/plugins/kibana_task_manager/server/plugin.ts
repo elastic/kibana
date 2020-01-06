@@ -20,7 +20,6 @@ import { TaskManagerConfig } from './config';
 interface LegacyDependencies {
   serializer: any;
   savedObjects: any;
-  elasticsearch: any;
 }
 
 export interface LegacySetup {
@@ -53,11 +52,13 @@ export class TaskManagerPlugin
     const config$ = this.initContext.config.create<TaskManagerConfig>();
 
     const legacyTaskManager = new Promise<PluginContract>(resolve => {
-      combineLatest(config$, core.elasticsearch.dataClient$).subscribe(
+      combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
         async ([config, elasticsearch]) => {
           this.legacySetupResult.then(({ legacyPlugin, legacyDependencies }) => {
             const logger = this.initContext.logger.get('kibanaTaskManager');
-            resolve(legacyPlugin.setup(core, { logger, config, ...legacyDependencies }));
+            resolve(
+              legacyPlugin.setup(core, { logger, config, elasticsearch, ...legacyDependencies })
+            );
           });
         }
       );

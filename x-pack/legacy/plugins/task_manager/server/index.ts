@@ -70,7 +70,6 @@ export function taskManager(kibana: any) {
             plugins: { kibanaTaskManager },
           },
         },
-        plugins: { elasticsearch },
       } = server;
 
       await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI({
@@ -78,7 +77,6 @@ export function taskManager(kibana: any) {
         legacyDependencies: {
           serializer,
           savedObjects,
-          elasticsearch,
         },
       });
     },

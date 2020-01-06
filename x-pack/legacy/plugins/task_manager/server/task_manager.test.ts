@@ -44,7 +44,7 @@ describe('TaskManager', () => {
     config,
     savedObjectsRepository: savedObjectsClient,
     serializer,
-    callWithInternalUser: jest.fn(),
+    callAsInternalUser: jest.fn(),
     logger: mockLogger(),
     taskManagerId: 'some-uuid',
   };
@@ -216,7 +216,7 @@ describe('TaskManager', () => {
 
   test('allows and queues fetching tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+    taskManagerOpts.callAsInternalUser.mockResolvedValue({
       hits: {
         total: {
           value: 0,
@@ -227,13 +227,13 @@ describe('TaskManager', () => {
     const promise = client.fetch({});
     client.start();
     await promise;
-    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
   });
 
   test('allows fetching tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     client.start();
-    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+    taskManagerOpts.callAsInternalUser.mockResolvedValue({
       hits: {
         total: {
           value: 0,
@@ -242,7 +242,7 @@ describe('TaskManager', () => {
       },
     });
     await client.fetch({});
-    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
   });
 
   test('allows middleware registration before starting', () => {
