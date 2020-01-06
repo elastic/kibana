@@ -37,13 +37,7 @@ const forgeRequest = ({
   path: string;
   method: RouteMethod;
 }>): KibanaRequest => {
-  return {
-    headers,
-    route: {
-      path,
-      method,
-    },
-  } as KibanaRequest;
+  return httpServerMock.createKibanaRequest({ headers, path, method });
 };
 
 describe('xsrf post-auth handler', () => {

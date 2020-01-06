@@ -18,7 +18,6 @@
  */
 
 import Joi from 'joi';
-import os from 'os';
 import { join } from 'path';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
@@ -69,7 +68,6 @@ export default () =>
     }),
 
     server: Joi.object({
-      name: Joi.string().default(os.hostname()),
       defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
       // keep them for BWC, remove when not used in Legacy.
       // validation should be in sync with one in New platform.
@@ -93,6 +91,7 @@ export default () =>
       customResponseHeaders: HANDLED_IN_NEW_PLATFORM,
       keepaliveTimeout: HANDLED_IN_NEW_PLATFORM,
       maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
+      name: HANDLED_IN_NEW_PLATFORM,
       socketTimeout: HANDLED_IN_NEW_PLATFORM,
       ssl: HANDLED_IN_NEW_PLATFORM,
       compression: HANDLED_IN_NEW_PLATFORM,
