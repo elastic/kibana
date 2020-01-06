@@ -111,10 +111,7 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup,
-    { features, licensing }: PluginSetupDependencies
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
       createConfig$(this.initializerContext, core.http.isTlsEnabled),
       this.initializerContext.config.legacy.globalConfig$,
@@ -170,7 +167,7 @@ export class Plugin {
       csp: core.http.csp,
     });
 
-    return deepFreeze({
+    return deepFreeze<PluginSetupContract>({
       authc,
 
       authz: {
