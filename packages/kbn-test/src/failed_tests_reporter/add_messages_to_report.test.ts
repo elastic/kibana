@@ -36,7 +36,7 @@ expect.addSnapshotSerializer({
 jest.mock('fs', () => {
   const realFs = jest.requireActual('fs');
   return {
-    readFile: realFs.read,
+    ...realFs,
     writeFile: (...args: any[]) => {
       setTimeout(args[args.length - 1], 0);
     },

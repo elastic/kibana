@@ -66,7 +66,7 @@ export async function buildProductionProjects({
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
 async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
   const projectsSubset = [projects.get('kibana')!];
 
