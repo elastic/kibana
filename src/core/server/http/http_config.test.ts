@@ -19,8 +19,6 @@
 
 import uuid from 'uuid';
 import { config, HttpConfig } from '.';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -265,8 +263,7 @@ describe('with TLS', () => {
           clientAuthentication: 'none',
         },
       }),
-      {} as any,
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(false);
@@ -283,8 +280,7 @@ describe('with TLS', () => {
           clientAuthentication: 'optional',
         },
       }),
-      {} as any,
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);
@@ -301,8 +297,7 @@ describe('with TLS', () => {
           clientAuthentication: 'required',
         },
       }),
-      {} as any,
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);

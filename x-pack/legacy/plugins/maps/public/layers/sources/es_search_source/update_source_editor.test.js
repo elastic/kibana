@@ -6,6 +6,12 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
+jest.mock('./load_index_settings', () => ({
+  loadIndexSettings: async () => {
+    return { maxInnerResultWindow: 100 };
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
