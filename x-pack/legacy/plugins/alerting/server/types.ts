@@ -32,6 +32,12 @@ export interface AlertExecutorOptions {
   services: AlertServices;
   params: Record<string, any>;
   state: State;
+  spaceId: string;
+  namespace?: string;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  updatedBy: string;
 }
 
 export interface AlertType {

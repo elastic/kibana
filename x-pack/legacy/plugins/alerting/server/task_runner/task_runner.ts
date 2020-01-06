@@ -118,13 +118,24 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    { params, throttle, muteAll, mutedInstanceIds }: SavedObject['attributes'],
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    {
+      params,
+      throttle,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    }: SavedObject['attributes'],
+    executionHandler: ReturnType<typeof createExecutionHandler>,
+    spaceId: string
   ): Promise<State> {
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
 
     const alertInstances = mapValues<AlertInstances>(
       alertRawInstances,
@@ -141,6 +152,12 @@ export class TaskRunner {
       state: alertTypeState,
       startedAt: this.taskInstance.startedAt!,
       previousStartedAt,
+      spaceId,
+      namespace,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
     });
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -191,7 +208,12 @@ export class TaskRunner {
       attributes.actions,
       references
     );
-    return this.executeAlertInstances(services, { ...attributes, params }, executionHandler);
+    return this.executeAlertInstances(
+      services,
+      { ...attributes, params },
+      executionHandler,
+      spaceId
+    );
   }
 
   async run() {
