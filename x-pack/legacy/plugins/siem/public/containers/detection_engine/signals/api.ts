@@ -80,20 +80,15 @@ export const updateSignalStatus = async ({
 /**
  * Fetch Signal Index
  *
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal AbortSignal for cancelling request
  */
-export const getSignalIndex = async ({
-  kbnVersion,
-  signal,
-}: BasicSignals): Promise<SignalsIndex | null> => {
+export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex | null> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     signal,
   });
@@ -111,20 +106,15 @@ export const getSignalIndex = async ({
 /**
  * Get User Privileges
  *
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal AbortSignal for cancelling request
  */
-export const getUserPrivilege = async ({
-  kbnVersion,
-  signal,
-}: BasicSignals): Promise<Privilege | null> => {
+export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege | null> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PRIVILEGES_URL}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     signal,
   });
@@ -136,20 +126,15 @@ export const getUserPrivilege = async ({
 /**
  * Create Signal Index if needed it
  *
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal AbortSignal for cancelling request
  */
-export const createSignalIndex = async ({
-  kbnVersion,
-  signal,
-}: BasicSignals): Promise<SignalsIndex | null> => {
+export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex | null> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     signal,
   });

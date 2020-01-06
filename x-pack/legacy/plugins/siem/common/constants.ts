@@ -27,7 +27,6 @@ export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_KBN_VERSION = 'kbnVersion';
 export const DEFAULT_FROM = 'now-24h';
 export const DEFAULT_TO = 'now';
 export const DEFAULT_INTERVAL_PAUSE = true;
