@@ -10,9 +10,7 @@ import {
   FilterBar,
   GetFilterBarQueryArgs,
   GetMonitorChartsDataQueryArgs,
-  GetMonitorPageTitleQueryArgs,
   MonitorChart,
-  MonitorPageTitle,
   GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
@@ -35,13 +33,6 @@ export type UMGetFilterBarResolver = UMResolver<
   UMContext
 >;
 
-export type UMGetMonitorPageTitleResolver = UMResolver<
-  MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
-  any,
-  GetMonitorPageTitleQueryArgs,
-  UMContext
->;
-
 export type UMGetSnapshotHistogram = UMResolver<
   HistogramResult | Promise<HistogramResult>,
   any,
@@ -56,7 +47,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getFilterBar: UMGetFilterBarResolver;
-    getMonitorPageTitle: UMGetMonitorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -97,13 +87,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         dateRangeStart,
         dateRangeEnd,
       });
-    },
-    async getMonitorPageTitle(
-      _resolver: any,
-      { monitorId },
-      { APICaller }
-    ): Promise<MonitorPageTitle | null> {
-      return await libs.monitors.getMonitorPageTitle({ callES: APICaller, monitorId });
     },
   },
 });

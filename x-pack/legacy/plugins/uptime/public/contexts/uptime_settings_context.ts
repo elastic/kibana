@@ -23,7 +23,6 @@ export interface UMSettingsContextValues {
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   refreshApp: () => void;
-  setHeadingText: (text: string) => void;
 }
 
 const {
@@ -63,9 +62,6 @@ const defaultContext: UMSettingsContextValues = {
   isLogsAvailable: true,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
-  },
-  setHeadingText: () => {
-    throw new Error('setHeadingText was not initialized on UMSettingsContext.');
   },
 };
 

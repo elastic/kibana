@@ -32,7 +32,6 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
   /** Fetches details about the uptime index. */
@@ -486,13 +485,6 @@ export interface FilterBar {
   urls?: string[] | null;
 }
 
-export interface MonitorPageTitle {
-  id: string;
-
-  url?: string | null;
-
-  name?: string | null;
-}
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
@@ -743,9 +735,7 @@ export interface GetFilterBarQueryArgs {
 
   dateRangeEnd: string;
 }
-export interface GetMonitorPageTitleQueryArgs {
-  monitorId: string;
-}
+
 export interface GetMonitorStatesQueryArgs {
   dateRangeStart: string;
 

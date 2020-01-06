@@ -29,7 +29,7 @@ export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorSta
 
     [String(getMonitorStatusSuccess)]: (state, action: Action<Ping>) => ({
       ...state,
-      status: action.payload as Ping,
+      status: { ...action.payload } as Ping,
     }),
 
     [String(getMonitorStatusFail)]: (state, action: Action<any>) => ({

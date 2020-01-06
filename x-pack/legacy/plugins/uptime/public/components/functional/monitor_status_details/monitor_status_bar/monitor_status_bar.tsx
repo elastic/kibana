@@ -4,23 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiLink,
+  EuiText,
+  EuiTitle,
+  EuiTextColor,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import React, { useEffect } from 'react';
-import { Ping } from '../../../../../common/graphql/types';
-import { EmptyStatusBar } from './empty_status_bar';
 import { convertMicrosecondsToMilliseconds } from '../../../../lib/helper';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
+import { StatusByLocations } from './status_by_location';
+import { Ping } from '../../../../../common/graphql/types';
+import { MonitorLocations } from '../../../../../common/runtime_types';
 
 interface MonitorStatusBarProps {
   monitorId: string;
-  loadMonitorStatus: any;
+  loadMonitorStatus?: any;
   dateStart: string;
   dateEnd: string;
-  monitorStatus: any;
+  monitorStatus: Ping;
+  monitorLocations: MonitorLocations;
 }
 
 export const MonitorStatusBarComponent = ({
@@ -29,19 +39,33 @@ export const MonitorStatusBarComponent = ({
   monitorId,
   loadMonitorStatus,
   monitorStatus,
+  monitorLocations,
 }: MonitorStatusBarProps) => {
   useEffect(() => {
     loadMonitorStatus();
-  }, [dateStart, dateEnd]);
+  }, [dateStart, dateEnd, loadMonitorStatus]);
 
   if (monitorStatus) {
     const { monitor, timestamp, tls } = monitorStatus;
-    const duration: number | undefined = get(monitor, 'duration.us', undefined);
-    const status = get<'up' | 'down'>(monitor, 'status', 'down');
-    const full = get<string>(monitorStatus, 'url.full');
+    const duration: number | undefined = monitor?.duration?.us;
+    const status = monitor?.status ?? 'down';
+    const full = monitorStatus?.url?.full ?? '';
 
     return (
       <>
+        <StatusByLocations locations={monitorLocations?.locations ?? []} />
+        <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
+          {full}
+        </EuiLink>
+        <EuiTitle size="xs">
+          <EuiTextColor color="subdued">
+            <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
+          </EuiTextColor>
+        </EuiTitle>
+        <EuiSpacer />
+        <EuiText>
+          <h5>Most Recent Check:</h5>
+        </EuiText>
         <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem grow={false}>
             <EuiHealth
@@ -51,13 +75,6 @@ export const MonitorStatusBarComponent = ({
             >
               {status === 'up' ? labels.upLabel : labels.downLabel}
             </EuiHealth>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexItem grow={false}>
-              <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-                {full}
-              </EuiLink>
-            </EuiFlexItem>
           </EuiFlexItem>
           {!!duration && (
             <EuiFlexItem aria-label={labels.durationTextAriaLabel} grow={false}>
@@ -76,11 +93,7 @@ export const MonitorStatusBarComponent = ({
         <MonitorSSLCertificate tls={tls} />
       </>
     );
+  } else {
+    return null;
   }
-  return <EmptyStatusBar message={labels.loadingMessage} monitorId={monitorId} />;
 };
-
-// export const MonitorStatusBar = withUptimeGraphQL<
-//   MonitorStatusBarQueryResult,
-//   MonitorStatusBarProps
-// >(MonitorStatusBarComponent, monitorStatusBarQuery);

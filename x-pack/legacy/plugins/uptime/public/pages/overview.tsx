@@ -5,10 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
   FilterGroup,
@@ -25,15 +23,12 @@ import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
+import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
+  commonlyUsedRanges: any;
   basePath: string;
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-  history: any;
-  location: {
-    pathname: string;
-    search: string;
-  };
   logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
@@ -59,8 +54,9 @@ export const OverviewPage = ({
   autocomplete,
   logOverviewPageLoad,
   setBreadcrumbs,
+  commonlyUsedRanges,
 }: Props) => {
-  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
+  const { colors } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {
@@ -75,17 +71,8 @@ export const OverviewPage = ({
 
   useEffect(() => {
     getIndexPattern(basePath, setIndexPattern);
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
     logOverviewPageLoad();
-    if (setHeadingText) {
-      setHeadingText(
-        i18n.translate('xpack.uptime.overviewPage.headerText', {
-          defaultMessage: 'Overview',
-          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-        })
-      );
-    }
-  }, [basePath, logOverviewPageLoad, setBreadcrumbs, setHeadingText]);
+  }, [basePath, logOverviewPageLoad]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
@@ -128,6 +115,7 @@ export const OverviewPage = ({
 
   return (
     <Fragment>
+      <PageHeader commonlyUsedRanges={commonlyUsedRanges} setBreadcrumbs={setBreadcrumbs} />
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

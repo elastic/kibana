@@ -14,5 +14,6 @@ export const rootReducer = combineReducers({
   monitor: monitorReducer,
   snapshot: snapshotReducer,
   ui: uiReducer,
+  // @ts-ignore
   monitorStatus: monitorStatusReducer,
 });

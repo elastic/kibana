@@ -5,12 +5,12 @@
  */
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
-import { getMonitorLocations } from '../../../state/selectors';
+import { selectMonitorLocations } from '../../../state/selectors';
 import { fetchMonitorLocations } from '../../../state/actions/monitor';
 import { MonitorStatusDetailsComponent } from './monitor_status_details';
 
 const mapStateToProps = (state: AppState, { monitorId }: any) => ({
-  monitorLocations: getMonitorLocations(state, monitorId),
+  monitorLocations: selectMonitorLocations(state, monitorId),
 });
 
 const mapDispatchToProps = (dispatch: any, ownProps: any) => ({

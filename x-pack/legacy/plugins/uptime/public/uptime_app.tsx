@@ -5,7 +5,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPage } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,7 @@ import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
-import { UptimeDatePicker, CommonlyUsedRange } from './components/functional/uptime_date_picker';
+import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { getTitle } from './lib/helper/get_title';
 import { store } from './state';
@@ -94,7 +94,6 @@ const Application = (props: UptimeAppProps) => {
     };
   }
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
-  const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     renderGlobalHelpControls();
@@ -147,7 +146,6 @@ const Application = (props: UptimeAppProps) => {
       isInfraAvailable,
       isLogsAvailable,
       refreshApp,
-      setHeadingText,
     };
   };
 
@@ -166,49 +164,24 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
-                          <EuiFlexGroup
-                            alignItems="center"
-                            justifyContent="spaceBetween"
-                            gutterSize="s"
-                          >
-                            <EuiFlexItem>
-                              <EuiTitle>
-                                <h1>{headingText}</h1>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <UptimeDatePicker
+                          <Switch>
+                            <Route path="/monitor/:monitorId/:location?">
+                              <MonitorPage
+                                logMonitorPageLoad={logMonitorPageLoad}
+                                setBreadcrumbs={setBreadcrumbs}
                                 refreshApp={refreshApp}
                                 commonlyUsedRanges={commonlyUsedRanges}
-                                {...rootRouteProps}
                               />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiSpacer size="s" />
-                          <Switch>
-                            <Route
-                              path="/monitor/:monitorId/:location?"
-                              render={routerProps => (
-                                <MonitorPage
-                                  logMonitorPageLoad={logMonitorPageLoad}
-                                  query={client.query}
-                                  setBreadcrumbs={setBreadcrumbs}
-                                  {...routerProps}
-                                />
-                              )}
-                            />
-                            <Route
-                              path="/"
-                              render={routerProps => (
-                                <OverviewPage
-                                  autocomplete={autocomplete}
-                                  basePath={basePath}
-                                  logOverviewPageLoad={logOverviewPageLoad}
-                                  setBreadcrumbs={setBreadcrumbs}
-                                  {...routerProps}
-                                />
-                              )}
-                            />
+                            </Route>
+                            <Route path="/">
+                              <OverviewPage
+                                autocomplete={autocomplete}
+                                basePath={basePath}
+                                logOverviewPageLoad={logOverviewPageLoad}
+                                setBreadcrumbs={setBreadcrumbs}
+                                commonlyUsedRanges={commonlyUsedRanges}
+                              />
+                            </Route>
                             <Route component={NotFoundPage} />
                           </Switch>
                         </main>

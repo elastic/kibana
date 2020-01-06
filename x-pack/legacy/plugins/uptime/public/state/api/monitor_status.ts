@@ -37,10 +37,4 @@ export const fetchMonitorStatus = async ({
   }
   const responseData = await response.json();
   return responseData;
-  // const decoded = SnapshotType.decode(responseData);
-  // ThrowReporter.report(decoded);
-  // if (isRight(decoded)) {
-  //   return decoded.right;
-  // }
-  // throw new Error('`fetchMonitorStatus` response did not correspond to expected type');
 };

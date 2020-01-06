@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { MonitorChart, Ping, LocationDurationLine } from '../../../../common/graphql/types';
+import { MonitorChart, LocationDurationLine } from '../../../../common/graphql/types';
 import { getHistogramIntervalFormatted } from '../../helper';
 import { MonitorError, MonitorLocation } from '../../../../common/runtime_types';
 import { UMMonitorsAdapter } from './adapter_types';
@@ -195,42 +195,6 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     }, {});
   },
 
-  getMonitorPageTitle: async ({ callES, monitorId }) => {
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              term: {
-                'monitor.id': monitorId,
-              },
-            },
-          },
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-        size: 1,
-      },
-    };
-
-    const result = await callES('search', params);
-    const pageTitle: Ping | null = get(result, 'hits.hits[0]._source', null);
-    if (pageTitle === null) {
-      return null;
-    }
-    return {
-      id: get(pageTitle, 'monitor.id', null) || monitorId,
-      url: get(pageTitle, 'url.full', null),
-      name: get(pageTitle, 'monitor.name', null),
-    };
-  },
-
   getMonitorDetails: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -279,11 +243,6 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     };
   },
 
-  /**
-   * Fetch data for the monitor page title.
-   * @param request Kibana server request
-   *
-   */
   getMonitorLocations: async ({ callES, monitorId, dateStart, dateEnd }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

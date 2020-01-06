@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { PingTls } from '../../../../common/graphql/types';
-import { MonitorSSLCertificate } from '../monitor_status_bar';
+import { MonitorSSLCertificate } from '../monitor_status_details/monitor_status_bar';
 
 describe('MonitorStatusBar component', () => {
   let monitorTls: PingTls;
