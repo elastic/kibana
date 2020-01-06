@@ -66,7 +66,7 @@ export function addEmbeddableToDashboardUrl(
  * output: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))
  * @param url dashboard absolute url
  */
-export function getDashboardUrlWithoutTime(url: string | undefined): string {
+export function getDashboardUrlWithoutTime(url: string | undefined): string | null {
   if (!url) {
     return null;
   }

@@ -118,9 +118,9 @@ export class AppPlugin {
             const lensUrl = `${getKibanaBasePathFromDashboardUrl(
               lastDashboardAbsoluteUrl
             )}/lens/edit/${id}`;
-            if (lensUrl) {
+            const dashboardUrlWithoutTime = getDashboardUrlWithoutTime(lastDashboardAbsoluteUrl);
+            if (lensUrl && dashboardUrlWithoutTime) {
               window.history.pushState({}, '', lensUrl);
-              const dashboardUrlWithoutTime = getDashboardUrlWithoutTime(lastDashboardAbsoluteUrl);
               const dashboardParsedUrl = addEmbeddableToDashboardUrl(
                 dashboardUrlWithoutTime,
                 id,
