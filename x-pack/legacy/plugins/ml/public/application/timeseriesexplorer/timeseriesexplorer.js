@@ -448,10 +448,6 @@ export class TimeSeriesExplorer extends React.Component {
         searchTerm,
         [
           {
-            fieldName: 'job_id',
-            fieldValue: selectedJob.job_id,
-          },
-          {
             fieldName: 'detector_index',
             fieldValue: detectorIndex,
           },
