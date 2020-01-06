@@ -26,7 +26,6 @@ export default async function({ readConfigFile }) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--logging.events.log',
         '["info","warning","error","fatal","optimize","reporting"]',
-        '--xpack.endpoint.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
         '--xpack.security.session.idleTimeout=3600000',
         '--xpack.spaces.enabled=false',
