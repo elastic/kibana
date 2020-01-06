@@ -23,7 +23,7 @@ import React, { useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from '../../..';
-import { Field } from '../../../../index_patterns';
+import { Field } from '../../../../../../../plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../../../utils';
 import { AggParam, FieldParamType } from '../../../../agg_types';
 import { AggParamEditorProps, ComboBoxGroupedOptions } from '..';

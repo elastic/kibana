@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { getBarStyles, getSeriesColors, getAreaStyles } from './series_styles';
+import { getBarStyles, getAreaStyles } from './series_styles';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js', () => {
   let bars;
   let color;
-  let specId;
   let points;
   let lines;
 
@@ -33,7 +32,6 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
       show: true,
     };
     color = 'rgb(224, 0, 221)';
-    specId = 'IT';
     points = {
       lineWidth: 1,
       show: true,
@@ -57,12 +55,6 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
       color = '';
 
       expect(getBarStyles(bars, color)).toMatchSnapshot();
-    });
-  });
-
-  describe('getSeriesColors()', () => {
-    test('should match a snapshot', () => {
-      expect(getSeriesColors(color, specId)).toMatchSnapshot();
     });
   });
 
