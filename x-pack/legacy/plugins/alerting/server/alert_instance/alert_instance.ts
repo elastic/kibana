@@ -5,7 +5,7 @@
  */
 
 import { State, Context } from '../types';
-import { parseDuration } from './parse_duration';
+import { parseDuration } from '../lib';
 
 interface Meta {
   lastScheduledActions?: {
