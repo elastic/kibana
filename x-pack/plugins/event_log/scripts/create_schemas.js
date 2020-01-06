@@ -39,12 +39,7 @@ function main() {
 
 // return a stripped down version of the ecs schema, with only exportedProperties
 function getEventLogMappings(ecsSchema, exportedProperties) {
-  const result = {
-    mappings: {
-      properties: {
-      }
-    }
-  };
+  const result = { mappings: { properties: {} } };
 
   // get full list of properties to copy
   const leafProperties = exportedProperties.map(replaceDotWithProperties);
@@ -92,7 +87,7 @@ function writeEventLogMappings(elSchema) {
 
   const mappings = {
     dynamic: 'strict',
-    properties: elSchema.mappings.properties
+    properties: elSchema.mappings.properties,
   };
 
   writeGeneratedFile(EVENT_LOG_MAPPINGS_FILE, JSON.stringify(mappings, null, 4));
@@ -161,7 +156,6 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     lineWriter.addLine(`schema.maybe(`);
     lineWriter.indent();
     lineWriter.addLine(`schema.object({`);
-
   } else {
     lineWriter.addLine(`${propKey}: schema.maybe(`);
     lineWriter.indent();
@@ -250,7 +244,9 @@ function getEcsDir() {
   }
 
   if (error || !stats.isDirectory()) {
-    logError(`directory not found: ${ecsDir} - did you checkout elastic/ecs as a peer of this repo?`);
+    logError(
+      `directory not found: ${ecsDir} - did you checkout elastic/ecs as a peer of this repo?`
+    );
   }
 
   return ecsDir;
@@ -314,10 +310,11 @@ function validateDate(isoDate: string) {
 }
 `.trim();
 
-function getSchemaFileContents(ecsVersion, schemaLines) { // interfaceLines) {
-  return SchemaFileTemplate
-    .replace('%%ECS_VERSION%%', ecsVersion)
-    .replace('%%SCHEMA%%', schemaLines);
+function getSchemaFileContents(ecsVersion, schemaLines) {
+  return SchemaFileTemplate.replace('%%ECS_VERSION%%', ecsVersion).replace(
+    '%%SCHEMA%%',
+    schemaLines
+  );
   // .replace('%%INTERFACE%%', interfaceLines);
 }
 

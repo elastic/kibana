@@ -16,7 +16,7 @@ import {
   RawAction,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../../../plugins/event_log/server/types';
+import { IEvent, IEventLogger } from '../../../../../plugins/event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;

@@ -23,19 +23,19 @@ exports.EcsKibanaExtensionsMappings = {
         // 'kibana' for typical saved object, 'task_manager' for TM, etc
         store: {
           type: 'keyword',
-          ignore_above: 1024
+          ignore_above: 1024,
         },
         id: {
           type: 'keyword',
-          ignore_above: 1024
+          ignore_above: 1024,
         },
         type: {
           type: 'keyword',
-          ignore_above: 1024
-        }
-      }
-    }
-  }
+          ignore_above: 1024,
+        },
+      },
+    },
+  },
 };
 
 // ECS and Kibana ECS extension properties to generate
@@ -59,6 +59,4 @@ exports.EcsEventLogProperties = [
 ];
 
 // properties that can have multiple values (array vs single value)
-exports.EcsEventLogMultiValuedProperties = [
-  'tags',
-];
+exports.EcsEventLogMultiValuedProperties = ['tags'];
