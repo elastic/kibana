@@ -8,7 +8,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_mean(\"span.duration.us\") partitionfield=\"span.type\"",
+        "detector_description": "increased span duration",
         "function": "high_mean",
         "field_name": "span.duration.us",
         "partition_field_name": "span.type"

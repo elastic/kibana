@@ -8,7 +8,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_non_zero_count partitionfield=\"user_agent.name\"",
+        "detector_description": "high error rate for user agent",
         "function": "high_non_zero_count",
         "partition_field_name": "user_agent.name"
       }

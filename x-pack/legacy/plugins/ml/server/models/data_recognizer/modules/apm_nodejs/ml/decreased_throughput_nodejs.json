@@ -9,7 +9,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "low_count",
+        "detector_description": "low throughput",
         "function": "low_count"
       }
     ],

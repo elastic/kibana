@@ -8,7 +8,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_mean(\"transaction.duration.us\") by \"transaction.name\"",
+        "detector_description": "increased trace duration",
         "function": "high_mean",
         "field_name": "transaction.duration.us",
         "by_field_name": "transaction.name"
