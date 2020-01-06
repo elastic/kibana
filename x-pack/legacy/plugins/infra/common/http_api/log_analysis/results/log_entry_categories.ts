@@ -77,6 +77,7 @@ export const logEntryCategoryRT = rt.type({
   datasets: rt.array(rt.string),
   histograms: rt.array(logEntryCategoryHistogramRT),
   logEntryCount: rt.number,
+  maximumAnomalyScore: rt.number,
   regularExpression: rt.string,
 });
 

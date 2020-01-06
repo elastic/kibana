@@ -55,6 +55,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
       <Settings showLegend={false} theme={theme} tooltip="none" xDomain={xDomain} />
       <AreaSeries
         data={metric}
+        id="metric"
         xAccessor={timestampAccessor}
         xScaleType="time"
         yAccessors={valueAccessor}

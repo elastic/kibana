@@ -129,8 +129,11 @@ export class LogEntryCategoriesAnalysis {
     const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
       topCategoryBucket => ({
         categoryId: parseCategoryId(topCategoryBucket.key),
-        logEntryCount: topCategoryBucket.sum_actual.value,
-        datasets: topCategoryBucket.terms_dataset.buckets.map(datasetBucket => datasetBucket.key),
+        logEntryCount: topCategoryBucket.filter_model_plot.sum_actual.value ?? 0,
+        datasets: topCategoryBucket.filter_model_plot.terms_dataset.buckets.map(
+          datasetBucket => datasetBucket.key
+        ),
+        maximumAnomalyScore: topCategoryBucket.filter_record.maximum_record_score.value ?? 0,
       })
     );
 
