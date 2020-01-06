@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { concatMap, catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import {
   ServerFacade,
   ExecuteJobFactory,
@@ -40,8 +40,8 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      concatMap(conditionalHeaders => getCustomLogo({ server, job, conditionalHeaders })),
-      concatMap(({ logo, conditionalHeaders }) => {
+      mergeMap(conditionalHeaders => getCustomLogo({ server, job, conditionalHeaders })),
+      mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ server, job });
 
         const { browserTimezone, layout, title } = job;

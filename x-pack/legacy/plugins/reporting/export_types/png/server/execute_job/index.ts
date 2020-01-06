@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { concatMap, catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
 import {
   ServerFacade,
@@ -38,7 +38,7 @@ export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFa
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      concatMap(conditionalHeaders => {
+      mergeMap(conditionalHeaders => {
         const urls = getFullUrls({ server, job });
         const hashUrl = urls[0];
         return generatePngObservable(
