@@ -6599,8 +6599,6 @@
     "xpack.maps.source.wmsTitle": "ウェブマップサービス",
     "xpack.maps.style.heatmap.displayNameLabel": "ヒートマップスタイル",
     "xpack.maps.style.heatmap.resolutionStyleErrorMessage": "解像度パラメーターが認識されません: {resolution}",
-    "xpack.maps.styles.staticDynamic.dynamicDescription": "プロパティ値で特徴をシンボル化します。",
-    "xpack.maps.styles.staticDynamic.staticDescription": "静的スタイルプロパティで特徴をシンボル化します。",
     "xpack.maps.styles.vector.borderColorLabel": "境界線の色",
     "xpack.maps.styles.vector.borderWidthLabel": "境界線の幅",
     "xpack.maps.styles.vector.fillColorLabel": "塗りつぶす色",
