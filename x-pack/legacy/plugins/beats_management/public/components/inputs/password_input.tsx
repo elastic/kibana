@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore currently no definition for EuiFieldPassword
 import { CommonProps, EuiFieldPassword, EuiFieldPasswordProps, EuiFormRow } from '@elastic/eui';
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
-interface ComponentProps extends FormsyInputProps, CommonProps, EuiFieldPasswordProps {
+interface ComponentProps
+  extends FormsyInputProps,
+    CommonProps,
+    Omit<EuiFieldPasswordProps, 'onChange' | 'onBlur'> {
   instantValidation?: boolean;
   label: string;
   errorText: string;

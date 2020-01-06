@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSourceContract } from 'ui/courier';
+import { ISearchSource } from 'ui/courier';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
@@ -36,7 +36,7 @@ export interface SavedObjectDashboard extends SavedObject {
   uiStateJSON?: string;
   lastSavedTitle: string;
   refreshInterval?: RefreshInterval;
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   getQuery(): Query;
   getFilters(): esFilters.Filter[];
 }

@@ -1,0 +1,17 @@
+{
+  "rule_id": "f4388e4c-ec3d-41b3-be5c-27c11f61473c",
+  "risk_score": 50,
+  "description": "Splunk - Detect Use of cmd.exe to Launch Script Interpreters",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Detect Use of cmd.exe to Launch Script Interpreters",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"wscript.exe\" or \"cscript.exe\") and process.parent.name:\"cmd.exe\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

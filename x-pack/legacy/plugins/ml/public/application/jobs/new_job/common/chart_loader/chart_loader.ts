@@ -6,13 +6,13 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { Field, SplitField, AggFieldPair } from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
