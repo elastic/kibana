@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ServerFacade, ConditionalHeaders } from '../../../types';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -23,15 +23,12 @@ function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloa
   return (job as JobDocPayloadPDF).objects !== undefined;
 }
 
-export async function getFullUrls<JobDocPayloadType>({
-  job,
+export function getFullUrls<JobDocPayloadType>({
   server,
-  ...mergeValues // pass-throughs
+  job,
 }: {
-  job: JobDocPayloadPDF | JobDocPayloadPNG;
   server: ServerFacade;
-  conditionalHeaders: ConditionalHeaders;
-  logo?: string;
+  job: JobDocPayloadPDF | JobDocPayloadPNG;
 }) {
   const config = server.config();
 
@@ -96,5 +93,5 @@ export async function getFullUrls<JobDocPayloadType>({
     });
   });
 
-  return { job, server, urls, ...mergeValues };
+  return urls;
 }
