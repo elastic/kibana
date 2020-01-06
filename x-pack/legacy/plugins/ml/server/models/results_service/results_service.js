@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -476,6 +477,15 @@ export function resultsServiceProvider(callWithRequest) {
     earliestMs,
     latestMs
   ) {
+    const jobsResponse = await callWithRequest('ml.jobs', { jobId: [jobId] });
+    if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
+      throw Boom.notFound(`Job with the id "${jobId}" not found`);
+    }
+
+    const job = jobsResponse.jobs[0];
+    // eslint-disable-next-line camelcase
+    const isModelPlotEnabled = job?.model_plot_config?.enabled;
+
     const fields = ['partition_field', 'over_field', 'by_field'];
 
     const resp = await callWithRequest('search', {
@@ -504,6 +514,11 @@ export function resultsServiceProvider(callWithRequest) {
                     lte: latestMs,
                     format: 'epoch_millis',
                   },
+                },
+              },
+              {
+                term: {
+                  result_type: isModelPlotEnabled ? 'model_plot' : 'record',
                 },
               },
             ],
