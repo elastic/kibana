@@ -25,7 +25,7 @@ import {
   FilterManager,
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { useKibanaCore } from '../../../../../lib/compose/kibana_core';
+import { useKibana } from '../../../../../lib/kibana';
 import { FilterLabel } from './filter_label';
 import { FormSchema } from '../shared_imports';
 import * as I18n from './translations';
@@ -70,8 +70,8 @@ const MyEuiTextArea = styled(EuiTextArea)`
 
 export const StepRuleDescription = memo<StepRuleDescriptionProps>(
   ({ data, direction = 'row', indexPatterns, schema }) => {
-    const core = useKibanaCore();
-    const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
+    const kibana = useKibana();
+    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
     const keys = Object.keys(schema);
     const listItems = keys.reduce(

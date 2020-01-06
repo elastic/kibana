@@ -1,0 +1,17 @@
+{
+  "rule_id": "25886074-6ae1-41c0-8546-e8cf55ed1b4b",
+  "risk_score": 50,
+  "description": "Indicates that a server is using a potentially unsafe cipher",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Weak_Cipher",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Weak_Cipher\" or rule.name: \"SSL::Weak_Cipher\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
