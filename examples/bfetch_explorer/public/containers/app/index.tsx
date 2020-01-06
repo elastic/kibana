@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';
@@ -38,7 +38,10 @@ export const App: React.FC = () => {
     <Router basename={appBasePath}>
       <EuiPage>
         <Sidebar />
-        {routeElements}
+        <Switch>
+          {routeElements}
+          <Redirect to="/count-until" />
+        </Switch>
       </EuiPage>
     </Router>
   );
