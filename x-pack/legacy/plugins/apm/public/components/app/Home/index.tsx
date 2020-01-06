@@ -89,26 +89,32 @@ export function Home({ tab }: Props) {
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
-    <div>
-      <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>APM</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SettingsLink>
-              <EuiButtonEmpty size="s" color="primary" iconType="gear">
-                {SETTINGS_LINK_LABEL}
-              </EuiButtonEmpty>
-            </SettingsLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SetupInstructionsLink />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ApmHeader>
+    <EuiFlexGroup
+      alignItems="stretch"
+      direction="column"
+      style={{ height: '100%' }}
+    >
+      <EuiFlexItem grow={false}>
+        <ApmHeader>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="l">
+                <h1>APM</h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SettingsLink>
+                <EuiButtonEmpty size="s" color="primary" iconType="gear">
+                  {SETTINGS_LINK_LABEL}
+                </EuiButtonEmpty>
+              </SettingsLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SetupInstructionsLink />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ApmHeader>
+      </EuiFlexItem>
       <EuiTabs>
         {homeTabs.map(homeTab => (
           <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
@@ -118,6 +124,6 @@ export function Home({ tab }: Props) {
       </EuiTabs>
       <EuiSpacer />
       {selectedTab.render()}
-    </div>
+    </EuiFlexGroup>
   );
 }
