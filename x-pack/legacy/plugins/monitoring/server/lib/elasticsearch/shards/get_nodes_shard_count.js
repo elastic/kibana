@@ -45,8 +45,9 @@ export async function getNodesShardCount(req, esIndexPattern, cluster) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const response = await getShardCountPerNode(req, esIndexPattern, cluster);
-  return get(response, 'aggregations.nodes.buckets', []).reduce((accum, bucket) => {
+  const nodes = get(response, 'aggregations.nodes.buckets', []).reduce((accum, bucket) => {
     accum[bucket.key] = { shardCount: bucket.doc_count };
     return accum;
   }, {});
+  return { nodes };
 }
