@@ -434,8 +434,7 @@ export class TimeSeriesExplorer extends React.Component {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
-    // Populate the entity input datalists with the values from the top records by score
-    // for the selected detector across the full time range. No need to pass through finish().
+    // Populate the entity input datalists with aggregated values. No need to pass through finish().
     const bounds = timefilter.getActiveBounds();
     const detectorIndex = +detectorId;
 
@@ -445,6 +444,7 @@ export class TimeSeriesExplorer extends React.Component {
       by_field: byField,
     } = await mlResultsService
       .fetchPartitionFieldsValues(
+        selectedJob.job_id,
         searchTerm,
         [
           {

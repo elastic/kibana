@@ -402,6 +402,12 @@ export function resultsServiceProvider(callWithRequest) {
     return definition;
   }
 
+  /**
+   * Gets an object for aggregation query to retrieve field name and values.
+   * @param {string} fieldType - Field type, e.g. partition_field, over_field or by_field
+   * @param {string} query - Optional query string for partition value
+   * @returns {Object}
+   */
   function getFieldAgg(fieldType, query) {
     const AGG_SIZE = 100;
 
@@ -434,13 +440,19 @@ export function resultsServiceProvider(callWithRequest) {
     };
   }
 
-  function getFieldObject(field, aggs) {
-    const fieldNameKey = `${field}_name`;
-    const fieldValueKey = `${field}_value`;
+  /**
+   * Gets formatted result for particular field from aggregation response.
+   * @param {string} fieldType - Field type, e.g. partition_field, over_field or by_field
+   * @param {Object} aggs - Aggregation response
+   * @returns {Object}
+   */
+  function getFieldObject(fieldType, aggs) {
+    const fieldNameKey = `${fieldType}_name`;
+    const fieldValueKey = `${fieldType}_value`;
 
     return aggs[fieldNameKey].buckets.length > 0
       ? {
-          [field]: {
+          [fieldType]: {
             name: aggs[fieldNameKey].buckets[0].key,
             values: aggs[fieldValueKey].values.buckets.map(({ key }) => key),
           },
@@ -450,13 +462,20 @@ export function resultsServiceProvider(callWithRequest) {
 
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
+   * @param {string} jobId - Job ID
    * @param {Object} searchTerm - object of queries for partition fields, e.g. { partition_field: 'query' }
    * @param {Object} criteriaFields - key - value pairs of the term field, e.g. { job_id: 'ml-job', detector_index: 0 }
    * @param {number} earliestMs
    * @param {number} latestMs
    * @returns {Promise<*>}
    */
-  async function getPartitionFieldsValues(searchTerm = {}, criteriaFields, earliestMs, latestMs) {
+  async function getPartitionFieldsValues(
+    jobId,
+    searchTerm = {},
+    criteriaFields,
+    earliestMs,
+    latestMs
+  ) {
     const fields = ['partition_field', 'over_field', 'by_field'];
 
     const resp = await callWithRequest('search', {
@@ -473,6 +492,11 @@ export function resultsServiceProvider(callWithRequest) {
                   },
                 };
               }),
+              {
+                term: {
+                  job_id: jobId,
+                },
+              },
               {
                 range: {
                   timestamp: {

@@ -19,7 +19,7 @@ import { DeepPartial } from '../../../../common/types/common';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { annotations } from './annotations';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
+import { CombinedJob, JobId } from '../../jobs/new_job/common/job_creator/configs';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -126,6 +126,7 @@ declare interface Ml {
   results: {
     getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
     fetchPartitionFieldsValues: (
+      jobId: JobId,
       searchTerm: Record<string, string>,
       criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
       earliestMs: number,
