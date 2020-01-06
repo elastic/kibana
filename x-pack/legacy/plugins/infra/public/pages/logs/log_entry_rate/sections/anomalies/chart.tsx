@@ -22,7 +22,10 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { MLSeverityScoreCategories } from '../../../../../../common/log_analysis';
+import {
+  MLSeverityScoreCategories,
+  ML_SEVERITY_COLORS,
+} from '../../../../../../common/log_analysis';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 
 export const AnomaliesChart: React.FunctionComponent<{
@@ -109,19 +112,19 @@ interface SeverityConfig {
 const severityConfigs: Record<string, SeverityConfig> = {
   warning: {
     id: `anomalies-warning`,
-    style: { fill: 'rgb(125, 180, 226)', opacity: 0.7 },
+    style: { fill: ML_SEVERITY_COLORS.warning, opacity: 0.7 },
   },
   minor: {
     id: `anomalies-minor`,
-    style: { fill: 'rgb(255, 221, 0)', opacity: 0.7 },
+    style: { fill: ML_SEVERITY_COLORS.minor, opacity: 0.7 },
   },
   major: {
     id: `anomalies-major`,
-    style: { fill: 'rgb(229, 113, 0)', opacity: 0.7 },
+    style: { fill: ML_SEVERITY_COLORS.major, opacity: 0.7 },
   },
   critical: {
     id: `anomalies-critical`,
-    style: { fill: 'rgb(228, 72, 72)', opacity: 0.7 },
+    style: { fill: ML_SEVERITY_COLORS.critical, opacity: 0.7 },
   },
 };
 
