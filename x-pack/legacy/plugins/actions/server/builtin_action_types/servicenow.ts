@@ -64,7 +64,7 @@ function validateSecrets(
     });
   }
   if (secrets.password == null) {
-    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiUserError', {
+    return i18n.translate('xpack.actions.builtin.servicenow.servicenowApiPasswordError', {
       defaultMessage: 'error configuring servicenow action: no secrets [password] provided',
     });
   }
