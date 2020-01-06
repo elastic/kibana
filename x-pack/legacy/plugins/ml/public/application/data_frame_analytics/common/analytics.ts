@@ -58,6 +58,23 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
+export interface FieldSelectionItem {
+  name: string;
+  mappings_types: string[];
+  is_included: boolean;
+  is_required: boolean;
+  feature_type?: string;
+  reason?: string;
+}
+
+export interface DfAnalyticsExplainResponse {
+  field_selection: FieldSelectionItem[];
+  memory_estimation: {
+    expected_memory_without_disk: string;
+    expected_memory_with_disk: string;
+  };
+}
+
 export interface Eval {
   meanSquaredError: number | string;
   rSquared: number | string;

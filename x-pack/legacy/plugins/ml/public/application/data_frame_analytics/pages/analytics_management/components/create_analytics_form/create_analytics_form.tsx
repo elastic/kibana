@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect } from 'react';
 
 import {
   EuiComboBox,
+  EuiComboBoxOptionProps,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
@@ -32,7 +33,6 @@ import {
   JOB_TYPES,
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
-  Option,
 } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
@@ -43,6 +43,12 @@ import {
   IndexPattern,
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
+import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+
+// based on code used by `ui/index_patterns` internally
+// remove the space character from the list of illegal characters
+INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
+const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
 const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.LONG,
@@ -146,7 +152,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (jobType === JOB_TYPES.CLASSIFICATION) return isSupportedByClassification;
   };
 
-  const onCreateOption = (searchValue: string, flattenedOptions: Option[]) => {
+  const onCreateOption = (searchValue: string, flattenedOptions: EuiComboBoxOptionProps[]) => {
     const normalizedSearchValue = searchValue.trim().toLowerCase();
 
     if (!normalizedSearchValue) {
@@ -159,9 +165,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
     // Create the option if it doesn't exist.
     if (
-      flattenedOptions.findIndex(
+      flattenedOptions.some(
         (option: { label: string }) => option.label.trim().toLowerCase() === normalizedSearchValue
-      ) === -1
+      )
     ) {
       excludesOptions.push(newOption);
       setFormState({ excludes: [...excludes, newOption.label] });
@@ -182,15 +188,16 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
       delete jobConfig.analyzed_fields;
-      const resp = await ml.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
+      const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
+        jobConfig
+      );
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
         const analyzedFieldsOptions: Array<{ label: string }> = [];
 
         if (resp.field_selection) {
-          resp.field_selection.forEach((selectedField: any) => {
-            // TODO: update type
+          resp.field_selection.forEach((selectedField: FieldSelectionItem) => {
             if (selectedField.is_included === true && selectedField.name !== dependentVariable) {
               analyzedFieldsOptions.push({ label: selectedField.name });
             }
@@ -295,6 +302,15 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
 
     return errors;
+  };
+
+  const onSourceIndexChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
+    setFormState({
+      excludes: [],
+      excludesOptions: [],
+      previousSourceIndex: sourceIndex,
+      sourceIndex: selectedOptions[0].label || '',
+    });
   };
 
   useEffect(() => {
@@ -438,14 +454,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   selectedOptions={
                     indexPatternsMap[sourceIndex] !== undefined ? [{ label: sourceIndex }] : []
                   }
-                  onChange={selectedOptions => {
-                    setFormState({
-                      excludes: [],
-                      excludesOptions: [],
-                      previousSourceIndex: sourceIndex,
-                      sourceIndex: selectedOptions[0].label || '',
-                    });
-                  }}
+                  onChange={onSourceIndexChange}
                   isClearable={false}
                   data-test-subj="mlAnalyticsCreateJobFlyoutSourceIndexSelect"
                 />

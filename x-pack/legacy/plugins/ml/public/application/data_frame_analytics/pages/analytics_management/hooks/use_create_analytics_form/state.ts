@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
@@ -38,10 +39,6 @@ export enum JOB_TYPES {
   CLASSIFICATION = 'classification',
 }
 
-export interface Option {
-  label: string;
-}
-
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
@@ -49,7 +46,7 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: Option[] | [];
+    dependentVariableOptions: EuiComboBoxOptionProps[] | [];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -57,7 +54,7 @@ export interface State {
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
     excludes: string[];
-    excludesOptions: Option[];
+    excludesOptions: EuiComboBoxOptionProps[];
     fieldOptionsFetchFail: boolean;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
