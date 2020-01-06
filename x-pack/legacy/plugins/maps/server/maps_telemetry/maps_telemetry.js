@@ -5,8 +5,12 @@
  */
 
 import _ from 'lodash';
-import { EMS_FILE, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { TELEMETRY_TYPE } from '../../common/constants';
+import {
+  EMS_FILE,
+  ES_GEO_FIELD_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  TELEMETRY_TYPE
+} from '../../common/constants';
 
 function getSavedObjectsClient(server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
