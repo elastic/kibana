@@ -184,11 +184,51 @@ test('properly iterates through plugin search locations', async () => {
       'kibana.json'
     )})`,
   ]);
-
-  expect(loggingServiceMock.collect(logger).warn).toEqual([]);
 });
 
-test('logs a warning about --plugin-paths when used in production', async () => {
+test('logs a warning about --plugin-paths when used in development', async () => {
+  mockPackage.raw = {
+    branch: 'master',
+    version: '1.2.3',
+    build: {
+      distributable: true,
+      number: 1,
+      sha: '',
+    },
+  };
+
+  const env = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { dev: false, envName: 'development' },
+    })
+  );
+  const configService = new ConfigService(
+    rawConfigServiceMock.create({ rawConfig: { plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } } }),
+    env,
+    logger
+  );
+  await configService.setSchema(config.path, config.schema);
+
+  const rawConfig = await configService
+    .atPath<PluginsConfigType>('plugins')
+    .pipe(first())
+    .toPromise();
+
+  discover(new PluginsConfig(rawConfig, env), {
+    coreId: Symbol(),
+    configService,
+    env,
+    logger,
+  });
+
+  expect(loggingServiceMock.collect(logger).warn).toEqual([
+    [
+      `Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] should only be used in development. Relative imports may not work properly in production.`,
+    ],
+  ]);
+});
+
+test('does not log a warning about --plugin-paths when used in production', async () => {
   mockPackage.raw = {
     branch: 'master',
     version: '1.2.3',
@@ -223,9 +263,5 @@ test('logs a warning about --plugin-paths when used in production', async () => 
     logger,
   });
 
-  expect(loggingServiceMock.collect(logger).warn).toEqual([
-    [
-      `Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] should only be used in development. Relative imports may not work properly in production.`,
-    ],
-  ]);
+  expect(loggingServiceMock.collect(logger).warn).toEqual([]);
 });
