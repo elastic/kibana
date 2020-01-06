@@ -20,7 +20,6 @@
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { hostname } from 'os';
 
-import { Env } from '../config';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
@@ -150,7 +149,6 @@ export class HttpConfig {
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
-  public publicDir: string;
   public defaultRoute?: string;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
@@ -160,19 +158,18 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
-    this.name = rawHttpConfig.name;
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
-    this.customResponseHeaders = rawHttpConfig.customResponseHeaders;
+    this.customResponseHeaders = rawHttpConfig.customResponseHeaders
     this.maxPayload = rawHttpConfig.maxPayload;
+    this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
-    this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.defaultRoute = rawHttpConfig.defaultRoute;
     this.compression = rawHttpConfig.compression;
