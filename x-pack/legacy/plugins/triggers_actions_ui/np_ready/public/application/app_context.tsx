@@ -7,19 +7,19 @@
 import React, { createContext, useContext } from 'react';
 import { AppDeps } from './app';
 
-const AppContext = createContext<AppDeps>(null as any);
+const AppContext = createContext<AppDeps | null>(null);
 
 export const AppContextProvider = ({
   children,
-  value,
+  appDeps,
 }: {
-  value: AppDeps;
+  appDeps: AppDeps | null;
   children: React.ReactNode;
 }) => {
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return appDeps ? <AppContext.Provider value={appDeps}>{children}</AppContext.Provider> : null;
 };
 
-export const useAppDependencies = () => {
+export const useAppDependencies = (): AppDeps => {
   const ctx = useContext(AppContext);
   if (!ctx) {
     throw new Error(

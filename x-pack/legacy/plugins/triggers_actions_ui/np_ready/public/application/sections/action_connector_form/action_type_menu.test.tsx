@@ -64,7 +64,7 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <AppContextProvider value={deps}>
+      <AppContextProvider appDeps={deps}>
         <ActionsConnectorsContextProvider
           value={{
             addFlyoutVisible: true,

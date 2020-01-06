@@ -31,14 +31,14 @@ export interface AppDeps {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
 
-export const App = (deps: AppDeps) => {
+export const App = (appDeps: AppDeps) => {
   const sections: Section[] = ['alerts', 'connectors'];
 
   const sectionsRegex = sections.join('|');
 
   return (
     <HashRouter>
-      <AppContextProvider value={deps}>
+      <AppContextProvider appDeps={appDeps}>
         <AppWithoutRouter sectionsRegex={sectionsRegex} />
       </AppContextProvider>
     </HashRouter>

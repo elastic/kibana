@@ -71,7 +71,7 @@ describe('action_connector_form', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsContextProvider
             value={{
               addFlyoutVisible: true,

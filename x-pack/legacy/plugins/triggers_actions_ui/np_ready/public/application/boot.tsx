@@ -11,7 +11,6 @@ import { SavedObjectsClientContract } from 'src/core/public';
 import { App, AppDeps } from './app';
 import { setSavedObjectsClient } from '../application/components/builtin_alert_types/threshold/lib/api';
 import { LegacyDependencies } from '../types';
-// import { LegacyDependencies } from '../types';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;

@@ -71,7 +71,7 @@ describe('actions_connectors_list component empty', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsList />
         </AppContextProvider>
       );
@@ -168,7 +168,7 @@ describe('actions_connectors_list component with items', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsList />
         </AppContextProvider>
       );
@@ -249,7 +249,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsList />
         </AppContextProvider>
       );
@@ -335,7 +335,7 @@ describe('actions_connectors_list with show only capability', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsList />
         </AppContextProvider>
       );

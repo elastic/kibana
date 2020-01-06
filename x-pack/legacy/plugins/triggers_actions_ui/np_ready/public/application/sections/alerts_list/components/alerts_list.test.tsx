@@ -104,7 +104,7 @@ describe('alerts_list component empty', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <AlertsList />
         </AppContextProvider>
       );
@@ -227,7 +227,7 @@ describe('alerts_list component with items', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <AlertsList />
         </AppContextProvider>
       );
@@ -315,7 +315,7 @@ describe('alerts_list component empty with show only capability', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <AlertsList />
         </AppContextProvider>
       );
@@ -430,7 +430,7 @@ describe('alerts_list with show only capability', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <AlertsList />
         </AppContextProvider>
       );

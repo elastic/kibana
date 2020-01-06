@@ -48,7 +48,7 @@ describe('connector_add_flyout', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppContextProvider value={deps}>
+        <AppContextProvider appDeps={deps}>
           <ActionsConnectorsContextProvider
             value={{
               addFlyoutVisible: true,
