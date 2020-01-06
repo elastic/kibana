@@ -3,13 +3,6 @@
 exports[`ui reducer adds integration popover status to state 1`] = `
 Object {
   "basePath": "",
-  "filters": Map {
-    "observer.geo.name" => Array [
-      "Tokyo",
-      "London",
-      "Karachi",
-    ],
-  },
   "integrationsPopoverOpen": Object {
     "id": "popover-2",
     "open": true,
@@ -21,28 +14,6 @@ Object {
 exports[`ui reducer sets the application's base path 1`] = `
 Object {
   "basePath": "yyz",
-  "filters": Map {
-    "observer.geo.name" => Array [
-      "Tokyo",
-      "London",
-      "Karachi",
-    ],
-  },
-  "integrationsPopoverOpen": null,
-  "lastRefresh": 125,
-}
-`;
-
-exports[`ui reducer updates the filter value 1`] = `
-Object {
-  "basePath": "",
-  "filters": Map {
-    "observer.geo.name" => Array [
-      "Tokyo",
-      "London",
-      "Karachi",
-    ],
-  },
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }
@@ -51,13 +22,6 @@ Object {
 exports[`ui reducer updates the refresh value 1`] = `
 Object {
   "basePath": "abc",
-  "filters": Map {
-    "observer.geo.name" => Array [
-      "Tokyo",
-      "London",
-      "Karachi",
-    ],
-  },
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }
