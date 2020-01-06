@@ -144,6 +144,15 @@ export const npStart = {
     chrome: {},
   },
   plugins: {
+    management: {
+      legacy: {
+        getSection: () => ({
+          register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
+        }),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
