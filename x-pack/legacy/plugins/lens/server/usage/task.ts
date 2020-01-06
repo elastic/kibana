@@ -41,21 +41,25 @@ type ClusterDeleteType = (
 ) => Promise<DeleteDocumentByQueryResponse>;
 
 export function initializeLensTelemetry(core: CoreSetup, server: Server) {
-  registerLensTelemetryTask(core, server);
-  scheduleTasks(server);
-}
-
-function registerLensTelemetryTask(core: CoreSetup, server: Server) {
-  const taskManager = {
-    ...server.newPlatform.setup.plugins.kibanaTaskManager,
-    ...server.newPlatform.start.plugins.kibanaTaskManager,
-  } as TaskManager;
-
+  const taskManager = getTaskManager(server);
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
-    return;
+  } else {
+    registerLensTelemetryTask(server, taskManager);
+    scheduleTasks(server, taskManager);
   }
+}
 
+function getTaskManager(server: Server) {
+  if (server?.newPlatform?.start?.plugins?.kibanaTaskManager) {
+    return {
+      ...server.newPlatform.setup.plugins.kibanaTaskManager,
+      ...server.newPlatform.start.plugins.kibanaTaskManager,
+    } as TaskManager;
+  }
+}
+
+function registerLensTelemetryTask(server: Server, taskManager: TaskManager) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -66,17 +70,10 @@ function registerLensTelemetryTask(core: CoreSetup, server: Server) {
   });
 }
 
-function scheduleTasks(server: Server) {
-  const taskManager = server.newPlatform.start.plugins
-    .kibanaTaskManager as TaskManagerPluginStartContract;
+function scheduleTasks(server: Server, taskManager: TaskManager) {
   const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;
-
-  if (!taskManager) {
-    server.log(['debug', 'telemetry'], `Task manager is not available`);
-    return;
-  }
 
   kbnServer.afterPluginsInit(() => {
     // The code block below can't await directly within "afterPluginsInit"
