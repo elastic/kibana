@@ -22,7 +22,7 @@ export function UpdateSourceEditor({ onChange, config }) {
           <h5>
             <FormattedMessage
               id="xpack.maps.source.emsTile.settingsTitle"
-              defaultMessage="EMS Basemap"
+              defaultMessage="Basemap"
             />
           </h5>
         </EuiTitle>
