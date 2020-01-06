@@ -20,15 +20,9 @@
 import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-
-import { AggGroupNames } from 'ui/vis/editors/default';
-import { colorSchemas, ColorSchemas } from 'ui/vislib/components/color/colormaps';
-
-// @ts-ignore
-import { MetricVisComponent } from './components/metric_vis_controller';
-
+import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
+import { Schemas, AggGroupNames, colorSchemas, ColorSchemas } from './legacy_imports';
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 
 export const metricVisTypeDefinition = {

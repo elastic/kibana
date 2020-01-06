@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { ColorSchemas, RangeValues } from './legacy_imports';
 import { SchemaConfig } from '../../visualizations/public';
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 import { Labels, Style } from '../../kbn_vislib_vis_types/public/types';

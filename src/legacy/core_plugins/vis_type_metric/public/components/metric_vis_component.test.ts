@@ -18,12 +18,13 @@
  */
 
 // @ts-ignore
-import { MetricVisComponent } from '../components/metric_vis_controller';
+import { MetricVisComponent } from './metric_vis_component';
+import { Vis } from '../legacy_imports';
 
 jest.mock('ui/new_platform');
 
 describe('metric_vis - controller', function() {
-  const vis = {
+  const vis: Vis = {
     params: {
       metric: {
         colorSchema: 'Green to Red',
@@ -35,16 +36,22 @@ describe('metric_vis - controller', function() {
         bucket: null,
       },
     },
-  };
+  } as any;
 
   let metricVis: MetricVisComponent;
 
   beforeEach(() => {
-    metricVis = new MetricVisComponent({ vis, visParams: vis.params });
+    metricVis = new MetricVisComponent({
+      vis,
+      visParams: vis.params,
+      visData: {} as any,
+      renderComplete: jest.fn(),
+    });
   });
 
   it('should set the metric label and value', function() {
-    const metrics = metricVis._processTableGroups({
+    // @ts-ignore
+    const metrics = metricVis.processTableGroups({
       columns: [{ id: 'col-0', name: 'Count' }],
       rows: [{ 'col-0': 4301021 }],
     });
@@ -56,7 +63,8 @@ describe('metric_vis - controller', function() {
 
   it('should support multi-value metrics', function() {
     vis.params.dimensions.metrics.push({ accessor: 1 });
-    const metrics = metricVis._processTableGroups({
+    // @ts-ignore
+    const metrics = metricVis.processTableGroups({
       columns: [
         { id: 'col-0', name: '1st percentile of bytes' },
         { id: 'col-1', name: '99th percentile of bytes' },

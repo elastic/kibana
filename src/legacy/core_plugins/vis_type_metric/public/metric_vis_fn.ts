@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vislibColorMaps, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps, ColorSchemas } from './legacy_imports';
 import {
   ExpressionFunction,
   KibanaDatatable,
@@ -30,7 +30,7 @@ import {
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 import { visType, DimensionsVisParam, VisParams } from './types';
 
-type Context = KibanaDatatable;
+export type Context = KibanaDatatable;
 
 const name = 'metricVis';
 

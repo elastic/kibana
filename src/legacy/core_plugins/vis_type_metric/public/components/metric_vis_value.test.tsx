@@ -47,7 +47,7 @@ describe('MetricVisValue', () => {
 
   it('should not add -isfilterable class if onFilter is not provided', () => {
     const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} onFilter={null} />
+      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} />
     );
     component.simulate('click');
     expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
