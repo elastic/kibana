@@ -1,0 +1,17 @@
+{
+  "rule_id": "45586490-99f6-4e11-8228-2229d727a3b4",
+  "risk_score": 50,
+  "description": "Indicates that a certificate’s NotValidBefore date is future dated.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Certificate_Not_Valid_Yet",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Certificate_Not_Valid_Yet\" or rule.name: \"SSL::Certificate_Not_Valid_Yet\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
