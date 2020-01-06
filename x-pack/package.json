@@ -231,7 +231,7 @@
     "file-type": "^10.9.0",
     "font-awesome": "4.7.0",
     "formsy-react": "^1.1.5",
-    "fp-ts": "^2.0.5",
+    "fp-ts": "^2.3.1",
     "geojson-rewind": "^0.3.1",
     "get-port": "4.2.0",
     "getos": "^3.1.0",
