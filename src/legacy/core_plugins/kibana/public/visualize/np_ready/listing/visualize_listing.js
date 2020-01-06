@@ -48,8 +48,8 @@ export function VisualizeListingController($injector, createNewVis) {
     addBasePath,
     chrome,
     legacyChrome,
-    savedObjectRegistry,
     savedObjectsClient,
+    savedVisualizations,
     data: {
       query: {
         timefilter: { timefilter },
@@ -97,15 +97,11 @@ export function VisualizeListingController($injector, createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
     this.createNewVis();
   }
-
-  // TODO: Extract this into an external service.
-  const services = savedObjectRegistry.byLoaderPropertiesName;
-  const visualizationService = services.visualizations;
   this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
-    return visualizationService
+    return savedVisualizations
       .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;

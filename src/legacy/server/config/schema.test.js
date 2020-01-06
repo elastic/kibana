@@ -19,7 +19,6 @@
 
 import schemaProvider from './schema';
 import Joi from 'joi';
-import { set } from 'lodash';
 
 describe('Config schema', function() {
   let schema;
@@ -98,61 +97,6 @@ describe('Config schema', function() {
         const { error } = validate({ server: { rewriteBasePath: 'foo' } });
         expect(error).toHaveProperty('details');
         expect(error.details[0]).toHaveProperty('path', ['server', 'rewriteBasePath']);
-      });
-    });
-
-    describe('xsrf', () => {
-      it('disableProtection is `false` by default.', () => {
-        const {
-          error,
-          value: {
-            server: {
-              xsrf: { disableProtection },
-            },
-          },
-        } = validate({});
-        expect(error).toBe(null);
-        expect(disableProtection).toBe(false);
-      });
-
-      it('whitelist is empty by default.', () => {
-        const {
-          value: {
-            server: {
-              xsrf: { whitelist },
-            },
-          },
-        } = validate({});
-        expect(whitelist).toBeInstanceOf(Array);
-        expect(whitelist).toHaveLength(0);
-      });
-
-      it('whitelist rejects paths that do not start with a slash.', () => {
-        const config = {};
-        set(config, 'server.xsrf.whitelist', ['path/to']);
-
-        const { error } = validate(config);
-        expect(error).toBeInstanceOf(Object);
-        expect(error).toHaveProperty('details');
-        expect(error.details[0]).toHaveProperty('path', ['server', 'xsrf', 'whitelist', 0]);
-      });
-
-      it('whitelist accepts paths that start with a slash.', () => {
-        const config = {};
-        set(config, 'server.xsrf.whitelist', ['/path/to']);
-
-        const {
-          error,
-          value: {
-            server: {
-              xsrf: { whitelist },
-            },
-          },
-        } = validate(config);
-        expect(error).toBe(null);
-        expect(whitelist).toBeInstanceOf(Array);
-        expect(whitelist).toHaveLength(1);
-        expect(whitelist).toContain('/path/to');
       });
     });
   });

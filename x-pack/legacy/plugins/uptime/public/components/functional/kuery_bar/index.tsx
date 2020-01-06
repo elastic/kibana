@@ -80,7 +80,7 @@ export function KueryBar({ autocomplete }: Props) {
   useEffect(() => {
     getIndexPattern(basePath, (result: any) => setIndexPattern(toStaticIndexPattern(result)));
     setIsLoadingIndexPattern(false);
-  }, []);
+  }, [basePath]);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 

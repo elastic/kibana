@@ -9,8 +9,6 @@ import {
   Axis,
   AreaSeries,
   Chart,
-  getAxisId,
-  getSpecId,
   Position,
   ScaleType,
   Settings,
@@ -26,7 +24,6 @@ import {
   ChartSeriesData,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
   WrappedByAutoSizer,
   useTheme,
   useBrowserTimeZone,
@@ -77,8 +74,8 @@ export const AreaChartBaseComponent = ({
   const timeZone = useBrowserTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
-  const xAxisId = getAxisId(`group-${data[0].key}-x`);
-  const yAxisId = getAxisId(`group-${data[0].key}-y`);
+  const xAxisId = `group-${data[0].key}-x`;
+  const yAxisId = `group-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
     theme,
@@ -90,20 +87,19 @@ export const AreaChartBaseComponent = ({
         <Settings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
-          const seriesSpecId = getSpecId(seriesKey);
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
             <AreaSeries
-              id={seriesSpecId}
+              id={seriesKey}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
-              data={series.value || undefined}
+              data={series.value || []}
               xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
               yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
               timeZone={timeZone}
               xAccessor="x"
               yAccessors={['y']}
               areaSeriesStyle={getSeriesLineStyle()}
-              customSeriesColors={getSeriesStyle(seriesKey, series.color)}
+              customSeriesColors={series.color ? [series.color] : undefined}
             />
           ) : null;
         })}
