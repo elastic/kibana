@@ -111,7 +111,7 @@ export class StaticDynamicStyleRow extends Component {
         });
 
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem
           className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
         >

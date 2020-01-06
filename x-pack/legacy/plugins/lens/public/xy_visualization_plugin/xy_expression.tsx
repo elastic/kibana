@@ -12,8 +12,6 @@ import {
   Settings,
   Axis,
   LineSeries,
-  getAxisId,
-  getSpecId,
   AreaSeries,
   BarSeries,
   Position,
@@ -205,7 +203,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       />
 
       <Axis
-        id={getAxisId('x')}
+        id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
@@ -214,7 +212,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       />
 
       <Axis
-        id={getAxisId('y')}
+        id="y"
         position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
@@ -260,7 +258,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
             key: index,
             splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: getSpecId(idForLegend),
+            id: idForLegend,
             xAccessor,
             yAccessors,
             data: sanitized.rows,
