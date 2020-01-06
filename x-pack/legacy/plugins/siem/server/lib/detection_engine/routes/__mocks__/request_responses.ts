@@ -285,9 +285,7 @@ export const getResult = (): RuleAlertType => ({
     ],
     riskScore: 50,
     maxSignals: 100,
-    size: 1,
     severity: 'high',
-    tags: [],
     to: 'now',
     type: 'query',
     threats: [
@@ -310,6 +308,8 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
+  createdAt: new Date('2019-12-13T16:40:33.400Z'),
+  updatedAt: new Date('2019-12-13T16:40:33.400Z'),
   schedule: { interval: '5m' },
   enabled: true,
   actions: [],
@@ -381,4 +381,5 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
+  isAuthenticated: false,
 });

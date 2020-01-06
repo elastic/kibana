@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
+import { IndexPattern } from '../../../../plugins/data/public';
 
 export interface AngularDirective {
   controller: (scope: AngularScope) => void;

@@ -46,8 +46,8 @@ export const EmptyPage = React.memo<EmptyPageProps>(
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               href={actionPrimaryUrl}
@@ -59,7 +59,7 @@ export const EmptyPage = React.memo<EmptyPageProps>(
           </EuiFlexItem>
 
           {actionSecondaryLabel && actionSecondaryUrl && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 href={actionSecondaryUrl}
                 iconType={actionSecondaryIcon}
