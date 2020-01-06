@@ -116,17 +116,15 @@ export class ReportManager {
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
-        if (report.uiStatsMetrics) {
-          const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-          this.report.uiStatsMetrics = this.report.uiStatsMetrics || {};
-          this.report.uiStatsMetrics[key] = {
-            key,
-            appName,
-            eventName,
-            type,
-            stats: this.incrementStats(count, existingStats),
-          };
-        }
+        this.report.uiStatsMetrics = this.report.uiStatsMetrics || {};
+        const existingStats = (this.report.uiStatsMetrics[key] || {}).stats;
+        this.report.uiStatsMetrics[key] = {
+          key,
+          appName,
+          eventName,
+          type,
+          stats: this.incrementStats(count, existingStats),
+        };
         return;
       }
       default:
