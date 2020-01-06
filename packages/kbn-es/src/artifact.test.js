@@ -52,6 +52,23 @@ const createArchive = (params = {}) => {
 const mockFetch = mock =>
   fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
+let previousSnapshotManifestValue = null;
+
+beforeAll(() => {
+  if ('ES_SNAPSHOT_MANIFEST' in process.env) {
+    previousSnapshotManifestValue = process.env.ES_SNAPSHOT_MANIFEST;
+    delete process.env.ES_SNAPSHOT_MANIFEST;
+  }
+});
+
+afterAll(() => {
+  if (previousSnapshotManifestValue !== null) {
+    process.env.ES_SNAPSHOT_MANIFEST = previousSnapshotManifestValue;
+  } else {
+    delete process.env.ES_SNAPSHOT_MANIFEST;
+  }
+});
+
 beforeEach(() => {
   jest.resetAllMocks();
 
