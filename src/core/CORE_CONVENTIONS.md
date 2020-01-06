@@ -92,7 +92,7 @@ area of Core API's and does not apply to internal types.
    > churn when we know related API methods will be introduced.
 
 ## 3. Tests and mocks
- - 3.1 Declary Jest mocks with a temporary variable to ensure types are
+ - 3.1 Declare Jest mocks with a temporary variable to ensure types are
    correctly inferred
 
    ```ts
