@@ -9,7 +9,6 @@ import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
@@ -18,6 +17,7 @@ import {
   INDEX_PATTERN_FILEBEAT,
 } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
+import { getUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_unassigned_shard_stats';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -54,7 +54,9 @@ export function esOverviewRoute(server) {
           getLastRecovery(req, esIndexPattern),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
+        const shardStats = await getUnassignedShardStats(req, esIndexPattern, clusterStats, {
+          includeIndices: true,
+        });
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),

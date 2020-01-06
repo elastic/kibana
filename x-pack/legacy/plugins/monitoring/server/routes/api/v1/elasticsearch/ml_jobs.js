@@ -8,10 +8,10 @@ import Joi from 'joi';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
-import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { getUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_unassigned_shard_stats';
 
 export function mlJobRoute(server) {
   server.route({
@@ -39,7 +39,9 @@ export function mlJobRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
+        const shardStats = await getUnassignedShardStats(req, esIndexPattern, clusterStats, {
+          includeIndices: true,
+        });
         const rows = await getMlJobs(req, esIndexPattern);
 
         return {

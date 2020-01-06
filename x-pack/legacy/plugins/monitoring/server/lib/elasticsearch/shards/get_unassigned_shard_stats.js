@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { checkParam } from '../../error_missing_required';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
+import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 
 function getBaselineQuery(cluster) {
   const metric = ElasticsearchMetric.getMetricFields();
@@ -96,6 +97,7 @@ export async function getUnassignedShardStats(
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   let indices;
+  let indicesTotals;
   let nodes;
 
   if (includeIndices) {
@@ -124,6 +126,7 @@ export async function getUnassignedShardStats(
       };
       return accum;
     }, {});
+    indicesTotals = calculateIndicesTotals(indices);
   }
 
   if (includeNodes) {
@@ -134,5 +137,5 @@ export async function getUnassignedShardStats(
     }, {});
   }
 
-  return { indices, nodes };
+  return { indices, nodes, indicesTotals };
 }

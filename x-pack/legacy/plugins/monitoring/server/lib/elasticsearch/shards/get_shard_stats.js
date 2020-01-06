@@ -39,7 +39,7 @@ export function getShardStats(
   req,
   esIndexPattern,
   cluster,
-  { includeNodes = false, includeIndices = false } = {}
+  { includeNodes = true, includeIndices = true } = {}
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
