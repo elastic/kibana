@@ -6,6 +6,7 @@
 
 import lowPolyLayerFeatures from './low_poly_layer.json';
 import { LocationPoint } from './embedded_map';
+import { UptimeAppColors } from '../../../../uptime_app';
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
@@ -15,7 +16,7 @@ import { LocationPoint } from './embedded_map';
 export const getLayerList = (
   upPoints: LocationPoint[],
   downPoints: LocationPoint[],
-  { gray, danger }: { gray: string; danger: string }
+  { gray, danger }: UptimeAppColors
 ) => {
   return [getLowPolyLayer(), getDownPointsLayer(downPoints, danger), getUpPointsLayer(upPoints)];
 };
