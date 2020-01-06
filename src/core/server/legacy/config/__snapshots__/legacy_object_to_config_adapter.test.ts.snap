@@ -11,6 +11,7 @@ Object {
   "customResponseHeaders": Object {
     "custom-header": "custom-value",
   },
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
@@ -39,10 +40,10 @@ Object {
     "enabled": true,
   },
   "cors": false,
-  "defaultRoute": undefined,
   "customResponseHeaders": Object {
     "custom-header": "custom-value",
   },
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
