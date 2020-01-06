@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  timeFormatter,
-  Settings,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
 import { EuiEmptyPrompt, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
@@ -110,12 +100,12 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
   const downMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
-  const downSpecId = getSpecId(downMonitorsId);
+  const downSpecId = downMonitorsId;
 
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
     defaultMessage: 'Up',
   });
-  const upSpecId = getSpecId(upMonitorsId);
+  const upSpecId = upMonitorsId;
   return (
     <>
       <EuiTitle size="xs">
@@ -148,21 +138,17 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
             showLegend={false}
           />
           <Axis
-            id={getAxisId(
-              i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
-                defaultMessage: 'Snapshot X Axis',
-              })
-            )}
+            id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
+              defaultMessage: 'Snapshot X Axis',
+            })}
             position={Position.Bottom}
             showOverlappingTicks={false}
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           />
           <Axis
-            id={getAxisId(
-              i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
-                defaultMessage: 'Snapshot Y Axis',
-              })
-            )}
+            id={i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
+              defaultMessage: 'Snapshot Y Axis',
+            })}
             position="left"
             title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
               defaultMessage: 'Pings',
@@ -171,7 +157,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
             })}
           />
           <BarSeries
-            customSeriesColors={getColorsMap(danger, downSpecId)}
+            customSeriesColors={[danger]}
             data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
             id={downSpecId}
             name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
@@ -185,7 +171,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
             yScaleType="linear"
           />
           <BarSeries
-            customSeriesColors={getColorsMap(gray, upSpecId)}
+            customSeriesColors={[gray]}
             data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
             id={upSpecId}
             name={upMonitorsId}
