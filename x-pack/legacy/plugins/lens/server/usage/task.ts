@@ -14,7 +14,6 @@ import {
   SearchResponse,
   DeleteDocumentByQueryResponse,
 } from 'elasticsearch';
-import { TaskManagerPluginStartContract } from '../../../../../plugins/kibana_task_manager/server';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { RunContext, TaskManager } from '../../../task_manager/server';
