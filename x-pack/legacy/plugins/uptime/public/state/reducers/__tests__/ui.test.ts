@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  setBasePath,
-  toggleIntegrationsPopover,
-  triggerAppRefresh,
-  setFilters,
-} from '../../actions';
+import { setBasePath, toggleIntegrationsPopover, triggerAppRefresh } from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
 
@@ -22,7 +17,6 @@ describe('ui reducer', () => {
           basePath: 'abc',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
-          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
         },
         action
       )
@@ -40,7 +34,6 @@ describe('ui reducer', () => {
           basePath: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
-          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
         },
         action
       )
@@ -55,24 +48,6 @@ describe('ui reducer', () => {
           basePath: 'abc',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
-          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
-        },
-        action
-      )
-    ).toMatchSnapshot();
-  });
-
-  it('updates the filter value', () => {
-    const action = setFilters(
-      new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]])
-    ) as Action<never>;
-    expect(
-      uiReducer(
-        {
-          basePath: '',
-          integrationsPopoverOpen: null,
-          lastRefresh: 125,
-          filters: new Map([['observer.geo.name', ['Tokyo', 'London']]]),
         },
         action
       )

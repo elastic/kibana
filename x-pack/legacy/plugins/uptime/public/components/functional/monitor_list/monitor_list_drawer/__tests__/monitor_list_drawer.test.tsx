@@ -14,7 +14,6 @@ describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;
   let loadMonitorDetails: any;
   let monitorDetails: MonitorDetails;
-  let filters: Map<string, string[]>;
 
   beforeEach(() => {
     summary = {
@@ -48,8 +47,6 @@ describe('MonitorListDrawer component', () => {
           'Get https://expired.badssl.com: x509: certificate has expired or is not yet valid',
       },
     };
-    filters = new Map();
-    filters.set('observer.geo.name', ['Tokyo', 'Berlin', 'NY']);
     loadMonitorDetails = () => null;
   });
 
@@ -59,7 +56,6 @@ describe('MonitorListDrawer component', () => {
         loadMonitorDetails={loadMonitorDetails}
         summary={summary}
         monitorDetails={monitorDetails}
-        filters={filters}
       />
     );
     expect(component).toEqual({});
@@ -72,7 +68,6 @@ describe('MonitorListDrawer component', () => {
         summary={summary}
         loadMonitorDetails={loadMonitorDetails}
         monitorDetails={monitorDetails}
-        filters={filters}
       />
     );
     expect(component).toEqual({});
@@ -84,7 +79,6 @@ describe('MonitorListDrawer component', () => {
         summary={summary}
         loadMonitorDetails={loadMonitorDetails}
         monitorDetails={monitorDetails}
-        filters={filters}
       />
     );
     expect(component).toMatchSnapshot();
@@ -120,7 +114,6 @@ describe('MonitorListDrawer component', () => {
         summary={summary}
         loadMonitorDetails={loadMonitorDetails}
         monitorDetails={monitorDetails}
-        filters={filters}
       />
     );
     expect(component).toMatchSnapshot();
