@@ -8,6 +8,21 @@ import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+
+import {
+  createPlainError,
+  throwErrors,
+} from '../../../../legacy/plugins/infra/common/runtime_types';
+
+import {
+  LOG_ENTRIES_HIGHLIGHTS_PATH,
+  logEntriesHighlightsRequestRT,
+  logEntriesHighlightsResponseRT,
+} from '../../../../legacy/plugins/infra/common/http_api';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
@@ -29,13 +44,150 @@ const KEY_AFTER_END = {
   tiebreaker: 0,
 };
 
+const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
+
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
   const client = getService('infraOpsGraphQLClient');
 
   describe('log highlight apis', () => {
     before(() => esArchiver.load('infra/simple_logs'));
     after(() => esArchiver.unload('infra/simple_logs'));
+
+    describe('/log_entries/highlights', () => {
+      describe('with the default source', () => {
+        before(() => esArchiver.load('empty_kibana'));
+        after(() => esArchiver.unload('empty_kibana'));
+
+        it('highlights built-in message column', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesHighlightsRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_BEFORE_START.time,
+                endDate: KEY_AFTER_END.time,
+                highlightTerms: ['message of document 0'],
+              })
+            )
+            .expect(200);
+
+          const logEntriesHighlightsResponse = pipe(
+            logEntriesHighlightsResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(logEntriesHighlightsResponse.data).to.have.length(1);
+
+          const data = logEntriesHighlightsResponse.data[0];
+          const entries = data.entries;
+          const firstEntry = entries[0];
+          const lastEntry = entries[entries.length - 1];
+
+          // Finds expected entries
+          expect(entries).to.have.length(10);
+
+          // Cursors are set correctly
+          expect(firstEntry.cursor).to.eql(data.topCursor);
+          expect(lastEntry.cursor).to.eql(data.bottomCursor);
+
+          // Entries fall within range
+          // @kbn/expect doesn't have a `lessOrEqualThan` or `moreOrEqualThan` comparators
+          expect(firstEntry.cursor.time >= KEY_BEFORE_START.time).to.be(true);
+          expect(lastEntry.cursor.time <= KEY_AFTER_END.time).to.be(true);
+
+          // All entries contain the highlights
+          entries.forEach(entry => {
+            entry.columns.forEach(column => {
+              if ('message' in column && 'highlights' in column.message[0]) {
+                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+              }
+            });
+          });
+        });
+
+        it('highlights field columns', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesHighlightsRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_BEFORE_START.time,
+                endDate: KEY_AFTER_END.time,
+                highlightTerms: ['generate_test_data/simple_logs'],
+              })
+            )
+            .expect(200);
+
+          const logEntriesHighlightsResponse = pipe(
+            logEntriesHighlightsResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(logEntriesHighlightsResponse.data).to.have.length(1);
+
+          const entries = logEntriesHighlightsResponse.data[0].entries;
+
+          // Finds expected entries
+          expect(entries).to.have.length(50);
+
+          // All entries contain the highlights
+          entries.forEach(entry => {
+            entry.columns.forEach(column => {
+              if ('field' in column && 'highlights' in column && column.highlights.length > 0) {
+                // https://github.com/elastic/kibana/issues/49959
+                // expect(column.highlights).to.eql(['generate_test_data/simple_logs']);
+                expect(column.highlights).to.eql(['generate_test_data']);
+              }
+            });
+          });
+        });
+
+        it('applies the query as well as the highlight', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesHighlightsRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_BEFORE_START.time,
+                endDate: KEY_AFTER_END.time,
+                query: JSON.stringify({
+                  multi_match: { query: 'host-a', type: 'phrase', lenient: true },
+                }),
+                highlightTerms: ['message'],
+              })
+            )
+            .expect(200);
+
+          const logEntriesHighlightsResponse = pipe(
+            logEntriesHighlightsResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(logEntriesHighlightsResponse.data).to.have.length(1);
+
+          const entries = logEntriesHighlightsResponse.data[0].entries;
+
+          // Finds expected entries
+          expect(entries).to.have.length(25);
+
+          // All entries contain the highlights
+          entries.forEach(entry => {
+            entry.columns.forEach(column => {
+              if ('message' in column && 'highlights' in column.message[0]) {
+                expect(column.message[0].highlights).to.eql(['message', 'message']);
+              }
+            });
+          });
+        });
+      });
+    });
 
     describe('logEntryHighlights', () => {
       describe('with the default source', () => {
