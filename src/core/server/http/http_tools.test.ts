@@ -31,8 +31,6 @@ import { HttpConfig, config } from './http_config';
 import { Router } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const emptyOutput = {
   statusCode: 400,
@@ -122,8 +120,7 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
-      {} as any,
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
@@ -152,8 +149,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
-      {} as any,
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
