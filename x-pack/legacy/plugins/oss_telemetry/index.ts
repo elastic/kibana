@@ -6,7 +6,6 @@
 
 import { Logger, PluginInitializerContext } from 'kibana/server';
 import { Legacy } from 'kibana';
-import { isFunction } from 'lodash';
 import { PLUGIN_ID } from './constants';
 import { OssTelemetryPlugin } from './server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
@@ -44,9 +43,11 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
 };
 
 function getTaskManager(server: Legacy.Server) {
-  const taskManager = {
-    ...(server.newPlatform.setup.plugins.kibanaTaskManager || {}),
-    ...(server.newPlatform.start.plugins.kibanaTaskManager || {}),
-  } as TaskManager;
-  return isFunction(taskManager.ensureScheduled) ? taskManager : undefined;
+  if (server?.newPlatform?.start?.plugins?.kibanaTaskManager) {
+    return {
+      ...(server.newPlatform.setup.plugins.kibanaTaskManager || {}),
+      ...(server.newPlatform.start.plugins.kibanaTaskManager || {}),
+    } as TaskManager;
+  }
+  return undefined;
 }
