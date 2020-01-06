@@ -19,6 +19,7 @@ import {
   NullValueParameter,
   IgnoreMalformedParameter,
   FormatParameter,
+  LocaleParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
@@ -56,18 +57,7 @@ export const DateType = ({ field }: Props) => {
       </BasicParametersSection>
 
       <AdvancedParametersSection>
-        {/* locale */}
-        <EditFieldFormRow
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
-            defaultMessage: 'Set locale',
-          })}
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
-            defaultMessage: 'The locale to use when parsing dates.',
-          })}
-          defaultToggleValue={getDefaultToggleValue('locale', field.source)}
-        >
-          <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
-        </EditFieldFormRow>
+        <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
 
         <DocValuesParameter />
 
