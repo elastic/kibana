@@ -9,16 +9,12 @@ import { shallow } from 'enzyme';
 
 import { VectorIcon } from './vector_icon';
 import { VectorStyle } from '../../vector_style';
+import { extractColorFromStyleProperty } from './extract_color_from_style_property';
+import { VECTOR_STYLES } from '../../vector_style_defaults';
 
 let isPointsOnly = false;
 let isLinesOnly = false;
-const defaultProps = {
-  loadIsPointsOnly: () => {
-    return isPointsOnly;
-  },
-  loadIsLinesOnly: () => {
-    return isLinesOnly;
-  },
+const styles = {
   fillColor: {
     type: VectorStyle.STYLE_TYPE.STATIC,
     options: {
@@ -33,6 +29,30 @@ const defaultProps = {
         name: 'prop1',
       },
     },
+  },
+};
+
+const defaultProps = {
+  getColorForProperty: (styleProperty, isLinesOnly) => {
+    if (isLinesOnly) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
+    }
+
+    if (styleProperty === VECTOR_STYLES.LINE_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'none');
+    } else if (styleProperty === VECTOR_STYLES.FILL_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.FILL_COLOR], 'grey');
+    } else {
+      //unexpected
+      console.error('Cannot return color for properties other then line or fill color');
+    }
+  },
+
+  loadIsPointsOnly: () => {
+    return isPointsOnly;
+  },
+  loadIsLinesOnly: () => {
+    return isLinesOnly;
   },
 };
 
