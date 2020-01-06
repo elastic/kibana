@@ -6,7 +6,10 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiLink, EuiCode } from '@elastic/eui';
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
@@ -61,9 +64,19 @@ export const DateType = ({ field }: Props) => {
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
             defaultMessage: 'Set locale',
           })}
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
-            defaultMessage: 'The locale to use when parsing dates.',
-          })}
+          description={
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.dateType.localeFieldDescription"
+              defaultMessage={`The locale to use when parsing dates. This can be useful as months may not have the same name or abbreviation in all languages. Defaults to the {root} locale.`}
+              values={{
+                root: (
+                  <EuiLink href={documentationService.getRootLocaleLink()} target="_blank">
+                    ROOT
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
           defaultToggleValue={getDefaultToggleValue('locale', field.source)}
         >
           <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
@@ -74,9 +87,10 @@ export const DateType = ({ field }: Props) => {
         <NullValueParameter
           defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.dateType.nullValueFieldDescription',
             {
-              defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
+              defaultMessage:
+                'Replace explicit null values with a date value so that it can be indexed and searched.',
             }
           )}
         />

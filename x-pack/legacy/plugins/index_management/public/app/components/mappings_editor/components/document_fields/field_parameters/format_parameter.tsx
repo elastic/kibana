@@ -6,8 +6,9 @@
 
 import React, { useState } from 'react';
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 import { UseField } from '../../../shared_imports';
@@ -38,9 +39,15 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldTitle', {
         defaultMessage: 'Set format',
       })}
-      description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription', {
-        defaultMessage: 'The date format(s) that can be parsed.',
-      })}
+      description={
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription"
+          defaultMessage="The date format(s) that can be parsed. Most of the built-in formats have a {strict} companion format, which means year, month, and day must use 4, 2, and 2 digits, respectively."
+          values={{
+            strict: <EuiCode>strict</EuiCode>,
+          }}
+        />
+      }
       docLink={{
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.formatDocLinkText', {
           defaultMessage: 'Format documentation',

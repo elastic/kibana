@@ -122,15 +122,43 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/date.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.dateLongDescription"
+          defaultMessage={`Date fields accept strings containing formatted dates, e.g. "2015-01-01" or "2015/01/01 12:10:30", a long number representing milliseconds-since-the-epoch, or an integer representing seconds-since-the-epoch. Multiple date formats can be specified. Dates with timezone information will be converted to UTC internally.`}
+        />
+      </p>
+    ),
   },
   date_nanos: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateNanosDescription', {
-      defaultMessage: 'Date nanos',
+      defaultMessage: 'Date nanoseconds',
     }),
     value: 'date_nanos',
     documentation: {
       main: '/date_nanos.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.dateLongDescription"
+          defaultMessage={`Date nanoseconds fields store dates in nanosecond resolution, which limits its range of dates. Aggregations are still on the millisecond resolution. If you need to store dates in millisecond resolution, use the {date}.`}
+          values={{
+            date: (
+              <EuiLink href={documentationService.getTypeDocLink('date')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.textLongDescription.dateTypeLink',
+                  {
+                    defaultMessage: 'date data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   binary: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.binaryDescription', {
