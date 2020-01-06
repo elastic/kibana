@@ -75,19 +75,19 @@ describe('test endpoint route', () => {
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
     expect(endpointResultList.endpoints.length).toEqual(3);
     expect(endpointResultList.total).toEqual(3);
-    expect(endpointResultList.requestIndex).toEqual(0);
-    expect(endpointResultList.requestPageSize).toEqual(10);
+    expect(endpointResultList.request_index).toEqual(0);
+    expect(endpointResultList.request_page_size).toEqual(10);
   });
 
   it('test find the latest of all endpoints with params', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        pagingProperties: [
+        paging_properties: [
           {
-            pageSize: 10,
+            page_size: 10,
           },
           {
-            pageIndex: 1,
+            page_index: 1,
           },
         ],
       },
@@ -117,7 +117,7 @@ describe('test endpoint route', () => {
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
     expect(endpointResultList.endpoints.length).toEqual(3);
     expect(endpointResultList.total).toEqual(3);
-    expect(endpointResultList.requestIndex).toEqual(10);
-    expect(endpointResultList.requestPageSize).toEqual(10);
+    expect(endpointResultList.request_index).toEqual(10);
+    expect(endpointResultList.request_page_size).toEqual(10);
   });
 });

@@ -21,8 +21,8 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(3);
-        expect(body.requestPageSize).to.eql(10);
-        expect(body.requestIndex).to.eql(0);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_index).to.eql(0);
       });
 
       it('endpoints api should return page based on params passed.', async () => {
@@ -30,20 +30,20 @@ export default function({ getService }: FtrProviderContext) {
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send({
-            pagingProperties: [
+            paging_properties: [
               {
-                pageSize: 1,
+                page_size: 1,
               },
               {
-                pageIndex: 1,
+                page_index: 1,
               },
             ],
           })
           .expect(200);
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(1);
-        expect(body.requestPageSize).to.eql(1);
-        expect(body.requestIndex).to.eql(1);
+        expect(body.request_page_size).to.eql(1);
+        expect(body.request_index).to.eql(1);
       });
 
       it('endpoints api should return 400 when pagingProperties is below boundaries.', async () => {
@@ -51,12 +51,12 @@ export default function({ getService }: FtrProviderContext) {
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send({
-            pagingProperties: [
+            paging_properties: [
               {
-                pageSize: 0,
+                page_size: 0,
               },
               {
-                pageIndex: 1,
+                page_index: 1,
               },
             ],
           })

@@ -9,8 +9,6 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { EndpointAppContext, EndpointData } from '../types';
 import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RouteSchemas } from '../../../../../src/core/server/http/router/route';
 
 interface HitSource {
   _source: EndpointData;
@@ -22,33 +20,31 @@ export interface EndpointResultList {
   // the total number of unique endpoints in the index
   total: number;
   // the page size requested
-  requestPageSize: number;
+  request_page_size: number;
   // the index requested
-  requestIndex: number;
+  request_index: number;
 }
-
-const endpointListRequestSchema: RouteSchemas<any, any, any> = {
-  body: schema.nullable(
-    schema.object({
-      pagingProperties: schema.arrayOf(
-        schema.oneOf([
-          // the number of results to return for this request per page
-          schema.object({
-            pageSize: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-          }),
-          // the index of the page to return
-          schema.object({ pageIndex: schema.number({ defaultValue: 0, min: 0 }) }),
-        ])
-      ),
-    })
-  ),
-};
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.post(
     {
       path: '/api/endpoint/endpoints',
-      validate: endpointListRequestSchema,
+      validate: {
+        body: schema.nullable(
+          schema.object({
+            paging_properties: schema.arrayOf(
+              schema.oneOf([
+                // the number of results to return for this request per page
+                schema.object({
+                  page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+                }),
+                // the index of the page to return
+                schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+              ])
+            ),
+          })
+        ),
+      },
       options: { authRequired: true },
     },
     async (context, req, res) => {
@@ -72,8 +68,8 @@ function mapToEndpointResultList(
 ): EndpointResultList {
   if (searchResponse.hits.hits.length > 0) {
     return {
-      requestPageSize: queryParams.size,
-      requestIndex: queryParams.from,
+      request_page_size: queryParams.size,
+      request_index: queryParams.from,
       endpoints: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
@@ -82,8 +78,8 @@ function mapToEndpointResultList(
     };
   } else {
     return {
-      requestPageSize: queryParams.size,
-      requestIndex: queryParams.from,
+      request_page_size: queryParams.size,
+      request_index: queryParams.from,
       total: 0,
       endpoints: [],
     };

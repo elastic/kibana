@@ -50,9 +50,9 @@ async function getPagingProperties(
   endpointAppContext: EndpointAppContext
 ) {
   const config = await endpointAppContext.config();
-  const pagingProperties: { pageSize?: number; pageIndex?: number } = {};
-  if (request?.body?.pagingProperties) {
-    for (const property of request.body.pagingProperties) {
+  const pagingProperties: { page_size?: number; page_index?: number } = {};
+  if (request?.body?.paging_properties) {
+    for (const property of request.body.paging_properties) {
       Object.assign(
         pagingProperties,
         ...Object.keys(property).map(key => ({ [key]: property[key] }))
@@ -60,7 +60,7 @@ async function getPagingProperties(
     }
   }
   return {
-    pageSize: pagingProperties.pageSize || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.pageIndex || config.endpointResultListDefaultFirstPageIndex,
+    pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
+    pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
   };
 }
