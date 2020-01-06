@@ -51,7 +51,7 @@ export const management = capabilities => {
   });
 
   main.register('ingest', {
-    display: i18n.translate('common.ui.management.dataIngestionDisplayName', {
+    display: i18n.translate('management.dataIngestionDisplayName', {
       defaultMessage: 'Data Ingestion',
     }),
     order: 30,
