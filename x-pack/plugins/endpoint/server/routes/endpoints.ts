@@ -8,7 +8,8 @@ import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { EndpointAppContext, EndpointData } from '../types';
-import { AllEndpointsQueryBuilder } from '../services/endpoint/endpoint_query_builders';
+import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
+import { RouteSchemas } from '../../../../../build/kibana/src/core/server/http/router/route';
 
 interface HitSource {
   _source: EndpointData;
@@ -25,26 +26,33 @@ export interface EndpointResultList {
   requestIndex: number;
 }
 
+const endpointListRequestSchema: RouteSchemas<any, any, any> = {
+  body: schema.nullable(
+    schema.object({
+      pagingProperties: schema.arrayOf(
+        schema.oneOf([
+          // the number of results to return for this request per page
+          schema.object({
+            pageSize: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+          }),
+          // the index of the page to return
+          schema.object({ pageIndex: schema.number({ defaultValue: 0, min: 0 }) }),
+        ])
+      ),
+    })
+  ),
+};
+
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  router.get(
+  router.post(
     {
       path: '/api/endpoint/endpoints',
-      validate: {
-        query: schema.object({
-          // the number of results to return for this request per page
-          pageSize: schema.number({ defaultValue: 10, min: 1 }),
-          // the index of the page to return
-          pageIndex: schema.number({ defaultValue: 0, min: 0 }),
-        }),
-      },
+      validate: endpointListRequestSchema,
       options: { authRequired: true },
     },
     async (context, req, res) => {
       try {
-        const queryParams = await new AllEndpointsQueryBuilder(
-          req,
-          endpointAppContext
-        ).toQueryParams();
+        const queryParams = await kibanaRequestToEndpointListQuery(req, endpointAppContext);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams

@@ -5,7 +5,7 @@
  */
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
-import { AllEndpointsQueryBuilder } from './endpoint_query_builders';
+import { kibanaRequestToEndpointListQuery } from './endpoint_query_builders';
 
 describe('test query builder', () => {
   describe('test query builder request processing', () => {
@@ -13,11 +13,10 @@ describe('test query builder', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });
-      const searchQueryBuilder = new AllEndpointsQueryBuilder(mockRequest, {
+      const query = await kibanaRequestToEndpointListQuery(mockRequest, {
         logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
-      const query = await searchQueryBuilder.toQueryParams();
       expect(query).toEqual({
         body: {
           query: {

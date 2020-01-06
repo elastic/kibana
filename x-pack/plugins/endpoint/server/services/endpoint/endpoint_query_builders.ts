@@ -6,62 +6,61 @@
 import { KibanaRequest } from 'kibana/server';
 import { EndpointAppConstants, EndpointAppContext } from '../../types';
 
-export class AllEndpointsQueryBuilder {
-  private readonly request: KibanaRequest<any, any, any>;
-  private readonly endpointAppContext: EndpointAppContext;
-
-  constructor(request: KibanaRequest<any, any, any>, endpointAppContext: EndpointAppContext) {
-    this.request = request;
-    this.endpointAppContext = endpointAppContext;
-  }
-  /* aggregating by endpoint machine id and retrieving the latest of each group of events
-      related to an endpoint by machine id using elastic search collapse functionality
-   */
-  async toQueryParams(): Promise<Record<string, any>> {
-    const paging = await this.paging();
-    return {
-      body: {
-        query: this.queryBody(),
-        collapse: {
-          field: 'machine_id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ created_at: 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'machine_id',
-            },
-          },
-        },
-        sort: [
-          {
-            created_at: {
-              order: 'desc',
-            },
-          },
-        ],
+export const kibanaRequestToEndpointListQuery = async (
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext
+): Promise<Record<string, any>> => {
+  const pagingProperties = await getPagingProperties(request, endpointAppContext);
+  return {
+    body: {
+      query: {
+        match_all: {},
       },
-      from: paging.pageIndex * paging.pageSize,
-      size: paging.pageSize,
-      index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
-    };
-  }
+      collapse: {
+        field: 'machine_id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          sort: [{ created_at: 'desc' }],
+        },
+      },
+      aggs: {
+        total: {
+          cardinality: {
+            field: 'machine_id',
+          },
+        },
+      },
+      sort: [
+        {
+          created_at: {
+            order: 'desc',
+          },
+        },
+      ],
+    },
+    from: pagingProperties.pageIndex * pagingProperties.pageSize,
+    size: pagingProperties.pageSize,
+    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+  };
+};
 
-  private queryBody(): Record<string, unknown> {
-    return {
-      match_all: {},
-    };
+async function getPagingProperties(
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext
+) {
+  const config = await endpointAppContext.config();
+  const pagingProperties: { pageSize?: number; pageIndex?: number } = {};
+  if (request?.body?.pagingProperties) {
+    for (const property of request.body.pagingProperties) {
+      Object.assign(
+        pagingProperties,
+        ...Object.keys(property).map(key => ({ [key]: property[key] }))
+      );
+    }
   }
-
-  private async paging() {
-    const config = await this.endpointAppContext.config();
-    return {
-      pageSize: this.request.query.pageSize || config.endpointResultListDefaultPageSize,
-      pageIndex: this.request.query.pageIndex || config.endpointResultListDefaultFirstPageIndex,
-    };
-  }
+  return {
+    pageSize: pagingProperties.pageSize || config.endpointResultListDefaultPageSize,
+    pageIndex: pagingProperties.pageIndex || config.endpointResultListDefaultFirstPageIndex,
+  };
 }

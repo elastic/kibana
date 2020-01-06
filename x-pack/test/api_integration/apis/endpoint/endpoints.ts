@@ -15,7 +15,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('GET /api/endpoint/endpoints', () => {
       it('endpoints api should return one entry for each endpoint with default paging', async () => {
         const { body } = await supertest
-          .get('/api/endpoint/endpoints')
+          .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -27,14 +27,41 @@ export default function({ getService }: FtrProviderContext) {
 
       it('endpoints api should return page based on params passed.', async () => {
         const { body } = await supertest
-          .get('/api/endpoint/endpoints?pageSize=1&pageIndex=1')
+          .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
-          .send()
+          .send({
+            pagingProperties: [
+              {
+                pageSize: 1,
+              },
+              {
+                pageIndex: 1,
+              },
+            ],
+          })
           .expect(200);
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(1);
         expect(body.requestPageSize).to.eql(1);
         expect(body.requestIndex).to.eql(1);
+      });
+
+      it('endpoints api should return 400 when pagingProperties is below boundaries.', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            pagingProperties: [
+              {
+                pageSize: 0,
+              },
+              {
+                pageIndex: 1,
+              },
+            ],
+          })
+          .expect(400);
+        expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
       });
     });
   });

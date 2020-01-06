@@ -47,16 +47,13 @@ describe('test endpoint route', () => {
   });
 
   it('test find the latest of all endpoints', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: {},
-      params: {},
-    });
+    const mockRequest = httpServerMock.createKibanaRequest({});
 
     const response: SearchResponse<EndpointData> = (data as unknown) as SearchResponse<
       EndpointData
     >;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/endpoints')
     )!;
 
@@ -72,38 +69,7 @@ describe('test endpoint route', () => {
       mockResponse
     );
 
-    expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
-      from: 0,
-      size: 10,
-      body: {
-        query: {
-          match_all: {},
-        },
-        collapse: {
-          field: 'machine_id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ created_at: 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'machine_id',
-            },
-          },
-        },
-        sort: [
-          {
-            created_at: {
-              order: 'desc',
-            },
-          },
-        ],
-      },
-      index: 'endpoint-agent*',
-    });
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
@@ -115,16 +81,21 @@ describe('test endpoint route', () => {
 
   it('test find the latest of all endpoints with params', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      body: {},
-      query: {
-        pageSize: 10,
-        pageIndex: 1,
+      body: {
+        pagingProperties: [
+          {
+            pageSize: 10,
+          },
+          {
+            pageIndex: 1,
+          },
+        ],
       },
     });
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve((data as unknown) as SearchResponse<EndpointData>)
     );
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/endpoints')
     )!;
 
@@ -140,38 +111,7 @@ describe('test endpoint route', () => {
       mockResponse
     );
 
-    expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
-      from: 10,
-      size: 10,
-      body: {
-        query: {
-          match_all: {},
-        },
-        collapse: {
-          field: 'machine_id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ created_at: 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'machine_id',
-            },
-          },
-        },
-        sort: [
-          {
-            created_at: {
-              order: 'desc',
-            },
-          },
-        ],
-      },
-      index: 'endpoint-agent*',
-    });
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
