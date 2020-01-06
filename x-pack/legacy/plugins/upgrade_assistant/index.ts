@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import mappings from './mappings.json';
 import { plugin } from './server/np_ready';
+import { CloudSetup } from '../../../plugins/cloud/server';
 
 export function upgradeAssistant(kibana: any) {
   const publicSrc = resolve(__dirname, 'public');
@@ -43,9 +44,11 @@ export function upgradeAssistant(kibana: any) {
     init(server: Legacy.Server) {
       // Add server routes and initialize the plugin here
       const instance = plugin({} as any);
-      const { usageCollection } = server.newPlatform.setup.plugins;
+
+      const { usageCollection, cloud } = server.newPlatform.setup.plugins;
       instance.setup(server.newPlatform.setup.core, {
         usageCollection,
+        cloud: cloud as CloudSetup,
         __LEGACY: {
           // Legacy objects
           events: server.events,
@@ -58,11 +61,6 @@ export function upgradeAssistant(kibana: any) {
           plugins: {
             elasticsearch: server.plugins.elasticsearch,
             xpack_main: server.plugins.xpack_main,
-            cloud: {
-              config: {
-                isCloudEnabled: _.get(server.plugins, 'cloud.config.isCloudEnabled', false),
-              },
-            },
           },
         },
       });

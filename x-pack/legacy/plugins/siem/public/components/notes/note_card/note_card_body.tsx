@@ -6,7 +6,6 @@
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
@@ -34,7 +33,7 @@ const HoverActionsContainer = styled(EuiPanel)`
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
-export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
+export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => (
   <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
     <WithHoverActions
       hoverContent={

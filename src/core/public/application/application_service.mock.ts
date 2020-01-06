@@ -20,7 +20,6 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { ApplicationService } from './application_service';
 import {
   ApplicationSetup,
   InternalApplicationStart,
@@ -28,8 +27,7 @@ import {
   InternalApplicationSetup,
   App,
 } from './types';
-
-type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
+import { ApplicationServiceContract } from './test_types';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
@@ -44,22 +42,27 @@ const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup
   registerMountContext: jest.fn(),
 });
 
-const createStartContractMock = (legacyMode = false): jest.Mocked<ApplicationStart> => ({
+const createStartContractMock = (): jest.Mocked<ApplicationStart> => ({
   capabilities: capabilitiesServiceMock.createStartContract().capabilities,
   navigateToApp: jest.fn(),
   getUrlForApp: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
-const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => ({
-  availableApps$: new BehaviorSubject<ReadonlyMap<string, App>>(new Map()),
-  capabilities: capabilitiesServiceMock.createStartContract().capabilities,
-  navigateToApp: jest.fn(),
-  getUrlForApp: jest.fn(),
-  registerMountContext: jest.fn(),
-  currentAppId$: new Subject<string | undefined>(),
-  getComponent: jest.fn(),
-});
+const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
+  const currentAppId$ = new Subject<string | undefined>();
+
+  return {
+    availableApps: new Map(),
+    availableLegacyApps: new Map(),
+    capabilities: capabilitiesServiceMock.createStartContract().capabilities,
+    currentAppId$: currentAppId$.asObservable(),
+    getComponent: jest.fn(),
+    getUrlForApp: jest.fn(),
+    navigateToApp: jest.fn().mockImplementation(appId => currentAppId$.next(appId)),
+    registerMountContext: jest.fn(),
+  };
+};
 
 const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
   setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
@@ -71,7 +74,6 @@ export const applicationServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
-
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
 };

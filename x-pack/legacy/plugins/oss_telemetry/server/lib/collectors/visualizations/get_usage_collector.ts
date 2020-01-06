@@ -5,17 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { HapiServer } from '../../../../';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
 
-async function isTaskManagerReady(server: HapiServer) {
-  const result = await fetch(server);
+async function isTaskManagerReady(taskManager: TaskManagerPluginSetupContract | undefined) {
+  const result = await fetch(taskManager);
   return result !== null;
 }
 
-async function fetch(server: HapiServer) {
-  const taskManager = server.plugins.task_manager;
-
+async function fetch(taskManager: TaskManagerPluginSetupContract | undefined) {
   if (!taskManager) {
     return null;
   }
@@ -40,12 +38,12 @@ async function fetch(server: HapiServer) {
   return docs;
 }
 
-export function getUsageCollector(server: HapiServer) {
+export function getUsageCollector(taskManager: TaskManagerPluginSetupContract | undefined) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;
     try {
-      isReady = await isTaskManagerReady(server);
+      isReady = await isTaskManagerReady(taskManager);
     } catch (err) {} // eslint-disable-line
 
     if (isReady) {
@@ -60,7 +58,7 @@ export function getUsageCollector(server: HapiServer) {
     type: VIS_USAGE_TYPE,
     isReady: () => isCollectorReady,
     fetch: async () => {
-      const docs = await fetch(server);
+      const docs = await fetch(taskManager);
       // get the accumulated state from the recurring task
       return get(docs, '[0].state.stats');
     },

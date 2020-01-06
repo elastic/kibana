@@ -43,9 +43,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: (
-                    <NotePreviews notes={notes} isModal={!showExtendedColumnsAndActions} />
-                  ),
+                  [savedObjectId]: <NotePreviews notes={notes} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}

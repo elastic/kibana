@@ -82,7 +82,13 @@ export const progressColumn = {
         {isBatchTransform && (
           <Fragment>
             <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              <EuiProgress value={progress} max={100} color="primary" size="m">
+              <EuiProgress
+                value={progress}
+                max={100}
+                color="primary"
+                size="m"
+                data-test-subj="mlAnalyticsTableProgress"
+              >
                 {progress}%
               </EuiProgress>
             </EuiFlexItem>
@@ -110,6 +116,7 @@ export const progressColumn = {
     );
   },
   width: '100px',
+  'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
 export const getColumns = (
@@ -155,15 +162,15 @@ export const getColumns = (
           iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
         />
       ),
+      'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
       field: DataFrameAnalyticsListColumn.id,
       name: 'ID',
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnId',
     },
-    // Description is not supported yet by API
-    /*
     {
       field: DataFrameAnalyticsListColumn.description,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.description', {
@@ -172,7 +179,6 @@ export const getColumns = (
       sortable: true,
       truncateText: true,
     },
-    */
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.sourceIndex', {
@@ -180,6 +186,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnSourceIndex',
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
@@ -188,6 +195,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnDestIndex',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.type', { defaultMessage: 'Type' }),
@@ -197,6 +205,7 @@ export const getColumns = (
         return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
       },
       width: '150px',
+      'data-test-subj': 'mlAnalyticsTableColumnType',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
@@ -206,6 +215,7 @@ export const getColumns = (
         return getTaskStateBadge(item.stats.state, item.stats.reason);
       },
       width: '100px',
+      'data-test-subj': 'mlAnalyticsTableColumnStatus',
     },
     // For now there is batch mode only so we hide this column for now.
     /*
@@ -227,7 +237,7 @@ export const getColumns = (
         defaultMessage: 'Actions',
       }),
       actions,
-      width: isManagementTable === true ? '100px' : '200px',
+      width: isManagementTable === true ? '100px' : '150px',
     },
   ];
 

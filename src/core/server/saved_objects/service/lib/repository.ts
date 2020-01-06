@@ -18,6 +18,7 @@
  */
 
 import { omit } from 'lodash';
+import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -51,7 +52,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -124,8 +125,50 @@ export class SavedObjectsRepository {
   private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
 
-  /** @internal */
-  constructor(options: SavedObjectsRepositoryOptions) {
+  /**
+   * A factory function for creating SavedObjectRepository instances.
+   *
+   * @internalRemarks
+   * Tests are located in ./repository_create_repository.test.ts
+   *
+   * @internal
+   */
+  public static createRepository(
+    migrator: KibanaMigrator,
+    schema: SavedObjectsSchema,
+    config: LegacyConfig,
+    indexName: string,
+    callCluster: APICaller,
+    extraTypes: string[] = [],
+    injectedConstructor: any = SavedObjectsRepository
+  ) {
+    const mappings = migrator.getActiveMappings();
+    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const serializer = new SavedObjectsSerializer(schema);
+    const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+
+    const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
+    if (missingTypeMappings.length > 0) {
+      throw new Error(
+        `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
+      );
+    }
+
+    const allowedTypes = [...new Set(visibleTypes.concat(extraTypes))];
+
+    return new injectedConstructor({
+      index: indexName,
+      config,
+      migrator,
+      mappings,
+      schema,
+      serializer,
+      allowedTypes,
+      callCluster: retryCallCluster(callCluster),
+    });
+  }
+
+  private constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
       config,

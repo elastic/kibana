@@ -24,6 +24,7 @@ import { mount } from 'enzyme';
 import { QueryBarTopRow } from './query_bar_top_row';
 
 import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { stubIndexPatternWithFields } from '../../stubs';
@@ -95,6 +96,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   const services = {
     ...startMock,
+    data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
   };
@@ -117,7 +119,7 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', () => {
+  it('Should render query and time picker', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,

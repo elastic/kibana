@@ -15,7 +15,7 @@ import { PageContent } from '../../../components/page';
 
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { WithLogFilter, WithLogFilterUrlState } from '../../../containers/logs/with_log_filter';
+import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
@@ -24,14 +24,14 @@ import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minima
 import { WithLogPositionUrlState } from '../../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
-import { ReduxSourceIdBridge, WithStreamItems } from '../../../containers/logs/with_stream_items';
+import { WithStreamItems } from '../../../containers/logs/with_stream_items';
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsBridge, LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { createDerivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
+  const { source, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -43,39 +43,32 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
-
+  const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   return (
     <>
-      <ReduxSourceIdBridge sourceId={sourceId} />
-      <LogHighlightsBridge indexPattern={derivedIndexPattern} />
-      <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
+      <LogHighlightsBridge />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <WithLogFilter indexPattern={derivedIndexPattern}>
-        {({ applyFilterQueryFromKueryExpression }) => (
-          <WithLogPosition>
-            {({ jumpToTargetPosition, stopLiveStreaming }) =>
-              flyoutVisible ? (
-                <LogEntryFlyout
-                  setFilter={applyFilterQueryFromKueryExpression}
-                  setTarget={(timeKey, flyoutItemId) => {
-                    jumpToTargetPosition(timeKey);
-                    setSurroundingLogsId(flyoutItemId);
-                    stopLiveStreaming();
-                  }}
-                  setFlyoutVisibility={setFlyoutVisibility}
-                  flyoutItem={flyoutItem}
-                  loading={isLoading}
-                />
-              ) : null
-            }
-          </WithLogPosition>
-        )}
-      </WithLogFilter>
+      <WithLogPosition>
+        {({ jumpToTargetPosition, stopLiveStreaming }) =>
+          flyoutVisible ? (
+            <LogEntryFlyout
+              setFilter={applyLogFilterQuery}
+              setTarget={(timeKey, flyoutItemId) => {
+                jumpToTargetPosition(timeKey);
+                setSurroundingLogsId(flyoutItemId);
+                stopLiveStreaming();
+              }}
+              setFlyoutVisibility={setFlyoutVisibility}
+              flyoutItem={flyoutItem}
+              loading={isLoading}
+            />
+          ) : null
+        }
+      </WithLogPosition>
       <PageContent key={`${sourceId}-${version}`}>
         <WithLogPosition>
           {({
@@ -87,7 +80,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             scrollUnlockLiveStreaming,
             isScrollLocked,
           }) => (
-            <WithStreamItems initializeOnMount={!isAutoReloading}>
+            <WithStreamItems>
               {({
                 currentHighlightKey,
                 hasMoreAfterEnd,
@@ -96,7 +89,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 isReloading,
                 items,
                 lastLoadedTime,
-                loadNewerEntries,
+                fetchNewerEntries,
               }) => (
                 <ScrollableLogTextStreamView
                   columnConfigurations={(source && source.configuration.logColumns) || []}
@@ -108,7 +101,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   items={items}
                   jumpToTarget={jumpToTargetPosition}
                   lastLoadedTime={lastLoadedTime}
-                  loadNewerItems={loadNewerEntries}
+                  loadNewerItems={fetchNewerEntries}
                   reportVisibleInterval={reportVisiblePositions}
                   scale={textScale}
                   target={targetPosition}
@@ -134,13 +127,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({
-                        isAutoReloading,
-                        jumpToTargetPosition,
-                        visibleMidpointTime,
-                        visibleTimeInterval,
-                      }) => (
-                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
+                        <WithStreamItems>
                           {({ isReloading }) => (
                             <LogMinimap
                               height={height}

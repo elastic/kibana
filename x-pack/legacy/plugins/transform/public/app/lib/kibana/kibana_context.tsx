@@ -6,12 +6,11 @@
 
 import React, { createContext, useContext, FC } from 'react';
 
+import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import {
-  IndexPattern as IndexPatternType,
-  IndexPatterns as IndexPatternsType,
-} from 'ui/index_patterns';
-
-import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../../src/plugins/data/public';
 import { KibanaConfig } from '../../../../../../../../src/legacy/server/kbn_server';
 
 // set() method is missing in original d.ts
@@ -25,9 +24,9 @@ interface UninitializedKibanaContextValue {
 
 export interface InitializedKibanaContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPatternType;
+  currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearch;
-  indexPatterns: IndexPatternsType;
+  indexPatterns: IndexPatternsContract;
   initialized: boolean;
   kbnBaseUrl: string;
   kibanaConfig: KibanaConfigTypeFix;

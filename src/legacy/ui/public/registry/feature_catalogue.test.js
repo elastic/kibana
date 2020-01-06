@@ -27,12 +27,11 @@ jest.mock('ui/capabilities', () => ({
         item3: true,
       },
     }),
-  }
+  },
 }));
 import { FeatureCatalogueCategory, FeatureCatalogueRegistryProvider } from './feature_catalogue';
 
 describe('FeatureCatalogueRegistryProvider', () => {
-
   beforeAll(() => {
     FeatureCatalogueRegistryProvider.register(() => {
       return {
@@ -78,22 +77,25 @@ describe('FeatureCatalogueRegistryProvider', () => {
 
     // eslint-disable-next-line new-cap
     const foo = FeatureCatalogueRegistryProvider(mockPrivate, mockInjector).inTitleOrder;
-    expect(foo).toEqual([{
-      id: 'item1',
-      title: 'foo',
-      description: 'this is foo',
-      icon: 'savedObjectsApp',
-      path: '/app/kibana#/management/kibana/objects',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.ADMIN,
-    }, {
-      id: 'item4',
-      title: 'secret',
-      description: 'this is a secret',
-      icon: 'savedObjectsApp',
-      path: '/app/kibana#/management/kibana/objects',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.ADMIN,
-    }]);
+    expect(foo).toEqual([
+      {
+        id: 'item1',
+        title: 'foo',
+        description: 'this is foo',
+        icon: 'savedObjectsApp',
+        path: '/app/kibana#/management/kibana/objects',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
+      },
+      {
+        id: 'item4',
+        title: 'secret',
+        description: 'this is a secret',
+        icon: 'savedObjectsApp',
+        path: '/app/kibana#/management/kibana/objects',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
+      },
+    ]);
   });
 });

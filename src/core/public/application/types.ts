@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -30,6 +30,7 @@ import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
+import { SavedObjectsStart } from '../saved_objects';
 
 /** @public */
 export interface AppBase {
@@ -136,12 +137,27 @@ export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefin
  */
 export interface App extends AppBase {
   /**
-   * A mount function called when the user navigates to this app's route.
-   * @param context The mount context for this app.
-   * @param targetDomElement An HTMLElement to mount the application onto.
-   * @returns An unmounting function that will be called to unmount the application.
+   * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
+   * {@link AppMountDeprecated}.
+   *
+   * @remarks
+   * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
+   * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
    */
-  mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+  mount: AppMount | AppMountDeprecated;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
+
+  /**
+   * Override the application's routing path from `/app/${id}`.
+   * Must be unique across registered applications. Should not include the
+   * base path from HTTP.
+   */
+  appRoute?: string;
 }
 
 /** @internal */
@@ -152,7 +168,39 @@ export interface LegacyApp extends AppBase {
 }
 
 /**
- * The context object received when applications are mounted to the DOM.
+ * A mount function called when the user navigates to this app's route.
+ *
+ * @param params {@link AppMountParameters}
+ * @returns An unmounting function that will be called to unmount the application. See {@link AppUnmount}.
+ *
+ * @public
+ */
+export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+/**
+ * A mount function called when the user navigates to this app's route.
+ *
+ * @remarks
+ * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
+ * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
+ *
+ * @param context The mount context for this app. Deprecated, use {@link CoreSetup.getStartServices}.
+ * @param params {@link AppMountParameters}
+ * @returns An unmounting function that will be called to unmount the application. See {@link AppUnmount}.
+ *
+ * @deprecated
+ * @public
+ */
+export type AppMountDeprecated = (
+  context: AppMountContext,
+  params: AppMountParameters
+) => AppUnmount | Promise<AppUnmount>;
+
+/**
+ * The context object received when applications are mounted to the DOM. Deprecated, use
+ * {@link CoreSetup.getStartServices}.
+ *
+ * @deprecated
  * @public
  */
 export interface AppMountContext {
@@ -174,6 +222,8 @@ export interface AppMountContext {
     notifications: NotificationsStart;
     /** {@link OverlayStart} */
     overlays: OverlayStart;
+    /** {@link SavedObjectsStart} */
+    savedObjects: SavedObjectsStart;
     /** {@link IUiSettingsClient} */
     uiSettings: IUiSettingsClient;
     /**
@@ -196,7 +246,8 @@ export interface AppMountParameters {
   element: HTMLElement;
 
   /**
-   * The base path for configuring the application's router.
+   * The route path for configuring navigation to the application.
+   * This string should not include the base path from HTTP.
    *
    * @example
    *
@@ -208,9 +259,10 @@ export interface AppMountParameters {
    *   setup({ application }) {
    *     application.register({
    *      id: 'my-app',
-   *      async mount(context, params) {
+   *      appRoute: '/my-app',
+   *      async mount(params) {
    *        const { renderApp } = await import('./application');
-   *        return renderApp(context, params);
+   *        return renderApp(params);
    *      },
    *    });
    *  }
@@ -223,7 +275,10 @@ export interface AppMountParameters {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * export renderApp = (context, { appBasePath, element }) => {
+   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ appBasePath, element }: AppMountParams) => {
    *   ReactDOM.render(
    *     // pass `appBasePath` to `basename`
    *     <BrowserRouter basename={appBasePath}>
@@ -248,6 +303,20 @@ export type AppUnmount = () => void;
 /** @internal */
 export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
 
+/** @internal */
+export type LegacyAppMounter = (params: AppMountParameters) => void;
+
+/** @internal */
+export type Mounter<T = App | LegacyApp> = SelectivePartial<
+  {
+    appRoute: string;
+    appBasePath: string;
+    mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    unmountBeforeMounting: T extends LegacyApp ? true : boolean;
+  },
+  T extends LegacyApp ? never : 'unmountBeforeMounting'
+>;
+
 /** @public */
 export interface ApplicationSetup {
   /**
@@ -266,14 +335,15 @@ export interface ApplicationSetup {
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context.
+   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
+   * @deprecated
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<App['mount'], T>
+    provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 }
 
@@ -295,8 +365,9 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context.
+   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
+   * @deprecated
    * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
@@ -304,7 +375,7 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<App['mount'], T>
+    provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 }
 
@@ -333,15 +404,16 @@ export interface ApplicationStart {
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context.
+   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
+   * @deprecated
    * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<App['mount'], T>
+    provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 }
 
@@ -356,8 +428,9 @@ export interface InternalApplicationStart
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context.
+   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
+   * @deprecated
    * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
@@ -365,10 +438,16 @@ export interface InternalApplicationStart
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<App['mount'], T>
+    provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 
   // Internal APIs
-  currentAppId$: Subject<string | undefined>;
+  currentAppId$: Observable<string | undefined>;
   getComponent(): JSX.Element | null;
 }
+
+/** @internal */
+type SelectivePartial<T, K extends keyof T> = Partial<Pick<T, K>> &
+  Required<Pick<T, Exclude<keyof T, K>>> extends infer U
+  ? { [P in keyof U]: U[P] }
+  : never;

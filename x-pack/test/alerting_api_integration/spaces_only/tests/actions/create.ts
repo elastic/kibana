@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,7 +23,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -34,16 +34,24 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
 
       expect(response.statusCode).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action');
       expect(response.body).to.eql({
         id: response.body.id,
-        description: 'My action',
+        name: 'My action',
         actionTypeId: 'test.index-record',
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
       });
       expect(typeof response.body.id).to.be('string');
-      objectRemover.add(Spaces.space1.id, response.body.id, 'action');
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'action',
+        id: response.body.id,
+      });
     });
   });
 }

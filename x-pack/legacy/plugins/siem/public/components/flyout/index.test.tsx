@@ -20,8 +20,6 @@ import { FlyoutButton } from './button';
 const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
 describe('Flyout', () => {
   const state: State = mockGlobalState;
 
@@ -37,7 +35,7 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Flyout'))).toMatchSnapshot();
     });
 
     test('it renders the default flyout state as a button', () => {

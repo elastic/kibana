@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Role, RoleIndexPrivilege } from '../../../../../../../common/model';
 import { isReadOnlyRole, isRoleEnabled } from '../../../../../../lib/role_utils';
 import { getFields } from '../../../../../../objects';
@@ -74,7 +74,7 @@ export class IndexPrivileges extends Component<Props, State> {
       />
     ));
 
-    return forms;
+    return <Fragment>{forms}</Fragment>;
   }
 
   public addIndexPrivilege = () => {

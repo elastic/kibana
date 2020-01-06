@@ -40,6 +40,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
@@ -246,6 +247,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
@@ -492,6 +494,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
@@ -738,6 +741,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={true}
         isLoading={false}
@@ -948,6 +952,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={true}
         isLoading={false}
@@ -1014,7 +1019,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
         compressed={true}
         fullWidth={true}
         onChange={[Function]}
-        resize="vertical"
         rows={2}
         value="https://www.google.co.uk/search?q=airline+code+$airline$"
       />
@@ -1063,6 +1067,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     >
       <EuiFieldText
         compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
@@ -1129,7 +1134,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
         compressed={true}
         fullWidth={true}
         onChange={[Function]}
-        resize="vertical"
         rows={2}
         value="https://www.google.co.uk/search?q=airline+code+$airline$"
       />

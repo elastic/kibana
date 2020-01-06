@@ -29,7 +29,9 @@ import { timelineSchema } from './timeline';
 import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
+import { alertsSchema } from './alerts';
 export const schemas = [
+  alertsSchema,
   anomaliesSchema,
   authenticationsSchema,
   ecsSchema,
@@ -55,15 +57,3 @@ export const schemas = [
   uncommonProcessesSchema,
   whoAmISchema,
 ];
-
-// The types from graphql-tools/src/mock.ts 'any' based. I add slightly
-// stricter types here, but these should go away when graphql-tools using something
-// other than "any" in the future for its types.
-// https://github.com/apollographql/graphql-tools/blob/master/src/mock.ts#L406
-export interface SiemContext {
-  req: {
-    payload: {
-      operationName: string;
-    };
-  };
-}

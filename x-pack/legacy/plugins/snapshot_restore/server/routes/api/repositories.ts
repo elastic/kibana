@@ -10,9 +10,14 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
-import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
+import {
+  Repository,
+  RepositoryType,
+  RepositoryVerification,
+  SlmPolicyEs,
+} from '../../../common/types';
 
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import {
   deserializeRepositorySettings,
   serializeRepositorySettings,
@@ -23,7 +28,7 @@ let isCloudEnabled: boolean = false;
 let callWithInternalUser: any;
 
 export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
-  isCloudEnabled = plugins.cloud.config.isCloudEnabled;
+  isCloudEnabled = plugins.cloud && plugins.cloud.isCloudEnabled;
   callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
@@ -34,14 +39,19 @@ export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   router.delete('repositories/{names}', deleteHandler);
 }
 
+interface ManagedRepository {
+  name?: string;
+  policy?: string;
+}
+
 export const getAllHandler: RouterRouteHandler = async (
   req,
   callWithRequest
 ): Promise<{
   repositories: Repository[];
-  managedRepository?: string;
+  managedRepository: ManagedRepository;
 }> => {
-  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+  const managedRepositoryName = await getManagedRepositoryName(callWithInternalUser);
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -54,6 +64,35 @@ export const getAllHandler: RouterRouteHandler = async (
       settings: deserializeRepositorySettings(settings),
     };
   });
+
+  const managedRepository = {
+    name: managedRepositoryName,
+  } as ManagedRepository;
+
+  // If a managed repository, we also need to check if a policy is associated to it
+  if (managedRepositoryName) {
+    try {
+      const policiesByName: {
+        [key: string]: SlmPolicyEs;
+      } = await callWithRequest('slm.policies', {
+        human: true,
+      });
+      const managedRepositoryPolicy = Object.entries(policiesByName)
+        .filter(([, data]) => {
+          const { policy } = data;
+          return policy.repository === managedRepositoryName;
+        })
+        .flat();
+
+      const [policyName] = managedRepositoryPolicy;
+
+      managedRepository.policy = policyName as ManagedRepository['name'];
+    } catch (e) {
+      // swallow error for now
+      // we don't want to block repositories from loading if request fails
+    }
+  }
+
   return { repositories, managedRepository };
 };
 

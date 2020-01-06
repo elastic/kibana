@@ -14,18 +14,21 @@ import {
   FetchRulesResponse,
   NewRule,
   Rule,
+  FetchRuleProps,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 /**
  * Add provided Rule
  *
  * @param rule to add
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal to cancel request
  */
 export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
-    method: 'POST',
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+    method: rule.id != null ? 'PUT' : 'POST',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
@@ -47,6 +50,7 @@ export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Prom
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param id if specified, will return specific rule if exists
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal to cancel request
  */
 export const fetchRules = async ({
   filterOptions = {
@@ -75,8 +79,8 @@ export const fetchRules = async ({
 
   const endpoint =
     id != null
-      ? `${chrome.getBasePath()}/api/detection_engine/rules?id="${id}"`
-      : `${chrome.getBasePath()}/api/detection_engine/rules/_find?${queryParams.join('&')}`;
+      ? `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id="${id}"`
+      : `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
 
   const response = await fetch(endpoint, {
     method: 'GET',
@@ -94,6 +98,28 @@ export const fetchRules = async ({
 };
 
 /**
+ * Fetch a Rule by providing a Rule ID
+ *
+ * @param id Rule ID's (not rule_id)
+ * @param kbnVersion current Kibana Version to use for headers
+ */
+export const fetchRuleById = async ({ id, kbnVersion, signal }: FetchRuleProps): Promise<Rule> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    signal,
+  });
+  await throwIfNotOk(response);
+  const rule: Rule = await response.json();
+  return rule;
+};
+
+/**
  * Enables/Disables provided Rule ID's
  *
  * @param ids array of Rule ID's (not rule_id) to enable/disable
@@ -106,7 +132,7 @@ export const enableRules = async ({
   kbnVersion,
 }: EnableRulesProps): Promise<Rule[]> => {
   const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
@@ -134,7 +160,7 @@ export const enableRules = async ({
 export const deleteRules = async ({ ids, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
   // TODO: Don't delete if immutable!
   const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules?id=${id}`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
@@ -163,7 +189,7 @@ export const duplicateRules = async ({
   kbnVersion,
 }: DuplicateRulesProps): Promise<Rule[]> => {
   const requests = rules.map(rule =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
@@ -174,11 +200,14 @@ export const duplicateRules = async ({
       body: JSON.stringify({
         ...rule,
         name: `${rule.name} [Duplicate]`,
+        created_at: undefined,
         created_by: undefined,
         id: undefined,
         rule_id: undefined,
+        updated_at: undefined,
         updated_by: undefined,
         enabled: rule.enabled,
+        immutable: false,
       }),
     })
   );

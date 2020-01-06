@@ -19,20 +19,16 @@
 
 import { Capabilities } from '../../../types/capabilities';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { LegacyApp, App } from '../types';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
-  apps: ReadonlyMap<string, App | LegacyApp>;
+  appIds: string[];
   http: HttpStart;
 }
-
-export { Capabilities };
 
 /** @internal */
 export interface CapabilitiesStart {
   capabilities: RecursiveReadonly<Capabilities>;
-  availableApps: ReadonlyMap<string, App | LegacyApp>;
 }
 
 /**
@@ -40,33 +36,14 @@ export interface CapabilitiesStart {
  * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, http }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = await this.fetchCapabilities(http, [...apps.keys()]);
-
-    const availableApps = new Map(
-      [...apps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
+  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
+    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+      body: JSON.stringify({ applications: appIds }),
+    });
 
     return {
-      availableApps,
-      capabilities,
+      capabilities: deepFreeze(capabilities),
     };
-  }
-
-  private async fetchCapabilities(http: HttpStart, appIds: string[]): Promise<Capabilities> {
-    const payload = JSON.stringify({
-      applications: appIds,
-    });
-
-    const url = http.anonymousPaths.isAnonymous(window.location.pathname)
-      ? '/api/core/capabilities/defaults'
-      : '/api/core/capabilities';
-    const capabilities = await http.post(url, {
-      body: payload,
-    });
-    return deepFreeze(capabilities);
   }
 }

@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
@@ -27,10 +27,10 @@ describe('createErrorGroupWatch', () => {
     .mockResolvedValue(undefined);
 
   beforeEach(async () => {
-    jest.spyOn(uuid, 'v4').mockReturnValue(new Buffer('mocked-uuid'));
+    jest.spyOn(uuid, 'v4').mockReturnValue(Buffer.from('mocked-uuid'));
 
     createWatchResponse = await createErrorGroupWatch({
-      http: {} as HttpServiceBase,
+      http: {} as HttpSetup,
       emails: ['my@email.dk', 'mySecond@email.dk'],
       schedule: {
         daily: {

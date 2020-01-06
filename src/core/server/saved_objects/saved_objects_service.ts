@@ -28,19 +28,18 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
+import { LegacyServiceDiscoverPlugins } from '../legacy';
 import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
 import { SavedObjectsClientContract } from './types';
-import { ISavedObjectsRepository } from './service/lib/repository';
+import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactory,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { createRepository } from './service/lib/create_repository';
 import { Logger } from '..';
 
 /**
@@ -237,7 +236,7 @@ export class SavedObjectsService
     }));
 
     const createSORepository = (callCluster: APICaller, extraTypes: string[] = []) => {
-      return createRepository(
+      return SavedObjectsRepository.createRepository(
         migrator,
         savedObjectSchemas,
         setupDeps.legacyPlugins.pluginExtendedConfig,

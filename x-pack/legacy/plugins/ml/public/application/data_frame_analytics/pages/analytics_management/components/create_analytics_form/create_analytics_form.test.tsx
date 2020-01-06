@@ -15,11 +15,6 @@ import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__
 
 import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
 
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS: [],
-}));
-
 const getMountedHook = () =>
   mountHook(
     () => useCreateAnalyticsForm(),
@@ -45,7 +40,7 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     );
 
     const euiFormRows = wrapper.find('EuiFormRow');
-    expect(euiFormRows.length).toBe(7);
+    expect(euiFormRows.length).toBe(8);
 
     const row1 = euiFormRows.at(0);
     expect(row1.find('label').text()).toBe('Job type');
@@ -56,6 +51,6 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     expect(options.at(2).props().value).toBe('regression');
 
     const row2 = euiFormRows.at(1);
-    expect(row2.find('p').text()).toBe('Enable advanced editor');
+    expect(row2.find('EuiSwitch').text()).toBe('Enable advanced editor');
   });
 });

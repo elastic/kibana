@@ -213,15 +213,14 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps$, currentAppId$ } = startDeps.application;
+      const { availableApps, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      const availableApps = await availableApps$.pipe(take(1)).toPromise();
-      [...availableApps.keys()].forEach(appId => currentAppId$.next(appId));
+      [...availableApps.keys()].forEach(appId => navigateToApp(appId));
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -236,14 +235,14 @@ describe('start', () => {
 
     it('changing visibility has no effect on chrome-hiding application', async () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
-      const { currentAppId$ } = startDeps.application;
+      const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      currentAppId$.next('alpha');
+      navigateToApp('alpha');
       chrome.setIsVisible(true);
       service.stop();
 

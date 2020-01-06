@@ -20,8 +20,7 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
-import { fromRoot } from '../legacy/utils';
-
+import { fromRoot } from '../core/server/utils';
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
@@ -39,12 +38,14 @@ export default async (kbnServer, server, config) => {
   }
 
   const { newPlatform, uiBundles } = kbnServer;
-  server.route(createBundlesRoute({
-    regularBundlesPath: uiBundles.getWorkingDir(),
-    dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-    basePublicPath: config.get('server.basePath'),
-    builtCssPath: fromRoot('built_assets/css'),
-  }));
+  server.route(
+    createBundlesRoute({
+      regularBundlesPath: uiBundles.getWorkingDir(),
+      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
+      basePublicPath: config.get('server.basePath'),
+      builtCssPath: fromRoot('built_assets/css'),
+    })
+  );
 
   // in prod, only bundle when something is missing or invalid
   const reuseCache = config.get('optimize.useBundleCache')
@@ -53,10 +54,7 @@ export default async (kbnServer, server, config) => {
 
   // we might not have any work to do
   if (reuseCache) {
-    server.log(
-      ['debug', 'optimize'],
-      `All bundles are cached and ready to go!`
-    );
+    server.log(['debug', 'optimize'], `All bundles are cached and ready to go!`);
     return;
   }
 
@@ -81,5 +79,8 @@ export default async (kbnServer, server, config) => {
   await optimizer.run();
   const seconds = ((Date.now() - start) / 1000).toFixed(2);
 
-  server.log(['info', 'optimize'], `Optimization of ${uiBundles.getDescription()} complete in ${seconds} seconds`);
+  server.log(
+    ['info', 'optimize'],
+    `Optimization of ${uiBundles.getDescription()} complete in ${seconds} seconds`
+  );
 };
