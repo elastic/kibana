@@ -80,20 +80,18 @@ export default function({ getService }: FtrProviderContext) {
           });
 
           it('will fetch a monitor snapshot filtered by down status', async () => {
-            const filters = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
             const statusFilter = 'down';
             const apiResponse = await supertest.get(
-              `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&filters=${filters}&statusFilter=${statusFilter}`
+              `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
             );
 
             expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_down');
           });
 
           it('will fetch a monitor snapshot filtered by up status', async () => {
-            const filters = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
             const statusFilter = 'up';
             const apiResponse = await supertest.get(
-              `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&filters=${filters}&statusFilter=${statusFilter}`
+              `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
             );
             expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_up');
           });

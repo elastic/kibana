@@ -51,7 +51,7 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     filters,
     statusFilter,
   }): Promise<Snapshot> => {
-    if (!(statusFilter === 'up' || statusFilter === 'down')) {
+    if (!(statusFilter === 'up' || statusFilter === 'down' || statusFilter === undefined)) {
       throw new Error(`Invalid status filter value '${statusFilter}'`);
     }
 
