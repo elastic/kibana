@@ -20,24 +20,30 @@
 import { Subscription } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import defaultComparator from 'fast-deep-equal';
-import { InitialTruthSource, IStateSyncConfig } from './types';
-import { isSyncStrategy, syncStrategies, SyncStrategy } from './state_sync_strategies';
+import { IStateSyncConfig } from './types';
+import { ISyncStrategy } from './state_sync_strategies';
 import { distinctUntilChangedWithInitialValue } from '../../common';
 
 /**
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
+ *
+ * Examples:
+ *
  * 1. the simplest use case
+ * const syncStrategy = createKbnUrlSyncStrategy();
  * syncState({
  *   syncKey: '_s',
  *   stateContainer,
+ *   syncStrategy
  * });
  *
- * 2. conditionally picking sync strategy
+ * 2. conditionally configuring sync strategy
+ * const syncStrategy = createKbnUrlSyncStrategy({useHash: config.get('state:stateContainerInSessionStorage')})
  * syncState({
  *   syncKey: '_s',
  *   stateContainer,
- *   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.KbnHashedUrl : SyncStrategy.KbnUrl
+ *   syncStrategy
  * });
  *
  * 3. implementing custom sync strategy
@@ -51,67 +57,61 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  *   syncStrategy: localStorageSyncStrategy
  * });
  *
- * 4. syncing only part of state
+ * 4. Transform state before serialising
+ *  Useful for:
+ *  * Migration / backward compatibility
+ *  * Syncing part of state
+ *  * Providing default values
  * const stateToStorage = (s) => ({ tab: s.tab });
  * syncState({
  *   syncKey: '_s',
  *   stateContainer: {
  *     get: () => stateToStorage(stateContainer.get()),
  *     set: stateContainer.set(({ tab }) => ({ ...stateContainer.get(), tab }),
- *       state$: stateContainer.state$.pipe(map(stateToStorage))
- *   }
+ *     state$: stateContainer.state$.pipe(map(stateToStorage))
+ *   },
+ *   syncStrategy
  * });
  *
- * 5. transform state before serialising
- * this could be super useful for backward compatibility
- * const stateToStorage = (s) => ({ t: s.tab });
- * syncState({
- *   syncKey: '_s',
- *   stateContainer: {
- *     get: () => stateToStorage(stateContainer.get()),
- *     set: ({ t }) => stateContainer.set({ ...stateContainer.get(), tab: t }),
- *     state$: stateContainer.state$.pipe(map(stateToStorage))
- *   }
- * });
+ * Caveats:
+ *
+ * 1. It is responsibility of consumer to make sure that initial app state and storage are in sync before starting syncing
+ *    No initial sync happens when syncState() is called
+ *
+ * 2. Syncing withing sync state is asynchronous
  */
-export type StartSyncStateFnType = () => Promise<void>; // resolves when initial state is rehydrated
 export type StopSyncStateFnType = () => void;
-export function syncState(
-  stateSyncConfig: IStateSyncConfig
-): [StartSyncStateFnType, StopSyncStateFnType] {
+export interface ISyncStateRef<SyncStrategy extends ISyncStrategy = ISyncStrategy> {
+  // stop syncing state with storage
+  stop: StopSyncStateFnType;
+}
+export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = ISyncStrategy>(
+  stateSyncConfig: IStateSyncConfig<State, SyncStrategy>
+): ISyncStateRef {
   const subscriptions: Subscription[] = [];
   let isSyncing = false;
-  return [start, stop];
+
+  start();
+
+  return {
+    stop,
+  };
 
   function stop() {
     isSyncing = false;
     subscriptions.forEach(s => s.unsubscribe());
   }
 
-  async function start() {
+  function start() {
     if (isSyncing) {
       throw new Error("SyncState: can't start syncing state, when syncing is already in progress");
     }
     isSyncing = true;
 
-    const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(stateSyncConfig.syncStrategy)
-      ? stateSyncConfig.syncStrategy
-      : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.KbnUrl];
+    const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
 
-    // returned boolean indicates if update happen
-    const updateState = async ({
-      isRestoringInitialState,
-    }: {
-      isRestoringInitialState: boolean;
-    }): Promise<boolean> => {
-      const storageState = await fromStorage(stateSyncConfig.syncKey, {
-        isRestoringInitialState,
-      });
-
-      if (!storageState) {
-        return false;
-      }
-
+    const updateState = async (): Promise<void> => {
+      const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
       if (
         isSyncing &&
         storageState &&
@@ -119,41 +119,15 @@ export function syncState(
       ) {
         stateSyncConfig.stateContainer.set(storageState);
       }
-
-      return true;
     };
 
-    // returned boolean indicates if update happen
-    const updateStorage = async ({
-      replace,
-      isRestoringInitialState,
-    }: {
-      replace: boolean;
-      isRestoringInitialState: boolean;
-    }): Promise<boolean> => {
+    const updateStorage = async (): Promise<void> => {
       const newStorageState = stateSyncConfig.stateContainer.get();
-      const oldStorageState = await fromStorage(stateSyncConfig.syncKey, {
-        isRestoringInitialState,
-      });
+      const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
       if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
-        await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
+        await toStorage(stateSyncConfig.syncKey, newStorageState);
       }
-
-      return true;
     };
-
-    // initial syncing of stateContainer state and storage state
-    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
-    if (initialTruthSource === InitialTruthSource.Storage) {
-      const hasUpdated = await updateState({ isRestoringInitialState: true });
-      // if there is nothing by state key in storage
-      // then we should fallback and consider state source of truth
-      if (!hasUpdated) {
-        await updateStorage({ replace: true, isRestoringInitialState: true });
-      }
-    } else if (initialTruthSource === InitialTruthSource.StateContainer) {
-      await updateStorage({ replace: true, isRestoringInitialState: true });
-    }
 
     // subscribe to state and storage updates
     subscriptions.push(
@@ -163,7 +137,7 @@ export function syncState(
             stateSyncConfig.stateContainer.get(),
             defaultComparator
           ),
-          concatMap(() => updateStorage({ isRestoringInitialState: false, replace: false }))
+          concatMap(() => updateStorage())
         )
         .subscribe()
     );
@@ -175,7 +149,7 @@ export function syncState(
               fromStorage(stateSyncConfig.syncKey),
               defaultComparator
             ),
-            concatMap(() => updateState({ isRestoringInitialState: false }))
+            concatMap(() => updateState())
           )
           .subscribe()
       );
@@ -185,48 +159,28 @@ export function syncState(
 
 /**
  * 6. multiple different sync configs
- * const stateAToStorage = s => ({ t: s.tab });
- * const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
  * syncStates([
  *   {
- *     syncKey: '_a',
- *     syncStrategy: SyncStrategy.Url,
- *     stateContainer: {
- *       get: () => stateAToStorage(stateContainer.get()),
- *       set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
- *       state$: stateContainer.state$.pipe(map(stateAToStorage))
- *     },
+ *     syncKey: '_s1',
+ *     syncStrategy: syncStrategy1,
+ *     stateContainer: stateContainer1,
  *   },
  *   {
- *     syncKey: '_b',
- *     syncStrategy: SyncStrategy.HashedUrl,
- *     stateContainer: {
- *       get: () => stateBToStorage(stateContainer.get()),
- *       set: s => stateContainer.set({
- *         ...stateContainer.get(),
- *         fieldFilter: s.f || '',
- *         indexedFieldTypeFilter: s.i || '',
- *         scriptedFieldLanguageFilter: s.l || ''
- *       }),
- *       state$: stateContainer.state$.pipe(map(stateBToStorage))
- *     },
+ *     syncKey: '_s2',
+ *     syncStrategy: syncStrategy2,
+ *     stateContainer: stateContainer2,
  *   },
  * ]);
- * @param stateSyncConfig
+ * @param stateSyncConfigs - Array of IStateSyncConfig to sync
  */
-export function syncStates(
-  stateSyncConfig: IStateSyncConfig[]
-): [StartSyncStateFnType, StopSyncStateFnType] {
-  const syncs = stateSyncConfig.map(config => syncState(config));
-  async function start() {
-    for (const [startSync] of syncs) {
-      await startSync();
-    }
-  }
+export function syncStates(stateSyncConfigs: Array<IStateSyncConfig<any>>): ISyncStateRef {
+  const syncs = stateSyncConfigs.map(config => syncState(config));
 
   function stop() {
-    syncs.forEach(([, stopSync]) => stopSync());
+    syncs.forEach(sync => sync.stop());
   }
 
-  return [start, stop];
+  return {
+    stop,
+  };
 }

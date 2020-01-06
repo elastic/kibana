@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createStateContainer } from '../state_containers';
+import { BaseStateContainer, createStateContainer } from '../state_containers';
 import {
   defaultState,
   pureTransitions,
@@ -30,10 +30,10 @@ import { Observable, Subject } from 'rxjs';
 import {
   createSessionStorageSyncStrategy,
   createKbnUrlSyncStrategy,
-  createKbnGlobalStateSyncStrategy,
 } from './state_sync_strategies';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
+import { INullableBaseStateContainer } from './types';
 
 const tick = () => new Promise(resolve => setTimeout(resolve));
 
@@ -57,15 +57,14 @@ describe('state_sync', () => {
 
     it('should sync state to storage', async () => {
       const key = '_s';
-      const [start, stop] = syncState({
-        stateContainer: container,
+      const { stop } = syncState({
+        stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
-      await start();
 
-      // initial sync of state to storage
-      expect(testSyncStrategy.toStorage).toBeCalledWith(key, defaultState, { replace: true });
+      // initial sync of state to storage is not happening
+      expect(testSyncStrategy.toStorage).not.toBeCalled();
 
       container.transitions.add({
         id: 1,
@@ -73,10 +72,7 @@ describe('state_sync', () => {
         completed: false,
       });
       await tick();
-      expect(testSyncStrategy.toStorage).toBeCalledWith(key, container.getState(), {
-        replace: false,
-      });
-
+      expect(testSyncStrategy.toStorage).toBeCalledWith(key, container.getState());
       stop();
     });
 
@@ -84,15 +80,14 @@ describe('state_sync', () => {
       const key = '_s';
       const storageState1 = [{ id: 1, text: 'todo', completed: false }];
       (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState1);
-      const [start, stop] = syncState({
-        stateContainer: container,
+      const { stop } = syncState({
+        stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
-      await start();
 
-      // initial sync of storage to state
-      expect(container.getState()).toEqual(storageState1);
+      // initial sync of storage to state is not happening
+      expect(container.getState()).toEqual(defaultState);
 
       const storageState2 = [{ id: 1, text: 'todo', completed: true }];
       (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState2);
@@ -106,12 +101,11 @@ describe('state_sync', () => {
 
     it('should not update storage if no actual state change happened', async () => {
       const key = '_s';
-      const [start, stop] = syncState({
-        stateContainer: container,
+      const { stop } = syncState({
+        stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
-      await start();
       (testSyncStrategy.toStorage as jest.Mock).mockClear();
 
       container.set(defaultState);
@@ -123,12 +117,11 @@ describe('state_sync', () => {
 
     it('should not update state container if no actual storage change happened', async () => {
       const key = '_s';
-      const [start, stop] = syncState({
-        stateContainer: container,
+      const { stop } = syncState({
+        stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
-      await start();
 
       const originalState = container.getState();
       const storageState = [...originalState];
@@ -143,150 +136,60 @@ describe('state_sync', () => {
   });
 
   describe('integration', () => {
-    const key1 = '_s1';
-    const container1 = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
-    const key2 = '_s2';
-    const container2 = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
+    const key = '_s';
+    const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 
     let sessionStorage: StubBrowserStorage;
     let sessionStorageSyncStrategy: ISyncStrategy;
     let history: History;
-    const getCurrentUrl = () => history.createHref(history.location);
     let urlSyncStrategy: ISyncStrategy;
 
     beforeEach(() => {
-      container1.set(defaultState);
-      container2.set(defaultState);
+      container.set(defaultState);
 
       window.location.href = '/';
       sessionStorage = new StubBrowserStorage();
       sessionStorageSyncStrategy = createSessionStorageSyncStrategy(sessionStorage);
       history = createBrowserHistory();
-      (history as any).anton = 'ha';
       urlSyncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
-    it('should sync state containers and storage to proper initial state depending on the order of state configs', async () => {
-      const sessionStorageState1 = [{ id: 1, text: 'todo1', completed: false }];
-      const sessionStorageState2 = [{ id: 2, text: 'todo2', completed: true }];
-      sessionStorage.setItem(key1, JSON.stringify(sessionStorageState1));
-      sessionStorage.setItem(key2, JSON.stringify(sessionStorageState2));
-      // @ts-ignore
-      const urlStorageState1 = [{ id: 3, text: 'todo3', completed: false }];
-      const urlStorageState2 = [{ id: 4, text: 'todo4', completed: true }];
-      history.replace(
-        '/#?_s1=!((completed:!f,id:3,text:todo3))&_s2=!((completed:!t,id:4,text:todo4))'
-      );
-
-      const [start, stop] = syncStates([
-        {
-          stateContainer: container1,
-          syncKey: key1,
-          syncStrategy: urlSyncStrategy,
-        },
-        {
-          stateContainer: container1,
-          syncKey: key1,
-          syncStrategy: sessionStorageSyncStrategy,
-        },
-        {
-          stateContainer: container2,
-          syncKey: key2,
-          syncStrategy: sessionStorageSyncStrategy,
-        },
-        {
-          stateContainer: container2,
-          syncKey: key2,
-          syncStrategy: urlSyncStrategy,
-        },
-      ]);
-      await start();
-
-      expect(container1.getState()).toEqual(sessionStorageState1); // because sessionStorageState1 comes after urlStorageState1
-      expect(container2.getState()).toEqual(urlStorageState2); // because urlStorageState2 comes after sessionStorageState2
-
-      expect(JSON.parse(sessionStorage.getItem(key2)!)).toEqual(urlStorageState2);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_s1=!((completed:!f,id:1,text:todo1))&_s2=!((completed:!t,id:4,text:todo4))"`
-      );
-
-      stop();
-    });
-
-    it('kbnGlobalStateSyncStrategy should restore initial state from passed initial url, then session storage and then current url', async () => {
-      const sessionStorageState1 = [{ id: 1, text: 'todo1', completed: false }];
-      const sessionStorageState2 = [{ id: 2, text: 'todo2', completed: true }];
-      sessionStorage.setItem(key1, JSON.stringify(sessionStorageState1));
-      sessionStorage.setItem(key2, JSON.stringify(sessionStorageState2));
-      // @ts-ignore
-      const urlStorageState1 = [{ id: 3, text: 'todo3', completed: false }];
-      // @ts-ignore
-      const urlStorageState2 = [{ id: 4, text: 'todo4', completed: true }];
-      history.replace(
-        '/#?_s1=!((completed:!f,id:3,text:todo3))&_s2=!((completed:!t,id:4,text:todo4))'
-      );
-
-      const initialAppUrl =
-        'http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s1=!((completed:!f,id:5,text:todo5))';
-      const initialAppUrlState1 = [{ id: 5, text: 'todo5', completed: false }];
-      // @ts-ignore
-      const initialAppUrlState2 = [{ id: 6, text: 'todo6', completed: true }];
-
-      const syncStrategy = createKbnGlobalStateSyncStrategy(
-        urlSyncStrategy,
-        sessionStorageSyncStrategy,
-        initialAppUrl
-      );
-
-      const [start, stop] = syncStates([
-        {
-          stateContainer: container1,
-          syncKey: key1,
-          syncStrategy,
-        },
-        {
-          stateContainer: container2,
-          syncKey: key2,
-          syncStrategy,
-        },
-      ]);
-      await start();
-
-      expect(container1.getState()).toEqual(initialAppUrlState1);
-      expect(container2.getState()).toEqual(sessionStorageState2);
-
-      expect(JSON.parse(sessionStorage.getItem(key1)!)).toEqual(initialAppUrlState1);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_s1=!((completed:!f,id:5,text:todo5))&_s2=!((completed:!t,id:2,text:todo2))"`
-      );
-
-      stop();
-    });
-
     it('change to one storage should also update other storage', async () => {
-      const [start, stop] = syncStates([
+      const { stop } = syncStates([
         {
-          stateContainer: container1,
-          syncKey: key1,
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
           syncStrategy: urlSyncStrategy,
         },
         {
-          stateContainer: container1,
-          syncKey: key1,
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
           syncStrategy: sessionStorageSyncStrategy,
         },
       ]);
-      await start();
 
       const newStateFromUrl = [{ completed: false, id: 1, text: 'changed' }];
-      history.replace('/#?_s1=!((completed:!f,id:1,text:changed))');
+      history.replace('/#?_s=!((completed:!f,id:1,text:changed))');
 
       await tick();
 
-      expect(container1.getState()).toEqual(newStateFromUrl);
-      expect(JSON.parse(sessionStorage.getItem(key1)!)).toEqual(newStateFromUrl);
+      expect(container.getState()).toEqual(newStateFromUrl);
+      expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual(newStateFromUrl);
 
       stop();
     });
   });
 });
+
+function withDefaultState<State>(
+  stateContainer: BaseStateContainer<State>,
+  // eslint-disable-next-line no-shadow
+  defaultState: State
+): INullableBaseStateContainer<State> {
+  return {
+    ...stateContainer,
+    set: (state: State | null) => {
+      stateContainer.set(state || defaultState);
+    },
+  };
+}

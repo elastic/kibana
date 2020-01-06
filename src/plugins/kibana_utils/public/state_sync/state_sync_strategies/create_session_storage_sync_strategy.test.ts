@@ -17,29 +17,24 @@
  * under the License.
  */
 
-import { ISyncStrategy } from './types';
-import { createSessionStorageSyncStrategy } from './create_session_storage_sync_strategy';
+import {
+  createSessionStorageSyncStrategy,
+  ISessionStorageSyncStrategy,
+} from './create_session_storage_sync_strategy';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
 describe('SessionStorageSyncStrategy', () => {
   let storage: StubBrowserStorage;
-  let syncStrategy: ISyncStrategy;
+  let syncStrategy: ISessionStorageSyncStrategy;
   beforeEach(() => {
     storage = new StubBrowserStorage();
     syncStrategy = createSessionStorageSyncStrategy(storage);
   });
 
-  it('should sync to storage', async () => {
-    const state = { state: 'state' };
-    await syncStrategy.toStorage('key', state);
-    expect(await syncStrategy.fromStorage('key')).toEqual(state);
-    expect(storage.getItem('key')).not.toBeNull();
-  });
-
   it('should synchronously sync to storage', () => {
     const state = { state: 'state' };
-    syncStrategy.toStorageSync!('key', state);
-    expect(syncStrategy.fromStorageSync!('key')).toEqual(state);
+    syncStrategy.toStorage('key', state);
+    expect(syncStrategy.fromStorage('key')).toEqual(state);
     expect(storage.getItem('key')).not.toBeNull();
   });
 

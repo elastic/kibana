@@ -19,17 +19,17 @@
 
 import { ISyncStrategy } from './types';
 
+export interface ISessionStorageSyncStrategy extends ISyncStrategy {
+  toStorage: <State>(syncKey: string, state: State) => void;
+  fromStorage: <State = unknown>(syncKey: string) => State | null;
+}
+
 export const createSessionStorageSyncStrategy = (
   storage: Storage = window.sessionStorage
-): ISyncStrategy => {
-  const toStorage = <State>(syncKey: string, state: State) =>
-    storage.setItem(syncKey, JSON.stringify(state));
-  const fromStorage = (syncKey: string) => JSON.parse(storage.getItem(syncKey)!);
-
+): ISessionStorageSyncStrategy => {
   return {
-    toStorage: async <State>(syncKey: string, state: State) => toStorage(syncKey, state),
-    fromStorage: async syncKey => fromStorage(syncKey),
-    toStorageSync: toStorage,
-    fromStorageSync: fromStorage,
+    toStorage: <State>(syncKey: string, state: State) =>
+      storage.setItem(syncKey, JSON.stringify(state)),
+    fromStorage: (syncKey: string) => JSON.parse(storage.getItem(syncKey)!),
   };
 };

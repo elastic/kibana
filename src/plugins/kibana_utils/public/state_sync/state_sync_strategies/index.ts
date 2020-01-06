@@ -17,39 +17,17 @@
  * under the License.
  */
 
-import { createBrowserHistory } from 'history';
 import { ISyncStrategy } from './types';
-import { createKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
-import { createSessionStorageSyncStrategy } from './create_session_storage_sync_strategy';
-import { createKbnGlobalStateSyncStrategy } from './create_kbn_global_state_sync_strategy';
-
-// strategies provided out of the box
-enum SyncStrategy {
-  KbnUrl,
-  KbnHashedUrl,
-  SessionStorage,
-}
-
-const history = createBrowserHistory(); // share the same instance
-const syncStrategies = {
-  [SyncStrategy.KbnUrl]: createKbnUrlSyncStrategy({ useHash: false, history }),
-  [SyncStrategy.KbnHashedUrl]: createKbnUrlSyncStrategy({ useHash: true, history }),
-  [SyncStrategy.SessionStorage]: createSessionStorageSyncStrategy(),
-  // SyncStrategies: LocalStorage, es, somewhere else...
-};
-
-function isSyncStrategy(
-  syncStrategy: SyncStrategy | ISyncStrategy | void
-): syncStrategy is ISyncStrategy {
-  return typeof syncStrategy === 'object';
-}
+import { createKbnUrlSyncStrategy, IKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
+import {
+  createSessionStorageSyncStrategy,
+  ISessionStorageSyncStrategy,
+} from './create_session_storage_sync_strategy';
 
 export {
-  isSyncStrategy,
   ISyncStrategy,
-  SyncStrategy,
-  syncStrategies,
+  IKbnUrlSyncStrategy,
+  ISessionStorageSyncStrategy,
   createKbnUrlSyncStrategy,
   createSessionStorageSyncStrategy,
-  createKbnGlobalStateSyncStrategy,
 };

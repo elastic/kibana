@@ -27,6 +27,12 @@ import {
   setStateToKbnUrl,
 } from '../../state_management/url';
 
+export interface IKbnUrlSyncStrategy extends ISyncStrategy {
+  toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<void>;
+  fromStorage: <State = unknown>(syncKey: string) => State | null;
+  storageChange$: <State = unknown>(syncKey: string) => Observable<State | null>;
+}
+
 /**
  * Implements syncing to/from url strategies.
  * Replicates what was implemented in state (AppState, GlobalState)
@@ -34,7 +40,7 @@ import {
  */
 export const createKbnUrlSyncStrategy = (
   { useHash = false, history }: { useHash: boolean; history?: History } = { useHash: false }
-): ISyncStrategy => {
+): IKbnUrlSyncStrategy => {
   const url = createKbnUrlControls(history);
   return {
     toStorage: async <State>(
@@ -47,7 +53,7 @@ export const createKbnUrlSyncStrategy = (
         replace
       );
     },
-    fromStorage: async syncKey => getStateFromKbnUrl(syncKey),
+    fromStorage: syncKey => getStateFromKbnUrl(syncKey),
     storageChange$: <State>(syncKey: string) =>
       new Observable(observer => {
         const unlisten = url.listen(() => {
@@ -61,15 +67,5 @@ export const createKbnUrlSyncStrategy = (
         map(() => getStateFromKbnUrl<State>(syncKey)),
         share()
       ),
-
-    // optional helper methods for strategy
-    toStorageSync: <State>(
-      syncKey: string,
-      state: State,
-      { replace = false }: { replace: boolean } = { replace: false }
-    ) => {
-      url.update(setStateToKbnUrl(syncKey, state, { useHash }), replace);
-    },
-    fromStorageSync: syncKey => getStateFromKbnUrl(syncKey),
   };
 };

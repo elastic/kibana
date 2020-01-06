@@ -32,10 +32,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
+  BaseStateContainer,
   createKbnUrlSyncStrategy,
   createStateContainer,
   createStateContainerReactHelpers,
   PureTransition,
+  INullableBaseStateContainer,
   syncStates,
   useUrlTracker,
 } from '../../../src/plugins/kibana_utils/public';
@@ -45,10 +47,8 @@ import {
   TodoActions,
   TodoState,
 } from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
-import {
-  createKbnGlobalStateSyncStrategy,
-  createSessionStorageSyncStrategy,
-} from '../../../src/plugins/kibana_utils/public/state_sync/state_sync_strategies';
+import { createSessionStorageSyncStrategy } from '../../../src/plugins/kibana_utils/public/state_sync/state_sync_strategies';
+import { getStateFromKbnUrl } from '../../../src/plugins/kibana_utils/public/state_management/url';
 
 interface GlobalState {
   text: string;
@@ -56,8 +56,9 @@ interface GlobalState {
 interface GlobalStateAction {
   setText: PureTransition<GlobalState, [string]>;
 }
+const defaultGlobalState: GlobalState = { text: '' };
 const globalStateContainer = createStateContainer<GlobalState, GlobalStateAction>(
-  { text: '' },
+  defaultGlobalState,
   {
     setText: state => text => ({ ...state, text }),
   }
@@ -195,31 +196,72 @@ export const TodoAppPage: React.FC<{
       useHash: useHashedUrl,
       history: props.history,
     });
+
     const sessionStorageSyncStrategy = createSessionStorageSyncStrategy();
-    const kbnGlobalStateSyncStrategy = createKbnGlobalStateSyncStrategy(
-      urlSyncStrategy,
-      sessionStorageSyncStrategy,
+
+    /**
+     * Restoring global state:
+     * State restoration similar to what GlobalState in legacy world did
+     * It restores state both from url and from session storage
+     */
+    const globalStateKey = `_g`;
+    const globalStateFromInitialUrl = getStateFromKbnUrl<GlobalState>(
+      globalStateKey,
       initialAppUrl.current
     );
-    const [startSyncingState, stopSyncingState] = syncStates([
+    const globalStateFromCurrentUrl = urlSyncStrategy.fromStorage<GlobalState>(globalStateKey);
+    const globalStateFromSessionStorage = sessionStorageSyncStrategy.fromStorage<GlobalState>(
+      globalStateKey
+    );
+
+    const initialGlobalState: GlobalState = {
+      ...defaultGlobalState,
+      ...globalStateFromCurrentUrl,
+      ...globalStateFromSessionStorage,
+      ...globalStateFromInitialUrl,
+    };
+    globalStateContainer.set(initialGlobalState);
+    urlSyncStrategy.toStorage(globalStateKey, initialGlobalState, { replace: true });
+    sessionStorageSyncStrategy.toStorage(globalStateKey, initialGlobalState);
+
+    /**
+     * Restoring app local state:
+     * State restoration similar to what AppState in legacy world did
+     * It restores state both from url
+     */
+    const appStateKey = `_todo-${props.appInstanceId}`;
+    const initialAppState: TodoState =
+      getStateFromKbnUrl<TodoState>(appStateKey, initialAppUrl.current) ||
+      urlSyncStrategy.fromStorage<TodoState>(appStateKey) ||
+      defaultState;
+    container.set(initialAppState);
+    urlSyncStrategy.toStorage(appStateKey, initialAppState, { replace: true });
+
+    // start syncing only when made sure, that state in synced
+    const { stop } = syncStates([
       {
-        stateContainer: container,
-        syncKey: `_todo-${props.appInstanceId}`,
+        stateContainer: withDefaultState(container, defaultState),
+        syncKey: appStateKey,
         syncStrategy: urlSyncStrategy,
       },
       {
-        stateContainer: globalStateContainer,
-        syncKey: '_g',
-        syncStrategy: kbnGlobalStateSyncStrategy,
+        stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
+        syncKey: globalStateKey,
+        syncStrategy: urlSyncStrategy,
+      },
+      {
+        stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
+        syncKey: globalStateKey,
+        syncStrategy: sessionStorageSyncStrategy,
       },
     ]);
-    startSyncingState();
+
     return () => {
-      stopSyncingState();
+      stop();
 
       // reset state containers
       container.set(defaultState);
-      globalStateContainer.set({ text: '' });
+      globalStateContainer.set(defaultGlobalState);
     };
   }, [props.appInstanceId, props.history, useHashedUrl]);
 
@@ -261,3 +303,23 @@ export const TodoAppPage: React.FC<{
     </Router>
   );
 };
+
+function withDefaultState<State>(
+  stateContainer: BaseStateContainer<State>,
+  // eslint-disable-next-line no-shadow
+  defaultState: State
+): INullableBaseStateContainer<State> {
+  return {
+    ...stateContainer,
+    set: (state: State | null) => {
+      if (Array.isArray(defaultState)) {
+        stateContainer.set(state || defaultState);
+      } else {
+        stateContainer.set({
+          ...defaultState,
+          ...state,
+        });
+      }
+    },
+  };
+}

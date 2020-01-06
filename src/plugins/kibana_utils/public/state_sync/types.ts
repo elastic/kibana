@@ -18,55 +18,39 @@
  */
 
 import { BaseStateContainer } from '../state_containers/types';
-import { SyncStrategy, ISyncStrategy } from './state_sync_strategies';
+import { ISyncStrategy } from './state_sync_strategies';
 
-export interface IStateSyncConfig<State = any> {
+export interface INullableBaseStateContainer<State> extends BaseStateContainer<State> {
+  // State sync state container have to handle setting "null"
+  // set() implementation could handle null and fallback to some state defaults
+  // this is required to handle edge case, when state in storage became empty and syncing is in progress.
+  // state container will be notified about about storage becoming empty
+  set: (state: State | null) => void;
+}
+
+export interface IStateSyncConfig<
+  State = unknown,
+  SyncStrategy extends ISyncStrategy = ISyncStrategy
+> {
   /**
    * Storage key to use for syncing,
    * e.g. syncKey '_a' should sync state to ?_a query param
    */
   syncKey: string;
   /**
-   * State container to keep in sync with storage, have to implement BaseStateContainer interface
+   * State container to keep in sync with storage, have to implement INullableBaseStateContainer<State> interface
    * The idea is that ./state_containers/ should be used as a state container,
    * but it is also possible to implement own custom container for advanced use cases
    */
-  stateContainer: BaseStateContainer<State>;
+  stateContainer: INullableBaseStateContainer<State>;
   /**
    * Sync strategy to use,
    * Sync strategy is responsible for serialising / deserialising and persisting / retrieving stored state
-   * 2 strategies available now out of the box, which replicate what State (AppState, GlobalState) implemented:
    *
-   * SyncStrategy.Url: the same as old persisting of expanded state in rison format to the url
-   * SyncStrategy.HashedUrl: the same as old persisting of hashed state using sessionStorage for storing expanded state
+   * There are common strategies already implemented:
+   * './state_sync_strategies/'
+   * which replicate what State (AppState, GlobalState) in legacy world did
    *
-   * Possible to provide own custom SyncStrategy by implementing ISyncStrategy
-   *
-   * SyncStrategy.KbnUrl is default
    */
-  syncStrategy?: SyncStrategy | ISyncStrategy;
-
-  /**
-   * During app bootstrap we could have default app state and data in storage to be out of sync,
-   * initialTruthSource indicates who's values to consider as source of truth
-   *
-   * InitialTruthSource.StateContainer - Application state take priority over storage state
-   * InitialTruthSource.Storage (default) - Storage state take priority over Application state
-   * InitialTruthSource.None - skip initial syncing do nothing
-   */
-  initialTruthSource?: InitialTruthSource;
-}
-
-/**
- * During app bootstrap we could have default app state and data in storage to be out of sync,
- * initialTruthSource indicates who's values to consider as source of truth
- *
- * InitialTruthSource.StateContainer - Application state take priority over storage state
- * InitialTruthSource.Storage (default) - Storage state take priority over Application state
- * InitialTruthSource.None - skip initial syncing do nothing
- */
-export enum InitialTruthSource {
-  StateContainer,
-  Storage,
-  None,
+  syncStrategy: SyncStrategy;
 }

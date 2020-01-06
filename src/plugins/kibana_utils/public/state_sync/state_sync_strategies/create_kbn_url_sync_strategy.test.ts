@@ -17,7 +17,7 @@
  * under the License.
  */
 import '../../storage/hashed_item_store/mock';
-import { createKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
+import { createKbnUrlSyncStrategy, IKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
 import { ISyncStrategy } from './types';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
@@ -25,7 +25,7 @@ import { Subject } from 'rxjs';
 
 describe('KbnUrlSyncStrategy', () => {
   describe('useHash: false', () => {
-    let syncStrategy: ISyncStrategy;
+    let syncStrategy: IKbnUrlSyncStrategy;
     let history: History;
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
@@ -39,15 +39,7 @@ describe('KbnUrlSyncStrategy', () => {
       const key = '_s';
       await syncStrategy.toStorage(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
-      expect(await syncStrategy.fromStorage(key)).toEqual(state);
-    });
-
-    it('should persist state to url synchronously', () => {
-      const state = { test: 'test', ok: 1 };
-      const key = '_s';
-      syncStrategy.toStorageSync!(key, state);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
-      expect(syncStrategy.fromStorageSync!(key)).toEqual(state);
+      expect(syncStrategy.fromStorage(key)).toEqual(state);
     });
 
     it('should notify about url changes', async () => {
@@ -84,15 +76,7 @@ describe('KbnUrlSyncStrategy', () => {
       const key = '_s';
       await syncStrategy.toStorage(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=h@487e077"`);
-      expect(await syncStrategy.fromStorage(key)).toEqual(state);
-    });
-
-    it('should persist state to url synchronously', () => {
-      const state = { test: 'test', ok: 1 };
-      const key = '_s';
-      syncStrategy.toStorageSync!(key, state);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=h@487e077"`);
-      expect(syncStrategy.fromStorageSync!(key)).toEqual(state);
+      expect(syncStrategy.fromStorage(key)).toEqual(state);
     });
 
     it('should notify about url changes', async () => {

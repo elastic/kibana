@@ -45,11 +45,13 @@ export {
 export {
   syncState,
   syncStates,
+  createKbnUrlSyncStrategy,
+  createSessionStorageSyncStrategy,
   ISyncStrategy,
   IStateSyncConfig,
-  SyncStrategy,
-  InitialTruthSource,
-  StartSyncStateFnType,
+  ISyncStateRef,
+  IKbnUrlSyncStrategy,
+  INullableBaseStateContainer,
+  ISessionStorageSyncStrategy,
   StopSyncStateFnType,
-  createKbnUrlSyncStrategy,
 } from './state_sync';

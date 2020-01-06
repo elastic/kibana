@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { ISyncStrategy, SyncStrategy, createKbnUrlSyncStrategy } from './state_sync_strategies';
-export { InitialTruthSource, IStateSyncConfig } from './types';
-export { syncState, syncStates, StartSyncStateFnType, StopSyncStateFnType } from './state_sync';
+export {
+  createKbnUrlSyncStrategy,
+  createSessionStorageSyncStrategy,
+  ISyncStrategy,
+  IKbnUrlSyncStrategy,
+  ISessionStorageSyncStrategy,
+} from './state_sync_strategies';
+export { IStateSyncConfig, INullableBaseStateContainer } from './types';
+export { syncState, syncStates, StopSyncStateFnType, ISyncStateRef } from './state_sync';
