@@ -364,7 +364,7 @@ app.controller(
 
       await Promise.all(getIndexPatternPromises);
       // ignore outdated results
-      if (!_.isEqual(prevIndexPatternIds, nextIndexPatternIds)) {
+      if (prevIndexPatternIds !== nextIndexPatternIds) {
         return;
       }
       $scope.$evalAsync(() => {
@@ -384,7 +384,7 @@ app.controller(
       }
 
       const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-      if (!_.isEqual(nextIndexPatternIds, prevIndexPatternIds)) {
+      if (prevIndexPatternIds !== nextIndexPatternIds) {
         prevIndexPatternIds = nextIndexPatternIds;
         updateIndexPatterns(nextIndexPatternIds);
       }
