@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
@@ -20,7 +19,6 @@ import { HOST_NAME_FIELD_NAME } from './constants';
 jest.mock('../../../../lib/kibana');
 
 describe('Events', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {

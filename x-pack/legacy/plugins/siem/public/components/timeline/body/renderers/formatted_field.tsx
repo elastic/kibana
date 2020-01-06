@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { DefaultDraggable } from '../../../draggables';
 import { Bytes, BYTES_FORMAT } from '../../../bytes';
