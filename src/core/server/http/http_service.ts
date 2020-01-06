@@ -62,9 +62,10 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService } = coreContext;
+    const { logger, configService, env } = coreContext;
 
     this.logger = logger;
+    this.env = env;
     this.log = logger.get('http');
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),

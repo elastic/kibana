@@ -163,7 +163,7 @@ export class HttpConfig {
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
-    this.customResponseHeaders = rawHttpConfig.customResponseHeaders
+    this.customResponseHeaders = rawHttpConfig.customResponseHeaders;
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
