@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+// @ts-ignore
 import { MetricVisComponent } from '../components/metric_vis_controller';
+
+jest.mock('ui/new_platform');
 
 describe('metric_vis - controller', function() {
   const vis = {
@@ -35,26 +37,26 @@ describe('metric_vis - controller', function() {
     },
   };
 
-  let metricController;
+  let metricVis: MetricVisComponent;
 
   beforeEach(() => {
-    metricController = new MetricVisComponent({ vis: vis, visParams: vis.params });
+    metricVis = new MetricVisComponent({ vis, visParams: vis.params });
   });
 
   it('should set the metric label and value', function() {
-    const metrics = metricController._processTableGroups({
+    const metrics = metricVis._processTableGroups({
       columns: [{ id: 'col-0', name: 'Count' }],
       rows: [{ 'col-0': 4301021 }],
     });
 
-    expect(metrics.length).to.be(1);
-    expect(metrics[0].label).to.be('Count');
-    expect(metrics[0].value).to.be('<span ng-non-bindable>4301021</span>');
+    expect(metrics.length).toBe(1);
+    expect(metrics[0].label).toBe('Count');
+    expect(metrics[0].value).toBe('<span ng-non-bindable>4301021</span>');
   });
 
   it('should support multi-value metrics', function() {
     vis.params.dimensions.metrics.push({ accessor: 1 });
-    const metrics = metricController._processTableGroups({
+    const metrics = metricVis._processTableGroups({
       columns: [
         { id: 'col-0', name: '1st percentile of bytes' },
         { id: 'col-1', name: '99th percentile of bytes' },
@@ -62,10 +64,10 @@ describe('metric_vis - controller', function() {
       rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
     });
 
-    expect(metrics.length).to.be(2);
-    expect(metrics[0].label).to.be('1st percentile of bytes');
-    expect(metrics[0].value).to.be('<span ng-non-bindable>182</span>');
-    expect(metrics[1].label).to.be('99th percentile of bytes');
-    expect(metrics[1].value).to.be('<span ng-non-bindable>445842.4634666484</span>');
+    expect(metrics.length).toBe(2);
+    expect(metrics[0].label).toBe('1st percentile of bytes');
+    expect(metrics[0].value).toBe('<span ng-non-bindable>182</span>');
+    expect(metrics[1].label).toBe('99th percentile of bytes');
+    expect(metrics[1].value).toBe('<span ng-non-bindable>445842.4634666484</span>');
   });
 });

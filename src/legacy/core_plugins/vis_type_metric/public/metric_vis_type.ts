@@ -31,7 +31,7 @@ import { MetricVisComponent } from './components/metric_vis_controller';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 
-export const metricVisDefinition = {
+export const metricVisTypeDefinition = {
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
