@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Readable } from 'stream';
-import { createSplitStream, createMapStream, createFilterStream } from 'src/legacy/utils/streams';
 import { has } from 'lodash/fp';
 import { RuleAlertParamsRest } from '../types';
+import {
+  createSplitStream,
+  createMapStream,
+  createFilterStream,
+} from '../../../../../../../../src/legacy/utils/streams';
+import { importRulesSchema } from '../routes/schemas/import_rules_schema';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -19,8 +24,13 @@ export const createRulesStreamFromNdJson = (ndJsonStream: Readable) => {
     .pipe(
       createMapStream((str: string) => {
         if (str && str.trim() !== '') {
-          // TODO: Check maybe that this is valid here with the schema?
-          return JSON.parse(str);
+          console.log('str is: ---->', str);
+          try {
+            return JSON.parse(str);
+          } catch (err) {
+            console.log('I am returning a parse error');
+            return err;
+          }
         }
       })
     )
@@ -28,5 +38,20 @@ export const createRulesStreamFromNdJson = (ndJsonStream: Readable) => {
       createFilterStream<RuleAlertParamsRest | RulesObjectsExportResultDetails>(
         obj => !!obj && !has('exportedCount', obj)
       )
+    )
+    .pipe(
+      createMapStream((obj: RuleAlertParamsRest) => {
+        if (!(obj instanceof Error)) {
+          console.log('Here is what I have now for you:', obj);
+          const validated = importRulesSchema.validate(obj);
+          if (validated.error != null) {
+            console.log(validated.error.message);
+            return new TypeError(validated.error.message);
+          } else {
+            return validated.value;
+          }
+        }
+        return obj;
+      })
     );
 };
