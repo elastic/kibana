@@ -16,9 +16,7 @@ exports[`MetricAggParamEditor should be rendered with default set of props 1`] =
     compressed={true}
     data-test-subj="visEditorSubAggMetric1"
     fullWidth={true}
-    hasNoInitialSelection={false}
     isInvalid={false}
-    isLoading={false}
     onChange={[Function]}
     options={
       Array [
