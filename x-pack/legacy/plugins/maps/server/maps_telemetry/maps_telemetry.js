@@ -9,7 +9,7 @@ import {
   EMS_FILE,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
-  TELEMETRY_TYPE
+  TELEMETRY_TYPE,
 } from '../../common/constants';
 
 function getSavedObjectsClient(server) {
