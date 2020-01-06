@@ -12,7 +12,8 @@
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
-      ]
+      ],
+      "fixtures/*": ["src/fixtures/*"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
