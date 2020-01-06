@@ -126,6 +126,7 @@ export interface IKbnUrlControls {
    * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
    */
   flush: (replace?: boolean) => string;
+  clear: () => void;
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string;
 
@@ -153,13 +154,18 @@ export const createKbnUrlControls = (
     return getCurrentUrl();
   }
 
+  // queue clean up
+  function clear() {
+    updateQueue.splice(0, updateQueue.length);
+    shouldReplace = true;
+  }
+
   function flush(replace = shouldReplace) {
     if (updateQueue.length === 0) return getCurrentUrl();
     const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
     const newUrl = updateUrl(resultUrl, replace);
-    // queue clean up
-    updateQueue.splice(0, updateQueue.length);
-    shouldReplace = true;
+
+    clear();
 
     return newUrl;
   }
@@ -184,6 +190,9 @@ export const createKbnUrlControls = (
     },
     flush: (replace?: boolean) => {
       return flush(replace);
+    },
+    clear: () => {
+      clear();
     },
   };
 };

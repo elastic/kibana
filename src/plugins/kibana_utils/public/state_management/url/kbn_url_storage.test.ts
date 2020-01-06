@@ -154,7 +154,7 @@ describe('kbn_url_storage', () => {
       expect(getCurrentUrl()).toBe('/3');
     });
 
-    it('flush should take priority over regular replace behvioir', async () => {
+    it('flush should take priority over regular replace behaviour', async () => {
       const pr1 = urlControls.updateAsync(() => '/1', true);
       const pr2 = urlControls.updateAsync(() => '/2', false);
       const pr3 = urlControls.updateAsync(() => '/3', true);
@@ -163,6 +163,16 @@ describe('kbn_url_storage', () => {
       await Promise.all([pr1, pr2, pr3]);
       expect(getCurrentUrl()).toBe('/3');
       expect(history.length).toBe(2);
+    });
+
+    it('should cancel async url updates', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      urlControls.clear();
+      expect(getCurrentUrl()).toBe('/');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/');
     });
   });
 

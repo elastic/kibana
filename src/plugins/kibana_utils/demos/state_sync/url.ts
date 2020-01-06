@@ -28,12 +28,13 @@ import {
 const tick = () => new Promise(resolve => setTimeout(resolve));
 
 const stateContainer = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
-const { stop } = syncState({
+const { start, stop } = syncState({
   stateContainer: withDefaultState(stateContainer, defaultState),
   syncKey: '_s',
   syncStrategy: createKbnUrlSyncStrategy(),
 });
 
+start();
 export const result = Promise.resolve()
   .then(() => {
     // http://localhost/#?_s=!((completed:!f,id:0,text:'Learning+state+containers')"

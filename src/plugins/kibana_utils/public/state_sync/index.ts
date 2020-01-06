@@ -25,4 +25,10 @@ export {
   ISessionStorageSyncStrategy,
 } from './state_sync_strategies';
 export { IStateSyncConfig, INullableBaseStateContainer } from './types';
-export { syncState, syncStates, StopSyncStateFnType, ISyncStateRef } from './state_sync';
+export {
+  syncState,
+  syncStates,
+  StopSyncStateFnType,
+  StartSyncStateFnType,
+  ISyncStateRef,
+} from './state_sync';

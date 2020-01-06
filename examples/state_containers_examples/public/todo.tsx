@@ -238,7 +238,7 @@ export const TodoAppPage: React.FC<{
     urlSyncStrategy.toStorage(appStateKey, initialAppState, { replace: true });
 
     // start syncing only when made sure, that state in synced
-    const { stop } = syncStates([
+    const { stop, start } = syncStates([
       {
         stateContainer: withDefaultState(container, defaultState),
         syncKey: appStateKey,
@@ -255,6 +255,8 @@ export const TodoAppPage: React.FC<{
         syncStrategy: sessionStorageSyncStrategy,
       },
     ]);
+
+    start();
 
     return () => {
       stop();

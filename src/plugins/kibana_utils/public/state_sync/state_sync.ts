@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Subscription } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { EMPTY, Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
 import { ISyncStrategy } from './state_sync_strategies';
@@ -77,67 +77,65 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  *
  * 1. It is responsibility of consumer to make sure that initial app state and storage are in sync before starting syncing
  *    No initial sync happens when syncState() is called
- *
- * 2. Syncing withing sync state is asynchronous
  */
 export type StopSyncStateFnType = () => void;
+export type StartSyncStateFnType = () => void;
 export interface ISyncStateRef<SyncStrategy extends ISyncStrategy = ISyncStrategy> {
   // stop syncing state with storage
   stop: StopSyncStateFnType;
+  // start syncing state
+  start: StartSyncStateFnType;
 }
 export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = ISyncStrategy>(
   stateSyncConfig: IStateSyncConfig<State, SyncStrategy>
 ): ISyncStateRef {
   const subscriptions: Subscription[] = [];
-  let isSyncing = true;
-  const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
+  const { toStorage, fromStorage, storageChange$, clear } = stateSyncConfig.syncStrategy;
 
-  const updateState = async () => {
-    const newState = await fromStorage<State>(stateSyncConfig.syncKey);
+  const updateState = () => {
+    const newState = fromStorage<State>(stateSyncConfig.syncKey);
     const oldState = stateSyncConfig.stateContainer.get();
-    if (isSyncing && !defaultComparator(newState, oldState)) {
+    if (!defaultComparator(newState, oldState)) {
       stateSyncConfig.stateContainer.set(newState);
     }
   };
 
-  const updateStorage = async () => {
+  const updateStorage = () => {
     const newStorageState = stateSyncConfig.stateContainer.get();
-    const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
-    if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
-      await toStorage(stateSyncConfig.syncKey, newStorageState);
+    const oldStorageState = fromStorage<State>(stateSyncConfig.syncKey);
+    if (!defaultComparator(newStorageState, oldStorageState)) {
+      toStorage(stateSyncConfig.syncKey, newStorageState);
     }
   };
 
-  // subscribe to state and storage updates
-  subscriptions.push(
-    stateSyncConfig.stateContainer.state$
-      .pipe(
+  const onStateChange$ = stateSyncConfig.stateContainer.state$.pipe(
+    distinctUntilChangedWithInitialValue(stateSyncConfig.stateContainer.get(), defaultComparator),
+    tap(() => updateStorage())
+  );
+
+  const onStorageChange$ = storageChange$
+    ? storageChange$(stateSyncConfig.syncKey).pipe(
         distinctUntilChangedWithInitialValue(
-          stateSyncConfig.stateContainer.get(),
+          fromStorage(stateSyncConfig.syncKey),
           defaultComparator
         ),
-        concatMap(() => updateStorage())
+        tap(() => {
+          updateState();
+        })
       )
-      .subscribe()
-  );
-  if (storageChange$) {
-    subscriptions.push(
-      storageChange$(stateSyncConfig.syncKey)
-        .pipe(
-          distinctUntilChangedWithInitialValue(
-            fromStorage(stateSyncConfig.syncKey),
-            defaultComparator
-          ),
-          concatMap(() => updateState())
-        )
-        .subscribe()
-    );
-  }
+    : EMPTY;
 
   return {
     stop: () => {
-      isSyncing = false;
+      if (clear) clear();
       subscriptions.forEach(s => s.unsubscribe());
+      subscriptions.splice(0, subscriptions.length);
+    },
+    start: () => {
+      if (subscriptions.length > 0) {
+        throw new Error("syncState: can't start syncing state, when syncing is in progress");
+      }
+      subscriptions.push(onStateChange$.subscribe(), onStorageChange$.subscribe());
     },
   };
 }
@@ -162,7 +160,10 @@ export function syncStates(stateSyncConfigs: Array<IStateSyncConfig<any>>): ISyn
   const syncRefs = stateSyncConfigs.map(config => syncState(config));
   return {
     stop: () => {
-      syncRefs.forEach(s => s.stop);
+      syncRefs.forEach(s => s.stop());
+    },
+    start: () => {
+      syncRefs.forEach(s => s.start());
     },
   };
 }

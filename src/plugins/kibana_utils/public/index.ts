@@ -53,5 +53,6 @@ export {
   IKbnUrlSyncStrategy,
   INullableBaseStateContainer,
   ISessionStorageSyncStrategy,
+  StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';

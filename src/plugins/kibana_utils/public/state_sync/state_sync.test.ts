@@ -35,8 +35,6 @@ import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 
-const tick = () => new Promise(resolve => setTimeout(resolve));
-
 describe('state_sync', () => {
   describe('basic', () => {
     const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
@@ -55,13 +53,14 @@ describe('state_sync', () => {
       };
     });
 
-    it('should sync state to storage', async () => {
+    it('should sync state to storage', () => {
       const key = '_s';
-      const { stop } = syncState({
+      const { start, stop } = syncState({
         stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
+      start();
 
       // initial sync of state to storage is not happening
       expect(testSyncStrategy.toStorage).not.toBeCalled();
@@ -71,20 +70,20 @@ describe('state_sync', () => {
         text: 'Learning transitions...',
         completed: false,
       });
-      await tick();
       expect(testSyncStrategy.toStorage).toBeCalledWith(key, container.getState());
       stop();
     });
 
-    it('should sync storage to state', async () => {
+    it('should sync storage to state', () => {
       const key = '_s';
       const storageState1 = [{ id: 1, text: 'todo', completed: false }];
       (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState1);
-      const { stop } = syncState({
+      const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
+      start();
 
       // initial sync of storage to state is not happening
       expect(container.getState()).toEqual(defaultState);
@@ -93,43 +92,61 @@ describe('state_sync', () => {
       (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState2);
       storageChange$.next(storageState2);
 
-      await tick();
       expect(container.getState()).toEqual(storageState2);
 
       stop();
     });
 
-    it('should not update storage if no actual state change happened', async () => {
+    it('should not update storage if no actual state change happened', () => {
       const key = '_s';
-      const { stop } = syncState({
+      const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
+      start();
       (testSyncStrategy.toStorage as jest.Mock).mockClear();
 
       container.set(defaultState);
-      await tick();
       expect(testSyncStrategy.toStorage).not.toBeCalled();
 
       stop();
     });
 
-    it('should not update state container if no actual storage change happened', async () => {
+    it('should not update state container if no actual storage change happened', () => {
       const key = '_s';
-      const { stop } = syncState({
+      const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
         syncKey: key,
         syncStrategy: testSyncStrategy,
       });
+      start();
 
       const originalState = container.getState();
       const storageState = [...originalState];
       (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState);
       storageChange$.next(storageState);
-      await tick();
 
       expect(container.getState()).toBe(originalState);
+
+      stop();
+    });
+
+    it('storage change to null should notify state', () => {
+      container.set([{ completed: false, id: 1, text: 'changed' }]);
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: '_s',
+          syncStrategy: testSyncStrategy,
+        },
+      ]);
+      start();
+
+      (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => null);
+      storageChange$.next(null);
+
+      expect(container.getState()).toEqual(defaultState);
 
       stop();
     });
@@ -154,8 +171,8 @@ describe('state_sync', () => {
       urlSyncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
-    it('change to one storage should also update other storage', async () => {
-      const { stop } = syncStates([
+    it('change to one storage should also update other storage', () => {
+      const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
           syncKey: key,
@@ -167,33 +184,13 @@ describe('state_sync', () => {
           syncStrategy: sessionStorageSyncStrategy,
         },
       ]);
+      start();
 
       const newStateFromUrl = [{ completed: false, id: 1, text: 'changed' }];
       history.replace('/#?_s=!((completed:!f,id:1,text:changed))');
 
-      await tick();
-
       expect(container.getState()).toEqual(newStateFromUrl);
       expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual(newStateFromUrl);
-
-      stop();
-    });
-
-    it('storage change to null should notify state', async () => {
-      container.set([{ completed: false, id: 1, text: 'changed' }]);
-      const { stop } = syncStates([
-        {
-          stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: urlSyncStrategy,
-        },
-      ]);
-
-      history.replace('/');
-
-      await tick();
-
-      expect(container.getState()).toEqual(defaultState);
 
       stop();
     });

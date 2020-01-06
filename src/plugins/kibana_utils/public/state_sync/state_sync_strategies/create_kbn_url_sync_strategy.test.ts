@@ -52,6 +52,17 @@ describe('KbnUrlSyncStrategy', () => {
       expect(syncStrategy.fromStorage(key)).toEqual(state);
     });
 
+    it('should cancel url updates', async () => {
+      const state = { test: 'test', ok: 1 };
+      const key = '_s';
+      const pr = syncStrategy.toStorage(key, state);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+      syncStrategy.clear();
+      await pr;
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+      expect(syncStrategy.fromStorage(key)).toEqual(null);
+    });
+
     it('should notify about url changes', async () => {
       expect(syncStrategy.storageChange$).toBeDefined();
       const key = '_s';
