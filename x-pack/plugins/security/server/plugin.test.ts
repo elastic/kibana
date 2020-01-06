@@ -49,8 +49,6 @@ describe('Security Plugin', () => {
               Object {
                 "__legacyCompat": Object {
                   "config": Object {
-                    "cookieName": "sid",
-                    "loginAssistanceMessage": undefined,
                     "secureCookies": true,
                   },
                   "license": Object {

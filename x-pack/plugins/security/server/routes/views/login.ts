@@ -4,47 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { parseNext } from '../../../common/parse_next';
+import { RouteDefinitionParams } from '..';
 
-import { parseNext } from '../../lib/parse_next';
-
-export function initLoginView(
-  {
-    __legacyCompat: {
-      config: { cookieName },
-      license,
+/**
+ * Defines routes required for the Login view.
+ */
+export function defineLoginRoutes({
+  router,
+  logger,
+  authc,
+  csp,
+  basePath,
+  license,
+}: RouteDefinitionParams) {
+  router.get(
+    {
+      path: '/login',
+      validate: {
+        query: schema.object(
+          {
+            next: schema.maybe(schema.string()),
+            msg: schema.maybe(schema.string()),
+          },
+          { allowUnknowns: true }
+        ),
+      },
+      options: { authRequired: false },
     },
-  },
-  server
-) {
-  const config = server.config();
-  const login = server.getHiddenUiAppById('login');
+    async (context, request, response) => {
+      // Default to true if license isn't available or it can't be resolved for some reason.
+      const shouldShowLogin = license.isEnabled() ? license.getFeatures().showLogin : true;
 
-  function shouldShowLogin() {
-    if (license.isEnabled()) {
-      return Boolean(license.getFeatures().showLogin);
-    }
-
-    // default to true if xpack info isn't available or
-    // it can't be resolved for some reason
-    return true;
-  }
-
-  server.route({
-    method: 'GET',
-    path: '/login',
-    handler(request, h) {
-      const isUserAlreadyLoggedIn = !!request.state[cookieName];
-      if (isUserAlreadyLoggedIn || !shouldShowLogin()) {
-        const basePath = config.get('server.basePath');
-        const url = get(request, 'raw.req.url');
-        const next = parseNext(url, basePath);
-        return h.redirect(next);
+      // Authentication flow isn't triggered automatically for this route, so we should explicitly
+      // check whether user has an active session already.
+      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) != null;
+      if (isUserAlreadyLoggedIn || !shouldShowLogin) {
+        logger.debug('User is already authenticated, redirecting...');
+        return response.redirected({
+          headers: { location: parseNext(request.url?.href ?? '', basePath.serverBasePath) },
+        });
       }
-      return h.renderAppWithDefaultConfig(login);
-    },
-    config: {
-      auth: false,
-    },
-  });
+
+      return response.ok({
+        body: await context.core.rendering.render({ includeUserSettings: false }),
+        headers: { 'content-security-policy': csp.header },
+      });
+    }
+  );
+
+  router.get(
+    { path: '/internal/security/login_state', validate: false, options: { authRequired: false } },
+    async (context, request, response) => {
+      const { showLogin, allowLogin, layout = 'form' } = license.getFeatures();
+      return response.ok({ body: { showLogin, allowLogin, layout } });
+    }
+  );
 }

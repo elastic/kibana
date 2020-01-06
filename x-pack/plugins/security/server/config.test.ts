@@ -13,57 +13,69 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "audit": Object {
+          "enabled": false,
+        },
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "enabled": true,
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "audit": Object {
+          "enabled": false,
+        },
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "enabled": true,
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "loginAssistanceMessage": "",
-                          "secureCookies": false,
-                          "session": Object {
-                            "idleTimeout": null,
-                            "lifespan": null,
-                          },
-                        }
-                `);
+      Object {
+        "audit": Object {
+          "enabled": false,
+        },
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "enabled": true,
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {

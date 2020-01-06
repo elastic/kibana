@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type LoginLayout = 'form' | 'error-es-unavailable' | 'error-xpack-unavailable';
+import { LoginLayout } from '../../../common/licensing';
 
 export interface LoginState {
   layout: LoginLayout;

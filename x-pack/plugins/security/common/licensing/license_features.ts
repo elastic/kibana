@@ -5,6 +5,11 @@
  */
 
 /**
+ * Represents types of login form layouts.
+ */
+export type LoginLayout = 'form' | 'error-es-unavailable' | 'error-xpack-unavailable';
+
+/**
  * Describes Security plugin features that depend on license.
  */
 export interface SecurityLicenseFeatures {
@@ -46,7 +51,7 @@ export interface SecurityLicenseFeatures {
   /**
    * Describes the layout of the login form if it's displayed.
    */
-  readonly layout?: string;
+  readonly layout?: LoginLayout;
 
   /**
    * Message to show when security links are clicked throughout the kibana app.

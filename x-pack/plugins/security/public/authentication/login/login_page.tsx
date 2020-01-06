@@ -5,45 +5,81 @@
  */
 
 import React, { Component } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import { LoginState } from '../../login_state';
-import { BasicLoginForm } from '../basic_login_form';
-import { DisabledLoginForm } from '../disabled_login_form';
+import { BehaviorSubject } from 'rxjs';
+import { parse } from 'url';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { CoreStart, FatalErrorsStart, HttpStart } from 'src/core/public';
+import { LoginLayout } from '../../../common/licensing';
+import { BasicLoginForm, DisabledLoginForm } from './components';
+import { LoginState } from './login_state';
 
 interface Props {
-  http: any;
-  window: any;
-  next: string;
-  infoMessage?: string;
-  loginState: LoginState;
-  isSecureConnection: boolean;
-  requiresSecureConnection: boolean;
+  http: HttpStart;
+  fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
+  requiresSecureConnection: boolean;
 }
 
-export class LoginPage extends Component<Props, {}> {
+interface State {
+  loginState: LoginState | null;
+}
+
+const infoMessageMap = new Map([
+  [
+    'SESSION_EXPIRED',
+    i18n.translate('xpack.security.login.sessionExpiredDescription', {
+      defaultMessage: 'Your session has timed out. Please log in again.',
+    }),
+  ],
+  [
+    'LOGGED_OUT',
+    i18n.translate('xpack.security.login.loggedOutDescription', {
+      defaultMessage: 'You have logged out of Kibana.',
+    }),
+  ],
+]);
+
+export class LoginPage extends Component<Props, State> {
+  state = { loginState: null };
+
+  public async componentDidMount() {
+    const loadingCount$ = new BehaviorSubject(1);
+    this.props.http.addLoadingCountSource(loadingCount$.asObservable());
+
+    try {
+      this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
+    } catch (err) {
+      this.props.fatalErrors.add(err);
+    }
+
+    loadingCount$.next(0);
+    loadingCount$.complete();
+  }
+
   public render() {
-    const allowLogin = this.allowLogin();
+    const loginState = this.state.loginState;
+    if (!loginState) {
+      return null;
+    }
+
+    const isSecureConnection = !!window.location.protocol.match(/^https/);
+    const { allowLogin, layout } = loginState;
+
+    const loginIsSupported =
+      this.props.requiresSecureConnection && !isSecureConnection
+        ? false
+        : allowLogin && layout === 'form';
 
     const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !allowLogin,
+      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
     const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !allowLogin,
+      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
     return (
@@ -75,23 +111,21 @@ export class LoginPage extends Component<Props, {}> {
         </header>
         <div className={contentBodyClasses}>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>{this.getLoginForm()}</EuiFlexItem>
+            <EuiFlexItem>{this.getLoginForm({ isSecureConnection, layout })}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
     );
   }
 
-  private allowLogin = () => {
-    if (this.props.requiresSecureConnection && !this.props.isSecureConnection) {
-      return false;
-    }
-
-    return this.props.loginState.allowLogin && this.props.loginState.layout === 'form';
-  };
-
-  private getLoginForm = () => {
-    if (this.props.requiresSecureConnection && !this.props.isSecureConnection) {
+  private getLoginForm = ({
+    isSecureConnection,
+    layout,
+  }: {
+    isSecureConnection: boolean;
+    layout: LoginLayout;
+  }) => {
+    if (this.props.requiresSecureConnection && !isSecureConnection) {
       return (
         <DisabledLoginForm
           title={
@@ -110,10 +144,17 @@ export class LoginPage extends Component<Props, {}> {
       );
     }
 
-    const layout = this.props.loginState.layout;
     switch (layout) {
       case 'form':
-        return <BasicLoginForm {...this.props} />;
+        return (
+          <BasicLoginForm
+            http={this.props.http}
+            infoMessage={infoMessageMap.get(
+              parse(window.location.href, true).query.msg?.toString()
+            )}
+            loginAssistanceMessage={this.props.loginAssistanceMessage}
+          />
+        );
       case 'error-es-unavailable':
         return (
           <DisabledLoginForm
@@ -167,4 +208,15 @@ export class LoginPage extends Component<Props, {}> {
         );
     }
   };
+}
+
+export function renderLoginPage(i18nStart: CoreStart['i18n'], element: Element, props: Props) {
+  ReactDOM.render(
+    <i18nStart.Context>
+      <LoginPage {...props} />
+    </i18nStart.Context>,
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
 }

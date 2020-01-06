@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoginPage } from './login_page';
+export { BasicLoginForm } from './basic_login_form';
+export { DisabledLoginForm } from './disabled_login_form';

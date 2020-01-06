@@ -33,6 +33,9 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     rename('sessionTimeout', 'session.idleTimeout'),
     unused('authorization.legacyFallback.enabled'),
   ],
+  exposeToBrowser: {
+    loginAssistanceMessage: true,
+  },
 };
 export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,

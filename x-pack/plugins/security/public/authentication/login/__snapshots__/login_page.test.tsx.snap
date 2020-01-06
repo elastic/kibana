@@ -218,23 +218,69 @@ exports[`LoginPage disabled form states renders as expected when loginAssistance
       gutterSize="l"
     >
       <EuiFlexItem>
-        <InjectIntl(BasicLoginFormUI)
+        <BasicLoginForm
           http={
             Object {
+              "addLoadingCountSource": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Observable {
+                      "_isScalar": false,
+                      "source": BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": 0,
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": true,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+                "serverBasePath": "",
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "/internal/security/login_state",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Promise {},
+                  },
+                ],
+              },
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
               "post": [MockFunction],
+              "put": [MockFunction],
             }
           }
-          isSecureConnection={false}
           loginAssistanceMessage="This is an *important* message"
-          loginState={
-            Object {
-              "allowLogin": true,
-              "layout": "form",
-            }
-          }
-          next=""
-          requiresSecureConnection={false}
-          window={Object {}}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -460,23 +506,198 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       gutterSize="l"
     >
       <EuiFlexItem>
-        <InjectIntl(BasicLoginFormUI)
+        <BasicLoginForm
           http={
             Object {
+              "addLoadingCountSource": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Observable {
+                      "_isScalar": false,
+                      "source": BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": 0,
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": true,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+                "serverBasePath": "",
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "/internal/security/login_state",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Promise {},
+                  },
+                ],
+              },
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
               "post": [MockFunction],
+              "put": [MockFunction],
             }
           }
-          isSecureConnection={false}
           loginAssistanceMessage=""
-          loginState={
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage enabled form state renders as expected when info message is set 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <BasicLoginForm
+          http={
             Object {
-              "allowLogin": true,
-              "layout": "form",
+              "addLoadingCountSource": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Observable {
+                      "_isScalar": false,
+                      "source": BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": 0,
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": true,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+                "serverBasePath": "",
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "/internal/security/login_state",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Promise {},
+                  },
+                ],
+              },
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
             }
           }
-          next=""
-          requiresSecureConnection={false}
-          window={Object {}}
+          infoMessage="Your session has timed out. Please log in again."
+          loginAssistanceMessage=""
         />
       </EuiFlexItem>
     </EuiFlexGroup>

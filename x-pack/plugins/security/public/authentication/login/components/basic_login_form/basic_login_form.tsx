@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { EuiText } from '@elastic/eui';
-import { LoginState } from '../../login_state';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpStart, IHttpFetchError } from 'src/core/public';
+import { parseNext } from '../../../../../common/parse_next';
 
 interface Props {
-  http: any;
-  window: any;
+  http: HttpStart;
   infoMessage?: string;
-  loginState: LoginState;
-  next: string;
-  intl: InjectedIntl;
   loginAssistanceMessage: string;
 }
 
@@ -29,7 +34,7 @@ interface State {
   message: string;
 }
 
-class BasicLoginFormUI extends Component<Props, State> {
+export class BasicLoginForm extends Component<Props, State> {
   public state = {
     hasError: false,
     isLoading: false,
@@ -175,7 +180,7 @@ class BasicLoginFormUI extends Component<Props, State> {
     });
   };
 
-  private submit = (e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>) => {
+  private submit = async (e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!this.isFormValid()) {
@@ -187,34 +192,28 @@ class BasicLoginFormUI extends Component<Props, State> {
       message: '',
     });
 
-    const { http, window, next, intl } = this.props;
-
+    const { http } = this.props;
     const { username, password } = this.state;
 
-    http.post('./internal/security/login', { username, password }).then(
-      () => (window.location.href = next),
-      (error: any) => {
-        const { statusCode = 500 } = error.data || {};
+    try {
+      await http.post('/internal/security/login', { body: JSON.stringify({ username, password }) });
+      window.location.href = parseNext(window.location.href, http.basePath.serverBasePath);
+    } catch (error) {
+      const message =
+        (error as IHttpFetchError).response?.status === 401
+          ? i18n.translate(
+              'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
+              { defaultMessage: 'Invalid username or password. Please try again.' }
+            )
+          : i18n.translate('xpack.security.login.basicLoginForm.unknownErrorMessage', {
+              defaultMessage: 'Oops! Error. Try again.',
+            });
 
-        let message = intl.formatMessage({
-          id: 'xpack.security.login.basicLoginForm.unknownErrorMessage',
-          defaultMessage: 'Oops! Error. Try again.',
-        });
-        if (statusCode === 401) {
-          message = intl.formatMessage({
-            id: 'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
-            defaultMessage: 'Invalid username or password. Please try again.',
-          });
-        }
-
-        this.setState({
-          hasError: true,
-          message,
-          isLoading: false,
-        });
-      }
-    );
+      this.setState({
+        hasError: true,
+        message,
+        isLoading: false,
+      });
+    }
   };
 }
-
-export const BasicLoginForm = injectI18n(BasicLoginFormUI);

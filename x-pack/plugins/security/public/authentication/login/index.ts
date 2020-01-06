@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoginPage } from './login_page';
+export { loginApp } from './login_app';

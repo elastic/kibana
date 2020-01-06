@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './logged_out';
+export interface ConfigType {
+  loginAssistanceMessage: string;
+}

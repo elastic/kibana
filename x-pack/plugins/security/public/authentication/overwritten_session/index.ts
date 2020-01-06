@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './overwritten_session';
+export { overwrittenSessionApp } from './overwritten_session_app';

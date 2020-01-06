@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function initLogoutView(server) {
-  const logout = server.getHiddenUiAppById('logout');
+import { RouteDefinitionParams } from '..';
 
-  server.route({
-    method: 'GET',
-    path: '/logout',
-    handler(request, h) {
-      return h.renderAppWithDefaultConfig(logout);
+/**
+ * Defines routes required for the Logout out view.
+ */
+export function defineLogoutRoutes({ router, csp }: RouteDefinitionParams) {
+  router.get(
+    {
+      path: '/logout',
+      validate: false,
+      options: { authRequired: false },
     },
-    config: {
-      auth: false,
-    },
-  });
+    async (context, request, response) => {
+      return response.ok({
+        body: await context.core.rendering.render({ includeUserSettings: false }),
+        headers: { 'content-security-policy': csp.header },
+      });
+    }
+  );
 }
