@@ -22,7 +22,7 @@
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
-    "management": "src/legacy/core_plugins/management",
+    "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "kibana_react": "src/legacy/core_plugins/kibana_react",
     "kibana-react": "src/plugins/kibana_react",
     "kibana_utils": "src/plugins/kibana_utils",
