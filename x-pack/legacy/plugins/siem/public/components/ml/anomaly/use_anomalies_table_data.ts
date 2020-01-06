@@ -15,7 +15,7 @@ import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_ANOMALY_SCORE, DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { useTimeZone } from '../../../hooks';
 
 interface Args {
@@ -66,7 +66,6 @@ export const useAnomaliesTableData = ({
   const [, dispatchToaster] = useStateToaster();
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 
@@ -96,7 +95,6 @@ export const useAnomaliesTableData = ({
               maxRecords: 500,
               maxExamples: 10,
             },
-            kbnVersion,
             abortCtrl.signal
           );
           if (isSubscribed) {

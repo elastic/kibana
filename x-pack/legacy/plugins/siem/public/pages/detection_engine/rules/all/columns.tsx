@@ -31,7 +31,7 @@ import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
 
-const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, history: H.History) => [
+const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'visControls',
@@ -50,7 +50,7 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, histor
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch, kbnVersion),
+    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch),
   },
   {
     description: i18n.EXPORT_RULE,
@@ -62,14 +62,13 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, histor
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, kbnVersion),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch),
   },
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
-  kbnVersion: string,
   history: H.History
 ): Array<EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>> => [
   {
@@ -171,7 +170,7 @@ export const getColumns = (
     width: '85px',
   },
   {
-    actions: getActions(dispatch, kbnVersion, history),
+    actions: getActions(dispatch, history),
     width: '40px',
   } as EuiTableActionsColumnType<TableData>,
 ];

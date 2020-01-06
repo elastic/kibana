@@ -29,12 +29,10 @@ import { parseJsonFromBody } from '../../../utils/api';
  * Fetch Signals by providing a query
  *
  * @param query String to match a dsl
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal AbortSignal for cancelling request
  */
 export const fetchQuerySignals = async <Hit, Aggregations>({
   query,
-  kbnVersion,
   signal,
 }: QuerySignals): Promise<SignalSearchResponse<Hit, Aggregations>> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_QUERY_SIGNALS_URL}`, {
@@ -42,8 +40,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     body: query,
     signal,
@@ -58,13 +55,11 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
  *
  * @param query of signals to update
  * @param status to update to('open' / 'closed')
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal AbortSignal for cancelling request
  */
 export const updateSignalStatus = async ({
   query,
   status,
-  kbnVersion,
   signal,
 }: UpdateSignalStatusProps): Promise<unknown> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_SIGNALS_STATUS_URL}`, {
@@ -72,8 +67,7 @@ export const updateSignalStatus = async ({
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     body: JSON.stringify({ status, ...query }),
     signal,

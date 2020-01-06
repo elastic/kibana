@@ -25,12 +25,10 @@ import { throwIfNotOk } from '../../hooks/api/api';
  * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules
  *
  * @param indexPatternName ES index pattern to check for compatible modules
- * @param headers optional headers to add
  * @param signal to cancel request
  */
 export const checkRecognizer = async ({
   indexPatternName,
-  kbnVersion,
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> => {
   const response = await fetch(
@@ -39,10 +37,9 @@ export const checkRecognizer = async ({
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        'kbn-system-api': 'true',
         'content-type': 'application/json',
-        'kbn-version': kbnVersion,
-        'kbn-xsrf': kbnVersion,
+        'kbn-system-api': 'true',
+        'kbn-xsrf': 'true',
       },
       signal,
     }
@@ -55,22 +52,16 @@ export const checkRecognizer = async ({
  * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
  *
  * @param moduleId id of the module to retrieve
- * @param headers optional headers to add optional headers to add
  * @param signal to cancel request
  */
-export const getModules = async ({
-  moduleId = '',
-  kbnVersion,
-  signal,
-}: GetModulesProps): Promise<Module[]> => {
+export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
     signal,
   });
@@ -93,7 +84,6 @@ export const setupMlJob = async ({
   indexPatternName = 'auditbeat-*',
   jobIdErrorFilter = [],
   groups = ['siem'],
-  kbnVersion,
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
@@ -107,10 +97,9 @@ export const setupMlJob = async ({
       useDedicatedIndex: true,
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
   await throwIfNotOk(response);
@@ -124,16 +113,13 @@ export const setupMlJob = async ({
  *
  * @param datafeedIds
  * @param start
- * @param headers optional headers to add
  */
 export const startDatafeeds = async ({
   datafeedIds,
-  kbnVersion,
   start = 0,
 }: {
   datafeedIds: string[];
   start: number;
-  kbnVersion: string;
 }): Promise<StartDatafeedResponse> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
     method: 'POST',
@@ -143,10 +129,9 @@ export const startDatafeeds = async ({
       ...(start !== 0 && { start }),
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
   await throwIfNotOk(response);
@@ -163,10 +148,8 @@ export const startDatafeeds = async ({
  */
 export const stopDatafeeds = async ({
   datafeedIds,
-  kbnVersion,
 }: {
   datafeedIds: string[];
-  kbnVersion: string;
 }): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
     method: 'POST',
@@ -175,9 +158,9 @@ export const stopDatafeeds = async ({
       datafeedIds,
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
 
@@ -198,7 +181,7 @@ export const stopDatafeeds = async ({
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
   });
 
@@ -214,10 +197,7 @@ export const stopDatafeeds = async ({
  *
  * @param signal to cancel request
  */
-export const getJobsSummary = async (
-  signal: AbortSignal,
-  kbnVersion: string
-): Promise<JobSummary[]> => {
+export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -225,8 +205,7 @@ export const getJobsSummary = async (
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     signal,
   });

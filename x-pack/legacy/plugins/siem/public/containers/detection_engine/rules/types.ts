@@ -41,7 +41,6 @@ export type NewRule = t.TypeOf<typeof NewRuleSchema>;
 
 export interface AddRulesProps {
   rule: NewRule;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -98,7 +97,6 @@ export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
   id?: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -117,22 +115,18 @@ export interface FetchRulesResponse {
 
 export interface FetchRuleProps {
   id: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
 export interface EnableRulesProps {
   ids: string[];
   enabled: boolean;
-  kbnVersion: string;
 }
 
 export interface DeleteRulesProps {
   ids: string[];
-  kbnVersion: string;
 }
 
 export interface DuplicateRulesProps {
   rules: Rules;
-  kbnVersion: string;
 }

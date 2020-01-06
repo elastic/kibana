@@ -170,13 +170,11 @@ export const getSignalsActions = ({
   setEventsDeleted,
   createTimeline,
   status,
-  kbnVersion,
 }: {
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  kbnVersion: string;
 }): TimelineAction[] => [
   {
     getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
@@ -209,7 +207,6 @@ export const getSignalsActions = ({
               status,
               setEventsLoading,
               setEventsDeleted,
-              kbnVersion,
             })
           }
           iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}

@@ -15,9 +15,7 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 import React, { useCallback, useState, useEffect } from 'react';
 
-import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
-import { useUiSetting$ } from '../../../../../lib/kibana';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
 
@@ -50,19 +48,17 @@ export const RuleSwitchComponent = ({
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch, kbnVersion);
+        await enableRulesAction([id], event.target.checked!, dispatch);
       } else {
         try {
           const updatedRules = await enableRules({
             ids: [id],
             enabled: event.target.checked!,
-            kbnVersion,
           });
           setMyEnabled(updatedRules[0].enabled);
         } catch {
@@ -71,7 +67,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [dispatch, id, kbnVersion]
+    [dispatch, id]
   );
 
   useEffect(() => {
