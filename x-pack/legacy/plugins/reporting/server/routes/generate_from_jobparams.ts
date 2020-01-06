@@ -14,6 +14,7 @@ import {
   GetRouteConfigFactoryFn,
   RouteConfigFactory,
 } from './lib/route_config_factories';
+import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
@@ -54,7 +55,8 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (originalRequest: RequestFacade, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(originalRequest);
       let jobParamsRison: string | null;
 
       if (request.payload) {

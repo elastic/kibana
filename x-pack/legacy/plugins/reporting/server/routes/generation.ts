@@ -18,6 +18,7 @@ import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { createQueueFactory, enqueueJobFactory } from '../lib';
+import { makeRequestFacade } from './lib/make_request_facade';
 
 export function registerJobGenerationRoutes(
   server: ServerFacade,
@@ -39,9 +40,10 @@ export function registerJobGenerationRoutes(
   async function handler(
     exportTypeId: string,
     jobParams: object,
-    request: RequestFacade,
+    originalRequest: RequestFacade,
     h: ReportingResponseToolkit
   ) {
+    const request = makeRequestFacade(originalRequest);
     const user = request.pre.user;
     const headers = request.headers;
 

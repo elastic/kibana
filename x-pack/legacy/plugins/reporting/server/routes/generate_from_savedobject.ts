@@ -9,6 +9,7 @@ import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../commo
 import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { makeRequestFacade } from './lib/make_request_facade';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 /*
@@ -31,7 +32,8 @@ export function registerGenerateCsvFromSavedObject(
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (originalRequest: RequestFacade, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(originalRequest);
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
        * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
