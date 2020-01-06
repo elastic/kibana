@@ -19,10 +19,9 @@ import {
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 import { store } from '../state';
@@ -36,7 +35,6 @@ interface OverviewPageProps {
     pathname: string;
     search: string;
   };
-  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -56,12 +54,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({
-  basePath,
-  autocomplete,
-  logOverviewPageLoad,
-  setBreadcrumbs,
-}: Props) => {
+export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -74,11 +67,11 @@ export const OverviewPage = ({
     filters: urlFilters,
   } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
+  useUptimeTelemetry(UptimePage.Overview);
+  useIndexPattern(setIndexPattern);
 
   useEffect(() => {
-    getIndexPattern(basePath, setIndexPattern);
     setBreadcrumbs(getOverviewPageBreadcrumbs());
-    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {
@@ -87,7 +80,7 @@ export const OverviewPage = ({
         })
       );
     }
-  }, [basePath, logOverviewPageLoad, setBreadcrumbs, setHeadingText]);
+  }, [basePath, setBreadcrumbs, setHeadingText]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
