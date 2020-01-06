@@ -101,12 +101,6 @@ export function App({
         }),
       },
       {
-        href: core.http.basePath.prepend(`/app/kibana#/lens`),
-        text: i18n.translate('xpack.lens.breadcrumbsLens', {
-          defaultMessage: 'Lens',
-        }),
-      },
-      {
         text: state.persistedDoc
           ? state.persistedDoc.title
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),

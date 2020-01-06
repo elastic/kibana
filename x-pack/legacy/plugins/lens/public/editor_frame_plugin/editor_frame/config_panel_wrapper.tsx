@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { useMemo, useContext, memo, useState } from 'react';
 import {
   EuiPanel,
@@ -17,7 +16,6 @@ import {
   EuiToolTip,
   EuiButton,
   EuiForm,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../native_renderer';
@@ -199,10 +197,8 @@ function LayerPanel(
         <EuiFlexItem grow={false}>
           <LayerSettings
             layerId={layerId}
-            isOnlyLayer={isOnlyLayer}
             layerConfigProps={layerConfigProps}
             activeVisualization={activeVisualization}
-            onRemove={onRemove}
           />
         </EuiFlexItem>
 
@@ -225,23 +221,37 @@ function LayerPanel(
 
       <EuiSpacer size="s" />
 
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="trash"
-          color="danger"
-          data-test-subj="lns_layer_remove"
-          onClick={onRemove}
-        >
-          {isOnlyLayer
-            ? i18n.translate('xpack.lens.resetLayer', {
-                defaultMessage: 'Reset layer',
-              })
-            : i18n.translate('xpack.lens.deleteLayer', {
-                defaultMessage: 'Delete layer',
-              })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="trash"
+            color="danger"
+            data-test-subj="lns_layer_remove"
+            onClick={() => {
+              // If we don't blur the remove / clear button, it remains focused
+              // which is a strange UX in this case. e.target.blur doesn't work
+              // due to who knows what, but probably event re-writing. Additionally,
+              // activeElement does not have blur so, we need to do some casting + safeguards.
+              const el = (document.activeElement as unknown) as { blur: () => void };
+
+              if (el && el.blur) {
+                el.blur();
+              }
+
+              onRemove();
+            }}
+          >
+            {isOnlyLayer
+              ? i18n.translate('xpack.lens.resetLayer', {
+                  defaultMessage: 'Reset layer',
+                })
+              : i18n.translate('xpack.lens.deleteLayer', {
+                  defaultMessage: 'Delete layer',
+                })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }

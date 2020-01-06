@@ -184,7 +184,6 @@ describe('Lens App', () => {
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
-      { text: 'Lens', href: '/testbasepath/app/kibana#/lens' },
       { text: 'Create' },
     ]);
 
@@ -203,7 +202,6 @@ describe('Lens App', () => {
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
-      { text: 'Lens', href: '/testbasepath/app/kibana#/lens' },
       { text: 'Daaaaaaadaumching!' },
     ]);
   });
