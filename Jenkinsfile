@@ -12,7 +12,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             parallel([
               'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
               'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
-              'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
+              'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildXpack() }, [
                 'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') }),
                 'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
                 'oss-ciGroup2': kibanaPipeline.getOssCiGroupWorker(2),

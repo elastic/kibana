@@ -41,11 +41,27 @@ export default async function({ readConfigFile }) {
     servers: commonConfig.get('servers'),
     security: commonConfig.get('security'),
 
-    esTestCluster: { ...commonConfig.get('esTestCluster'), license: 'trial' },
+    esTestCluster: {
+      ...commonConfig.get('esTestCluster'),
+      license: 'trial',
+    },
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        '--status.allowAnonymous=true',
+        '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
+        '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.maps.preserveDrawingBuffer=true',
+        '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
+        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
+        '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--telemetry.banner=false',
+        '--timelion.ui.enabled=true',
+      ],
     },
 
     uiSettings: {
