@@ -178,12 +178,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -819,21 +813,6 @@ module.exports = {
         'jsx-a11y/label-has-associated-control': 'off',
         'jsx-a11y/aria-role': 'off',
       },
-    },
-
-    /**
-     * Monitoring overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
-      rules: {
-        'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
-        'no-else-return': 'error',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/monitoring/public/**/*.js'],
-      env: { browser: true },
     },
 
     /**
