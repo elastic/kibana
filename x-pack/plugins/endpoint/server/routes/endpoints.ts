@@ -9,7 +9,8 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { EndpointAppContext, EndpointData } from '../types';
 import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
-import { RouteSchemas } from '../../../../../build/kibana/src/core/server/http/router/route';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RouteSchemas } from '../../../../../src/core/server/http/router/route';
 
 interface HitSource {
   _source: EndpointData;
