@@ -108,10 +108,14 @@ describe('core lifecycle handlers', () => {
 
   describe('customHeaders pre-response handler', () => {
     const testRoute = '/custom_headers/test/route';
+    const testErrorRoute = '/custom_headers/test/error_route';
 
     beforeEach(async () => {
       router.get({ path: testRoute, validate: false }, (context, req, res) => {
         return res.ok({ body: 'ok' });
+      });
+      router.get({ path: testErrorRoute, validate: false }, (context, req, res) => {
+        return res.badRequest({ body: 'bad request' });
       });
       await server.start();
     });
@@ -128,10 +132,30 @@ describe('core lifecycle handlers', () => {
       );
     });
 
+    it('adds the kbn-name header in case of error', async () => {
+      const result = await supertest(innerServer.listener)
+        .get(testErrorRoute)
+        .expect(400);
+      const headers = result.header as Record<string, string>;
+      expect(headers).toEqual(
+        expect.objectContaining({
+          [nameHeader]: kibanaName,
+        })
+      );
+    });
+
     it('adds the custom headers', async () => {
       const result = await supertest(innerServer.listener)
         .get(testRoute)
         .expect(200, 'ok');
+      const headers = result.header as Record<string, string>;
+      expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
+    });
+
+    it('adds the custom headers in case of error', async () => {
+      const result = await supertest(innerServer.listener)
+        .get(testErrorRoute)
+        .expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
     });
