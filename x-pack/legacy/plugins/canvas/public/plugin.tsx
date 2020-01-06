@@ -12,7 +12,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
 // @ts-ignore: Untyped Local
 import { AngularStrings } from '../i18n';
-const { CanvasRootController: strings } = AngularStrings;
+const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 import { createStore } from './store';
 
@@ -94,8 +94,8 @@ export class CanvasPlugin
       core.application.capabilities.canvas.save
         ? undefined
         : {
-            text: strings.getReadOnlyBadgeText(),
-            tooltip: strings.getReadOnlyBadgeTooltip(),
+            text: strings.getText(),
+            tooltip: strings.getTooltip(),
             iconType: 'glasses',
           }
     );
