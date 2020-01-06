@@ -106,7 +106,7 @@ describe('zooming', () => {
     });
     describe('when the user pans right by 100 pixels', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPanningOffset', payload: [-100, 0] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-100, 0] };
         store.dispatch(action);
       });
       it(

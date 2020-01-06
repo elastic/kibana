@@ -61,7 +61,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     } else {
       return stateWithNewScaling;
     }
-  } else if (action.type === 'userSetPanningOffset') {
+  } else if (action.type === 'userSetPositionOfCamera') {
     return {
       ...state,
       translationNotCountingCurrentPanning: action.payload,

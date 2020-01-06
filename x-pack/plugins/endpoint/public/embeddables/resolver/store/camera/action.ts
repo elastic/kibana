@@ -30,11 +30,11 @@ interface UserSetRasterSize {
   readonly payload: Vector2;
 }
 
-// TODO, fix and rename this. or remove it
-// this is used to directly set the transform of the camera,
-// it should be named something like 'userSetPositionOfCamera'. It should work in conjunction with panning (it doesn't, or at least its not tested or tried.)
-interface UserSetPanningOffset {
-  readonly type: 'userSetPanningOffset';
+/**
+ * This is currently only used in tests. The 'back to center' button will use this action, and more tests around its behavior will need to be added.
+ */
+interface UserSetPositionOfCamera {
+  readonly type: 'userSetPositionOfCamera';
   /**
    * The world transform of the camera
    */
@@ -71,7 +71,7 @@ interface UserMovedPointer {
 export type CameraAction =
   | UserScaled
   | UserSetRasterSize
-  | UserSetPanningOffset
+  | UserSetPositionOfCamera
   | UserStartedPanning
   | UserStoppedPanning
   | UserCanceledPanning
