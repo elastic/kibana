@@ -159,11 +159,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.hasFeatureType).toEqual({
-        LINE: false,
-        POINT: true,
-        POLYGON: false,
-      });
+      expect(featuresMeta.isPointsOnly).toBe(true);
+      expect(featuresMeta.isLinesOnly).toBe(false);
+      expect(featuresMeta.isPolygonsOnly).toBe(false);
     });
 
     it('Should identify when feature collection only contains lines', async () => {
@@ -189,11 +187,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.hasFeatureType).toEqual({
-        LINE: true,
-        POINT: false,
-        POLYGON: false,
-      });
+      expect(featuresMeta.isPointsOnly).toBe(false);
+      expect(featuresMeta.isLinesOnly).toBe(true);
+      expect(featuresMeta.isPolygonsOnly).toBe(false);
     });
   });
 
@@ -241,11 +237,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       );
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.hasFeatureType).toEqual({
-        LINE: false,
-        POINT: true,
-        POLYGON: false,
-      });
+      expect(featuresMeta.isPointsOnly).toBe(true);
+      expect(featuresMeta.isLinesOnly).toBe(false);
+      expect(featuresMeta.isPolygonsOnly).toBe(false);
     });
 
     it('Should extract scaled field range', async () => {
@@ -272,91 +266,6 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         max: 10,
         min: 1,
       });
-    });
-  });
-});
-
-describe('checkIfOnlyFeatureType', () => {
-  describe('source supports single feature type', () => {
-    it('isPointsOnly should be true when source feature type only supports points', async () => {
-      const vectorStyle = new VectorStyle(
-        {},
-        new MockSource({
-          supportedShapeTypes: [VECTOR_SHAPE_TYPES.POINT],
-        })
-      );
-      const isPointsOnly = await vectorStyle._getIsPointsOnly();
-      expect(isPointsOnly).toBe(true);
-    });
-
-    it('isLineOnly should be false when source feature type only supports points', async () => {
-      const vectorStyle = new VectorStyle(
-        {},
-        new MockSource({
-          supportedShapeTypes: [VECTOR_SHAPE_TYPES.POINT],
-        })
-      );
-      const isLineOnly = await vectorStyle._getIsLinesOnly();
-      expect(isLineOnly).toBe(false);
-    });
-  });
-
-  describe('source supports multiple feature types', () => {
-    it('isPointsOnly should be true when data contains just points', async () => {
-      const vectorStyle = new VectorStyle(
-        {
-          __styleMeta: {
-            hasFeatureType: {
-              POINT: true,
-              LINE: false,
-              POLYGON: false,
-            },
-          },
-        },
-        new MockSource({
-          supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES),
-        })
-      );
-      const isPointsOnly = await vectorStyle._getIsPointsOnly();
-      expect(isPointsOnly).toBe(true);
-    });
-
-    it('isPointsOnly should be false when data contains just lines', async () => {
-      const vectorStyle = new VectorStyle(
-        {
-          __styleMeta: {
-            hasFeatureType: {
-              POINT: false,
-              LINE: true,
-              POLYGON: false,
-            },
-          },
-        },
-        new MockSource({
-          supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES),
-        })
-      );
-      const isPointsOnly = await vectorStyle._getIsPointsOnly();
-      expect(isPointsOnly).toBe(false);
-    });
-
-    it('isPointsOnly should be false when data contains points, lines, and polygons', async () => {
-      const vectorStyle = new VectorStyle(
-        {
-          __styleMeta: {
-            hasFeatureType: {
-              POINT: true,
-              LINE: true,
-              POLYGON: true,
-            },
-          },
-        },
-        new MockSource({
-          supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES),
-        })
-      );
-      const isPointsOnly = await vectorStyle._getIsPointsOnly();
-      expect(isPointsOnly).toBe(false);
     });
   });
 });
