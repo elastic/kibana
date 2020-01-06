@@ -13,7 +13,14 @@ import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, State } from '../types';
+import {
+  AlertType,
+  RawAlert,
+  IntervalSchedule,
+  Services,
+  State,
+  AlertInfoExecutionParams,
+} from '../types';
 import { promiseResult, map } from '../lib/result_type';
 
 type AlertInstances = Record<string, AlertInstance>;
@@ -127,7 +134,7 @@ export class TaskRunner {
       tags,
       createdBy,
       updatedBy,
-    }: SavedObject['attributes'],
+    }: AlertInfoExecutionParams,
     executionHandler: ReturnType<typeof createExecutionHandler>,
     spaceId: string
   ): Promise<State> {
@@ -192,7 +199,7 @@ export class TaskRunner {
   async validateAndRunAlert(
     services: Services,
     apiKey: string | null,
-    attributes: SavedObject['attributes'],
+    attributes: RawAlert,
     references: SavedObject['references']
   ) {
     const {

@@ -36,8 +36,8 @@ export interface AlertExecutorOptions {
   namespace?: string;
   name: string;
   tags: string[];
-  createdBy: string;
-  updatedBy: string;
+  createdBy: string | null;
+  updatedBy: string | null;
 }
 
 export interface AlertType {
@@ -113,6 +113,18 @@ export interface RawAlert extends SavedObjectAttributes {
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type AlertInfoExecutionParams = Pick<
+  RawAlert,
+  | 'params'
+  | 'throttle'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'name'
+  | 'tags'
+  | 'createdBy'
+  | 'updatedBy'
+>;
 
 export interface AlertingPlugin {
   setup: PluginSetupContract;
