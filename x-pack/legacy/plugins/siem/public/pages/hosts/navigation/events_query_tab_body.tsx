@@ -28,8 +28,11 @@ const eventsStackByOptions: MatrixHistogramOption[] = [
 ];
 
 export const EventsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
+  refetch,
+  setQuery,
   startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
@@ -38,9 +41,12 @@ export const EventsQueryTabBody = ({
       <MatrixHistogramContainer
         dataKey="Events"
         defaultStackByOption={eventsStackByOptions[0]}
+        deleteQuery={deleteQuery}
         endDate={endDate}
         filterQuery={filterQuery}
         query={EventsOverTimeGqlQuery}
+        refetch={refetch}
+        setQuery={setQuery}
         sourceId="default"
         stackByOptions={eventsStackByOptions}
         startDate={startDate}

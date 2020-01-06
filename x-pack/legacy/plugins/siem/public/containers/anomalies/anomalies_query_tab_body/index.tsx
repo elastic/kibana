@@ -27,7 +27,10 @@ const AnomaliesOverTimeGqlQuery = gql`
   ${getMatrixHistogramQuery('Anomalies')}
 `;
 export const AnomaliesQueryTabBody = ({
+  deleteQuery,
   endDate,
+  refetch,
+  setQuery,
   skip,
   startDate,
   type,
@@ -56,11 +59,14 @@ export const AnomaliesQueryTabBody = ({
       <MatrixHistogramContainer
         dataKey="Anomalies"
         defaultStackByOption={anomaliesStackByOptions[0]}
+        deleteQuery={deleteQuery}
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         hideHistogramIfEmpty={true}
         id={ID}
         query={AnomaliesOverTimeGqlQuery}
+        refetch={refetch}
+        setQuery={setQuery}
         sourceId="default"
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}

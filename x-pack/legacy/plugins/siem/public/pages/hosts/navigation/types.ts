@@ -13,6 +13,7 @@ import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { NavTab } from '../../../components/navigation/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { inputsModel } from '../../../store';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -47,6 +48,7 @@ export interface QueryTabBodyProps {
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: IIndexPattern;
+  refetch: inputsModel.Refetch;
   skip: boolean;
   setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;

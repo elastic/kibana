@@ -19,6 +19,7 @@ import {
   MatrixHistogramMappingTypes,
 } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface EventsArgs {
   endDate: number;
@@ -34,12 +35,16 @@ export interface EventsArgs {
 export interface OwnProps extends QueryTemplateProps {
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
+  deleteQuery?: ({ id }: { id: string }) => void;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
   query: Maybe<string>;
+  refetch: inputsModel.Refetch;
+  setQuery: SetQuery;
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];
+  subtitle?: string;
   type: hostsModel.HostsType | networkModel.NetworkType;
   title: string;
   updateDateRange: UpdateDateRange;

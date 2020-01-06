@@ -28,9 +28,12 @@ const AlertsOverTimeGqlQuery = gql`
   ${getMatrixHistogramQuery('Alerts')}
 `;
 export const AlertsView = ({
+  deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
+  refetch,
+  setQuery,
   startDate,
   type,
   updateDateRange = noop,
@@ -38,11 +41,14 @@ export const AlertsView = ({
   <>
     <MatrixHistogramContainer
       dataKey={dataKey}
+      deleteQuery={deleteQuery}
       defaultStackByOption={alertsStackByOptions[0]}
       endDate={endDate}
       filterQuery={filterQuery}
       id={ID}
       query={AlertsOverTimeGqlQuery}
+      refetch={refetch}
+      setQuery={setQuery}
       sourceId="default"
       stackByOptions={alertsStackByOptions}
       startDate={startDate}

@@ -56,6 +56,7 @@ export const AuthenticationsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
+  refetch,
   skip,
   setQuery,
   startDate,
@@ -66,11 +67,14 @@ export const AuthenticationsQueryTabBody = ({
     <MatrixHistogramContainer
       dataKey="Authentications"
       defaultStackByOption={authStackByOptions[0]}
+      deleteQuery={deleteQuery}
       endDate={endDate}
       filterQuery={filterQuery}
       id={ID}
       mapping={authMatrixDataMappingFields}
       query={AuthenticationsOverTimeGqlQuery}
+      refetch={refetch}
+      setQuery={setQuery}
       sourceId="default"
       startDate={startDate}
       stackByOptions={authStackByOptions}
@@ -87,17 +91,7 @@ export const AuthenticationsQueryTabBody = ({
       startDate={startDate}
       type={type}
     >
-      {({
-        authentications,
-        totalCount,
-        loading,
-        pageInfo,
-        loadPage,
-        id,
-        inspect,
-        isInspected,
-        refetch,
-      }) => (
+      {({ authentications, totalCount, loading, pageInfo, loadPage, id, inspect, isInspected }) => (
         <AuthenticationTableManage
           data={authentications}
           deleteQuery={deleteQuery}

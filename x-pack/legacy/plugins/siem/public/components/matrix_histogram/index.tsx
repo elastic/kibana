@@ -28,12 +28,14 @@ import {
   MatrixHistogramDataTypes,
 } from './types';
 import { generateTablePaginationOptions } from '../paginated_table/helpers';
+import { inputsModel } from '../../store';
 
 export const MatrixHistogram = React.memo(
   ({
     activePage,
     dataKey,
     defaultStackByOption,
+    deleteQuery,
     endDate,
     filterQuery,
     hideHistogramIfEmpty = false,
@@ -43,7 +45,9 @@ export const MatrixHistogram = React.memo(
     limit,
     mapping,
     query,
+    refetch,
     scaleType = ScaleType.Time,
+    setQuery,
     showLegend,
     stackByOptions,
     startDate,
@@ -73,6 +77,7 @@ export const MatrixHistogram = React.memo(
     const [subtitleWithCounts, setSubtitle] = useState(subtitle);
     const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
+    const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
     const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
     const [totalCount, setTotalCount] = useState(-1);
     const setSelectedChatOptionCallback = useCallback(
@@ -90,9 +95,11 @@ export const MatrixHistogram = React.memo(
           useQuery<{}, HistogramAggregation>({
             dataKey,
             endDate,
+            filterQuery,
             query,
             setLoading,
             setData,
+            setInspect,
             setTotalCount,
             startDate,
             sort,
@@ -114,7 +121,9 @@ export const MatrixHistogram = React.memo(
             } else {
               setHideHistogram(false);
             }
-          }, [totalCount]);
+
+            setQuery({ id, inspect, loading, refetch });
+          }, [totalCount, isInspected, loading]);
 
           const barChartData: ChartSeriesData[] = useMemo(() => getCustomChartData(data, mapping), [
             data,

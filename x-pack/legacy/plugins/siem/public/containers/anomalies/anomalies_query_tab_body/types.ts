@@ -13,6 +13,7 @@ import { HostsType } from '../../../store/hosts/model';
 import { NetworkType } from '../../../store/network/model';
 import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
 import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
+import { inputsModel } from '../../../store';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType;
@@ -20,15 +21,17 @@ interface QueryTabBodyProps {
 }
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
-  startDate: number;
-  endDate: number;
-  skip: boolean;
-  setQuery: SetQuery;
-  narrowDateRange: NarrowDateRange;
-  updateDateRange?: UpdateDateRange;
   anomaliesFilterQuery?: object;
+  AnomaliesTableComponent: typeof AnomaliesHostTable | typeof AnomaliesNetworkTable;
+  deleteQuery?: ({ id }: { id: string }) => void;
+  endDate: number;
+  flowTarget?: FlowTarget;
+  narrowDateRange: NarrowDateRange;
+  refetch: inputsModel.Refetch;
+  setQuery: SetQuery;
+  startDate: number;
+  skip: boolean;
+  updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
-  flowTarget?: FlowTarget;
-  AnomaliesTableComponent: typeof AnomaliesHostTable | typeof AnomaliesNetworkTable;
 };

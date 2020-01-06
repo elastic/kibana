@@ -19,23 +19,28 @@ import {
 } from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
+import { inputsModel } from '../../store';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 export type MatrixHistogramMappingTypes = Record<
   string,
-  { key: string; value: null; color: string }
+  { key: string; value: null; color?: string | undefined }
 >;
 export interface MatrixHistogramOption {
   text: string;
   value: string;
 }
 export interface MatrixHistogramBasicProps {
+  deleteQuery?: ({ id }: { id: string }) => void;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
+  refetch: inputsModel.Refetch;
+  setQuery: SetQuery;
   sourceId: string;
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
@@ -60,8 +65,9 @@ export interface MatrixHistogramQueryProps {
 }
 
 export interface MatrixHistogramQueryActionProps {
-  setLoading: Dispatch<SetStateAction<boolean>>;
   setData: Dispatch<SetStateAction<MatrixHistogramDataTypes[] | null>>;
+  setInspect: Dispatch<SetStateAction<inputsModel.InspectQuery | null>>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
   setTotalCount: Dispatch<SetStateAction<number>>;
 }
 

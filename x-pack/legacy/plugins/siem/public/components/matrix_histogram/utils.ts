@@ -115,6 +115,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   query,
   setLoading,
   setData,
+  setInspect,
   setTotalCount,
   startDate,
   sort,
@@ -170,6 +171,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               const source = getOr({}, `data.source.${rootDataKey}`, result);
               setData(getOr([], histogramDataKey, source));
               setTotalCount(getOr(-1, 'totalCount', source));
+              setInspect(getOr(null, 'inspect', source));
               setLoading(false);
             }
           },
@@ -177,6 +179,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
             if (isSubscribed) {
               setData(null);
               setTotalCount(-1);
+              setInspect(null);
               errorToToaster({
                 title: i18n.translate(
                   'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDescription',
@@ -198,5 +201,5 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query]);
+  }, [query, isInspected]);
 };
