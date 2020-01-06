@@ -30,14 +30,14 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     validateUrls([relativeUrl]);
 
     return {
+      objectType,
+      title,
       relativeUrl,
       headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
       basePath: request.getBasePath(),
       forceNow: new Date().toISOString(),
-      title,
-      objectType,
     };
   };
 };
