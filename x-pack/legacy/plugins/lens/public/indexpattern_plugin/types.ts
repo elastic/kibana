@@ -39,7 +39,7 @@ export interface IndexPatternField {
   aggregatable: boolean;
   scripted?: boolean;
   searchable: boolean;
-  aggregationRestrictions?: AggregationRestrictions;
+  aggregationRestrictions?: Partial<AggregationRestrictions>;
 }
 
 export interface IndexPatternLayer {
