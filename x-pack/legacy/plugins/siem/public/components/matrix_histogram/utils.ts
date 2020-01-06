@@ -15,7 +15,7 @@ import {
   MatrixHistogramQueryProps,
   MatrixHistogramQueryActionProps,
   MatrixHistogramQueryVariables,
-  MatrixHistogramQueryQuery,
+  MatrixHistogramQuery,
 } from './types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { useStateToaster } from '../toasters';
@@ -108,48 +108,6 @@ export const bytesFormatter = (value: number) => {
   return numeral(value).format('0,0.[0]b');
 };
 
-export const getSignalsHistogramQuery = (stackByField: string, from: number, to: number) => ({
-  aggs: {
-    signalsByGrouping: {
-      terms: {
-        field: stackByField,
-        missing: i18n.translate(
-          'xpack.siem.detectionEngine.signals.histogram.allOthersGroupingLabel',
-          {
-            defaultMessage: 'All others',
-          }
-        ),
-        order: {
-          _count: 'desc',
-        },
-        size: 10,
-      },
-      aggs: {
-        signals: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: '30s',
-          },
-        },
-      },
-    },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
-    },
-  },
-});
-
 export const useQuery = <Hit, Aggs, TCache = object>({
   dataKey,
   endDate,
@@ -179,7 +137,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       if (!apolloClient) return null;
 
       return apolloClient
-        .query<MatrixHistogramQueryQuery, MatrixHistogramQueryVariables<NetworkDnsSortField>>({
+        .query<MatrixHistogramQuery, MatrixHistogramQueryVariables<NetworkDnsSortField>>({
           query,
           fetchPolicy: 'cache-first',
           variables: {
@@ -215,7 +173,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setLoading(false);
             }
           },
-          (error: Error) => {
+          error => {
             if (isSubscribed) {
               setData(null);
               setTotalCount(-1);

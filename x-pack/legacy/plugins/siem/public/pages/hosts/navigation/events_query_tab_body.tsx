@@ -11,7 +11,7 @@ import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { SignalsHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { getMatrixHistogramQuery } from '../../../containers/helpers';
 
@@ -20,7 +20,7 @@ const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 export const EventsOverTimeGqlQuery = gql`
   ${getMatrixHistogramQuery('Events')}
 `;
-const eventsStackByOptions: SignalsHistogramOption[] = [
+const eventsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'action',
     value: 'event.action',

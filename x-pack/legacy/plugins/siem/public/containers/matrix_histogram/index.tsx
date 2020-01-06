@@ -8,13 +8,16 @@ import React from 'react';
 import { compose } from 'redux';
 
 import { connect } from 'react-redux';
-import { inputsModel, State, inputsSelectors, hostsModel } from '../../store';
+import { inputsModel, State, inputsSelectors, hostsModel, networkModel } from '../../store';
 import { QueryTemplateProps } from '../query_template';
 import { withKibana } from '../../lib/kibana';
 
 import { MatrixOverTimeHistogramData, Maybe } from '../../graphql/types';
 import { MatrixHistogram } from '../../components/matrix_histogram';
-import { SignalsHistogramOption } from '../../components/matrix_histogram/types';
+import {
+  MatrixHistogramOption,
+  MatrixHistogramMappingTypes,
+} from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 
 export interface EventsArgs {
@@ -29,14 +32,15 @@ export interface EventsArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
+  dataKey: string | string[];
+  defaultStackByOption: MatrixHistogramOption;
+  hideHistogramIfEmpty?: boolean;
   id: string;
-  dataKey: string;
-  defaultStackByOption: SignalsHistogramOption;
-  hideHistogramIfEmpty: boolean;
+  mapping?: MatrixHistogramMappingTypes;
   query: Maybe<string>;
   sourceId: string;
-  stackByOptions: SignalsHistogramOption[];
-  type: hostsModel.HostsType;
+  stackByOptions: MatrixHistogramOption[];
+  type: hostsModel.HostsType | networkModel.NetworkType;
   title: string;
   updateDateRange: UpdateDateRange;
 }

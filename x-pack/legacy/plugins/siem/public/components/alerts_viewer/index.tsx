@@ -10,15 +10,14 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
 import { AlertsComponentsQueryProps } from './types';
-import { hostsModel } from '../../store/model';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
-import { SignalsHistogramOption } from '../matrix_histogram/types';
+import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../containers/helpers';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 
 const ID = 'alertsOverTimeQuery';
-const alertsStackByOptions: SignalsHistogramOption[] = [
+const alertsStackByOptions: MatrixHistogramOption[] = [
   {
     text: i18n.ALERTS_STACK_BY_ACTIONS,
     value: 'event.actions',
@@ -29,13 +28,9 @@ const AlertsOverTimeGqlQuery = gql`
   ${getMatrixHistogramQuery('Alerts')}
 `;
 export const AlertsView = ({
-  defaultFilters,
-  deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
-  skip,
-  setQuery,
   startDate,
   type,
   updateDateRange = noop,
@@ -45,17 +40,16 @@ export const AlertsView = ({
       dataKey={dataKey}
       defaultStackByOption={alertsStackByOptions[0]}
       endDate={endDate}
+      filterQuery={filterQuery}
       id={ID}
       query={AlertsOverTimeGqlQuery}
-      setQuery={setQuery}
+      sourceId="default"
       stackByOptions={alertsStackByOptions}
       startDate={startDate}
       subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
       title={`${i18n.ALERTS_DOCUMENT_TYPE} ${i18n.ALERTS_BY}`}
+      type={type}
       updateDateRange={updateDateRange}
-      filterQuery={filterQuery}
-      sourceId="default"
-      type={hostsModel.HostsType.page}
     />
     <EuiSpacer size="l" />
     <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />

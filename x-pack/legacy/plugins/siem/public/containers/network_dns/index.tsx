@@ -10,6 +10,8 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
+import { DocumentNode } from 'graphql';
+import { ScaleType } from '@elastic/charts';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkDnsQuery,
@@ -26,7 +28,8 @@ import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_te
 import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
 import { MatrixHistogram } from '../../components/matrix_histogram';
-import { SignalsHistogramOption } from '../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
+import { UpdateDateRange } from '../../components/charts/common';
 
 const ID = 'networkDnsQuery';
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
@@ -49,10 +52,16 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 }
 
 interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
-  dataKey: string;
-  defaultStackByOption: SignalsHistogramOption;
-  stackByOptions: SignalsHistogramOption[];
+  dataKey: string | string[];
+  defaultStackByOption: MatrixHistogramOption;
+  query: DocumentNode;
+  scaleType: ScaleType;
+  stackByOptions: MatrixHistogramOption[];
+  title: string;
   type: networkModel.NetworkType;
+  updateDateRange: UpdateDateRange;
+  yTickFormatter?: (value: number) => string;
+  showLegend?: boolean;
 }
 
 export interface NetworkDnsComponentReduxProps {

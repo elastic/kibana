@@ -22,7 +22,7 @@ import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData, useQuery } from './utils';
 import {
   MatrixHistogramProps,
-  SignalsHistogramOption,
+  MatrixHistogramOption,
   HistogramAggregation,
   MatrixHistogramQueryProps,
   MatrixHistogramDataTypes,
@@ -67,7 +67,7 @@ export const MatrixHistogram = React.memo(
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
-    const [selectedStackByOption, setSelectedStackByOption] = useState<SignalsHistogramOption>(
+    const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
       defaultStackByOption
     );
     const [subtitleWithCounts, setSubtitle] = useState(subtitle);

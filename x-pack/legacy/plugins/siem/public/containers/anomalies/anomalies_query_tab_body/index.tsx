@@ -13,11 +13,11 @@ import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs'
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { MatrixHistogramContainer } from '../../matrix_histogram';
-import { SignalsHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../helpers';
 
 const ID = 'anomaliesOverTimeQuery';
-const anomaliesStackByOptions: SignalsHistogramOption[] = [
+const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'job',
     value: 'job_id',
@@ -34,13 +34,12 @@ export const AnomaliesQueryTabBody = ({
   narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
-  setQuery,
   updateDateRange = () => {},
   AnomaliesTableComponent,
   flowTarget,
   ip,
 }: AnomaliesQueryTabBodyProps) => {
-  const [siemJobsLoading, siemJobs] = useSiemJobs(true);
+  const [, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
@@ -66,6 +65,7 @@ export const AnomaliesQueryTabBody = ({
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
         title="Anomalies"
+        type={type}
         updateDateRange={updateDateRange}
       />
       <EuiSpacer />

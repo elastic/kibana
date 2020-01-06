@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { MatrixHistogram } from '.';
+import { EventsOverTimeGqlQuery as mockQuery } from '../../pages/hosts/navigation';
 
 jest.mock('../../lib/kibana');
 
@@ -29,18 +30,23 @@ jest.mock('../charts/barchart', () => {
   };
 });
 
-describe('Load More Events Table Component', () => {
+describe('Matrix Histogram Component', () => {
   const mockMatrixOverTimeHistogramProps = {
-    data: [],
     dataKey: 'mockDataKey',
+    defaultIndex: ['defaultIndex'],
+    defaultStackByOption: { text: 'text', value: 'value' },
     endDate: new Date('2019-07-18T20:00:00.000Z').valueOf(),
     id: 'mockId',
-    loading: true,
-    updateDateRange: () => {},
+    isInspected: false,
+    isPtrIncluded: false,
+    query: mockQuery,
+    sourceId: 'default',
+    stackByOptions: [{ text: 'text', value: 'value' }],
     startDate: new Date('2019-07-18T19:00: 00.000Z').valueOf(),
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',
+    updateDateRange: () => {},
   };
   describe('rendering', () => {
     test('it renders EuiLoadingContent on initialLoad', () => {

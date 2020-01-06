@@ -25,20 +25,20 @@ export type MatrixHistogramMappingTypes = Record<
   string,
   { key: string; value: null; color: string }
 >;
-export interface SignalsHistogramOption {
+export interface MatrixHistogramOption {
   text: string;
   value: string;
 }
 export interface MatrixHistogramBasicProps {
   defaultIndex: string[];
-  defaultStackByOption: SignalsHistogramOption;
+  defaultStackByOption: MatrixHistogramOption;
   endDate: number;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
   sourceId: string;
   startDate: number;
-  stackByOptions: SignalsHistogramOption[];
+  stackByOptions: MatrixHistogramOption[];
   subtitle?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
@@ -51,11 +51,11 @@ export interface MatrixHistogramQueryProps {
   filterQuery?: ESQuery | string | undefined;
   limit?: number;
   query: DocumentNode;
-  sort: NetworkDnsSortField;
+  sort?: NetworkDnsSortField;
   startDate: number;
   isInspected: boolean;
   isPtrIncluded: boolean;
-  isHistogram: boolean;
+  isHistogram?: boolean;
   pagination?: PaginationInputPaginated;
 }
 
@@ -77,13 +77,13 @@ export interface MatrixHistogramQueryVariables<SortField> {
   filterQuery?: Maybe<string>;
   defaultIndex: string[];
   inspect: boolean;
-  isHistogram: boolean;
+  isHistogram?: boolean;
   sort?: SortField;
   isPtrIncluded: boolean;
   pagination?: PaginationInputPaginated;
 }
 
-export interface MatrixHistogramQueryQuery {
+export interface MatrixHistogramQuery {
   source: Source;
 }
 

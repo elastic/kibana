@@ -14,7 +14,7 @@ import { AuthenticationsQuery } from '../../../containers/authentications';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import {
-  SignalsHistogramOption,
+  MatrixHistogramOption,
   MatrixHistogramMappingTypes,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
@@ -23,7 +23,7 @@ import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/ty
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
-const authStackByOptions: SignalsHistogramOption[] = [
+const authStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'event type',
     value: 'event.type',

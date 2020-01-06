@@ -15,13 +15,13 @@ import { manageQuery } from '../../../components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
-import { SignalsHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { networkDnsQuery } from '../../../containers/network_dns/index.gql_query';
 import { bytesFormatter } from '../../../components/matrix_histogram/utils';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
-const dnsStackByOptions: SignalsHistogramOption[] = [
+const dnsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'domain',
     value: 'dns.question.registered_domain',
