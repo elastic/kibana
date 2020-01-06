@@ -14,6 +14,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   const config = server.config();
 
   return async function authorizedUserPreRouting(request) {
+    console.log('how are you');
     const xpackInfo = server.plugins.xpack_main.info;
 
     if (!xpackInfo || !xpackInfo.isAvailable()) {

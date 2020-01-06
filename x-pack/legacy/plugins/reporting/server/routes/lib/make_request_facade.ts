@@ -9,6 +9,7 @@ import { RequestFacade } from '../../../types';
 export function makeRequestFacade(request: RequestFacade): RequestFacade {
   return {
     headers: request.headers,
+    auth: request.auth, // for getUser
     params: request.params,
     payload: request.payload,
     query: request.query,

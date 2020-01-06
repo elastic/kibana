@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getUserFactory(server) {
-  return async request => {
+import { RequestFacade, ServerFacade } from '../../types';
+
+export function getUserFactory(server: ServerFacade) {
+  return async (request: RequestFacade) => {
     if (!server.plugins.security) {
       return null;
     }

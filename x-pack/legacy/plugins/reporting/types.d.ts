@@ -80,6 +80,7 @@ export interface ServerFacade {
   newPlatform: Legacy.Server['newPlatform'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
+    security: LegacyPlugins['security'];
     xpack_main: XPackMainPlugin & {
       status?: any;
     };
@@ -101,6 +102,7 @@ export type EnqueueJobFn = <JobParamsType>(
 export interface RequestFacade {
   getBasePath: Legacy.Request['getBasePath'];
   getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
+  auth: Legacy.Request['auth'];
   headers: Legacy.Request['headers'];
   params: Legacy.Request['params'];
   payload: JobParamPostPayload | GenerateExportTypePayload;

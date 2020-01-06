@@ -17,10 +17,11 @@ import {
   runValidations,
 } from './server/lib';
 import { config as reportingConfig } from './config';
-import { logConfiguration } from './log_configuration';
 import { createBrowserDriverFactory } from './server/browsers';
 import { registerReportingUsageCollector } from './server/usage';
 import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
+import { logConfiguration } from './log_configuration';
+import { makeServerFacade } from './make_server_facade';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -70,28 +71,28 @@ export const reporting = (kibana: any) => {
       },
     },
 
-    // TODO: Decouple Hapi: Build a server facade object based on the server to
-    // pass through to the libs. Do not pass server directly
     async init(server: ServerFacade) {
+      const serverFacade = makeServerFacade(server);
+
       const exportTypesRegistry = getExportTypesRegistry();
 
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      const { usageCollection } = server.newPlatform.setup.plugins;
+      const { usageCollection } = serverFacade.newPlatform.setup.plugins;
       registerReportingUsageCollector(
         usageCollection,
-        server,
+        serverFacade,
         () => isCollectorReady,
         exportTypesRegistry
       );
 
-      const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(server);
+      const logger = LevelLogger.createForServer(serverFacade, [PLUGIN_ID]);
+      const browserDriverFactory = await createBrowserDriverFactory(serverFacade);
 
-      logConfiguration(server, logger);
-      runValidations(server, logger, browserDriverFactory);
+      logConfiguration(serverFacade, logger);
+      runValidations(serverFacade, logger, browserDriverFactory);
 
-      const { xpack_main: xpackMainPlugin } = server.plugins;
+      const { xpack_main: xpackMainPlugin } = serverFacade.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       (xpackMainPlugin as any).status.once('green', () => {
@@ -104,7 +105,7 @@ export const reporting = (kibana: any) => {
       isCollectorReady = true;
 
       // Reporting routes
-      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
+      registerRoutes(serverFacade, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {
