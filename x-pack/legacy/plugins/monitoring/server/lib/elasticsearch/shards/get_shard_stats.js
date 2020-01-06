@@ -39,12 +39,19 @@ export function getShardStats(
   req,
   esIndexPattern,
   cluster,
-  { includeNodes = true, includeIndices = true } = {}
+  { includeNodes = true, includeIndices = true, indexName = null, nodeUuid = null } = {}
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
   const metric = ElasticsearchMetric.getMetricFields();
+  const filters = [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }];
+  if (indexName) {
+    filters.push({ term: { 'shard.index': indexName } });
+  }
+  if (nodeUuid) {
+    filters.push({ term: { 'shard.node': nodeUuid } });
+  }
   const params = {
     index: esIndexPattern,
     size: 0,
@@ -55,7 +62,7 @@ export function getShardStats(
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
         metric,
-        filters: [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }],
+        filters,
       }),
       aggs: {
         ...getShardAggs(config, includeNodes, includeIndices),

@@ -17,7 +17,7 @@ import {
   INDEX_PATTERN_FILEBEAT,
 } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
-import { getUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_unassigned_shard_stats';
+import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -54,12 +54,14 @@ export function esOverviewRoute(server) {
           getLastRecovery(req, esIndexPattern),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
-        const shardStats = await getUnassignedShardStats(req, esIndexPattern, clusterStats, {
-          includeIndices: true,
-        });
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
+          req,
+          esIndexPattern,
+          clusterStats
+        );
 
         return {
-          clusterStatus: getClusterStatus(clusterStats, shardStats),
+          clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           metrics,
           logs,
           shardActivity,

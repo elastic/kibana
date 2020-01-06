@@ -11,7 +11,7 @@ import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
-import { getUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_unassigned_shard_stats';
+import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function mlJobRoute(server) {
   server.route({
@@ -39,13 +39,15 @@ export function mlJobRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getUnassignedShardStats(req, esIndexPattern, clusterStats, {
-          includeIndices: true,
-        });
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
+          req,
+          esIndexPattern,
+          clusterStats
+        );
         const rows = await getMlJobs(req, esIndexPattern);
 
         return {
-          clusterStatus: getClusterStatus(clusterStats, shardStats),
+          clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           rows,
         };
       } catch (err) {

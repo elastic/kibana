@@ -29,7 +29,7 @@ import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_me
  * @param {Object} shardStats: per-node information about shards
  * @return {Array} node info combined with metrics for each node from handle_response
  */
-export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats) {
+export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, nodesShardCount) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
@@ -104,5 +104,9 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, clusterStats, shardStats, pageOfNodes, { min, max, bucketSize });
+  return handleResponse(response, clusterStats, nodesShardCount, pageOfNodes, {
+    min,
+    max,
+    bucketSize,
+  });
 }
