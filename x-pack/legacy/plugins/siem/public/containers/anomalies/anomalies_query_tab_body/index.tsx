@@ -6,17 +6,26 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import gql from 'graphql-tag';
 import { AnomaliesQueryTabBodyProps } from './types';
-import { manageQuery } from '../../../components/page/manage_query';
-import { AnomaliesOverTimeHistogram } from '../../../components/anomalies_over_time';
-import { AnomaliesOverTimeQuery } from '../anomalies_over_time';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import { MatrixHistogramContainer } from '../../matrix_histogram';
+import { SignalsHistogramOption } from '../../../components/matrix_histogram/types';
+import { getMatrixHistogramQuery } from '../../helpers';
 
-const AnomaliesOverTimeManage = manageQuery(AnomaliesOverTimeHistogram);
-
+const ID = 'anomaliesOverTimeQuery';
+const anomaliesStackByOptions: SignalsHistogramOption[] = [
+  {
+    text: 'job',
+    value: 'job_id',
+  },
+];
+const AnomaliesOverTimeGqlQuery = gql`
+  ${getMatrixHistogramQuery('Anomalies')}
+`;
 export const AnomaliesQueryTabBody = ({
   endDate,
   skip,
@@ -26,8 +35,7 @@ export const AnomaliesQueryTabBody = ({
   filterQuery,
   anomaliesFilterQuery,
   setQuery,
-  hideHistogramIfEmpty,
-  updateDateRange = () => {},
+  updateDateRange = () => { },
   AnomaliesTableComponent,
   flowTarget,
   ip,
@@ -46,37 +54,21 @@ export const AnomaliesQueryTabBody = ({
 
   return (
     <>
-      <AnomaliesOverTimeQuery
+      <MatrixHistogramContainer
+        dataKey="Anomalies"
+        defaultStackByOption={anomaliesStackByOptions[0]}
         endDate={endDate}
         filterQuery={mergedFilterQuery}
+        hideHistogramIfEmpty={true}
+        id={ID}
+        query={AnomaliesOverTimeGqlQuery}
         sourceId="default"
+        stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
-        type={type}
-      >
-        {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => {
-          if (hideHistogramIfEmpty && !anomaliesOverTime.length) {
-            return <div />;
-          }
-
-          return (
-            <>
-              <AnomaliesOverTimeManage
-                data={anomaliesOverTime!}
-                endDate={endDate}
-                id={id}
-                inspect={inspect}
-                loading={siemJobsLoading || loading}
-                refetch={refetch}
-                setQuery={setQuery}
-                startDate={startDate}
-                totalCount={totalCount}
-                updateDateRange={updateDateRange}
-              />
-              <EuiSpacer />
-            </>
-          );
-        }}
-      </AnomaliesOverTimeQuery>
+        title="Anomalies"
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}

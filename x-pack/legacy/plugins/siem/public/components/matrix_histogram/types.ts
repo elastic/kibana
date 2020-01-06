@@ -5,28 +5,131 @@
  */
 
 import { ScaleType } from '@elastic/charts';
-import { MatrixOverTimeHistogramData, MatrixOverOrdinalHistogramData } from '../../graphql/types';
-import { AuthMatrixDataFields } from '../page/hosts/authentications_over_time/utils';
+import { SetStateAction } from 'react';
+import { Dispatch } from 'src/plugins/kibana_utils/public';
+import { DocumentNode } from 'graphql';
+import {
+  MatrixOverTimeHistogramData,
+  MatrixOverOrdinalHistogramData,
+  NetworkDnsSortField,
+  PaginationInputPaginated,
+  TimerangeInput,
+  Maybe,
+  Source,
+} from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
+import { ESQuery } from '../../../common/typed_json';
 
 export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
-export type MatrixHistogramMappingTypes = AuthMatrixDataFields;
-export interface MatrixHistogramBasicProps<T> {
-  data: T[];
+export type MatrixHistogramMappingTypes = Record<
+  string,
+  { key: string; value: null; color: string }
+>;
+export interface SignalsHistogramOption {
+  text: string;
+  value: string;
+}
+export interface MatrixHistogramBasicProps {
+  defaultIndex: string[];
+  defaultStackByOption: SignalsHistogramOption;
   endDate: number;
+  hideHistogramIfEmpty?: boolean;
   id: string;
-  loading: boolean;
   mapping?: MatrixHistogramMappingTypes;
+  sourceId: string;
   startDate: number;
-  totalCount: number;
+  stackByOptions: SignalsHistogramOption[];
+  subtitle?: string;
+  title?: string;
   updateDateRange: UpdateDateRange;
 }
 
-export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
-  dataKey?: string;
+export interface MatrixHistogramQueryProps {
+  activePage?: number;
+  dataKey: string;
+  endDate: number;
+  filterQuery?: ESQuery | string | undefined;
+  limit?: number;
+  query: DocumentNode;
+  sort: NetworkDnsSortField;
+  startDate: number;
+  isInspected: boolean;
+  isPtrIncluded: boolean;
+  isHistogram: boolean;
+  pagination?: PaginationInputPaginated;
+}
+
+export interface MatrixHistogramQueryActionProps {
+  setLoading: Dispatch<SetStateAction<boolean>>;
+  setData: Dispatch<SetStateAction<MatrixHistogramDataTypes[] | null>>;
+  setTotalCount: Dispatch<SetStateAction<number>>;
+}
+
+export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
-  subtitle?: string;
-  title?: string;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
 }
+
+export interface MatrixHistogramQueryVariables<SortField> {
+  sourceId: string;
+  timerange: TimerangeInput;
+  filterQuery?: Maybe<string>;
+  defaultIndex: string[];
+  inspect: boolean;
+  isHistogram: boolean;
+  sort?: SortField;
+  isPtrIncluded: boolean;
+  pagination?: PaginationInputPaginated;
+}
+
+export interface MatrixHistogramQueryQuery {
+  source: Source;
+}
+
+export interface HistogramBucket {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+}
+export interface GroupBucket {
+  key: string;
+  signals: {
+    buckets: HistogramBucket[];
+  };
+}
+
+export interface HistogramAggregation {
+  histogramAgg: {
+    buckets: GroupBucket[];
+  };
+}
+
+export interface SignalsResponse {
+  took: number;
+  timeout: boolean;
+}
+
+export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
+  extends SignalsResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: Hit[];
+  };
+}
+
+export type Return<Hit, Aggs> = [
+  boolean,
+  SignalSearchResponse<Hit, Aggs> | null,
+  React.Dispatch<SetStateAction<string>>
+];

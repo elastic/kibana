@@ -461,11 +461,11 @@ export interface Source {
 
   AlertsHistogram: AlertsOverTimeData;
 
-  AnomaliesOverTime: AnomaliesOverTimeData;
+  AnomaliesHistogram: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
-  AuthenticationsOverTime: AuthenticationsOverTimeData;
+  AuthenticationsHistogram: AuthenticationsOverTimeData;
 
   Timeline: TimelineData;
 
@@ -473,7 +473,7 @@ export interface Source {
 
   LastEventTime: LastEventTimeData;
 
-  EventsOverTime: EventsOverTimeData;
+  EventsHistogram: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -565,7 +565,7 @@ export interface IndexField {
 export interface AlertsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
+  AlertsOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -587,7 +587,7 @@ export interface MatrixOverTimeHistogramData {
 export interface AnomaliesOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  anomaliesOverTime: MatrixOverTimeHistogramData[];
+  AnomaliesOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -729,7 +729,7 @@ export interface PageInfoPaginated {
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  authenticationsOverTime: MatrixOverTimeHistogramData[];
+  AuthenticationsOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -1313,7 +1313,7 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  eventsOverTime: MatrixOverTimeHistogramData[];
+  EventsOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -2156,7 +2156,7 @@ export interface AlertsHistogramSourceArgs {
 
   timerange: TimerangeInput;
 }
-export interface AnomaliesOverTimeSourceArgs {
+export interface AnomaliesHistogramSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
@@ -2172,7 +2172,7 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface AuthenticationsOverTimeSourceArgs {
+export interface AuthenticationsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
@@ -2208,7 +2208,7 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsOverTimeSourceArgs {
+export interface EventsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
@@ -2800,11 +2800,11 @@ export namespace SourceResolvers {
 
     AlertsHistogram?: AlertsHistogramResolver<AlertsOverTimeData, TypeParent, TContext>;
 
-    AnomaliesOverTime?: AnomaliesOverTimeResolver<AnomaliesOverTimeData, TypeParent, TContext>;
+    AnomaliesHistogram?: AnomaliesHistogramResolver<AnomaliesOverTimeData, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
-    AuthenticationsOverTime?: AuthenticationsOverTimeResolver<
+    AuthenticationsHistogram?: AuthenticationsHistogramResolver<
       AuthenticationsOverTimeData,
       TypeParent,
       TContext
@@ -2816,7 +2816,7 @@ export namespace SourceResolvers {
 
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, TContext>;
 
-    EventsOverTime?: EventsOverTimeResolver<EventsOverTimeData, TypeParent, TContext>;
+    EventsHistogram?: EventsHistogramResolver<EventsOverTimeData, TypeParent, TContext>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, TContext>;
 
@@ -2885,12 +2885,12 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
   }
 
-  export type AnomaliesOverTimeResolver<
+  export type AnomaliesHistogramResolver<
     R = AnomaliesOverTimeData,
     Parent = Source,
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, AnomaliesOverTimeArgs>;
-  export interface AnomaliesOverTimeArgs {
+  > = Resolver<R, Parent, TContext, AnomaliesHistogramArgs>;
+  export interface AnomaliesHistogramArgs {
     timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
@@ -2913,12 +2913,12 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type AuthenticationsOverTimeResolver<
+  export type AuthenticationsHistogramResolver<
     R = AuthenticationsOverTimeData,
     Parent = Source,
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, AuthenticationsOverTimeArgs>;
-  export interface AuthenticationsOverTimeArgs {
+  > = Resolver<R, Parent, TContext, AuthenticationsHistogramArgs>;
+  export interface AuthenticationsHistogramArgs {
     timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
@@ -2973,12 +2973,12 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type EventsOverTimeResolver<
+  export type EventsHistogramResolver<
     R = EventsOverTimeData,
     Parent = Source,
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, EventsOverTimeArgs>;
-  export interface EventsOverTimeArgs {
+  > = Resolver<R, Parent, TContext, EventsHistogramArgs>;
+  export interface EventsHistogramArgs {
     timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
@@ -3443,7 +3443,7 @@ export namespace AlertsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    alertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
+    AlertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -3518,7 +3518,7 @@ export namespace AnomaliesOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    anomaliesOverTime?: AnomaliesOverTimeResolver<
+    AnomaliesOverTimeByModule?: AnomaliesOverTimeByModuleResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -3532,7 +3532,7 @@ export namespace AnomaliesOverTimeDataResolvers {
     Parent = AnomaliesOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AnomaliesOverTimeResolver<
+  export type AnomaliesOverTimeByModuleResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = AnomaliesOverTimeData,
     TContext = SiemContext
@@ -3993,7 +3993,7 @@ export namespace AuthenticationsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    authenticationsOverTime?: AuthenticationsOverTimeResolver<
+    AuthenticationsOverTimeByModule?: AuthenticationsOverTimeByModuleResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -4007,7 +4007,7 @@ export namespace AuthenticationsOverTimeDataResolvers {
     Parent = AuthenticationsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AuthenticationsOverTimeResolver<
+  export type AuthenticationsOverTimeByModuleResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = AuthenticationsOverTimeData,
     TContext = SiemContext
@@ -5947,7 +5947,11 @@ export namespace EventsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    eventsOverTime?: EventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, TContext>;
+    EventsOverTimeByModule?: EventsOverTimeByModuleResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
 
     totalCount?: TotalCountResolver<number, TypeParent, TContext>;
   }
@@ -5957,7 +5961,7 @@ export namespace EventsOverTimeDataResolvers {
     Parent = EventsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type EventsOverTimeResolver<
+  export type EventsOverTimeByModuleResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = EventsOverTimeData,
     TContext = SiemContext

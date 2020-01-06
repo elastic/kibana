@@ -76,7 +76,7 @@ export const eventsSchema = gql`
 
   type EventsOverTimeData {
     inspect: Inspect
-    eventsOverTime: [MatrixOverTimeHistogramData!]!
+    EventsOverTimeByModule: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
@@ -100,7 +100,7 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
-    EventsOverTime(
+    EventsHistogram(
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!

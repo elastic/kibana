@@ -33,7 +33,7 @@ export interface EventsResolversDeps {
 }
 
 type QueryEventsOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.EventsOverTimeResolver>,
+  AppResolverOf<SourceResolvers.EventsHistogramResolver>,
   QuerySourceResolver
 >;
 
@@ -44,7 +44,7 @@ export const createEventsResolvers = (
     Timeline: QueryTimelineResolver;
     TimelineDetails: QueryTimelineDetailsResolver;
     LastEventTime: QueryLastEventTimeResolver;
-    EventsOverTime: QueryEventsOverTimeResolver;
+    EventsHistogram: QueryEventsOverTimeResolver;
   };
 } => ({
   Source: {
@@ -71,7 +71,7 @@ export const createEventsResolvers = (
       };
       return libs.events.getLastEventTimeData(req, options);
     },
-    async EventsOverTime(source, args, { req }, info) {
+    async EventsHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,

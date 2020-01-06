@@ -45,7 +45,7 @@ describe('alerts elasticsearch_adapter', () => {
       );
 
       expect(data).to.eql({
-        alertsOverTimeByModule: mockAlertsHistogramDataFormattedResponse,
+        AlertsOverTimeByModule: mockAlertsHistogramDataFormattedResponse,
         inspect: {
           dsl: ['"mockAlertsHistogramQueryDsl"'],
           response: [JSON.stringify(mockAlertsHistogramDataResponse, null, 2)],

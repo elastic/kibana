@@ -16,6 +16,7 @@ export const networkDnsQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $isHistogram: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -28,7 +29,7 @@ export const networkDnsQuery = gql`
         defaultIndex: $defaultIndex
       ) {
         totalCount
-        edges {
+        edges @skip(if: $isHistogram) {
           node {
             _id
             dnsBytesIn
@@ -41,7 +42,7 @@ export const networkDnsQuery = gql`
             value
           }
         }
-        pageInfo {
+        pageInfo @skip(if: $isHistogram) {
           activePage
           fakeTotalCount
           showMorePagesIndicator
@@ -50,7 +51,7 @@ export const networkDnsQuery = gql`
           dsl
           response
         }
-        histogram {
+        histogram @include(if: $isHistogram) {
           x
           y
           g

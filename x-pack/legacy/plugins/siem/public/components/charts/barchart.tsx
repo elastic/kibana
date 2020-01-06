@@ -56,6 +56,7 @@ export const BarChartBaseComponent = ({
 }) => {
   const theme = useTheme();
   const timeZone = useBrowserTimeZone();
+  const customSeriesColors = get('configs.customSeriesColors', chartConfigs);
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
@@ -87,7 +88,9 @@ export const BarChartBaseComponent = ({
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
+            customSeriesColors={
+              customSeriesColors ?? getSeriesStyle(barSeriesKey, series.color, seriesType)
+            }
           />
         ) : null;
       })}

@@ -16,7 +16,7 @@ type QueryAuthenticationsResolver = ChildResolverOf<
 >;
 
 type QueryAuthenticationsOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AuthenticationsOverTimeResolver>,
+  AppResolverOf<SourceResolvers.AuthenticationsHistogramResolver>,
   QuerySourceResolver
 >;
 
@@ -29,7 +29,7 @@ export const createAuthenticationsResolvers = (
 ): {
   Source: {
     Authentications: QueryAuthenticationsResolver;
-    AuthenticationsOverTime: QueryAuthenticationsOverTimeResolver;
+    AuthenticationsHistogram: QueryAuthenticationsOverTimeResolver;
   };
 } => ({
   Source: {
@@ -37,7 +37,7 @@ export const createAuthenticationsResolvers = (
       const options = createOptionsPaginated(source, args, info);
       return libs.authentications.getAuthentications(req, options);
     },
-    async AuthenticationsOverTime(source, args, { req }, info) {
+    async AuthenticationsHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,

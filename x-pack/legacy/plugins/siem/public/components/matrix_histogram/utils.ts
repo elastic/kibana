@@ -3,12 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
-import { get, groupBy, map, toPairs } from 'lodash/fp';
+import { get, groupBy, map, toPairs, getOr } from 'lodash/fp';
 import numeral from '@elastic/numeral';
+import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
+import {
+  MatrixHistogramDataTypes,
+  MatrixHistogramMappingTypes,
+  MatrixHistogramQueryProps,
+  MatrixHistogramQueryActionProps,
+  MatrixHistogramQueryVariables,
+  MatrixHistogramQueryQuery,
+} from './types';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { useStateToaster } from '../toasters';
+import { errorToToaster } from '../ml/api/error_to_toaster';
+import { useUiSetting$ } from '../../lib/kibana';
+import { createFilter } from '../../containers/helpers';
+import { useApolloClient } from '../../utils/apollo_context';
+import { NetworkDnsSortField } from '../../graphql/types';
 
 export const getBarchartConfigs = ({
   from,
@@ -72,9 +87,10 @@ export const formatToChartDataItem = ([key, value]: [
 });
 
 export const getCustomChartData = (
-  data: MatrixHistogramDataTypes[],
+  data: MatrixHistogramDataTypes[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
+  if (!data) return [];
   const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
@@ -90,4 +106,139 @@ export const getCustomChartData = (
 
 export const bytesFormatter = (value: number) => {
   return numeral(value).format('0,0.[0]b');
+};
+
+export const getSignalsHistogramQuery = (stackByField: string, from: number, to: number) => ({
+  aggs: {
+    signalsByGrouping: {
+      terms: {
+        field: stackByField,
+        missing: i18n.translate(
+          'xpack.siem.detectionEngine.signals.histogram.allOthersGroupingLabel',
+          {
+            defaultMessage: 'All others',
+          }
+        ),
+        order: {
+          _count: 'desc',
+        },
+        size: 10,
+      },
+      aggs: {
+        signals: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: '30s',
+          },
+        },
+      },
+    },
+  },
+  query: {
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+    },
+  },
+});
+
+export const useQuery = <Hit, Aggs, TCache = object>({
+  dataKey,
+  endDate,
+  filterQuery,
+  query,
+  setLoading,
+  setData,
+  setTotalCount,
+  startDate,
+  sort,
+  isPtrIncluded,
+  isInspected,
+  isHistogram,
+  pagination,
+}: MatrixHistogramQueryProps & MatrixHistogramQueryActionProps) => {
+  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [, dispatchToaster] = useStateToaster();
+  const apolloClient = useApolloClient();
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
+    setLoading(true);
+
+    async function fetchData(abortSignal: AbortSignal) {
+      if (!apolloClient) return null;
+
+      return apolloClient
+        .query<MatrixHistogramQueryQuery, MatrixHistogramQueryVariables<NetworkDnsSortField>>({
+          query,
+          fetchPolicy: 'cache-first',
+          variables: {
+            filterQuery: createFilter(filterQuery),
+            sourceId: 'default',
+            timerange: {
+              interval: '12h',
+              from: startDate!,
+              to: endDate!,
+            },
+            defaultIndex,
+            inspect: isInspected,
+            isHistogram,
+            sort,
+            isPtrIncluded,
+            pagination,
+          },
+          context: {
+            fetchOptions: {
+              abortSignal,
+            },
+          },
+        })
+        .then(
+          result => {
+            if (isSubscribed) {
+              const isDataKeyAnArray = Array.isArray(dataKey);
+              const rootDataKey = isDataKeyAnArray ? dataKey[0] : `${dataKey}Histogram`;
+              const histogramDataKey = isDataKeyAnArray ? dataKey[1] : `${dataKey}OverTimeByModule`;
+              const source = getOr({}, `data.source.${rootDataKey}`, result);
+              setData(getOr([], histogramDataKey, source));
+              setTotalCount(getOr(-1, 'totalCount', source));
+              setLoading(false);
+            }
+          },
+          (error: Error) => {
+            if (isSubscribed) {
+              setData(null);
+              setTotalCount(-1);
+              errorToToaster({
+                title: i18n.translate(
+                  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDescription',
+                  {
+                    defaultMessage: 'Failed to query signals',
+                  }
+                ),
+                error,
+                dispatchToaster,
+              });
+              setLoading(false);
+            }
+          }
+        );
+    }
+
+    fetchData(signal);
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
+  }, [query]);
 };

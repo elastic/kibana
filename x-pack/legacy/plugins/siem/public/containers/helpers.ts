@@ -13,3 +13,35 @@ export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
 
 export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-and-network';
+
+export const getMatrixHistogramQuery = (dataKey: string): string => {
+  return `
+  query Get${dataKey}OverTimeQuery(
+    $sourceId: ID!
+    $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
+    $filterQuery: String
+    $inspect: Boolean!
+  ) {
+    source(id: $sourceId) {
+      id
+      ${dataKey}Histogram(
+        timerange: $timerange
+        filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
+      ) {
+        ${dataKey}OverTimeByModule {
+          x
+          y
+          g
+        }
+        totalCount
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
+      }
+    }
+  }
+`;
+};

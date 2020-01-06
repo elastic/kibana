@@ -6,48 +6,49 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import gql from 'graphql-tag';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
-import { manageQuery } from '../../../components/page/manage_query';
-import { EventsOverTimeHistogram } from '../../../components/page/hosts/events_over_time';
-import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
+import { SignalsHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { getMatrixHistogramQuery } from '../../../containers/helpers';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
-const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
+const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
+export const EventsOverTimeGqlQuery = gql`
+  ${getMatrixHistogramQuery('Events')}
+`;
+const eventsStackByOptions: SignalsHistogramOption[] = [
+  {
+    text: 'action',
+    value: 'event.action',
+  },
+];
 
 export const EventsQueryTabBody = ({
   endDate,
   filterQuery,
-  setQuery,
   startDate,
-  updateDateRange = () => {},
+  updateDateRange = () => { },
 }: HostsComponentsQueryProps) => {
   return (
     <>
-      <EventsOverTimeQuery
+      <MatrixHistogramContainer
+        dataKey="Events"
+        defaultStackByOption={eventsStackByOptions[0]}
         endDate={endDate}
         filterQuery={filterQuery}
+        query={EventsOverTimeGqlQuery}
         sourceId="default"
+        stackByOptions={eventsStackByOptions}
         startDate={startDate}
         type={hostsModel.HostsType.page}
-      >
-        {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
-          <EventsOverTimeManage
-            data={eventsOverTime!}
-            endDate={endDate}
-            id={id}
-            inspect={inspect}
-            loading={loading}
-            refetch={refetch}
-            setQuery={setQuery}
-            startDate={startDate}
-            totalCount={totalCount}
-            updateDateRange={updateDateRange}
-          />
-        )}
-      </EventsOverTimeQuery>
+        title="Events"
+        updateDateRange={updateDateRange}
+        id={EVENTS_HISTOGRAM_ID}
+      />
       <EuiSpacer size="l" />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}

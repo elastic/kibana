@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export const alertsSchema = gql`
   type AlertsOverTimeData {
     inspect: Inspect
-    alertsOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    AlertsOverTimeByModule: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 

@@ -714,7 +714,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AnomaliesOverTime",
+            "name": "AnomaliesHistogram",
             "description": "",
             "args": [
               {
@@ -822,7 +822,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AuthenticationsOverTime",
+            "name": "AuthenticationsHistogram",
             "description": "",
             "args": [
               {
@@ -1058,7 +1058,7 @@
             "deprecationReason": null
           },
           {
-            "name": "EventsOverTime",
+            "name": "EventsHistogram",
             "description": "",
             "args": [
               {
@@ -2599,7 +2599,7 @@
             "deprecationReason": null
           },
           {
-            "name": "alertsOverTimeByModule",
+            "name": "AlertsOverTimeByModule",
             "description": "",
             "args": [],
             "type": {
@@ -2752,7 +2752,7 @@
             "deprecationReason": null
           },
           {
-            "name": "anomaliesOverTime",
+            "name": "AnomaliesOverTimeByModule",
             "description": "",
             "args": [],
             "type": {
@@ -3516,7 +3516,7 @@
             "deprecationReason": null
           },
           {
-            "name": "authenticationsOverTime",
+            "name": "AuthenticationsOverTimeByModule",
             "description": "",
             "args": [],
             "type": {
@@ -6235,7 +6235,7 @@
             "deprecationReason": null
           },
           {
-            "name": "eventsOverTime",
+            "name": "EventsOverTimeByModule",
             "description": "",
             "args": [],
             "type": {

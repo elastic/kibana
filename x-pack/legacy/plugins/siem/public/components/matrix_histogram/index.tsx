@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ApolloConsumer } from 'react-apollo';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { ChartSeriesData } from '../charts/common';
@@ -17,79 +19,161 @@ import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData } from './utils';
-import { MatrixHistogramProps, MatrixHistogramDataTypes } from './types';
+import { getBarchartConfigs, getCustomChartData, useQuery } from './utils';
+import {
+  MatrixHistogramProps,
+  SignalsHistogramOption,
+  HistogramAggregation,
+  MatrixHistogramQueryProps,
+  MatrixHistogramDataTypes,
+} from './types';
+import { generateTablePaginationOptions } from '../paginated_table/helpers';
 
-export const MatrixHistogram = ({
-  data,
-  dataKey,
-  endDate,
-  id,
-  loading,
-  mapping,
-  scaleType = ScaleType.Time,
-  startDate,
-  subtitle,
-  title,
-  totalCount,
-  updateDateRange,
-  yTickFormatter,
-  showLegend,
-}: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
-  const barchartConfigs = getBarchartConfigs({
-    from: startDate,
-    to: endDate,
-    onBrushEnd: updateDateRange,
-    scaleType,
-    yTickFormatter,
+export const MatrixHistogram = React.memo(
+  ({
+    activePage,
+    dataKey,
+    defaultStackByOption,
+    endDate,
+    filterQuery,
+    hideHistogramIfEmpty = false,
+    id,
+    isPtrIncluded,
+    isInspected,
+    limit,
+    mapping,
+    query,
+    scaleType = ScaleType.Time,
     showLegend,
-  });
-  const [showInspect, setShowInspect] = useState(false);
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const [loadingInitial, setLoadingInitial] = useState(false);
+    stackByOptions,
+    startDate,
+    subtitle,
+    title,
+    updateDateRange,
+    yTickFormatter,
+    sort,
+  }: MatrixHistogramProps & MatrixHistogramQueryProps) => {
+    const barchartConfigs = getBarchartConfigs({
+      from: startDate,
+      to: endDate,
+      onBrushEnd: updateDateRange,
+      scaleType,
+      yTickFormatter,
+      showLegend,
+    });
+    const [showInspect, setShowInspect] = useState(false);
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
-  const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
-  useEffect(() => {
-    if (totalCount >= 0 && loadingInitial) {
-      setLoadingInitial(false);
-    }
-  }, [loading, loadingInitial, totalCount]);
+    const [selectedStackByOption, setSelectedStackByOption] = useState<SignalsHistogramOption>(
+      defaultStackByOption
+    );
+    const [subtitleWithCounts, setSubtitle] = useState(subtitle);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
+    const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
+    const [totalCount, setTotalCount] = useState(-1);
+    const setSelectedChatOptionCallback = useCallback(
+      (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedStackByOption(
+          stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
+        );
+      },
+      []
+    );
 
-  const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
-  const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+    return (
+      <ApolloConsumer>
+        {client => {
+          useQuery<{}, HistogramAggregation>({
+            dataKey,
+            endDate,
+            query,
+            setLoading,
+            setData,
+            setTotalCount,
+            startDate,
+            sort,
+            isInspected,
+            isPtrIncluded,
+            isHistogram: true,
+            pagination:
+              activePage != null && limit != null
+                ? generateTablePaginationOptions(activePage, limit)
+                : undefined,
+          });
+          useEffect(() => {
+            const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
+            setSubtitle(formattedSubTitle);
 
-  return (
-    <Panel
-      data-test-subj={`${dataKey}Panel`}
-      loading={loading}
-      onMouseEnter={handleOnMouseEnter}
-      onMouseLeave={handleOnMouseLeave}
-    >
-      <HeaderSection
-        id={id}
-        title={title}
-        showInspect={!loadingInitial && showInspect}
-        subtitle={!loadingInitial && subtitle}
-      />
+            if (totalCount <= 0) {
+              if (hideHistogramIfEmpty) setHideHistogram(true);
+              else setHideHistogram(false);
+            } else {
+              setHideHistogram(false);
+            }
+          }, [totalCount]);
 
-      {loadingInitial ? (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
-      ) : (
-        <>
-          <BarChart barChart={barChartData} configs={barchartConfigs} />
+          const barChartData: ChartSeriesData[] = useMemo(() => getCustomChartData(data, mapping), [
+            data,
+          ]);
+          return !hideHistogram ? (
+            <Panel
+              data-test-subj={`${id}Panel`}
+              loading={loading}
+              onMouseEnter={handleOnMouseEnter}
+              onMouseLeave={handleOnMouseLeave}
+            >
+              <HeaderSection
+                id={id}
+                title={
+                  title && selectedStackByOption
+                    ? `${title} by ${selectedStackByOption.text}`
+                    : null
+                }
+                showInspect={!loading && showInspect}
+                subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+              >
+                {stackByOptions && (
+                  <EuiSelect
+                    onChange={setSelectedChatOptionCallback}
+                    options={stackByOptions}
+                    prepend={i18n.translate(
+                      'xpack.siem.detectionEngine.signals.histogram.stackByOptions.stackByLabel',
+                      {
+                        defaultMessage: 'Stack by',
+                      }
+                    )}
+                    value={selectedStackByOption?.value}
+                  />
+                )}
+              </HeaderSection>
 
-          {loading && (
-            <Loader
-              overlay
-              overlayBackground={
-                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-              }
-              size="xl"
-            />
-          )}
-        </>
-      )}
-    </Panel>
-  );
-};
+              {loading ? (
+                <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
+              ) : (
+                <>
+                  <BarChart barChart={barChartData} configs={barchartConfigs} />
+
+                  {loading && (
+                    <Loader
+                      overlay
+                      overlayBackground={
+                        darkMode
+                          ? darkTheme.euiPageBackgroundColor
+                          : lightTheme.euiPageBackgroundColor
+                      }
+                      size="xl"
+                    />
+                  )}
+                </>
+              )}
+            </Panel>
+          ) : null;
+        }}
+      </ApolloConsumer>
+    );
+  }
+);

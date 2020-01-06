@@ -8,14 +8,26 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { manageQuery } from '../page/manage_query';
-import { AlertsOverTimeHistogram } from '../page/hosts/alerts_over_time';
+import gql from 'graphql-tag';
 import { AlertsComponentsQueryProps } from './types';
-import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
 import { hostsModel } from '../../store/model';
 import { AlertsTable } from './alerts_table';
+import * as i18n from './translations';
+import { SignalsHistogramOption } from '../matrix_histogram/types';
+import { getMatrixHistogramQuery } from '../../containers/helpers';
+import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 
-const AlertsOverTimeManage = manageQuery(AlertsOverTimeHistogram);
+const ID = 'alertsOverTimeQuery';
+const alertsStackByOptions: SignalsHistogramOption[] = [
+  {
+    text: i18n.ALERTS_STACK_BY_ACTIONS,
+    value: 'event.actions',
+  },
+];
+const dataKey = 'Alerts';
+const AlertsOverTimeGqlQuery = gql`
+  ${getMatrixHistogramQuery('Alerts')}
+`;
 export const AlertsView = ({
   defaultFilters,
   deleteQuery,
@@ -29,28 +41,22 @@ export const AlertsView = ({
   updateDateRange = noop,
 }: AlertsComponentsQueryProps) => (
   <>
-    <AlertsOverTimeQuery
+    <MatrixHistogramContainer
+      dataKey={dataKey}
+      defaultStackByOption={alertsStackByOptions[0]}
       endDate={endDate}
+      id={ID}
+      query={AlertsOverTimeGqlQuery}
+      setQuery={setQuery}
+      stackByOptions={alertsStackByOptions}
+      startDate={startDate}
+      subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
+      title={`${i18n.ALERTS_DOCUMENT_TYPE} ${i18n.ALERTS_BY}`}
+      updateDateRange={updateDateRange}
       filterQuery={filterQuery}
       sourceId="default"
-      startDate={startDate}
       type={hostsModel.HostsType.page}
-    >
-      {({ alertsOverTime, loading, id, inspect, refetch, totalCount }) => (
-        <AlertsOverTimeManage
-          data={alertsOverTime!}
-          endDate={endDate}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          refetch={refetch}
-          setQuery={setQuery}
-          startDate={startDate}
-          totalCount={totalCount}
-          updateDateRange={updateDateRange}
-        />
-      )}
-    </AlertsOverTimeQuery>
+    />
     <EuiSpacer size="l" />
     <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
   </>

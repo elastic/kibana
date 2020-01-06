@@ -18,7 +18,7 @@ import { TermAggregation } from '../types';
 import { EventHit } from '../events/types';
 
 export class ElasticsearchAlertsAdapter implements AlertsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getAlertsHistogramData(
     request: FrameworkRequest,
@@ -31,14 +31,14 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
-    const alertsOverTimeByModule = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
+    const AlertsOverTimeByModule = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
     return {
       inspect,
-      alertsOverTimeByModule: getAlertsOverTimeByModule(alertsOverTimeByModule),
+      AlertsOverTimeByModule: getAlertsOverTimeByModule(AlertsOverTimeByModule),
       totalCount,
     };
   }

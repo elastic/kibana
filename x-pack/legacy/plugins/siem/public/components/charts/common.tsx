@@ -17,6 +17,7 @@ import {
   ScaleType,
   SettingSpecProps,
   TickFormatter,
+  Position,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
@@ -39,6 +40,7 @@ export interface ChartData {
 
 export interface ChartSeriesConfigs {
   customHeight?: number;
+  customSeriesColors?: string[];
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -127,6 +129,7 @@ export const chartDefaultSettings = {
   showLegend: false,
   showLegendDisplayValue: false,
   debug: false,
+  legendPosition: Position.Bottom,
 };
 
 export const useBrowserTimeZone = () => {

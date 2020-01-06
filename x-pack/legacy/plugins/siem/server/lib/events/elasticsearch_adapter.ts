@@ -49,7 +49,7 @@ import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
 import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getTimelineData(
     request: FrameworkRequest,
@@ -147,7 +147,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
     return {
       inspect,
-      eventsOverTime: getEventsOverTimeByActionName(eventsOverTimeBucket),
+      EventsOverTimeByModule: getEventsOverTimeByActionName(eventsOverTimeBucket),
       totalCount,
     };
   }
@@ -162,10 +162,10 @@ export const getTotalEventsOverTime = (
 ): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
-        x: key,
-        y: doc_count,
-        g: 'total events',
-      }))
+      x: key,
+      y: doc_count,
+      g: 'total events',
+    }))
     : [];
 };
 
@@ -263,22 +263,22 @@ const mergeTimelineFieldsWithHit = <T>(
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
             ? [
-                ...get('node.data', flattenedFields),
-                {
-                  field: fieldName,
-                  value: specialFields.includes(esField)
-                    ? get(esField, hit)
-                    : get(esField, hit._source),
-                },
-              ]
+              ...get('node.data', flattenedFields),
+              {
+                field: fieldName,
+                value: specialFields.includes(esField)
+                  ? get(esField, hit)
+                  : get(esField, hit._source),
+              },
+            ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
-                ...get('node.ecs', flattenedFields),
-                ...fieldName
-                  .split('.')
-                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
-              }
+              ...get('node.ecs', flattenedFields),
+              ...fieldName
+                .split('.')
+                .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+            }
             : get('node.ecs', flattenedFields),
         },
       };

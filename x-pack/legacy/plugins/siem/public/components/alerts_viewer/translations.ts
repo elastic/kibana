@@ -17,3 +17,24 @@ export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.hosts.totalCount
 export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
   defaultMessage: 'Alerts',
 });
+
+export const ALERTS_STACK_BY_ACTIONS = i18n.translate(
+  'xpack.siem.histogram.alertsStackByOptions.eventActions',
+  {
+    defaultMessage: 'actions',
+  }
+);
+
+export const ALERTS_BY = i18n.translate('xpack.siem.histogram.alertsCountFrequencyByModuleTitle', {
+  defaultMessage: 'by',
+});
+
+export const SHOWING = i18n.translate('xpack.siem.histogram.showing', {
+  defaultMessage: 'Showing',
+});
+
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.histogram.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });

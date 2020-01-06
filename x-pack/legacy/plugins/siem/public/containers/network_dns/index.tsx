@@ -25,6 +25,8 @@ import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
+import { MatrixHistogram } from '../../components/matrix_histogram';
+import { SignalsHistogramOption } from '../../components/matrix_histogram/types';
 
 const ID = 'networkDnsQuery';
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
@@ -46,6 +48,13 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
   type: networkModel.NetworkType;
 }
 
+interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
+  dataKey: string;
+  defaultStackByOption: SignalsHistogramOption;
+  stackByOptions: SignalsHistogramOption[];
+  type: networkModel.NetworkType;
+}
+
 export interface NetworkDnsComponentReduxProps {
   activePage: number;
   sort: NetworkDnsSortField;
@@ -60,7 +69,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
   NetworkDnsProps,
   GetNetworkDnsQuery.Query,
   GetNetworkDnsQuery.Variables
-> {
+  > {
   public render() {
     const {
       activePage,
@@ -80,6 +89,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     const variables: GetNetworkDnsQuery.Variables = {
       defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
+      isHistogram: false,
       inspect: isInspected,
       isPtrIncluded,
       pagination: generateTablePaginationOptions(activePage, limit),
@@ -179,7 +189,7 @@ export const NetworkDnsQuery = compose<React.ComponentClass<OwnProps>>(
   withKibana
 )(NetworkDnsComponentQuery);
 
-export const NetworkDnsHistogramQuery = compose<React.ComponentClass<OwnProps>>(
+export const NetworkDnsHistogramQuery = compose<React.ComponentClass<DnsHistogramOwnProps>>(
   connect(makeMapHistogramStateToProps),
   withKibana
-)(NetworkDnsComponentQuery);
+)(MatrixHistogram);

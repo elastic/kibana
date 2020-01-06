@@ -16,7 +16,7 @@ import { buildAnomaliesOverTimeQuery } from './query.anomalies_over_time.dsl';
 import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchAnomaliesAdapter implements AnomaliesAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getAnomaliesOverTime(
     request: FrameworkRequest,
@@ -39,7 +39,7 @@ export class ElasticsearchAnomaliesAdapter implements AnomaliesAdapter {
     };
     return {
       inspect,
-      anomaliesOverTime: getAnomaliesOverTimeByJobId(anomaliesOverTimeBucket),
+      AnomaliesOverTimeByModule: getAnomaliesOverTimeByJobId(anomaliesOverTimeBucket),
       totalCount,
     };
   }
