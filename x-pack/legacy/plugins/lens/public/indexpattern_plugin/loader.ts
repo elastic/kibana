@@ -15,6 +15,7 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternField,
+  AggregationRestrictions,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
@@ -30,19 +31,7 @@ interface SavedIndexPatternAttributes extends SavedObjectAttributes {
 }
 
 interface SavedRestrictionsObject {
-  aggs: Record<
-    string,
-    Record<
-      string,
-      {
-        agg: string;
-        fixed_interval?: string;
-        calendar_interval?: string;
-        delay?: string;
-        time_zone?: string;
-      }
-    >
-  >;
+  aggs: Record<string, AggregationRestrictions>;
 }
 
 type SetState = StateSetter<IndexPatternPrivateState>;
@@ -230,7 +219,7 @@ export async function syncExistingFields({
   setState,
 }: {
   dateRange: DateRange;
-  indexPatterns: Array<{ title: string; timeFieldName?: string | null }>;
+  indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
   fetchJson: HttpSetup['get'];
   setState: SetState;
 }) {
@@ -245,7 +234,7 @@ export async function syncExistingFields({
         query.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.title}`, {
+      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
         query,
       }) as Promise<ExistingFields>;
     })
@@ -301,8 +290,9 @@ function fromSavedObject(
   newFields.forEach((field, index) => {
     const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
     aggs.forEach(agg => {
-      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
-        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
+      const restriction = typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
+      if (restriction) {
+        restrictionsObj[agg] = restriction;
       }
     });
     if (Object.keys(restrictionsObj).length) {
