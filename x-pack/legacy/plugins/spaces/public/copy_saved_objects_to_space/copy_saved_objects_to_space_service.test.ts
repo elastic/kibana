@@ -33,25 +33,5 @@ describe('CopySavedObjectsToSpaceService', () => {
         expect.any(CopyToSpaceSavedObjectsManagementAction)
       );
     });
-
-    it('will not re-register the CopyToSpaceSavedObjectsManagementAction', () => {
-      const deps = {
-        spacesManager: spacesManagerMock.create(),
-        // we don't have a proper NP mock for this yet
-        managementSetup: ({
-          savedObjects: {
-            registry: {
-              has: jest.fn().mockReturnValue(true),
-              register: jest.fn(),
-            },
-          },
-        } as unknown) as ManagementSetup,
-      };
-
-      const service = new CopySavedObjectsToSpaceService();
-      service.setup(deps);
-
-      expect(deps.managementSetup.savedObjects.registry.register).toHaveBeenCalledTimes(0);
-    });
   });
 });

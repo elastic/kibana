@@ -53,10 +53,10 @@ routes.when('/management/spaces/list', {
   k7Breadcrumbs: getListBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
   controller($scope: any) {
-    $scope.$$postDigest(async () => {
+    $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const { spacesManager } = await spacesNPStart;
+      const { spacesManager } = spacesNPStart;
 
       render(
         <I18nContext>
@@ -83,10 +83,10 @@ routes.when('/management/spaces/create', {
   k7Breadcrumbs: getCreateBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
   controller($scope: any) {
-    $scope.$$postDigest(async () => {
+    $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const { spacesManager } = await spacesNPStart;
+      const { spacesManager } = spacesNPStart;
 
       render(
         <I18nContext>

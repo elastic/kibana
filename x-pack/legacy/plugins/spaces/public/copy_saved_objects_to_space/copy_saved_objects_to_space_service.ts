@@ -16,8 +16,6 @@ interface SetupDeps {
 export class CopySavedObjectsToSpaceService {
   public setup({ spacesManager, managementSetup }: SetupDeps) {
     const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager);
-    if (!managementSetup.savedObjects.registry.has(action.id)) {
-      managementSetup.savedObjects.registry.register(action);
-    }
+    managementSetup.savedObjects.registry.register(action);
   }
 }
