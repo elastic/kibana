@@ -45,8 +45,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 >
                   <EuiComboBox
                     aria-label="Status"
-                    compressed={false}
-                    fullWidth={false}
                     isClearable={false}
                     onChange={[Function]}
                     options={
@@ -94,8 +92,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 >
                   <EuiComboBox
                     aria-label="Location"
-                    compressed={false}
-                    fullWidth={false}
                     isClearable={false}
                     onChange={[Function]}
                     options={
@@ -406,6 +402,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
         }
       }
       responsive={true}
+      tableLayout="fixed"
     />
   </EuiPanel>
 </Fragment>
