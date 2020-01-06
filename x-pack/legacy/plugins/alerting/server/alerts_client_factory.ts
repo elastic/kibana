@@ -6,12 +6,12 @@
 
 import Hapi from 'hapi';
 import uuid from 'uuid';
-import { AlertsClient } from '../alerts_client';
-import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from '../types';
-import { SecurityPluginStartContract, TaskManagerStartContract } from '../shim';
-import { KibanaRequest, Logger } from '../../../../../../src/core/server';
-import { InvalidateAPIKeyParams } from '../../../../../plugins/security/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
+import { AlertsClient } from './alerts_client';
+import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { SecurityPluginStartContract, TaskManagerStartContract } from './shim';
+import { KibanaRequest, Logger } from '../../../../../src/core/server';
+import { InvalidateAPIKeyParams } from '../../../../plugins/security/server';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
 
 export interface ConstructorOpts {
   logger: Logger;
