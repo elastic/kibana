@@ -9,14 +9,11 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getAxisId,
-  getSpecId,
   niceTimeFormatter,
   Settings,
   TooltipValue,
   LIGHT_THEME,
   DARK_THEME,
-  getAnnotationId,
   RectAnnotation,
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
@@ -44,7 +41,7 @@ export const AnomaliesChart: React.FunctionComponent<{
     [timeRange]
   );
 
-  const logEntryRateSpecId = getSpecId('averageValues');
+  const logEntryRateSpecId = 'averageValues';
 
   const tooltipProps = useMemo(
     () => ({
@@ -67,13 +64,13 @@ export const AnomaliesChart: React.FunctionComponent<{
     <div style={{ height: 160, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
-          id={getAxisId('timestamp')}
+          id="timestamp"
           position="bottom"
           showOverlappingTicks
           tickFormat={chartDateFormatter}
         />
         <Axis
-          id={getAxisId('values')}
+          id="values"
           position="left"
           tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
@@ -102,7 +99,7 @@ export const AnomaliesChart: React.FunctionComponent<{
 };
 
 interface SeverityConfig {
-  annotationId: AnnotationId;
+  id: AnnotationId;
   style: {
     fill: string;
     opacity: number;
@@ -111,19 +108,19 @@ interface SeverityConfig {
 
 const severityConfigs: Record<string, SeverityConfig> = {
   warning: {
-    annotationId: getAnnotationId(`anomalies-warning`),
+    id: `anomalies-warning`,
     style: { fill: 'rgb(125, 180, 226)', opacity: 0.7 },
   },
   minor: {
-    annotationId: getAnnotationId(`anomalies-minor`),
+    id: `anomalies-minor`,
     style: { fill: 'rgb(255, 221, 0)', opacity: 0.7 },
   },
   major: {
-    annotationId: getAnnotationId(`anomalies-major`),
+    id: `anomalies-major`,
     style: { fill: 'rgb(229, 113, 0)', opacity: 0.7 },
   },
   critical: {
-    annotationId: getAnnotationId(`anomalies-critical`),
+    id: `anomalies-critical`,
     style: { fill: 'rgb(228, 72, 72)', opacity: 0.7 },
   },
 };
@@ -138,7 +135,7 @@ const renderAnnotations = (
       <RectAnnotation
         key={`${chartId}:${entry[0]}`}
         dataValues={entry[1]}
-        annotationId={severityConfigs[entry[0]].annotationId}
+        id={severityConfigs[entry[0]].id}
         style={severityConfigs[entry[0]].style}
         renderTooltip={renderAnnotationTooltip}
       />
