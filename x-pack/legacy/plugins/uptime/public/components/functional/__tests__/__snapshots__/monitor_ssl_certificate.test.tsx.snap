@@ -13,14 +13,23 @@ Array [
     class="c0"
   >
     <div
-      aria-label="SSL certificate expires"
+      aria-label="SSL certificate expires in 2 months"
       class="euiText euiText--small euiText--constrainedWidth"
     >
-      <div
-        class="euiTextColor euiTextColor--subdued"
+      SSL certificate expires 
+      <span
+        class="euiBadge euiBadge--iconLeft euiBadge--default"
       >
-        SSL certificate expires in 2 months
-      </div>
+        <span
+          class="euiBadge__content"
+        >
+          <span
+            class="euiBadge__text"
+          >
+            in 2 months
+          </span>
+        </span>
+      </span>
     </div>
   </div>,
 ]
