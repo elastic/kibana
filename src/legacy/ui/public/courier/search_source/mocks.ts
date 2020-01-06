@@ -36,9 +36,11 @@
  * under the License.
  */
 
-import { SearchSourceContract } from './search_source';
+// This mock is here for BWC, but will be left behind and replaced by
+// the data service mock in the new platform.
+import { ISearchSource } from '../index';
 
-export const searchSourceMock: MockedKeys<SearchSourceContract> = {
+export const searchSourceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),

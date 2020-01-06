@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
+import { npSetup } from 'ui/new_platform';
 import { toastNotifications } from 'ui/notify';
 import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
@@ -21,7 +22,6 @@ app.directive('pipelineEdit', function($injector) {
   const pipelineService = $injector.get('pipelineService');
   const licenseService = $injector.get('logstashLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
-  const shieldUser = $injector.get('ShieldUser');
   const $route = $injector.get('$route');
 
   return {
@@ -32,7 +32,7 @@ app.directive('pipelineEdit', function($injector) {
         scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
       const userResource = logstashSecurity.isSecurityEnabled()
-        ? await shieldUser.getCurrent().$promise
+        ? await npSetup.plugins.security.authc.getCurrentUser()
         : null;
 
       render(

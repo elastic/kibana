@@ -27,9 +27,7 @@ const MAX_COUNT = '10';
 const EXPIRE_AFTER_VALUE = '30';
 const repository = fixtures.getRepository({ name: `a${getRandomString()}`, type: 'fs' });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<PolicyAdd />', () => {
+describe('<PolicyAdd />', () => {
   let testBed: PolicyFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -195,6 +193,7 @@ describe.skip('<PolicyAdd />', () => {
 
         const expected = {
           config: {},
+          isManagedPolicy: false,
           name: POLICY_NAME,
           repository: repository.name,
           retention: {

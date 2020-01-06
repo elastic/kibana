@@ -28,29 +28,15 @@ export const security = kibana =>
         enabled: Joi.boolean().default(true),
         cookieName: HANDLED_IN_NEW_PLATFORM,
         encryptionKey: HANDLED_IN_NEW_PLATFORM,
-        session: Joi.object({
-          idleTimeout: HANDLED_IN_NEW_PLATFORM,
-          lifespan: HANDLED_IN_NEW_PLATFORM,
-        }).default(),
+        session: HANDLED_IN_NEW_PLATFORM,
         secureCookies: HANDLED_IN_NEW_PLATFORM,
         loginAssistanceMessage: HANDLED_IN_NEW_PLATFORM,
-        authorization: Joi.object({
-          legacyFallback: Joi.object({
-            enabled: Joi.boolean().default(true), // deprecated
-          }).default(),
-        }).default(),
+        authorization: HANDLED_IN_NEW_PLATFORM,
         audit: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
         authc: HANDLED_IN_NEW_PLATFORM,
       }).default();
-    },
-
-    deprecations: function({ rename, unused }) {
-      return [
-        unused('authorization.legacyFallback.enabled'),
-        rename('sessionTimeout', 'session.idleTimeout'),
-      ];
     },
 
     uiExports: {
@@ -130,7 +116,6 @@ export const security = kibana =>
       const config = server.config();
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
         isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
           server.plugins.kibana.systemApi
