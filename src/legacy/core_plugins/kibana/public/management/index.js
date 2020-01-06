@@ -113,7 +113,7 @@ export function updateSidebar(legacySections, id) {
   render(
     <I18nContext>
       <ManagementSidebarNav
-        getSections={npStart.plugins.management.sections.getAllSections}
+        getSections={npStart.plugins.management.sections.getSectionsEnabled}
         legacySections={legacySections}
         selectedId={id}
         className="mgtSideNav"

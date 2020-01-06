@@ -130,7 +130,7 @@ export const mergeLegacyItems = (
 ) => {
   const filteredLegacySections = legacySections
     .filter(sectionVisible)
-    .filter(section => section.visibleItems.filter(sectionVisible).length);
+    .filter(section => section.visibleItems.length);
 
   filteredLegacySections.forEach(legacySection => {
     const section = findOrAddSection(navItems, legacySection);
