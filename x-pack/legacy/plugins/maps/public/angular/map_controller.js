@@ -384,7 +384,7 @@ app.controller(
       }
 
       const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-      if (prevIndexPatternIds !== nextIndexPatternIds) {
+      if (nextIndexPatternIds !== prevIndexPatternIds) {
         prevIndexPatternIds = nextIndexPatternIds;
         updateIndexPatterns(nextIndexPatternIds);
       }
