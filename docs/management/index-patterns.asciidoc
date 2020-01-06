@@ -8,7 +8,7 @@ Once you create an index pattern, you're ready to:
 
 * Interactively explore your data in <<discover, Discover>>.
 * Analyze your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
-* Show off your data in a <<canvas, Canvas>> presentation.
+* Show off your data in a <<canvas, Canvas>> workpad.
 * If your data includes geo data, visualize it with <<maps, Maps>>.
 
 [float]
@@ -55,7 +55,7 @@ to use the time filter.
 
 
 [float]
-==== Rollup index patterns
+==== Rollup index pattern
 
 If a rollup index is detected in the cluster, clicking *Create index pattern*
 includes an item for creating a rollup index pattern.
@@ -93,35 +93,35 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 === Manage your index pattern
 
 Once you create an index pattern, manually or with a sample data set,
-you might want to look at its fields and associated data types.
-You might also want to perform housekeeping tasks, such as making the
+you can look at its fields and associated data types.
+You can also perform housekeeping tasks, such as making the
 index pattern the default or deleting it when you longer need it.
-You can drill down into the details of an index pattern by clicking its name in
+To drill down into the details of an index pattern, click its name in
 the *Index patterns* overview.
 
 [role="screenshot"]
 image:management/index-patterns/images/new-index-pattern.png["Index files and data types"]
 
-From this view, you can perform the following actions:
+From the detailed view, you can perform the following actions:
 
-* *Manage the index fields.* Click a column header to sort the table by that column.
-Use the field dropdown menu to limit the display to a specific field.
-See <<managing-fields, Managing fields>> for more detailed information.
+* *Manage the index fields.* You can add formatters to format values and create
+scripted fields.
+See <<managing-fields, Managing fields>> for more information.
 
 * [[set-default-pattern]]*Set the default index pattern.* {kib} uses a badge to make users
 aware of which index pattern is the default. The first pattern
 you create is automatically designated as the default pattern. The default
 index pattern is loaded when you open *Discover*.
 
-* [[reload-fields]]*Reload the index fields list.* You can reload the index fields list to
+* [[reload-fields]]*Refresh the index fields list.* You can refresh the index fields list to
 pick up any newly-added fields. Doing so also resets Kibana’s popularity counters
-for the fields. The popularity counters keep track of the fields
-you’ve used most often in {kib} and are used to sort fields in lists.
+for the fields. The popularity counters are used in *Discover* to sort fields in lists.
 
 * [[delete-pattern]]*Delete the index pattern.* This action removes the pattern from the list of
 Saved Objects in {kib}. You will not be able to recover field formatters,
 scripted fields, source filters, and field popularity data associated with the index pattern.
-+
-Deleting an index pattern breaks all visualizations, saved searches, and
-other saved objects that reference the pattern. Deleting an index pattern does
+Deleting an index pattern does
 not remove any indices or data documents from {es}.
++
+WARNING: Deleting an index pattern breaks all visualizations, saved searches, and
+other saved objects that reference the pattern.
