@@ -70,7 +70,6 @@ export default () =>
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
-      defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
       customResponseHeaders: Joi.object()
         .unknown(true)
         .default({}),
