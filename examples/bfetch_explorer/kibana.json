@@ -1,0 +1,10 @@
+{
+  "id": "bfetchExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["bfetch_explorer"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["bfetch"],
+  "optionalPlugins": []
+}
