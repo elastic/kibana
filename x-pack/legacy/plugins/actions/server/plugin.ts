@@ -33,6 +33,8 @@ import {
   listActionTypesRoute,
   getExecuteActionRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
+import { LicenseState } from './lib/license_state';
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -54,9 +56,10 @@ export class Plugin {
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private defaultKibanaIndex?: string;
+  private licenseState: LicenseState | null = null;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get('plugins', 'actions');
     this.config$ = initializerContext.config.create();
     this.kibana$ = initializerContext.config.kibana$;
   }
@@ -68,6 +71,8 @@ export class Plugin {
     const config = await this.config$.pipe(first()).toPromise();
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
+
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     // - `secrets` properties will be encrypted
@@ -103,13 +108,15 @@ export class Plugin {
     });
 
     // Routes
-    core.http.route(createActionRoute);
-    core.http.route(deleteActionRoute);
-    core.http.route(getActionRoute);
-    core.http.route(findActionRoute);
-    core.http.route(updateActionRoute);
-    core.http.route(listActionTypesRoute);
-    core.http.route(getExecuteActionRoute(actionExecutor));
+    core.http.route(extendRouteWithLicenseCheck(createActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(deleteActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(findActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(listActionTypesRoute, this.licenseState));
+    core.http.route(
+      extendRouteWithLicenseCheck(getExecuteActionRoute(actionExecutor), this.licenseState)
+    );
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
@@ -175,5 +182,11 @@ export class Plugin {
         });
       },
     };
+  }
+
+  public stop() {
+    if (this.licenseState) {
+      this.licenseState.clean();
+    }
   }
 }

@@ -5,17 +5,61 @@
  */
 
 import chrome from 'ui/chrome';
-import { UpdateSignalStatusProps } from './types';
+
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../common/constants';
+import {
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_INDEX_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
+} from '../../../../common/constants';
+import {
+  QuerySignals,
+  SignalSearchResponse,
+  UpdateSignalStatusProps,
+  SignalsIndex,
+  SignalIndexError,
+  Privilege,
+  PostSignalError,
+  BasicSignals,
+} from './types';
+import { parseJsonFromBody } from '../../../utils/api';
+
+/**
+ * Fetch Signals by providing a query
+ *
+ * @param query String to match a dsl
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
+ */
+export const fetchQuerySignals = async <Hit, Aggregations>({
+  query,
+  kbnVersion,
+  signal,
+}: QuerySignals): Promise<SignalSearchResponse<Hit, Aggregations>> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_QUERY_SIGNALS_URL}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    body: query,
+    signal,
+  });
+  await throwIfNotOk(response);
+  const signals = await response.json();
+  return signals;
+};
 
 /**
  * Update signal status by query
  *
  * @param query of signals to update
- * @param status to update to ('open' / 'closed')
+ * @param status to update to('open' / 'closed')
  * @param kbnVersion current Kibana Version to use for headers
- * @param signal to cancel request
+ * @param signal AbortSignal for cancelling request
  */
 export const updateSignalStatus = async ({
   query,
@@ -37,4 +81,91 @@ export const updateSignalStatus = async ({
 
   await throwIfNotOk(response);
   return response.json();
+};
+
+/**
+ * Fetch Signal Index
+ *
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
+ */
+export const getSignalIndex = async ({
+  kbnVersion,
+  signal,
+}: BasicSignals): Promise<SignalsIndex | null> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    signal,
+  });
+  if (response.ok) {
+    const signalIndex = await response.json();
+    return signalIndex;
+  }
+  const error = await parseJsonFromBody(response);
+  if (error != null) {
+    throw new SignalIndexError(error);
+  }
+  return null;
+};
+
+/**
+ * Get User Privileges
+ *
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
+ */
+export const getUserPrivilege = async ({
+  kbnVersion,
+  signal,
+}: BasicSignals): Promise<Privilege | null> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PRIVILEGES_URL}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    signal,
+  });
+
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+/**
+ * Create Signal Index if needed it
+ *
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal AbortSignal for cancelling request
+ */
+export const createSignalIndex = async ({
+  kbnVersion,
+  signal,
+}: BasicSignals): Promise<SignalsIndex | null> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_INDEX_URL}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    signal,
+  });
+  if (response.ok) {
+    const signalIndex = await response.json();
+    return signalIndex;
+  }
+  const error = await parseJsonFromBody(response);
+  if (error != null) {
+    throw new PostSignalError(error);
+  }
+  return null;
 };

@@ -19,7 +19,7 @@
 
 import { AggConfigs } from '../agg_configs';
 import { AggConfig } from '../../vis';
-import { SearchSourceContract, FetchOptions } from '../../courier/types';
+import { ISearchSource, FetchOptions } from '../../courier/types';
 
 export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;
@@ -54,7 +54,7 @@ export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
    */
   modifyAggConfigOnSearchRequestStart: (
     aggConfig: TAggConfig,
-    searchSource?: SearchSourceContract,
+    searchSource?: ISearchSource,
     options?: FetchOptions
   ) => void;
 
