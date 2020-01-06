@@ -11,8 +11,10 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -28,7 +30,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
       {
-        defaultMessage: 'Configure Slack using a webhook url they provide',
+        defaultMessage: 'Send a message to a Slack channel or user.',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {
@@ -42,7 +44,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requiredWebhookUrlText',
             {
-              defaultMessage: 'WebhookUrl is required.',
+              defaultMessage: 'Webhook URL is required.',
             }
           )
         );
@@ -62,7 +64,6 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   action,
   editActionSecrets,
   errors,
-  hasErrors,
 }) => {
   const { webhookUrl } = action.secrets;
 
@@ -71,8 +72,19 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
       <EuiFormRow
         id="webhookUrl"
         fullWidth
+        helpText={
+          <EuiLink
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-slack.html#configuring-slack"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.indexNameHelpLabel"
+              defaultMessage="Learn how to create a Slack webhook URL"
+            />
+          </EuiLink>
+        }
         error={errors.webhookUrl}
-        isInvalid={hasErrors === true && webhookUrl !== undefined}
+        isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
           {
@@ -82,8 +94,9 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors === true && webhookUrl !== undefined}
+          isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
           name="webhookUrl"
+          placeholder="URL like https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
           onChange={e => {

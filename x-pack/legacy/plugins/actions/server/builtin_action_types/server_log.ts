@@ -12,7 +12,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
 
-const ACTION_NAME = 'Server Log';
+const ACTION_NAME = 'Server log';
 
 // params definition
 

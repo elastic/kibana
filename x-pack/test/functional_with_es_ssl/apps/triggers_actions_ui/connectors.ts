@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults).to.eql([
         {
           name: connectorName,
-          actionType: 'Server Log',
+          actionType: 'Server log',
           referencedByCount: '0',
         },
       ]);
@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterEdit).to.eql([
         {
           name: updatedConnectorName,
-          actionType: 'Server Log',
+          actionType: 'Server log',
           referencedByCount: '0',
         },
       ]);

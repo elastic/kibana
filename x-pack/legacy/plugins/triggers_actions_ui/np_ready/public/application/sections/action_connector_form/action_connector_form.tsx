@@ -147,12 +147,12 @@ export const ActionConnectorForm = ({
                 defaultMessage="Name"
               />
             }
-            isInvalid={hasErrors && connector.name !== undefined}
+            isInvalid={errors.name.length > 0 && connector.name !== undefined}
             error={errors.name}
           >
             <EuiFieldText
               fullWidth
-              isInvalid={hasErrors && connector.name !== undefined}
+              isInvalid={errors.name.length > 0 && connector.name !== undefined}
               name="name"
               data-test-subj="nameInput"
               value={connector.name || ''}

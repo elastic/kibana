@@ -58,7 +58,7 @@ describe('slack connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        webhookUrl: ['WebhookUrl is required.'],
+        webhookUrl: ['Webhook URL is required.'],
       },
     });
   });
@@ -106,7 +106,6 @@ describe('SlackActionFields renders', () => {
         errors={{}}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();

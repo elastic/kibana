@@ -118,7 +118,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{}}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="webhookAddHeaderButton"]').length > 0).toBeTruthy();

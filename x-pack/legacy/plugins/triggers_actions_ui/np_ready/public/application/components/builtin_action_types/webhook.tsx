@@ -55,7 +55,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
             {
-              defaultMessage: 'Url is required.',
+              defaultMessage: 'URL is required.',
             }
           )
         );
@@ -75,7 +75,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText',
             {
-              defaultMessage: 'User is required.',
+              defaultMessage: 'Username is required.',
             }
           )
         );
@@ -106,7 +106,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   editActionConfig,
   editActionSecrets,
   errors,
-  hasErrors,
 }) => {
   const [headerKey, setHeaderKey] = useState<string>('');
   const [headerValue, setHeaderValue] = useState<string>('');
@@ -126,7 +125,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
         {
-          defaultMessage: 'Header Key is required.',
+          defaultMessage: 'Header key is required.',
         }
       )
     );
@@ -136,7 +135,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
         {
-          defaultMessage: 'Header Value is required.',
+          defaultMessage: 'Header value is required.',
         }
       )
     );
@@ -182,7 +181,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
               {
-                defaultMessage: 'Header Key',
+                defaultMessage: 'Header key',
               }
             )}
           >
@@ -207,7 +206,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
               {
-                defaultMessage: 'Header Value',
+                defaultMessage: 'Header value',
               }
             )}
           >
@@ -255,17 +254,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             id="url"
             fullWidth
             error={errors.url}
-            isInvalid={hasErrors === true && url !== undefined}
+            isInvalid={errors.url.length > 0 && url !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
               {
-                defaultMessage: 'Url',
+                defaultMessage: 'URL',
               }
             )}
           >
             <EuiFieldText
               name="url"
-              isInvalid={hasErrors === true && url !== undefined}
+              isInvalid={errors.url.length > 0 && url !== undefined}
               fullWidth
               value={url || ''}
               data-test-subj="webhookUrlText"
@@ -287,17 +286,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             id="webhookUser"
             fullWidth
             error={errors.user}
-            isInvalid={hasErrors === true && user !== undefined}
+            isInvalid={errors.user.length > 0 && user !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.userTextFieldLabel',
               {
-                defaultMessage: 'User',
+                defaultMessage: 'Username',
               }
             )}
           >
             <EuiFieldText
               fullWidth
-              isInvalid={hasErrors === true && user !== undefined}
+              isInvalid={errors.user.length > 0 && user !== undefined}
               name="user"
               value={user || ''}
               data-test-subj="webhookUserInput"
@@ -317,7 +316,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             id="webhookPassword"
             fullWidth
             error={errors.password}
-            isInvalid={hasErrors === true && password !== undefined}
+            isInvalid={errors.password.length > 0 && password !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.passwordTextFieldLabel',
               {
@@ -328,7 +327,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             <EuiFieldPassword
               fullWidth
               name="password"
-              isInvalid={hasErrors === true && password !== undefined}
+              isInvalid={errors.password.length > 0 && password !== undefined}
               value={password || ''}
               data-test-subj="webhookPasswordInput"
               onChange={e => {
@@ -365,7 +364,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                defaultMessage="HTTP headers list:"
+                defaultMessage="HTTP header list:"
                 id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.httpHeadersTitle"
               />
             </h5>

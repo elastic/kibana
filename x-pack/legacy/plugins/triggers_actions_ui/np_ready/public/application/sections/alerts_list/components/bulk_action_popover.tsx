@@ -162,7 +162,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.buttonTitle"
-            defaultMessage="Bulk action"
+            defaultMessage="Manage alerts"
           />
         </EuiButton>
       }
@@ -177,7 +177,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-              defaultMessage="Mute all"
+              defaultMessage="Mute"
             />
           </EuiButtonEmpty>
         </EuiFormRow>
@@ -192,7 +192,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-              defaultMessage="Unmute all"
+              defaultMessage="Unmute"
             />
           </EuiButtonEmpty>
         </EuiFormRow>
@@ -207,7 +207,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-              defaultMessage="Enable all"
+              defaultMessage="Enable"
             />
           </EuiButtonEmpty>
         </EuiFormRow>
@@ -222,7 +222,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-              defaultMessage="Disable all"
+              defaultMessage="Disable"
             />
           </EuiButtonEmpty>
         </EuiFormRow>
@@ -236,7 +236,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-            defaultMessage="Delete all"
+            defaultMessage="Delete"
           />
         </EuiButtonEmpty>
       </EuiFormRow>

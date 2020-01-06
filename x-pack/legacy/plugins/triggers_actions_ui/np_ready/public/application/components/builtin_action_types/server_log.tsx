@@ -15,7 +15,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.selectMessageText',
       {
-        defaultMessage: 'Adds a log line with a message you define',
+        defaultMessage: 'Add a message to a Kibana log.',
       }
     ),
     validateConnector: (): ValidationResult => {

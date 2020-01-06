@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -21,7 +29,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
-        defaultMessage: 'Configure PageDuty API details to send events to their system',
+        defaultMessage: 'Send an event in PagerDuty.',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {
@@ -35,7 +43,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
             {
-              defaultMessage: 'Routing Key is required.',
+              defaultMessage: 'A routing key is required.',
             }
           )
         );
@@ -53,7 +61,6 @@ export function getActionType(): ActionTypeModel {
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   errors,
-  hasErrors,
   action,
   editActionConfig,
   editActionSecrets,
@@ -68,7 +75,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
-            defaultMessage: 'ApiUrl',
+            defaultMessage: 'API URL',
           }
         )}
       >
@@ -90,18 +97,29 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
       <EuiFormRow
         id="routingKey"
         fullWidth
+        helpText={
+          <EuiLink
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-pagerduty.html#configuring-pagerduty"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.indexNameHelpLabel"
+              defaultMessage="Learn how to configure PagerDuty Accounts"
+            />
+          </EuiLink>
+        }
         error={errors.routingKey}
-        isInvalid={hasErrors === true && routingKey !== undefined}
+        isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
-            defaultMessage: 'RoutingKey',
+            defaultMessage: 'Routing key',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors === true && routingKey !== undefined}
+          isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
           name="routingKey"
           value={routingKey || ''}
           data-test-subj="pagerdutyRoutingKeyInput"

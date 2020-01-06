@@ -43,7 +43,7 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel"
-              defaultMessage="Action Type"
+              defaultMessage="Action type"
             />
           </EuiFilterButton>
         }

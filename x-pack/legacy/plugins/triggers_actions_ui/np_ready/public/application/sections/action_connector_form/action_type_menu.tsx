@@ -43,19 +43,21 @@ export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
       };
     });
 
-  const cardNodes = actionTypes.map((item, index): any => {
-    return (
-      <EuiFlexItem key={index}>
-        <EuiCard
-          data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={item.name}
-          description={item.selectMessage}
-          onClick={() => onActionTypeChange(item.actionType)}
-        />
-      </EuiFlexItem>
-    );
-  });
+  const cardNodes = actionTypes
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((item, index): any => {
+      return (
+        <EuiFlexItem key={index}>
+          <EuiCard
+            data-test-subj={`${item.actionType.id}-card`}
+            icon={<EuiIcon size="xl" type={item.iconClass} />}
+            title={item.name}
+            description={item.selectMessage}
+            onClick={() => onActionTypeChange(item.actionType)}
+          />
+        </EuiFlexItem>
+      );
+    });
 
   return (
     <Fragment>

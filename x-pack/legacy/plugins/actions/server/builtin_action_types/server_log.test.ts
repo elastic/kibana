@@ -25,7 +25,7 @@ beforeAll(() => {
 describe('get()', () => {
   test('returns action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('Server Log');
+    expect(actionType.name).toEqual('Server log');
   });
 });
 
@@ -98,6 +98,6 @@ describe('execute()', () => {
       config: {},
       secrets: {},
     });
-    expect(mockedLogger.info).toHaveBeenCalledWith('Server Log: message text here');
+    expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');
   });
 });

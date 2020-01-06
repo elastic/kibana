@@ -25,13 +25,14 @@ import {
 } from '../../../types';
 
 export function getActionType(): ActionTypeModel {
+  const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   return {
     id: '.email',
     iconClass: 'email',
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
       {
-        defaultMessage: 'Configure settings to send email through your mail server',
+        defaultMessage: 'Send email from your server.',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {
@@ -50,7 +51,17 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
             {
-              defaultMessage: 'From is required.',
+              defaultMessage: 'Sender is required.',
+            }
+          )
+        );
+      }
+      if (action.config.from && !action.config.from.match(mailformat)) {
+        errors.from.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
+            {
+              defaultMessage: 'Sender is not a valid email address.',
             }
           )
         );
@@ -60,7 +71,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
             {
-              defaultMessage: 'Port or Service is required.',
+              defaultMessage: 'Port is required.',
             }
           )
         );
@@ -70,7 +81,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
             {
-              defaultMessage: 'Service or host with port is required.',
+              defaultMessage: 'Service is required.',
             }
           )
         );
@@ -80,7 +91,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
             {
-              defaultMessage: 'Host or Service is required.',
+              defaultMessage: 'Host is required.',
             }
           )
         );
@@ -90,7 +101,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
             {
-              defaultMessage: 'User is required.',
+              defaultMessage: 'Username is required.',
             }
           )
         );
@@ -164,9 +175,8 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   editActionConfig,
   editActionSecrets,
   errors,
-  hasErrors,
 }) => {
-  const { from, host, port, secure, service } = action.config;
+  const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
   return (
@@ -175,17 +185,17 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         id="from"
         fullWidth
         error={errors.from}
-        isInvalid={hasErrors && from !== undefined}
+        isInvalid={errors.from.length > 0 && from !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
           {
-            defaultMessage: 'From',
+            defaultMessage: 'Sender',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors && from !== undefined}
+          isInvalid={errors.from.length > 0 && from !== undefined}
           name="from"
           value={from || ''}
           data-test-subj="emailFromInput"
@@ -199,41 +209,13 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        id="service"
-        fullWidth
-        error={errors.service}
-        isInvalid={hasErrors && service !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
-          {
-            defaultMessage: 'Service',
-          }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="service"
-          isInvalid={hasErrors && service !== undefined}
-          value={service || ''}
-          data-test-subj="emailServiceInput"
-          onChange={e => {
-            editActionConfig('service', e.target.value);
-          }}
-          onBlur={() => {
-            if (!service) {
-              editActionConfig('service', '');
-            }
-          }}
-        />
-      </EuiFormRow>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFormRow
             id="emailHost"
             fullWidth
             error={errors.host}
-            isInvalid={hasErrors && host !== undefined}
+            isInvalid={errors.host.length > 0 && host !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
               {
@@ -243,8 +225,9 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldText
               fullWidth
-              isInvalid={hasErrors && host !== undefined}
+              isInvalid={errors.host.length > 0 && host !== undefined}
               name="host"
+              placeholder="localhost"
               value={host || ''}
               data-test-subj="emailHostInput"
               onChange={e => {
@@ -262,8 +245,9 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           <EuiFormRow
             id="emailPort"
             fullWidth
+            placeholder="8080"
             error={errors.port}
-            isInvalid={hasErrors && port !== undefined}
+            isInvalid={errors.port.length > 0 && port !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
               {
@@ -273,7 +257,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldNumber
               prepend=":"
-              isInvalid={hasErrors && port !== undefined}
+              isInvalid={errors.port.length > 0 && port !== undefined}
               fullWidth
               name="port"
               value={port || ''}
@@ -310,17 +294,17 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             id="emailUser"
             fullWidth
             error={errors.user}
-            isInvalid={hasErrors && user !== undefined}
+            isInvalid={errors.user.length > 0 && user !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
               {
-                defaultMessage: 'User',
+                defaultMessage: 'Username',
               }
             )}
           >
             <EuiFieldText
               fullWidth
-              isInvalid={hasErrors && user !== undefined}
+              isInvalid={errors.user.length > 0 && user !== undefined}
               name="user"
               value={user || ''}
               data-test-subj="emailUserInput"
@@ -340,7 +324,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             id="emailPassword"
             fullWidth
             error={errors.password}
-            isInvalid={hasErrors && password !== undefined}
+            isInvalid={errors.password.length > 0 && password !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
               {
@@ -350,7 +334,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldPassword
               fullWidth
-              isInvalid={hasErrors && password !== undefined}
+              isInvalid={errors.password.length > 0 && password !== undefined}
               name="password"
               value={password || ''}
               data-test-subj="emailPasswordInput"

@@ -165,7 +165,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       'data-test-subj': 'connectorsTableCell-referencedByCount',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Attached actions' }
+        { defaultMessage: 'Actions' }
       ),
       sortable: false,
       truncateText: true,
@@ -283,7 +283,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-              defaultMessage="Create"
+              defaultMessage="Create connector"
             />
           </EuiButton>,
         ],
@@ -313,7 +313,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
-            defaultMessage="Use connectors to set up reusable configurations for your Email, Slack, Elasticsearch and third party services that Kibana can trigger"
+            defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana can trigger."
           />
         </p>
       }
@@ -328,7 +328,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-            defaultMessage="Create"
+            defaultMessage="Create connector"
           />
         </EuiButton>
       }
