@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
@@ -25,7 +25,14 @@ import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
 
 export const App: React.FC = () => {
-  const { appBasePath } = useDeps();
+  const { appBasePath, plugins } = useDeps();
+  const double = useMemo(
+    () =>
+      plugins.bfetch.batchedFunction<{ num: number }, { num: number; delay: number }>({
+        url: '/bfetch_explorer/double',
+      }),
+    [plugins.bfetch]
+  );
 
   return (
     <Router basename={appBasePath}>

@@ -17,29 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
-import { PageDoubleIntegers } from './containers/app/pages/page_double_integers';
+import * as React from 'react';
+import { ExplorerService } from '../../plugin';
 
-interface RouteDef {
-  title: string;
-  id: string;
-  component: React.ReactNode;
+export interface Props {
+  double: ExplorerService['double'];
 }
 
-export const routes: RouteDef[] = [
-  {
-    title: 'Double integeters',
-    id: 'double-integers',
-    component: <PageDoubleIntegers />,
-  },
-  {
-    title: 'Todo embeddable',
-    id: 'todoEmbeddableSection',
-    component: <div>todo</div>,
-  },
-  {
-    title: 'List container embeddable',
-    id: 'listContainerSection',
-    component: <div>list</div>,
-  },
-];
+export const DoubleIntegers: React.FC<Props> = () => {
+  return <div>doubling...</div>;
+};

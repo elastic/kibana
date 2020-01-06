@@ -18,19 +18,35 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
-import { BfetchPublicStart } from '../../../src/plugins/bfetch/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../src/plugins/bfetch/public';
 import { mount } from './mount';
+
+export interface ExplorerService {
+  double: (number: { num: number }) => Promise<{ num: number }>;
+}
+
+export interface BfetchExplorerSetupPlugins {
+  bfetch: BfetchPublicSetup;
+}
 
 export interface BfetchExplorerStartPlugins {
   bfetch: BfetchPublicStart;
 }
 
 export class BfetchExplorerPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup<BfetchExplorerStartPlugins>) {
-    coreSetup.application.register({
-      id: 'bfetchExplorer',
+  public setup(core: CoreSetup<BfetchExplorerStartPlugins>, plugins: BfetchExplorerSetupPlugins) {
+    const double = plugins.bfetch.batchedFunction<{ num: number }, { num: number }>({
+      url: '/bfetch/double',
+    });
+
+    const explorer: ExplorerService = {
+      double,
+    };
+
+    core.application.register({
+      id: 'bfetch-explorer',
       title: 'bfetch explorer',
-      mount: mount(coreSetup),
+      mount: mount(core, explorer),
     });
   }
 

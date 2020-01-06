@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["bfetch_explorer"],
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["bfetch"],
   "optionalPlugins": []
