@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TaskManagerStartContract } from '../../../../../../legacy/plugins/alerting/server/shim';
+
 const taskManagerQuery = (...filters: any[]) => ({
   bool: {
     filter: {
@@ -38,7 +40,8 @@ export default function(kibana: any) {
     },
 
     init(server: any) {
-      const taskManager = server.plugins.task_manager;
+      const taskManager = server.newPlatform.start.plugins
+        .kibanaTaskManager as TaskManagerStartContract;
 
       server.route({
         path: '/api/alerting_tasks/{taskId}',
