@@ -66,3 +66,8 @@ export const SIGNALS_INDEX_KEY = 'signalsIndex';
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
+
+/**
+ * Common naming convention for an unauthenticated user
+ */
+export const UNAUTHENTICATED_USER = 'Unauthenticated';

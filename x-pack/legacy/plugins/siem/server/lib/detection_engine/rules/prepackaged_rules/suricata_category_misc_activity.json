@@ -1,0 +1,17 @@
+{
+  "rule_id": "403ddbde-a486-4dd7-b932-cee4ebef88b6",
+  "risk_score": 50,
+  "description": "Suricata Category - Misc Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Misc Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Misc activity\" or rule.category: \"Misc activity\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

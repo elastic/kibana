@@ -30,7 +30,14 @@ const tileMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({}),
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+        };
+      },
     },
     config(Joi: any) {
       return Joi.object({
