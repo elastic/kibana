@@ -67,7 +67,7 @@ export const DateType = ({ field }: Props) => {
           description={
             <FormattedMessage
               id="xpack.idxMgmt.mappingsEditor.dateType.localeFieldDescription"
-              defaultMessage={`The locale to use when parsing dates. This can be useful as months may not have the same name or abbreviation in all languages. Defaults to the {root} locale.`}
+              defaultMessage="The locale to use when parsing dates. This can be useful as months may not have the same name or abbreviation in all languages. Defaults to the {root} locale."
               values={{
                 root: (
                   <EuiLink href={documentationService.getRootLocaleLink()} target="_blank">
