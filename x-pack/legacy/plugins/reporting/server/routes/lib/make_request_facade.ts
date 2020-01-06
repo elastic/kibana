@@ -14,6 +14,7 @@ export function makeRequestFacade(request: RequestFacade): RequestFacade {
     query: request.query,
     pre: request.pre,
     getBasePath: request.getBasePath,
-    getSavedObjectsClient: request.getSavedObjectsClient,
+    getSavedObjectsClient: request.getSavedObjectsClient.bind(request),
+    route: request.route,
   };
 }

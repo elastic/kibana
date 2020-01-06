@@ -103,8 +103,9 @@ export interface RequestFacade {
   getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
   headers: Legacy.Request['headers'];
   params: Legacy.Request['params'];
-  query: ListQuery & GenerateQuery;
   payload: JobParamPostPayload | GenerateExportTypePayload;
+  query: ListQuery & GenerateQuery;
+  route: Legacy.Request['route'];
   pre: {
     management: {
       jobTypes: any;
