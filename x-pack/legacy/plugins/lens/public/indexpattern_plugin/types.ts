@@ -39,6 +39,7 @@ export interface IndexPatternField {
   type: string;
   esTypes?: string[];
   aggregatable: boolean;
+  scripted?: boolean;
   searchable: boolean;
   aggregationRestrictions?: AggregationRestrictions;
 }

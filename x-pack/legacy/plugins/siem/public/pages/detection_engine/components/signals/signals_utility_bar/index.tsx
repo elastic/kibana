@@ -16,7 +16,7 @@ import {
 } from '../../../../../components/detection_engine/utility_bar';
 import * as i18n from './translations';
 import { getBatchItems } from './batch_actions';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
@@ -45,7 +45,7 @@ export const SignalsUtilityBar = React.memo<SignalsUtilityBarProps>(
     updateSignalsStatus,
     sendSignalsToTimeline,
   }) => {
-    const [defaultNumberFormat] = useKibanaUiSetting(DEFAULT_NUMBER_FORMAT);
+    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
