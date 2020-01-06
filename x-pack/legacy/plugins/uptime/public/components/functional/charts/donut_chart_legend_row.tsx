@@ -33,6 +33,11 @@ export const DonutChartLegendRow = ({ color, content, message }: Props) => (
     <EuiFlexItemReducedMargin component="span" grow={false}>
       {message}
     </EuiFlexItemReducedMargin>
-    <EuiFlexItemAlignRight component="span">{content}</EuiFlexItemAlignRight>
+    <EuiFlexItemAlignRight
+      component="span"
+      data-test-subj={`xpack.uptime.donutChart.${message.toLowerCase()}`}
+    >
+      {content}
+    </EuiFlexItemAlignRight>
   </EuiFlexGroup>
 );

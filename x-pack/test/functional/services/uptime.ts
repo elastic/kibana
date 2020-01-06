@@ -49,5 +49,11 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     async setStatusFilterDown() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
     },
+    async getSnapshotCount() {
+      return {
+        up: await testSubjects.getVisibleText('xpack.uptime.donutChart.up'),
+        down: await testSubjects.getVisibleText('xpack.uptime.donutChart.down'),
+      };
+    },
   };
 }

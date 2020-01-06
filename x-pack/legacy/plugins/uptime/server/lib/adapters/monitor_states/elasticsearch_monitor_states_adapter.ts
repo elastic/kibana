@@ -51,6 +51,10 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     filters,
     statusFilter,
   }): Promise<Snapshot> => {
+    if (!(statusFilter === 'up' || statusFilter === 'down')) {
+      throw new Error(`Invalid status filter value '${statusFilter}'`);
+    }
+
     const context = new QueryContext(
       callES,
       dateRangeStart,
@@ -58,8 +62,7 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
       CONTEXT_DEFAULTS.CURSOR_PAGINATION,
       filters && filters !== '' ? JSON.parse(filters) : null,
       CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
-      // ignore the supplied status filter, we apply it at the end
-      undefined
+      statusFilter
     );
 
     // Calculate the total, up, and down counts.
@@ -76,7 +79,11 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
       counts[mostCommonStatus] = counts.total - counts[leastCommonStatus];
     }
 
-    return counts;
+    return {
+      total: statusFilter ? counts[statusFilter] : counts.total,
+      up: statusFilter === 'down' ? 0 : counts.up,
+      down: statusFilter === 'up' ? 0 : counts.down,
+    };
   },
 
   statesIndexExists: async ({ callES }) => {
