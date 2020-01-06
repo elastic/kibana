@@ -89,76 +89,64 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
   stateSyncConfig: IStateSyncConfig<State, SyncStrategy>
 ): ISyncStateRef {
   const subscriptions: Subscription[] = [];
-  let isSyncing = false;
+  let isSyncing = true;
+  const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
 
-  start();
-
-  return {
-    stop,
+  const updateState = async () => {
+    const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
+    if (
+      isSyncing &&
+      storageState &&
+      !defaultComparator(storageState, stateSyncConfig.stateContainer.get())
+    ) {
+      stateSyncConfig.stateContainer.set(storageState);
+    }
   };
 
-  function stop() {
-    isSyncing = false;
-    subscriptions.forEach(s => s.unsubscribe());
-  }
-
-  function start() {
-    if (isSyncing) {
-      throw new Error("SyncState: can't start syncing state, when syncing is already in progress");
+  const updateStorage = async () => {
+    const newStorageState = stateSyncConfig.stateContainer.get();
+    const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
+    if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
+      await toStorage(stateSyncConfig.syncKey, newStorageState);
     }
-    isSyncing = true;
+  };
 
-    const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
-
-    const updateState = async (): Promise<void> => {
-      const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
-      if (
-        isSyncing &&
-        storageState &&
-        !defaultComparator(storageState, stateSyncConfig.stateContainer.get())
-      ) {
-        stateSyncConfig.stateContainer.set(storageState);
-      }
-    };
-
-    const updateStorage = async (): Promise<void> => {
-      const newStorageState = stateSyncConfig.stateContainer.get();
-      const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
-      if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
-        await toStorage(stateSyncConfig.syncKey, newStorageState);
-      }
-    };
-
-    // subscribe to state and storage updates
+  // subscribe to state and storage updates
+  subscriptions.push(
+    stateSyncConfig.stateContainer.state$
+      .pipe(
+        distinctUntilChangedWithInitialValue(
+          stateSyncConfig.stateContainer.get(),
+          defaultComparator
+        ),
+        concatMap(() => updateStorage())
+      )
+      .subscribe()
+  );
+  if (storageChange$) {
     subscriptions.push(
-      stateSyncConfig.stateContainer.state$
+      storageChange$(stateSyncConfig.syncKey)
         .pipe(
           distinctUntilChangedWithInitialValue(
-            stateSyncConfig.stateContainer.get(),
+            fromStorage(stateSyncConfig.syncKey),
             defaultComparator
           ),
-          concatMap(() => updateStorage())
+          concatMap(() => updateState())
         )
         .subscribe()
     );
-    if (storageChange$) {
-      subscriptions.push(
-        storageChange$(stateSyncConfig.syncKey)
-          .pipe(
-            distinctUntilChangedWithInitialValue(
-              fromStorage(stateSyncConfig.syncKey),
-              defaultComparator
-            ),
-            concatMap(() => updateState())
-          )
-          .subscribe()
-      );
-    }
   }
+
+  return {
+    stop: () => {
+      isSyncing = false;
+      subscriptions.forEach(s => s.unsubscribe());
+    },
+  };
 }
 
 /**
- * 6. multiple different sync configs
+ * multiple different sync configs
  * syncStates([
  *   {
  *     syncKey: '_s1',
@@ -174,13 +162,10 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
  * @param stateSyncConfigs - Array of IStateSyncConfig to sync
  */
 export function syncStates(stateSyncConfigs: Array<IStateSyncConfig<any>>): ISyncStateRef {
-  const syncs = stateSyncConfigs.map(config => syncState(config));
-
-  function stop() {
-    syncs.forEach(sync => sync.stop());
-  }
-
+  const syncRefs = stateSyncConfigs.map(config => syncState(config));
   return {
-    stop,
+    stop: () => {
+      syncRefs.forEach(s => s.stop);
+    },
   };
 }
