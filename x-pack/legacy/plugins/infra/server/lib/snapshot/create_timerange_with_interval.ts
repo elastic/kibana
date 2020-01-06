@@ -47,12 +47,12 @@ const aggregationsToModules = async (
   options: InfraSnapshotRequestOptions
 ): Promise<string[]> => {
   const uniqueFields = Object.values(aggregations)
-    .reduce((fields, agg) => {
+    .reduce<Array<string | undefined>>((fields, agg) => {
       if (SnapshotModelMetricAggRT.is(agg)) {
         return uniq(fields.concat(Object.values(agg).map(a => a?.field)));
       }
       return fields;
-    }, [] as Array<string | undefined>)
+    }, [])
     .filter(v => v) as string[];
   const fields = await Promise.all(
     uniqueFields.map(
