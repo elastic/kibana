@@ -7,7 +7,7 @@ import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 
 management.register('ingest', {
-  display: i18n.translate('common.ui.management.dataIngestionDisplayName', {
+  display: i18n.translate('xpack.ingest.management.dataIngestionDisplayName', {
     defaultMessage: 'Data Ingestion',
   }),
   order: 30,
