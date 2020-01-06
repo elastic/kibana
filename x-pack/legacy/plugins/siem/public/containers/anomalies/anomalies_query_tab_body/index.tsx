@@ -35,7 +35,7 @@ export const AnomaliesQueryTabBody = ({
   filterQuery,
   anomaliesFilterQuery,
   setQuery,
-  updateDateRange = () => { },
+  updateDateRange = () => {},
   AnomaliesTableComponent,
   flowTarget,
   ip,

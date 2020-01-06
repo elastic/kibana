@@ -51,7 +51,7 @@ const getAuthenticationsOverTimeByAuthenticationResult = (
 };
 
 export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getAuthentications(
     request: FrameworkRequest,

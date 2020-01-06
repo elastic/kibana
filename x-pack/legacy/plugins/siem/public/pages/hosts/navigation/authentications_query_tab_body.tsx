@@ -60,62 +60,62 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = () => { },
+  updateDateRange = () => {},
 }: HostsComponentsQueryProps) => (
-    <>
-      <MatrixHistogramContainer
-        dataKey="Authentications"
-        defaultStackByOption={authStackByOptions[0]}
-        endDate={endDate}
-        filterQuery={filterQuery}
-        id={ID}
-        mapping={authMatrixDataMappingFields}
-        query={AuthenticationsOverTimeGqlQuery}
-        sourceId="default"
-        startDate={startDate}
-        stackByOptions={authStackByOptions}
-        title="Authentication"
-        type={hostsModel.HostsType.page}
-        updateDateRange={updateDateRange}
-      />
-      <EuiSpacer size="l" />
-      <AuthenticationsQuery
-        endDate={endDate}
-        filterQuery={filterQuery}
-        skip={skip}
-        sourceId="default"
-        startDate={startDate}
-        type={type}
-      >
-        {({
-          authentications,
-          totalCount,
-          loading,
-          pageInfo,
-          loadPage,
-          id,
-          inspect,
-          isInspected,
-          refetch,
-        }) => (
-            <AuthenticationTableManage
-              data={authentications}
-              deleteQuery={deleteQuery}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-              id={id}
-              inspect={inspect}
-              isInspect={isInspected}
-              loading={loading}
-              loadPage={loadPage}
-              refetch={refetch}
-              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-              setQuery={setQuery}
-              totalCount={totalCount}
-              type={type}
-            />
-          )}
-      </AuthenticationsQuery>
-    </>
-  );
+  <>
+    <MatrixHistogramContainer
+      dataKey="Authentications"
+      defaultStackByOption={authStackByOptions[0]}
+      endDate={endDate}
+      filterQuery={filterQuery}
+      id={ID}
+      mapping={authMatrixDataMappingFields}
+      query={AuthenticationsOverTimeGqlQuery}
+      sourceId="default"
+      startDate={startDate}
+      stackByOptions={authStackByOptions}
+      title="Authentication"
+      type={hostsModel.HostsType.page}
+      updateDateRange={updateDateRange}
+    />
+    <EuiSpacer size="l" />
+    <AuthenticationsQuery
+      endDate={endDate}
+      filterQuery={filterQuery}
+      skip={skip}
+      sourceId="default"
+      startDate={startDate}
+      type={type}
+    >
+      {({
+        authentications,
+        totalCount,
+        loading,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => (
+        <AuthenticationTableManage
+          data={authentications}
+          deleteQuery={deleteQuery}
+          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+          id={id}
+          inspect={inspect}
+          isInspect={isInspected}
+          loading={loading}
+          loadPage={loadPage}
+          refetch={refetch}
+          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+          setQuery={setQuery}
+          totalCount={totalCount}
+          type={type}
+        />
+      )}
+    </AuthenticationsQuery>
+  </>
+);
 
 AuthenticationsQueryTabBody.displayName = 'AuthenticationsQueryTabBody';

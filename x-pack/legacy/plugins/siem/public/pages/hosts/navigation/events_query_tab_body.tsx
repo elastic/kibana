@@ -31,7 +31,7 @@ export const EventsQueryTabBody = ({
   endDate,
   filterQuery,
   startDate,
-  updateDateRange = () => { },
+  updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   return (
     <>

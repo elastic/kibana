@@ -44,7 +44,7 @@ import {
 } from './types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getNetworkTopCountries(
     request: FrameworkRequest,
@@ -255,38 +255,38 @@ const getFlowTargetFromString = (flowAsString: string) =>
 const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
   result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
     ? {
-      geo: getOr(
-        '',
-        `location.top_geo.hits.hits[0]._source.${
-        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-        }.geo`,
-        result
-      ),
-      flowTarget: getFlowTargetFromString(
-        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-      ),
-    }
+        geo: getOr(
+          '',
+          `location.top_geo.hits.hits[0]._source.${
+            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+          }.geo`,
+          result
+        ),
+        flowTarget: getFlowTargetFromString(
+          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+        ),
+      }
     : null;
 
 const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
   result.autonomous_system.top_as.hits.hits.length > 0 &&
-    result.autonomous_system.top_as.hits.hits[0]._source
+  result.autonomous_system.top_as.hits.hits[0]._source
     ? {
-      number: getOr(
-        null,
-        `autonomous_system.top_as.hits.hits[0]._source.${
-        Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
-        }.as.number`,
-        result
-      ),
-      name: getOr(
-        '',
-        `autonomous_system.top_as.hits.hits[0]._source.${
-        Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
-        }.as.organization.name`,
-        result
-      ),
-    }
+        number: getOr(
+          null,
+          `autonomous_system.top_as.hits.hits[0]._source.${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
+          }.as.number`,
+          result
+        ),
+        name: getOr(
+          '',
+          `autonomous_system.top_as.hits.hits[0]._source.${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
+          }.as.organization.name`,
+          result
+        ),
+      }
     : null;
 
 const formatTopNFlowEdges = (

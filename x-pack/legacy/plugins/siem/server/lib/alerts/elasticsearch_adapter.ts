@@ -18,7 +18,7 @@ import { TermAggregation } from '../types';
 import { EventHit } from '../events/types';
 
 export class ElasticsearchAlertsAdapter implements AlertsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getAlertsHistogramData(
     request: FrameworkRequest,

@@ -69,7 +69,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
   NetworkDnsProps,
   GetNetworkDnsQuery.Query,
   GetNetworkDnsQuery.Variables
-  > {
+> {
   public render() {
     const {
       activePage,
