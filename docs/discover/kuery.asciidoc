@@ -62,7 +62,7 @@ would match values like "windows 7" and "windows 10".
 
 Wildcards also allow us to search multiple fields at once. This can come in handy when you have both `text` and `keyword`
 versions of a field. Let's say we have `machine.os` and `machine.os.keyword` fields and we want to check both for the term
-"windows 10". We can do it like this: `machine.os*:windows 10".
+"windows 10". We can do it like this: `machine.os*:windows 10`.
 
 
 [NOTE]
