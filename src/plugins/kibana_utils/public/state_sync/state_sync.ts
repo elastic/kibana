@@ -93,13 +93,10 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
   const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
 
   const updateState = async () => {
-    const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
-    if (
-      isSyncing &&
-      storageState &&
-      !defaultComparator(storageState, stateSyncConfig.stateContainer.get())
-    ) {
-      stateSyncConfig.stateContainer.set(storageState);
+    const newState = await fromStorage<State>(stateSyncConfig.syncKey);
+    const oldState = stateSyncConfig.stateContainer.get();
+    if (isSyncing && !defaultComparator(newState, oldState)) {
+      stateSyncConfig.stateContainer.set(newState);
     }
   };
 

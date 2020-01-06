@@ -178,6 +178,25 @@ describe('state_sync', () => {
 
       stop();
     });
+
+    it('storage change to null should notify state', async () => {
+      container.set([{ completed: false, id: 1, text: 'changed' }]);
+      const { stop } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
+          syncStrategy: urlSyncStrategy,
+        },
+      ]);
+
+      history.replace('/');
+
+      await tick();
+
+      expect(container.getState()).toEqual(defaultState);
+
+      stop();
+    });
   });
 });
 
