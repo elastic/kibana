@@ -15,12 +15,12 @@ import {
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
-import { IWaterfallError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
 
 interface Props {
-  mark: IWaterfallError;
+  mark: ErrorMark;
 }
 
 const Popover = styled.div`
@@ -57,7 +57,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     />
   );
 
-  const error = mark.custom;
+  const { error } = mark;
 
   const { rangeTo, rangeFrom } = urlParams;
   const query = {
@@ -78,7 +78,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     >
       <Popover>
         <TimeLegend
-          text={asDuration(mark.offset + mark.skew)}
+          text={asDuration(mark.offset)}
           indicator={() => (
             <div style={{ marginRight: px(units.quarter) }}>@</div>
           )}

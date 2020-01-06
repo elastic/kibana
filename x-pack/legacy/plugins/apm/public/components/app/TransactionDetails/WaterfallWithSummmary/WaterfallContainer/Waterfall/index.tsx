@@ -16,7 +16,8 @@ import { history } from '../../../../../../utils/history';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
-import { getAgentMarks } from '../get_agent_marks';
+import { getAgentMarks } from '../Marks/get_agent_marks';
+import { getErrorMarks } from '../Marks/get_error_marks';
 import { WaterfallFlyout } from './WaterfallFlyout';
 import { WaterfallItem } from './WaterfallItem';
 import {
@@ -48,10 +49,8 @@ const toggleFlyout = ({
     ...location,
     search: fromQuery({
       ...toQuery(location.search),
-      ...{
-        flyoutDetailTab: undefined,
-        waterfallItemId: item ? String(item.id) : undefined
-      }
+      flyoutDetailTab: undefined,
+      waterfallItemId: item?.id
     })
   });
 };
@@ -80,8 +79,8 @@ export const Waterfall: React.FC<Props> = ({
 
   const { serviceColors, duration } = waterfall;
 
-  const agentMarkers = getAgentMarks(waterfall.entryTransaction);
-  const errorMarkers = waterfall.items.filter(item => item.docType === 'error');
+  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const errorMarks = getErrorMarks(waterfall.items);
 
   const renderWaterfallItem = (item: IWaterfallItem) => {
     if (item.docType === 'error') {
@@ -90,14 +89,14 @@ export const Waterfall: React.FC<Props> = ({
 
     const errorCount =
       item.docType === 'transaction'
-        ? waterfall.errorsPerTransaction[item.custom.transaction.id]
+        ? waterfall.errorsPerTransaction[item.doc.transaction.id]
         : 0;
 
     return (
       <WaterfallItem
         key={item.id}
         timelineMargins={TIMELINE_MARGINS}
-        color={serviceColors[item.custom.service.name]}
+        color={serviceColors[item.doc.service.name]}
         item={item}
         totalDuration={duration}
         isSelected={item.id === waterfallItemId}
@@ -122,7 +121,7 @@ export const Waterfall: React.FC<Props> = ({
       )}
       <StickyContainer>
         <Timeline
-          marks={[...agentMarkers, ...errorMarkers]}
+          marks={[...agentMarks, ...errorMarks]}
           duration={duration}
           height={waterfallHeight}
           margins={TIMELINE_MARGINS}

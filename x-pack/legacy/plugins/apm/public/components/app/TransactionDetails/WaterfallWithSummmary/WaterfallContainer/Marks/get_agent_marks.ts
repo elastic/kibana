@@ -5,12 +5,12 @@
  */
 
 import { sortBy } from 'lodash';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
+import { Mark } from '.';
 
-export interface AgentMark {
-  docType: 'agentMark';
-  name: string;
-  offset: number;
+// Extends Mark without adding new properties to it.
+export interface AgentMark extends Mark {
+  type: 'agentMark';
 }
 
 export function getAgentMarks(transaction?: Transaction): AgentMark[] {
@@ -21,9 +21,10 @@ export function getAgentMarks(transaction?: Transaction): AgentMark[] {
 
   return sortBy(
     Object.entries(agent).map(([name, ms]) => ({
-      docType: 'agentMark',
-      name,
-      offset: ms * 1000
+      type: 'agentMark',
+      id: name,
+      offset: ms * 1000,
+      verticalLine: true
     })),
     'offset'
   );

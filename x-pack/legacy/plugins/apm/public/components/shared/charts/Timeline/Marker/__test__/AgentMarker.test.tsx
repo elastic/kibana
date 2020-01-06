@@ -7,13 +7,14 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { AgentMarker } from '../AgentMarker';
-import { AgentMark } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/get_agent_marks';
+import { AgentMark } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 describe('AgentMarker', () => {
   const mark = {
-    name: 'agent',
+    id: 'agent',
     offset: 1000,
-    docType: 'agentMark'
+    type: 'agentMark',
+    verticalLine: true
   } as AgentMark;
   it('renders', () => {
     const component = shallow(<AgentMarker mark={mark} />);

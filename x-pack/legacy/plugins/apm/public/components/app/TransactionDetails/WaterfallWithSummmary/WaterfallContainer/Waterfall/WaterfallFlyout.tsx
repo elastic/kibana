@@ -31,13 +31,13 @@ export const WaterfallFlyout: React.FC<Props> = ({
     case 'span':
       const parentTransaction =
         currentItem.parent?.docType === 'transaction'
-          ? currentItem.parent?.custom
+          ? currentItem.parent?.doc
           : undefined;
 
       return (
         <SpanFlyout
           totalDuration={waterfall.duration}
-          span={currentItem.custom}
+          span={currentItem.doc}
           parentTransaction={parentTransaction}
           onClose={() => toggleFlyout({ location })}
         />
@@ -45,7 +45,7 @@ export const WaterfallFlyout: React.FC<Props> = ({
     case 'transaction':
       return (
         <TransactionFlyout
-          transaction={currentItem.custom}
+          transaction={currentItem.doc}
           onClose={() => toggleFlyout({ location })}
           rootTransactionDuration={
             waterfall.rootTransaction?.transaction.duration.us

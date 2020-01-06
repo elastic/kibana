@@ -11,9 +11,10 @@ exports[`Marker renders agent marker 1`] = `
   <AgentMarker
     mark={
       Object {
-        "docType": "agentMark",
-        "name": "agent",
+        "id": "agent",
         "offset": 1000,
+        "type": "agentMark",
+        "verticalLine": true,
       }
     }
   />
@@ -31,7 +32,7 @@ exports[`Marker renders error marker 1`] = `
   <ErrorMarker
     mark={
       Object {
-        "custom": Object {
+        "error": Object {
           "error": Object {
             "grouping_key": "123",
           },
@@ -45,10 +46,11 @@ exports[`Marker renders error marker 1`] = `
             "id": "456",
           },
         },
-        "docType": "error",
-        "id": "123",
-        "offset": 10000,
+        "id": "agent",
+        "offset": 1000,
         "serviceColor": "#fff",
+        "type": "errorMark",
+        "verticalLine": true,
       }
     }
   />

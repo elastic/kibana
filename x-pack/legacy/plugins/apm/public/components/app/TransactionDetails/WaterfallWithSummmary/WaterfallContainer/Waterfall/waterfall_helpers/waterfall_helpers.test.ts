@@ -168,7 +168,7 @@ describe('waterfall_helpers', () => {
       const items: IWaterfallItem[] = [
         {
           docType: 'span',
-          custom: {
+          doc: {
             parent: { id: 'c' },
             service: { name: 'opbeans-java' },
             transaction: {
@@ -188,7 +188,7 @@ describe('waterfall_helpers', () => {
         },
         {
           docType: 'span',
-          custom: {
+          doc: {
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
             transaction: {
@@ -208,7 +208,7 @@ describe('waterfall_helpers', () => {
         },
         {
           docType: 'span',
-          custom: {
+          doc: {
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
             transaction: {
@@ -228,7 +228,7 @@ describe('waterfall_helpers', () => {
         },
         {
           docType: 'transaction',
-          custom: {
+          doc: {
             parent: { id: 'b' },
             service: { name: 'opbeans-java' },
             timestamp: { us: 1536763736369000 },
@@ -242,7 +242,7 @@ describe('waterfall_helpers', () => {
         },
         {
           docType: 'transaction',
-          custom: {
+          doc: {
             service: { name: 'opbeans-java' },
             timestamp: { us: 1536763736366000 },
             transaction: {
@@ -273,7 +273,7 @@ describe('waterfall_helpers', () => {
         {
           docType: 'transaction',
           id: 'a',
-          custom: ({
+          doc: ({
             transaction: { id: 'a' },
             timestamp: { us: 10 }
           } as unknown) as Transaction
@@ -282,7 +282,7 @@ describe('waterfall_helpers', () => {
           docType: 'span',
           id: 'b',
           parentId: 'a',
-          custom: ({
+          doc: ({
             span: {
               id: 'b'
             },
@@ -306,7 +306,7 @@ describe('waterfall_helpers', () => {
     it('should adjust when child starts before parent', () => {
       const child = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 0 }
         },
         duration: 50
@@ -314,7 +314,7 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 100 }
         },
         duration: 100,
@@ -327,7 +327,7 @@ describe('waterfall_helpers', () => {
     it('should not adjust when child starts after parent has ended', () => {
       const child = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 250 }
         },
         duration: 50
@@ -335,7 +335,7 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 100 }
         },
         duration: 100,
@@ -348,7 +348,7 @@ describe('waterfall_helpers', () => {
     it('should not adjust when child starts within parent duration', () => {
       const child = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 150 }
         },
         duration: 50
@@ -356,7 +356,7 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 100 }
         },
         duration: 100,
@@ -373,7 +373,7 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'span',
-        custom: {
+        doc: {
           timestamp: { us: 100 }
         },
         duration: 100,
@@ -390,7 +390,7 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'transaction',
-        custom: {
+        doc: {
           timestamp: { us: 100 }
         },
         duration: 100,

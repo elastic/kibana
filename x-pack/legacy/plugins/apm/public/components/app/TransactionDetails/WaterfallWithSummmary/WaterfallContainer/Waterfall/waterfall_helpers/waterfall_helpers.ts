@@ -40,7 +40,7 @@ export interface IWaterfall {
 
 interface IWaterfallItemBase<T, U> {
   docType: U;
-  custom: T;
+  doc: T;
 
   serviceColor?: string;
 
@@ -80,7 +80,7 @@ export type IWaterfallItem =
 function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
   return {
     docType: 'transaction',
-    custom: transaction,
+    doc: transaction,
     id: transaction.transaction.id,
     parentId: transaction.parent?.id,
     duration: transaction.transaction.duration.us,
@@ -92,7 +92,7 @@ function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
 function getSpanItem(span: Span): IWaterfallSpan {
   return {
     docType: 'span',
-    custom: span,
+    doc: span,
     id: span.span.id,
     parentId: span.parent?.id,
     duration: span.span.duration.us,
@@ -101,15 +101,19 @@ function getSpanItem(span: Span): IWaterfallSpan {
   };
 }
 
-function getErrorItem(error: APMError): IWaterfallError {
+function getErrorItem(
+  error: APMError,
+  serviceColors: IServiceColors
+): IWaterfallError {
   return {
     docType: 'error',
-    custom: error,
+    doc: error,
     id: error.error.id,
     parentId: error.parent?.id,
     offset: 0,
     skew: 0,
-    duration: 0
+    duration: 0,
+    serviceColor: serviceColors[error.service.name]
   };
 }
 
@@ -127,10 +131,10 @@ export function getClockSkew(
       return parentItem.skew;
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
-      const parentStart = parentItem.custom.timestamp.us + parentItem.skew;
+      const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
 
       // determine if child starts before the parent
-      const offsetStart = parentStart - item.custom.timestamp.us;
+      const offsetStart = parentStart - item.doc.timestamp.us;
       if (offsetStart > 0) {
         const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
         return offsetStart + latency;
@@ -149,7 +153,7 @@ export function getOrderedWaterfallItems(
   if (!entryWaterfallTransaction) {
     return [];
   }
-  const entryTimestamp = entryWaterfallTransaction.custom.timestamp.us;
+  const entryTimestamp = entryWaterfallTransaction.doc.timestamp.us;
   const visitedWaterfallItemSet = new Set();
 
   function getSortedChildren(
@@ -168,7 +172,7 @@ export function getOrderedWaterfallItems(
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.custom.timestamp.us - entryTimestamp;
+    item.offset = item.doc.timestamp.us - entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
@@ -184,14 +188,14 @@ export function getOrderedWaterfallItems(
 function getRootTransaction(childrenByParentId: IWaterfallGroup) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
-    return item.custom;
+    return item.doc;
   }
 }
 
 export type IServiceColors = Record<string, string>;
 
-function getServiceColors(waterfallItems: IWaterfallItem[]) {
-  const services = uniq(waterfallItems.map(item => item.custom.service.name));
+function getServiceColors(traceItems: TraceAPIResponse['trace']['items']) {
+  const services = uniq(traceItems.map(item => item.service.name));
 
   const assignedColors = [
     theme.euiColorVis1,
@@ -212,7 +216,10 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
     0
   );
 
-const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
+const getWaterfallItems = (
+  items: TraceAPIResponse['trace']['items'],
+  serviceColors: IServiceColors
+) =>
   items.map(item => {
     const docType = item.processor.event;
     switch (docType) {
@@ -221,7 +228,7 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
       case 'transaction':
         return getTransactionItem(item as Transaction);
       case 'error':
-        return getErrorItem(item as APMError);
+        return getErrorItem(item as APMError, serviceColors);
     }
   });
 
@@ -250,7 +257,12 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems: IWaterfallItem[] = getWaterfallItems(trace.items);
+  const serviceColors = getServiceColors(trace.items);
+
+  const waterfallItems: IWaterfallItem[] = getWaterfallItems(
+    trace.items,
+    serviceColors
+  );
 
   const childrenByParentId = getChildrenGroupedByParentId(waterfallItems);
 
@@ -266,19 +278,8 @@ export function getWaterfall(
 
   const rootTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);
-  const serviceColors = getServiceColors(items);
 
-  const entryTransaction = entryWaterfallTransaction?.custom;
-
-  const waterfallErrors = items.filter(
-    item => item.docType === 'error'
-  ) as IWaterfallError[];
-
-  // Add the service color into the error waterfall item
-  waterfallErrors.map(error => {
-    error.serviceColor = serviceColors[error.custom.service.name];
-    return error;
-  });
+  const entryTransaction = entryWaterfallTransaction?.doc;
 
   return {
     entryTransaction,
@@ -286,7 +287,7 @@ export function getWaterfall(
     duration,
     items,
     errorsPerTransaction,
-    errorsCount: waterfallErrors.length,
+    errorsCount: items.filter(item => item.docType === 'error').length,
     serviceColors
   };
 }

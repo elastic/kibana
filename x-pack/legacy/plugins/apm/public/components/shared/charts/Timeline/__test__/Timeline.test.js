@@ -31,19 +31,22 @@ describe('Timeline', () => {
       animation: null,
       marks: [
         {
-          name: 'timeToFirstByte',
+          id: 'timeToFirstByte',
           offset: 100000,
-          docType: 'agentMark'
+          type: 'agentMark',
+          verticalLine: true
         },
         {
-          name: 'domInteractive',
+          id: 'domInteractive',
           offset: 110000,
-          docType: 'agentMark'
+          type: 'agentMark',
+          verticalLine: true
         },
         {
-          name: 'domComplete',
+          id: 'domComplete',
           offset: 190000,
-          docType: 'agentMark'
+          type: 'agentMark',
+          verticalLine: true
         }
       ]
     };
