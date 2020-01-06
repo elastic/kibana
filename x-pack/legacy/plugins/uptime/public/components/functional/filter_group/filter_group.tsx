@@ -5,7 +5,7 @@
  */
 
 import { EuiFilterGroup } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
