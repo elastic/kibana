@@ -107,7 +107,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
-  unusedFromRoot('uiSettings.enabled'),
   renameFromRoot('optimize.lazy', 'optimize.watch'),
   renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
