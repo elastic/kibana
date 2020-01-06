@@ -69,7 +69,7 @@ export class CanvasPlugin
       title: 'Canvas App',
       async mount(context, params) {
         // Load application bundle
-        const { renderApp } = await import('./application/canvas');
+        const { renderApp } = await import('./applications/canvas');
 
         // Setup our store
         const canvasStore = await createStore(core);
