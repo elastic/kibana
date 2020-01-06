@@ -78,6 +78,7 @@ input[type='checkbox'],
   flex-shrink: 0;
   flex-basis: auto;
   flex-direction: column;
+  background-color: $euiPageBackgroundColor;
 
   > * {
     flex-shrink: 0;
