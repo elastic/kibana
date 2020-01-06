@@ -100,7 +100,7 @@ export function DashboardEmptyScreen({
     constants.addExistingVisualizationLinkText,
     constants.addExistingVisualizationLinkAriaLabel
   );
-  const page = (text: string, showAdditionalParagraph: boolean) => {
+  const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
       <EuiPage className="dshStartScreen" restrictWidth="500px">
         <EuiPageBody>
@@ -112,8 +112,13 @@ export function DashboardEmptyScreen({
           >
             <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
             <EuiText size="m">
-              <p style={{ fontWeight: 'bold' }}>{text}</p>
+              <p style={{ fontWeight: 'bold' }}>{mainText}</p>
             </EuiText>
+            {additionalText ? (
+              <EuiText size="m" color="subdued">
+                {additionalText}
+              </EuiText>
+            ) : null}
             {showAdditionalParagraph ? (
               <React.Fragment>
                 <EuiSpacer size="m" />
@@ -125,7 +130,11 @@ export function DashboardEmptyScreen({
       </EuiPage>
     );
   };
-  const readonlyMode = page(constants.emptyDashboardTitle, false);
+  const readonlyMode = page(
+    constants.emptyDashboardTitle,
+    false,
+    constants.emptyDashboardContactOwner
+  );
   const viewMode = page(constants.fillDashboardTitle, true);
   const editMode = (
     <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">

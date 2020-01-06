@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 
 /** READONLY VIEW CONSTANTS **/
 export const emptyDashboardTitle: string = i18n.translate('kbn.dashboard.emptyDashboardTitle', {
-  defaultMessage: 'This dashboard is empty.',
+  defaultMessage: 'This dashboard is empty or you do not have permission to view.',
+});
+export const emptyDashboardContactOwner = i18n.translate('kbn.dashboard.emptyDashboardTitle', {
+  defaultMessage: 'Please contact the owner of the dashboard if you think this is an error.',
 });
 /** VIEW MODE CONSTANTS **/
 export const fillDashboardTitle: string = i18n.translate('kbn.dashboard.fillDashboardTitle', {

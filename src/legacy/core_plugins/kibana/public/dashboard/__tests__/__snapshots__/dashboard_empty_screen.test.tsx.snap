@@ -326,8 +326,27 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                               }
                             }
                           >
-                            This dashboard is empty.
+                            This dashboard is empty or you do not have permission to view.
                           </p>
+                        </div>
+                      </EuiText>
+                      <EuiText
+                        color="subdued"
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <EuiTextColor
+                            color="subdued"
+                            component="div"
+                          >
+                            <div
+                              className="euiTextColor euiTextColor--subdued"
+                            >
+                              Please contact the owner of the dashboard if you think this is an error.
+                            </div>
+                          </EuiTextColor>
                         </div>
                       </EuiText>
                     </div>
