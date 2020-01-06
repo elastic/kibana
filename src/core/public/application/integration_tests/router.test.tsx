@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { createMemoryHistory, History } from 'history';
+import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
 import { EitherApp, MockedMounterMap, MockedMounterTuple } from '../test_types';
@@ -27,7 +27,15 @@ import { createRenderer, createAppMounter, createLegacyAppMounter } from './util
 describe('AppContainer', () => {
   let mounters: MockedMounterMap<EitherApp>;
   let history: History;
-  let navigate: ReturnType<typeof createRenderer>;
+  let update: ReturnType<typeof createRenderer>;
+
+  const navigate = (path: string) => {
+    history.push(path);
+    return update();
+  };
+
+  const mockMountersToMounters = () =>
+    new Map([...mounters].map(([appId, { mounter }]) => [appId, mounter]));
 
   beforeEach(() => {
     mounters = new Map([
@@ -38,14 +46,14 @@ describe('AppContainer', () => {
       createAppMounter('app3', '<div>App 3</div>', '/custom/path'),
     ] as Array<MockedMounterTuple<EitherApp>>);
     history = createMemoryHistory();
-    navigate = createRenderer(<AppRouter history={history} mounters={mounters} />, history.push);
+    update = createRenderer(<AppRouter history={history} mounters={mockMountersToMounters()} />);
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {
     const dom1 = await navigate('/app/app1');
     const app1 = mounters.get('app1')!;
 
-    expect(app1.mount).toHaveBeenCalled();
+    expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom1?.html()).toMatchInlineSnapshot(`
       "<div><div>
       basename: /app/app1
@@ -53,11 +61,11 @@ describe('AppContainer', () => {
       </div></div>"
     `);
 
-    const app1Unmount = await app1.mount.mock.results[0].value;
+    const app1Unmount = await app1.mounter.mount.mock.results[0].value;
     const dom2 = await navigate('/app/app2');
 
     expect(app1Unmount).toHaveBeenCalled();
-    expect(mounters.get('app2')!.mount).toHaveBeenCalled();
+    expect(mounters.get('app2')!.mounter.mount).toHaveBeenCalled();
     expect(dom2?.html()).toMatchInlineSnapshot(`
       "<div><div>
       basename: /app/app2
@@ -70,29 +78,77 @@ describe('AppContainer', () => {
     mounters.set(...createAppMounter('spaces', '<div>Custom Space</div>', '/spaces/fake-login'));
     mounters.set(...createAppMounter('login', '<div>Login Page</div>', '/fake-login'));
     history = createMemoryHistory();
-    navigate = createRenderer(<AppRouter history={history} mounters={mounters} />, history.push);
+    update = createRenderer(<AppRouter history={history} mounters={mockMountersToMounters()} />);
 
     await navigate('/fake-login');
 
-    expect(mounters.get('spaces')!.mount).not.toHaveBeenCalled();
-    expect(mounters.get('login')!.mount).toHaveBeenCalled();
+    expect(mounters.get('spaces')!.mounter.mount).not.toHaveBeenCalled();
+    expect(mounters.get('login')!.mounter.mount).toHaveBeenCalled();
   });
 
   it('should not mount when partial route path has higher specificity', async () => {
     mounters.set(...createAppMounter('login', '<div>Login Page</div>', '/fake-login'));
     mounters.set(...createAppMounter('spaces', '<div>Custom Space</div>', '/spaces/fake-login'));
     history = createMemoryHistory();
-    navigate = createRenderer(<AppRouter history={history} mounters={mounters} />, history.push);
+    update = createRenderer(<AppRouter history={history} mounters={mockMountersToMounters()} />);
 
     await navigate('/spaces/fake-login');
 
-    expect(mounters.get('spaces')!.mount).toHaveBeenCalled();
-    expect(mounters.get('login')!.mount).not.toHaveBeenCalled();
+    expect(mounters.get('spaces')!.mounter.mount).toHaveBeenCalled();
+    expect(mounters.get('login')!.mounter.mount).not.toHaveBeenCalled();
+  });
+
+  it('should not remount when changing pages within app', async () => {
+    const { mounter, unmount } = mounters.get('app1')!;
+    await navigate('/app/app1/page1');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+
+    // Navigating to page within app does not trigger re-render
+    await navigate('/app/app1/page2');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+    expect(unmount).not.toHaveBeenCalled();
+  });
+
+  it('should not remount when going back within app', async () => {
+    const { mounter, unmount } = mounters.get('app1')!;
+    await navigate('/app/app1/page1');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+
+    // Hitting back button within app does not trigger re-render
+    await navigate('/app/app1/page2');
+    history.goBack();
+    await update();
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+    expect(unmount).not.toHaveBeenCalled();
+  });
+
+  it('should not remount when when changing pages within app using hash history', async () => {
+    history = createHashHistory();
+    update = createRenderer(<AppRouter history={history} mounters={mockMountersToMounters()} />);
+
+    const { mounter, unmount } = mounters.get('app1')!;
+    await navigate('/app/app1/page1');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+
+    // Changing hash history does not trigger re-render
+    await navigate('/app/app1/page2');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+    expect(unmount).not.toHaveBeenCalled();
+  });
+
+  it('should unmount when changing between apps', async () => {
+    const { mounter, unmount } = mounters.get('app1')!;
+    await navigate('/app/app1/page1');
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+
+    // Navigating to other app triggers unmount
+    await navigate('/app/app2/page1');
+    expect(unmount).toHaveBeenCalledTimes(1);
   });
 
   it('calls legacy mount handler', async () => {
     await navigate('/app/legacyApp1');
-    expect(mounters.get('legacyApp1')!.mount.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mounters.get('legacyApp1')!.mounter.mount.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "appBasePath": "/app/legacyApp1",
@@ -104,7 +160,7 @@ describe('AppContainer', () => {
 
   it('handles legacy apps with subapps', async () => {
     await navigate('/app/baseApp');
-    expect(mounters.get('baseApp:legacyApp2')!.mount.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mounters.get('baseApp:legacyApp2')!.mounter.mount.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "appBasePath": "/app/baseApp",
