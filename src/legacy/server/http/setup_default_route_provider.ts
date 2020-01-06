@@ -29,7 +29,7 @@ export function setupDefaultRouteProvider(server: Legacy.Server) {
 
     const uiSettings = request.getUiSettingsService();
 
-    const defaultRoute = await uiSettings.get('defaultRoute');
+    const defaultRoute = await uiSettings.get<string>('defaultRoute');
     const qualifiedDefaultRoute = `${request.getBasePath()}${defaultRoute}`;
 
     if (isRelativePath(qualifiedDefaultRoute, serverBasePath)) {
