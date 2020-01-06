@@ -32,8 +32,9 @@ export interface Pkcs12ReadResult {
  * @remarks
  * The PKCS12 key store may contain the following:
  * - 0 or more certificates contained in a `certBag` (OID
- *  1.2.840.113549.1.12.10.1.3); the first is treated as an instance
- *  certificate, and any others are treated as CA certificates
+ *  1.2.840.113549.1.12.10.1.3); if a certificate has an associated
+ *  private key it is treated as an instance certificate, otherwise it is
+ *  treated as a CA certificate
  * - 0 or 1 private keys contained in a `keyBag` (OID
  *  1.2.840.113549.1.12.10.1.1) or a `pkcs8ShroudedKeyBag` (OID
  *  1.2.840.113549.1.12.10.1.2)
@@ -121,7 +122,11 @@ const getCerts = (p12: pkcs12.Pkcs12Pfx, pubKey?: PublicKeyData) => {
   if (ca) {
     cert = ca.find(x => doesPubKeyMatch(x?.publicKeyData, pubKey))?.cert;
     ca = ca.filter(x => !doesPubKeyMatch(x?.publicKeyData, pubKey)).map(x => x!.cert);
+    if (ca.length === 0) {
+      ca = undefined;
+    }
   }
+
   return { ca, cert };
 };
 

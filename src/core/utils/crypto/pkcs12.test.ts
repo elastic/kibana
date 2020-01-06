@@ -26,6 +26,7 @@ import {
   ES_EMPTYPASSWORD_P12_PATH,
   ES_NOPASSWORD_P12_PATH,
 } from '@kbn/dev-utils';
+import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
 import { readFileSync } from 'fs';
 
 import { readPkcs12Keystore, Pkcs12ReadResult, readPkcs12Truststore } from '.';
@@ -42,23 +43,30 @@ const readPem = (file: string) => {
   return reformatPem(pem);
 };
 
+let pemCA: string;
+let pemCert: string;
+let pemKey: string;
+
+beforeAll(() => {
+  pemCA = readPem(CA_CERT_PATH);
+  pemCert = readPem(ES_CERT_PATH);
+  pemKey = readPem(ES_KEY_PATH);
+});
+
 describe('#readPkcs12Keystore', () => {
   const expectKey = (pkcs12ReadResult: Pkcs12ReadResult) => {
     const result = reformatPem(pkcs12ReadResult.key!);
-    const pemKey = readPem(ES_KEY_PATH);
     expect(result).toEqual(pemKey);
   };
 
   const expectCert = (pkcs12ReadResult: Pkcs12ReadResult) => {
     const result = reformatPem(pkcs12ReadResult.cert!);
-    const pemCert = readPem(ES_CERT_PATH);
     expect(result).toEqual(pemCert);
   };
 
-  const expectCA = (pkcs12ReadResult: Pkcs12ReadResult) => {
+  const expectCA = (pkcs12ReadResult: Pkcs12ReadResult, ca = [pemCA]) => {
     const result = pkcs12ReadResult.ca?.map(x => reformatPem(x));
-    const pemCA = readPem(CA_CERT_PATH);
-    expect(result).toEqual([pemCA]);
+    expect(result).toEqual(ca);
   };
 
   describe('Succeeds when the correct password is used', () => {
@@ -124,23 +132,66 @@ describe('#readPkcs12Keystore', () => {
     });
   });
 
-  describe('Throws when an invalid password is used', () => {
+  describe('Handles other key store permutations', () => {
+    it('Succeeds with no key', () => {
+      const pkcs12ReadResult = readPkcs12Keystore(NO_KEY_PATH, '');
+      expectCA(pkcs12ReadResult, [pemCert, pemCA]);
+      expect(pkcs12ReadResult.cert).toBeUndefined();
+      expect(pkcs12ReadResult.key).toBeUndefined();
+    });
+
+    it('Succeeds with no instance certificate', () => {
+      const pkcs12ReadResult = readPkcs12Keystore(NO_CERT_PATH, '');
+      expectCA(pkcs12ReadResult);
+      expect(pkcs12ReadResult.cert).toBeUndefined();
+      expectKey(pkcs12ReadResult);
+    });
+
+    it('Succeeds with no CA certificate', () => {
+      const pkcs12ReadResult = readPkcs12Keystore(NO_CA_PATH, '');
+      expect(pkcs12ReadResult.ca).toBeUndefined();
+      expectCert(pkcs12ReadResult);
+      expectKey(pkcs12ReadResult);
+    });
+
+    it('Succeeds with two CA certificates', () => {
+      const pkcs12ReadResult = readPkcs12Keystore(TWO_CAS_PATH, '');
+      expectCA(pkcs12ReadResult, [pemCA, pemCA]);
+      expectCert(pkcs12ReadResult);
+      expectKey(pkcs12ReadResult);
+    });
+  });
+
+  describe('Throws errors', () => {
     const expectError = (password?: string) => {
       expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrowError(
         'PKCS#12 MAC could not be verified. Invalid password?'
       );
     };
 
-    it('Incorrect password', () => {
+    it('When an invalid password is used (incorrect)', () => {
       expectError('incorrect');
     });
 
-    it('Empty password', () => {
+    it('When an invalid password is used (empty)', () => {
       expectError('');
     });
 
-    it('Undefined password', () => {
+    it('When an invalid password is used (undefined)', () => {
       expectError();
+    });
+
+    it('When an invalid file path is used', () => {
+      const path = 'invalid-filepath';
+      expect(() => readPkcs12Keystore(path)).toThrowError(
+        `ENOENT: no such file or directory, open '${path}'`
+      );
+    });
+
+    it('When two keys are present', () => {
+      expect(() => readPkcs12Keystore(TWO_KEYS_PATH, '')).toThrowError(
+        'Keystore contains multiple private keys.'
+      );
     });
   });
 });
@@ -149,8 +200,6 @@ describe('#readPkcs12Truststore', () => {
   it('reads all certificates into one CA array and discards any certificates that have keys', () => {
     const ca = readPkcs12Truststore(ES_P12_PATH, ES_P12_PASSWORD);
     const result = ca?.map(x => reformatPem(x));
-    const pemCA = readPem(CA_CERT_PATH);
-
     expect(result).toEqual([pemCA]);
   });
 });
