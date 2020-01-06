@@ -10,7 +10,6 @@ import { LogEntry, LogEntryHighlight } from '../../utils/log_entry';
 import { RendererFunction } from '../../utils/typed_react';
 // deep inporting to avoid a circular import problem
 import { LogHighlightsState } from './log_highlights/log_highlights';
-import { LogPositionState } from './log_position';
 import { LogEntriesState, LogEntriesStateParams, LogEntriesCallbacks } from './log_entries';
 import { UniqueTimeKey } from '../../../common/time';
 
