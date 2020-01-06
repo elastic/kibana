@@ -18,7 +18,6 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { Env } from '../config';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
@@ -126,7 +125,6 @@ export class HttpConfig {
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
-  public publicDir: string;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
@@ -134,7 +132,7 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -144,7 +142,6 @@ export class HttpConfig {
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
-    this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
