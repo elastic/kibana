@@ -61,7 +61,7 @@ Go to *Management > Users*, add a new user, and assign the user the built-in
 ==== With a custom index
 
 If you are using Reporting with a custom index,
-start the `xpack.reporting.index` setting
+the `xpack.reporting.index` setting should begin 
 with `.reporting-*`. The default {kib} system user has
 `all` privileges against the `.reporting-*` pattern of indices.
 
