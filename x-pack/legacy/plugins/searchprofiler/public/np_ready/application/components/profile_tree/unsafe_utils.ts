@@ -166,7 +166,11 @@ export function initTree<T>(
   depth = 0,
   parent: Operation | null = null
 ) {
-  if (MAX_TREE_DEPTH === depth) {
+  if (MAX_TREE_DEPTH + 1 === depth) {
+    if (parent) {
+      parent!.hasChildren = false;
+      parent!.children = [];
+    }
     return;
   }
   for (const child of data) {
