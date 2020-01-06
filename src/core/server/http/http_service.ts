@@ -21,11 +21,10 @@ import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
-import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
-
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
+import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
 import { CspConfigType, config as cspConfig } from '../csp';
@@ -43,6 +42,7 @@ import {
 } from './types';
 
 import { RequestHandlerContext } from '../../server';
+import { registerCoreHandlers } from './lifecycle_handlers';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -57,6 +57,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
 
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
+  private readonly env: Env;
   private notReadyServer?: Server;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
@@ -64,11 +65,12 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     const { logger, configService, env } = coreContext;
 
     this.logger = logger;
+    this.env = env;
     this.log = logger.get('http');
-    this.config$ = combineLatest(
+    this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
-      configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+      configService.atPath<CspConfigType>(cspConfig.path),
+    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
@@ -92,6 +94,9 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     }
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
+
+    registerCoreHandlers(serverContract, config, this.env);
+
     const contract: InternalHttpServiceSetup = {
       ...serverContract,
 
@@ -107,10 +112,6 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
-
-      config: {
-        defaultRoute: config.defaultRoute,
-      },
     };
 
     return contract;
