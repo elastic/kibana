@@ -50,9 +50,17 @@ export const management = capabilities => {
     icon: 'logoKibana',
   });
 
+  main.register('ingest', {
+    display: i18n.translate('common.ui.management.dataIngestionDisplayName', {
+      defaultMessage: 'Data Ingestion',
+    }),
+    order: 30,
+    icon: 'logoBeats',
+  });
+
   main.register('logstash', {
     display: 'Logstash',
-    order: 30,
+    order: 40,
     icon: 'logoLogstash',
   });
 
