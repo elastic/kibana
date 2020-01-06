@@ -269,7 +269,7 @@ describe('url state', () => {
     const bestTimelineName = 'The Best Timeline';
     cy.get(TIMELINE_TITLE).type(`${bestTimelineName}{enter}`);
     cy.wait(3000);
-    cy.hash().then(hash => {
+    cy.url().then(hash => {
       const matched = hash.match(/timeline=\(id:'(.+)'/g);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
       expect(matched).to.have.lengthOf(1);

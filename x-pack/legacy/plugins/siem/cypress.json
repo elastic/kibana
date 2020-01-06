@@ -1,5 +1,6 @@
 {
   "baseUrl": "http://localhost:5601",
+  "chromeWebSecurity": false,
   "env": {
     "filterInput": "4bf34c1c-eaa9-46de-8921-67a4ccc49829"
   },
