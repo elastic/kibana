@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
@@ -48,19 +48,29 @@ const EmbeddedPanel = styled.div`
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeSettingsContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input = {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
-    query: { query: '', language: 'kuery' },
-    refreshConfig: { value: 0, pause: false },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    refreshConfig: {
+      value: 0,
+      pause: false,
+    },
     viewMode: 'view',
     isLayerTOCOpen: false,
     hideFilterActions: true,
-    mapCenter: { lon: 11, lat: 20, zoom: 0 },
+    mapCenter: {
+      lon: 11,
+      lat: 20,
+      zoom: 0,
+    },
     disableInteractive: true,
     disableTooltipControl: true,
     hideToolbarOverlay: true,
@@ -80,16 +90,19 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
       setEmbeddable(embeddableObject);
     }
     setupEmbeddable();
+
     // we want this effect to execute exactly once after the component mounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // update map layers based on points
   useEffect(() => {
     if (embeddable) {
       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
   }, [upPoints, downPoints, embeddable, colors]);
 
+  // We can only render after embeddable has already initialized
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
