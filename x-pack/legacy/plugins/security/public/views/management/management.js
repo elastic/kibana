@@ -13,10 +13,10 @@ import 'plugins/security/views/management/edit_user/edit_user';
 import 'plugins/security/views/management/edit_role/index';
 import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import '../../services/shield_user';
 import { ROLES_PATH, USERS_PATH, API_KEYS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
+import { npSetup } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -36,7 +36,7 @@ routes
   })
   .defaults(/\/management/, {
     resolve: {
-      securityManagementSection: function(ShieldUser) {
+      securityManagementSection: function() {
         const showSecurityLinks = xpackInfo.get('features.security.showLinks');
 
         function deregisterSecurity() {
@@ -93,12 +93,11 @@ routes
         if (!showSecurityLinks) {
           deregisterSecurity();
         } else {
-          // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
-          // management screens
-          //
-          // $promise is used here because the result is an ngResource, not a promise itself
-          return ShieldUser.getCurrent()
-            .$promise.then(ensureSecurityRegistered)
+          // getCurrentUser will reject if there is no authenticated user, so we prevent them from
+          // seeing the security management screens.
+          return npSetup.plugins.security.authc
+            .getCurrentUser()
+            .then(ensureSecurityRegistered)
             .catch(deregisterSecurity);
         }
       },
