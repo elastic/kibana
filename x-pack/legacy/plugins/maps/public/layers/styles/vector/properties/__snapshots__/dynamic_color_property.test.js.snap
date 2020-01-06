@@ -1,98 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Should render categorical legend 1`] = `
-<div>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <EuiFlexItem
-      key="0"
-    >
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="none"
-      >
-        <EuiFlexItem>
-          <EuiText
-            size="xs"
-          >
-            0_format
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VectorIcon
-            getColorForProperty={[Function]}
-            loadIsLinesOnly={[Function]}
-            loadIsPointsOnly={[Function]}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem
-      key="1"
-    >
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="none"
-      >
-        <EuiFlexItem>
-          <EuiText
-            size="xs"
-          >
-            10_format
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VectorIcon
-            getColorForProperty={[Function]}
-            loadIsLinesOnly={[Function]}
-            loadIsPointsOnly={[Function]}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    justifyContent="spaceAround"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiToolTip
-        content="foobar_label"
-        delay="regular"
-        position="top"
-        title="Border color"
-      >
-        <EuiText
-          className="eui-textTruncate"
-          size="xs"
-          style={
-            Object {
-              "maxWidth": "180px",
-            }
-          }
-        >
-          <small>
-            <strong>
-              foobar_label
-            </strong>
-          </small>
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
+exports[`Should render categorical legend 1`] = `""`;
 
 exports[`Should render ranged legend 1`] = `
 <RangedStyleLegendRow
-  fieldLabel="foobar_label"
+  fieldLabel=""
   header={
     <ColorGradient
       colorRampName="Blues"

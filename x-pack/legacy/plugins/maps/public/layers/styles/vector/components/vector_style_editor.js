@@ -86,38 +86,22 @@ export class VectorStyleEditor extends Component {
 
   async _loadSupportedFeatures() {
     const supportedFeatures = await this.props.layer.getSource().getSupportedShapeTypes();
-    const isPointsOnly = await this.props.loadIsPointsOnly();
-    const isLinesOnly = await this.props.loadIsLinesOnly();
-
     if (!this._isMounted) {
       return;
     }
 
-    if (
-      _.isEqual(supportedFeatures, this.state.supportedFeatures) &&
-      isPointsOnly === this.state.isPointsOnly &&
-      isLinesOnly === this.state.isLinesOnly
-    ) {
-      return;
-    }
-
     let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
-    if (isPointsOnly) {
+    if (this.props.isPointsOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.POINT;
-    } else if (isLinesOnly) {
+    } else if (this.props.isLinesOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.LINE;
     }
 
     if (
       !_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
-      selectedFeature !== this.state.selectedFeature
+      !_.isEqual(selectedFeature, this.state.selectedFeature)
     ) {
-      this.setState({
-        supportedFeatures,
-        selectedFeature,
-        isPointsOnly,
-        isLinesOnly,
-      });
+      this.setState({ supportedFeatures, selectedFeature });
     }
   }
 

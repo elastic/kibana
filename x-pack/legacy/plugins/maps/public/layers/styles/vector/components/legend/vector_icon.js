@@ -4,82 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { VECTOR_STYLES } from '../../vector_style_defaults';
 
-export class VectorIcon extends Component {
-  state = {
-    isInitialized: false,
+export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }) {
+  if (isLinesOnly) {
+    const style = {
+      stroke: strokeColor,
+      strokeWidth: '4px',
+    };
+    return <LineIcon style={style} />;
+  }
+
+  const style = {
+    stroke: strokeColor,
+    strokeWidth: '1px',
+    fill: fillColor,
   };
 
-  componentDidMount() {
-    this._isMounted = true;
-    this._init();
+  if (!isPointsOnly) {
+    return <PolygonIcon style={style} />;
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
+  if (!symbolId) {
+    return <CircleIcon style={style} />;
   }
 
-  async _init() {
-    const isPointsOnly = await this.props.loadIsPointsOnly();
-    const isLinesOnly = await this.props.loadIsLinesOnly();
-    if (this._isMounted) {
-      this.setState({
-        isInitialized: true,
-        isPointsOnly,
-        isLinesOnly,
-      });
-    }
-  }
-
-  render() {
-    if (!this.state.isInitialized) {
-      return null;
-    }
-
-    if (this.state.isLinesOnly) {
-      const style = {
-        stroke: this.props.getColorForProperty(VECTOR_STYLES.LINE_COLOR, true),
-        strokeWidth: '4px',
-      };
-      return <LineIcon style={style} />;
-    }
-
-    const style = {
-      stroke: this.props.getColorForProperty(VECTOR_STYLES.LINE_COLOR, false),
-      strokeWidth: '1px',
-      fill: this.props.getColorForProperty(VECTOR_STYLES.FILL_COLOR, false),
-    };
-
-    if (!this.state.isPointsOnly) {
-      return <PolygonIcon style={style} />;
-    }
-
-    if (!this.props.symbolId) {
-      return <CircleIcon style={style} />;
-    }
-
-    return (
-      <SymbolIcon
-        symbolId={this.props.symbolId}
-        fill={style.fill}
-        stroke={style.stroke}
-        strokeWidth={style.strokeWidth}
-      />
-    );
-  }
+  return (
+    <SymbolIcon
+      symbolId={symbolId}
+      fill={style.fill}
+      stroke={style.stroke}
+      strokeWidth={style.strokeWidth}
+    />
+  );
 }
 
 VectorIcon.propTypes = {
-  getColorForProperty: PropTypes.func.isRequired,
+  fillColor: PropTypes.string,
+  isPointsOnly: PropTypes.bool.isRequired,
+  isLinesOnly: PropTypes.bool.isRequired,
+  strokeColor: PropTypes.string.isRequired,
   symbolId: PropTypes.string,
-  loadIsPointsOnly: PropTypes.func.isRequired,
-  loadIsLinesOnly: PropTypes.func.isRequired,
 };

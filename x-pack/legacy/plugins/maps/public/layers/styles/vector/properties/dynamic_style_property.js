@@ -165,12 +165,12 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return null;
   }
 
-  _renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
     return (
       <CategoricalLegend
         style={this}
-        loadIsLinesOnly={loadIsLinesOnly}
-        loadIsPointsOnly={loadIsPointsOnly}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
         symbolId={symbolId}
       />
     );
@@ -180,11 +180,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return <OrdinalLegend style={this} />;
   }
 
-  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     if (this.isRanged()) {
       return this._renderRangeLegend();
     } else if (this.hasBreaks()) {
-      return this._renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId });
+      return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
     } else {
       return null;
     }
