@@ -7,11 +7,9 @@
 import React from 'react';
 import _ from 'lodash';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
-import { getVectorStyleLabel } from '../../components/get_vector_style_label';
-
 const EMPTY_VALUE = '';
 
-export class DynamicLegendRow extends React.Component {
+export class OrdinalLegend extends React.Component {
   constructor() {
     super();
     this._isMounted = false;
@@ -28,6 +26,13 @@ export class DynamicLegendRow extends React.Component {
     }
   }
 
+  _formatValue(value) {
+    if (value === EMPTY_VALUE) {
+      return value;
+    }
+    return this.props.style.formatField(value);
+  }
+
   componentDidUpdate() {
     this._loadParams();
   }
@@ -40,14 +45,6 @@ export class DynamicLegendRow extends React.Component {
     this._isMounted = true;
     this._loadParams();
   }
-
-  _formatValue(value) {
-    if (value === EMPTY_VALUE) {
-      return value;
-    }
-    return this.props.style.formatField(value);
-  }
-
   render() {
     const fieldMeta = this.props.style.getFieldMeta();
 
@@ -70,10 +67,10 @@ export class DynamicLegendRow extends React.Component {
 
     return (
       <RangedStyleLegendRow
-        header={this.props.style.renderLegendHeader()}
+        header={this.props.style.renderRangeLegendHeader()}
         minLabel={minLabel}
         maxLabel={maxLabel}
-        propertyLabel={getVectorStyleLabel(this.props.style.getStyleName())}
+        propertyLabel={this.props.style.getDisplayStyleName()}
         fieldLabel={this.state.label}
       />
     );

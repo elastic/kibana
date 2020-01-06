@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import { merge } from 'lodash/fp';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { RulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
@@ -28,7 +29,9 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         const callWithRequest = callWithRequestFactory(request, server);
         const index = getIndex(request, server);
         const permissions = await readPrivileges(callWithRequest, index);
-        return permissions;
+        return merge(permissions, {
+          isAuthenticated: request?.auth?.isAuthenticated ?? false,
+        });
       } catch (err) {
         return transformError(err);
       }
