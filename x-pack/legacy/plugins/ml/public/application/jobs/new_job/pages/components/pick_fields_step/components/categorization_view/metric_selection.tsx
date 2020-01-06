@@ -15,6 +15,7 @@ import { CategorizationDetector } from '../categorization_detector';
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import { CategoryExample } from '../../../../../common/results_loader';
+import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 // import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 
 interface Props {
@@ -28,6 +29,9 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [categorizationAnalyzerString, setCategorizationAnalyzerString] = useState(
+    JSON.stringify(jobCreator.categorizationAnalyzer)
+  );
   const [fieldExamples, setFieldExamples] = useState<CategoryExample[] | null>(null);
   const [examplesValid, setExamplesValid] = useState(0);
 
@@ -44,9 +48,19 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   }, [categorizationFieldName]);
 
   useEffect(() => {
+    let updateExamples = false;
     if (jobCreator.start !== start || jobCreator.end !== end) {
       setStart(jobCreator.start);
       setEnd(jobCreator.end);
+      updateExamples = true;
+    }
+    const tempCategorizationAnalyzerString = JSON.stringify(jobCreator.categorizationAnalyzer);
+    if (tempCategorizationAnalyzerString !== categorizationAnalyzerString) {
+      setCategorizationAnalyzerString(tempCategorizationAnalyzerString);
+      updateExamples = true;
+    }
+
+    if (updateExamples) {
       loadFieldExamples();
     }
     if (jobCreator.categorizationFieldName !== categorizationFieldName) {
@@ -77,7 +91,12 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       <CategorizationDetector />
       <CategorizationField />
       <FieldExamples fieldExamples={fieldExamples} />
-      {fieldExamples !== null && <ExamplesValidCallout examplesValid={examplesValid} />}
+      {fieldExamples !== null && (
+        <>
+          <ExamplesValidCallout examplesValid={examplesValid} />
+          <EditCategorizationAnalyzerFlyout />
+        </>
+      )}
     </Fragment>
   );
 };

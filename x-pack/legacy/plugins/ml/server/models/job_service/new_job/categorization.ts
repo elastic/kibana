@@ -92,10 +92,14 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
 
     const tokensPerExample: Token[][] = lengths.map(l => []);
+
+    const { tokenizer } = getAnalyzer(analyzer); // remove this once ml_classic bug is fixed
+
     tokens.forEach((t, i) => {
       for (let g = 0; g < sumLengths.length; g++) {
-        if (t.start_offset <= sumLengths[g]) {
-          const offset = g > 0 ? sumLengths[g - 1] : 0;
+        const extra = tokenizer === 'ml_classic' ? 0 : g; // remove this once ml_classic bug is fixed
+        if (t.start_offset <= sumLengths[g] + extra) {
+          const offset = g > 0 ? sumLengths[g - 1] + extra : 0;
           tokensPerExample[g].push({
             ...t,
             start_offset: t.start_offset - offset,
