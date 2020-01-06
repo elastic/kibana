@@ -7,13 +7,16 @@
 import { produce } from 'immer';
 import { flow } from 'fp-ts/lib/function';
 import { Targets, Shard, ShardSerialized } from '../../types';
-import { calcTimes, normalizeTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
+import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
 import { IndexMap } from './types';
 
 /**
  * Functions prefixed with "mutate" change values by reference. Be careful when using these!
  *
  * It's recommended to us immer's `produce` functions to ensure immutability.
+ *
+ * Note: For aggregations, all display data is derived from "shard.aggregations" where with searches
+ * all display data is derived from "shard.query". Do not alter these values directly.
  */
 
 export function mutateAggsTimesTree(shard: Shard) {
@@ -26,8 +29,7 @@ export function mutateAggsTimesTree(shard: Shard) {
     shardTime += totalTime;
   }
   for (const agg of shard.aggregations!) {
-    normalizeTimes([agg], shardTime, 0);
-    initTree([agg], 0);
+    initTree([agg], shardTime);
   }
   shard.time = shardTime;
 }
@@ -43,8 +45,7 @@ export function mutateSearchTimesTree(shard: Shard) {
     shard.rewrite_time += search.rewrite_time!;
     const totalTime = calcTimes(search.query!);
     shardTime += totalTime;
-    normalizeTimes(search.query!, totalTime, 0);
-    initTree(search.query!, 0);
+    initTree(search.query!, totalTime);
     search.treeRoot = search.query![0];
     search.query = null as any;
   }
@@ -70,11 +71,16 @@ const initShards = (data: ShardSerialized[]) =>
 
 export const calculateShardValues = (target: Targets) => (data: Shard[]) =>
   produce<Shard[]>(data, draft => {
-    for (const shard of draft) {
-      if (target === 'searches') {
-        mutateSearchTimesTree(shard);
-      } else if (target === 'aggregations') {
-        mutateAggsTimesTree(shard);
+    const mutateTimesTree =
+      target === 'searches'
+        ? mutateSearchTimesTree
+        : target === 'aggregations'
+        ? mutateAggsTimesTree
+        : null;
+
+    if (mutateTimesTree) {
+      for (const shard of draft) {
+        mutateTimesTree(shard);
       }
     }
   });

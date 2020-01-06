@@ -49,7 +49,7 @@ describe('Highlight Details Flyout', () => {
         selfTime: 100,
         time: 100,
         children: [],
-        timePercentage: 100,
+        timePercentage: '100',
         hasChildren: false,
         visible: true,
         absoluteColor: '123',

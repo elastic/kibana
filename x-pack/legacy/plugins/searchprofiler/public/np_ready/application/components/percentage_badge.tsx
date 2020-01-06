@@ -9,7 +9,7 @@ import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 
 interface Props {
-  timePercentage: number;
+  timePercentage: string;
   label: string;
   valueType?: 'percent' | 'time';
 }
