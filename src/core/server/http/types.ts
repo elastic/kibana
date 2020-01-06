@@ -250,16 +250,6 @@ export interface InternalHttpServiceSetup
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
-  config: {
-    /**
-     * @internalRemarks
-     * Deprecated part of the server config, provided until
-     * https://github.com/elastic/kibana/issues/40255
-     *
-     * @deprecated
-     * */
-    defaultRoute?: string;
-  };
 }
 
 /** @public */

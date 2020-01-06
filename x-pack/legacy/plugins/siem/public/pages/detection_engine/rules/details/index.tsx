@@ -41,7 +41,11 @@ import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
 import { signalsHistogramOptions } from '../../components/signals_histogram_panel/config';
 
-export const RuleDetailsComponent = memo(() => {
+interface RuleDetailsComponentProps {
+  signalsIndex: string | null;
+}
+
+export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIndex }) => {
   const { ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
   const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
@@ -206,7 +210,12 @@ export const RuleDetailsComponent = memo(() => {
                     <EuiSpacer />
 
                     {ruleId != null && (
-                      <SignalsTable from={from} to={to} defaultFilters={signalDefaultFilters} />
+                      <SignalsTable
+                        defaultFilters={signalDefaultFilters}
+                        from={from}
+                        signalsIndex={signalsIndex ?? ''}
+                        to={to}
+                      />
                     )}
                   </WrapperPage>
                 </StickyContainer>
@@ -226,4 +235,5 @@ export const RuleDetailsComponent = memo(() => {
     </>
   );
 });
+
 RuleDetailsComponent.displayName = 'RuleDetailsComponent';
