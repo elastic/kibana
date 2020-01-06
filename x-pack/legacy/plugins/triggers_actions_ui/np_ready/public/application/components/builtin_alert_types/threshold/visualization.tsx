@@ -272,7 +272,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
               return (
                 <LineAnnotation
                   key={specId}
-                  annotationId={getAnnotationId(specId)}
+                  id={specId}
                   domainType={AnnotationDomainTypes.YDomain}
                   dataValues={[{ dataValue: threshold[i], details: specId }]}
                 />
