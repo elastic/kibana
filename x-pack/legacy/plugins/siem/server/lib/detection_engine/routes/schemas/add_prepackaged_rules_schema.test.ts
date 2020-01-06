@@ -1099,7 +1099,7 @@ describe('add prepackaged rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('validates with timeline_id', () => {
+  test('validates with timeline_id and timeline_title', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -1117,6 +1117,61 @@ describe('add prepackaged rules schema', () => {
         language: 'kuery',
         version: 1,
         timeline_id: 'timeline-id',
+        timeline_title: 'timeline-title',
+      }).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot omit timeline_title when timeline_id are present', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>
+      >({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: 'timeline-id',
+        timeline_title: null,
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You can have timeline_title empty string when timeline_id are present', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>
+      >({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: 'timeline-id',
+        timeline_title: '',
       }).error
     ).toBeFalsy();
   });

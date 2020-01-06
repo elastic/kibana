@@ -23,5 +23,9 @@ export const stepAboutDefaultValue: AboutStepRule = {
   references: [''],
   falsePositives: [''],
   tags: [],
+  timeline: {
+    id: null,
+    title: null,
+  },
   threats: threatsDefault,
 };

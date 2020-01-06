@@ -9,7 +9,6 @@ import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { SearchTimelineSuperSelect } from '../../../../../components/timeline/search_super_select';
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
 import { AddItem } from '../add_item_form';
@@ -22,6 +21,7 @@ import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from './helpers';
 import { schema } from './schema';
 import * as I18n from './translations';
+import { PickTimeline } from '../pick_timeline';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -133,7 +133,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               euiFieldProps: {
                 max: 100,
                 min: 0,
-
                 fullWidth: false,
                 disabled: isLoading,
                 options: severityOptions,
@@ -142,7 +141,15 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               },
             }}
           />
-          <SearchTimelineSuperSelect />
+          <UseField
+            path="timeline"
+            component={PickTimeline}
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleTimeline',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
+            }}
+          />
           <UseField
             path="references"
             component={AddItem}

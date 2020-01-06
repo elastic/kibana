@@ -93,6 +93,14 @@ export const schema: FormSchema = {
       }
     ),
   },
+  timeline: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      {
+        defaultMessage: 'Timeline template',
+      }
+    ),
+  },
   references: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',

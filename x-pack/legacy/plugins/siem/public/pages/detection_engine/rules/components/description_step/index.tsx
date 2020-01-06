@@ -16,9 +16,9 @@ import {
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../lib/kibana';
-import { FormSchema } from '../shared_imports';
-
 import { IMitreEnterpriseAttack } from '../../types';
+import { FieldValueTimeline } from '../pick_timeline';
+import { FormSchema } from '../shared_imports';
 import { ListItems } from './types';
 import {
   buildQueryBarDescription,
@@ -133,6 +133,14 @@ const getDescriptionItem = (
   } else if (field === 'severity') {
     const val: string = get(field, value);
     return buildSeverityDescription(label, val);
+  } else if (field === 'timeline') {
+    const timeline = get(field, value) as FieldValueTimeline;
+    return [
+      {
+        title: label,
+        description: timeline.title,
+      },
+    ];
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {

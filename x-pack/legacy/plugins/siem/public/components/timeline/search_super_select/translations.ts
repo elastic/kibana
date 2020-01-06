@@ -6,13 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DEFAULT_TIMELINE_TITLE = i18n.translate('xpack.siem.timeline.defaultTitle', {
+export const DEFAULT_TIMELINE_TITLE = i18n.translate('xpack.siem.timeline.defaultTimelineTitle', {
   defaultMessage: 'Default blank timeline',
 });
 
-export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate('xpack.siem.timeline.defaultTitle', {
-  defaultMessage: 'Timeline offered by default when creating new timeline.',
-});
+export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
+  'xpack.siem.timeline.defaultTimelineDescription',
+  {
+    defaultMessage: 'Timeline offered by default when creating new timeline.',
+  }
+);
 
 export const SEARCH_BOX_TIMELINE_PLACEHOLDER = i18n.translate(
   'xpack.siem.timeline.searchBoxPlaceholder',

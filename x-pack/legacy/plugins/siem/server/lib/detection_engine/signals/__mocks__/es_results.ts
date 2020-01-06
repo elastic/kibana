@@ -31,6 +31,7 @@ export const sampleRuleAlertParams = (
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,
+  timelineTitle: undefined,
   meta: undefined,
   threats: undefined,
   version: 1,

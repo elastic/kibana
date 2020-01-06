@@ -71,8 +71,8 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
-    type: t.string,
     tags: t.array(t.string),
+    type: t.string,
     to: t.string,
     threats: t.array(t.unknown),
     updated_at: t.string,
@@ -80,6 +80,8 @@ export const RuleSchema = t.intersection([
   }),
   t.partial({
     saved_id: t.string,
+    timeline_id: t.string,
+    timeline_title: t.string,
   }),
 ]);
 

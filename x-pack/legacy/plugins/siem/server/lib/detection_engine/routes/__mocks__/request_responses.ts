@@ -52,6 +52,7 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   timeline_id: 'timeline-id',
+  timeline_title: 'timeline-title',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -271,6 +272,7 @@ export const getResult = (): RuleAlertType => ({
     outputIndex: '.siem-signals',
     savedId: 'some-id',
     timelineId: 'some-timeline-id',
+    timelineTitle: 'some-timeline-title',
     meta: { someMeta: 'someField' },
     filters: [
       {

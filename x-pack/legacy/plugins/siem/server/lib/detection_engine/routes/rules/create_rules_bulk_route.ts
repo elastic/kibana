@@ -74,6 +74,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             updated_at: updatedAt,
             references,
             timeline_id: timelineId,
+            timeline_title: timelineTitle,
             version,
           } = payloadRule;
           const ruleIdOrUuid = ruleId ?? uuid.v4();
@@ -112,6 +113,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               outputIndex: finalIndex,
               savedId,
               timelineId,
+              timelineTitle,
               meta,
               filters,
               ruleId: ruleIdOrUuid,

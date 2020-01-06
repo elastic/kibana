@@ -36,6 +36,9 @@
               "timeline_id": {
                 "type": "keyword"
               },
+              "timeline_title": {
+                "type": "keyword"
+              },
               "max_signals": {
                 "type": "keyword"
               },

@@ -37,9 +37,10 @@ const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
 `;
 
 interface SearchTimelineSuperSelectProps {
-  timelineId?: string | null;
-  timelineTitle?: string | null;
-  onTimelineSelection?: (timelineTitle: string, timelineId: string) => void;
+  isDisabled: boolean;
+  timelineId: string | null;
+  timelineTitle: string | null;
+  onTimelineChange: (timelineTitle: string, timelineId: string) => void;
 }
 
 const basicSuperSelectOptions = [
@@ -63,7 +64,7 @@ const PopoverHeight = 260;
 const TimelineItemHeight = 50;
 
 export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
-  ({ timelineId, timelineTitle, onTimelineSelection }) => {
+  ({ isDisabled, timelineId, timelineTitle, onTimelineChange }) => {
     const [pageSize, setPageSize] = useState(OriginalPageSize);
     const [heightTrigger, setHeightTrigger] = useState(0);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -104,53 +105,49 @@ export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
       );
     }, []);
 
-    const handleTimelineSelection = useCallback(options => {
+    const handleTimelineChange = useCallback(options => {
       const selectedTimeline = options.filter(
         (option: { checked: string }) => option.checked === 'on'
       );
-      if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineSelection != null) {
-        onTimelineSelection(selectedTimeline[0].title, selectedTimeline[0].id);
+      if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
+        onTimelineChange(selectedTimeline[0].title, selectedTimeline[0].id);
       }
       setIsPopoverOpen(false);
     }, []);
 
-    const onScroll = useCallback(
-      ({
-        clientHeight,
-        scrollHeight,
-        scrollTop,
-      }: {
-        clientHeight: number;
-        scrollHeight: number;
-        scrollTop: number;
-      }) => {
-        const clientHeightTrigger = clientHeight * 1.2;
-        if (
-          scrollTop > 10 &&
-          scrollHeight - scrollTop < clientHeightTrigger &&
-          scrollHeight > heightTrigger
-        ) {
-          setHeightTrigger(scrollHeight);
-          setPageSize(pageSize + OriginalPageSize);
+    const handleOnScroll = useCallback(
+      (
+        totalTimelines: number,
+        totalCount: number,
+        {
+          clientHeight,
+          scrollHeight,
+          scrollTop,
+        }: {
+          clientHeight: number;
+          scrollHeight: number;
+          scrollTop: number;
+        }
+      ) => {
+        if (totalTimelines < totalCount) {
+          const clientHeightTrigger = clientHeight * 1.2;
+          if (
+            scrollTop > 10 &&
+            scrollHeight - scrollTop < clientHeightTrigger &&
+            scrollHeight > heightTrigger
+          ) {
+            setHeightTrigger(scrollHeight);
+            setPageSize(pageSize + OriginalPageSize);
+          }
         }
       },
       [heightTrigger, pageSize]
     );
 
-    const listProps = useMemo(
-      () => ({
-        rowHeight: TimelineItemHeight,
-        showIcons: false,
-        virtualizedProps: {
-          onScroll,
-        } as ListProps,
-      }),
-      [onScroll]
-    );
-
     const superSelect = useMemo(
       () => (
         <EuiSuperSelect
+          disabled={isDisabled}
           onFocus={handleOpenPopover}
           options={
             timelineId == null
@@ -207,9 +204,15 @@ export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
               <EuiSelectable
                 height={PopoverHeight}
                 isLoading={loading && timelines.length === 0}
-                listProps={listProps}
+                listProps={{
+                  rowHeight: TimelineItemHeight,
+                  showIcons: false,
+                  virtualizedProps: ({
+                    onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
+                  } as unknown) as ListProps,
+                }}
                 renderOption={renderTimelineOption}
-                onChange={handleTimelineSelection}
+                onChange={handleTimelineChange}
                 searchable
                 searchProps={{
                   'data-test-subj': 'timeline-super-select-search-box',

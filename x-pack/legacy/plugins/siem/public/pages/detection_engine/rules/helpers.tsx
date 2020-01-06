@@ -44,6 +44,10 @@ export const getStepsData = ({
           threats: rule.threats as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
+          timeline: {
+            id: rule.timeline_id ?? null,
+            title: rule.timeline_title ?? null,
+          },
         }
       : null;
   const scheduleRuleData: ScheduleStepRule | null =

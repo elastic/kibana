@@ -22,7 +22,10 @@
   ],
   "enabled": false,
   "immutable": true,
-  "index": ["auditbeat-*", "filebeat-*"],
+  "index": [
+    "auditbeat-*",
+    "filebeat-*"
+  ],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
   "output_index": ".siem-signals-default",
@@ -36,7 +39,11 @@
   "language": "kuery",
   "risk_score": 1,
   "max_signals": 100,
-  "tags": ["tag 1", "tag 2", "any tag you want"],
+  "tags": [
+    "tag 1",
+    "tag 2",
+    "any tag you want"
+  ],
   "to": "now",
   "from": "now-6m",
   "severity": "high",
@@ -78,5 +85,6 @@
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
   "timeline_id": "other-timeline-id",
+  "timeline_title": "other-timeline-title",
   "version": 42
 }
