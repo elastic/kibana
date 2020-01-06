@@ -264,7 +264,7 @@ describe('url state', () => {
     assertAtLeastOneEventMatchesSearch();
     const bestTimelineName = 'The Best Timeline';
     cy.get(TIMELINE_TITLE).type(`${bestTimelineName}{enter}`);
-    cy.url({ timeout: DEFAULT_TIMEOUT }).should('include', 'timeline=(id');
+    cy.url({ timeout: DEFAULT_TIMEOUT }).should('include', 'isOpen');
     cy.hash().then(hash => {
       const matched = hash.match(/timeline=\(id:'(.+)'/g);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
