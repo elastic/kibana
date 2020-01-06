@@ -31,6 +31,7 @@ export interface IKbnUrlSyncStrategy extends ISyncStrategy {
   toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<void>;
   fromStorage: <State = unknown>(syncKey: string) => State | null;
   storageChange$: <State = unknown>(syncKey: string) => Observable<State | null>;
+  flush: (opts?: { replace?: boolean }) => void;
 }
 
 /**
@@ -67,5 +68,8 @@ export const createKbnUrlSyncStrategy = (
         map(() => getStateFromKbnUrl<State>(syncKey)),
         share()
       ),
+    flush: ({ replace = false }: { replace?: boolean } = {}) => {
+      url.flush(replace);
+    },
   };
 };

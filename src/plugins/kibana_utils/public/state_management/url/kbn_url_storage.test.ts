@@ -142,6 +142,28 @@ describe('kbn_url_storage', () => {
 
       expect(cb).toHaveBeenCalledTimes(3);
     });
+
+    it('should flush async url updates', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', false);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', false);
+      expect(getCurrentUrl()).toBe('/');
+      urlControls.flush();
+      expect(getCurrentUrl()).toBe('/3');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+    });
+
+    it('flush should take priority over regular replace behvioir', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      urlControls.flush(false);
+      expect(getCurrentUrl()).toBe('/3');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+      expect(history.length).toBe(2);
+    });
   });
 
   describe('getRelativeToHistoryPath', () => {

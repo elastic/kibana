@@ -119,7 +119,13 @@ export interface IKbnUrlControls {
    * @param updater - fn which receives current url and should return next url to update to
    * @param replace - use replace instead of push
    */
-  updateAsync: (updater: UrlUpdaterFnType, replace: boolean) => Promise<string>;
+  updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string>;
+
+  /**
+   * Synchronously Flushes scheduled url updates
+   * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
+   */
+  flush: (replace?: boolean) => string;
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string;
 
@@ -147,6 +153,17 @@ export const createKbnUrlControls = (
     return getCurrentUrl();
   }
 
+  function flush(replace = shouldReplace) {
+    if (updateQueue.length === 0) return getCurrentUrl();
+    const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+    const newUrl = updateUrl(resultUrl, replace);
+    // queue clean up
+    updateQueue.splice(0, updateQueue.length);
+    shouldReplace = true;
+
+    return newUrl;
+  }
+
   return {
     listen: (cb: () => void) =>
       history.listen(() => {
@@ -160,16 +177,13 @@ export const createKbnUrlControls = (
       }
 
       // Schedule url update to the next microtask
+      // this allows to batch synchronous url changes
       return Promise.resolve().then(() => {
-        if (updateQueue.length === 0) return getCurrentUrl();
-        const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
-        const newUrl = updateUrl(resultUrl, shouldReplace);
-        // queue clean up
-        updateQueue.splice(0, updateQueue.length);
-        shouldReplace = true;
-
-        return newUrl;
+        return flush();
       });
+    },
+    flush: (replace?: boolean) => {
+      return flush(replace);
     },
   };
 };

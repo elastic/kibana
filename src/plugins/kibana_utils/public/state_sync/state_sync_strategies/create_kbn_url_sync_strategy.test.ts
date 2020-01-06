@@ -42,6 +42,16 @@ describe('KbnUrlSyncStrategy', () => {
       expect(syncStrategy.fromStorage(key)).toEqual(state);
     });
 
+    it('should flush state to url', () => {
+      const state = { test: 'test', ok: 1 };
+      const key = '_s';
+      syncStrategy.toStorage(key, state);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+      syncStrategy.flush();
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
+      expect(syncStrategy.fromStorage(key)).toEqual(state);
+    });
+
     it('should notify about url changes', async () => {
       expect(syncStrategy.storageChange$).toBeDefined();
       const key = '_s';
