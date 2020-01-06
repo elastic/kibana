@@ -225,57 +225,7 @@ export class ElasticsearchConfig {
     this.customHeaders = rawConfig.customHeaders;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
-
-    let key: string | undefined;
-    let keyPassphrase: string | undefined;
-    let certificate: string | undefined;
-    let certificateAuthorities: string[] | undefined;
-    const addCAs = (ca: string[] | undefined) => {
-      if (ca && ca.length) {
-        certificateAuthorities = [...(certificateAuthorities || []), ...ca];
-      }
-    };
-
-    if (rawConfig.ssl.keystore?.path) {
-      const keystore = readPkcs12Keystore(
-        rawConfig.ssl.keystore.path,
-        rawConfig.ssl.keystore.password
-      );
-      if (!keystore.key && !keystore.cert) {
-        throw new Error(`Did not find key or certificate in Elasticsearch keystore.`);
-      }
-      key = keystore.key;
-      certificate = keystore.cert;
-      addCAs(keystore.ca);
-    } else {
-      if (rawConfig.ssl.key) {
-        key = readFile(rawConfig.ssl.key);
-        keyPassphrase = rawConfig.ssl.keyPassphrase;
-      }
-      if (rawConfig.ssl.certificate) {
-        certificate = readFile(rawConfig.ssl.certificate);
-      }
-    }
-
-    if (rawConfig.ssl.truststore?.path) {
-      const ca = readPkcs12Truststore(
-        rawConfig.ssl.truststore.path,
-        rawConfig.ssl.truststore.password
-      );
-      addCAs(ca);
-    }
-
-    const ca = rawConfig.ssl.certificateAuthorities;
-    if (ca) {
-      const parsed: string[] = [];
-      const paths = Array.isArray(ca) ? ca : [ca];
-      if (paths.length > 0) {
-        for (const path of paths) {
-          parsed.push(readFile(path));
-        }
-        addCAs(parsed);
-      }
-    }
+    const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
 
     if (key && !certificate) {
       log.warn(`Detected a key without a certificate; mutual TLS authentication is disabled.`);
@@ -293,6 +243,67 @@ export class ElasticsearchConfig {
     };
   }
 }
+
+const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
+  let key: string | undefined;
+  let keyPassphrase: string | undefined;
+  let certificate: string | undefined;
+  let certificateAuthorities: string[] | undefined;
+
+  const addCAs = (ca: string[] | undefined) => {
+    if (ca && ca.length) {
+      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
+    }
+  };
+
+  if (rawConfig.ssl.keystore?.path) {
+    const keystore = readPkcs12Keystore(
+      rawConfig.ssl.keystore.path,
+      rawConfig.ssl.keystore.password
+    );
+    if (!keystore.key && !keystore.cert) {
+      throw new Error(`Did not find key or certificate in Elasticsearch keystore.`);
+    }
+    key = keystore.key;
+    certificate = keystore.cert;
+    addCAs(keystore.ca);
+  } else {
+    if (rawConfig.ssl.key) {
+      key = readFile(rawConfig.ssl.key);
+      keyPassphrase = rawConfig.ssl.keyPassphrase;
+    }
+    if (rawConfig.ssl.certificate) {
+      certificate = readFile(rawConfig.ssl.certificate);
+    }
+  }
+
+  if (rawConfig.ssl.truststore?.path) {
+    const ca = readPkcs12Truststore(
+      rawConfig.ssl.truststore.path,
+      rawConfig.ssl.truststore.password
+    );
+    addCAs(ca);
+  }
+
+  const ca = rawConfig.ssl.certificateAuthorities;
+  if (ca) {
+    const parsed: string[] = [];
+    const paths = Array.isArray(ca) ? ca : [ca];
+    if (paths.length > 0) {
+      for (const path of paths) {
+        parsed.push(readFile(path));
+      }
+      addCAs(parsed);
+    }
+  }
+
+  return {
+    key,
+    keyPassphrase,
+    certificate,
+    certificateAuthorities,
+  };
+};
 
 const readFile = (file: string) => {
   return readFileSync(file, 'utf8');
