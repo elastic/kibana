@@ -8,19 +8,19 @@ import React from 'react';
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function StaticOrientationForm(props) {
+export function StaticOrientationForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
   const onOrientationChange = orientation => {
-    props.onStaticStyleChange(props.styleProperty.getStyleName(), { orientation });
+    onStaticStyleChange(styleProperty.getStyleName(), { orientation });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <ValidatedRange
           min={0}
           max={360}
-          value={props.styleProperty.getOptions().orientation}
+          value={styleProperty.getOptions().orientation}
           onChange={onOrientationChange}
           showInput="inputWithPopover"
           showLabels

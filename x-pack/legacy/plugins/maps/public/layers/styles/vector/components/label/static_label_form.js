@@ -8,20 +8,20 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function StaticLabelForm(props) {
+export function StaticLabelForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
   const onValueChange = event => {
-    props.onStaticStyleChange(props.styleProperty.getStyleName(), { value: event.target.value });
+    onStaticStyleChange(styleProperty.getStyleName(), { value: event.target.value });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <EuiFieldText
           placeholder={i18n.translate('xpack.maps.styles.staticLabel.valuePlaceholder', {
             defaultMessage: 'symbol label',
           })}
-          value={props.styleProperty.getOptions().value}
+          value={styleProperty.getOptions().value}
           onChange={onValueChange}
           aria-label={i18n.translate('xpack.maps.styles.staticLabel.valueAriaLabel', {
             defaultMessage: 'symbol label',

@@ -9,19 +9,19 @@ import { ValidatedRange } from '../../../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function StaticSizeForm(props) {
+export function StaticSizeForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
   const onSizeChange = size => {
-    props.onStaticStyleChange(props.styleProperty.getStyleName(), { size });
+    onStaticStyleChange(styleProperty.getStyleName(), { size });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <ValidatedRange
           min={0}
           max={100}
-          value={props.styleProperty.getOptions().size}
+          value={styleProperty.getOptions().size}
           onChange={onSizeChange}
           showInput="inputWithPopover"
           showLabels

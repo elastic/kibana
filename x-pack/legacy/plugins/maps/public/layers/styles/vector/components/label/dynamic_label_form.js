@@ -9,19 +9,24 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldSelect } from '../field_select';
 
-export function DynamicLabelForm(props) {
-  const styleOptions = props.styleProperty.getOptions();
+export function DynamicLabelForm({
+  fields,
+  onDynamicStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}) {
+  const styleOptions = styleProperty.getOptions();
 
   const onFieldChange = ({ field }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), { ...styleOptions, field });
+    onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <FieldSelect
-          fields={props.fields}
+          fields={fields}
           selectedFieldName={_.get(styleOptions, 'field.name')}
           onChange={onFieldChange}
           compressed

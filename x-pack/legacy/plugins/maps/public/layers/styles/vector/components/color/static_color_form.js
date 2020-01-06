@@ -7,19 +7,24 @@
 import React from 'react';
 import { EuiColorPicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function StaticColorForm(props) {
+export function StaticColorForm({
+  onStaticStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+  swatches,
+}) {
   const onColorChange = color => {
-    props.onStaticStyleChange(props.styleProperty.getStyleName(), { color });
+    onStaticStyleChange(styleProperty.getStyleName(), { color });
   };
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <EuiColorPicker
           onChange={onColorChange}
-          color={props.styleProperty.getOptions().color}
-          swatches={props.swatches}
+          color={styleProperty.getOptions().color}
+          swatches={swatches}
           compressed
         />
       </EuiFlexItem>

@@ -10,15 +10,20 @@ import { FieldSelect } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-export function DynamicColorForm(props) {
-  const styleOptions = props.styleProperty.getOptions();
+export function DynamicColorForm({
+  fields,
+  onDynamicStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}) {
+  const styleOptions = styleProperty.getOptions();
 
   const onFieldChange = ({ field }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), { ...styleOptions, field });
+    onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
   };
 
   const onColorChange = colorOptions => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       ...colorOptions,
     });
@@ -40,10 +45,10 @@ export function DynamicColorForm(props) {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
-            fields={props.fields}
+            fields={fields}
             selectedFieldName={_.get(styleOptions, 'field.name')}
             onChange={onFieldChange}
             compressed

@@ -9,11 +9,16 @@ import React from 'react';
 import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export function DynamicOrientationForm(props) {
-  const styleOptions = props.styleProperty.getOptions();
+export function DynamicOrientationForm({
+  fields,
+  onDynamicStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}) {
+  const styleOptions = styleProperty.getOptions();
 
   const onFieldChange = ({ field }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       field,
     });
@@ -21,10 +26,10 @@ export function DynamicOrientationForm(props) {
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
       <EuiFlexItem>
         <FieldSelect
-          fields={props.fields}
+          fields={fields}
           selectedFieldName={_.get(styleOptions, 'field.name')}
           onChange={onFieldChange}
           compressed

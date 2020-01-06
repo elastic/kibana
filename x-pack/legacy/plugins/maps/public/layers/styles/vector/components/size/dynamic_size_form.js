@@ -10,15 +10,20 @@ import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-export function DynamicSizeForm(props) {
-  const styleOptions = props.styleProperty.getOptions();
+export function DynamicSizeForm({
+  fields,
+  onDynamicStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}) {
+  const styleOptions = styleProperty.getOptions();
 
   const onFieldChange = ({ field }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), { ...styleOptions, field });
+    onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
   };
 
   const onSizeRangeChange = ({ minSize, maxSize }) => {
-    props.onDynamicStyleChange(props.styleProperty.getStyleName(), {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       minSize,
       maxSize,
@@ -41,10 +46,10 @@ export function DynamicSizeForm(props) {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>{props.staticDynamicSelect}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
-            fields={props.fields}
+            fields={fields}
             selectedFieldName={_.get(styleOptions, 'field.name')}
             onChange={onFieldChange}
             compressed
