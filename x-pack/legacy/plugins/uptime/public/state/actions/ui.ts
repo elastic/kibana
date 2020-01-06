@@ -13,9 +13,9 @@ export interface PopoverState {
 export type UiPayload = PopoverState & string & number & Map<string, string[]>;
 
 export const setBasePath = createAction<string>('SET BASE PATH');
+
 export const triggerAppRefresh = createAction<number>('REFRESH APP');
 
-export const setFilters = createAction<Map<string, string[]>>('SET FILTERS');
 export const toggleIntegrationsPopover = createAction<PopoverState>(
   'TOGGLE INTEGRATION POPOVER STATE'
 );

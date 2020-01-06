@@ -12,8 +12,6 @@ export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
 export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: AppState) =>
   integrationsPopoverOpen;
 
-export const getFilters = ({ ui: { filters } }: AppState) => filters;
-
 // Monitor Selectors
 export const getMonitorDetails = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];

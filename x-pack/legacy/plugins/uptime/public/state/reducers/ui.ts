@@ -10,7 +10,6 @@ import {
   toggleIntegrationsPopover,
   setBasePath,
   triggerAppRefresh,
-  setFilters,
   UiPayload,
 } from '../actions/ui';
 
@@ -18,14 +17,12 @@ export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
   basePath: string;
   lastRefresh: number;
-  filters: Map<string, string[]>;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
   basePath: '',
   lastRefresh: Date.now(),
-  filters: new Map(),
 };
 
 export const uiReducer = handleActions<UiState, UiPayload>(
@@ -43,11 +40,6 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
       ...state,
       lastRefresh: action.payload as number,
-    }),
-
-    [String(setFilters)]: (state, action: Action<Map<string, string[]>>) => ({
-      ...state,
-      filters: new Map([...state.filters, ...(action.payload as Map<string, string[]>)]),
     }),
   },
   initialState

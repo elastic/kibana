@@ -231,7 +231,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     };
   },
 
-  getMonitorDetails: async ({ callES, monitorId, dateStart, dateEnd, location }) => {
+  getMonitorDetails: async ({ callES, monitorId, dateStart, dateEnd }) => {
     const queryFilters: any = [
       {
         range: {
@@ -248,15 +248,6 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       },
     ];
 
-    // Doing filtering by location, because only that matters here
-    // All of the other filters are already automatically applied by MonitorId
-    if (location) {
-      queryFilters.push({
-        terms: {
-          'observer.geo.name': location.split(','),
-        },
-      });
-    }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

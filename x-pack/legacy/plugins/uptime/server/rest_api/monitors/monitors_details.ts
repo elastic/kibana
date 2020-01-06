@@ -16,14 +16,13 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
-      location: schema.maybe(schema.string()),
     }),
   },
   options: {
     tags: ['access:uptime'],
   },
   handler: async ({ callES }, _context, request, response): Promise<any> => {
-    const { monitorId, dateStart, dateEnd, location } = request.query;
+    const { monitorId, dateStart, dateEnd } = request.query;
     return response.ok({
       body: {
         ...(await libs.monitors.getMonitorDetails({
@@ -31,7 +30,6 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
           monitorId,
           dateStart,
           dateEnd,
-          location,
         })),
       },
     });

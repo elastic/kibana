@@ -29,7 +29,6 @@ export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
-  location?: string;
 }
 
 export interface GetMonitorPageTitleParams {
