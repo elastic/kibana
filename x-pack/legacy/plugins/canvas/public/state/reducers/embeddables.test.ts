@@ -35,7 +35,7 @@ describe('embeddables reducer', () => {
     const newState = embeddableReducer(mockWorkpadState, action);
 
     expect(newState.pages[0].elements[0].expression.replace(/\s/g, '')).toBe(
-      `function1 | ${action.payload.embeddableExpression}`.replace(/\s/g, '')
+      `function1 | ${action.payload!.embeddableExpression}`.replace(/\s/g, '')
     );
   });
 });
