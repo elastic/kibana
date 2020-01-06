@@ -310,6 +310,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/geo-point.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.geoPointLongDescription"
+          defaultMessage="Geo-point fields accept latitude and longitude pairs. Use to search within a bounding box, aggregate documents geographically, and sort documents by distance."
+        />
+      </p>
+    ),
   },
   geo_shape: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoShapeDescription', {
@@ -415,6 +423,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/shape.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.shapeLongDescription"
+          defaultMessage="Shape fields enable searching of complex shapes, such as rectangles and polygons."
+        />
+      </p>
+    ),
   },
 };
 
