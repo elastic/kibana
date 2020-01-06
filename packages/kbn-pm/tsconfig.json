@@ -1,11 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "exclude": [
-    "dist"
-  ],
   "include": [
     "./src/**/*.ts",
+    "./dist/*.d.ts",
   ],
+  "exclude": [],
   "compilerOptions": {
     "types": [
       "jest",

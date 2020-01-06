@@ -9,8 +9,6 @@ import {
   Chart,
   HistogramBarSeries,
   Settings,
-  getAxisId,
-  getSpecId,
   niceTimeFormatByDay,
   timeFormatter,
 } from '@elastic/charts';
@@ -62,16 +60,12 @@ export const HistogramSignals = React.memo(() => {
         theme={npStart.plugins.eui_utils.useChartsTheme()}
       />
 
-      <Axis
-        id={getAxisId('signalAxisX')}
-        position="bottom"
-        tickFormat={timeFormatter(niceTimeFormatByDay(1))}
-      />
+      <Axis id="signalAxisX" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
 
-      <Axis id={getAxisId('signalAxisY')} position="left" />
+      <Axis id="signalAxisY" position="left" />
 
       <HistogramBarSeries
-        id={getSpecId('signalBar')}
+        id="signalBar"
         xScaleType="time"
         yScaleType="linear"
         xAccessor="x"

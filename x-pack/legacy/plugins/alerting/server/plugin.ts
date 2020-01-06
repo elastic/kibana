@@ -108,11 +108,18 @@ export class Plugin {
   public start(core: AlertingCoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const { adminClient, serverBasePath } = this;
 
+    function spaceIdToNamespace(spaceId?: string): string | undefined {
+      const spacesPlugin = plugins.spaces();
+      return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
+    }
+
     const alertsClientFactory = new AlertsClientFactory({
       alertTypeRegistry: this.alertTypeRegistry!,
       logger: this.logger,
       taskManager: plugins.task_manager,
       securityPluginSetup: plugins.security,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      spaceIdToNamespace,
       getSpaceId(request: Hapi.Request) {
         const spacesPlugin = plugins.spaces();
         return spacesPlugin ? spacesPlugin.getSpaceId(request) : undefined;
@@ -128,12 +135,9 @@ export class Plugin {
           savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
         };
       },
+      spaceIdToNamespace,
       executeAction: plugins.actions.execute,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
-      spaceIdToNamespace(spaceId?: string): string | undefined {
-        const spacesPlugin = plugins.spaces();
-        return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
-      },
       getBasePath(spaceId?: string): string {
         const spacesPlugin = plugins.spaces();
         return spacesPlugin && spaceId ? spacesPlugin.getBasePath(spaceId) : serverBasePath!;

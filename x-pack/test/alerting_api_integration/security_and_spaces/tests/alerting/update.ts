@@ -87,7 +87,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 muteAll: false,
                 mutedInstanceIds: [],
                 scheduledTaskId: createdAlert.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
               });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+                Date.parse(response.body.createdAt)
+              );
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
