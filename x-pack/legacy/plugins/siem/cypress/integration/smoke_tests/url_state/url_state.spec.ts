@@ -149,6 +149,8 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
+    cy.wait(3000);
+
     cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
       timeout: DEFAULT_TIMEOUT,
     }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`);
@@ -160,6 +162,8 @@ describe('url state', () => {
     cy.get(DATE_PICKER_ABSOLUTE_TAB)
       .first()
       .click({ force: true });
+
+    cy.wait(3000);
 
     cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
       timeout: DEFAULT_TIMEOUT,
@@ -264,7 +268,7 @@ describe('url state', () => {
     assertAtLeastOneEventMatchesSearch();
     const bestTimelineName = 'The Best Timeline';
     cy.get(TIMELINE_TITLE).type(`${bestTimelineName}{enter}`);
-    cy.url({ timeout: DEFAULT_TIMEOUT }).should('include', 'isOpen');
+    cy.wait(3000);
     cy.hash().then(hash => {
       const matched = hash.match(/timeline=\(id:'(.+)'/g);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
