@@ -68,7 +68,6 @@ const createSetupContractMock = () => {
       getAuthHeaders: jest.fn(),
     },
     isTlsEnabled: false,
-    config: {},
   };
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()

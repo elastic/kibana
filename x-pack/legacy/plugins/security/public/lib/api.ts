@@ -5,16 +5,12 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { AuthenticatedUser, Role, User, EditUser } from '../../common/model';
+import { Role, User, EditUser } from '../../common/model';
 
 const usersUrl = '/internal/security/users';
 const rolesUrl = '/api/security/role';
 
 export class UserAPIClient {
-  public async getCurrentUser(): Promise<AuthenticatedUser> {
-    return await kfetch({ pathname: `/internal/security/me` });
-  }
-
   public async getUsers(): Promise<User[]> {
     return await kfetch({ pathname: usersUrl });
   }
