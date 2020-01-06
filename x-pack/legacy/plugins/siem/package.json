@@ -13,24 +13,9 @@
   "devDependencies": {
     "@types/lodash": "^4.14.110",
     "@types/js-yaml": "^3.12.1",
-    "@types/react-beautiful-dnd": "^11.0.3",
-    "graphql-tools": "^4.0.6",
-    "graphql-toolkit": "^0.7.4"
+    "@types/react-beautiful-dnd": "^11.0.3"
   },
   "dependencies": {
-    "@apollo/client": "^3.0.0-beta.19",
-    "@apollo/react-common": "^3.2.0-beta.0",
-    "@apollo/react-components": "^3.2.0-beta.0",
-    "@graphql-codegen/cli": "1.9.1",
-    "@graphql-codegen/add": "1.9.1",
-    "@graphql-codegen/introspection": "1.9.1",
-    "@graphql-codegen/typescript": "1.9.1",
-    "@graphql-codegen/typescript-compatibility": "1.9.1",
-    "@graphql-codegen/typescript-operations": "1.9.1",
-    "@graphql-codegen/typescript-resolvers": "1.9.1",
-    "@graphql-codegen/typescript-react-apollo": "1.9.1",
-    "apollo-link-error": "^2.0.0-beta.0",
-    "graphql": "^14.5.8",
     "lodash": "^4.17.15",
     "react-beautiful-dnd": "^12.2.0",
     "react-markdown": "^4.0.6"

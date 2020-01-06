@@ -5,25 +5,18 @@
  */
 
 import { Alerts } from '../../lib/alerts';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 
 export interface AlertsResolversDeps {
   alerts: Alerts;
 }
 
-type QueryAlertsHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AlertsHistogramResolver>,
-  QuerySourceResolver
->;
-
 export const createAlertsResolvers = (
   libs: AlertsResolversDeps
 ): {
   Source: {
-    AlertsHistogram: QueryAlertsHistogramResolver;
+    AlertsHistogram: SourceResolvers['AlertsHistogram'];
   };
 } => ({
   Source: {

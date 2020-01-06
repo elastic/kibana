@@ -9,16 +9,11 @@
   },
   "devDependencies": {
     "@types/boom": "7.2.1",
-    "@types/graphql": "^0.13.2",
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
     "@types/color": "^3.0.0",
     "boom": "7.3.0",
-    "graphql": "^0.13.2",
-    "graphql-fields": "^1.0.2",
-    "graphql-tag": "^2.9.2",
-    "graphql-tools": "^3.0.2",
     "lodash": "^4.17.15"
   }
 }

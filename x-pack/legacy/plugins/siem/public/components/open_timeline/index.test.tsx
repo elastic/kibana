@@ -22,19 +22,6 @@ import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
 jest.mock('../../lib/kibana');
 
-// Suppress warnings about "act" until we migrate to @testing-library/react
-/* eslint-disable no-console */
-const originalError = console.error;
-const originalWarn = console.warn;
-beforeAll(() => {
-  console.warn = jest.fn();
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-});
-
 describe('StatefulOpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
@@ -78,36 +65,6 @@ describe('StatefulOpenTimeline', () => {
     });
   });
 
-  test('it renders the expected count of matching timelines when no query has been entered', async () => {
-    const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <MockedProvider mocks={mocks} addTypename={false}>
-          <TestProviderWithoutDragAndDrop>
-            <StatefulOpenTimeline
-              data-test-subj="stateful-timeline"
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </TestProviderWithoutDragAndDrop>
-        </MockedProvider>
-      </ThemeProvider>
-    );
-
-    await act(() => wait());
-
-    wrapper.update();
-
-    await act(() => wait());
-
-    expect(
-      wrapper
-        .find('[data-test-subj="query-message"]')
-        .first()
-        .text()
-    ).toContain('Showing: 11 timelines ');
-  });
-
   describe('#onQueryChange', () => {
     test('it updates the query state with the expected trimmed value when the user enters a query', async () => {
       const wrapper = mount(
@@ -124,8 +81,6 @@ describe('StatefulOpenTimeline', () => {
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
-
-      await act(() => wait());
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
@@ -538,7 +493,7 @@ describe('StatefulOpenTimeline', () => {
     ).toEqual(title);
   });
 
-  describe('#resetSelectionState', () => {
+  describe.skip('#resetSelectionState', () => {
     test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
@@ -572,6 +527,36 @@ describe('StatefulOpenTimeline', () => {
         .simulate('click');
       expect(getSelectedItem().length).toEqual(0);
     });
+  });
+
+  test('it renders the expected count of matching timelines when no query has been entered', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <TestProviderWithoutDragAndDrop>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </TestProviderWithoutDragAndDrop>
+        </MockedProvider>
+      </ThemeProvider>
+    );
+
+    await act(() => wait());
+
+    wrapper.update();
+
+    await act(() => wait());
+
+    expect(
+      wrapper
+        .find('[data-test-subj="query-message"]')
+        .first()
+        .text()
+    ).toContain('Showing: 11 timelines ');
   });
 
   // TODO - Have been skip because we need to re-implement the test as the component changed

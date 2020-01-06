@@ -9,7 +9,7 @@ import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
 
-import introspectionQueryResultData from '../../graphql/introspection.json';
+// import introspectionQueryResultData from '../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 

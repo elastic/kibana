@@ -85,6 +85,7 @@
     "**/@types/hapi": "^17.0.18",
     "**/@types/angular": "^1.6.56",
     "**/typescript": "3.7.2",
+    "**/apollo-link": "^1.2.13",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/image-diff/gm/debug": "^2.6.9",
