@@ -6,7 +6,7 @@
 
 import yaml from 'js-yaml';
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { Datasource, Stream } from '../../../ingest/server/libs/types';
+import { Datasource, Stream } from '../../../ingest/common/types/domain_data';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import * as Ingest from '../ingest';

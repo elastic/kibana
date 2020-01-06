@@ -5,7 +5,7 @@
  */
 import fetch from 'node-fetch';
 import { ReturnTypeCreate, ReturnTypeUpdate } from '../../ingest/common/types/std_return_format';
-import { Datasource } from '../../ingest/server/libs/types';
+import { Datasource } from '../../ingest/common/types/domain_data';
 import { Request } from './types';
 
 // Temporary while we're iterating.

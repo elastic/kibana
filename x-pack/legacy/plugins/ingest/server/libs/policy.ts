@@ -14,7 +14,7 @@ import { PolicyAdapter } from './adapters/policy/default';
 import { DatasourcesLib } from './datasources';
 import { BackendFrameworkLib } from './framework';
 import { OutputsLib } from './outputs';
-import { Status, Datasource, Policy } from './types';
+import { Status, Policy, Datasource } from '../../common/types/domain_data';
 
 export class PolicyLib {
   public events: EventEmitter = new EventEmitter();

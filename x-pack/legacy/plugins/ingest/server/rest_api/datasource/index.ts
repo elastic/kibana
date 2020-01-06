@@ -17,7 +17,8 @@ import {
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
 import { HapiFrameworkAdapter } from '../../libs/adapters/framework/hapi_framework_adapter';
-import { ServerLibs, Datasource } from '../../libs/types';
+import { ServerLibs } from '../../libs/types';
+import { Datasource } from '../../../common/types/domain_data';
 
 export const registerDatasourceRoutes = (
   frameworkAdapter: HapiFrameworkAdapter,

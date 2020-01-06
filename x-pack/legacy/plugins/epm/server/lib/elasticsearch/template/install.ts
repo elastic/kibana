@@ -5,7 +5,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { AssetType } from '../../../../../ingest/server/libs/types';
+import { AssetType } from '../../../../../ingest/common/types/domain_data';
 import { AssetReference, Dataset, RegistryPackage } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';

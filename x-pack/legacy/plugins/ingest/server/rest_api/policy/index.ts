@@ -17,7 +17,8 @@ import {
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
 import { HapiFrameworkAdapter } from '../../libs/adapters/framework/hapi_framework_adapter';
-import { ServerLibs, Policy } from '../../libs/types';
+import { ServerLibs } from '../../libs/types';
+import { Policy } from '../../../common/types/domain_data';
 
 export const registerPolicyRoutes = (frameworkAdapter: HapiFrameworkAdapter, libs: ServerLibs) => {
   frameworkAdapter.registerRoute(createGETPolicyRoute(libs));
