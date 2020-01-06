@@ -19,7 +19,7 @@ import { start as spacesNPStart } from '../legacy';
 
 const module = uiModules.get('spaces_selector', []);
 module.controller('spacesSelectorController', ($scope: any) => {
-  $scope.$$postDigest(async () => {
+  $scope.$$postDigest(() => {
     const domNode = document.getElementById('spaceSelectorRoot');
 
     const { spacesManager } = spacesNPStart;

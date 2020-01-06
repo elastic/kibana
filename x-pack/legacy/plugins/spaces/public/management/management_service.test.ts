@@ -58,7 +58,6 @@ describe('ManagementService', () => {
       const service = new ManagementService();
       service.start(deps);
 
-      expect(deps.managementStart.legacy.getSection).toHaveBeenCalledTimes(1);
       expect(mockKibanaSection.register).toHaveBeenCalledTimes(0);
     });
 

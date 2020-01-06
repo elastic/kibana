@@ -403,7 +403,8 @@ describe('CopyToSpaceFlyout', () => {
             type: 'visualization',
             id: 'my-viz',
             error: {
-              type: 'missing_references' as any,
+              type: 'missing_references',
+              blocking: [],
               references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
             },
           },
