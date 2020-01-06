@@ -32,8 +32,4 @@ export class DynamicTextProperty extends DynamicStyleProperty {
   isScaled() {
     return false;
   }
-
-  renderHeader() {
-    return null;
-  }
 }

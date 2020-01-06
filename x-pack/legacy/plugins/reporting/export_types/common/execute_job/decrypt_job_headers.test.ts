@@ -43,7 +43,7 @@ describe('headers', () => {
     };
 
     const encryptedHeaders = await encryptHeaders(headers);
-    const { decryptedHeaders } = await decryptJobHeaders({
+    const decryptedHeaders = await decryptJobHeaders({
       job: {
         title: 'cool-job-bro',
         type: 'csv',

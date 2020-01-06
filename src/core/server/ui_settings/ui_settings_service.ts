@@ -56,7 +56,9 @@ export class UiSettingsService
   public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     registerRoutes(deps.http.createRouter(''));
     this.log.debug('Setting up ui settings service');
-    this.overrides = await this.getOverrides(deps);
+    const config = await this.config$.pipe(first()).toPromise();
+    this.overrides = config.overrides;
+
     return {
       register: this.register.bind(this),
       asScopedToClient: this.getScopedClientFactory(),
@@ -94,19 +96,5 @@ export class UiSettingsService
       }
       this.uiSettingsDefaults.set(key, value);
     });
-  }
-
-  private async getOverrides(deps: SetupDeps) {
-    const config = await this.config$.pipe(first()).toPromise();
-    const overrides: Record<string, any> = config.overrides;
-    // manually implemented deprecation until New platform Config service
-    // supports them https://github.com/elastic/kibana/issues/40255
-    if (typeof deps.http.config.defaultRoute !== 'undefined') {
-      overrides.defaultRoute = deps.http.config.defaultRoute;
-      this.log.warn(
-        'Config key "server.defaultRoute" is deprecated. It has been replaced with "uiSettings.overrides.defaultRoute"'
-      );
-    }
-    return overrides;
   }
 }
