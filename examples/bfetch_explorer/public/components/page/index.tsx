@@ -17,43 +17,35 @@
  * under the License.
  */
 
-import React from 'react';
-import { PageDoubleIntegers } from './containers/app/pages/page_double_integers';
-import { PageCountUntil } from './containers/app/pages/page_count_until';
+import * as React from 'react';
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
 
-interface RouteSectionDef {
-  title: string;
-  id: string;
-  items: RouteDef[];
+export interface PageProps {
+  title?: React.ReactNode;
 }
 
-interface RouteDef {
-  title: string;
-  id: string;
-  component: React.ReactNode;
-}
-
-export const routes: RouteSectionDef[] = [
-  {
-    title: 'fetchStreaming',
-    id: 'fetchStreaming',
-    items: [
-      {
-        title: 'Count until',
-        id: 'count-until',
-        component: <PageCountUntil />,
-      },
-    ],
-  },
-  {
-    title: 'batchedFunction',
-    id: 'batchedFunction',
-    items: [
-      {
-        title: 'Double integers',
-        id: 'double-integers',
-        component: <PageDoubleIntegers />,
-      },
-    ],
-  },
-];
+export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+  return (
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
+          {children}
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};

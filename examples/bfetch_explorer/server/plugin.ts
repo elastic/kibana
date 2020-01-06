@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Subject } from 'rxjs';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/server';
 import { BfetchServerSetup, BfetchServerStart } from '../../../src/plugins/bfetch/server';
 
@@ -30,6 +31,22 @@ export interface BfetchExplorerStartPlugins {
 
 export class BfetchExplorerPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: BfetchExplorerSetupPlugins) {
+    plugins.bfetch.addStreamingResponseRoute<string, string>('/bfetch_explorer/count', () => ({
+      getResponseStream: ({ data }: any) => {
+        const subject = new Subject<string>();
+        const countTo = Number(data);
+        for (let cnt = 1; cnt <= countTo; cnt++) {
+          setTimeout(() => {
+            subject.next(String(cnt));
+          }, cnt * 1000);
+        }
+        setTimeout(() => {
+          subject.complete();
+        }, countTo * 1000);
+        return subject;
+      },
+    }));
+
     plugins.bfetch.addBatchProcessingRoute<{ num: number }, { num: number }>(
       '/bfetch_explorer/double',
       () => ({

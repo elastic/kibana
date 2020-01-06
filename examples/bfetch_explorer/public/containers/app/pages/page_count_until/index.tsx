@@ -19,26 +19,26 @@
 
 import * as React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { DoubleIntegers } from '../../../../components/double_integers';
+import { CountUntil } from '../../../../components/count_until';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 
 // eslint-disable-next-line
 export interface Props {}
 
-export const PageDoubleIntegers: React.FC<Props> = () => {
-  const { explorer } = useDeps();
+export const PageCountUntil: React.FC<Props> = () => {
+  const { plugins } = useDeps();
 
   return (
-    <Page title={'Double Integers'}>
+    <Page title={'Count Until'}>
       <EuiText>
-        Below is a list of numbers in milliseconds. They are sent as a batch to the server. For each
-        number server waits given number of milliseconds then doubles the number and streams it
-        back.
+        This demo sends a single number N using <code>fetchStreaming</code> to the server. The
+        server will stream back N number of messages with 1 second delay each containing a number
+        from 1 to N, after which it will close the stream.
       </EuiText>
       <br />
       <EuiPanel paddingSize="l">
-        <DoubleIntegers double={explorer.double} />
+        <CountUntil fetchStreaming={plugins.bfetch.fetchStreaming} />
       </EuiPanel>
     </Page>
   );
