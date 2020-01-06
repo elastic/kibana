@@ -6,7 +6,7 @@
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
 import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
