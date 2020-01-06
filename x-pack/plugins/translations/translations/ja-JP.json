@@ -12663,7 +12663,6 @@
     "xpack.lens.xyChart.addLayerButton": "レイヤーを追加",
     "xpack.lens.xyChart.chartTypeLabel": "チャートタイプ",
     "xpack.lens.xyChart.chartTypeLegend": "チャートタイプ",
-    "xpack.lens.xyChart.deleteLayer": "レイヤーを削除",
     "xpack.lens.xyChart.help": "X/Y チャート",
     "xpack.lens.xyChart.isVisible.help": "判例の表示・非表示を指定します。",
     "xpack.lens.xyChart.layerSettings": "レイヤー設定を編集",

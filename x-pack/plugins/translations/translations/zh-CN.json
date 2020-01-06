@@ -12752,7 +12752,6 @@
     "xpack.lens.xyChart.addLayerButton": "添加图层",
     "xpack.lens.xyChart.chartTypeLabel": "图表类型",
     "xpack.lens.xyChart.chartTypeLegend": "图表类型",
-    "xpack.lens.xyChart.deleteLayer": "删除图层",
     "xpack.lens.xyChart.help": "X/Y 图表",
     "xpack.lens.xyChart.isVisible.help": "指定图例是否可见。",
     "xpack.lens.xyChart.layerSettings": "编辑图层设置",
