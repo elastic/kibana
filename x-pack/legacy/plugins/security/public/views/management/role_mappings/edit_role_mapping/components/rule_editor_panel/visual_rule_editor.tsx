@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
@@ -53,7 +53,8 @@ export class VisualRuleEditor extends Component<Props, {}> {
         }
         data-test-subj="roleMappingsNoRulesDefined"
         actions={
-          <EuiButtonEmpty
+          <EuiButton
+            color="primary"
             iconType="plusInCircle"
             data-test-subj="roleMappingsAddRuleButton"
             onClick={() => {
@@ -64,7 +65,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
               id="xpack.security.management.editRoleMapping.addFirstRuleButton"
               defaultMessage="Add rules"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         }
       />
     );

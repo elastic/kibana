@@ -75,20 +75,27 @@ export class MappingInfoPanel extends Component<Props, State> {
         title={
           <h3>
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.roleMappingNameFormRowTitle"
-              defaultMessage="Name"
+              id="xpack.security.management.editRoleMapping.roleMappingNameFormGroupTitle"
+              defaultMessage="Mapping name"
             />
           </h3>
         }
         description={
           <FormattedMessage
-            id="xpack.security.management.editRoleMapping.roleMappingNameFormRowHelpText"
+            id="xpack.security.management.editRoleMapping.roleMappingNameFormGroupHelpText"
             defaultMessage="A distinct name used solely as an identifier."
           />
         }
+        fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace
+          label={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleMappingNameFormRowTitle"
+              defaultMessage="Name"
+            />
+          }
+          fullWidth
           {...(this.props.validateForm && validateRoleMappingName(this.props.roleMapping))}
         >
           <EuiFieldText
@@ -152,6 +159,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             </EuiLink>
           </EuiText>
         }
+        fullWidth
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
@@ -218,6 +226,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             </EuiLink>
           </EuiText>
         }
+        fullWidth
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
@@ -246,16 +255,30 @@ export class MappingInfoPanel extends Component<Props, State> {
         description={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowHelpText"
-            defaultMessage="If disabled, ignore when role mapping is performed."
+            defaultMessage="Map roles to users based on their username, groups, and other metadata. When false, ignore mappings."
           />
         }
+        fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowLabel"
+              defaultMessage="Enable mapping"
+            />
+          }
+          fullWidth
+        >
           <EuiSwitch
             name={'enabled'}
-            label={'enabled'}
-            data-test-subj="roleMappingsEnabledSwitch"
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.roleMappingEnabledLabel"
+                defaultMessage="Enable mapping"
+              />
+            }
             showLabel={false}
+            data-test-subj="roleMappingsEnabledSwitch"
             checked={this.props.roleMapping.enabled}
             onChange={e => {
               this.props.onChange({
