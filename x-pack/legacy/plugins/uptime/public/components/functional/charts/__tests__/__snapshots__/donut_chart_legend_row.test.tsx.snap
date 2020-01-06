@@ -21,6 +21,7 @@ exports[`DonutChartLegendRow passes appropriate props 1`] = `
   </Styled(EuiFlexItem)>
   <Styled(EuiFlexItem)
     component="span"
+    data-test-subj="xpack.uptime.donutChart.foo"
   >
     23
   </Styled(EuiFlexItem)>

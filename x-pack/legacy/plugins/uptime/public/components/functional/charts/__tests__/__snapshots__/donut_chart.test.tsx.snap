@@ -103,6 +103,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
         <span
           class="euiFlexItem c2"
+          data-test-subj="xpack.uptime.donutChart.down"
         >
           32
         </span>
@@ -150,6 +151,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
         <span
           class="euiFlexItem c2"
+          data-test-subj="xpack.uptime.donutChart.up"
         >
           95
         </span>
