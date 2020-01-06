@@ -65,6 +65,7 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 }
 
 export interface Alert {
+  id: string;
   enabled: boolean;
   name: string;
   tags: string[];
@@ -84,6 +85,8 @@ export interface Alert {
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;

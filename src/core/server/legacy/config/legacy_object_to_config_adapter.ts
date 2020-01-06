@@ -66,7 +66,6 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       basePath: configValue.basePath,
       cors: configValue.cors,
       customResponseHeaders: configValue.customResponseHeaders,
-      defaultRoute: configValue.defaultRoute,
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
       name: configValue.name,
