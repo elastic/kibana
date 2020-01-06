@@ -6,7 +6,6 @@
 
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { pure } from 'recompose';
 import * as React from 'react';
 
 import * as i18n from '../translations';
@@ -22,7 +21,7 @@ export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
 /**
  * Renders a modal that confirms deletion of a timeline
  */
-export const DeleteTimelineModal = pure<Props>(({ title, closeModal, onDelete }) => (
+export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => (
   <EuiConfirmModal
     title={
       <FormattedMessage

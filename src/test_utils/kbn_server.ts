@@ -33,7 +33,6 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 import KbnServer from '../legacy/server/kbn_server';
 import { CallCluster } from '../legacy/core_plugins/elasticsearch';
@@ -77,6 +76,7 @@ export function createRootWithSettings(
       repl: false,
       basePath: false,
       optimize: false,
+      runExamples: false,
       oss: true,
       ...cliArgs,
     },
@@ -84,9 +84,9 @@ export function createRootWithSettings(
   });
 
   return new Root(
-    new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
-    ),
+    {
+      getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
+    },
     env
   );
 }

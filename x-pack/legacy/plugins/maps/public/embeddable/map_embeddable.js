@@ -30,6 +30,8 @@ import {
   disableInteractive,
   disableTooltipControl,
   hideToolbarOverlay,
+  hideLayerControl,
+  hideViewControl,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -132,6 +134,14 @@ export class MapEmbeddable extends Embeddable {
       this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
     }
 
+    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
+      this._store.dispatch(hideLayerControl(this.input.hideLayerControl));
+    }
+
+    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
+      this._store.dispatch(hideViewControl(this.input.hideViewControl));
+    }
+
     if (this.input.mapCenter) {
       this._store.dispatch(
         setGotoWithCenter({
@@ -163,6 +173,11 @@ export class MapEmbeddable extends Embeddable {
     this._unsubscribeFromStore = this._store.subscribe(() => {
       this._handleStoreChanges();
     });
+  }
+
+  async setLayerList(layerList) {
+    this._layerList = layerList;
+    return await this._store.dispatch(replaceLayerList(this._layerList));
   }
 
   addFilters = filters => {

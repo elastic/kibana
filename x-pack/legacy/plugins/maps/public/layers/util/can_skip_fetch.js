@@ -32,15 +32,18 @@ export function updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
     previousBuffer.minLon,
     previousBuffer.minLat,
     previousBuffer.maxLon,
-    previousBuffer.maxLat
+    previousBuffer.maxLat,
   ]);
   const newBufferGeometry = turf.bboxPolygon([
     newBuffer.minLon,
     newBuffer.minLat,
     newBuffer.maxLon,
-    newBuffer.maxLat
+    newBuffer.maxLat,
   ]);
-  const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
+  const doesPreviousBufferContainNewBuffer = turfBooleanContains(
+    previousBufferGeometry,
+    newBufferGeometry
+  );
 
   const isTrimmed = _.get(prevMeta, 'areResultsTrimmed', false);
   return doesPreviousBufferContainNewBuffer && !isTrimmed
@@ -49,7 +52,6 @@ export function updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
 }
 
 export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta }) {
-
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
   const extentAware = source.isFilterByMapBounds();
@@ -65,7 +67,7 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
     !isQueryAware &&
     !isGeoGridPrecisionAware
   ) {
-    return (prevDataRequest && prevDataRequest.hasDataOrRequestInProgress());
+    return prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
   }
 
   if (!prevDataRequest) {
@@ -83,7 +85,10 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
 
   let updateDueToRefreshTimer = false;
   if (refreshTimerAware && nextMeta.refreshTimerLastTriggeredAt) {
-    updateDueToRefreshTimer = !_.isEqual(prevMeta.refreshTimerLastTriggeredAt, nextMeta.refreshTimerLastTriggeredAt);
+    updateDueToRefreshTimer = !_.isEqual(
+      prevMeta.refreshTimerLastTriggeredAt,
+      nextMeta.refreshTimerLastTriggeredAt
+    );
   }
 
   let updateDueToFields = false;
@@ -117,14 +122,51 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
 
-  return !updateDueToTime
-    && !updateDueToRefreshTimer
-    && !updateDueToExtentChange
-    && !updateDueToFields
-    && !updateDueToQuery
-    && !updateDueToFilters
-    && !updateDueToSourceQuery
-    && !updateDueToApplyGlobalQuery
-    && !updateDueToPrecisionChange
-    && !updateDueToSourceMetaChange;
+  return (
+    !updateDueToTime &&
+    !updateDueToRefreshTimer &&
+    !updateDueToExtentChange &&
+    !updateDueToFields &&
+    !updateDueToQuery &&
+    !updateDueToFilters &&
+    !updateDueToSourceQuery &&
+    !updateDueToApplyGlobalQuery &&
+    !updateDueToPrecisionChange &&
+    !updateDueToSourceMetaChange
+  );
+}
+
+export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
+  if (!prevDataRequest) {
+    return false;
+  }
+  const prevMeta = prevDataRequest.getMeta();
+  if (!prevMeta) {
+    return false;
+  }
+
+  const updateDueToFields = !_.isEqual(prevMeta.dynamicStyleFields, nextMeta.dynamicStyleFields);
+
+  const updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
+
+  const updateDueToIsTimeAware = nextMeta.isTimeAware !== prevMeta.isTimeAware;
+  const updateDueToTime = nextMeta.isTimeAware
+    ? !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters)
+    : false;
+
+  return (
+    !updateDueToFields && !updateDueToSourceQuery && !updateDueToIsTimeAware && !updateDueToTime
+  );
+}
+
+export function canSkipFormattersUpdate({ prevDataRequest, nextMeta }) {
+  if (!prevDataRequest) {
+    return false;
+  }
+  const prevMeta = prevDataRequest.getMeta();
+  if (!prevMeta) {
+    return false;
+  }
+
+  return _.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
 }

@@ -100,7 +100,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
           "success": "#7de2d1",
           "warning": "#ffce7a",
         },
-        "euiCardGraphicHeight": "40px",
+        "euiCardBottomNodeHeight": "40px",
         "euiCardSelectButtonBackgrounds": Object {
           "danger": "#4d1f1f",
           "ghost": "#98a2b3",
@@ -116,7 +116,6 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
           "text": "#7de2d1",
         },
         "euiCardSpacing": "16px",
-        "euiCardTitleSize": "18px",
         "euiCheckBoxSize": "16px",
         "euiCodeBlockAdditionBackgroundColor": "#144212",
         "euiCodeBlockAdditionColor": "#e6e1dc",
@@ -195,7 +194,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiDataGridCellPaddingS": "4px",
         "euiDataGridColumnResizerWidth": "3px",
         "euiDataGridPrefix": ".euiDataGrid--",
-        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'fontSizeSmall', 'fontSizeLarge'",
+        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'fontSizeSmall', 'fontSizeLarge', 'noControls'",
         "euiDataGridVerticalBorder": "solid 1px #24272e",
         "euiDatePickerCalendarWidth": "284px",
         "euiDragAndDropSpacing": Object {
@@ -290,7 +289,6 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiNavDrawerWidthCollapsed": "48px",
         "euiNavDrawerWidthExpanded": "240px",
         "euiPageBackgroundColor": "#1a1b20",
-        "euiPanelBorderColor": "#000000",
         "euiPanelPaddingModifiers": Object {
           "paddingLarge": "24px",
           "paddingMedium": "16px",
@@ -334,6 +332,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiScrollBar": "16px",
         "euiScrollBarCorner": "6px",
         "euiSelectableListItemBorder": "1px solid #202128",
+        "euiSelectableListItemPadding": "4px 12px",
         "euiShadowColor": "#000000",
         "euiShadowColorLarge": "#000000",
         "euiSize": "16px",

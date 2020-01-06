@@ -41,16 +41,27 @@
 
 import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
 import { HttpServiceSetup } from './http';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
-export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
+export {
+  ConfigPath,
+  ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  EnvironmentMode,
+  PackageInfo,
+} from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -59,6 +70,7 @@ export {
   HandlerParameters,
 } from './context';
 export { CoreId } from './core_context';
+export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
@@ -105,6 +117,10 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContextContainer,
@@ -119,15 +135,22 @@ export {
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
+export { RenderingServiceSetup, IRenderOptions, LegacyRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -139,6 +162,7 @@ export {
   PluginInitializerContext,
   PluginManifest,
   PluginName,
+  SharedGlobalConfig,
 } from './plugins';
 
 export {
@@ -188,6 +212,7 @@ export {
   UiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UserProvidedValues,
 } from './ui_settings';
 
@@ -206,23 +231,35 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+export {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyUiExports,
+  LegacyInternals,
+} from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients:
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
  *      admin client which uses the credentials of the incoming request
+ *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
+ *      which uses the credentials of the incoming request
  *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
     };
@@ -254,6 +291,8 @@ export interface CoreSetup {
   savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UuidServiceSetup} */
+  uuid: UuidServiceSetup;
 }
 
 /**
@@ -266,13 +305,17 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
 }
 
 export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
+  UuidServiceSetup,
 };

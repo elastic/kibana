@@ -172,13 +172,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -215,6 +209,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -304,15 +299,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "addLoadingCountSource": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -330,8 +320,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -803,13 +791,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -846,6 +828,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -935,15 +918,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "addLoadingCountSource": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
@@ -961,8 +939,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -1422,13 +1398,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -1465,6 +1435,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -1554,15 +1525,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "addLoadingCountSource": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -1580,8 +1546,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -2050,13 +2014,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -2093,6 +2051,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -2182,15 +2141,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "addLoadingCountSource": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
@@ -2208,8 +2162,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -2669,13 +2621,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -2712,6 +2658,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -2801,15 +2748,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "addLoadingCountSource": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -2827,8 +2769,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -3297,13 +3237,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -3340,6 +3274,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -3429,15 +3364,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "addLoadingCountSource": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
@@ -3455,8 +3385,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],

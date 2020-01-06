@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns';
 import { IndexedArray } from 'ui/indexed_array';
 import { AggTypeFieldFilters } from './field_filters';
 import { AggConfig } from 'ui/vis';
+import { Field } from '../../../../../../plugins/data/public';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;

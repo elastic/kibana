@@ -34,7 +34,7 @@ export function lintFiles(log, files, { fix } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,
-    fix
+    fix,
   });
 
   const paths = files.map(file => file.getRelativePath());

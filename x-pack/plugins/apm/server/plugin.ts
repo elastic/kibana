@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'hapi';
@@ -11,6 +16,7 @@ import { once } from 'lodash';
 import { Plugin as APMOSSPlugin } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from '../../../legacy/plugins/apm/server/lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../../../legacy/plugins/apm/server/routes/create_apm_api';
+import { getApmIndices } from '../../../legacy/plugins/apm/server/lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
 
 export interface LegacySetup {
@@ -20,13 +26,18 @@ export interface LegacySetup {
 export interface APMPluginContract {
   config$: Observable<APMConfig>;
   registerLegacyAPI: (__LEGACY: LegacySetup) => void;
+  getApmIndices: (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => ReturnType<typeof getApmIndices>;
 }
 
 export class APMPlugin implements Plugin<APMPluginContract> {
   legacySetup$: AsyncSubject<LegacySetup>;
+  currentConfig: APMConfig;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.legacySetup$ = new AsyncSubject();
+    this.currentConfig = {} as APMConfig;
   }
 
   public async setup(
@@ -49,6 +60,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     await new Promise(resolve => {
       combineLatest(mergedConfig$, core.elasticsearch.dataClient$).subscribe(
         async ([config, dataClient]) => {
+          this.currentConfig = config;
           await createApmAgentConfigurationIndex({
             esClient: dataClient,
             config,
@@ -64,6 +76,9 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.legacySetup$.next(__LEGACY);
         this.legacySetup$.complete();
       }),
+      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
+        return getApmIndices({ savedObjectsClient, config: this.currentConfig });
+      },
     };
   }
 

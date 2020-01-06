@@ -1,0 +1,17 @@
+{
+  "rule_id": "68ecc190-cce2-4021-b976-c7c846ac0a00",
+  "risk_score": 50,
+  "description": "Windows Signed Binary Proxy Execution Download",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Signed Binary Proxy Execution Download",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.code:3 and http and (process.name:certutil.exe or process.name:replace.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

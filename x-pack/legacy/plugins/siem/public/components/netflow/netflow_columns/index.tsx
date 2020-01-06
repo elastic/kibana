@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { SourceDestination } from '../../source_destination';
@@ -32,7 +31,7 @@ EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
  * This component will allow columns to wrap if constraints on width prevent all
  * the columns from fitting on a single horizontal row
  */
-export const NetflowColumns = pure<NetflowColumnsProps>(
+export const NetflowColumns = React.memo<NetflowColumnsProps>(
   ({
     contextId,
     destinationBytes,

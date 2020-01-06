@@ -12,8 +12,6 @@ import { map } from 'rxjs/operators';
 import {
   createRootEpic,
   initialState,
-  logEntriesSelectors,
-  logFilterSelectors,
   logPositionSelectors,
   reducer,
   State,
@@ -38,14 +36,8 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     apolloClient$: apolloClient,
-    selectIsLoadingLogEntries: logEntriesSelectors.selectIsLoadingEntries,
-    selectLogEntriesEnd: logEntriesSelectors.selectEntriesEnd,
-    selectLogEntriesStart: logEntriesSelectors.selectEntriesStart,
-    selectHasMoreLogEntriesAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd,
-    selectHasMoreLogEntriesBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart,
     selectIsAutoReloadingLogEntries: logPositionSelectors.selectIsAutoReloading,
     selectIsAutoReloadingScrollLocked: logPositionSelectors.selectAutoReloadScrollLock,
-    selectLogFilterQueryAsJson: logFilterSelectors.selectLogFilterQueryAsJson,
     selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
     selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
     selectWaffleTimeUpdatePolicyInterval: waffleTimeSelectors.selectTimeUpdatePolicyInterval,

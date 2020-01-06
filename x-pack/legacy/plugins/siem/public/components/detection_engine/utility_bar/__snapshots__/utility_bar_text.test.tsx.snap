@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UtilityBarText it renders 1`] = `
-<Component>
-  <UtilityBarText>
-    Test text
-  </UtilityBarText>
-</Component>
+<UtilityBarText>
+  Test text
+</UtilityBarText>
 `;

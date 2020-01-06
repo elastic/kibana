@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { config, HttpConfig } from '.';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -75,6 +74,14 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
     rewriteBasePath: true,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
 });
 
 describe('with TLS', () => {
@@ -256,7 +263,7 @@ describe('with TLS', () => {
           clientAuthentication: 'none',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(false);
@@ -273,7 +280,7 @@ describe('with TLS', () => {
           clientAuthentication: 'optional',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);
@@ -290,7 +297,7 @@ describe('with TLS', () => {
           clientAuthentication: 'required',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);

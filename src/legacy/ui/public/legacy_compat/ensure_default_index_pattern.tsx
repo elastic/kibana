@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
-import { DataStart } from '../../../core_plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 let bannerId: string;
 let timeoutId: NodeJS.Timeout | undefined;
@@ -40,11 +40,11 @@ let timeoutId: NodeJS.Timeout | undefined;
  */
 export async function ensureDefaultIndexPattern(
   newPlatform: CoreStart,
-  data: DataStart,
+  data: DataPublicPluginStart,
   $rootScope: IRootScopeService,
   kbnUrl: any
 ) {
-  const patterns = await data.indexPatterns.indexPatterns.getIds();
+  const patterns = await data.indexPatterns.getIds();
   let defaultId = newPlatform.uiSettings.get('defaultIndex');
   let defined = !!defaultId;
   const exists = contains(patterns, defaultId);

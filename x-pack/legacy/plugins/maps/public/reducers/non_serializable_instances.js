@@ -46,13 +46,11 @@ export function nonSerializableInstances(state, action = {}) {
     case SET_EVENT_HANDLERS: {
       return {
         ...state,
-        eventHandlers: action.eventHandlers
+        eventHandlers: action.eventHandlers,
       };
     }
     default:
       return state;
-
-
   }
 }
 
@@ -78,14 +76,14 @@ export const registerCancelCallback = (requestToken, callback) => {
   };
 };
 
-export const unregisterCancelCallback = (requestToken) => {
+export const unregisterCancelCallback = requestToken => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = (requestToken) => {
+export const cancelRequest = requestToken => {
   return (dispatch, getState) => {
     if (!requestToken) {
       return;

@@ -9,7 +9,7 @@ import { Chrome } from 'ui/chrome';
 
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import { IndexPatterns, IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
@@ -25,13 +25,13 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
   private chrome: Chrome;
-  private indexPatternService: IndexPatterns;
+  private indexPatternService: IndexPatternsContract;
   private expressionRenderer: ExpressionRenderer;
 
   constructor(
     chrome: Chrome,
     expressionRenderer: ExpressionRenderer,
-    indexPatternService: IndexPatterns
+    indexPatternService: IndexPatternsContract
   ) {
     super({
       savedObjectMetaData: {

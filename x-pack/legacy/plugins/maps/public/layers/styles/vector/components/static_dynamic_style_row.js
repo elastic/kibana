@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { VectorStyle } from '../vector_style';
 import { i18n } from '@kbn/i18n';
+import { FieldMetaOptionsPopover } from './field_meta_options_popover';
 import { getVectorStyleLabel } from './get_vector_style_label';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
-export class StaticDynamicStyleRow extends React.Component {
+export class StaticDynamicStyleRow extends Component {
   // Store previous options locally so when type is toggled,
   // previous style options can be used.
   prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
   prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
 
   _canBeDynamic() {
-    return this.props.ordinalFields.length > 0;
+    return this.props.fields.length > 0;
   }
 
   _isDynamic() {
@@ -28,6 +29,17 @@ export class StaticDynamicStyleRow extends React.Component {
   _getStyleOptions() {
     return this.props.styleProperty.getOptions();
   }
+
+  _onFieldMetaOptionsChange = fieldMetaOptions => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        ...this._getStyleOptions(),
+        fieldMetaOptions,
+      },
+    };
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
+  };
 
   _onStaticStyleChange = options => {
     const styleDescriptor = {
@@ -64,11 +76,17 @@ export class StaticDynamicStyleRow extends React.Component {
     if (this._isDynamic()) {
       const DynamicSelector = this.props.DynamicSelector;
       return (
-        <DynamicSelector
-          ordinalFields={this.props.ordinalFields}
-          onChange={this._onDynamicStyleChange}
-          styleOptions={this._getStyleOptions()}
-        />
+        <Fragment>
+          <DynamicSelector
+            fields={this.props.fields}
+            onChange={this._onDynamicStyleChange}
+            styleOptions={this._getStyleOptions()}
+          />
+          <FieldMetaOptionsPopover
+            styleProperty={this.props.styleProperty}
+            onChange={this._onFieldMetaOptionsChange}
+          />
+        </Fragment>
       );
     }
 
@@ -86,14 +104,14 @@ export class StaticDynamicStyleRow extends React.Component {
     const isDynamic = this._isDynamic();
     const dynamicTooltipContent = isDynamic
       ? i18n.translate('xpack.maps.styles.staticDynamic.staticDescription', {
-        defaultMessage: 'Use static styling properties to symbolize features.',
-      })
+          defaultMessage: 'Use static styling properties to symbolize features.',
+        })
       : i18n.translate('xpack.maps.styles.staticDynamic.dynamicDescription', {
-        defaultMessage: 'Use property values to symbolize features.',
-      });
+          defaultMessage: 'Use property values to symbolize features.',
+        });
 
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem
           className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
         >

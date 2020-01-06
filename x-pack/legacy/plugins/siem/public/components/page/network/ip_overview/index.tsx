@@ -7,12 +7,11 @@
 import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useContext, useState } from 'react';
-import { pure } from 'recompose';
+import React, { useContext, useState, useCallback } from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
-import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../lib/kibana';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -59,7 +58,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   );
 };
 
-export const IpOverview = pure<IpOverviewProps>(
+export const IpOverview = React.memo<IpOverviewProps>(
   ({
     id,
     ip,
@@ -75,7 +74,7 @@ export const IpOverview = pure<IpOverviewProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
-    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const typeData: Overview = data[flowTarget]!;
     const column: DescriptionList[] = [
       {
@@ -140,11 +139,12 @@ export const IpOverview = pure<IpOverviewProps>(
         { title: i18n.REPUTATION, description: reputationRenderer(ip) },
       ],
     ];
+
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+
     return (
-      <OverviewWrapper
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
-      >
+      <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <InspectButton
           queryId={id}
           show={showInspect}
