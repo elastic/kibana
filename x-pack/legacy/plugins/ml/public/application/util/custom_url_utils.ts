@@ -140,13 +140,14 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
       commonEscapeCallback
     );
 
-    return str.replace(/\$([^?&$\'"]+)\$/g, (match, name: string) => {
+    // Looking for a $token$ with an optional trailing slash
+    return str.replace(/\$([^?&$\'"]+)\$(\/)?/g, (match, name: string, slash: string = '') => {
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValue: string | string[] | undefined = get(record, name);
       tokenValue = Array.isArray(tokenValue) ? tokenValue[0] : tokenValue;
 
-      // If property not found string is not replaced.
-      return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
+      // If property not found token is replaced with an empty string.
+      return tokenValue === undefined ? '' : getResultTokenValue(tokenValue) + slash;
     });
   };
 

@@ -405,6 +405,38 @@ describe('ML - custom URL utils', () => {
       );
     });
 
+    test('removes an empty path component with a trailing slash', () => {
+      const urlConfig = {
+        url_name: 'APM',
+        time_range: '2h',
+        url_value:
+          'apm#/services/$service.name$/transactions?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=&transactionType=request',
+      };
+
+      const testRecords = {
+        job_id: 'decreased_throughput_jsbase',
+        result_type: 'record',
+        probability: 8.91350850732573e-9,
+        multi_bucket_impact: 5,
+        record_score: 93.63625728951217,
+        initial_record_score: 93.63625728951217,
+        bucket_span: 900,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1573266600000,
+        function: 'low_count',
+        function_description: 'count',
+        typical: [100615.66506877479],
+        actual: [25251],
+        earliest: '2019-11-09T00:30:00.000Z',
+        latest: '2019-11-09T04:45:00.000Z',
+      };
+
+      expect(getUrlForRecord(urlConfig, testRecords)).toBe(
+        'apm#/services/transactions?rangeFrom=2019-11-09T00:30:00.000Z&rangeTo=2019-11-09T04:45:00.000Z&refreshPaused=true&refreshInterval=0&kuery=&transactionType=request'
+      );
+    });
+
     test('returns expected URL for other type URL', () => {
       expect(getUrlForRecord(TEST_OTHER_URL, TEST_RECORD)).toBe(
         'http://airlinecodes.info/airline-code-AAL'
