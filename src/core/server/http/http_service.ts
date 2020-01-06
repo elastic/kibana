@@ -61,14 +61,14 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService, env } = coreContext;
+    const { logger, configService } = coreContext;
 
     this.logger = logger;
     this.log = logger.get('http');
     this.config$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
@@ -107,10 +107,6 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
-
-      config: {
-        defaultRoute: config.defaultRoute,
-      },
     };
 
     return contract;
