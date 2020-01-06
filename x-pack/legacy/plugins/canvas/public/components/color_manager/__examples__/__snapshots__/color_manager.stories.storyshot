@@ -41,7 +41,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="blue"
           />
@@ -88,7 +88,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abc"
           />
@@ -135,7 +135,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abcd"
           />
@@ -182,7 +182,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abcdef"
           />
@@ -229,7 +229,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#aabbccdd"
           />
@@ -276,7 +276,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="rgb(50, 100, 150)"
           />
@@ -323,7 +323,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="rgba(50, 100, 150, .5)"
           />
@@ -371,7 +371,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value=""
           />
@@ -481,7 +481,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="elastic"
           />
@@ -524,7 +524,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#xyz"
           />
@@ -567,7 +567,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#ghij"
           />
@@ -610,7 +610,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#canvas"
           />
@@ -653,7 +653,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#12345xyz"
           />
@@ -696,7 +696,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="rgb(a,b,c)"
           />
@@ -739,7 +739,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="rgba(w,x,y,z)"
           />
@@ -791,7 +791,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abcdef"
           />
@@ -880,7 +880,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abcdef"
           />
@@ -969,7 +969,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="Color code"
+            placeholder="strings.getCodePlaceholder()"
             type="text"
             value="#abcdef"
           />

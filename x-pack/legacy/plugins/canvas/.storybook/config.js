@@ -57,7 +57,7 @@ function loadStories() {
   css.keys().forEach(filename => css(filename));
 
   // Find all files ending in *.examples.ts
-  const req = require.context('./..', true, /.examples.tsx$/);
+  const req = require.context('./..', true, /.(stories|examples).tsx$/);
   req.keys().forEach(filename => req(filename));
 }
 
