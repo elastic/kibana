@@ -17,23 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { BfetchPublicStart } from '../../../src/plugins/bfetch/public';
-import { mount } from './mount';
+import { useKibana } from '../../../../src/plugins/kibana_react/public';
+import { BfetchDeps } from '../mount';
 
-export interface BfetchExplorerStartPlugins {
-  bfetch: BfetchPublicStart;
-}
-
-export class BfetchExplorerPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup<BfetchExplorerStartPlugins>) {
-    coreSetup.application.register({
-      id: 'bfetchExplorer',
-      title: 'bfetch explorer',
-      mount: mount(coreSetup),
-    });
-  }
-
-  public start() {}
-  public stop() {}
-}
+export const useDeps = () => useKibana().services as BfetchDeps;

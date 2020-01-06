@@ -17,23 +17,28 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { BfetchPublicStart } from '../../../src/plugins/bfetch/public';
-import { mount } from './mount';
+import React from 'react';
 
-export interface BfetchExplorerStartPlugins {
-  bfetch: BfetchPublicStart;
+interface RouteDef {
+  title: string;
+  id: string;
+  component: React.ReactNode;
 }
 
-export class BfetchExplorerPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup<BfetchExplorerStartPlugins>) {
-    coreSetup.application.register({
-      id: 'bfetchExplorer',
-      title: 'bfetch explorer',
-      mount: mount(coreSetup),
-    });
-  }
-
-  public start() {}
-  public stop() {}
-}
+export const routes: RouteDef[] = [
+  {
+    title: 'Double integeters',
+    id: 'double-integers',
+    component: <div>Double integers</div>,
+  },
+  {
+    title: 'Todo embeddable',
+    id: 'todoEmbeddableSection',
+    component: <div>todo</div>,
+  },
+  {
+    title: 'List container embeddable',
+    id: 'listContainerSection',
+    component: <div>list</div>,
+  },
+];

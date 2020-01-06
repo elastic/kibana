@@ -18,14 +18,23 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
-import { BfetchExplorerStartPlugins } from './plugin';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { EuiPage } from '@elastic/eui';
+import { useDeps } from '../../hooks/use_deps';
+import { Sidebar } from './sidebar';
+import { routes } from '../../routes';
 
-export interface Props {
-  core: CoreStart;
-  plugins: BfetchExplorerStartPlugins;
-}
+export const App: React.FC = () => {
+  const { appBasePath } = useDeps();
 
-export const BfetchExplorerApp: React.FC<Props> = ({ core, plugins }) => {
-  return <div>bfetch</div>;
+  return (
+    <Router basename={appBasePath}>
+      <EuiPage>
+        <Sidebar />
+        {routes.map(({ id, component }) => (
+          <Route key={id} path={`/${id}`} render={props => component} />
+        ))}
+      </EuiPage>
+    </Router>
+  );
 };

@@ -17,23 +17,35 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { BfetchPublicStart } from '../../../src/plugins/bfetch/public';
-import { mount } from './mount';
+import React from 'react';
+import { EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { useDeps } from '../../../hooks/use_deps';
+import { routes } from '../../../routes';
 
-export interface BfetchExplorerStartPlugins {
-  bfetch: BfetchPublicStart;
-}
+// eslint-disable-next-line
+interface SidebarProps {}
 
-export class BfetchExplorerPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup<BfetchExplorerStartPlugins>) {
-    coreSetup.application.register({
-      id: 'bfetchExplorer',
-      title: 'bfetch explorer',
-      mount: mount(coreSetup),
-    });
-  }
+export const Sidebar: React.FC<SidebarProps> = () => {
+  const {} = useDeps();
+  const history = useHistory();
 
-  public start() {}
-  public stop() {}
-}
+  return (
+    <EuiPageSideBar>
+      <EuiSideNav
+        items={[
+          {
+            name: 'Embeddable explorer',
+            id: 'home',
+            items: routes.map(({ id, title }) => ({
+              id,
+              name: title,
+              onClick: () => history.push(`/${id}`),
+              'data-test-subj': id,
+            })),
+          },
+        ]}
+      />
+    </EuiPageSideBar>
+  );
+};
