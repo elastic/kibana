@@ -91,7 +91,7 @@ describe('formatted_date', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('(Empty String)');
+      expect(wrapper.text()).toEqual(getEmptyString());
     });
 
     test('it renders against an null as a EMPTY_VALUE', () => {
