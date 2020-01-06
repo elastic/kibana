@@ -46,9 +46,9 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  if (config.additionalPluginPaths.length) {
+  if (config.additionalPluginPaths.length && coreContext.env.mode.dev) {
     log.warn(
-      `Explicit plugin paths [${config.additionalPluginPaths}] are only supported in development. Relative imports will not work in production.`
+      `Explicit plugin paths [${config.additionalPluginPaths}] should only be used in development. Relative imports may not work properly in production.`
     );
   }
 

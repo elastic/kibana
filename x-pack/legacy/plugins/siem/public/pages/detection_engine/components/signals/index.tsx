@@ -25,7 +25,7 @@ import {
   SignalsTableFilterGroup,
 } from './signals_filter_group';
 import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
-import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
+import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
 import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { inputsSelectors, State } from '../../../../store';
@@ -48,6 +48,7 @@ const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 interface OwnProps {
   defaultFilters?: esFilters.Filter[];
   from: number;
+  signalsIndex: string;
   to: number;
 }
 
@@ -69,15 +70,14 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     selectedEventIds,
     setEventsDeleted,
     setEventsLoading,
+    signalsIndex,
     to,
   }) => {
     const [selectAll, setSelectAll] = useState(false);
 
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([
-      `${DEFAULT_SIGNALS_INDEX}-default`,
-    ]); // TODO Get from new FrankInspired XavierHook
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
     const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
     const kibana = useKibana();
 
@@ -223,9 +223,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [createTimelineCallback, filterGroup, kbnVersion]
     );
 
-    const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}-default`], [
-      `${DEFAULT_SIGNALS_INDEX}-default`,
-    ]);
+    const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
     const defaultFiltersMemo = useMemo(
       () => [
         ...defaultFilters,
@@ -249,7 +247,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
 
     return (
       <StatefulEventsViewer
-        defaultIndices={defaultIndices} // TODO Get from new FrankInspired XavierHook
+        defaultIndices={defaultIndices}
         pageFilters={defaultFiltersMemo}
         defaultModel={signalsDefaultModel}
         end={to}
