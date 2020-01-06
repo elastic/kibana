@@ -74,13 +74,22 @@ interface DownloadParams {
 
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
-export type ServerFacade = Legacy.Server & {
+type LegacyPlugins = Legacy.Server['plugins'];
+
+export interface ServerFacade {
+  config: Legacy.Server['config'];
+  info: Legacy.Server['info'];
+  newPlatform: Legacy.Server['newPlatform'];
   plugins: {
-    xpack_main?: XPackMainPlugin & {
+    elasticsearch: LegacyPlugins['elasticsearch'];
+    xpack_main: XPackMainPlugin & {
       status?: any;
     };
   };
-};
+  route: Legacy.Server['route'];
+  savedObjects: Legacy.Server['savedObjects'];
+  uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
+}
 
 interface ReportingRequest {
   query: ListQuery & GenerateQuery;
