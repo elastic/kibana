@@ -58,6 +58,30 @@ Go to *Management > Users*, add a new user, and assign the user the built-in
 `reporting_user` role and your new custom role, `custom_reporting_user`.
 
 [float]
+==== With a custom index
+
+If you are using Reporting with a custom index,
+start the `xpack.reporting.index` setting
+with `.reporting-*`. The default {kib} system user has
+`all` privileges against the `.reporting-*` pattern of indices.
+
+[source,js]
+xpack.reporting.index: '.reporting-custom-index'
+
+If you use a different pattern for the `xpack.reporting.index` setting,
+you must create a custom role with appropriate access to the index, similar
+to the following:
+
+. Go to *Management > Roles*, and click *Create role*.
+. Name the role `custom-reporting-user`.
+. Specify the custom index and assign it the `all` index privilege.
+. Go to *Management > Users* and create a new user with
+the `kibana_system` role and the `custom-reporting-user` role.
+. Configure {kib} to use the new account:
+[source,js]
+elasticsearch.username: 'custom_kibana_system'
+
+[float]
 [[reporting-roles-user-api]]
 ==== With the user API
 This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
