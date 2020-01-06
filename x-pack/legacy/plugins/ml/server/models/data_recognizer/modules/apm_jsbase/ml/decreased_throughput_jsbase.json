@@ -25,6 +25,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
+    "created_by": "ml-module-apm-jsbase",
     "custom_urls": [
       {
         "url_name": "APM",

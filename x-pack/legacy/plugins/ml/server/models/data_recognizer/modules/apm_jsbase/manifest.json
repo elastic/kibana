@@ -7,13 +7,7 @@
   "defaultIndexPattern": "apm-*",
   "query": {
     "bool": {
-      "filter": [
-        {
-          "term": {
-            "agent.name": "js-base"
-          }
-        }
-      ]
+      "filter": [{ "term": { "agent.name": "js-base" } }]
     }
   },
   "jobs": [

@@ -7,24 +7,8 @@
   "query": {
     "bool": {
       "must": [
-        {
-          "bool": {
-            "filter": {
-              "term": {
-                "agent.name": "js-base"
-              }
-            }
-          }
-        },
-        {
-          "bool": {
-            "filter": {
-              "term": {
-                "processor.event": "span"
-              }
-            }
-          }
-        }
+        { "bool": { "filter": { "term": { "agent.name": "js-base" } } } },
+        { "bool": { "filter": { "term": { "processor.event": "span" } } } }
       ]
     }
   }

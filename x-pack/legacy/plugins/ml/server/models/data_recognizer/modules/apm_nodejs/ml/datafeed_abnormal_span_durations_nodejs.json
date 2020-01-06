@@ -7,24 +7,8 @@
   "query": {
     "bool": {
       "must": [
-        {
-          "bool": {
-            "filter": {
-              "term": {
-                "agent.name": "nodejs"
-              }
-            }
-          }
-        },
-        {
-          "bool": {
-            "filter": {
-              "term": {
-                "processor.event": "span"
-              }
-            }
-          }
-        }
+        { "bool": { "filter": { "term": { "agent.name": "nodejs" } } } },
+        { "bool": { "filter": { "term": { "processor.event": "span" } } } }
       ]
     }
   }

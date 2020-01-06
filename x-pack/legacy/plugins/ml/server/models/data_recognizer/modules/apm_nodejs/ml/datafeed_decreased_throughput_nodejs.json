@@ -6,11 +6,7 @@
   "max_empty_searches": 10,
   "query": {
     "bool": {
-      "filter": {
-        "term": {
-          "agent.name": "nodejs"
-        }
-      }
+      "filter": { "term": { "agent.name": "nodejs" } }
     }
   },
   "aggregations": {

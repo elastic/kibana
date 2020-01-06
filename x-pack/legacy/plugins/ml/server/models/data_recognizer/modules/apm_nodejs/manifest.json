@@ -6,15 +6,7 @@
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",
   "query": {
-    "bool": {
-      "filter": [
-        {
-          "term": {
-            "agent.name": "nodejs"
-          }
-        }
-      ]
-    }
+    "bool": { "filter": [{ "term": { "agent.name": "nodejs" } }] }
   },
   "jobs": [
     {

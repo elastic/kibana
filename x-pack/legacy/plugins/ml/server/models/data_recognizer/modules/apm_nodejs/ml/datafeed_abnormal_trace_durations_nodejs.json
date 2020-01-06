@@ -6,24 +6,8 @@
   "max_empty_searches": 10,
   "query": {
     "bool": {
-      "must_not": [
-        {
-          "exists": {
-            "field": "parent.id"
-          }
-        }
-      ],
-      "must": [
-        {
-          "bool": {
-            "filter": {
-              "term": {
-                "agent.name": "nodejs"
-              }
-            }
-          }
-        }
-      ]
+      "must_not": [{ "exists": { "field": "parent.id" } }],
+      "must": [{ "bool": { "filter": { "term": { "agent.name": "nodejs" } } } }]
     }
   }
 }
