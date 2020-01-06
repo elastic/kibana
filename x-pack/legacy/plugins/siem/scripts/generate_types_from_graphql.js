@@ -100,7 +100,6 @@ async function main() {
       },
       {
         'typescript-react-apollo': {
-          apolloReactCommonImportFrom: '@apollo/react-common',
           apolloReactComponentsImportFrom: '@apollo/react-components',
           reactApolloVersion: 3,
           withHooks: true,

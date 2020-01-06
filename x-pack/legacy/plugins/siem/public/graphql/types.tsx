@@ -9,7 +9,7 @@
 
 import gql from 'graphql-tag';
 import * as React from 'react';
-import * as ApolloReactCommon from '@apollo/react-common';
+import * as ApolloReactCommon from '@apollo/client';
 import * as ApolloReactComponents from '@apollo/react-components';
 import * as ApolloReactHooks from '@apollo/client';
 export type Maybe<T> = T | null;
