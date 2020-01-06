@@ -6,10 +6,21 @@
 
 import { JobDocPayload, JobParamPostPayload, ConditionalHeaders, RequestFacade } from '../../types';
 
+interface DocValueField {
+  field: string;
+  format: string;
+}
+
+interface SortOptions {
+  order: string;
+  unmapped_type: string;
+}
+
 export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
   state?: {
     query: any;
-    sort: any[];
+    sort: Array<Record<string, SortOptions>>;
+    docvalue_fields: DocValueField[];
   };
 }
 
