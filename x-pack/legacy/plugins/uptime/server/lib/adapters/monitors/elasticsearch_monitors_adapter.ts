@@ -10,9 +10,33 @@ import { MonitorChart, Ping, LocationDurationLine } from '../../../../common/gra
 import { getHistogramIntervalFormatted } from '../../helper';
 import { MonitorError, MonitorLocation } from '../../../../common/runtime_types';
 import { UMMonitorsAdapter } from './adapter_types';
-import { combineRangeWithFilters } from './combine_range_with_filters';
 import { generateFilterAggs } from './generate_filter_aggs';
 import { OverviewFilters } from '../../../../common/runtime_types';
+
+export const combineRangeWithFilters = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: Record<string, any>
+) => {
+  const range = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (!filters) return range;
+  const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
+    ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
+      filters.bool.filter
+    : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
+      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+        ...filters?.bool?.filter?.[key],
+      }));
+  filters.bool.filter = [...clientFiltersList, range];
+  return filters;
+};
 
 type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
 
