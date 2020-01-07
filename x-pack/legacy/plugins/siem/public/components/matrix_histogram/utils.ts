@@ -87,7 +87,3 @@ export const getCustomChartData = (
     }, formattedChartData);
   else return formattedChartData;
 };
-
-export const bytesFormatter = (value: number) => {
-  return numeral(value).format('0,0.[0]b');
-};
