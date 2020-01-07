@@ -99,39 +99,46 @@ export const ActionConnectorForm = ({
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   async function onActionConnectorSave(): Promise<any> {
-    try {
-      let message;
-      let savedConnector;
-      if (connector.id === undefined) {
-        savedConnector = await createActionConnector({ http, connector });
-        message = i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.createSuccessNotificationText',
-          {
-            defaultMessage: "Created '{connectorName}'",
-            values: {
-              connectorName: savedConnector.name,
-            },
-          }
-        );
-      } else {
-        savedConnector = await updateActionConnector({ http, connector, id: connector.id });
-        message = i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
-          {
-            defaultMessage: "Updated '{connectorName}'",
-            values: {
-              connectorName: savedConnector.name,
-            },
-          }
-        );
-      }
-      toastNotifications.addSuccess(message);
-      return savedConnector;
-    } catch (error) {
+    let message: string;
+    let savedConnector: ActionConnector | undefined;
+    let error;
+    if (connector.id === undefined) {
+      await createActionConnector({ http, connector })
+        .then(res => {
+          savedConnector = res;
+        })
+        .catch(errorRes => {
+          error = errorRes;
+        });
+
+      message = "Created '{connectorName}'";
+    } else {
+      await updateActionConnector({ http, connector, id: connector.id })
+        .then(res => {
+          savedConnector = res;
+        })
+        .catch(errorRes => {
+          error = errorRes;
+        });
+      message = "Updated '{connectorName}'";
+    }
+    if (error) {
       return {
         error,
       };
     }
+    toastNotifications.addSuccess(
+      i18n.translate(
+        'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
+        {
+          defaultMessage: message,
+          values: {
+            connectorName: savedConnector ? savedConnector.name : '',
+          },
+        }
+      )
+    );
+    return savedConnector;
   }
 
   return (
