@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { act } from '@testing-library/react';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { securityMock } from '../../../../../../../plugins/security/public/mocks';
 import { AccountManagementPage } from './account_management_page';
+import { AuthenticatedUser } from '../../../../common/model';
 
 jest.mock('ui/kfetch');
 
@@ -32,10 +35,24 @@ const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }:
   };
 };
 
+function getSecuritySetupMock({ currentUser }: { currentUser: AuthenticatedUser }) {
+  const securitySetupMock = securityMock.createSetup();
+  securitySetupMock.authc.getCurrentUser.mockResolvedValue(currentUser);
+  return securitySetupMock;
+}
+
 describe('<AccountManagementPage>', () => {
-  it(`displays users full name, username, and email address`, () => {
+  it(`displays users full name, username, and email address`, async () => {
     const user = createUser();
-    const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
+    const wrapper = mountWithIntl(
+      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(
       user.full_name
     );
@@ -43,28 +60,60 @@ describe('<AccountManagementPage>', () => {
     expect(wrapper.find('[data-test-subj="email"]').text()).toEqual(user.email);
   });
 
-  it(`displays username when full_name is not provided`, () => {
+  it(`displays username when full_name is not provided`, async () => {
     const user = createUser({ withFullName: false });
-    const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
+    const wrapper = mountWithIntl(
+      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(user.username);
   });
 
-  it(`displays a placeholder when no email address is provided`, () => {
+  it(`displays a placeholder when no email address is provided`, async () => {
     const user = createUser({ withEmail: false });
-    const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
+    const wrapper = mountWithIntl(
+      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('[data-test-subj="email"]').text()).toEqual('no email address');
   });
 
-  it(`displays change password form for users in the native realm`, () => {
+  it(`displays change password form for users in the native realm`, async () => {
     const user = createUser();
-    const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
+    const wrapper = mountWithIntl(
+      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(1);
     expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(1);
   });
 
-  it(`does not display change password form for users in the saml realm`, () => {
+  it(`does not display change password form for users in the saml realm`, async () => {
     const user = createUser({ realm: 'saml' });
-    const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
+    const wrapper = mountWithIntl(
+      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(0);
     expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(0);
   });
