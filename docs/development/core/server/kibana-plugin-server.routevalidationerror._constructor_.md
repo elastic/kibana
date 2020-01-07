@@ -9,7 +9,7 @@ Constructs a new instance of the `RouteValidationError` class
 <b>Signature:</b>
 
 ```typescript
-constructor(error;: Error | string, path?: string[];)
+constructor(error: Error | string, path?: string[]);
 ```
 
 ## Parameters
