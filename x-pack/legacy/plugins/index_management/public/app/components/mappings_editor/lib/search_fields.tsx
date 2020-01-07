@@ -13,6 +13,17 @@ interface FieldWithMeta {
   metadata: SearchMetadata;
 }
 
+interface SearchData {
+  term: string;
+  searchRegexArray: RegExp[];
+  type?: string;
+}
+
+interface FieldData {
+  path: string;
+  type: string;
+}
+
 const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
   return b.metadata.score - a.metadata.score;
 };
@@ -44,10 +55,13 @@ const calculateScore = (metadata: Omit<SearchMetadata, 'score' | 'display'>): nu
 };
 
 const getJSXdisplayFromMeta = (
-  term: string,
-  path: string,
+  searchData: SearchData,
+  fieldData: FieldData,
   metadata: Omit<SearchMetadata, 'score' | 'display'>
 ): JSX.Element => {
+  const { term } = searchData;
+  const { path } = fieldData;
+
   let display: JSX.Element = <span>{path}</span>;
 
   if (metadata.fullyMatchPath) {
@@ -65,16 +79,20 @@ const getJSXdisplayFromMeta = (
       </span>
     );
   } else if (metadata.matchPath) {
-    const words = term.split(' ');
-    const matchWord = words[metadata.wordMatchIndex];
-    const charIndex = path.indexOf(matchWord);
-    const startString = path.substr(0, charIndex);
-    const endString = path.substr(charIndex + matchWord.length);
+    // Execute all the regEx and sort them with the one that has the most
+    // characters match first.
+    const stringMatch = searchData.searchRegexArray
+      .map(regex => regex.exec(path))
+      .filter(Boolean)
+      .sort((a, b) => b![0].length - a![0].length)[0]![0];
 
+    const charIndex = path.toLowerCase().indexOf(stringMatch.toLowerCase());
+    const startString = path.substr(0, charIndex);
+    const endString = path.substr(charIndex + stringMatch.length);
     display = (
       <span>
         {startString}
-        <strong>{matchWord}</strong>
+        <strong>{stringMatch}</strong>
         {endString}
       </span>
     );
@@ -83,43 +101,22 @@ const getJSXdisplayFromMeta = (
   return display;
 };
 
-const getSearchMetadata = (term: string, field: NormalizedField, type?: string): SearchMetadata => {
+const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): SearchMetadata => {
+  const { term, type, searchRegexArray } = searchData;
   const typeToCompare = type ?? term;
 
-  const words = term.split(' ');
-  const hasMultipleWords = words.length > 1;
-
-  const matchStartOfPath = field.path.startsWith(term);
-  const wordMatchIndex = hasMultipleWords
-    ? words.reduce((acc, word, index) => {
-        if (acc >= 0) {
-          // We already have a match, exit
-          return acc;
-        }
-        // Test with insensitive case if the word match the field path
-        if (new RegExp(word, 'gi').test(field.path)) {
-          acc = index;
-        }
-        return acc;
-      }, -1)
-    : field.path.includes(term)
-    ? 0
-    : -1;
+  const matchStartOfPath = fieldData.path.startsWith(term);
 
   const metadata = {
-    matchPath: wordMatchIndex >= 0,
+    matchPath: searchRegexArray.some(searchRegex => searchRegex.test(fieldData.path)),
     matchStartOfPath,
-    fullyMatchPath: term === field.path,
-    matchType: field.source.type.includes(typeToCompare),
-    fullyMatchType: typeToCompare === field.source.type,
-    wordMatchIndex,
+    fullyMatchPath: term === fieldData.path,
+    matchType: fieldData.type.includes(typeToCompare),
+    fullyMatchType: typeToCompare === fieldData.type,
   };
 
   const score = calculateScore(metadata);
-
-  // console.log(score, term, field.path, metadata);
-
-  const display = getJSXdisplayFromMeta(term, field.path, metadata);
+  const display = getJSXdisplayFromMeta(searchData, fieldData, metadata);
 
   return {
     ...metadata,
@@ -129,38 +126,64 @@ const getSearchMetadata = (term: string, field: NormalizedField, type?: string):
 };
 
 /**
+ * Return an array of array combining sibling elements
+ * In: ['A', 'B', 'C', 'D']
+ * Out: [['A', 'B'], ['B', 'C'], ['C', 'D']]
+ *
+ * @param arr Array of string
+ */
+const getSubArrays = (arr: string[]): string[][] => {
+  let i = 0;
+  const result = [];
+  while (i < arr.length - 1) {
+    result.push([arr[i], arr[i + 1]]);
+    i++;
+  }
+  return result;
+};
+
+const getRegexFromArray = (array: string[]): RegExp[] => {
+  const termsRegexArray = array.map(value => new RegExp(value, 'i'));
+  const fuzzyJoinChar = '[_\\.-\\s]?';
+  const fuzzySearchRegexArray = getSubArrays(array).map(
+    ([A, B]) => new RegExp(A + fuzzyJoinChar + B, 'i')
+  );
+  const regexArray = [...termsRegexArray, ...fuzzySearchRegexArray];
+
+  return regexArray;
+};
+
+/**
  * We will parsre the term to check if the _first_ or _last_ word matches a field "type"
  *
  * @param term The term introduced in the search box
  */
-const parseSearchTerm = (term: string): { type?: string; parsedTerm: string } => {
+const parseSearchTerm = (term: string): SearchData => {
   let type: string | undefined;
-  let parsedTerm = term.replace(/\s+/g, ' '); // Remove multiple spaces with 1 single space
+  const parsedTerm = term.replace(/\s+/g, ' ').trim(); // Remove multiple spaces with 1 single space
 
   const words = parsedTerm.split(' ');
+  const searchRegexArray = getRegexFromArray(words);
+
   const firstWordIsType = ALL_DATA_TYPES.includes(words[0]);
   const lastWordIsType = ALL_DATA_TYPES.includes(words[words.length - 1]);
 
   if (firstWordIsType) {
     type = words[0];
-    words.shift();
-    parsedTerm = parsedTerm.substr((parsedTerm.length - type.length) * -1);
   } else if (lastWordIsType) {
     type = words[words.length - 1];
-    words.pop();
-    parsedTerm = parsedTerm.substr(0, parsedTerm.length - type.length);
   }
 
-  return { parsedTerm: parsedTerm.trim(), type };
+  return { term: parsedTerm, type, searchRegexArray };
 };
 
 export const searchFields = (term: string, fields: NormalizedFields['byId']): SearchResult[] => {
-  const { parsedTerm, type } = parseSearchTerm(term);
+  const searchData = parseSearchTerm(term);
 
   return Object.values(fields)
     .map(field => ({
       field,
-      metadata: getSearchMetadata(parsedTerm, field, type),
+      metadata: getSearchMetadata(searchData, { path: field.path, type: field.source.type }),
     }))
     .filter(({ metadata }) => metadata.score > 0)
     .sort(sortResult)

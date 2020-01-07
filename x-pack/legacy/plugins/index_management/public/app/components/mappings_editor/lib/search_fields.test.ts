@@ -48,7 +48,7 @@ describe('Search fields', () => {
     const allFields = {
       [field.id]: field,
     };
-    const searchTerm = 'property';
+    const searchTerm = 'some property';
 
     const result = searchFields(searchTerm, allFields);
     expect(result.length).toBe(1);
@@ -115,5 +115,39 @@ describe('Search fields', () => {
     const result = searchFields(searchTerm, allFields);
     expect(result.length).toBe(1);
     expect(result[0].field.path).toEqual(field3.path);
+  });
+
+  test('should be case insensitive', () => {
+    const field1 = getField({ type: 'text' }, 'myFirstField');
+    const field2 = getField({ type: 'text' }, 'myObject.firstProp');
+
+    const allFields = {
+      [field1.id]: field1,
+      [field2.id]: field2,
+    };
+
+    const searchTerm = 'first';
+
+    const result = searchFields(searchTerm, allFields);
+    expect(result.length).toBe(2);
+    expect(result[0].field.path).toEqual(field1.path);
+    expect(result[1].field.path).toEqual(field2.path);
+  });
+
+  test('should find any word', () => {
+    const field1 = getField({ type: 'text' }, 'this');
+    const field2 = getField({ type: 'keyword' }, 'myObject.isOK');
+
+    const allFields = {
+      [field1.id]: field1,
+      [field2.id]: field2,
+    };
+
+    const searchTerm = 'keyword bad but this one isOk';
+
+    const result = searchFields(searchTerm, allFields);
+    expect(result.length).toBe(2);
+    expect(result[0].field.path).toEqual(field2.path); // Field 2 first as it matches the type
+    expect(result[1].field.path).toEqual(field1.path); // Matches the string "this"
   });
 });
