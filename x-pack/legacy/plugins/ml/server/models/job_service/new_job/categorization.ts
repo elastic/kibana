@@ -57,17 +57,24 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       ?.map((doc: any) => doc._source[categorizationFieldName])
       .filter((example: string | undefined) => example !== undefined);
 
-    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
-      body: {
-        ...getAnalyzer(analyzer),
-        text: examples,
-      },
-    });
+    let tokens: Token[] = [];
+    try {
+      const { tokens: tempTokens } = await callWithRequest('indices.analyze', {
+        body: {
+          ...getAnalyzer(analyzer),
+          text: examples,
+        },
+      });
+      tokens = tempTokens;
+    } catch (error) {
+      // fail silently, the tokens could not be loaded
+      // an empty list of tokens will be returned for each example
+    }
 
     const lengths = examples.map(e => e.length);
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
 
-    const tokensPerExample: Token[][] = lengths.map(l => []);
+    const tokensPerExample: Token[][] = examples.map(e => []);
 
     const { tokenizer } = getAnalyzer(analyzer); // remove this once ml_classic bug is fixed
 

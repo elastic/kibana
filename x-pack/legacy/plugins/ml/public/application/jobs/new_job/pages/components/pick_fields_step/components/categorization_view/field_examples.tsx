@@ -6,7 +6,6 @@
 
 import React, { FC } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
-import { Token } from '../../../../../../../../../common/types/categories';
 import { CategoryExample } from '../../../../../common/results_loader';
 
 interface Props {
