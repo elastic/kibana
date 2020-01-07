@@ -32,20 +32,12 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
     tags: ['access:uptime'],
   },
   handler: async ({ callES }, _context, request, response) => {
-    const {
-      dateRangeStart,
-      dateRangeEnd,
-      locations,
-      schemes,
-      search: searchString,
-      ports,
-      tags,
-    } = request.query;
+    const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
-    let search: Record<string, any> | undefined;
-    if (searchString) {
+    let parsedSearch: Record<string, any> | undefined;
+    if (search) {
       try {
-        search = JSON.parse(searchString);
+        parsedSearch = JSON.parse(search);
       } catch (e) {
         return response.badRequest();
       }
@@ -55,7 +47,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       callES,
       dateRangeStart,
       dateRangeEnd,
-      search,
+      search: parsedSearch,
       filterOptions: objectValuesToArrays<string>({
         locations,
         ports,
