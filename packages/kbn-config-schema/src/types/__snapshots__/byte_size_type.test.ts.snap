@@ -18,6 +18,12 @@ ByteSizeValue {
 }
 `;
 
+exports[`#defaultValue can be a string-formatted number 1`] = `
+ByteSizeValue {
+  "valueInBytes": 1024,
+}
+`;
+
 exports[`#max returns error when larger 1`] = `"Value is [1mb] ([1048576b]) but it must be equal to or less than [1kb]"`;
 
 exports[`#max returns value when smaller 1`] = `

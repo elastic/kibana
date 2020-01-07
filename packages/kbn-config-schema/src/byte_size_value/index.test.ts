@@ -20,6 +20,10 @@
 import { ByteSizeValue } from '.';
 
 describe('parsing units', () => {
+  test('number string (bytes)', () => {
+    expect(ByteSizeValue.parse('123').getValueInBytes()).toBe(123);
+  });
+
   test('bytes', () => {
     expect(ByteSizeValue.parse('123b').getValueInBytes()).toBe(123);
   });
@@ -35,10 +39,6 @@ describe('parsing units', () => {
 
   test('gigabytes', () => {
     expect(ByteSizeValue.parse('1gb').getValueInBytes()).toBe(1073741824);
-  });
-
-  test('throws an error when no unit specified', () => {
-    expect(() => ByteSizeValue.parse('123')).toThrowError('could not parse byte size value');
   });
 
   test('throws an error when unsupported unit specified', () => {
