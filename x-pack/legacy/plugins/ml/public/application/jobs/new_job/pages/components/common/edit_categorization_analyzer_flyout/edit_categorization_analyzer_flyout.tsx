@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState, useContext } from 'react';
+import React, { Fragment, FC, useEffect, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -30,17 +30,17 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
+  const [saveable, setSaveable] = useState(false);
 
   const [categorizationAnalyzerString, setCategorizationAnalyzerString] = useState(
     JSON.stringify(jobCreator.categorizationAnalyzer, null, 2)
   );
 
-  const [saveable, setSaveable] = useState(false);
-
-  // useEffect(() => {
-  //   // setJobConfigString(jobCreator.formattedJobJson);
-  //   // setDatafeedConfigString(jobCreator.formattedDatafeedJson);
-  // }, [jobCreatorUpdated]);
+  useEffect(() => {
+    if (showJsonFlyout === true) {
+      setCategorizationAnalyzerString(JSON.stringify(jobCreator.categorizationAnalyzer, null, 2));
+    }
+  }, [showJsonFlyout]);
 
   function toggleJsonFlyout() {
     setSaveable(false);
