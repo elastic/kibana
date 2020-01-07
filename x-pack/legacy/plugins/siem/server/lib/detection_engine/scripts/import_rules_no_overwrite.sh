@@ -12,7 +12,7 @@ set -e
 # Uses a default if no argument is specified
 RULES=${1:-./rules/import/multiple_ruleid_queries.ndjson}
 
-# Example: ./import_rules.sh
+# Example: ./import_rules_no_overwrite.sh
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
