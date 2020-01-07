@@ -7,7 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 
 import {
   getLogEntryCategoryDatasetsRequestPayloadRT,
@@ -21,21 +21,24 @@ export const callGetLogEntryCategoryDatasetsAPI = async (
   startTime: number,
   endTime: number
 ) => {
-  const response = await kfetch({
-    method: 'POST',
-    pathname: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH,
-    body: JSON.stringify(
-      getLogEntryCategoryDatasetsRequestPayloadRT.encode({
-        data: {
-          sourceId,
-          timeRange: {
-            startTime,
-            endTime,
+  const response = await npStart.core.http.fetch(
+    LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH,
+    {
+      method: 'POST',
+      body: JSON.stringify(
+        getLogEntryCategoryDatasetsRequestPayloadRT.encode({
+          data: {
+            sourceId,
+            timeRange: {
+              startTime,
+              endTime,
+            },
           },
-        },
-      })
-    ),
-  });
+        })
+      ),
+    }
+  );
+
   return pipe(
     getLogEntryCategoryDatasetsSuccessReponsePayloadRT.decode(response),
     fold(throwErrors(createPlainError), identity)
