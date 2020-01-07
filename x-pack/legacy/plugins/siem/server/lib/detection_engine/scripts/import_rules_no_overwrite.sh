@@ -16,6 +16,6 @@ RULES=${1:-./rules/import/multiple_ruleid_queries.ndjson}
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_import?overwrite=true \
+  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_import \
   --form file=@${RULES} \
   | jq .;

@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Readable } from 'stream';
-import { has } from 'lodash/fp';
+import { Readable, Transform } from 'stream';
+import { has, isString } from 'lodash/fp';
 import { RuleAlertParamsRest } from '../types';
 import {
   createSplitStream,
   createMapStream,
   createFilterStream,
+  createConcatStream,
 } from '../../../../../../../../src/legacy/utils/streams';
 import { importRulesSchema } from '../routes/schemas/import_rules_schema';
 
@@ -18,40 +19,69 @@ export interface RulesObjectsExportResultDetails {
   exportedCount: number;
 }
 
-export const createRulesStreamFromNdJson = (ndJsonStream: Readable) => {
+export const parseNdjsonStrings = (): Transform => {
+  return createMapStream((ndJsonStr: string) => {
+    if (isString(ndJsonStr) && ndJsonStr.trim() !== '') {
+      try {
+        return JSON.parse(ndJsonStr);
+      } catch (err) {
+        return err;
+      }
+    }
+  });
+};
+
+export const filterExportedCounts = (): Transform => {
+  return createFilterStream<RuleAlertParamsRest | RulesObjectsExportResultDetails>(
+    obj => obj != null && !has('exportedCount', obj)
+  );
+};
+
+export const validateRules = (): Transform => {
+  return createMapStream((obj: RuleAlertParamsRest) => {
+    if (!(obj instanceof Error)) {
+      const validated = importRulesSchema.validate(obj);
+      if (validated.error != null) {
+        return new TypeError(validated.error.message);
+      } else {
+        return validated.value;
+      }
+    } else {
+      return obj;
+    }
+  });
+};
+
+// Adaptation from: saved_objects/import/create_limit_stream.ts
+export const createLimitStream = (limit: number): Transform => {
+  let counter = 0;
+  return new Transform({
+    objectMode: true,
+    async transform(obj, _, done) {
+      if (counter >= limit) {
+        return done(new Error(`Can't import more than ${limit} rules`));
+      }
+      counter++;
+      done(undefined, obj);
+    },
+  });
+};
+
+// TODO: Capture both the line number and the rule_id if you have that information for the error message
+
+/**
+ * Inspiration and the pattern of code followed is from:
+ * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
+ */
+export const createRulesStreamFromNdJson = (
+  ndJsonStream: Readable,
+  ruleLimit: number
+): Transform => {
   return ndJsonStream
     .pipe(createSplitStream('\n'))
-    .pipe(
-      createMapStream((str: string) => {
-        if (str && str.trim() !== '') {
-          console.log('str is: ---->', str);
-          try {
-            return JSON.parse(str);
-          } catch (err) {
-            console.log('I am returning a parse error');
-            return err;
-          }
-        }
-      })
-    )
-    .pipe(
-      createFilterStream<RuleAlertParamsRest | RulesObjectsExportResultDetails>(
-        obj => !!obj && !has('exportedCount', obj)
-      )
-    )
-    .pipe(
-      createMapStream((obj: RuleAlertParamsRest) => {
-        if (!(obj instanceof Error)) {
-          console.log('Here is what I have now for you:', obj);
-          const validated = importRulesSchema.validate(obj);
-          if (validated.error != null) {
-            console.log(validated.error.message);
-            return new TypeError(validated.error.message);
-          } else {
-            return validated.value;
-          }
-        }
-        return obj;
-      })
-    );
+    .pipe(parseNdjsonStrings())
+    .pipe(filterExportedCounts())
+    .pipe(validateRules())
+    .pipe(createLimitStream(ruleLimit))
+    .pipe(createConcatStream([]));
 };

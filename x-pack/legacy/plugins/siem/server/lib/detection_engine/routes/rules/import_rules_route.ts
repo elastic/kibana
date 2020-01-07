@@ -9,22 +9,24 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { extname } from 'path';
 import { isFunction } from 'lodash/fp';
-import uuid from 'uuid';
+import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
   callWithRequestFactory,
   getIndex,
-  transformBulkError,
-  createBulkErrorObject,
+  createImportErrorObject,
+  transformImportError,
+  ImportSuccessError,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
-import { collectRulesObjects } from '../../rules/collect_rules_objects';
+import { ImportRuleAlertRest } from '../../types';
+import { transformOrImportError } from './utils';
+import { updateRules } from '../../rules/update_rules';
 
 export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -49,7 +51,6 @@ export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         payload: Joi.object({
           file: Joi.object().required(),
         }).default(),
-        // payload: createRulesBulkSchema, // TODO: Change this out to be a set of JSON documents if possible
       },
     },
     async handler(request: ImportRulesRequest, headers) {
@@ -67,119 +68,28 @@ export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return Boom.badRequest(`Invalid file extension ${fileExtension}`);
       }
 
-      console.log('YOLO, I AM HERE RETURNING THE PAYLOAD');
-      try {
-        const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
-        const readStream = createRulesStreamFromNdJson(request.payload.file);
+      const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+      const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
+      const parsedObjects = await createPromiseFromStreams<[ImportRuleAlertRest | Error]>([
+        readStream,
+      ]);
 
-        // TODO: Add overwrite
-        // const overwrite = request.query.overwrite;
-        const ruleObjects = collectRulesObjects({ readStream, objectLimit });
-        const parsedObjects = (await ruleObjects).collectedObjects;
-        const parsedErrors = (await ruleObjects).errors;
-        console.log('Parsed objects are: ---->', JSON.stringify(parsedObjects, null, 2));
-        const moreStuff = Promise.all(
-          parsedObjects.map(async parsedRule => {
-            const {
-              created_at: createdAt,
-              description,
-              enabled,
-              false_positives: falsePositives,
-              from,
-              immutable,
-              query,
-              language,
-              output_index: outputIndex,
-              saved_id: savedId,
-              meta,
-              filters,
-              rule_id: ruleId,
-              index,
-              interval,
-              max_signals: maxSignals,
-              risk_score: riskScore,
-              name,
-              severity,
-              tags,
-              threats,
-              to,
-              type,
-              updated_at: updatedAt,
-              references,
-              timeline_id: timelineId,
-              version,
-            } = parsedRule;
-            // TODO: Change RuleAlertParamsRest for a better Type so we have created_at, created_by, etc... and ruleId is not null
-            try {
-              const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-              const callWithRequest = callWithRequestFactory(request, server);
-              const indexExists = await getIndexExists(callWithRequest, finalIndex);
-              if (!indexExists) {
-                return createBulkErrorObject({
-                  ruleId: ruleIdOrUuid,
-                  statusCode: 409,
-                  message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-                });
-              }
-              if (ruleId != null) {
-                const rule = await readRules({ alertsClient, ruleId });
-                if (rule != null) {
-                  return createBulkErrorObject({
-                    ruleId,
-                    statusCode: 409,
-                    message: `rule_id: "${ruleId}" already exists`,
-                  });
-                }
-              }
-              const createdRule = await createRules({
-                alertsClient,
-                actionsClient,
-                createdAt,
-                description,
-                enabled,
-                falsePositives,
-                from,
-                immutable,
-                query,
-                language,
-                outputIndex: finalIndex,
-                savedId,
-                timelineId,
-                meta,
-                filters,
-                ruleId: ruleIdOrUuid,
-                index,
-                interval,
-                maxSignals,
-                riskScore,
-                name,
-                severity,
-                tags,
-                to,
-                type,
-                threats,
-                updatedAt,
-                references,
-                version,
-              });
-              return transformOrBulkError(ruleIdOrUuid, createdRule);
-            } catch (err) {
-              return transformBulkError(ruleIdOrUuid, err);
-            }
-          })
-        );
-        return {
-          success: parsedObjects.length,
-          errors: parsedErrors,
-        };
-      } catch (err) {
-        console.log('I AM IN ERR:', err);
-        // TODO: Change the error reporting
-        return transformBulkError('TODO: Change this', err);
-      }
-      const rules = Promise.all(
-        request.payload.map(async payloadRule => {
+      const reduced = await parsedObjects.reduce<Promise<ImportSuccessError>>(
+        async (accum, parsedRule) => {
+          const existingImportSuccessError = await accum;
+          if (parsedRule instanceof Error) {
+            // If the JSON object had a validation or parse error then we return
+            // early with the error and an (unknown) for the ruleId
+            return createImportErrorObject({
+              ruleId: '(unknown)',
+              statusCode: 400,
+              message: parsedRule.message,
+              existingImportSuccessError,
+            });
+          }
+
           const {
+            id,
             created_at: createdAt,
             description,
             enabled,
@@ -207,67 +117,99 @@ export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             references,
             timeline_id: timelineId,
             version,
-          } = payloadRule;
-          const ruleIdOrUuid = ruleId ?? uuid.v4();
+          } = parsedRule;
           try {
             const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
             const callWithRequest = callWithRequestFactory(request, server);
             const indexExists = await getIndexExists(callWithRequest, finalIndex);
             if (!indexExists) {
-              return createBulkErrorObject({
-                ruleId: ruleIdOrUuid,
+              return createImportErrorObject({
+                ruleId,
                 statusCode: 409,
                 message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+                existingImportSuccessError,
               });
             }
-            if (ruleId != null) {
-              const rule = await readRules({ alertsClient, ruleId });
-              if (rule != null) {
-                return createBulkErrorObject({
-                  ruleId,
-                  statusCode: 409,
-                  message: `rule_id: "${ruleId}" already exists`,
-                });
-              }
+            const rule = await readRules({ alertsClient, id, ruleId });
+            if (rule == null) {
+              const createdRule = await createRules({
+                alertsClient,
+                actionsClient,
+                createdAt,
+                description,
+                enabled,
+                falsePositives,
+                from,
+                immutable,
+                query,
+                language,
+                outputIndex: finalIndex,
+                savedId,
+                timelineId,
+                meta,
+                filters,
+                ruleId,
+                index,
+                interval,
+                maxSignals,
+                riskScore,
+                name,
+                severity,
+                tags,
+                to,
+                type,
+                threats,
+                updatedAt,
+                references,
+                version,
+              });
+              return transformOrImportError(ruleId, createdRule, existingImportSuccessError);
+            } else if (rule != null && request.query.overwrite) {
+              const updatedRule = await updateRules({
+                alertsClient,
+                actionsClient,
+                description,
+                enabled,
+                falsePositives,
+                from,
+                immutable,
+                query,
+                language,
+                outputIndex,
+                savedId,
+                timelineId,
+                meta,
+                filters,
+                id,
+                ruleId,
+                index,
+                interval,
+                maxSignals,
+                riskScore,
+                name,
+                severity,
+                tags,
+                to,
+                type,
+                threats,
+                references,
+                version,
+              });
+              return transformOrImportError(ruleId, updatedRule, existingImportSuccessError);
+            } else {
+              return existingImportSuccessError;
             }
-            const createdRule = await createRules({
-              alertsClient,
-              actionsClient,
-              createdAt,
-              description,
-              enabled,
-              falsePositives,
-              from,
-              immutable,
-              query,
-              language,
-              outputIndex: finalIndex,
-              savedId,
-              timelineId,
-              meta,
-              filters,
-              ruleId: ruleIdOrUuid,
-              index,
-              interval,
-              maxSignals,
-              riskScore,
-              name,
-              severity,
-              tags,
-              to,
-              type,
-              threats,
-              updatedAt,
-              references,
-              version,
-            });
-            return transformOrBulkError(ruleIdOrUuid, createdRule);
           } catch (err) {
-            return transformBulkError(ruleIdOrUuid, err);
+            return transformImportError(ruleId, err, existingImportSuccessError);
           }
+        },
+        Promise.resolve({
+          success: true,
+          success_count: 0,
+          errors: [],
         })
       );
-      return rules;
+      return reduced;
     },
   };
 };

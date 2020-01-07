@@ -9,7 +9,13 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
-import { createBulkErrorObject, BulkError } from '../utils';
+import {
+  createBulkErrorObject,
+  BulkError,
+  createSuccessObject,
+  ImportSuccessError,
+  createImportErrorObject,
+} from '../utils';
 
 export const getIdError = ({
   id,
@@ -124,6 +130,23 @@ export const transformOrBulkError = (
       ruleId,
       statusCode: 500,
       message: 'Internal error transforming',
+    });
+  }
+};
+
+export const transformOrImportError = (
+  ruleId: string,
+  alert: unknown,
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  if (isAlertType(alert)) {
+    return createSuccessObject(existingImportSuccessError);
+  } else {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+      existingImportSuccessError,
     });
   }
 };

@@ -38,13 +38,20 @@ import {
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
+/**
+ * Differences from this and the createRulesSchema are
+ *   - rule_id is required
+ */
+
+// TODO: Do we make _most_ of this required since an export should export all the major elements
+// and then on an import we require all those fields and have a 1-1 between export and import?
 export const importRulesSchema = Joi.object({
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
   filters,
   from: from.required(),
-  rule_id,
+  rule_id: rule_id.required(),
   immutable: immutable.default(false),
   index,
   interval: interval.default('5m'),

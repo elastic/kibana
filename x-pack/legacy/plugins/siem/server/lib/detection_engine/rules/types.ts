@@ -53,7 +53,8 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends RequestFacade {
+export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+  query: { overwrite: boolean };
   payload: { file: HapiReadableStream };
 }
 

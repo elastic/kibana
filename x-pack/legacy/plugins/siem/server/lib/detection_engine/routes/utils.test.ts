@@ -63,8 +63,8 @@ describe('utils', () => {
       const boom = new Boom('some boom message', { statusCode: 400 });
       const transformed = transformBulkError('rule-1', boom);
       const expected: BulkError = {
-        id: 'rule-1',
-        error: { message: 'some boom message', statusCode: 400 },
+        rule_id: 'rule-1',
+        error: { message: 'some boom message', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
@@ -77,8 +77,8 @@ describe('utils', () => {
       };
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
-        id: 'rule-1',
-        error: { message: 'some message', statusCode: 403 },
+        rule_id: 'rule-1',
+        error: { message: 'some message', status_code: 403 },
       };
       expect(transformed).toEqual(expected);
     });
@@ -90,8 +90,8 @@ describe('utils', () => {
       };
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
-        id: 'rule-1',
-        error: { message: 'some message', statusCode: 500 },
+        rule_id: 'rule-1',
+        error: { message: 'some message', status_code: 500 },
       };
       expect(transformed).toEqual(expected);
     });
@@ -100,8 +100,8 @@ describe('utils', () => {
       const error: TypeError = new TypeError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
-        id: 'rule-1',
-        error: { message: 'I have a type error', statusCode: 400 },
+        rule_id: 'rule-1',
+        error: { message: 'I have a type error', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
