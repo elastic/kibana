@@ -96,7 +96,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       onFilterFieldChange,
       fieldName: 'url.port',
       id: 'port',
-      isDisabled: ports.length === 0,
+      disabled: ports.length === 0,
       items: ports.map((p: number) => p.toString()),
       selectedItems: getSelectedItems('url.port'),
       title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
@@ -106,7 +106,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       onFilterFieldChange,
       fieldName: 'monitor.type',
       id: 'scheme',
-      isDisabled: schemes.length === 0,
+      disabled: schemes.length === 0,
       items: schemes,
       selectedItems: getSelectedItems('monitor.type'),
       title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
@@ -118,7 +118,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       onFilterFieldChange,
       fieldName: 'tags',
       id: 'tags',
-      isDisabled: tags.length === 0,
+      disabled: tags.length === 0,
       items: tags,
       selectedItems: getSelectedItems('tags'),
       title: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
