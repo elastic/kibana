@@ -6,6 +6,7 @@
 
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { getApiPath } from '../../lib/helper';
+import { BaseParams } from './types';
 import {
   MonitorDetailsType,
   MonitorDetails,
@@ -19,12 +20,23 @@ interface ApiRequest {
   basePath: string;
 }
 
+export type MonitorQueryParams = BaseParams & ApiRequest;
+
 export const fetchMonitorDetails = async ({
   monitorId,
   basePath,
-}: ApiRequest): Promise<MonitorDetails> => {
-  const url = getApiPath(`/api/uptime/monitor/details?monitorId=${monitorId}`, basePath);
-  const response = await fetch(url);
+  dateStart,
+  dateEnd,
+}: MonitorQueryParams): Promise<MonitorDetails> => {
+  const url = getApiPath(`/api/uptime/monitor/details`, basePath);
+  const params = {
+    monitorId,
+    dateStart,
+    dateEnd,
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${url}?${urlParams}`);
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }

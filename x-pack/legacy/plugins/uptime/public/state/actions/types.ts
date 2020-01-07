@@ -12,3 +12,10 @@ export interface QueryParams {
   statusFilter?: string;
   location?: string;
 }
+
+export interface MonitorDetailsActionPayload {
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+  location?: string;
+}

@@ -16,20 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular from 'angular';
-import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices } from './kibana_services';
+import { Chrome, setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_types';
+import { DocViewTable } from './np_ready/components/table/table';
+import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 
 /**
@@ -37,12 +42,17 @@ import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
  * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
  * @public
  */
-export type DiscoverSetup = void;
+export interface DiscoverSetup {
+  addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+}
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
-  uiActions: IUiActionsStart;
+  uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
+  __LEGACY: {
+    chrome: Chrome;
+  };
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
@@ -65,13 +75,30 @@ const embeddableAngularName = 'app/discoverEmbeddable';
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
+  private docViewsRegistry: DocViewsRegistry | null = null;
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
    */
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
+
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
+    this.docViewsRegistry = new DocViewsRegistry(plugins.__LEGACY.chrome);
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
+        defaultMessage: 'Table',
+      }),
+      order: 10,
+      component: DocViewTable,
+    });
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
+        defaultMessage: 'JSON',
+      }),
+      order: 20,
+      component: JsonCodeBlock,
+    });
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
@@ -91,6 +118,10 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       },
     });
     registerFeature(plugins.home);
+
+    return {
+      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+    };
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
@@ -112,7 +143,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       if (this.servicesInitialized) {
         return;
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, this.docViewsRegistry!);
       setServices(services);
       this.servicesInitialized = true;
     };

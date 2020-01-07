@@ -5,7 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 

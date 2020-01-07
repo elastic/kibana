@@ -27,6 +27,8 @@ export interface GetFilterBarParams {
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
+  dateStart: string;
+  dateEnd: string;
 }
 
 /**
