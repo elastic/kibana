@@ -6,9 +6,6 @@
 
 import React, { SetStateAction, useEffect, useState } from 'react';
 
-import { useUiSetting$ } from '../../../lib/kibana';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-
 import { fetchQuerySignals } from './api';
 import { SignalSearchResponse } from './types';
 
@@ -28,7 +25,6 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
   const [queryString, setQueryString] = useState(query);
   const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -39,7 +35,6 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
       try {
         const signalResponse = await fetchQuerySignals<Hit, Aggs>({
           query: queryString,
-          kbnVersion,
           signal: abortCtrl.signal,
         });
 
