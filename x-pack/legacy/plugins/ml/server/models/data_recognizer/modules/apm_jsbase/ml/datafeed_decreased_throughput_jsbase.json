@@ -23,9 +23,5 @@
         }
       }
     }
-  },
-  "chunking_config": {
-    "mode": "manual",
-    "time_span": "900000000ms"
   }
 }
