@@ -46,6 +46,8 @@ export class Assigned extends React.Component {
 
     // TODO: redesign for shard allocation, possibly giving shard display the
     // ability to use the euiLink CSS class (blue link text instead of white link text)
+    // Disabling eslint because EuiKeyboardAccessible does it for us
+    /* eslint-disable jsx-a11y/click-events-have-key-events */
     const name = (
       <EuiKeyboardAccessible>
         <a onClick={changeUrl}>
@@ -53,6 +55,7 @@ export class Assigned extends React.Component {
         </a>
       </EuiKeyboardAccessible>
     );
+    /* eslint-enable jsx-a11y/click-events-have-key-events */
     const master =
       data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
