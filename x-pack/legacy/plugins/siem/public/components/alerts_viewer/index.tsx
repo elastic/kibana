@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { noop } from 'lodash/fp';
-import React from 'react';
-
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
 import { AlertsComponentsQueryProps } from './types';
@@ -15,7 +13,6 @@ import * as i18n from './translations';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../containers/helpers';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
-
 const ID = 'alertsOverTimeQuery';
 const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -37,29 +34,37 @@ export const AlertsView = ({
   startDate,
   type,
   updateDateRange = noop,
-}: AlertsComponentsQueryProps) => (
-  <>
-    <MatrixHistogramContainer
-      dataKey={dataKey}
-      deleteQuery={deleteQuery}
-      defaultStackByOption={alertsStackByOptions[0]}
-      endDate={endDate}
-      filterQuery={filterQuery}
-      id={ID}
-      query={AlertsOverTimeGqlQuery}
-      setQuery={setQuery}
-      skip={skip}
-      sourceId="default"
-      stackByOptions={alertsStackByOptions}
-      startDate={startDate}
-      subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
-      title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
-      type={type}
-      updateDateRange={updateDateRange}
-    />
-    <EuiSpacer size="l" />
-    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
-  </>
-);
-
+}: AlertsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+  return (
+    <>
+      <MatrixHistogramContainer
+        dataKey={dataKey}
+        deleteQuery={deleteQuery}
+        defaultStackByOption={alertsStackByOptions[0]}
+        endDate={endDate}
+        filterQuery={filterQuery}
+        id={ID}
+        query={AlertsOverTimeGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
+        sourceId="default"
+        stackByOptions={alertsStackByOptions}
+        startDate={startDate}
+        subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
+        title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
+        type={type}
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer size="l" />
+      <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+    </>
+  );
+};
 AlertsView.displayName = 'AlertsView';

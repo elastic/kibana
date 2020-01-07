@@ -101,6 +101,7 @@ export const MatrixHistogram = React.memo(
           : undefined,
       stackByField: selectedStackByOption.value,
     });
+
     useEffect(() => {
       const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
       setSubtitle(formattedSubTitle);
@@ -115,11 +116,6 @@ export const MatrixHistogram = React.memo(
       setBarChartData(getCustomChartData(data, mapping));
 
       setQuery({ id, inspect, loading, refetch: undefined });
-      return () => {
-        if (deleteQuery) {
-          deleteQuery({ id });
-        }
-      };
     }, [totalCount, isInspected, loading, data]);
 
     return !hideHistogram ? (
