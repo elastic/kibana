@@ -34,7 +34,7 @@ will package individual calls into batches and send them to the server.
 
 ```ts
 const double = plugins.bfetch.batchedFunction<{ num: number }, { num: number }>({
-  url: '/bfetch_explorer/double',
+  url: '/my-plugin/double',
 });
 ```
 
