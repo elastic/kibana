@@ -26,6 +26,10 @@ describe('state selectors', () => {
       loading: false,
     },
     ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
+    monitorStatus: {
+      status: null,
+      loading: false,
+    },
   };
 
   it('selects base path from state', () => {

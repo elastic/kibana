@@ -32,6 +32,7 @@ const mapDispatchToProps = (dispatch: any, ownProps: any) => ({
 export const MonitorStatusBar = connect(
   mapStateToProps,
   mapDispatchToProps
+  // @ts-ignore some unrecognized ts check error here, TODO: investigate
 )(MonitorStatusBarComponent);
 
 export { MonitorSSLCertificate } from './monitor_ssl_certificate';

@@ -64,8 +64,14 @@ export const MonitorStatusBarComponent = ({
         </EuiTitle>
         <EuiSpacer />
         <EuiText>
-          <h5>Most Recent Check:</h5>
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.monitorStatusBar.mostRecentCheck.label"
+              defaultMessage="Most Recent Check:"
+            />
+          </h5>
         </EuiText>
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem grow={false}>
             <EuiHealth
