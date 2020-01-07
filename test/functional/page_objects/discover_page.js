@@ -288,7 +288,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async selectIndexPattern(indexPattern) {
       await testSubjects.click('indexPattern-switch-link');
       await find.clickByCssSelector(
-        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}*"]`
+        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
