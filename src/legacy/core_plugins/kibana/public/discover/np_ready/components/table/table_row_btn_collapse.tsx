@@ -16,11 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      docViews: ['plugins/kbn_doc_views/kbn_doc_views'],
-    },
+export interface Props {
+  onClick: () => void;
+  isCollapsed: boolean;
+}
+
+export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
+  const label = i18n.translate('kbn.discover.docViews.table.toggleFieldDetails', {
+    defaultMessage: 'Toggle field details',
   });
+  return (
+    <EuiToolTip content={label}>
+      <EuiButtonIcon
+        aria-expanded={!isCollapsed}
+        aria-label={label}
+        data-test-subj="collapseBtn"
+        onClick={() => onClick()}
+        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        iconSize={'s'}
+      />
+    </EuiToolTip>
+  );
 }

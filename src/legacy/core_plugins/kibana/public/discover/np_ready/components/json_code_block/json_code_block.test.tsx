@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { addDocView } from 'ui/registry/doc_views';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { shallow } from 'enzyme';
 import { JsonCodeBlock } from './json_code_block';
+import { IndexPattern } from '../../../kibana_services';
 
-/*
- * Registration of the the doc view: json
- * - used to display an ES hit as pretty printed JSON at Discover
- */
-addDocView({
-  title: i18n.translate('kbnDocViews.json.jsonTitle', {
-    defaultMessage: 'JSON',
-  }),
-  order: 20,
-  component: JsonCodeBlock,
+it('returns the `JsonCodeEditor` component', () => {
+  const props = {
+    hit: { _index: 'test', _source: { test: 123 } },
+    columns: [],
+    indexPattern: {} as IndexPattern,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
 });
