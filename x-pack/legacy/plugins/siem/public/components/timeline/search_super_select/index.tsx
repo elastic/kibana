@@ -223,7 +223,7 @@ export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
                 }}
                 singleSelection={true}
                 options={[
-                  ...basicSelectableOptions,
+                  ...(!onlyFavorites && searchTimelineValue === '' ? basicSelectableOptions : []),
                   ...timelines.map(
                     (t, index) =>
                       ({
@@ -251,4 +251,3 @@ export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
     );
   }
 );
-// onChange={this.onChange}
