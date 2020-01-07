@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';

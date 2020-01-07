@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { MapToolTipComponent } from './map_tool_tip';
 import { MapFeature } from '../types';
 

@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../../containers/source';

@@ -95,7 +95,7 @@ export const RENOVATE_CONFIG = {
         allowedVersions: group.allowedVersions || undefined,
         reviewers: group.reviewers || undefined,
         masterIssueApproval: group.autoOpenPr ? false : undefined,
-      })),
+      })).sort((a, b) => a.groupName.localeCompare(b.groupName)),
 
       // internal/local packages
       {
