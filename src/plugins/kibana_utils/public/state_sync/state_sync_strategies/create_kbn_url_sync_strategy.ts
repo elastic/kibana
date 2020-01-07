@@ -54,6 +54,7 @@ export const createKbnUrlSyncStrategy = (
       state: State,
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
+      // syncState() utils doesn't wait for this promise
       return url.updateAsync(
         currentUrl => setStateToKbnUrl(syncKey, state, { useHash }, currentUrl),
         replace

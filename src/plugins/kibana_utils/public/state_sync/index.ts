@@ -20,7 +20,6 @@
 export {
   createKbnUrlSyncStrategy,
   createSessionStorageSyncStrategy,
-  ISyncStrategy,
   IKbnUrlSyncStrategy,
   ISessionStorageSyncStrategy,
 } from './state_sync_strategies';

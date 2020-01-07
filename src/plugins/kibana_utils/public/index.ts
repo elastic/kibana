@@ -47,7 +47,6 @@ export {
   syncStates,
   createKbnUrlSyncStrategy,
   createSessionStorageSyncStrategy,
-  ISyncStrategy,
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlSyncStrategy,

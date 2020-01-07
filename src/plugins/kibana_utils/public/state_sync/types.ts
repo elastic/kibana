@@ -21,10 +21,10 @@ import { BaseStateContainer } from '../state_containers/types';
 import { ISyncStrategy } from './state_sync_strategies';
 
 export interface INullableBaseStateContainer<State> extends BaseStateContainer<State> {
-  // State sync state container have to handle setting "null"
-  // set() implementation could handle null and fallback to some state defaults
-  // this is required to handle edge case, when state in storage became empty and syncing is in progress.
-  // state container will be notified about about storage becoming empty
+  // State container for stateSync() have to accept "null"
+  // for example, set() implementation could handle null and fallback to some default state
+  // this is required to handle edge case, when state in storage becomes empty and syncing is in progress.
+  // state container will be notified about about storage becoming empty with null passed in
   set: (state: State | null) => void;
 }
 
