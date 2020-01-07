@@ -54,7 +54,15 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, excludes } = state.form;
+  const {
+    jobIdEmpty,
+    jobIdValid,
+    jobIdExists,
+    jobType,
+    createIndexPattern,
+    excludes,
+    maxDistinctValuesError,
+  } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -197,6 +205,7 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
     excludesValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
@@ -226,6 +235,7 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
+    maxDistinctValuesError,
     modelMemoryLimit,
   } = state.form;
 
@@ -241,6 +251,7 @@ const validateForm = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
     !jobTypeEmpty &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&

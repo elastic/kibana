@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { ml } from '../../../../../services/ml_api_service';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
+import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -43,25 +42,7 @@ import {
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
 import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
-
-const BASIC_NUMERICAL_TYPES = new Set([
-  ES_FIELD_TYPES.LONG,
-  ES_FIELD_TYPES.INTEGER,
-  ES_FIELD_TYPES.SHORT,
-  ES_FIELD_TYPES.BYTE,
-]);
-
-const EXTENDED_NUMERICAL_TYPES = new Set([
-  ES_FIELD_TYPES.DOUBLE,
-  ES_FIELD_TYPES.FLOAT,
-  ES_FIELD_TYPES.HALF_FLOAT,
-  ES_FIELD_TYPES.SCALED_FLOAT,
-]);
-
-const CATEGORICAL_TYPES = new Set(['ip', 'keyword', 'text']);
-
-// List of system fields we want to ignore for the numeric field check.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
@@ -129,23 +110,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  // Regression supports numeric fields. Classification supports categorical, numeric, and boolean.
-  const shouldAddAsDepVarOption = (field: Field) => {
-    if (field.id === EVENT_RATE_FIELD_ID) return false;
-
-    const isBasicNumerical = BASIC_NUMERICAL_TYPES.has(field.type);
-
-    const isSupportedByClassification =
-      isBasicNumerical ||
-      CATEGORICAL_TYPES.has(field.type) ||
-      field.type === ES_FIELD_TYPES.BOOLEAN;
-
-    if (jobType === JOB_TYPES.REGRESSION) {
-      return isBasicNumerical || EXTENDED_NUMERICAL_TYPES.has(field.type);
-    }
-    if (jobType === JOB_TYPES.CLASSIFICATION) return isSupportedByClassification;
-  };
-
   const onCreateOption = (searchValue: string, flattenedOptions: EuiComboBoxOptionProps[]) => {
     const normalizedSearchValue = searchValue.trim().toLowerCase();
 
@@ -159,7 +123,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
     // Create the option if it doesn't exist.
     if (
-      flattenedOptions.some(
+      !flattenedOptions.some(
         (option: EuiComboBoxOptionProps) =>
           option.label.trim().toLowerCase() === normalizedSearchValue
       )
@@ -255,7 +219,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         const depVarOptions: EuiComboBoxOptionProps[] = [];
 
         fields.forEach((field: Field) => {
-          if (shouldAddAsDepVarOption(field)) {
+          if (shouldAddAsDepVarOption(field, jobType)) {
             depVarOptions.push({ label: field.id });
           }
         });
