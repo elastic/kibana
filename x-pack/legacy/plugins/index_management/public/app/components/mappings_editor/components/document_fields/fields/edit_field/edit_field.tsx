@@ -115,9 +115,6 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                                   })}
                             </h2>
                           </EuiTitle>
-
-                          {/* Field path */}
-                          <EuiCode>{field.path.join(' > ')}</EuiCode>
                         </div>
                       </EuiFlexItem>
 
@@ -142,6 +139,15 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                             }
                           )}
                         </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    {/* Field path */}
+                    <EuiFlexGroup>
+                      <EuiFlexItem style={{ display: 'flex', flexDirection: 'row' }}>
+                        {field.path.map((path, i) => (
+                          <EuiCode key={i}>{path}</EuiCode>
+                        ))}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlyoutHeader>
