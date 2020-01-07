@@ -56,7 +56,7 @@ interface Props {
   indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof QueryStringInput>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
