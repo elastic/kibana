@@ -52,7 +52,7 @@ interface ManagementSidebarNavState {
 
 const managementSectionOrAppToNav = (appOrSection: ManagementApp | ManagementSection) => ({
   id: appOrSection.id,
-  name: `${appOrSection.title} ${appOrSection.order}`,
+  name: appOrSection.title,
   'data-test-subj': appOrSection.id,
   order: appOrSection.order,
 });
@@ -83,7 +83,7 @@ const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
 });
 
 const legacySectionToNavSection = (section: LegacySection) => ({
-  name: `${section.display} ${section.order}`,
+  name: section.display,
   id: section.id,
   icon: section.icon ? <EuiIcon type={section.icon} /> : null,
   items: [],
@@ -94,7 +94,7 @@ const legacySectionToNavSection = (section: LegacySection) => ({
 
 const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
   isSelected: selectedId === app.id,
-  name: `${app.display} ${app.order}`,
+  name: app.display,
   id: app.id,
   href: app.url,
   'data-test-subj': app.id,
