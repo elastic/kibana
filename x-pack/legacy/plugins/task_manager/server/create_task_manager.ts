@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, IClusterClient } from 'kibana/server';
+import {
+  IClusterClient,
+  SavedObjectsSerializer,
+  SavedObjectsSchema,
+  CoreSetup,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { Logger } from './types';
 import { TaskManager } from './task_manager';
 
@@ -25,20 +31,25 @@ export interface LifecycleContract {
 
 export interface LegacyDeps {
   config: any;
-  serializer: any;
+  savedObjectSchemas: any;
   elasticsearch: Pick<IClusterClient, 'callAsInternalUser'>;
-  savedObjects: any;
+  savedObjectsRepository: SavedObjectsClientContract;
   logger: Logger;
 }
 
 export function createTaskManager(
   core: CoreSetup,
-  { logger, config, serializer, elasticsearch: { callAsInternalUser }, savedObjects }: LegacyDeps
+  {
+    logger,
+    config,
+    savedObjectSchemas,
+    elasticsearch: { callAsInternalUser },
+    savedObjectsRepository,
+  }: LegacyDeps
 ) {
-  const savedObjectsRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser, [
-    'task',
-  ]);
-
+  // as we use this Schema solely to interact with Tasks, we
+  // can initialise it with solely the Tasks schema
+  const serializer = new SavedObjectsSerializer(new SavedObjectsSchema(savedObjectSchemas));
   return new TaskManager({
     taskManagerId: core.uuid.getInstanceUuid(),
     config,

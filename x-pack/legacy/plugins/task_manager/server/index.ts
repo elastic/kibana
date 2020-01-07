@@ -12,11 +12,7 @@ import {
   createTaskManager,
   LegacyDeps,
 } from './create_task_manager';
-import {
-  SavedObjectsSerializer,
-  SavedObjectsSchema,
-  CoreSetup,
-} from '../../../../../src/core/server';
+import { CoreSetup } from '../../../../../src/core/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { TaskManagerPluginSetupContract } from '../../../../plugins/kibana_task_manager/server';
@@ -31,6 +27,17 @@ export {
   TaskStatus,
   RunContext,
 } from './task';
+
+const savedObjectSchemas = {
+  task: {
+    hidden: true,
+    isNamespaceAgnostic: true,
+    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
+    indexPattern(config: any) {
+      return config.get('xpack.task_manager.index');
+    },
+  },
+};
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -68,11 +75,7 @@ export function taskManager(kibana: any) {
       }).default();
     },
     async init(server: Legacy.Server) {
-      const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
-      const serializer = new SavedObjectsSerializer(schema);
-
       const {
-        savedObjects,
         newPlatform: {
           setup: {
             plugins: { kibanaTaskManager },
@@ -81,8 +84,8 @@ export function taskManager(kibana: any) {
       } = server;
 
       await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI(
-        (core: CoreSetup, deps: Omit<LegacyDeps, 'savedObjects' | 'serializer'>) => {
-          const tm = createTaskManager(core, { ...deps, serializer, savedObjects });
+        (core: CoreSetup, deps: Omit<LegacyDeps, 'savedObjectsSchema'>) => {
+          const tm = createTaskManager(core, { ...deps, savedObjectSchemas });
           this.kbnServer.afterPluginsInit(() => {
             tm.start();
           });
@@ -93,16 +96,7 @@ export function taskManager(kibana: any) {
     uiExports: {
       mappings,
       migrations,
-      savedObjectSchemas: {
-        task: {
-          hidden: true,
-          isNamespaceAgnostic: true,
-          convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-          indexPattern(config: any) {
-            return config.get('xpack.task_manager.index');
-          },
-        },
-      },
+      savedObjectSchemas,
     },
   });
 }

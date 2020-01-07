@@ -45,14 +45,14 @@ export class TaskManagerPlugin
   public setup(core: CoreSetup, plugins: any): TaskManagerPluginSetupContract {
     const logger = this.initContext.logger.get('kibanaTaskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
-
+    const savedObjectsRepository = core.savedObjects.createInternalRepository(['task']);
     return {
       config$,
       registerLegacyAPI: once((createTaskManager: LegacySetup) => {
         combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
           async ([config, elasticsearch]) => {
             this.legacyTaskManager$.next(
-              createTaskManager(core, { logger, config, elasticsearch })
+              createTaskManager(core, { logger, config, elasticsearch, savedObjectsRepository })
             );
             this.legacyTaskManager$.complete();
           }
