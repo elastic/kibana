@@ -6,7 +6,7 @@
 
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
-import numeral from '@elastic/numeral';
+
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 
