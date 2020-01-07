@@ -17,13 +17,17 @@
  * under the License.
  */
 
-export * from './assert_never';
-export * from './context';
-export * from './deep_freeze';
-export * from './get';
-export * from './map_to_object';
-export * from './merge';
-export * from './pick';
-export * from './promise';
-export * from './url';
-export * from './unset';
+export function withTimeout<T>({
+  promise,
+  timeout,
+  errorMessage,
+}: {
+  promise: Promise<T>;
+  timeout: number;
+  errorMessage: string;
+}) {
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => setTimeout(() => reject(new Error(errorMessage)), timeout)),
+  ]) as Promise<T>;
+}
