@@ -271,7 +271,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
         return (
           <EuiFieldNumber
             data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
-            value={rowRuleValue as string}
+            value={rowRuleValue as number}
             onChange={this.onNumericValueChange(valueIndex)}
           />
         );
