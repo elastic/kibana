@@ -145,6 +145,7 @@ def buildArchives(destination) {
   withEnv([
     // Select the correct JDK for this branch
     "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
+    "JAVA_HOME=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}",
 
     // These Jenkins env vars trigger some automation in the elasticsearch repo that we don't want
     "BUILD_NUMBER=",
