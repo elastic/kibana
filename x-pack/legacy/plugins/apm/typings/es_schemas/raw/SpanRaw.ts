@@ -42,6 +42,12 @@ export interface SpanRaw extends APMBaseDoc {
       [key: string]: unknown;
     };
     [key: string]: unknown;
+    message?: {
+      queue?: { name: string };
+      age?: { ms: number };
+      body?: string;
+      headers?: Record<string, unknown>;
+    };
   };
   transaction?: {
     id: string;
