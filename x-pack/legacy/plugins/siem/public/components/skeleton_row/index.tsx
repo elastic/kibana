@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 interface RowProps {
@@ -12,7 +12,7 @@ interface RowProps {
   rowPadding?: string;
 }
 
-const Row = styled.div.attrs<RowProps>(({ rowHeight, rowPadding, theme }) => ({
+const RowComponent = styled.div.attrs<RowProps>(({ rowHeight, rowPadding, theme }) => ({
   className: 'siemSkeletonRow',
   rowHeight: rowHeight || theme.eui.euiSizeXL,
   rowPadding: rowPadding || `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.xs}`,
@@ -22,6 +22,10 @@ const Row = styled.div.attrs<RowProps>(({ rowHeight, rowPadding, theme }) => ({
   height: ${({ rowHeight }) => rowHeight};
   padding: ${({ rowPadding }) => rowPadding};
 `;
+RowComponent.displayName = 'RowComponent';
+
+const Row = React.memo(RowComponent);
+
 Row.displayName = 'Row';
 
 interface CellProps {
@@ -29,7 +33,7 @@ interface CellProps {
   cellMargin?: string;
 }
 
-const Cell = styled.div.attrs<CellProps>(({ cellColor, cellMargin, theme }) => ({
+const CellComponent = styled.div.attrs<CellProps>(({ cellColor, cellMargin, theme }) => ({
   className: 'siemSkeletonRow__cell',
   cellColor: cellColor || theme.eui.euiColorLightestShade,
   cellMargin: cellMargin || theme.eui.gutterTypes.gutterSmall,
@@ -42,6 +46,10 @@ const Cell = styled.div.attrs<CellProps>(({ cellColor, cellMargin, theme }) => (
     margin-left: ${({ cellMargin }) => cellMargin};
   }
 `;
+CellComponent.displayName = 'CellComponent';
+
+const Cell = React.memo(CellComponent);
+
 Cell.displayName = 'Cell';
 
 export interface SkeletonRowProps extends CellProps, RowProps {
@@ -51,9 +59,14 @@ export interface SkeletonRowProps extends CellProps, RowProps {
 
 export const SkeletonRow = React.memo<SkeletonRowProps>(
   ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding, style }) => {
-    const cells = [...Array(cellCount)].map((_, i) => (
-      <Cell cellColor={cellColor} cellMargin={cellMargin} key={i} />
-    ));
+    const cells = useMemo(
+      () =>
+        [...Array(cellCount)].map(
+          (_, i) => <Cell cellColor={cellColor} cellMargin={cellMargin} key={i} />,
+          [cellCount]
+        ),
+      [cellCount, cellColor, cellMargin]
+    );
 
     return (
       <Row rowHeight={rowHeight} rowPadding={rowPadding} style={style}>

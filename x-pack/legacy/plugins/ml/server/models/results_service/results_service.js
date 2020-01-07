@@ -10,6 +10,7 @@ import moment from 'moment';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -408,5 +409,6 @@ export function resultsServiceProvider(callWithRequest) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callWithRequest),
   };
 }
