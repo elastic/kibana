@@ -6,13 +6,16 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
-import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
+import {
+  AnalyzeInMlButton,
+  FirstUseCallout,
+} from '../../../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from './datasets_selector';
 import { TopCategoriesTable } from './top_categories_table';
 
@@ -20,6 +23,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   availableDatasets: string[];
   isLoadingDatasets?: boolean;
   isLoadingTopCategories?: boolean;
+  isFirstUse?: boolean;
   jobId: string;
   onChangeDatasetSelection: (datasets: string[]) => void;
   onRequestRecreateMlJob: () => void;
@@ -28,6 +32,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   topCategories: LogEntryCategory[];
 }> = ({
   availableDatasets,
+  isFirstUse = false,
   isLoadingDatasets = false,
   isLoadingTopCategories = false,
   jobId,
@@ -37,6 +42,8 @@ export const TopCategoriesSection: React.FunctionComponent<{
   timeRange,
   topCategories,
 }) => {
+  const hasResults = useMemo(() => topCategories.length > 0, [topCategories.length]);
+
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -53,6 +60,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
       <DatasetsSelector
         availableDatasets={availableDatasets}
         isLoading={isLoadingDatasets}

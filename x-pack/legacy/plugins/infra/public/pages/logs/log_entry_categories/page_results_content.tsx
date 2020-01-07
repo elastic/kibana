@@ -177,6 +177,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
             <EuiPanel paddingSize="l">
               <TopCategoriesSection
                 availableDatasets={logEntryCategoryDatasets}
+                isFirstUse={isFirstUse}
                 isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
                 isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}

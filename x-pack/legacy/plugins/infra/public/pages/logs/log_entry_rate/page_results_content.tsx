@@ -26,7 +26,6 @@ import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapp
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
-import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
@@ -35,6 +34,7 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
+import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
