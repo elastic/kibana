@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { applyMatrix3 } from '../../lib/vector2';
+import { applyMatrix3, subtract } from '../../lib/vector2';
 import { userIsPanning, translation, projectionMatrix, inverseProjectionMatrix } from './selectors';
 import { clamp } from '../../lib/math';
 
@@ -31,25 +31,34 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       scaling: [clamp(deltaX, 0.1, 3), clamp(deltaY, 0.1, 3)],
     };
   } else if (action.type === 'userZoomed') {
+    /**
+     * When the user zooms we change the scale. Limit the change in scale so that we aren't liable for supporting crazy values (e.g. infinity or negative scale.)
+     */
     const newScaleX = clamp(state.scaling[0] + action.payload, 0.1, 3);
     const newScaleY = clamp(state.scaling[1] + action.payload, 0.1, 3);
+
     const stateWithNewScaling: CameraState = {
       ...state,
       scaling: [newScaleX, newScaleY],
     };
-    // TODO, test that asserts that this behavior doesn't happen when user is panning
-    if (state.latestFocusedWorldCoordinates !== null && userIsPanning(state) === false) {
+
+    /**
+     * Zooming fundamentally just changes the scale, but that would always zoom in (or out) around the center of the map. The user might be interested in
+     * something else, like a node. If the user has moved their pointer on to the map, we can keep the pointer over the same point in the map by adjusting the
+     * panning when we zoom.
+     *
+     * You can see this in action by moving your pointer over a node that isn't directly in the center of the map and then changing the zoom level. Do it by
+     * using CTRL and the mousewheel, or by pinching the trackpad on a Mac. The node will stay under your mouse cursor and other things in the map will get
+     * nearer or further from the mouse cursor. This lets you keep your context when changing zoom levels.
+     */
+    if (state.latestFocusedWorldCoordinates !== null) {
       const rasterOfLastFocusedWorldCoordinates = applyMatrix3(
         state.latestFocusedWorldCoordinates,
         projectionMatrix(state)
       );
       const matrix = inverseProjectionMatrix(stateWithNewScaling);
       const worldCoordinateThereNow = applyMatrix3(rasterOfLastFocusedWorldCoordinates, matrix);
-      // TODO, use vector subtraction method
-      const delta = [
-        worldCoordinateThereNow[0] - state.latestFocusedWorldCoordinates[0],
-        worldCoordinateThereNow[1] - state.latestFocusedWorldCoordinates[1],
-      ];
+      const delta = subtract(worldCoordinateThereNow, state.latestFocusedWorldCoordinates);
 
       return {
         ...stateWithNewScaling,
@@ -84,11 +93,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     } else {
       return state;
     }
-  } else if (action.type === 'userCanceledPanning') {
-    return {
-      ...state,
-      panning: undefined,
-    };
   } else if (action.type === 'userSetRasterSize') {
     return {
       ...state,

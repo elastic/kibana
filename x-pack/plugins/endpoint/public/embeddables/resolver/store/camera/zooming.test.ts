@@ -75,7 +75,6 @@ describe('zooming', () => {
     });
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
-        // TODO update action
         const action: CameraAction = {
           type: 'userMovedPointer',
           payload: [200, 50],
@@ -84,9 +83,11 @@ describe('zooming', () => {
       });
       it('should have focused the world position 50, 50', () => {
         const coords = store.getState().latestFocusedWorldCoordinates;
-        expect(coords).not.toBeNull();
-        // TODO, revisit this
-        expectVectorsToBeClose(coords!, [50, 50]);
+        if (coords !== null) {
+          expectVectorsToBeClose(coords, [50, 50]);
+        } else {
+          throw new Error('coords should not have been null');
+        }
       });
       describe('when the user zooms in by 0.5 zoom units', () => {
         beforeEach(() => {

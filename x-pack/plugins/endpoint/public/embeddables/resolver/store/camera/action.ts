@@ -55,10 +55,6 @@ interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 }
 
-interface UserCanceledPanning {
-  readonly type: 'userCanceledPanning';
-}
-
 interface UserMovedPointer {
   readonly type: 'userMovedPointer';
   /**
@@ -74,6 +70,5 @@ export type CameraAction =
   | UserSetPositionOfCamera
   | UserStartedPanning
   | UserStoppedPanning
-  | UserCanceledPanning
   | UserZoomed
   | UserMovedPointer;
