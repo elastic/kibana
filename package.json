@@ -234,7 +234,6 @@
     "react-resize-detector": "^4.2.0",
     "react-router-dom": "^5.1.2",
     "react-sizeme": "^2.3.6",
-    "react-tiny-virtual-list": "^2.2.0",
     "react-use": "^13.10.2",
     "reactcss": "1.2.3",
     "redux": "4.0.0",
