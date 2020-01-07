@@ -37,6 +37,7 @@ export interface DashboardEmptyScreenProps {
   onVisualizeClick?: () => void;
   uiSettings: IUiSettingsClient;
   http: HttpStart;
+  isReadonlyMode?: boolean;
 }
 
 export function DashboardEmptyScreen({
@@ -45,6 +46,7 @@ export function DashboardEmptyScreen({
   onVisualizeClick,
   uiSettings,
   http,
+  isReadonlyMode,
 }: DashboardEmptyScreenProps) {
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
@@ -98,25 +100,42 @@ export function DashboardEmptyScreen({
     constants.addExistingVisualizationLinkText,
     constants.addExistingVisualizationLinkAriaLabel
   );
-  const viewMode = (
-    <EuiPage className="dshStartScreen" restrictWidth="500px">
-      <EuiPageBody>
-        <EuiPageContent
-          verticalPosition="center"
-          horizontalPosition="center"
-          paddingSize="none"
-          className="dshStartScreen__pageContent"
-        >
-          <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
-          <EuiText size="m">
-            <p style={{ fontWeight: 'bold' }}>{constants.fillDashboardTitle}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+  const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
+    return (
+      <EuiPage className="dshStartScreen" restrictWidth="500px">
+        <EuiPageBody>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            paddingSize="none"
+            className="dshStartScreen__pageContent"
+          >
+            <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
+            <EuiText size="m">
+              <p style={{ fontWeight: 'bold' }}>{mainText}</p>
+            </EuiText>
+            {additionalText ? (
+              <EuiText size="m" color="subdued">
+                {additionalText}
+              </EuiText>
+            ) : null}
+            {showAdditionalParagraph ? (
+              <React.Fragment>
+                <EuiSpacer size="m" />
+                <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
+              </React.Fragment>
+            ) : null}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  };
+  const readonlyMode = page(
+    constants.emptyDashboardTitle,
+    false,
+    constants.emptyDashboardAdditionalPrivilege
   );
+  const viewMode = page(constants.fillDashboardTitle, true);
   const editMode = (
     <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
       {enterViewModeParagraph}
@@ -124,5 +143,6 @@ export function DashboardEmptyScreen({
       {linkToVisualizeParagraph}
     </div>
   );
-  return <I18nProvider>{showLinkToVisualize ? editMode : viewMode}</I18nProvider>;
+  const actionableMode = showLinkToVisualize ? editMode : viewMode;
+  return <I18nProvider>{isReadonlyMode ? readonlyMode : actionableMode}</I18nProvider>;
 }

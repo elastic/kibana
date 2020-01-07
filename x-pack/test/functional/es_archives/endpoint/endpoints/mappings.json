@@ -1,0 +1,104 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "endpoint-agent",
+    "mappings": {
+      "properties": {
+        "created_at": {
+          "type": "date"
+        },
+        "endpoint": {
+          "properties": {
+            "active_directory_distinguished_name": {
+              "type": "text"
+            },
+            "active_directory_hostname": {
+              "type": "text"
+            },
+            "domain": {
+              "type": "text"
+            },
+            "is_base_image": {
+              "type": "boolean"
+            },
+            "isolation": {
+              "properties": {
+                "status": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "policy": {
+              "properties": {
+                "id": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "sensor": {
+              "properties": {
+                "persistence": {
+                  "type": "boolean"
+                },
+                "status": {
+                  "type": "object"
+                }
+              }
+            },
+            "upgrade": {
+              "type": "object"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "hostname": {
+              "type": "text"
+            },
+            "ip": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "mac_address": {
+              "type": "text"
+            },
+            "name": {
+              "type": "text"
+            },
+            "os": {
+              "properties": {
+                "full": {
+                  "type": "text"
+                },
+                "name": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "machine_id": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
