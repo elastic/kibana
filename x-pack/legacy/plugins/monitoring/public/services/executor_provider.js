@@ -72,7 +72,7 @@ export function executorProvider(Promise, $timeout) {
     ).finally(reset);
   }
 
-  function reFetch(_changes) {
+  function reFetch() {
     cancel();
     run();
   }
