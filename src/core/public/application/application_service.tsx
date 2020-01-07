@@ -18,30 +18,30 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Subject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
-import { CapabilitiesService, Capabilities } from './capabilities';
+import { Capabilities, CapabilitiesService } from './capabilities';
 import {
-  AppBase,
   App,
-  LegacyApp,
+  AppBase,
   AppMount,
   AppMountDeprecated,
   AppMounter,
+  AppNavLinkStatus,
   AppStatus,
-  AppUpdater,
   AppUpdatableFields,
-  LegacyAppMounter,
-  Mounter,
+  AppUpdater,
   InternalApplicationSetup,
   InternalApplicationStart,
+  LegacyApp,
+  LegacyAppMounter,
+  Mounter,
 } from './types';
 
 interface SetupDeps {
@@ -75,12 +75,6 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   `/${mounters.get(appId)?.appRoute ?? `/app/${appId}`}/${path}`
     .replace(/\/{2,}/g, '/') // Remove duplicate slashes
     .replace(/\/$/, ''); // Remove trailing slash
-
-/*
-function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
-  return (app as AppBox).mount === undefined;
-}
-*/
 
 const allApplicationsFilter = '__ALL__';
 
@@ -173,10 +167,12 @@ export class ApplicationService {
           return unmount;
         };
 
-        const { status, updater$, ...appProps } = app;
+        const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
           status: app.status !== undefined ? app.status : AppStatus.accessible,
+          navLinkStatus:
+            app.navLinkStatus !== undefined ? app.navLinkStatus : AppNavLinkStatus.default,
           legacy: false,
         });
         if (updater$) {
@@ -203,10 +199,12 @@ export class ApplicationService {
         const appBasePath = basePath.prepend(appRoute);
         const mount: LegacyAppMounter = () => redirectTo(appBasePath);
 
-        const { status, updater$, ...appProps } = app;
+        const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
           status: app.status !== undefined ? app.status : AppStatus.accessible,
+          navLinkStatus:
+            app.navLinkStatus !== undefined ? app.navLinkStatus : AppNavLinkStatus.default,
           legacy: true,
         });
         if (updater$) {
@@ -246,9 +244,6 @@ export class ApplicationService {
       .pipe(
         map(([apps, statusUpdaters]) => {
           return new Map([...apps].map(([id, app]) => [id, updateStatus(app, statusUpdaters)]));
-        }),
-        map(apps => {
-          return new Map([...apps].filter(([id, app]) => app.status !== AppStatus.inaccessible));
         })
       )
       .subscribe(apps => availableApps$.next(apps));
@@ -261,15 +256,11 @@ export class ApplicationService {
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        /*
-        if (this.apps.get(appId) === undefined) {
-          throw new Error(`Trying to navigate to an unknown application: ${appId}`);
-        }
         const app = availableApps$.value.get(appId);
-        if (app === undefined || app.status !== AppStatus.accessible) {
+        if (app && app.status !== AppStatus.accessible) {
+          // should probably redirect to the error page instead
           throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
         }
-         */
         this.navigate!(getAppUrl(availableMounters, appId, path), state);
         this.currentAppId$.next(appId);
       },
@@ -298,6 +289,7 @@ const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapp
         ...changes,
         ...fields,
         status: Math.max(changes.status || 0, fields.status || 0),
+        navLinkStatus: Math.max(changes.navLinkStatus || 0, fields.navLinkStatus || 0),
       };
     }
   });

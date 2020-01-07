@@ -51,6 +51,13 @@ export interface AppBase {
   status?: AppStatus;
 
   /**
+   * The initial status of the application's navLink.
+   * Defaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`
+   * See {@link AppNavLinkStatus}
+   */
+  navLinkStatus?: AppNavLinkStatus;
+
+  /**
    * An {@link AppUpdater} observable that can be used to update
    * the application {@link AppUpdatableFields} at runtime.
    */
@@ -109,20 +116,41 @@ export enum AppStatus {
    */
   accessible = 0,
   /**
-   * Application is not accessible, but visible in an inactive state in navigation.
-   */
-  inaccessibleWithDisabledNavLink = 1,
-  /**
    * Application is not accessible.
    */
   inaccessible = 2,
 }
 
 /**
+ * Status of the application's navLink.
+ *
+ * @public
+ */
+export enum AppNavLinkStatus {
+  /**
+   * The application navLink will be `visible` if the application's {@link AppStatus} is set to `accessible`
+   * and `hidden` if the application status is set to `inaccessible`.
+   */
+  default = 0,
+  /**
+   * The application navLink is visible and clickable in the navigation bar.
+   */
+  visible = 1,
+  /**
+   * The application navLink is visible but inactive and not clickable in the navigation bar.
+   */
+  disabled = 2,
+  /**
+   * The application navLink does not appear in the navigation bar.
+   */
+  hidden = 3,
+}
+
+/**
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
 
 /**
  * Updater for applications.

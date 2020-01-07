@@ -18,11 +18,13 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject, Observable, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { App, AppStatus, InternalApplicationStart, LegacyApp } from '../../application';
-import { HttpStart, IBasePath } from '../../http';
+
+import { InternalApplicationStart } from '../../application';
+import { HttpStart } from '../../http';
+import { ChromeNavLink, ChromeNavLinkUpdateableFields, NavLinkWrapper } from './nav_link';
+import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -192,32 +194,9 @@ export class NavLinksService {
   }
 }
 
-function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
-  return new NavLinkWrapper({
-    ...app,
-    hidden: false,
-    disabled: app.status === AppStatus.inaccessibleWithDisabledNavLink,
-    legacy: isLegacyApp(app),
-    baseUrl: isLegacyApp(app)
-      ? relativeToAbsolute(basePath.prepend(app.appUrl))
-      : relativeToAbsolute(basePath.prepend(app.appRoute || `/app/${app.id}`)),
-  });
-}
-
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   return sortBy(
     [...navLinks.values()].map(link => link.properties),
     'order'
   );
-}
-
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-function isLegacyApp(app: App | LegacyApp): app is LegacyApp {
-  return app.legacy === true;
 }

@@ -9,5 +9,5 @@ Defines the list of fields that can be updated via an [AppUpdater](./kibana-plug
 <b>Signature:</b>
 
 ```typescript
-export declare type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
+export declare type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
 ```

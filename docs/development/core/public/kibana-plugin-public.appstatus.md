@@ -18,5 +18,4 @@ export declare enum AppStatus
 |  --- | --- | --- |
 |  accessible | <code>0</code> | Application is accessible. |
 |  inaccessible | <code>2</code> | Application is not accessible. |
-|  inaccessibleWithDisabledNavLink | <code>1</code> | Application is not accessible, but visible in an inactive state in navigation. |
 

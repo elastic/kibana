@@ -22,6 +22,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Enumeration | Description |
 |  --- | --- |
+|  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
 |  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
 
 ## Interfaces

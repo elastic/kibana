@@ -28,7 +28,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { AppUpdater, AppStatus } from './types';
+import { AppNavLinkStatus, AppStatus, AppUpdater } from './types';
 
 function mount() {}
 
@@ -86,6 +86,7 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
           },
           "app2" => Object {
@@ -93,13 +94,14 @@ describe('#setup()', () => {
             "id": "app2",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
           },
         }
       `);
 
       updater$.next(app => ({
-        status: AppStatus.inaccessibleWithDisabledNavLink,
+        status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
       }));
 
@@ -110,7 +112,8 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 0,
+            "status": 2,
             "tooltip": "App inaccessible due to reason",
           },
           "app2" => Object {
@@ -118,6 +121,7 @@ describe('#setup()', () => {
             "id": "app2",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
           },
         }
@@ -201,7 +205,8 @@ describe('#setup()', () => {
         new BehaviorSubject<AppUpdater>(app => {
           if (app.id === 'app1') {
             return {
-              status: AppStatus.inaccessibleWithDisabledNavLink,
+              status: AppStatus.inaccessible,
+              navLinkStatus: AppNavLinkStatus.disabled,
               tooltip: 'App inaccessible due to reason',
             };
           }
@@ -218,7 +223,8 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 2,
+            "status": 2,
             "tooltip": "App inaccessible due to reason",
           },
           "app2" => Object {
@@ -226,6 +232,7 @@ describe('#setup()', () => {
             "id": "app2",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
             "tooltip": "App accessible",
           },
@@ -237,7 +244,8 @@ describe('#setup()', () => {
       const setup = service.setup(setupDeps);
       const pluginId = Symbol('plugin');
       const appStatusUpdater$ = new BehaviorSubject<AppUpdater>(app => ({
-        status: AppStatus.inaccessibleWithDisabledNavLink,
+        status: AppStatus.inaccessible,
+        navLinkStatus: AppNavLinkStatus.disabled,
       }));
       setup.register(pluginId, { id: 'app1', updater$: appStatusUpdater$, mount } as any);
       setup.register(pluginId, { id: 'app2', mount } as any);
@@ -251,6 +259,7 @@ describe('#setup()', () => {
           }
           return {
             status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
           };
         })
       );
@@ -264,8 +273,17 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 2,
+            "status": 2,
             "tooltip": "App inaccessible due to reason",
+          },
+          "app2" => Object {
+            "appRoute": "/app/app2",
+            "id": "app2",
+            "legacy": false,
+            "mount": [Function],
+            "navLinkStatus": 3,
+            "status": 2,
           },
         }
       `);
@@ -291,11 +309,20 @@ describe('#setup()', () => {
 
       expect(await start.availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
         Map {
+          "app1" => Object {
+            "appRoute": "/app/app1",
+            "id": "app1",
+            "legacy": false,
+            "mount": [Function],
+            "navLinkStatus": 0,
+            "status": 2,
+          },
           "app2" => Object {
             "appRoute": "/app/app2",
             "id": "app2",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
           },
         }
@@ -310,7 +337,8 @@ describe('#setup()', () => {
       setup.registerAppUpdater(
         new BehaviorSubject<AppUpdater>(app => {
           return {
-            status: AppStatus.inaccessibleWithDisabledNavLink,
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.disabled,
           };
         })
       );
@@ -318,6 +346,7 @@ describe('#setup()', () => {
         new BehaviorSubject<AppUpdater>(app => {
           return {
             status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.default,
           };
         })
       );
@@ -331,7 +360,8 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 2,
+            "status": 2,
           },
         }
       `);
@@ -345,7 +375,8 @@ describe('#setup()', () => {
 
       const statusUpdater = new BehaviorSubject<AppUpdater>(app => {
         return {
-          status: AppStatus.inaccessibleWithDisabledNavLink,
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.disabled,
         };
       });
       setup.registerAppUpdater(statusUpdater);
@@ -362,7 +393,8 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 2,
+            "status": 2,
           },
         }
       `);
@@ -380,6 +412,7 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": false,
             "mount": [Function],
+            "navLinkStatus": 0,
             "status": 0,
           },
         }
@@ -394,7 +427,8 @@ describe('#setup()', () => {
       setup.registerAppUpdater(
         new BehaviorSubject<AppUpdater>(app => {
           return {
-            status: AppStatus.inaccessibleWithDisabledNavLink,
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
             tooltip: 'App inaccessible due to reason',
           };
         })
@@ -408,7 +442,8 @@ describe('#setup()', () => {
             "id": "app1",
             "legacy": true,
             "mount": [Function],
-            "status": 1,
+            "navLinkStatus": 3,
+            "status": 2,
             "tooltip": "App inaccessible due to reason",
           },
         }
@@ -467,11 +502,13 @@ describe('#start()', () => {
           "id": "app1",
           "legacy": false,
           "mount": [Function],
+          "navLinkStatus": 0,
           "status": 0,
         },
         "app2" => Object {
           "id": "app2",
           "legacy": true,
+          "navLinkStatus": 0,
           "status": 0,
         },
       }
@@ -521,11 +558,13 @@ describe('#start()', () => {
           "id": "app1",
           "legacy": false,
           "mount": [Function],
+          "navLinkStatus": 0,
           "status": 0,
         },
         "legacyApp1" => Object {
           "id": "legacyApp1",
           "legacy": true,
+          "navLinkStatus": 0,
           "status": 0,
         },
       }

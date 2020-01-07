@@ -32,6 +32,7 @@ export interface AppBase {
     id: string;
     // @internal
     legacy?: boolean;
+    navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
     title: string;
@@ -92,17 +93,24 @@ export interface AppMountParameters {
 }
 
 // @public
+export enum AppNavLinkStatus {
+    default = 0,
+    disabled = 2,
+    hidden = 3,
+    visible = 1
+}
+
+// @public
 export enum AppStatus {
     accessible = 0,
-    inaccessible = 2,
-    inaccessibleWithDisabledNavLink = 1
+    inaccessible = 2
 }
 
 // @public
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
 
 // @public
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;

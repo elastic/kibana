@@ -20,6 +20,7 @@ export interface AppBase
 |  [euiIconType](./kibana-plugin-public.appbase.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [icon](./kibana-plugin-public.appbase.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> | The unique identifier of the application |
+|  [navLinkStatus](./kibana-plugin-public.appbase.navlinkstatus.md) | <code>AppNavLinkStatus</code> | The initial status of the application's navLink. Defaulting to <code>visible</code> if <code>status</code> is <code>accessible</code> and <code>hidden</code> if status is <code>inaccessible</code> See [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) |
 |  [order](./kibana-plugin-public.appbase.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
 |  [status](./kibana-plugin-public.appbase.status.md) | <code>AppStatus</code> | The initial status of the application. Defaulting to <code>accessible</code> |
 |  [title](./kibana-plugin-public.appbase.title.md) | <code>string</code> | The title of the application. |

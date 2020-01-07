@@ -28,6 +28,7 @@ export {
   AppMountContext,
   AppMountParameters,
   AppStatus,
+  AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
   ApplicationSetup,
