@@ -23,26 +23,30 @@ describe('Events', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
-        contextId="test"
-        fieldName="timestamp"
-        fieldType="date"
-        value={get('timestamp', mockTimelineData[0].ecs)}
-      />
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="timestamp"
+          fieldType="date"
+          value={get('timestamp', mockTimelineData[0].ecs)}
+        />
+      </TestProviders>
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {
     const wrapper = mount(
-      <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
-        contextId="test"
-        fieldName="timestamp"
-        fieldType="date"
-        value={get('timestamp', mockTimelineData[0].ecs)}
-      />
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="timestamp"
+          fieldType="date"
+          value={get('timestamp', mockTimelineData[0].ecs)}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(true);
@@ -230,13 +234,15 @@ describe('Events', () => {
 
   test('it renders a hyperlink to the hosts details page when fieldName is host.name, and a hostname is provided', () => {
     const wrapper = mount(
-      <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
-        contextId="test"
-        fieldName={HOST_NAME_FIELD_NAME}
-        fieldType="text"
-        value={'some-hostname'}
-      />
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName={HOST_NAME_FIELD_NAME}
+          fieldType="text"
+          value={'some-hostname'}
+        />
+      </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(true);
   });
