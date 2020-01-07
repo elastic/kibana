@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiBasicTableColumn, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import React from 'react';

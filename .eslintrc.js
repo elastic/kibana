@@ -762,6 +762,7 @@ module.exports = {
         // 'prefer-template': 'warn',
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
+        'react/display-name': 'error',
         'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
         // This style will be turned on after most bugs are fixed
