@@ -9,7 +9,7 @@ import { FrameworkUser } from './adapters/framework/adapter_types';
 import { StoredDatasource } from './adapters/datasource/adapter_types';
 import { DatasourceAdapter } from './adapters/datasource/default';
 import { BackendFrameworkLib } from './framework';
-import { Datasource } from './types';
+import { Datasource } from '../../common/types/domain_data';
 
 export class DatasourcesLib {
   constructor(

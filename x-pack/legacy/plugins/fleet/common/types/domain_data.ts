@@ -5,7 +5,7 @@
  */
 import * as t from 'io-ts';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../constants';
-export { Policy, Datasource, Status, Output } from '../../../ingest/server/libs/types';
+export { Policy, Datasource, Status, Output } from '../../../ingest/common/types/domain_data';
 
 const RuntimeAgentActionType = t.union([
   t.literal('POLICY_CHANGE'),

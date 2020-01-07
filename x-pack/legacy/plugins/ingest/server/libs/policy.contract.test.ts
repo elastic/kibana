@@ -9,7 +9,8 @@ import * as elasticsearch from 'elasticsearch';
 import { INDEX_NAMES } from '../../common/constants/index_names';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { compose } from './compose/memorized';
-import { ServerLibs, Policy } from './types';
+import { ServerLibs } from './types';
+import { Policy } from '../../common/types/domain_data';
 
 jest.mock('uuid/v4', () => {
   let uuid = 1;

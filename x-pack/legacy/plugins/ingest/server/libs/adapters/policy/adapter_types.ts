@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { Status, AssetType, InputType, Policy } from '../../types';
+import { Status, AssetType, InputType, Policy } from '../../../../common/types/domain_data';
 
 /**
  * The entire config for the Beats agent, including all assigned data source config outputs

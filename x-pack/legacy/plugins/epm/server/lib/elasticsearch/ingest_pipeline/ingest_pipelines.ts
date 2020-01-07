@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetType } from '../../../../../ingest/server/libs/types';
+import { AssetType } from '../../../../../ingest/common/types/domain_data';
 import { AssetReference, Dataset, ElasticsearchAssetType } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';

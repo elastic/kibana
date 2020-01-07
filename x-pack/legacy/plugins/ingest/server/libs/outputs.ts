@@ -5,7 +5,7 @@
  */
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { BackendFrameworkLib } from './framework';
-import { Output, OutputType } from './types';
+import { Output, OutputType } from '../../common/types/domain_data';
 
 export class OutputsLib {
   constructor(

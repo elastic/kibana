@@ -11,7 +11,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../src/core/public';
-import { AssetType as IngestAssetType } from '../../ingest/server/libs/types';
+import { AssetType as IngestAssetType } from '../../ingest/common/types/domain_data';
 
 export enum InstallationStatus {
   installed = 'installed',

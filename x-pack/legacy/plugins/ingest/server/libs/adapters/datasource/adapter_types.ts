@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { AssetType, InputType } from '../../types';
+import { AssetType, InputType } from '../../../../common/types/domain_data';
 
 export const RuntimeStoredDatasource = t.intersection([
   t.type({
