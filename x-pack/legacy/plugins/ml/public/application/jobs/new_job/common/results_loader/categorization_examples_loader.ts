@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
