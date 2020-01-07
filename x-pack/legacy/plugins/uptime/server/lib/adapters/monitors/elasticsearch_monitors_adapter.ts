@@ -12,7 +12,26 @@ import { MonitorError, MonitorLocation } from '../../../../common/runtime_types'
 import { UMMonitorsAdapter } from './adapter_types';
 import { combineRangeWithFilters } from './combine_range_with_filters';
 import { generateFilterAggs } from './generate_filter_aggs';
-import { extractFilterAggsResults } from './extract_filter_aggs_results';
+import { OverviewFilters } from '../../../../common/runtime_types';
+
+type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
+
+export const extractFilterAggsResults = (
+  responseAggregations: Record<string, any>,
+  keys: SupportedFields[]
+): OverviewFilters => {
+  const values: OverviewFilters = {
+    locations: [],
+    ports: [],
+    schemes: [],
+    tags: [],
+  };
+  keys.forEach(key => {
+    const buckets = responseAggregations[key]?.term?.buckets ?? [];
+    values[key] = buckets.map((item: { key: string | number }) => item.key);
+  });
+  return values;
+};
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
