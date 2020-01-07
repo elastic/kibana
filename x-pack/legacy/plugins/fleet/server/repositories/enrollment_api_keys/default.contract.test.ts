@@ -105,7 +105,8 @@ describe('Enrollment api key Repository', () => {
       expect(savedEnrollmentApiKey).toBeDefined();
       expect(enrollmentApiKey.id).toBeDefined();
 
-      expect(savedEnrollmentApiKey.attributes.apiKey !== 'notencryptedkey').toBe(true);
+      // TODO fix when we encrypt keys again
+      // expect(savedEnrollmentApiKey.attributes.apiKey !== 'notencryptedkey').toBe(true);
 
       expect(savedEnrollmentApiKey.attributes).toMatchObject({
         active: true,
@@ -141,7 +142,9 @@ describe('Enrollment api key Repository', () => {
         SAVED_OBJECT_TYPE,
         enrollmentApiKeyId
       )) as SavedObject<EnrollmentApiKey>;
-      expect(soEnrollmentKey.attributes.api_key !== 'notencryptedapikey').toBe(true);
+
+      // TODO fix when we encrypt keys again
+      // expect(soEnrollmentKey.attributes.api_key !== 'notencryptedapikey').toBe(true);
       expect(soEnrollmentKey.attributes).toMatchObject({
         active: false,
       });
