@@ -14,6 +14,7 @@ import { RulesRequest } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
@@ -65,8 +66,10 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -120,7 +123,17 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           references,
           version: 1,
         });
-        return transformOrError(createdRule);
+        const date = new Date().toISOString();
+        const ruleStatus = await savedObjectsClient.create(ruleStatusSavedObjectType, {
+          alertId: createdRule.id, // do a search for this id.
+          statusDate: date,
+          status: 'executing',
+          lastFailureAt: 'test-failure',
+          lastSuccessAt: 'test-success',
+          lastFailureMessage: 'test-failure',
+          lastSuccessMessage: 'test-failure',
+        });
+        return transformOrError(createdRule, ruleStatus);
       } catch (err) {
         return transformError(err);
       }

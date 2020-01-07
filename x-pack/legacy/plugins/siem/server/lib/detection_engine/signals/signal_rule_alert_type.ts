@@ -19,6 +19,7 @@ import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
+import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 
 export const signalRulesAlertType = ({
   logger,
@@ -75,6 +76,36 @@ export const signalRulesAlertType = ({
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get('alert', alertId);
+      const ruleStatusSavedObjects = await services.savedObjectsClient.find({
+        type: ruleStatusSavedObjectType,
+        perPage: 10, // should limit to 5 but since we only allow 5... idk.
+        search: `"${alertId}"`,
+        searchFields: ['alertId'],
+      });
+      ruleStatusSavedObjects.saved_objects.sort((a, b) => {
+        const dateA = new Date(a.attributes.statusDate);
+        const dateB = new Date(b.attributes.statusDate);
+        if (dateA < dateB) {
+          return -1;
+        } else if (dateA === dateB) {
+          return 0;
+        }
+        return 1;
+      });
+      // get status objects, update 0th element to executing
+      ruleStatusSavedObjects.saved_objects[0].attributes.status = 'executing';
+      ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = new Date().toISOString();
+      await services.savedObjectsClient.update(
+        ruleStatusSavedObjectType,
+        ruleStatusSavedObjects.saved_objects[0].id,
+        {
+          ...ruleStatusSavedObjects.saved_objects[0].attributes,
+        }
+      );
+      // then in the end of the executor delete all statuses
+      // based on relevant alertIds
+      // then create a new status saved object with bulk create
+
       const name: string = savedObject.attributes.name;
       const tags: string[] = savedObject.attributes.tags;
 
@@ -158,10 +189,58 @@ export const signalRulesAlertType = ({
           logger.debug(
             `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
+          const sDate = new Date().toISOString();
+          ruleStatusSavedObjects.saved_objects[0].attributes.status = 'succeeded';
+          ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = sDate;
+          ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt = sDate;
+          ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage = 'succeeded';
+          await services.savedObjectsClient.update(
+            ruleStatusSavedObjectType,
+            ruleStatusSavedObjects.saved_objects[0].id,
+            {
+              ...ruleStatusSavedObjects.saved_objects[0].attributes,
+            }
+          );
         } else {
           logger.error(
             `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
+
+          if (ruleStatusSavedObjects.saved_objects.length < 5) {
+            // create new status with same alertId
+            const sDate = new Date().toISOString();
+            await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+              alertId, // do a search for this id.
+              statusDate: sDate,
+              status: 'failed',
+              lastFailureAt: sDate,
+              lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+              lastFailureMessage: 'There was an error!!',
+              lastSuccessMessage:
+                ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+            });
+          } else {
+            // delete all statuses with same alertId, then bulk create
+            ruleStatusSavedObjects.saved_objects.forEach(async obj =>
+              services.savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+            );
+            const sDate = new Date().toISOString();
+            const newStatus = ruleStatusSavedObjects.saved_objects[0];
+            newStatus.attributes = {
+              alertId,
+              statusDate: sDate,
+              status: 'failed',
+              lastFailureAt: sDate,
+              lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+              lastFailureMessage: 'There was an error!!',
+              lastSuccessMessage:
+                ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+            };
+            await services.savedObjectsClient.bulkCreate([
+              newStatus,
+              ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+            ]);
+          }
         }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
@@ -169,6 +248,41 @@ export const signalRulesAlertType = ({
         logger.error(
           `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${err.message}`
         );
+        if (ruleStatusSavedObjects.saved_objects.length < 5) {
+          // create new status with same alertId
+          const sDate = new Date().toISOString();
+          await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+            alertId,
+            statusDate: sDate,
+            status: 'failed',
+            lastFailureAt: sDate,
+            lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+            lastFailureMessage: 'There was an error!!',
+            lastSuccessMessage:
+              ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+          });
+        } else {
+          // delete all statuses with same alertId, then bulk create
+          ruleStatusSavedObjects.saved_objects.forEach(async obj =>
+            services.savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+          );
+          const sDate = new Date().toISOString();
+          const newStatus = ruleStatusSavedObjects.saved_objects[0];
+          newStatus.attributes = {
+            alertId,
+            statusDate: sDate,
+            status: 'failed',
+            lastFailureAt: sDate,
+            lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+            lastFailureMessage: err.message,
+            lastSuccessMessage:
+              ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+          };
+          await services.savedObjectsClient.bulkCreate([
+            newStatus,
+            ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+          ]);
+        }
       }
     },
   };

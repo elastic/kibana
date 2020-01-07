@@ -60,5 +60,11 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: ruleParams.createdAt,
     updated_at: ruleParams.updatedAt,
+    status: 'succeeded',
+    status_date: '',
+    last_success_at: '',
+    last_failure_at: '',
+    last_success_message: '',
+    last_failure_message: '',
   });
 };

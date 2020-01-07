@@ -21,6 +21,7 @@ import {
   createBulkErrorObject,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -40,8 +41,10 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -131,7 +134,16 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               references,
               version,
             });
-            return transformOrBulkError(ruleIdOrUuid, createdRule);
+            const date = new Date().toISOString();
+            const ruleStatus = await savedObjectsClient.create(ruleStatusSavedObjectType, {
+              alertId: createdRule.id ?? ruleId, // defaults to alert id if no ruleId is provided.
+              statusDate: date,
+              lastFailureAt: 'test-failure',
+              lastSuccessAt: 'test-success',
+              lastFailureMessage: 'test-failure',
+              lastSuccessMessage: 'test-failure',
+            });
+            return transformOrBulkError(ruleIdOrUuid, createdRule, ruleStatus);
           } catch (err) {
             return transformBulkError(ruleIdOrUuid, err);
           }

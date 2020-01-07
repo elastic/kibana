@@ -14,6 +14,7 @@ import { readRules } from '../../rules/read_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { QueryRequest } from '../../rules/types';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
@@ -31,8 +32,10 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
     const { id, rule_id: ruleId } = request.query;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
-
-    if (!alertsClient || !actionsClient) {
+    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+      ? request.getSavedObjectsClient()
+      : null;
+    if (!alertsClient || !actionsClient || !savedObjectsClient) {
       return headers.response().code(404);
     }
     try {
@@ -41,8 +44,24 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
         id,
         ruleId,
       });
+      const ruleStatuses = await savedObjectsClient.find({
+        type: ruleStatusSavedObjectType,
+        perPage: 10,
+        search: `"${id}"`,
+        searchFields: ['alertId'],
+      });
+      ruleStatuses.saved_objects.sort((a, b) => {
+        const dateA = new Date(a.attributes.statusDate);
+        const dateB = new Date(b.attributes.statusDate);
+        if (dateA < dateB) {
+          return 1;
+        } else if (dateA === dateB) {
+          return 0;
+        }
+        return -1;
+      });
       if (rule != null) {
-        return transformOrError(rule);
+        return transformOrError(rule, ruleStatuses.saved_objects[0].attributes); // update this to run with an array of rule statuses
       } else {
         return getIdError({ id, ruleId });
       }

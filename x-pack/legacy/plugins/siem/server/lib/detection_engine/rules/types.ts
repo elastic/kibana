@@ -40,6 +40,18 @@ export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
+export interface RuleStatus {
+  alertId: string; // created alert id.
+  statusDate: string;
+  lastFailureAt: string;
+  lastFailureMessage: string;
+  lastSuccessAt: string;
+  lastSuccessMessage: string;
+  status: RuleStatusString;
+}
+
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
+
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
 }
@@ -124,4 +136,12 @@ export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
+};
+
+export const isRuleStatusType = (obj: unknown): obj is RuleStatus => {
+  return get('lastSuccessMessage', obj) !== null;
+};
+
+export const isRuleStatusTypes = (obj: unknown[]): obj is RuleStatus[] => {
+  return obj.every(ruleStatus => isRuleStatusType(ruleStatus));
 };

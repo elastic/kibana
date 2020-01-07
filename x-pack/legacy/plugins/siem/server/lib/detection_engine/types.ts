@@ -5,6 +5,7 @@
  */
 
 import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { RuleStatus } from './rules/types';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
@@ -65,18 +66,31 @@ export type RuleAlertParamsRest = Omit<
   | 'outputIndex'
   | 'updatedAt'
   | 'createdAt'
-> & {
-  rule_id: RuleAlertParams['ruleId'];
-  false_positives: RuleAlertParams['falsePositives'];
-  saved_id: RuleAlertParams['savedId'];
-  timeline_id: RuleAlertParams['timelineId'];
-  timeline_title: RuleAlertParams['timelineTitle'];
-  max_signals: RuleAlertParams['maxSignals'];
-  risk_score: RuleAlertParams['riskScore'];
-  output_index: RuleAlertParams['outputIndex'];
-  created_at: RuleAlertParams['createdAt'];
-  updated_at: RuleAlertParams['updatedAt'];
-};
+> &
+  Omit<
+    RuleStatus,
+    | 'alertId'
+    | 'statusDate'
+    | 'lastFailureAt'
+    | 'lastSuccessAt'
+    | 'lastSuccessMessage'
+    | 'lastFailureMessage'
+  > & {
+    rule_id: RuleAlertParams['ruleId'];
+    false_positives: RuleAlertParams['falsePositives'];
+    saved_id: RuleAlertParams['savedId'];
+    timeline_id: RuleAlertParams['timelineId'];
+    max_signals: RuleAlertParams['maxSignals'];
+    risk_score: RuleAlertParams['riskScore'];
+    output_index: RuleAlertParams['outputIndex'];
+    created_at: RuleAlertParams['createdAt'];
+    updated_at: RuleAlertParams['updatedAt'];
+    status_date: RuleStatus['statusDate'];
+    last_failure_at: RuleStatus['lastFailureAt'];
+    last_success_at: RuleStatus['lastSuccessAt'];
+    last_failure_message: RuleStatus['lastFailureMessage'];
+    last_success_message: RuleStatus['lastSuccessMessage'];
+  };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
