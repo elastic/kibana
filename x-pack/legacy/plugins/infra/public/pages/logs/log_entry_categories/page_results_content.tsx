@@ -35,8 +35,8 @@ import {
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
   const {
     fetchJobStatus,
