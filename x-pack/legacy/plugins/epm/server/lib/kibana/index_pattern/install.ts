@@ -75,8 +75,7 @@ const createIndexPattern = async ({
 const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
   const dedupedFields = dedupFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
-  const dedupedFlattenedFields = dedupFields(flattenedFields);
-  const transformedFields = dedupedFlattenedFields.map(transformField);
+  const transformedFields = flattenedFields.map(transformField);
   return transformedFields;
 };
 
@@ -108,10 +107,18 @@ const transformField = (field: Field): IndexPatternField => {
   };
 };
 
+/**
+ * flattenFields
+ *
+ * flattens fields and renames them with a path of the parent names
+ */
 const flattenFields = (fields: Field[]): Field[] =>
   fields.reduce<Field[]>((acc, field) => {
     if (field.fields?.length) {
-      acc = acc.concat(flattenFields(field.fields));
+      const flattenedFields = flattenFields(field.fields);
+      flattenedFields.forEach(nestedField => {
+        acc.push({ ...nestedField, name: `${field.name}.${nestedField.name}` });
+      });
     } else {
       acc.push(field);
     }
