@@ -7,15 +7,12 @@
 import { isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
-import {
-  InfraSnapshotMetricType,
-  InfraSnapshotNodePath,
-  InfraSnapshotNodeMetric,
-  InfraNodeType,
-} from '../../graphql/types';
+import { InfraSnapshotNodePath } from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './types';
 import { findInventoryModel } from '../../../common/inventory_models';
+import { InventoryItemType, SnapshotMetricType } from '../../../common/inventory_models/types';
+import { SnapshotNodeMetric } from '../../../common/http_api/snapshot_api';
 
 export interface InfraSnapshotNodeMetricsBucket {
   key: { id: string };
@@ -70,7 +67,7 @@ export interface InfraSnapshotNodeGroupByBucket {
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
 
 export const getIPFromBucket = (
-  nodeType: InfraNodeType,
+  nodeType: InventoryItemType,
   bucket: InfraSnapshotNodeGroupByBucket
 ): string | null => {
   const inventoryModel = findInventoryModel(nodeType);
@@ -121,7 +118,7 @@ export const getNodeMetricsForLookup = (
 export const getNodeMetrics = (
   nodeBuckets: InfraSnapshotMetricsBucket[],
   options: InfraSnapshotRequestOptions
-): InfraSnapshotNodeMetric => {
+): SnapshotNodeMetric => {
   if (!nodeBuckets) {
     return {
       name: options.metric.type,
@@ -156,18 +153,15 @@ const findLastFullBucket = (
   }, last(buckets));
 };
 
-const getMetricValueFromBucket = (
-  type: InfraSnapshotMetricType,
-  bucket: InfraSnapshotMetricsBucket
-) => {
+const getMetricValueFromBucket = (type: SnapshotMetricType, bucket: InfraSnapshotMetricsBucket) => {
   const metric = bucket[type];
   return (metric && (metric.normalized_value || metric.value)) || 0;
 };
 
-function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: InfraSnapshotMetricType) {
+function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
   return max(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) || 0;
 }
 
-function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: InfraSnapshotMetricType) {
+function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
   return sum(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
 }

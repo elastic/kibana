@@ -6,22 +6,19 @@
 
 import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import {
-  InfraMetric,
-  InfraMetricData,
-  InfraNodeType,
-  InfraTimerangeInput,
-} from '../../../graphql/types';
+  NodeDetailsRequest,
+  NodeDetailsMetricData,
+} from '../../../../common/http_api/node_details_api';
+import { InventoryMetric } from '../../../../common/inventory_models/types';
 import { InfraSourceConfiguration } from '../../sources';
 
-export interface InfraMetricsRequestOptions {
+export interface InfraMetricsRequestOptions
+  extends Omit<NodeDetailsRequest, 'sourceId' | 'nodeId' | 'cloudId'> {
   nodeIds: {
     nodeId: string;
     cloudId?: string | null;
   };
-  nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerangeInput;
-  metrics: InfraMetric[];
 }
 
 export interface InfraMetricsAdapter {
@@ -29,7 +26,7 @@ export interface InfraMetricsAdapter {
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
     request: KibanaRequest
-  ): Promise<InfraMetricData[]>;
+  ): Promise<NodeDetailsMetricData[]>;
 }
 
 export enum InfraMetricModelQueryType {
@@ -52,7 +49,7 @@ export enum InfraMetricModelMetricType {
 }
 
 export interface InfraMetricModel {
-  id: InfraMetric;
+  id: InventoryMetric;
   requires: string[];
   index_pattern: string | string[];
   interval: string;

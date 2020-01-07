@@ -50,6 +50,6 @@ export const NodeDetailsRequestRT = rt.intersection([
 ]);
 
 // export type NodeDetailsRequest = InfraWrappableRequest<NodesArgs & SourceArgs>;
-
+export type NodeDetailsMetricData = rt.TypeOf<typeof NodeDetailsMetricDataRT>;
 export type NodeDetailsRequest = rt.TypeOf<typeof NodeDetailsRequestRT>;
 export type NodeDetailsMetricDataResponse = rt.TypeOf<typeof NodeDetailsMetricDataResponseRT>;

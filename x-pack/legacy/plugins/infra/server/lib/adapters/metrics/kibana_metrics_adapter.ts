@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { InfraMetric, InfraMetricData } from '../../../graphql/types';
+import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { metrics, findInventoryFields } from '../../../../common/inventory_models';
-import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
+import { TSVBMetricModelCreator, InventoryMetric } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -26,7 +26,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
-  ): Promise<InfraMetricData[]> {
+  ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
@@ -58,7 +58,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           );
 
           return metricIds.map((id: string) => {
-            const infraMetricId: InfraMetric = (InfraMetric as any)[id];
+            const infraMetricId = id as InventoryMetric;
             if (!infraMetricId) {
               throw new Error(
                 i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
@@ -87,7 +87,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   async makeTSVBRequest(
-    metricId: InfraMetric,
+    metricId: InventoryMetric,
     options: InfraMetricsRequestOptions,
     nodeField: string,
     requestContext: RequestHandlerContext
