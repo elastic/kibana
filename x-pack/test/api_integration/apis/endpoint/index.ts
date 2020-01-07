@@ -9,5 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Endpoint plugin', function() {
     loadTestFile(require.resolve('./resolver'));
+    loadTestFile(require.resolve('./endpoints'));
   });
 }
