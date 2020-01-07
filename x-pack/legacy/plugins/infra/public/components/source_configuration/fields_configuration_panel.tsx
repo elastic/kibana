@@ -15,6 +15,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -55,21 +56,39 @@ export const FieldsConfigurationPanel = ({
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiCallOut title="Depreciation Notice" color="warning" iconType="help">
+      <EuiCallOut
+        title={i18n.translate('xpack.infra.sourceConfiguration.deprecationNotice', {
+          defaultMessage: 'Deprecation Notice',
+        })}
+        color="warning"
+        iconType="help"
+      >
         <p>
-          Configuring these fields have been depreciated and will be removed in 8.0.0. This
-          application is designed to work with{' '}
-          <EuiLink href="https://www.elastic.co/guide/en/ecs/current/index.html" target="BLANK">
-            ECS
-          </EuiLink>
-          , you should adjust your indexing to use the{' '}
-          <EuiLink
-            href="https://www.elastic.co/guide/en/infrastructure/guide/7.4/infrastructure-metrics.html"
-            target="BLANK"
-          >
-            documented fields
-          </EuiLink>
-          .
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.deprecationMessage"
+            defaultMessage="Configuring these fields have been depreciated and will be removed in 8.0.0. This application is designed to work with {ecsLink}, you should adjust your indexing to use the {documentationLink}."
+            values={{
+              documentationLink: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/infrastructure/guide/7.4/infrastructure-metrics.html"
+                  target="BLANK"
+                >
+                  <FormattedMessage
+                    id="xpack.infra.sourceConfiguration.documentedFields"
+                    defaultMessage="documented fields"
+                  />
+                </EuiLink>
+              ),
+              ecsLink: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/ecs/current/index.html"
+                  target="BLANK"
+                >
+                  ECS
+                </EuiLink>
+              ),
+            }}
+          />
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
