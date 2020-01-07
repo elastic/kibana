@@ -44,7 +44,6 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 
 const defaultPanelWidth = 500;
-const NO_KEYWORD_FIELDTYPES = [ES_FIELD_TYPES.BOOLEAN, ES_FIELD_TYPES.INTEGER];
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -73,7 +72,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
-  let noKeywordRequired = false;
+  let requiresKeyword = false;
 
   const loadData = async ({
     isTrainingClause,
@@ -95,7 +94,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
 
         if (depVarFieldType !== undefined) {
-          noKeywordRequired = NO_KEYWORD_FIELDTYPES.includes(depVarFieldType);
+          requiresKeyword = depVarFieldType === ES_FIELD_TYPES.KEYWORD;
         }
       }
     } catch (e) {
@@ -112,7 +111,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       searchQuery,
       ignoreDefaultQuery,
       jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
-      requiresKeyword: noKeywordRequired === false,
+      requiresKeyword,
     });
 
     const docsCountResp = await loadDocsCount({
