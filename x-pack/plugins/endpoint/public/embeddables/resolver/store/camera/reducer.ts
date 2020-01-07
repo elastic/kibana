@@ -20,22 +20,38 @@ function initialState(): CameraState {
   };
 }
 
+/**
+ * The minimum allowed value for the camera scale. This is the least scale that we will ever render something at.
+ */
+const minimumScale = 0.1;
+
+/**
+ * The maximum allowed value for the camera scale. This is greatest scale that we will ever render something at.
+ */
+const maximumScale = 3;
+
 export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   state = initialState(),
   action
 ) => {
   if (action.type === 'userScaled') {
+    /**
+     * Handle the scale being explicitly set, for example by a 'reset zoom' feature, or by a range slider with exact scale values
+     */
     const [deltaX, deltaY] = action.payload;
     return {
       ...state,
-      scaling: [clamp(deltaX, 0.1, 3), clamp(deltaY, 0.1, 3)],
+      scaling: [
+        clamp(deltaX, minimumScale, maximumScale),
+        clamp(deltaY, minimumScale, maximumScale),
+      ],
     };
   } else if (action.type === 'userZoomed') {
     /**
      * When the user zooms we change the scale. Limit the change in scale so that we aren't liable for supporting crazy values (e.g. infinity or negative scale.)
      */
-    const newScaleX = clamp(state.scaling[0] + action.payload, 0.1, 3);
-    const newScaleY = clamp(state.scaling[1] + action.payload, 0.1, 3);
+    const newScaleX = clamp(state.scaling[0] + action.payload, minimumScale, maximumScale);
+    const newScaleY = clamp(state.scaling[1] + action.payload, minimumScale, maximumScale);
 
     const stateWithNewScaling: CameraState = {
       ...state,
@@ -71,11 +87,17 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       return stateWithNewScaling;
     }
   } else if (action.type === 'userSetPositionOfCamera') {
+    /**
+     * Handle the case where the position of the camera is explicitly set, for example by a 'back to center' feature.
+     */
     return {
       ...state,
       translationNotCountingCurrentPanning: action.payload,
     };
   } else if (action.type === 'userStartedPanning') {
+    /**
+     * When the user begins panning with a mousedown event we mark the starting position for later comparisons.
+     */
     return {
       ...state,
       panning: {
@@ -84,6 +106,9 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       },
     };
   } else if (action.type === 'userStoppedPanning') {
+    /**
+     * When the user stops panning (by letting up on the mouse) we calculate the new translation of the camera.
+     */
     if (userIsPanning(state)) {
       return {
         ...state,
@@ -94,6 +119,10 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       return state;
     }
   } else if (action.type === 'userSetRasterSize') {
+    /**
+     * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
+     * and world coordinates.
+     */
     return {
       ...state,
       rasterSize: action.payload,

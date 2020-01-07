@@ -14,7 +14,7 @@ import {
   translationTransformation,
 } from '../../lib/transformation';
 
-interface ClippingPlane {
+interface ClippingPlanes {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;
@@ -23,8 +23,11 @@ interface ClippingPlane {
   clippingPlaneBottom: number;
 }
 
+/**
+ * The viewable area in the Resolver map, in world coordinates.
+ */
 export function viewableBoundingBox(state: CameraState): AABB {
-  const { renderWidth, renderHeight } = clippingPlane(state);
+  const { renderWidth, renderHeight } = clippingPlanes(state);
   const matrix = inverseProjectionMatrix(state);
   return {
     minimum: applyMatrix3([0, renderHeight], matrix),
@@ -32,7 +35,10 @@ export function viewableBoundingBox(state: CameraState): AABB {
   };
 }
 
-function clippingPlane(state: CameraState): ClippingPlane {
+/**
+ * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
+ */
+function clippingPlanes(state: CameraState): ClippingPlanes {
   const renderWidth = state.rasterSize[0];
   const renderHeight = state.rasterSize[1];
   const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
@@ -49,7 +55,8 @@ function clippingPlane(state: CameraState): ClippingPlane {
 }
 
 /**
- * https://en.wikipedia.org/wiki/Orthographic_projection
+ * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
+ * See https://en.wikipedia.org/wiki/Orthographic_projection
  */
 export const projectionMatrix: (state: CameraState) => Matrix3 = state => {
   const {
@@ -59,7 +66,7 @@ export const projectionMatrix: (state: CameraState) => Matrix3 = state => {
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = clippingPlane(state);
+  } = clippingPlanes(state);
 
   return multiply(
     // 5. convert from 0->2 to 0->rasterWidth (or height)
@@ -86,6 +93,18 @@ export const projectionMatrix: (state: CameraState) => Matrix3 = state => {
   );
 };
 
+/**
+ * The camera has a translation value (not counting any current panning.) This is initialized to (0, 0) and
+ * updating any time panning ends.
+ *
+ * When the user is panning, we keep the initial position of the pointer and the current position of the
+ * pointer. The difference between these values equals the panning vector.
+ *
+ * When the user is panning, the translation of the camera is found by adding the panning vector to the
+ * translationNotCountingCurrentPanning.
+ *
+ * We could update the translation as the user moved the mouse but floating point drift (round-off error) could occur.
+ */
 export function translation(state: CameraState): Vector2 {
   if (state.panning) {
     return add(
@@ -101,6 +120,10 @@ export function translation(state: CameraState): Vector2 {
   }
 }
 
+/**
+ * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
+ * See https://en.wikipedia.org/wiki/Orthographic_projection
+ */
 export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state => {
   const {
     renderWidth,
@@ -109,7 +132,7 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = clippingPlane(state);
+  } = clippingPlanes(state);
 
   const [translationX, translationY] = translation(state);
 
@@ -145,6 +168,12 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
   );
 };
 
+/**
+ * The scale by which world values are scaled when rendered.
+ */
 export const scale = (state: CameraState): Vector2 => state.scaling;
 
+/**
+ * Whether or not the user is current panning the map.
+ */
 export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;
