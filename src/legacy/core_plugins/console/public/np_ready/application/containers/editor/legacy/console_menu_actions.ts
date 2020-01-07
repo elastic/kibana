@@ -17,8 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getEndpointFromPosition } from '../../../../lib/autocomplete/autocomplete';
+import { getEndpointFromPosition } from '../../../../lib/autocomplete/get_endpoint_from_position';
 import { SenseEditor } from '../../../models/sense_editor';
 
 export async function autoIndent(editor: SenseEditor, event: Event) {
@@ -40,7 +39,7 @@ export function getDocumentation(
     }
     const position = requests[0].range.end;
     position.column = position.column - 1;
-    const endpoint = getEndpointFromPosition(editor, position, editor.parser);
+    const endpoint = getEndpointFromPosition(editor.getCoreEditor(), position, editor.parser);
     if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
       return endpoint.documentation
         .replace('/master/', `/${docLinkVersion}/`)

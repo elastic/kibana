@@ -3,5 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home"]
+  "requiredPlugins": ["home"],
+  "optionalPlugins": ["usageCollection"]
 }
