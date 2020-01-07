@@ -7,15 +7,24 @@
 import { parameterizeValues } from '../parameterize_values';
 
 describe('parameterizeValues', () => {
+  let params: URLSearchParams;
+
+  beforeEach(() => {
+    params = new URLSearchParams();
+  });
+
   it('parameterizes the provided values for a given field name', () => {
-    expect(parameterizeValues({ foo: ['bar', 'baz'] })).toMatchSnapshot();
+    parameterizeValues(params, { foo: ['bar', 'baz'] });
+    expect(params.toString()).toMatchSnapshot();
   });
 
   it('parameterizes provided values for multiple fields', () => {
-    expect(parameterizeValues({ foo: ['bar', 'baz'], bar: ['foo', 'baz'] })).toMatchSnapshot();
+    parameterizeValues(params, { foo: ['bar', 'baz'], bar: ['foo', 'baz'] });
+    expect(params.toString()).toMatchSnapshot();
   });
 
   it('returns an empty string when there are no values provided', () => {
-    expect(parameterizeValues({ foo: [] })).toBe('');
+    parameterizeValues(params, { foo: [] });
+    expect(params.toString()).toBe('');
   });
 });
