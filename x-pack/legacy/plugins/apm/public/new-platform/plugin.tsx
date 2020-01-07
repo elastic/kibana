@@ -32,7 +32,6 @@ import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { px, unit, units } from '../style/variables';
 import { history } from '../utils/history';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
@@ -93,7 +92,6 @@ export class ApmPlugin
 
   // Take the DOM element as the constructor, so we can mount the app.
   public setup(_core: CoreSetup, plugins: ApmPluginSetupDeps) {
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
     this.setupPlugins = plugins;
   }
 

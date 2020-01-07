@@ -515,5 +515,3 @@ app.controller('timelion', function(
 
   init();
 });
-
-require('ui/routes').enable();
