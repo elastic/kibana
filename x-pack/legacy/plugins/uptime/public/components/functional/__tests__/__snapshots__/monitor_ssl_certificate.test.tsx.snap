@@ -5,32 +5,24 @@ Array [
   <div
     class="euiSpacer euiSpacer--s"
   />,
-  .c0 {
-  margin-left: 20px;
-}
-
-<div
-    class="c0"
+  <div
+    aria-label="SSL certificate expires in 2 months"
+    class="euiText euiText--small euiText--constrainedWidth"
   >
-    <div
-      aria-label="SSL certificate expires in 2 months"
-      class="euiText euiText--small euiText--constrainedWidth"
+    SSL certificate expires 
+    <span
+      class="euiBadge euiBadge--iconLeft euiBadge--default"
     >
-      SSL certificate expires 
       <span
-        class="euiBadge euiBadge--iconLeft euiBadge--default"
+        class="euiBadge__content"
       >
         <span
-          class="euiBadge__content"
+          class="euiBadge__text"
         >
-          <span
-            class="euiBadge__text"
-          >
-            in 2 months
-          </span>
+          in 2 months
         </span>
       </span>
-    </div>
+    </span>
   </div>,
 ]
 `;
