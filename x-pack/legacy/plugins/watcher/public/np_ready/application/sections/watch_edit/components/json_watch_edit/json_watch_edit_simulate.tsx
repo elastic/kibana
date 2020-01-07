@@ -186,7 +186,11 @@ export const JsonWatchEditSimulate = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFieldNumber
-                  value={scheduledTimeValue}
+                  value={
+                    scheduledTimeValue == null || scheduledTimeValue === ''
+                      ? scheduledTimeValue
+                      : parseInt(scheduledTimeValue, 10)
+                  }
                   min={0}
                   data-test-subj="scheduledTimeInput"
                   onChange={e => {
@@ -225,7 +229,11 @@ export const JsonWatchEditSimulate = ({
             )}
           >
             <EuiFieldNumber
-              value={triggeredTimeValue}
+              value={
+                triggeredTimeValue == null || triggeredTimeValue === ''
+                  ? triggeredTimeValue
+                  : parseInt(triggeredTimeValue, 10)
+              }
               min={0}
               data-test-subj="triggeredTimeInput"
               append={

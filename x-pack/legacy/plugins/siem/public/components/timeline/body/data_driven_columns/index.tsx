@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { OnColumnResized } from '../../events';
@@ -30,7 +30,7 @@ export const DataDrivenColumns = React.memo<Props>(
     return (
       <EventsTdGroupData data-test-subj="data-driven-columns">
         {columnHeaders.map((header, index) => (
-          <EventsTd key={header.id} style={{ flexBasis: header.width + 'px' }}>
+          <EventsTd key={header.id} style={{ flexBasis: `${header.width}px` }}>
             <EventsTdContent data-test-subj="cell-container">
               {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
                 columnName: header.id,

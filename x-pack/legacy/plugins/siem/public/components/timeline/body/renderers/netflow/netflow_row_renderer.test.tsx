@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
@@ -24,8 +24,6 @@ export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',
   timestamp: '2018-11-12T19:03:25.936Z',
 };
-
-jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
 
 describe('netflowRowRenderer', () => {
   const mount = useMountAppended();

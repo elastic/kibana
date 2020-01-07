@@ -6,31 +6,17 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
 
 import { mocksSource } from '../../containers/source/mock';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { TestProviders } from '../../mock';
-import { mockUiSettings } from '../../mock/ui_settings';
 import { Network } from './network';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    kibana: 'http://www.example.com',
-  },
-}));
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
+jest.mock('../../lib/kibana');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../lib/helpers';
@@ -56,8 +56,6 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 const getNetflowInstance = () => (
   <Netflow

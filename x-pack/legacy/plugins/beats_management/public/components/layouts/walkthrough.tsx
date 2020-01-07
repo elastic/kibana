@@ -6,13 +6,7 @@
 
 import React from 'react';
 
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  // @ts-ignore
-  EuiStepsHorizontal,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageContent, EuiPageContentBody, EuiStepsHorizontal, EuiTitle } from '@elastic/eui';
 
 interface LayoutProps {
   title: string;

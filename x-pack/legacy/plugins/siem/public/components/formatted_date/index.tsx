@@ -5,23 +5,24 @@
  */
 
 import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
+
+import { useUiSetting$ } from '../../lib/kibana';
 
 import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_TIMEZONE_BROWSER,
 } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
-  const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
-  const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
-  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+  const [dateFormat] = useUiSetting$<string>(DEFAULT_DATE_FORMAT);
+  const [dateFormatTz] = useUiSetting$<string>(DEFAULT_DATE_FORMAT_TZ);
+  const [timezone] = useUiSetting$<string>(DEFAULT_TIMEZONE_BROWSER);
 
   return (
     <>

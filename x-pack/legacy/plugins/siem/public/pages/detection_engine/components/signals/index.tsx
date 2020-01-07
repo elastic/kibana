@@ -25,8 +25,8 @@ import {
   SignalFilterOption,
   SignalsTableFilterGroup,
 } from './signals_filter_group';
-import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
+import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
 import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
 import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -43,7 +43,6 @@ import {
 } from './types';
 import { inputsActions } from '../../../../store/inputs';
 import { combineQueries } from '../../../../components/timeline/helpers';
-import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { InputsRange } from '../../../../store/inputs/model';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
@@ -92,6 +91,7 @@ interface DispatchProps {
 interface OwnProps {
   defaultFilters?: esFilters.Filter[];
   from: number;
+  signalsIndex: string;
   to: number;
 }
 
@@ -113,22 +113,21 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     selectedEventIds,
     setEventsDeleted,
     setEventsLoading,
+    signalsIndex,
     to,
   }) => {
     const [selectAll, setSelectAll] = useState(false);
 
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([
-      `${DEFAULT_SIGNALS_INDEX}-default`,
-    ]); // TODO Get from new FrankInspired XavierHook
-    const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-    const core = useKibanaCore();
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
+    const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
+    const kibana = useKibana();
 
     const getGlobalQuery = useCallback(() => {
       if (browserFields != null && indexPatterns != null) {
         return combineQueries({
-          config: esQuery.getEsQueryConfig(core.uiSettings),
+          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,
@@ -267,9 +266,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [createTimelineCallback, filterGroup, kbnVersion]
     );
 
-    const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}-default`], [
-      `${DEFAULT_SIGNALS_INDEX}-default`,
-    ]);
+    const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
     const defaultFiltersMemo = useMemo(
       () => [
         ...defaultFilters,
@@ -293,7 +290,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
 
     return (
       <StatefulEventsViewer
-        defaultIndices={defaultIndices} // TODO Get from new FrankInspired XavierHook
+        defaultIndices={defaultIndices}
         pageFilters={defaultFiltersMemo}
         defaultModel={signalsDefaultModel}
         end={to}

@@ -26,7 +26,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker', 'visChart']);
 
   type Duration =
     | 'Milliseconds'
@@ -101,7 +101,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getMetricValue() {
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
@@ -110,7 +110,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
       await input.type(markdown, { charByChar: true });
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async clearMarkdown() {
@@ -304,7 +304,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getRhythmChartLegendValue(nth = 0) {
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const metricValue = (
         await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
       )[nth];
@@ -348,7 +348,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const prevAggs = await testSubjects.findAll('aggSelector');
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await retry.waitFor('new agg is added', async () => {
         const currentAggs = await testSubjects.findAll('aggSelector');
         return currentAggs.length > prevAggs.length;
@@ -485,7 +485,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await this.checkColorPickerPopUpIsPresent();
       await find.setValue('.tvbColorPickerPopUp input', colorHex);
       await this.clickColorPicker();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -494,10 +494,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const prevRenderingCount = await PageObjects.visChart.getVisualizationRenderingCount();
       const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
       await changePreviewBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visChart.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async checkPreviewIsDisabled(): Promise<void> {
@@ -508,7 +508,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async cloneSeries(nth: number = 0): Promise<void> {
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     /**
@@ -525,10 +525,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async deleteSeries(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const prevRenderingCount = await PageObjects.visChart.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddDeleteBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visChart.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async getLegendItems(): Promise<WebElementWrapper[]> {

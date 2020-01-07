@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';

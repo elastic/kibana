@@ -43,6 +43,12 @@ export interface TransactionRaw extends APMBaseDoc {
     };
     type: string;
     custom?: Record<string, unknown>;
+    message?: {
+      queue?: { name: string };
+      age?: { ms: number };
+      body?: string;
+      headers?: Record<string, unknown>;
+    };
   };
 
   // Shared by errors and transactions
