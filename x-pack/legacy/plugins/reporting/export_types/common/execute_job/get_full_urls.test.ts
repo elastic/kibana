@@ -28,7 +28,7 @@ test(`fails if no URL is passed`, async () => {
       server: mockServer,
     } as FullUrlsOpts);
   expect(fn).toThrowErrorMatchingInlineSnapshot(
-    `"No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\`"`
+    `"No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\`"`
   );
 });
 
@@ -64,7 +64,10 @@ test(`fails if URLs are file-protocols for PDF`, async () => {
   const relativeUrl = 'file://etc/passwd/#/something';
   const fn = () =>
     getFullUrls({
-      job: { objects: [{ relativeUrl }], forceNow },
+      job: {
+        relativeUrls: [relativeUrl],
+        forceNow,
+      },
       server: mockServer,
     } as FullUrlsOpts);
   expect(fn).toThrowErrorMatchingInlineSnapshot(
@@ -79,11 +82,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
   const fn = () =>
     getFullUrls({
       job: {
-        objects: [
-          {
-            relativeUrl,
-          },
-        ],
+        relativeUrls: [relativeUrl],
         forceNow,
       },
       server: mockServer,
@@ -95,18 +94,15 @@ test(`fails if URLs are absolute for PDF`, async () => {
 
 test(`fails if any URLs are absolute or file's for PDF`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const objects = [
-    { relativeUrl: '/app/kibana#/something_aaa' },
-    {
-      relativeUrl:
-        'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
-    },
-    { relativeUrl: 'file://etc/passwd/#/something' },
+  const relativeUrls = [
+    '/app/kibana#/something_aaa',
+    'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
+    'file://etc/passwd/#/something',
   ];
 
   const fn = () =>
     getFullUrls({
-      job: { objects, forceNow },
+      job: { relativeUrls, forceNow },
       server: mockServer,
     } as FullUrlsOpts);
   expect(fn).toThrowErrorMatchingInlineSnapshot(
@@ -163,11 +159,11 @@ test(`adds forceNow to each of multiple urls`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const urls = await getFullUrls({
     job: {
-      objects: [
-        { relativeUrl: '/app/kibana#/something_aaa' },
-        { relativeUrl: '/app/kibana#/something_bbb' },
-        { relativeUrl: '/app/kibana#/something_ccc' },
-        { relativeUrl: '/app/kibana#/something_ddd' },
+      relativeUrls: [
+        '/app/kibana#/something_aaa',
+        '/app/kibana#/something_bbb',
+        '/app/kibana#/something_ccc',
+        '/app/kibana#/something_ddd',
       ],
       forceNow,
     },
