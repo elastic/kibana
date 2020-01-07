@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './common';
+export * from './entries';
+export * from './highlights';
 export * from './item';
 export * from './summary';
 export * from './summary_highlights';

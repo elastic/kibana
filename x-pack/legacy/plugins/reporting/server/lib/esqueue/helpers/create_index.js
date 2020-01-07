@@ -15,7 +15,7 @@ const schema = {
     properties: {
       /**
        * Type of object that is triggering this report. Should be either search, visualization or dashboard.
-       * Used for phone home stats only.
+       * Used for job listing and telemetry stats only.
        */
       objectType: {
         type: 'text',

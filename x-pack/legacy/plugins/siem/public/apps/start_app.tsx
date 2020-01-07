@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory } from 'history';
-import React, { memo, FC } from 'react';
+import { createHashHistory, History } from 'history';
+import React, { memo, useMemo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
+import { Store } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
@@ -23,7 +24,7 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
-import { AppFrontendLibs } from '../lib/lib';
+import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
 import { StartCore, StartPlugins } from './plugin';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
@@ -32,48 +33,70 @@ import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabili
 
 import { ApolloClientContext } from '../utils/apollo_context';
 
-const StartApp: FC<AppFrontendLibs> = memo(libs => {
+interface AppPluginRootComponentProps {
+  apolloClient: AppApolloClient;
+  history: History;
+  store: Store;
+  theme: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
+  theme,
+  store,
+  apolloClient,
+  history,
+}) => (
+  <EuiErrorBoundary>
+    <I18nContext>
+      <ManageGlobalToaster>
+        <ReduxStoreProvider store={store}>
+          <ApolloProvider client={apolloClient}>
+            <ApolloClientContext.Provider value={apolloClient}>
+              <ThemeProvider theme={theme}>
+                <MlCapabilitiesProvider>
+                  <PageRouter history={history} />
+                </MlCapabilitiesProvider>
+              </ThemeProvider>
+              <ErrorToastDispatcher />
+              <GlobalToaster />
+            </ApolloClientContext.Provider>
+          </ApolloProvider>
+        </ReduxStoreProvider>
+      </ManageGlobalToaster>
+    </I18nContext>
+  </EuiErrorBoundary>
+);
+
+const AppPluginRoot = memo(AppPluginRootComponent);
+
+const StartAppComponent: FC<AppFrontendLibs> = libs => {
   const history = createHashHistory();
-
   const libs$ = new BehaviorSubject(libs);
-
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
+  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const theme = useMemo(
+    () => ({
+      eui: darkMode ? euiDarkVars : euiLightVars,
+      darkMode,
+    }),
+    [darkMode]
+  );
 
-  const AppPluginRoot = memo(() => {
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    return (
-      <EuiErrorBoundary>
-        <I18nContext>
-          <ManageGlobalToaster>
-            <ReduxStoreProvider store={store}>
-              <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <ThemeProvider
-                    theme={() => ({
-                      eui: darkMode ? euiDarkVars : euiLightVars,
-                      darkMode,
-                    })}
-                  >
-                    <MlCapabilitiesProvider>
-                      <PageRouter history={history} />
-                    </MlCapabilitiesProvider>
-                  </ThemeProvider>
-                  <ErrorToastDispatcher />
-                  <GlobalToaster />
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
-            </ReduxStoreProvider>
-          </ManageGlobalToaster>
-        </I18nContext>
-      </EuiErrorBoundary>
-    );
-  });
-  return <AppPluginRoot />;
-});
+  return (
+    <AppPluginRoot store={store} apolloClient={libs.apolloClient} history={history} theme={theme} />
+  );
+};
+
+const StartApp = memo(StartAppComponent);
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core, plugins }) => (
+interface SiemAppComponentProps {
+  core: StartCore;
+  plugins: StartPlugins;
+}
+
+const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) => (
   <KibanaContextProvider
     services={{
       appName: 'siem',
@@ -84,4 +107,6 @@ export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core,
   >
     <StartApp {...compose()} />
   </KibanaContextProvider>
-));
+);
+
+export const SiemApp = memo(SiemAppComponent);
