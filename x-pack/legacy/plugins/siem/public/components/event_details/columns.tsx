@@ -23,16 +23,14 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
-import { DefaultDraggable } from '../draggables';
 import { DraggableFieldBadge } from '../draggables/field_badge';
-import { EVENT_DURATION_FIELD_NAME } from '../duration';
 import { FieldName } from '../fields_browser/field_name';
 import { SelectableText } from '../selectable_text';
 import { OverflowField } from '../tables/helpers';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { DATE_FIELD_TYPE, MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
+import { MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../with_hover_actions';
@@ -180,28 +178,14 @@ export const getColumns = ({
                   data.field === MESSAGE_FIELD_NAME ? (
                     <OverflowField value={value} />
                   ) : (
-                    <DefaultDraggable
-                      data-test-subj="ip"
-                      field={data.field}
-                      id={`event-details-value-default-draggable-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                      tooltipContent={
-                        data.type === DATE_FIELD_TYPE || data.field === EVENT_DURATION_FIELD_NAME
-                          ? null
-                          : data.field
-                      }
+                    <FormattedFieldValue
+                      contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                      eventId={eventId}
+                      fieldFormat={data.format}
+                      fieldName={data.field}
+                      fieldType={data.type}
                       value={value}
-                    >
-                      <EuiText size="xs">
-                        <FormattedFieldValue
-                          contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                          eventId={eventId}
-                          fieldFormat={data.format}
-                          fieldName={data.field}
-                          fieldType={data.type}
-                          value={value}
-                        />
-                      </EuiText>
-                    </DefaultDraggable>
+                    />
                   )
                 }
               />

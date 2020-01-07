@@ -39,8 +39,13 @@ import {
   unhashUrl,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
-import { FilterStateManager, IndexPattern } from '../../../../data/public';
-import { Query, SavedQuery, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import { FilterStateManager } from '../../../../data/public';
+import {
+  IndexPattern,
+  Query,
+  SavedQuery,
+  IndexPatternsContract,
+} from '../../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -118,7 +123,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -156,6 +161,12 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
+    const getIsEmptyInReadonlyMode = () =>
+      !dashboardStateManager.getPanels().length &&
+      !getShouldShowEditHelp() &&
+      !getShouldShowViewHelp() &&
+      dashboardConfig.getHideWriteControls();
+
     const addVisualization = () => {
       navActions[TopNavIds.VISUALIZE]();
     };
@@ -188,13 +199,21 @@ export class DashboardAppController {
       }
     };
 
-    const getEmptyScreenProps = (shouldShowEditHelp: boolean): DashboardEmptyScreenProps => {
+    const getEmptyScreenProps = (
+      shouldShowEditHelp: boolean,
+      isEmptyInReadOnlyMode: boolean
+    ): DashboardEmptyScreenProps => {
       const emptyScreenProps: DashboardEmptyScreenProps = {
         onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
         showLinkToVisualize: shouldShowEditHelp,
+        uiSettings,
+        http,
       };
       if (shouldShowEditHelp) {
         emptyScreenProps.onVisualizeClick = addVisualization;
+      }
+      if (isEmptyInReadOnlyMode) {
+        emptyScreenProps.isReadonlyMode = true;
       }
       return emptyScreenProps;
     };
@@ -212,6 +231,7 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
+      const isEmptyInReadonlyMode = getIsEmptyInReadonlyMode();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -224,7 +244,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -268,9 +288,12 @@ export class DashboardAppController {
           dashboardContainer.renderEmpty = () => {
             const shouldShowEditHelp = getShouldShowEditHelp();
             const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
+            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
+            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
-              <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
+              <DashboardEmptyScreen
+                {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
+              />
             ) : null;
           };
 
