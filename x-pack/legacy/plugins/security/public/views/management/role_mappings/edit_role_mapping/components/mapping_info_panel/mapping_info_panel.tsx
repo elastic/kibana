@@ -83,7 +83,7 @@ export class MappingInfoPanel extends Component<Props, State> {
         description={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.roleMappingNameFormGroupHelpText"
-            defaultMessage="A distinct name used solely as an identifier."
+            defaultMessage="A unique name used to identify this role mapping."
           />
         }
         fullWidth
