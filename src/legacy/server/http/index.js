@@ -22,11 +22,9 @@ import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 
-import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupDefaultRouteProvider } from './setup_default_route_provider';
-import { setupXsrf } from './xsrf';
 
 export default async function(kbnServer, server, config) {
   server = kbnServer.server;
@@ -62,29 +60,6 @@ export default async function(kbnServer, server, config) {
     });
   });
 
-  // attach the app name to the server, so we can be sure we are actually talking to kibana
-  server.ext('onPreResponse', function onPreResponse(req, h) {
-    const response = req.response;
-
-    const customHeaders = {
-      ...config.get('server.customResponseHeaders'),
-      'kbn-name': kbnServer.name,
-    };
-
-    if (response.isBoom) {
-      response.output.headers = {
-        ...response.output.headers,
-        ...customHeaders,
-      };
-    } else {
-      Object.keys(customHeaders).forEach(name => {
-        response.header(name, customHeaders[name]);
-      });
-    }
-
-    return h.continue;
-  });
-
   server.route({
     path: '/',
     method: 'GET',
@@ -116,7 +91,4 @@ export default async function(kbnServer, server, config) {
 
   // Expose static assets
   server.exposeStaticDir('/ui/{path*}', resolve(__dirname, '../../ui/public/assets'));
-
-  setupVersionCheck(server, config);
-  setupXsrf(server, config);
 }

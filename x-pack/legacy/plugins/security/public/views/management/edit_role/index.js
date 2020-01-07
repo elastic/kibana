@@ -11,10 +11,10 @@ import { kfetch } from 'ui/kfetch';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+import { UserAPIClient } from '../../../lib/api';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
@@ -69,9 +69,8 @@ const routeDefinition = action => ({
 
       return role.then(res => res.toJSON());
     },
-    users(ShieldUser) {
-      // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldUser.query().$promise.then(users => _.map(users, 'username'));
+    users() {
+      return new UserAPIClient().getUsers().then(users => _.map(users, 'username'));
     },
     indexPatterns() {
       return npStart.plugins.data.indexPatterns.getTitles();
