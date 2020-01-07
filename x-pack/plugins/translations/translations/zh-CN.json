@@ -6590,8 +6590,6 @@
     "xpack.maps.source.wmsTitle": "Web 地图服务",
     "xpack.maps.style.heatmap.displayNameLabel": "热图样式",
     "xpack.maps.style.heatmap.resolutionStyleErrorMessage": "无法识别分辨率参数：{resolution}",
-    "xpack.maps.styles.staticDynamic.dynamicDescription": "使用属性值代表功能。",
-    "xpack.maps.styles.staticDynamic.staticDescription": "使用静态样式属性代表功能。",
     "xpack.maps.styles.vector.borderColorLabel": "边框颜色",
     "xpack.maps.styles.vector.borderWidthLabel": "边框宽度",
     "xpack.maps.styles.vector.fillColorLabel": "填充颜色",
