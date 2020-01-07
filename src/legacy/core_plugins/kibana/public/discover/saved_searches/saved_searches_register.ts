@@ -17,20 +17,9 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-
 import { createSavedSearchesService } from './saved_searches';
 
-// this is needed for saved object management
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedSearches',
-  title: 'searches',
-});
 const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   indexPatterns: npStart.plugins.data.indexPatterns,
@@ -39,5 +28,11 @@ const services = {
 };
 const savedSearches = createSavedSearchesService(services);
 
-const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', () => savedSearches);
+// this is needed for saved object management
+// Register this service with the saved object registry so it can be
+// edited by the object editor.
+savedObjectManagementRegistry.register({
+  id: 'savedSearches',
+  service: savedSearches,
+  title: 'searches',
+});

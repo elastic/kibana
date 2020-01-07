@@ -17,9 +17,6 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import './saved_visualizations';
 import { createSavedVisLoader } from './saved_visualizations';
@@ -36,8 +33,7 @@ const savedObjectLoaderVisualize = createSavedVisLoader(services);
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 savedObjectManagementRegistry.register({
-  service: 'savedVisualizations',
+  id: 'savedVisualizations',
+  service: savedObjectLoaderVisualize,
   title: 'visualizations',
 });
-
-uiModules.get('app/visualize').service('savedVisualizations', () => savedObjectLoaderVisualize);

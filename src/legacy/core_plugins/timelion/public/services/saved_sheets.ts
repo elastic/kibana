@@ -26,13 +26,6 @@ import { createSavedSheetClass } from './_saved_sheet';
 
 const module = uiModules.get('app/sheet');
 
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedSheets',
-  title: 'sheets',
-});
-
 const savedObjectsClient = npStart.core.savedObjects.client;
 const services = {
   savedObjectsClient,
@@ -55,6 +48,14 @@ savedSheetLoader.loaderProperties = {
   noun: 'Saved Sheets',
   nouns: 'saved sheets',
 };
+
+// Register this service with the saved object registry so it can be
+// edited by the object editor.
+savedObjectManagementRegistry.register({
+  id: 'savedSheets',
+  service: savedSheetLoader,
+  title: 'sheets',
+});
 
 // This is the only thing that gets injected into controllers
 module.service('savedSheets', () => savedSheetLoader);
