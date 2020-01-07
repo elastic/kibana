@@ -11829,8 +11829,6 @@
     "xpack.uptime.kueryBar.searchPlaceholder": "モニター ID、名前、プロトコルタイプなどを検索…",
     "xpack.uptime.monitorList.noItemForSelectedFiltersMessage": "選択されたフィルター条件でモニターが見つかりませんでした",
     "xpack.uptime.monitorList.table.description": "列にステータス、名前、URL、IP、ダウンタイム履歴、統合が入力されたモニターステータス表です。この表は現在 {length} 項目を表示しています。",
-    "xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel": "SSL 証明書の有効期限:",
-    "xpack.uptime.monitorStatusBar.sslCertificateExpiry.content": "SSL 証明書の有効期限: {certificateValidity}",
     "xpack.uptime.notFountPage.homeLinkText": "ホームへ戻る",
     "xpack.uptime.overviewPageLink.disabled.ariaLabel": "無効になったページ付けボタンです。モニターリストがこれ以上ナビゲーションできないことを示しています。",
     "xpack.uptime.overviewPageLink.next.ariaLabel": "次の結果ページ",

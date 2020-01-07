@@ -11918,8 +11918,6 @@
     "xpack.uptime.kueryBar.searchPlaceholder": "搜索监测 ID、名称和协议类型......",
     "xpack.uptime.monitorList.noItemForSelectedFiltersMessage": "未找到匹配选定筛选条件的监测",
     "xpack.uptime.monitorList.table.description": "具有“状态”、“名称”、“URL”、“IP”、“中断历史记录”和“集成”列的“监测状态”表。该表当前显示 {length} 个项目。",
-    "xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel": "SSL 证书过期",
-    "xpack.uptime.monitorStatusBar.sslCertificateExpiry.content": "SSL 证书于 {certificateValidity} 过期",
     "xpack.uptime.notFountPage.homeLinkText": "返回主页",
     "xpack.uptime.overviewPageLink.disabled.ariaLabel": "禁用的分页按钮表示在监测列表中无法进行进一步导航。",
     "xpack.uptime.overviewPageLink.next.ariaLabel": "下页结果",

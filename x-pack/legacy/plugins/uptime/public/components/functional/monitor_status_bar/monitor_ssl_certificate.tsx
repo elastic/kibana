@@ -41,20 +41,20 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
           grow={false}
           size="s"
           aria-label={i18n.translate(
-            'xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel',
+            'xpack.uptime.monitorStatusBar.sslCertificateExpiry.label.ariaLabel',
             {
               defaultMessage: 'SSL certificate expires {validityDate}',
-              values: { validityDate: moment(certValidityDate).fromNow() },
+              values: { validityDate: moment(certValidityDate.valueOf()).fromNow() },
             }
           )}
         >
           <FormattedMessage
-            id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.content"
+            id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
             defaultMessage="SSL certificate expires {emphasizedText}"
             values={{
               emphasizedText: (
                 <EuiBadge color={isExpiringInMonth ? 'warning' : 'default'}>
-                  {moment(certValidityDate).fromNow()}
+                  {moment(certValidityDate.valueOf()).fromNow()}
                 </EuiBadge>
               ),
             }}
