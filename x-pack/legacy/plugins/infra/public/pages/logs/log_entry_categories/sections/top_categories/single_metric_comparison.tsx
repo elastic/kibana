@@ -43,7 +43,7 @@ export const SingleMetricComparison: React.FunctionComponent<{
   return null;
 };
 
-const formatPercentage = (value: number) => numeral(value).format('+0%');
+const formatPercentage = (value: number) => numeral(value).format('+0,0 %');
 
 const newCategoryTrendLabel = i18n.translate(
   'xpack.infra.logs.logEntryCategories.newCategoryTrendLabel',
