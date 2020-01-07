@@ -6,15 +6,24 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { Plugin, PluginContract } from './plugin';
-import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../../src/core/server';
+import {
+  PluginContract,
+  LifecycleContract,
+  createTaskManager,
+  LegacyDeps,
+} from './create_task_manager';
+import {
+  SavedObjectsSerializer,
+  SavedObjectsSchema,
+  CoreSetup,
+} from '../../../../../src/core/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { TaskManagerPluginSetupContract } from '../../../../plugins/kibana_task_manager/server';
 export { Middleware } from './lib/middleware';
 export { TaskDictionary, TaskDefinition } from './task';
 
-export { PluginContract as TaskManager };
+export { PluginContract as TaskManager, LifecycleContract };
 export {
   TaskInstance,
   ConcreteTaskInstance,
@@ -59,7 +68,6 @@ export function taskManager(kibana: any) {
       }).default();
     },
     async init(server: Legacy.Server) {
-      const legacyPlugin = new Plugin();
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
 
@@ -72,13 +80,15 @@ export function taskManager(kibana: any) {
         },
       } = server;
 
-      await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI({
-        legacyPlugin,
-        legacyDependencies: {
-          serializer,
-          savedObjects,
-        },
-      });
+      await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI(
+        (core: CoreSetup, deps: Omit<LegacyDeps, 'savedObjects' | 'serializer'>) => {
+          const tm = createTaskManager(core, { ...deps, serializer, savedObjects });
+          this.kbnServer.afterPluginsInit(() => {
+            tm.start();
+          });
+          return tm;
+        }
+      );
     },
     uiExports: {
       mappings,

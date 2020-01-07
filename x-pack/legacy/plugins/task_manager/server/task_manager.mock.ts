@@ -6,21 +6,19 @@
 
 import { TaskManager } from './types';
 
-const createTaskManagerMock = () => {
-  const mocked: jest.Mocked<TaskManager> = {
-    registerTaskDefinitions: jest.fn(),
-    addMiddleware: jest.fn(),
-    ensureScheduled: jest.fn(),
-    schedule: jest.fn(),
-    fetch: jest.fn(),
-    runNow: jest.fn(),
-    remove: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  return mocked;
-};
-
 export const taskManagerMock = {
-  create: createTaskManagerMock,
+  create() {
+    const mocked: jest.Mocked<TaskManager> = {
+      registerTaskDefinitions: jest.fn(),
+      addMiddleware: jest.fn(),
+      ensureScheduled: jest.fn(),
+      schedule: jest.fn(),
+      fetch: jest.fn(),
+      runNow: jest.fn(),
+      remove: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+    };
+    return mocked;
+  },
 };

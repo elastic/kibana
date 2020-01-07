@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { Observable, combineLatest, AsyncSubject } from 'rxjs';
+import { Observable, combineLatest, Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { once } from 'lodash';
 import {
-  Plugin as TaskManagerLegacyPlugin,
-  PluginContract,
-} from '../../../legacy/plugins/task_manager/server/plugin';
+  LifecycleContract,
+  TaskManager as TaskManagerContract,
+} from '../../../legacy/plugins/task_manager/server';
 import {
   TaskDictionary,
   TaskDefinition,
@@ -17,30 +18,23 @@ import {
 } from '../../../legacy/plugins/task_manager/server';
 import { TaskManagerConfig } from './config';
 
-interface LegacyDependencies {
-  serializer: any;
-  savedObjects: any;
-}
-
-export interface LegacySetup {
-  legacyPlugin: TaskManagerLegacyPlugin;
-  legacyDependencies: LegacyDependencies;
-}
+export type LegacyApi = TaskManagerContract & LifecycleContract;
+export type LegacySetup = (core: any, deps: any) => LegacyApi;
 
 export type TaskManagerPluginSetupContract = {
   config$: Observable<TaskManagerConfig>;
   registerLegacyAPI: (LegacyPlugin: LegacySetup) => void;
-} & Pick<PluginContract, 'addMiddleware' | 'registerTaskDefinitions'>;
+} & Pick<TaskManagerContract, 'addMiddleware' | 'registerTaskDefinitions'>;
 
 export type TaskManagerPluginStartContract = Omit<
-  PluginContract,
+  TaskManagerContract,
   'addMiddleware' | 'registerTaskDefinitions'
 >;
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerPluginSetupContract, TaskManagerPluginStartContract> {
-  legacySetup$: AsyncSubject<LegacySetup> = new AsyncSubject<LegacySetup>();
-  legacySetupResult: Promise<LegacySetup> = resolveOnFirstValue<LegacySetup>(this.legacySetup$);
+  legacyTaskManager$: Subject<LegacyApi> = new Subject<LegacyApi>();
+  taskManager: Promise<LegacyApi> = this.legacyTaskManager$.pipe(first()).toPromise();
   currentConfig: TaskManagerConfig;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -49,60 +43,42 @@ export class TaskManagerPlugin
   }
 
   public setup(core: CoreSetup, plugins: any): TaskManagerPluginSetupContract {
+    const logger = this.initContext.logger.get('kibanaTaskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
-
-    const legacyTaskManager = new Promise<PluginContract>(resolve => {
-      combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
-        async ([config, elasticsearch]) => {
-          this.legacySetupResult.then(({ legacyPlugin, legacyDependencies }) => {
-            const logger = this.initContext.logger.get('kibanaTaskManager');
-            resolve(
-              legacyPlugin.setup(core, { logger, config, elasticsearch, ...legacyDependencies })
-            );
-          });
-        }
-      );
-    });
 
     return {
       config$,
-      registerLegacyAPI: once((legacySetup: LegacySetup) => {
-        this.legacySetup$.next(legacySetup);
-        this.legacySetup$.complete();
-        return legacyTaskManager;
+      registerLegacyAPI: once((createTaskManager: LegacySetup) => {
+        combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
+          async ([config, elasticsearch]) => {
+            this.legacyTaskManager$.next(
+              createTaskManager(core, { logger, config, elasticsearch })
+            );
+            this.legacyTaskManager$.complete();
+          }
+        );
       }),
       addMiddleware: (middleware: Middleware) => {
-        legacyTaskManager.then(tm => tm.addMiddleware(middleware));
+        this.taskManager.then(tm => tm.addMiddleware(middleware));
       },
       registerTaskDefinitions: (taskDefinition: TaskDictionary<TaskDefinition>) => {
-        legacyTaskManager.then(tm => tm.registerTaskDefinitions(taskDefinition));
+        this.taskManager.then(tm => tm.registerTaskDefinitions(taskDefinition));
       },
     };
   }
 
   public start(): TaskManagerPluginStartContract {
-    const legacyTaskManager = this.legacySetupResult.then(({ legacyPlugin }) =>
-      legacyPlugin.start()
-    );
     return {
-      fetch: (...args) => legacyTaskManager.then(tm => tm.fetch(...args)),
-      remove: (...args) => legacyTaskManager.then(tm => tm.remove(...args)),
-      schedule: (...args) => legacyTaskManager.then(tm => tm.schedule(...args)),
-      runNow: (...args) => legacyTaskManager.then(tm => tm.runNow(...args)),
-      ensureScheduled: (...args) => legacyTaskManager.then(tm => tm.ensureScheduled(...args)),
+      fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
+      remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),
+      schedule: (...args) => this.taskManager.then(tm => tm.schedule(...args)),
+      runNow: (...args) => this.taskManager.then(tm => tm.runNow(...args)),
+      ensureScheduled: (...args) => this.taskManager.then(tm => tm.ensureScheduled(...args)),
     };
   }
   public stop() {
-    this.legacySetupResult.then(({ legacyPlugin }) => {
-      legacyPlugin.stop();
+    this.taskManager.then(tm => {
+      tm.stop();
     });
   }
-}
-
-function resolveOnFirstValue<T>(stream$: AsyncSubject<T>): Promise<T> {
-  return new Promise(resolve => {
-    stream$.subscribe(value => {
-      resolve(value);
-    });
-  });
 }

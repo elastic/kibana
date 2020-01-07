@@ -5,12 +5,12 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
+import { TaskManager } from '../../../../../task_manager/server';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(
   collectorSet: UsageCollectionSetup,
-  taskManager: TaskManagerPluginSetupContract | undefined
+  taskManager: TaskManager | undefined
 ): void {
   const collector = collectorSet.makeUsageCollector(getUsageCollector(taskManager));
   collectorSet.registerCollector(collector);

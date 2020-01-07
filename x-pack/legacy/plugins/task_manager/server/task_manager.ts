@@ -108,8 +108,6 @@ export class TaskManager {
     beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
 
-  private shouldAllowRegistrationAfterStart: boolean;
-
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -117,7 +115,6 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.logger = opts.logger;
-    this.shouldAllowRegistrationAfterStart = true;
 
     const { taskManagerId } = opts;
     if (!taskManagerId) {
@@ -354,7 +351,7 @@ export class TaskManager {
    * @returns void
    */
   private assertUninitialized(message: string) {
-    if (!this.shouldAllowRegistrationAfterStart && this.isStarted) {
+    if (this.isStarted) {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
     }
   }

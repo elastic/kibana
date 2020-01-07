@@ -255,7 +255,7 @@ describe('TaskManager', () => {
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
-  test('allows middleware registration after starting', async () => {
+  test('disallows middleware registration after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
@@ -264,8 +264,9 @@ describe('TaskManager', () => {
     };
 
     client.start();
-
-    expect(() => client.addMiddleware(middleware)).not.toThrow();
+    expect(() => client.addMiddleware(middleware)).toThrow(
+      /Cannot add middleware after the task manager is initialized/i
+    );
   });
 
   describe('runNow', () => {

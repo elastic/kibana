@@ -6,8 +6,8 @@
 
 import { APICaller, CoreSetup } from 'kibana/server';
 
-import { TaskInstance } from '../../task_manager/server';
-import { PluginContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
+import { TaskInstance, TaskManager } from '../../task_manager/server';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 
 export const getMockTaskInstance = (): TaskInstance => ({
   state: { runs: 0, stats: {} },
@@ -48,12 +48,10 @@ export const getMockConfig = () => {
   };
 };
 
-export const getMockTaskManager = (fetch: any = getMockTaskFetch()) =>
-  (({
-    registerTaskDefinitions: () => undefined,
-    ensureScheduled: () => Promise.resolve(),
-    fetch,
-  } as unknown) as TaskManagerPluginSetupContract);
+export const getMockTaskManager = (fetch: any = getMockTaskFetch()): TaskManager => ({
+  ...taskManagerMock.create(),
+  fetch,
+});
 
 export const getCluster = () => ({
   callWithInternalUser: getMockCallWithInternal(),

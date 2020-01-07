@@ -18,6 +18,11 @@ export interface PluginContract {
   registerTaskDefinitions: TaskManager['registerTaskDefinitions'];
 }
 
+export interface LifecycleContract {
+  start: TaskManager['start'];
+  stop: TaskManager['stop'];
+}
+
 export interface LegacyDeps {
   config: any;
   serializer: any;
@@ -26,38 +31,20 @@ export interface LegacyDeps {
   logger: Logger;
 }
 
-export class Plugin {
-  private taskManager?: TaskManager;
+export function createTaskManager(
+  core: CoreSetup,
+  { logger, config, serializer, elasticsearch: { callAsInternalUser }, savedObjects }: LegacyDeps
+) {
+  const savedObjectsRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser, [
+    'task',
+  ]);
 
-  constructor() {}
-
-  // TODO: Make asynchronous like new platform
-  public setup(
-    core: CoreSetup,
-    { logger, config, serializer, elasticsearch: { callAsInternalUser }, savedObjects }: LegacyDeps
-  ): PluginContract {
-    const savedObjectsRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser, [
-      'task',
-    ]);
-
-    this.taskManager = new TaskManager({
-      taskManagerId: core.uuid.getInstanceUuid(),
-      config,
-      savedObjectsRepository,
-      serializer,
-      callAsInternalUser,
-      logger,
-    });
-
-    return this.taskManager;
-  }
-
-  public start(): PluginContract {
-    this.taskManager!.start();
-    return this.taskManager!;
-  }
-
-  public stop() {
-    this.taskManager!.stop();
-  }
+  return new TaskManager({
+    taskManagerId: core.uuid.getInstanceUuid(),
+    config,
+    savedObjectsRepository,
+    serializer,
+    callAsInternalUser,
+    logger,
+  });
 }

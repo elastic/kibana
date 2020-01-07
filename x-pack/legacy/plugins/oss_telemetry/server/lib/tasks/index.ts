@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, Logger } from 'kibana/server';
-import { PluginContract as TaskManagerPluginSetupContract } from '../../../../task_manager/server/plugin';
+import { TaskManager } from '../../../../task_manager/server';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
@@ -18,7 +18,7 @@ export function registerTasks({
   elasticsearch,
   config,
 }: {
-  taskManager?: TaskManagerPluginSetupContract;
+  taskManager?: TaskManager;
   logger: Logger;
   elasticsearch: CoreSetup['elasticsearch'];
   config: LegacyConfig;
@@ -46,7 +46,7 @@ export function scheduleTasks({
   xpackMainStatus,
   logger,
 }: {
-  taskManager?: TaskManagerPluginSetupContract;
+  taskManager?: TaskManager;
   xpackMainStatus: { kbnServer: KbnServer };
   logger: Logger;
 }) {
