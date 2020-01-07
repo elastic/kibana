@@ -31,7 +31,7 @@ describe('formatted_date', () => {
 
   describe('PreferenceFormattedDate', () => {
     test('renders correctly against snapshot', () => {
-      mockUseDateFormat.mockImplementation(() => null);
+      mockUseDateFormat.mockImplementation(() => '');
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -43,12 +43,11 @@ describe('formatted_date', () => {
       expect(wrapper.text()).toEqual('Feb 25, 2019 @ 22:27:05.000');
     });
 
-    test('it renders a UTC ISO8601 date string supplied when no configuration exists', () => {
-      mockUseDateFormat.mockImplementation(() => null);
-      mockUseTimeZone.mockImplementation(() => null);
+    test('it renders a UTC ISO8601 date string supplied when no date format configuration exists', () => {
+      mockUseDateFormat.mockImplementation(() => '');
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(wrapper.text()).toEqual(isoDateString);
+      expect(wrapper.text()).toEqual('2019-02-25T22:27:05Z');
     });
 
     test('it renders the correct timezone when a non-UTC configuration exists', () => {

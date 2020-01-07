@@ -17,13 +17,7 @@ export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) =
   const dateFormat = useDateFormat();
   const timeZone = useTimeZone();
 
-  return (
-    <>
-      {dateFormat && timeZone
-        ? moment.tz(value, timeZone).format(dateFormat)
-        : moment.utc(value).toISOString()}
-    </>
-  );
+  return <>{moment.tz(value, timeZone).format(dateFormat)}</>;
 });
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
