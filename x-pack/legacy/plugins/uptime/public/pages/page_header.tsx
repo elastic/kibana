@@ -48,7 +48,7 @@ export const PageHeaderComponent = ({
   useEffect(() => {
     if (monitorPage) {
       setHeaderText(monitorStatus?.url?.full);
-      if (monitorStatus) {
+      if (monitorStatus?.monitor) {
         const { name, id } = monitorStatus.monitor;
         document.title = getTitle(name || id);
       }
