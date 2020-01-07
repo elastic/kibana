@@ -164,7 +164,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.estimateDataFrameAnalyticsMemoryUsage',
+          'ml.explainDataFrameAnalytics',
           {
             body: request.body,
           }
