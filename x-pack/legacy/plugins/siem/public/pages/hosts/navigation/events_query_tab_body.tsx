@@ -31,8 +31,8 @@ export const EventsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
-  refetch,
   setQuery,
+  skip,
   startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
@@ -45,8 +45,8 @@ export const EventsQueryTabBody = ({
         endDate={endDate}
         filterQuery={filterQuery}
         query={EventsOverTimeGqlQuery}
-        refetch={refetch}
         setQuery={setQuery}
+        skip={skip}
         sourceId="default"
         stackByOptions={eventsStackByOptions}
         startDate={startDate}

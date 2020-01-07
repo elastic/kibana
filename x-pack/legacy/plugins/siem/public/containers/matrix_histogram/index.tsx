@@ -40,7 +40,6 @@ export interface OwnProps extends QueryTemplateProps {
   id: string;
   mapping?: MatrixHistogramMappingTypes;
   query: Maybe<string>;
-  refetch: inputsModel.Refetch;
   setQuery: SetQuery;
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];

@@ -6,14 +6,13 @@
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs, getOr } from 'lodash/fp';
 import numeral from '@elastic/numeral';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import {
   MatrixHistogramDataTypes,
   MatrixHistogramMappingTypes,
   MatrixHistogramQueryProps,
-  MatrixHistogramQueryActionProps,
   MatrixHistogramQueryVariables,
   MatrixHistogramQuery,
 } from './types';
@@ -24,6 +23,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../../containers/helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { NetworkDnsSortField } from '../../graphql/types';
+import { inputsModel } from '../../store';
 
 export const getBarchartConfigs = ({
   from,
@@ -113,19 +113,20 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   endDate,
   filterQuery,
   query,
-  setLoading,
-  setData,
-  setInspect,
-  setTotalCount,
   startDate,
   sort,
+  title,
   isPtrIncluded,
   isInspected,
   isHistogram,
   pagination,
-}: MatrixHistogramQueryProps & MatrixHistogramQueryActionProps) => {
+}: MatrixHistogramQueryProps) => {
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [, dispatchToaster] = useStateToaster();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
+  const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
+  const [totalCount, setTotalCount] = useState(-1);
   const apolloClient = useApolloClient();
 
   useEffect(() => {
@@ -182,9 +183,9 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setInspect(null);
               errorToToaster({
                 title: i18n.translate(
-                  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDescription',
+                  `xpack.siem.component.matrixHistogram.${title}.errorFetchingSignalsDescription`,
                   {
-                    defaultMessage: 'Failed to query signals',
+                    defaultMessage: `Failed to query ${title}`,
                   }
                 ),
                 error,
@@ -202,4 +203,6 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       abortCtrl.abort();
     };
   }, [query, isInspected, startDate, endDate]);
+
+  return { data, loading, inspect, totalCount };
 };

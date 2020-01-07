@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApolloConsumer } from 'react-apollo';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
-import { ChartSeriesData } from '../charts/common';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 import { Loader } from '../loader';
@@ -25,10 +23,9 @@ import {
   MatrixHistogramOption,
   HistogramAggregation,
   MatrixHistogramQueryProps,
-  MatrixHistogramDataTypes,
 } from './types';
 import { generateTablePaginationOptions } from '../paginated_table/helpers';
-import { inputsModel } from '../../store';
+import { ChartSeriesData } from '../charts/common';
 
 export const MatrixHistogram = React.memo(
   ({
@@ -45,10 +42,10 @@ export const MatrixHistogram = React.memo(
     limit,
     mapping,
     query,
-    refetch,
     scaleType = ScaleType.Time,
     setQuery,
     showLegend,
+    skip,
     stackByOptions,
     startDate,
     subtitle,
@@ -75,11 +72,8 @@ export const MatrixHistogram = React.memo(
       defaultStackByOption
     );
     const [subtitleWithCounts, setSubtitle] = useState(subtitle);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
-    const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
     const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
-    const [totalCount, setTotalCount] = useState(-1);
+    const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
     const setSelectedChatOptionCallback = useCallback(
       (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedStackByOption(
@@ -89,105 +83,92 @@ export const MatrixHistogram = React.memo(
       []
     );
 
-    return (
-      <ApolloConsumer>
-        {client => {
-          useQuery<{}, HistogramAggregation>({
-            dataKey,
-            endDate,
-            filterQuery,
-            query,
-            setLoading,
-            setData,
-            setInspect,
-            setTotalCount,
-            startDate,
-            sort,
-            isInspected,
-            isPtrIncluded,
-            isHistogram: true,
-            pagination:
-              activePage != null && limit != null
-                ? generateTablePaginationOptions(activePage, limit)
-                : undefined,
-          });
-          useEffect(() => {
-            const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
-            setSubtitle(formattedSubTitle);
+    const { data, loading, inspect, totalCount } = useQuery<{}, HistogramAggregation>({
+      dataKey,
+      endDate,
+      filterQuery,
+      query,
+      skip,
+      startDate,
+      sort,
+      title,
+      isInspected,
+      isPtrIncluded,
+      isHistogram: true,
+      pagination:
+        activePage != null && limit != null
+          ? generateTablePaginationOptions(activePage, limit)
+          : undefined,
+    });
+    useEffect(() => {
+      const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
+      setSubtitle(formattedSubTitle);
 
-            if (totalCount <= 0) {
-              if (hideHistogramIfEmpty) setHideHistogram(true);
-              else setHideHistogram(false);
-            } else {
-              setHideHistogram(false);
-            }
+      if (totalCount <= 0) {
+        if (hideHistogramIfEmpty) setHideHistogram(true);
+        else setHideHistogram(false);
+      } else {
+        setHideHistogram(false);
+      }
 
-            setQuery({ id, inspect, loading, refetch });
-            return () => {
-              if (deleteQuery) {
-                deleteQuery({ id });
-              }
-            };
-          }, [totalCount, isInspected, loading]);
+      setBarChartData(getCustomChartData(data, mapping));
 
-          const barChartData: ChartSeriesData[] = useMemo(() => getCustomChartData(data, mapping), [
-            data,
-          ]);
-          return !hideHistogram ? (
-            <Panel
-              data-test-subj={`${id}Panel`}
-              loading={loading}
-              onMouseEnter={handleOnMouseEnter}
-              onMouseLeave={handleOnMouseLeave}
-            >
-              <HeaderSection
-                id={id}
-                title={
-                  title && selectedStackByOption
-                    ? `${title} by ${selectedStackByOption.text}`
-                    : null
+      setQuery({ id, inspect, loading, refetch: undefined });
+      return () => {
+        if (deleteQuery) {
+          deleteQuery({ id });
+        }
+      };
+    }, [totalCount, isInspected, loading, data]);
+
+    return !hideHistogram ? (
+      <Panel
+        data-test-subj={`${id}Panel`}
+        loading={loading}
+        onMouseEnter={handleOnMouseEnter}
+        onMouseLeave={handleOnMouseLeave}
+      >
+        <HeaderSection
+          id={id}
+          title={
+            title && selectedStackByOption ? `${title} by ${selectedStackByOption.text}` : null
+          }
+          showInspect={!loading && showInspect}
+          subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+        >
+          {stackByOptions && (
+            <EuiSelect
+              onChange={setSelectedChatOptionCallback}
+              options={stackByOptions}
+              prepend={i18n.translate(
+                'xpack.siem.detectionEngine.signals.histogram.stackByOptions.stackByLabel',
+                {
+                  defaultMessage: 'Stack by',
                 }
-                showInspect={!loading && showInspect}
-                subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
-              >
-                {stackByOptions && (
-                  <EuiSelect
-                    onChange={setSelectedChatOptionCallback}
-                    options={stackByOptions}
-                    prepend={i18n.translate(
-                      'xpack.siem.detectionEngine.signals.histogram.stackByOptions.stackByLabel',
-                      {
-                        defaultMessage: 'Stack by',
-                      }
-                    )}
-                    value={selectedStackByOption?.value}
-                  />
-                )}
-              </HeaderSection>
-
-              {loading ? (
-                <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
-              ) : (
-                <>
-                  <BarChart barChart={barChartData} configs={barchartConfigs} />
-
-                  {loading && (
-                    <Loader
-                      overlay
-                      overlayBackground={
-                        darkMode
-                          ? darkTheme.euiPageBackgroundColor
-                          : lightTheme.euiPageBackgroundColor
-                      }
-                      size="xl"
-                    />
-                  )}
-                </>
               )}
-            </Panel>
-          ) : null;
-        }}
-      </ApolloConsumer>
-    );
+              value={selectedStackByOption?.value}
+            />
+          )}
+        </HeaderSection>
+
+        {loading ? (
+          <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
+        ) : (
+          <>
+            <BarChart barChart={barChartData} configs={barchartConfigs} />
+
+            {loading && (
+              <Loader
+                overlay
+                overlayBackground={
+                  darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                }
+                size="xl"
+              />
+            )}
+          </>
+        )}
+      </Panel>
+    ) : null;
   }
 );

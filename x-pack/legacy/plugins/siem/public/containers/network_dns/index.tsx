@@ -30,6 +30,7 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/cons
 import { MatrixHistogram } from '../../components/matrix_histogram';
 import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
 const ID = 'networkDnsQuery';
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
@@ -56,6 +57,7 @@ interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
   defaultStackByOption: MatrixHistogramOption;
   query: DocumentNode;
   scaleType: ScaleType;
+  setQuery: SetQuery;
   stackByOptions: MatrixHistogramOption[];
   title: string;
   type: networkModel.NetworkType;

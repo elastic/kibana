@@ -29,7 +29,6 @@ const AnomaliesOverTimeGqlQuery = gql`
 export const AnomaliesQueryTabBody = ({
   deleteQuery,
   endDate,
-  refetch,
   setQuery,
   skip,
   startDate,
@@ -65,8 +64,8 @@ export const AnomaliesQueryTabBody = ({
         hideHistogramIfEmpty={true}
         id={ID}
         query={AnomaliesOverTimeGqlQuery}
-        refetch={refetch}
         setQuery={setQuery}
+        skip={skip}
         sourceId="default"
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}

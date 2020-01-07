@@ -45,6 +45,7 @@ export const DnsQueryTabBody = ({
       filterQuery={filterQuery}
       query={networkDnsQuery}
       scaleType={ScaleType.Ordinal}
+      setQuery={setQuery}
       sourceId="default"
       startDate={startDate}
       stackByOptions={dnsStackByOptions}
@@ -73,7 +74,6 @@ export const DnsQueryTabBody = ({
         inspect,
         isInspected,
         refetch,
-        histogram,
       }) => (
         <NetworkDnsTableManage
           data={networkDns}

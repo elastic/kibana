@@ -32,8 +32,8 @@ export const AlertsView = ({
   endDate,
   filterQuery,
   pageFilters,
-  refetch,
   setQuery,
+  skip,
   startDate,
   type,
   updateDateRange = noop,
@@ -47,8 +47,8 @@ export const AlertsView = ({
       filterQuery={filterQuery}
       id={ID}
       query={AlertsOverTimeGqlQuery}
-      refetch={refetch}
       setQuery={setQuery}
+      skip={skip}
       sourceId="default"
       stackByOptions={alertsStackByOptions}
       startDate={startDate}

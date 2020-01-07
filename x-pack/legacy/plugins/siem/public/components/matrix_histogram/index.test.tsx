@@ -40,13 +40,15 @@ describe('Matrix Histogram Component', () => {
     isInspected: false,
     isPtrIncluded: false,
     query: mockQuery,
+    setQuery: jest.fn(),
+    skip: false,
     sourceId: 'default',
     stackByOptions: [{ text: 'text', value: 'value' }],
     startDate: new Date('2019-07-18T19:00: 00.000Z').valueOf(),
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',
-    updateDateRange: () => {},
+    updateDateRange: jest.fn(),
   };
   describe('rendering', () => {
     test('it renders EuiLoadingContent on initialLoad', () => {

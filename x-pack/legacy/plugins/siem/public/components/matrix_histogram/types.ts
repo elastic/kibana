@@ -6,7 +6,6 @@
 
 import { ScaleType } from '@elastic/charts';
 import { SetStateAction } from 'react';
-import { Dispatch } from 'src/plugins/kibana_utils/public';
 import { DocumentNode } from 'graphql';
 import {
   MatrixOverTimeHistogramData,
@@ -19,7 +18,6 @@ import {
 } from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
-import { inputsModel } from '../../store';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
@@ -39,7 +37,6 @@ export interface MatrixHistogramBasicProps {
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
-  refetch: inputsModel.Refetch;
   setQuery: SetQuery;
   sourceId: string;
   startDate: number;
@@ -57,18 +54,13 @@ export interface MatrixHistogramQueryProps {
   limit?: number;
   query: DocumentNode;
   sort?: NetworkDnsSortField;
+  skip: boolean;
   startDate: number;
+  title: string;
   isInspected: boolean;
   isPtrIncluded: boolean;
   isHistogram?: boolean;
   pagination?: PaginationInputPaginated;
-}
-
-export interface MatrixHistogramQueryActionProps {
-  setData: Dispatch<SetStateAction<MatrixHistogramDataTypes[] | null>>;
-  setInspect: Dispatch<SetStateAction<inputsModel.InspectQuery | null>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
-  setTotalCount: Dispatch<SetStateAction<number>>;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

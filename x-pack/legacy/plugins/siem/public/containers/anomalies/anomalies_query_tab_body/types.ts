@@ -13,7 +13,6 @@ import { HostsType } from '../../../store/hosts/model';
 import { NetworkType } from '../../../store/network/model';
 import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
 import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
-import { inputsModel } from '../../../store';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType;
@@ -27,7 +26,6 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   endDate: number;
   flowTarget?: FlowTarget;
   narrowDateRange: NarrowDateRange;
-  refetch: inputsModel.Refetch;
   setQuery: SetQuery;
   startDate: number;
   skip: boolean;
