@@ -17,7 +17,25 @@
  * under the License.
  */
 
-export * from './core_editor';
-export * from './token';
-export * from './tokens_provider';
-export * from './common';
+import { CoreEditor, Position } from '../../types';
+import { getCurrentMethodAndTokenPaths } from './autocomplete';
+
+// @ts-ignore
+import { getTopLevelUrlCompleteComponents } from '../kb/kb';
+// @ts-ignore
+import { populateContext } from './engine';
+
+export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: any) {
+  const lineValue = editor.getLineValue(pos.lineNumber);
+  const context = {
+    ...getCurrentMethodAndTokenPaths(
+      editor,
+      { column: lineValue.length, lineNumber: pos.lineNumber },
+      parser,
+      true
+    ),
+  };
+  const components = getTopLevelUrlCompleteComponents(context.method);
+  populateContext(context.urlTokenPath, context, editor, true, components);
+  return context.endpoint;
+}

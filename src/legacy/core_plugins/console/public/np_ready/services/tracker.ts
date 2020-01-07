@@ -17,7 +17,15 @@
  * under the License.
  */
 
-export * from './core_editor';
-export * from './token';
-export * from './tokens_provider';
-export * from './common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { MetricsTracker } from '../types';
+import { createUiStatsReporter } from '../../../../ui_metric/public';
+
+const APP_TRACKER_NAME = 'console';
+export const createUsageTracker = (): MetricsTracker => {
+  const track = createUiStatsReporter(APP_TRACKER_NAME);
+  return {
+    count: (eventName: string) => track(METRIC_TYPE.COUNT, eventName),
+    load: (eventName: string) => track(METRIC_TYPE.LOADED, eventName),
+  };
+};
