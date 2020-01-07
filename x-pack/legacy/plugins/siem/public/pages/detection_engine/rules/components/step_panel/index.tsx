@@ -17,15 +17,15 @@ interface StepPanelProps {
 }
 
 const MyPanel = styled(EuiPanel)`
-  poistion: relative;
+  position: relative;
 `;
 
-export const StepPanel = memo<StepPanelProps>(({ children, loading, title }) => {
-  return (
-    <MyPanel>
-      {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      <HeaderSection title={title} />
-      {children}
-    </MyPanel>
-  );
-});
+const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
+  <MyPanel>
+    {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+    <HeaderSection title={title} />
+    {children}
+  </MyPanel>
+);
+
+export const StepPanel = memo(StepPanelComponent);

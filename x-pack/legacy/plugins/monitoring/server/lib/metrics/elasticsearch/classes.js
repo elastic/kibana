@@ -116,7 +116,7 @@ export class LatencyMetric extends ElasticsearchMetric {
       },
     };
 
-    this.calculation = (bucket, _key, _metric, _bucketSizeInSeconds) => {
+    this.calculation = bucket => {
       const timeInMillisDeriv = _.get(bucket, 'event_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'event_total_deriv.normalized_value', null);
 
