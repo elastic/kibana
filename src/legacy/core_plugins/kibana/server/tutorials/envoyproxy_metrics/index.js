@@ -30,11 +30,11 @@ export function envoyproxyMetricsSpecProvider(server, context) {
   return {
     id: 'envoyproxyMetrics',
     name: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.nameTitle', {
-      defaultMessage: 'envoyproxy metrics',
+      defaultMessage: 'Envoy Proxy metrics',
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from envoyproxy.',
+      defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.longDescription', {
       defaultMessage:
