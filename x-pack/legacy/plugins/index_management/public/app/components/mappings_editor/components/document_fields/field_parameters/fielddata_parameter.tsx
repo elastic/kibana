@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiCallOut, EuiLink, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiLink, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   UseField,
@@ -99,13 +99,25 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
         }}
       >
         {({ min, max }) => {
+          const FielddataFrequencyComponent =
+            valueType === 'percentage'
+              ? FielddataFrequencyFilterPercentage
+              : FielddataFrequencyFilterAbsolute;
+
           return (
             <>
-              {valueType === 'percentage' ? (
-                <FielddataFrequencyFilterPercentage min={min} max={max} />
-              ) : (
-                <FielddataFrequencyFilterAbsolute min={min} max={max} />
-              )}
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <FielddataFrequencyComponent min={min} max={max} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <UseField
+                    path="fielddata_frequency_filter.min_segment_size"
+                    config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
+                    component={Field}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
               <EuiSpacer size="s" />
 
@@ -125,14 +137,6 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
           );
         }}
       </UseMultiFields>
-
-      <EuiSpacer />
-
-      <UseField
-        path="fielddata_frequency_filter.min_segment_size"
-        config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
-        component={Field}
-      />
 
       <FormDataProvider pathsToWatch="fielddata">
         {({ fielddata }) =>

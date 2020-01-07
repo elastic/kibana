@@ -35,8 +35,9 @@ export const FielddataFrequencyFilterPercentage = ({ min, max }: Props) => {
         max={100}
         value={[min.value as number, max.value as number]}
         onChange={onFrequencyFilterChange}
-        showInput
-        fullWidth
+        showInput="inputWithPopover"
+        // @ts-ignore
+        append={'%'}
       />
     </EuiFormRow>
   );
