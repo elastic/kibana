@@ -82,16 +82,6 @@ node scripts/functional_tests_server.js --config test/reporting/configs/chromium
 
 **Note:** Dashboard has some snapshot testing too, in `_dashboard_snapshots.js`. This test watches for a command line flag `--updateBaselines` which automates updating the baselines. Probably worthwhile to do some similar here in the long run.
 
-  ### Adding a new BWC test
-
-  We have tests that ensure the latest version of Kibana will continue to generate reports from URLs generated in previous versions, to ensure backward compatibility.  These tests are in `api/bwc_generation_urls.js`. It's important to update these every now and then and add new ones, especially if anything in the URL changed in a release.
-
-  To add test coverage for a specific minor release,:
-1. Checkout previous branch, e.g. `git checkout upstream/6.4`
-2. Sync your environment via `yarn kbn bootstrap` (Note, if you run into problems you may want to first clean via `yarn kbn clean`)
-3. Start up kibana and Elasticsearch (`yarn es snapshot --license trial` in one terminal, and `yarn start` in another)
-4. Load the reporting test data that is used in the tests. Ensure you are in the `x-pack` directory and run:
-
 ```
 node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 load ../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana
 ```

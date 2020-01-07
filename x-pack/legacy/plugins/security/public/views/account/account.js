@@ -6,21 +6,12 @@
 
 import routes from 'ui/routes';
 import template from './account.html';
-import '../../services/shield_user';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { npSetup } from 'ui/new_platform';
 import { AccountManagementPage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-const renderReact = (elem, user) => {
-  render(
-    <I18nContext>
-      <AccountManagementPage user={user} />
-    </I18nContext>,
-    elem
-  );
-};
 
 routes.when('/account', {
   template,
@@ -31,13 +22,8 @@ routes.when('/account', {
       }),
     },
   ],
-  resolve: {
-    user(ShieldUser) {
-      return ShieldUser.getCurrent().$promise;
-    },
-  },
   controllerAs: 'accountController',
-  controller($scope, $route) {
+  controller($scope) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('userProfileReactRoot');
       if (elem) {
@@ -45,8 +31,12 @@ routes.when('/account', {
       }
     });
     $scope.$$postDigest(() => {
-      const elem = document.getElementById('userProfileReactRoot');
-      renderReact(elem, $route.current.locals.user);
+      render(
+        <I18nContext>
+          <AccountManagementPage securitySetup={npSetup.plugins.security} />
+        </I18nContext>,
+        document.getElementById('userProfileReactRoot')
+      );
     });
   },
 });
