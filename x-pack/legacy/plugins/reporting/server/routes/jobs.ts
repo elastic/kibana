@@ -42,15 +42,15 @@ export function registerJobInfoRoutes(
     method: 'GET',
     options: getRouteConfig(),
     handler: (originalRequest: RequestFacade) => {
-      const requestFacade = makeRequestFacade(originalRequest);
-      const { page: queryPage, size: querySize, ids: queryIds } = requestFacade.query;
+      const request = makeRequestFacade(originalRequest);
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
 
       const results = jobsQuery.list(
-        requestFacade.pre.management.jobTypes,
-        requestFacade.pre.user,
+        request.pre.management.jobTypes,
+        request.pre.user,
         page,
         size,
         jobIds
@@ -65,11 +65,8 @@ export function registerJobInfoRoutes(
     method: 'GET',
     options: getRouteConfig(),
     handler: (originalRequest: RequestFacade) => {
-      const requestFacade = makeRequestFacade(originalRequest);
-      const results = jobsQuery.count(
-        requestFacade.pre.management.jobTypes,
-        requestFacade.pre.user
-      );
+      const request = makeRequestFacade(originalRequest);
+      const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
   });
@@ -80,17 +77,17 @@ export function registerJobInfoRoutes(
     method: 'GET',
     options: getRouteConfig(),
     handler: (originalRequest: RequestFacade) => {
-      const requestFacade = makeRequestFacade(originalRequest);
-      const { docId } = requestFacade.params;
+      const request = makeRequestFacade(originalRequest);
+      const { docId } = request.params;
 
-      return jobsQuery.get(requestFacade.pre.user, docId, { includeContent: true }).then(
+      return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
         ({ _source: job }: JobSource<any>): JobDocOutput => {
           if (!job) {
             throw boom.notFound();
           }
 
           const { jobtype: jobType } = job;
-          if (!requestFacade.pre.management.jobTypes.includes(jobType)) {
+          if (!request.pre.management.jobTypes.includes(jobType)) {
             throw boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
@@ -106,18 +103,18 @@ export function registerJobInfoRoutes(
     method: 'GET',
     options: getRouteConfig(),
     handler: (originalRequest: RequestFacade) => {
-      const requestFacade = makeRequestFacade(originalRequest);
-      const { docId } = requestFacade.params;
+      const request = makeRequestFacade(originalRequest);
+      const { docId } = request.params;
 
       return jobsQuery
-        .get(requestFacade.pre.user, docId)
+        .get(request.pre.user, docId)
         .then(({ _source: job }: JobSource<any>): JobSource<any>['_source'] => {
           if (!job) {
             throw boom.notFound();
           }
 
           const { jobtype: jobType, payload } = job;
-          if (!requestFacade.pre.management.jobTypes.includes(jobType)) {
+          if (!request.pre.management.jobTypes.includes(jobType)) {
             throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
           }
 
