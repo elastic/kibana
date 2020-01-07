@@ -130,6 +130,10 @@ export interface RequestBasicOptions {
   defaultIndex: string[];
 }
 
+export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
+  stackByField: string;
+}
+
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
   fields: readonly string[];

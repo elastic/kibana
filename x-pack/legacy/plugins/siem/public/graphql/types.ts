@@ -2153,6 +2153,8 @@ export interface AlertsHistogramSourceArgs {
   defaultIndex: string[];
 
   timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
 }
 export interface AnomaliesHistogramSourceArgs {
   timerange: TimerangeInput;
@@ -2160,6 +2162,8 @@ export interface AnomaliesHistogramSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2176,6 +2180,8 @@ export interface AuthenticationsHistogramSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2212,6 +2218,8 @@ export interface EventsHistogramSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;

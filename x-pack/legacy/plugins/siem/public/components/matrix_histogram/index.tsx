@@ -99,6 +99,7 @@ export const MatrixHistogram = React.memo(
         activePage != null && limit != null
           ? generateTablePaginationOptions(activePage, limit)
           : undefined,
+      stackByField: selectedStackByOption.value,
     });
     useEffect(() => {
       const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());

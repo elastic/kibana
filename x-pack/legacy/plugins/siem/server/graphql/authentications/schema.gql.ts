@@ -52,6 +52,7 @@ export const authenticationsSchema = gql`
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!
+      stackByField: String
     ): AuthenticationsOverTimeData!
   }
 `;

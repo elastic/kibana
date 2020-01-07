@@ -18,6 +18,7 @@ export const anomaliesSchema = gql`
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!
+      stackByField: String
     ): AnomaliesOverTimeData!
   }
 `;

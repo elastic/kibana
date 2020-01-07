@@ -22,7 +22,6 @@ import { errorToToaster } from '../ml/api/error_to_toaster';
 import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../../containers/helpers';
 import { useApolloClient } from '../../utils/apollo_context';
-import { NetworkDnsSortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
 
 export const getBarchartConfigs = ({
@@ -113,6 +112,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   endDate,
   filterQuery,
   query,
+  stackByField,
   startDate,
   sort,
   title,
@@ -139,7 +139,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       if (!apolloClient) return null;
 
       return apolloClient
-        .query<MatrixHistogramQuery, MatrixHistogramQueryVariables<NetworkDnsSortField>>({
+        .query<MatrixHistogramQuery, MatrixHistogramQueryVariables>({
           query,
           fetchPolicy: 'cache-first',
           variables: {
@@ -153,6 +153,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
             defaultIndex,
             inspect: isInspected,
             isHistogram,
+            stackByField,
             sort,
             isPtrIncluded,
             pagination,

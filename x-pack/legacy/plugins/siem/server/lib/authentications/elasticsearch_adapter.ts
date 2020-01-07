@@ -17,7 +17,7 @@ import {
   FrameworkAdapter,
   FrameworkRequest,
   RequestOptionsPaginated,
-  RequestBasicOptions,
+  MatrixHistogramRequestOptions,
 } from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -112,7 +112,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
 
   public async getAuthenticationsOverTime(
     request: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AuthenticationsOverTimeData> {
     const dsl = buildAuthenticationsOverTimeQuery(options);
     const response = await this.framework.callWithRequest<AuthenticationHit, TermAggregation>(

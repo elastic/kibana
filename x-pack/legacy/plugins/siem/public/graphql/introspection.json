@@ -703,6 +703,12 @@
                   "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -749,6 +755,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -857,6 +869,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -1093,6 +1111,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],

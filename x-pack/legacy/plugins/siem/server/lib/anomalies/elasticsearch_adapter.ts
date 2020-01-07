@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 
 import { AnomaliesOverTimeData } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
-import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 
 import { AnomalyHit, AnomaliesAdapter, AnomaliesActionGroupData } from './types';
@@ -20,7 +20,7 @@ export class ElasticsearchAnomaliesAdapter implements AnomaliesAdapter {
 
   public async getAnomaliesOverTime(
     request: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AnomaliesOverTimeData> {
     const dsl = buildAnomaliesOverTimeQuery(options);
 

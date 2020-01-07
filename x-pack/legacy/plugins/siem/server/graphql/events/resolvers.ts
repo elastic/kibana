@@ -75,6 +75,7 @@ export const createEventsResolvers = (
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,
+        stackByField: args.stackByField,
       };
       return libs.events.getEventsOverTime(req, options);
     },

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 
 import expect from '@kbn/expect';
 import { ElasticsearchAlertsAdapter } from './elasticsearch_adapter';
@@ -41,7 +41,7 @@ describe('alerts elasticsearch_adapter', () => {
       const EsNetworkTimelineAlerts = new ElasticsearchAlertsAdapter(mockFramework);
       const data = await EsNetworkTimelineAlerts.getAlertsHistogramData(
         (mockRequest as unknown) as FrameworkRequest,
-        (mockOptions as unknown) as RequestBasicOptions
+        (mockOptions as unknown) as MatrixHistogramRequestOptions
       );
 
       expect(data).to.eql({

@@ -54,6 +54,7 @@ export interface MatrixHistogramQueryProps {
   limit?: number;
   query: DocumentNode;
   sort?: NetworkDnsSortField;
+  stackByField: string;
   skip: boolean;
   startDate: number;
   title: string;
@@ -69,7 +70,7 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   showLegend?: boolean;
 }
 
-export interface MatrixHistogramQueryVariables<SortField> {
+export interface MatrixHistogramQueryVariables<SortField = NetworkDnsSortField> {
   sourceId: string;
   timerange: TimerangeInput;
   filterQuery?: Maybe<string>;
@@ -77,6 +78,7 @@ export interface MatrixHistogramQueryVariables<SortField> {
   inspect: boolean;
   isHistogram?: boolean;
   sort?: SortField;
+  stackByField: string;
   isPtrIncluded: boolean;
   pagination?: PaginationInputPaginated;
 }

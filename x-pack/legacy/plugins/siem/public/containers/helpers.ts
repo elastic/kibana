@@ -22,6 +22,7 @@ export const getMatrixHistogramQuery = (dataKey: string): string => {
     $defaultIndex: [String!]!
     $filterQuery: String
     $inspect: Boolean!
+    $stackByField: String!
   ) {
     source(id: $sourceId) {
       id
@@ -29,6 +30,7 @@ export const getMatrixHistogramQuery = (dataKey: string): string => {
         timerange: $timerange
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        stackByField: $stackByField
       ) {
         ${dataKey}OverTimeByModule {
           x

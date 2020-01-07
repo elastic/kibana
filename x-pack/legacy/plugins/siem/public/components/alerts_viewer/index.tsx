@@ -19,8 +19,8 @@ import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 const ID = 'alertsOverTimeQuery';
 const alertsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.ALERTS_STACK_BY_ACTIONS,
-    value: 'event.actions',
+    text: i18n.ALERTS_STACK_BY_MODULE,
+    value: 'event.module',
   },
 ];
 const dataKey = 'Alerts';
@@ -53,7 +53,7 @@ export const AlertsView = ({
       stackByOptions={alertsStackByOptions}
       startDate={startDate}
       subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
-      title={`${i18n.ALERTS_DOCUMENT_TYPE} ${i18n.ALERTS_BY}`}
+      title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
       type={type}
       updateDateRange={updateDateRange}
     />

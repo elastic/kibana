@@ -41,6 +41,7 @@ export const createAuthenticationsResolvers = (
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,
+        stackByField: args.stackByField,
       };
       return libs.authentications.getAuthenticationsOverTime(req, options);
     },

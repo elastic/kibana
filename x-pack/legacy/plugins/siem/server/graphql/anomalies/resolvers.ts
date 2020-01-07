@@ -31,6 +31,7 @@ export const createAnomaliesResolvers = (
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,
+        stackByField: args.stackByField,
       };
       return libs.anomalies.getAnomaliesOverTime(req, options);
     },

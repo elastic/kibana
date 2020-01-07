@@ -18,16 +18,12 @@ export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.hosts.alertsDocumen
   defaultMessage: 'Alerts',
 });
 
-export const ALERTS_STACK_BY_ACTIONS = i18n.translate(
+export const ALERTS_STACK_BY_MODULE = i18n.translate(
   'xpack.siem.histogram.alertsStackByOptions.eventActions',
   {
-    defaultMessage: 'actions',
+    defaultMessage: 'modules',
   }
 );
-
-export const ALERTS_BY = i18n.translate('xpack.siem.histogram.alertsCountFrequencyByModuleTitle', {
-  defaultMessage: 'by',
-});
 
 export const SHOWING = i18n.translate('xpack.siem.histogram.showing', {
   defaultMessage: 'Showing',
