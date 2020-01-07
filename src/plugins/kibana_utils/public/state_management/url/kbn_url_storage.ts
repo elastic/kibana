@@ -122,11 +122,15 @@ export interface IKbnUrlControls {
   updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string>;
 
   /**
-   * Synchronously Flushes scheduled url updates
+   * Synchronously flushes scheduled url updates
    * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
    */
   flush: (replace?: boolean) => string;
-  clear: () => void;
+
+  /**
+   * Cancels any pending url updates
+   */
+  cancel: () => void;
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string;
 
@@ -155,18 +159,19 @@ export const createKbnUrlControls = (
   }
 
   // queue clean up
-  function clear() {
+  function cleanUp() {
     updateQueue.splice(0, updateQueue.length);
     shouldReplace = true;
   }
 
+  // runs scheduled url updates
   function flush(replace = shouldReplace) {
     if (updateQueue.length === 0) return getCurrentUrl();
     const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+
+    cleanUp();
+
     const newUrl = updateUrl(resultUrl, replace);
-
-    clear();
-
     return newUrl;
   }
 
@@ -191,8 +196,8 @@ export const createKbnUrlControls = (
     flush: (replace?: boolean) => {
       return flush(replace);
     },
-    clear: () => {
-      clear();
+    cancel: () => {
+      cleanUp();
     },
   };
 };

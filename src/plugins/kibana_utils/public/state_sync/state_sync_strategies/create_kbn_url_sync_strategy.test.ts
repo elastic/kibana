@@ -57,7 +57,7 @@ describe('KbnUrlSyncStrategy', () => {
       const key = '_s';
       const pr = syncStrategy.toStorage(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      syncStrategy.clear();
+      syncStrategy.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
       expect(syncStrategy.fromStorage(key)).toEqual(null);

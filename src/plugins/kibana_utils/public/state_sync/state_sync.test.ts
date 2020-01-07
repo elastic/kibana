@@ -30,6 +30,7 @@ import { Observable, Subject } from 'rxjs';
 import {
   createSessionStorageSyncStrategy,
   createKbnUrlSyncStrategy,
+  IKbnUrlSyncStrategy,
 } from './state_sync_strategies';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
@@ -159,7 +160,9 @@ describe('state_sync', () => {
     let sessionStorage: StubBrowserStorage;
     let sessionStorageSyncStrategy: ISyncStrategy;
     let history: History;
-    let urlSyncStrategy: ISyncStrategy;
+    let urlSyncStrategy: IKbnUrlSyncStrategy;
+    const getCurrentUrl = () => history.createHref(history.location);
+    const tick = () => new Promise(resolve => setTimeout(resolve));
 
     beforeEach(() => {
       container.set(defaultState);
@@ -191,6 +194,100 @@ describe('state_sync', () => {
 
       expect(container.getState()).toEqual(newStateFromUrl);
       expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual(newStateFromUrl);
+
+      stop();
+    });
+
+    it('KbnUrlSyncStrategy applies url updates asynchronously to trigger single history change', async () => {
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
+          syncStrategy: urlSyncStrategy,
+        },
+      ]);
+      start();
+
+      const startHistoryLength = history.length;
+      container.transitions.add({ id: 2, text: '2', completed: false });
+      container.transitions.add({ id: 3, text: '3', completed: false });
+      container.transitions.completeAll();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      await tick();
+      expect(history.length).toBe(startHistoryLength + 1);
+
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+      );
+
+      stop();
+    });
+
+    it('KbnUrlSyncStrategy supports flushing url updates synchronously and triggers single history change', async () => {
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
+          syncStrategy: urlSyncStrategy,
+        },
+      ]);
+      start();
+
+      const startHistoryLength = history.length;
+      container.transitions.add({ id: 2, text: '2', completed: false });
+      container.transitions.add({ id: 3, text: '3', completed: false });
+      container.transitions.completeAll();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      urlSyncStrategy.flush();
+
+      expect(history.length).toBe(startHistoryLength + 1);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+      );
+
+      await tick();
+
+      expect(history.length).toBe(startHistoryLength + 1);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+      );
+
+      stop();
+    });
+
+    it('KbnUrlSyncStrategy supports cancellation of pending updates ', async () => {
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          syncKey: key,
+          syncStrategy: urlSyncStrategy,
+        },
+      ]);
+      start();
+
+      const startHistoryLength = history.length;
+      container.transitions.add({ id: 2, text: '2', completed: false });
+      container.transitions.add({ id: 3, text: '3', completed: false });
+      container.transitions.completeAll();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      urlSyncStrategy.cancel();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      await tick();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
       stop();
     });

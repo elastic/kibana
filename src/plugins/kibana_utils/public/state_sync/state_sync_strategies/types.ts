@@ -27,12 +27,11 @@ import { Observable } from 'rxjs';
  *
  * For an example take a look at already implemented URL sync strategies
  */
-
 export interface ISyncStrategy {
   /**
    * Take in a state object, should serialise and persist
    */
-  toStorage: <State>(syncKey: string, state: State) => void;
+  toStorage: <State>(syncKey: string, state: State) => any;
 
   /**
    * Should retrieve state from the storage and deserialize it
@@ -45,7 +44,8 @@ export interface ISyncStrategy {
   storageChange$?: <State = unknown>(syncKey: string) => Observable<State | null>;
 
   /**
-   * Optional method to clean up any pending activity
+   * Optional method to cancel any pending activity
+   * syncState() will call it, if it is provided by SyncStrategy
    */
-  clear?: () => void;
+  cancel?: () => void;
 }

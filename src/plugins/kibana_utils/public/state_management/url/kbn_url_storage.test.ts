@@ -169,7 +169,7 @@ describe('kbn_url_storage', () => {
       const pr1 = urlControls.updateAsync(() => '/1', true);
       const pr2 = urlControls.updateAsync(() => '/2', false);
       const pr3 = urlControls.updateAsync(() => '/3', true);
-      urlControls.clear();
+      urlControls.cancel();
       expect(getCurrentUrl()).toBe('/');
       await Promise.all([pr1, pr2, pr3]);
       expect(getCurrentUrl()).toBe('/');

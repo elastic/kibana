@@ -90,7 +90,7 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
   stateSyncConfig: IStateSyncConfig<State, SyncStrategy>
 ): ISyncStateRef {
   const subscriptions: Subscription[] = [];
-  const { toStorage, fromStorage, storageChange$, clear } = stateSyncConfig.syncStrategy;
+  const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
 
   const updateState = () => {
     const newState = fromStorage<State>(stateSyncConfig.syncKey);
@@ -127,7 +127,11 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
 
   return {
     stop: () => {
-      if (clear) clear();
+      // if syncStrategy has any cancellation logic, then run it
+      if (stateSyncConfig.syncStrategy.cancel) {
+        stateSyncConfig.syncStrategy.cancel();
+      }
+
       subscriptions.forEach(s => s.unsubscribe());
       subscriptions.splice(0, subscriptions.length);
     },

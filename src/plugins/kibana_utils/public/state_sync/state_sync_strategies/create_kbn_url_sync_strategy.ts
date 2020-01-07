@@ -28,6 +28,14 @@ import {
 } from '../../state_management/url';
 
 export interface IKbnUrlSyncStrategy extends ISyncStrategy {
+  toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<string>;
+  fromStorage: <State = unknown>(syncKey: string) => State | null;
+  storageChange$: <State = unknown>(syncKey: string) => Observable<State | null>;
+
+  // cancels any pending url updates
+  cancel: () => void;
+
+  // synchronously runs any pending url updates
   flush: (opts?: { replace?: boolean }) => void;
 }
 
@@ -46,7 +54,7 @@ export const createKbnUrlSyncStrategy = (
       state: State,
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
-      url.updateAsync(
+      return url.updateAsync(
         currentUrl => setStateToKbnUrl(syncKey, state, { useHash }, currentUrl),
         replace
       );
@@ -68,8 +76,8 @@ export const createKbnUrlSyncStrategy = (
     flush: ({ replace = false }: { replace?: boolean } = {}) => {
       url.flush(replace);
     },
-    clear() {
-      url.clear();
+    cancel() {
+      url.cancel();
     },
   };
 };
