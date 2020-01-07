@@ -64,7 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // need to fix label for savedObjectFinderSearchInput
-    it.skip('Open load saved search panel', async () => {
+    it('Open load saved search panel', async () => {
       await PageObjects.discover.openLoadSavedSearchPanel();
       await a11y.testAppSnapshot();
     });
