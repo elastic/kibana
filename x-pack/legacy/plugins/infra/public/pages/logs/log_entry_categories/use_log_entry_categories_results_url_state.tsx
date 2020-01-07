@@ -46,7 +46,7 @@ export const useLogEntryCategoriesResultsUrlState = () => {
   const [autoRefresh, setAutoRefresh] = useUrlState({
     defaultState: {
       isPaused: false,
-      interval: 30000,
+      interval: 60000,
     },
     decodeUrlState: (value: unknown) =>
       pipe(autoRefreshRT.decode(value), fold(constant(undefined), identity)),
