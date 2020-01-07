@@ -159,9 +159,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isPointsOnly).toBe(true);
-      expect(featuresMeta.isLinesOnly).toBe(false);
-      expect(featuresMeta.isPolygonsOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(true);
+      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
     });
 
     it('Should identify when feature collection only contains lines', async () => {
@@ -187,9 +187,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isPointsOnly).toBe(false);
-      expect(featuresMeta.isLinesOnly).toBe(true);
-      expect(featuresMeta.isPolygonsOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(true);
+      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
     });
   });
 
@@ -237,9 +237,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       );
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isPointsOnly).toBe(true);
-      expect(featuresMeta.isLinesOnly).toBe(false);
-      expect(featuresMeta.isPolygonsOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(true);
+      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(false);
+      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
     });
 
     it('Should extract scaled field range', async () => {

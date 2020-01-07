@@ -17,10 +17,6 @@ export function isOnlySingleFeatureType(featureType, supportedFeatures, hasFeatu
     return supportedFeatures[0] === featureType;
   }
 
-  if (!hasFeatureType) {
-    return false;
-  }
-
   const featureTypes = Object.keys(hasFeatureType);
   return featureTypes.reduce((isOnlyTargetFeatureType, featureTypeKey) => {
     const hasFeature = hasFeatureType[featureTypeKey];

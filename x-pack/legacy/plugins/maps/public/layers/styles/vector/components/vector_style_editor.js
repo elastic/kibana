@@ -99,7 +99,7 @@ export class VectorStyleEditor extends Component {
 
     if (
       !_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
-      !_.isEqual(selectedFeature, this.state.selectedFeature)
+      selectedFeature !== this.state.selectedFeature
     ) {
       this.setState({ supportedFeatures, selectedFeature });
     }

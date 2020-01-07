@@ -220,46 +220,47 @@ export class VectorStyle extends AbstractStyle {
     const features = _.get(sourceDataRequest.getData(), 'features', []);
 
     const supportedFeatures = await this._source.getSupportedShapeTypes();
-    let hasFeatureType;
+    const hasFeatureType = {
+      [VECTOR_SHAPE_TYPES.POINT]: false,
+      [VECTOR_SHAPE_TYPES.LINE]: false,
+      [VECTOR_SHAPE_TYPES.POLYGON]: false,
+    };
     if (supportedFeatures.length > 1) {
-      let hasPoints = false;
-      let hasLines = false;
-      let hasPolygons = false;
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
-        if (!hasPoints && POINTS.includes(feature.geometry.type)) {
-          hasPoints = true;
+        if (!hasFeatureType[VECTOR_SHAPE_TYPES.POINT] && POINTS.includes(feature.geometry.type)) {
+          hasFeatureType[VECTOR_SHAPE_TYPES.POINT] = true;
         }
-        if (!hasLines && LINES.includes(feature.geometry.type)) {
-          hasLines = true;
+        if (!hasFeatureType[VECTOR_SHAPE_TYPES.LINE] && LINES.includes(feature.geometry.type)) {
+          hasFeatureType[VECTOR_SHAPE_TYPES.LINE] = true;
         }
-        if (!hasPolygons && POLYGONS.includes(feature.geometry.type)) {
-          hasPolygons = true;
+        if (
+          !hasFeatureType[VECTOR_SHAPE_TYPES.POLYGON] &&
+          POLYGONS.includes(feature.geometry.type)
+        ) {
+          hasFeatureType[VECTOR_SHAPE_TYPES.POLYGON] = true;
         }
       }
-      hasFeatureType = {
-        [VECTOR_SHAPE_TYPES.POINT]: hasPoints,
-        [VECTOR_SHAPE_TYPES.LINE]: hasLines,
-        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons,
-      };
     }
 
     const featuresMeta = {
-      isPointsOnly: isOnlySingleFeatureType(
-        VECTOR_SHAPE_TYPES.POINT,
-        supportedFeatures,
-        hasFeatureType
-      ),
-      isLinesOnly: isOnlySingleFeatureType(
-        VECTOR_SHAPE_TYPES.LINE,
-        supportedFeatures,
-        hasFeatureType
-      ),
-      isPolygonsOnly: isOnlySingleFeatureType(
-        VECTOR_SHAPE_TYPES.POLYGON,
-        supportedFeatures,
-        hasFeatureType
-      ),
+      geometryTypes: {
+        isPointsOnly: isOnlySingleFeatureType(
+          VECTOR_SHAPE_TYPES.POINT,
+          supportedFeatures,
+          hasFeatureType
+        ),
+        isLinesOnly: isOnlySingleFeatureType(
+          VECTOR_SHAPE_TYPES.LINE,
+          supportedFeatures,
+          hasFeatureType
+        ),
+        isPolygonsOnly: isOnlySingleFeatureType(
+          VECTOR_SHAPE_TYPES.POLYGON,
+          supportedFeatures,
+          hasFeatureType
+        ),
+      },
     };
 
     const dynamicProperties = this.getDynamicPropertiesArray();
@@ -305,15 +306,15 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getIsPointsOnly = () => {
-    return _.get(this._getStyleMeta(), 'isPointsOnly', false);
+    return _.get(this._getStyleMeta(), 'geometryTypes.isPointsOnly', false);
   };
 
   _getIsLinesOnly = () => {
-    return _.get(this._getStyleMeta(), 'isLinesOnly', false);
+    return _.get(this._getStyleMeta(), 'geometryTypes.isLinesOnly', false);
   };
 
   _getIsPolygonsOnly = () => {
-    return _.get(this._getStyleMeta(), 'isPolygonsOnly', false);
+    return _.get(this._getStyleMeta(), 'geometryTypes.isPolygonsOnly', false);
   };
 
   _getDynamicPropertyByFieldName(fieldName) {
