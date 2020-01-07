@@ -16,8 +16,6 @@ const testFlyoutHeight = 980;
 const testWidth = 640;
 const usersViewing = ['elastic'];
 
-jest.mock('../../../lib/kibana');
-
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(

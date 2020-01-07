@@ -28,8 +28,6 @@ const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
-jest.mock('../../../lib/kibana');
-
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../components/search_bar', () => ({
