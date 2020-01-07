@@ -77,9 +77,6 @@ export class EnrollmentApiKeysRepository implements EnrollmentApiKeysRepositoryT
       name?: string;
     }
   ): Promise<EnrollmentApiKey> {
-    if (user.kind !== 'authenticated') {
-      throw new Error('Only authenticated user can create enrollment api keys.');
-    }
     const so = await this.soAdapter.create(user, SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       api_key: apiKey,
@@ -122,9 +119,6 @@ export class EnrollmentApiKeysRepository implements EnrollmentApiKeysRepositoryT
     id: string,
     newData: Partial<EnrollmentApiKey>
   ): Promise<void> {
-    if (user.kind !== 'authenticated') {
-      throw new Error('Only authenticated can update enrollment api keys');
-    }
     const { error } = await this.soAdapter.update(user, SAVED_OBJECT_TYPE, id, newData);
 
     if (error) {

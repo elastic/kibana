@@ -57,11 +57,13 @@ export function fleet(kibana: any) {
     config: () => config,
     configPrefix: CONFIG_PREFIX,
     init(server: any) {
-      server.newPlatform.setup.plugins.encryptedSavedObjects.registerType({
-        type: 'enrollment_api_keys',
-        attributesToEncrypt: new Set(['api_key']),
-        attributesToExcludeFromAAD: new Set(['enrollment_rules']),
-      });
+      // TODO https://github.com/elastic/kibana/issues/53199
+      // server.newPlatform.setup.plugins.encryptedSavedObjects.registerType({
+      //   type: 'enrollment_api_keys',
+      //   // attributesToEncrypt: new Set(['api_key']),
+      //   attributesToEncrypt: new Set([]),
+      //   attributesToExcludeFromAAD: new Set(['enrollment_rules']),
+      // });
       server.plugins.xpack_main.registerFeature({
         id: 'fleet',
         name: 'Fleet',

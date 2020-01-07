@@ -9,6 +9,7 @@ import { DatasourcesLib } from './datasources';
 import { BackendFrameworkLib } from './framework';
 import { OutputsLib } from './outputs';
 import { PolicyLib } from './policy';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 
 export interface ServerLibs {
   outputs: OutputsLib;
@@ -17,3 +18,9 @@ export interface ServerLibs {
   framework: BackendFrameworkLib;
   database?: ESDatabaseAdapter;
 }
+
+export type PolicyUpdateHandler = (
+  user: FrameworkUser,
+  action: 'created' | 'updated' | 'deleted',
+  policyId: string
+) => Promise<void>;

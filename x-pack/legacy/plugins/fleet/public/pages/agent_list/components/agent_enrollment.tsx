@@ -131,7 +131,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
       {apiKeyListVisible && (
         <>
           <EuiSpacer size="m" />
-          <EnrollmentApiKeysTable />
+          <EnrollmentApiKeysTable onChange={() => enrollmentApiKeys.refresh()} />
         </>
       )}
     </>
