@@ -70,7 +70,7 @@ describe('webhook connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        url: ['Url is required.'],
+        url: ['URL is required.'],
         method: [],
         user: [],
         password: ['Password is required.'],
@@ -115,7 +115,7 @@ describe('WebhookActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{}}
+        errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
       />

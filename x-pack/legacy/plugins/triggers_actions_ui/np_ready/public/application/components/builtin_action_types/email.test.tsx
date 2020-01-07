@@ -102,9 +102,9 @@ describe('connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        service: ['Service or host with port is required.'],
-        port: ['Port or Service is required.'],
-        host: ['Host or Service is required.'],
+        service: ['Service is required.'],
+        port: ['Port is required.'],
+        host: ['Host is required.'],
         user: [],
         password: [],
       },
@@ -172,7 +172,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{}}
+        errors={{ from: [], service: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         hasErrors={false}

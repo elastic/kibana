@@ -70,7 +70,7 @@ describe('pagerduty connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        routingKey: ['Routing Key is required.'],
+        routingKey: ['A routing key is required.'],
       },
     });
   });
@@ -117,7 +117,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{}}
+        errors={{ routingKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         hasErrors={false}

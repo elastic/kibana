@@ -103,7 +103,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
             target="_blank"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.indexNameHelpLabel"
+              id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
               defaultMessage="Learn how to configure PagerDuty Accounts"
             />
           </EuiLink>

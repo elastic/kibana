@@ -103,7 +103,7 @@ describe('SlackActionFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{}}
+        errors={{ webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
       />
