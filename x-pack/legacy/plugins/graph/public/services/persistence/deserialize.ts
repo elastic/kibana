@@ -89,6 +89,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
       color: colorChoices[index % colorChoices.length],
       selected: false,
       type: field.type,
+      aggregatable: Boolean(field.aggregatable),
     }))
     .sort((a, b) => {
       if (a.name < b.name) {
