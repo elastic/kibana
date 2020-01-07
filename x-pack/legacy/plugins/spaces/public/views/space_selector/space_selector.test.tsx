@@ -5,10 +5,16 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import {
+  renderWithIntl,
+  shallowWithIntl,
+  mountWithIntl,
+  nextTick,
+} from 'test_utils/enzyme_helpers';
 import { Space } from '../../../common/model/space';
 import { spacesManagerMock } from '../../lib/mocks';
 import { SpaceSelector } from './space_selector';
+import { findTestSubject } from 'test_utils/find_test_subject';
 
 function getSpacesManager(spaces: Space[] = []) {
   const manager = spacesManagerMock.create();
@@ -73,4 +79,42 @@ test('it queries for spaces when not provided on props', () => {
   return Promise.resolve().then(() => {
     expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
   });
+});
+
+test('it renders the search bar when there are 8 or more spaces', async () => {
+  const spaces = [1, 2, 3, 4, 5, 6, 7, 8].map(num => ({
+    id: `space-${num}`,
+    name: `Space ${num}`,
+    disabledFeatures: [],
+  }));
+
+  const spacesManager = getSpacesManager(spaces);
+
+  const wrapper = mountWithIntl(
+    <SpaceSelector.WrappedComponent spacesManager={spacesManager as any} intl={null as any} />
+  );
+
+  await nextTick();
+  wrapper.update();
+
+  expect(findTestSubject(wrapper, 'spaceSelectorSearchField')).toHaveLength(1);
+});
+
+test('it does not render the search bar when there are fewer than 8 spaces', async () => {
+  const spaces = [1, 2, 3, 4, 5, 6, 7].map(num => ({
+    id: `space-${num}`,
+    name: `Space ${num}`,
+    disabledFeatures: [],
+  }));
+
+  const spacesManager = getSpacesManager(spaces);
+
+  const wrapper = mountWithIntl(
+    <SpaceSelector.WrappedComponent spacesManager={spacesManager as any} intl={null as any} />
+  );
+
+  await nextTick();
+  wrapper.update();
+
+  expect(findTestSubject(wrapper, 'spaceSelectorSearchField')).toHaveLength(0);
 });
