@@ -60,7 +60,7 @@ uiModules
         uiCapabilities
       ) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-        const service = $injector.get(serviceObj.service);
+        const service = serviceObj.service;
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
         /**
