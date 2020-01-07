@@ -40,13 +40,17 @@ export class ManagementTestPlugin
         params.setBreadcrumbs([{ text: 'Management Test' }]);
         ReactDOM.render(
           <Router>
-            <div>Hello from Management test plugin</div>
+            <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
             <Switch>
               <Route exact path={`${params.basePath}`}>
-                <Link to={`${params.basePath}/two`}>Link to /one</Link>
+                <Link to={`${params.basePath}/one`} data-test-subj="test-management-link-one">
+                  Link to /one
+                </Link>
               </Route>
-              <Route path={`${params.basePath}`}>
-                <Link to={`${params.basePath}`}>Link to basePath</Link>
+              <Route path={`${params.basePath}/one`}>
+                <Link to={`${params.basePath}`} data-test-subj="test-management-link-basepath">
+                  Link to basePath
+                </Link>
               </Route>
             </Switch>
           </Router>,
