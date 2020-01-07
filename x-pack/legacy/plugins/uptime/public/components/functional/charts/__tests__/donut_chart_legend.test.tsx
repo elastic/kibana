@@ -10,7 +10,9 @@ import React from 'react';
 
 describe('DonutChartLegend', () => {
   it('applies valid props as expected', () => {
-    const wrapper = shallowWithIntl(<DonutChartLegend down={23} up={45} />);
+    const wrapper = shallowWithIntl(
+      <DonutChartLegend down={23} up={45} dataTestSubjPrefix="foo" />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

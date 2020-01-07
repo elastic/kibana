@@ -18,7 +18,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('when no data is present', async () => {
       it('returns a null snapshot', async () => {
         const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&filters=`
+          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         );
 
         expectFixtureEql(apiResponse.body, 'snapshot_empty');

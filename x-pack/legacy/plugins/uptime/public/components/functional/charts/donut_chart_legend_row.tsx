@@ -23,9 +23,10 @@ interface Props {
   color: string;
   message: string;
   content: string | number;
+  dataTestSubjPrefix: string;
 }
 
-export const DonutChartLegendRow = ({ color, content, message }: Props) => (
+export const DonutChartLegendRow = ({ color, content, message, dataTestSubjPrefix }: Props) => (
   <EuiFlexGroup gutterSize="l" responsive={false}>
     <EuiFlexItemReducedMargin component="span" grow={false}>
       <EuiHealth color={color} />
@@ -35,7 +36,7 @@ export const DonutChartLegendRow = ({ color, content, message }: Props) => (
     </EuiFlexItemReducedMargin>
     <EuiFlexItemAlignRight
       component="span"
-      data-test-subj={`xpack.uptime.donutChart.${message.toLowerCase()}`}
+      data-test-subj={`${dataTestSubjPrefix}.${message.toLowerCase()}`}
     >
       {content}
     </EuiFlexItemAlignRight>

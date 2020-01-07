@@ -12,6 +12,7 @@ exports[`Snapshot component renders without errors 1`] = `
     size="xs"
   />
   <DonutChart
+    dataTestSubjPrefix="xpack.uptime.snapshot.donutChart"
     down={2}
     height={144}
     up={8}

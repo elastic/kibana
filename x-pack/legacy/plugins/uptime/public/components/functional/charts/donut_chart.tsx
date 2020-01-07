@@ -16,9 +16,10 @@ interface DonutChartProps {
   height: number;
   up: number;
   width: number;
+  dataTestSubjPrefix: string;
 }
 
-export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
+export const DonutChart = ({ height, down, up, width, dataTestSubjPrefix }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
 
   const {
@@ -73,7 +74,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <svg
-          aria-label={i18n.translate('xpack.uptime.donutChart.ariaLabel', {
+          aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },
@@ -84,7 +85,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <DonutChartLegend down={down} up={up} />
+        <DonutChartLegend down={down} up={up} dataTestSubjPrefix={dataTestSubjPrefix} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

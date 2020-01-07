@@ -118,6 +118,7 @@ const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
       query: { bool: { filter: await context.dateAndCustomFilters() } },
       aggs: {
         unique: {
+          // We set the precision threshold to 40k which is the max precision supported by cardinality
           cardinality: { field: 'monitor.id', precision_threshold: 40000 },
         },
         down: {

@@ -70,6 +70,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       down={get<number>(count, 'down', 0)}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
+      dataTestSubjPrefix={'xpack.uptime.snapshot.donutChart'}
     />
   </ChartWrapper>
 );
