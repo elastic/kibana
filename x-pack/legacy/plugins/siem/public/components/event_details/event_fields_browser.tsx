@@ -37,7 +37,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',
         })),
-      []
+      [data, fieldsByName]
     );
     const columns = useMemo(
       () =>

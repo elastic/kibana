@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isString } from 'lodash/fp';
+import { isNumber, isString, isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../draggables';
@@ -86,7 +86,7 @@ export const FormattedFieldValue = React.memo<{
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
   } else if (columnNamesNotDraggable.includes(fieldName)) {
-    return truncate ? (
+    return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
           data-test-subj="message-tool-tip"

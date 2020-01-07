@@ -33,7 +33,7 @@ describe('Events', () => {
         />
       </TestProviders>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('FormattedFieldValue'))).toMatchSnapshot();
   });
 
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {

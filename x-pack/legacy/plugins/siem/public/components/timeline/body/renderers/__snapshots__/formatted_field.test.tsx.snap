@@ -1,15 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Events renders correctly against snapshot 1`] = `
-<DefaultDraggable
-  field="timestamp"
-  id="event-details-value-default-draggable-test-1-timestamp-2018-11-05T19:03:25.937Z"
-  tooltipContent={null}
+<FormattedFieldValue
+  contextId="test"
+  eventId="1"
+  fieldName="timestamp"
+  fieldType="date"
   value="2018-11-05T19:03:25.937Z"
->
-  <FormattedDate
-    fieldName="timestamp"
-    value="2018-11-05T19:03:25.937Z"
-  />
-</DefaultDraggable>
+/>
 `;
