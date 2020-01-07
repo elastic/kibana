@@ -10,7 +10,12 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  DEFAULT_BUCKET_SPAN,
+  DEFAULT_RARE_BUCKET_SPAN,
+} from '../../../../../../common/constants/new_job';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
@@ -68,8 +73,10 @@ export class CategorizationJobCreator extends JobCreator {
     this.removeAllInfluencers();
     if (type === ML_JOB_AGGREGATION.COUNT) {
       this._createCountDetector();
+      this.bucketSpan = DEFAULT_BUCKET_SPAN;
     } else {
       this._createRareDetector();
+      this.bucketSpan = DEFAULT_RARE_BUCKET_SPAN;
     }
   }
 
@@ -132,7 +139,12 @@ export class CategorizationJobCreator extends JobCreator {
         dtr.agg.id === ML_JOB_AGGREGATION.COUNT
           ? ML_JOB_AGGREGATION.COUNT
           : ML_JOB_AGGREGATION.RARE;
+
+      const bs = job.analysis_config.bucket_span;
       this.setDetectorType(this._detectorType);
+      // set the bucketspan back to the original value
+      // as setDetectorType applies a default
+      this.bucketSpan = bs;
     }
   }
 }

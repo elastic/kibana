@@ -21,6 +21,7 @@ export enum CREATED_BY_LABEL {
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';
 export const DEFAULT_BUCKET_SPAN = '15m';
+export const DEFAULT_RARE_BUCKET_SPAN = '1h';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
