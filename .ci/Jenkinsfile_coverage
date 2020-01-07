@@ -61,7 +61,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             kibanaPipeline.jobRunner('tests-l', false) {
               kibanaPipeline.downloadCoverageArtifacts()
               kibanaPipeline.bash(
-                """
+                '''
                   # bootstrap from x-pack folder
                   source src/dev/ci_setup/setup_env.sh
                   cd x-pack
@@ -76,14 +76,14 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
                   echo extracting kibana-xpack-tests
                   for i in {1..3}; do
-                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-\${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
                   done
                   # replace path in json files to have valid html report
-                  pwd=\$(pwd)
+                  pwd=$(pwd)
                   du -sh /tmp/extracted_coverage/target/kibana-coverage/
                   echo replacing path in json files
                   for i in {1..9}; do
-                    sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/\${i}*.json &
+                    sed -i "s|/dev/shm/workspace/kibana|$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
                   done
                   wait
                   # merge oss & x-pack reports
@@ -93,7 +93,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   echo copy mocha reports
                   mkdir -p target/kibana-coverage/mocha-combined
                   cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
-                """,
+                ''',
                 "run `yarn kbn bootstrap && merge coverage`"
               )
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'

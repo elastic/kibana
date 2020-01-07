@@ -9,11 +9,11 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 else
   echo "NODE_ENV=$NODE_ENV"
   echo " -> Running jest tests with coverage"
-  checks-reporter-with-killswitch "Jest Coverage" node scripts/jest --ci --verbose --coverage
+  node scripts/jest --ci --verbose --coverage
   echo ""
   echo ""
   echo " -> Running mocha tests with coverage"
-  checks-reporter-with-killswitch "Mocha Coverage" yarn run grunt "test:mochaCoverage";
+  yarn run grunt "test:mochaCoverage";
   echo ""
   echo ""
 fi

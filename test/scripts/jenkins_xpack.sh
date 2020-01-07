@@ -41,9 +41,11 @@ else
   # build runtime for canvas
   echo "NODE_ENV=$NODE_ENV"
   node ./legacy/plugins/canvas/scripts/shareable_runtime
-  checks-reporter-with-killswitch "X-Pack Jest Coverage" node scripts/jest --ci --verbose --coverage
+  node scripts/jest --ci --verbose --coverage
   # rename file in order to be unique one
-  mv ../target/kibana-coverage/jest/coverage-final.json ../target/kibana-coverage/jest/xpack-coverage-final.json
+  test -f ../target/kibana-coverage/jest/coverage-final.json \
+    && mv ../target/kibana-coverage/jest/coverage-final.json \
+    ../target/kibana-coverage/jest/xpack-coverage-final.json
   echo ""
   echo ""
 fi

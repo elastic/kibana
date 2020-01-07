@@ -57,8 +57,5 @@ else
 
   export NODE_OPTIONS=--max_old_space_size=8192
 
-  checks-reporter-with-killswitch "X-Pack Functional tests with code coverage / Group ${CI_GROUP}" \
-    node scripts/functional_tests \
-      --debug \
-      --include-tag "ciGroup$CI_GROUP"
+  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"
 fi
