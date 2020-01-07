@@ -83,6 +83,16 @@ describe('Management', () => {
   it('maps legacy sections and apps into SidebarNav items', () => {
     expect(mergeLegacyItems([], managementSections, 'active-item-id')).toMatchSnapshot();
   });
-});
 
-// todo - itetrate through various inputs and test outputs
+  it('adds legacy apps to existing SidebarNav sections', () => {
+    const navSection = {
+      'data-test-subj': 'activeSection',
+      icon: null,
+      id: 'activeSection',
+      items: [],
+      name: 'activeSection',
+      order: 10,
+    };
+    expect(mergeLegacyItems([navSection], managementSections, 'active-item-id')).toMatchSnapshot();
+  });
+});
