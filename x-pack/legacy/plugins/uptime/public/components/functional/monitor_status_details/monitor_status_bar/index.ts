@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { MonitorStatusBarComponent } from './monitor_status_bar';
 import { selectMonitorStatus, selectMonitorLocations } from '../../../../state/selectors';
 import { AppState } from '../../../../state';
-import { getMonitorStatus } from '../../../../state/actions';
+import { getMonitorStatus, getSelectedMonitor } from '../../../../state/actions';
 
 const mapStateToProps = (state: AppState, ownProps: any) => ({
   monitorStatus: selectMonitorStatus(state),
@@ -17,13 +17,17 @@ const mapStateToProps = (state: AppState, ownProps: any) => ({
 
 const mapDispatchToProps = (dispatch: any, ownProps: any) => ({
   loadMonitorStatus: () => {
-    const { dateStart, dateEnd, monitorId, location } = ownProps;
+    const { dateStart, dateEnd, monitorId } = ownProps;
     dispatch(
       getMonitorStatus({
         monitorId,
         dateStart,
         dateEnd,
-        location,
+      })
+    );
+    dispatch(
+      getSelectedMonitor({
+        monitorId,
       })
     );
   },

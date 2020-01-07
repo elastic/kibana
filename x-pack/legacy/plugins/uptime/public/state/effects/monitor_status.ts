@@ -7,15 +7,32 @@
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import {
+  getSelectedMonitor,
+  getSelectedMonitorSuccess,
+  getSelectedMonitorFail,
   getMonitorStatus,
   getMonitorStatusSuccess,
   getMonitorStatusFail,
 } from '../actions/monitor_status';
-import { fetchMonitorStatus } from '../api';
+import { fetchSelectedMonitor, fetchMonitorStatus } from '../api';
 import { getBasePath } from '../selectors';
 
+function* selectedMonitorEffect(action: Action<any>) {
+  const { monitorId } = action.payload;
+  try {
+    const basePath = yield select(getBasePath);
+    const response = yield call(fetchSelectedMonitor, {
+      monitorId,
+      basePath,
+    });
+    yield put({ type: getSelectedMonitorSuccess, payload: response });
+  } catch (error) {
+    yield put({ type: getSelectedMonitorFail, payload: error.message });
+  }
+}
+
 function* monitorStatusEffect(action: Action<any>) {
-  const { monitorId, dateStart, dateEnd, location } = action.payload;
+  const { monitorId, dateStart, dateEnd } = action.payload;
   try {
     const basePath = yield select(getBasePath);
     const response = yield call(fetchMonitorStatus, {
@@ -23,7 +40,6 @@ function* monitorStatusEffect(action: Action<any>) {
       basePath,
       dateStart,
       dateEnd,
-      location,
     });
     yield put({ type: getMonitorStatusSuccess, payload: response });
   } catch (error) {
@@ -33,4 +49,5 @@ function* monitorStatusEffect(action: Action<any>) {
 
 export function* fetchMonitorStatusEffect() {
   yield takeLatest(getMonitorStatus, monitorStatusEffect);
+  yield takeLatest(getSelectedMonitor, selectedMonitorEffect);
 }

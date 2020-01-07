@@ -11,7 +11,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { UptimeDatePicker, CommonlyUsedRange } from '../components/functional/uptime_date_picker';
 import { AppState } from '../state';
-import { selectMonitorStatus } from '../state/selectors';
+import { selectSelectedMonitor } from '../state/selectors';
 import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
@@ -85,7 +85,7 @@ export const PageHeaderComponent = ({
 };
 
 const mapStateToProps = (state: AppState) => ({
-  monitorStatus: selectMonitorStatus(state),
+  monitorStatus: selectSelectedMonitor(state),
 });
 
 export const PageHeader = connect(mapStateToProps, null)(PageHeaderComponent);

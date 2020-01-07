@@ -8,6 +8,28 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
+export const createGetMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'GET',
+  path: '/api/uptime/monitor/selected',
+  validate: {
+    query: schema.object({
+      monitorId: schema.maybe(schema.string()),
+    }),
+  },
+  options: {
+    tags: ['access:uptime'],
+  },
+  handler: async ({ callES }, _context, request, response): Promise<any> => {
+    const { monitorId } = request.query;
+
+    return response.ok({
+      body: {
+        ...(await libs.pings.getMonitor({ callES, monitorId })),
+      },
+    });
+  },
+});
+
 export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/monitor/status',
@@ -16,20 +38,18 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
       monitorId: schema.string(),
       dateStart: schema.string(),
       dateEnd: schema.string(),
-      location: schema.maybe(schema.string()),
     }),
   },
   options: {
     tags: ['access:uptime'],
   },
   handler: async ({ callES }, _context, request, response): Promise<any> => {
-    const { monitorId, dateStart, dateEnd, location } = request.query;
+    const { monitorId, dateStart, dateEnd } = request.query;
     const result = await libs.pings.getLatestMonitorStatus({
       callES,
       monitorId,
       dateStart,
       dateEnd,
-      location,
     });
     return response.ok({
       body: {

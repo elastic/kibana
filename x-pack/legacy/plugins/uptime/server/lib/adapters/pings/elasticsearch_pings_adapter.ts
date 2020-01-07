@@ -88,7 +88,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return results;
   },
 
-  getLatestMonitorStatus: async ({ callES, dateStart, dateEnd, monitorId, location }) => {
+  getLatestMonitorStatus: async ({ callES, dateStart, dateEnd, monitorId }) => {
     // TODO: Write tests for this function
 
     const params = {
@@ -106,7 +106,6 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
                 },
               },
               ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
-              ...(location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
           },
         },
@@ -139,6 +138,38 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
       ...ping?._source,
       timestamp: ping?._source?.['@timestamp'],
     };
+  },
+
+  getMonitor: async ({ callES, monitorId }) => {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 1,
+        _source: ['url', 'monitor', 'observer'],
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.id': monitorId,
+                },
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    };
+
+    const result = await callES('search', params);
+
+    return result.hits.hits[0]?._source;
   },
 
   getPingHistogram: async ({

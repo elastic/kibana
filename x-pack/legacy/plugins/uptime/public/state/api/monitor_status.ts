@@ -16,19 +16,31 @@ export interface APIParams {
   monitorId: string;
 }
 
+export const fetchSelectedMonitor = async ({ basePath, monitorId }: APIParams): Promise<Ping> => {
+  const url = getApiPath(`/api/uptime/monitor/selected`, basePath);
+  const params = {
+    monitorId,
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${url}?${urlParams}`);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const responseData = await response.json();
+  return responseData;
+};
+
 export const fetchMonitorStatus = async ({
   basePath,
   monitorId,
   dateStart,
   dateEnd,
-  location,
 }: QueryParams & APIParams): Promise<Ping> => {
   const url = getApiPath(`/api/uptime/monitor/status`, basePath);
   const params = {
     monitorId,
     dateStart,
     dateEnd,
-    ...(location && { location }),
   };
   const urlParams = new URLSearchParams(params).toString();
   const response = await fetch(`${url}?${urlParams}`);

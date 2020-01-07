@@ -4,25 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiLink,
-  EuiText,
-  EuiTitle,
-  EuiTextColor,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
+import { EuiLink, EuiTitle, EuiTextColor, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { convertMicrosecondsToMilliseconds } from '../../../../lib/helper';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
+import { MostRecentCheck } from './most_recent_check';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -45,61 +34,25 @@ export const MonitorStatusBarComponent = ({
     loadMonitorStatus();
   }, [dateStart, dateEnd, loadMonitorStatus]);
 
-  if (monitorStatus) {
-    const { monitor, timestamp, tls } = monitorStatus;
-    const duration: number | undefined = monitor?.duration?.us;
-    const status = monitor?.status ?? 'down';
-    const full = monitorStatus?.url?.full ?? '';
+  const monitor = monitorStatus?.monitor;
+  const duration: number | undefined = monitor?.duration?.us;
+  const status = monitor?.status ?? 'down';
+  const full = monitorStatus?.url?.full ?? '';
 
-    return (
-      <>
-        <StatusByLocations locations={monitorLocations?.locations ?? []} />
-        <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-          {full}
-        </EuiLink>
-        <EuiTitle size="xs">
-          <EuiTextColor color="subdued">
-            <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
-          </EuiTextColor>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiText>
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.monitorStatusBar.mostRecentCheck.label"
-              defaultMessage="Most Recent Check:"
-            />
-          </h5>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="l" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiHealth
-              aria-label={labels.healthStatusMessageAriaLabel}
-              color={status === 'up' ? 'success' : 'danger'}
-              style={{ lineHeight: 'inherit' }}
-            >
-              {status === 'up' ? labels.upLabel : labels.downLabel}
-            </EuiHealth>
-          </EuiFlexItem>
-          {!!duration && (
-            <EuiFlexItem aria-label={labels.durationTextAriaLabel} grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
-                values={{ duration: convertMicrosecondsToMilliseconds(duration) }}
-                defaultMessage="{duration}ms"
-                description="The 'ms' is an abbreviation for 'milliseconds'."
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem aria-label={labels.timestampFromNowTextAriaLabel} grow={true}>
-            {moment(new Date(timestamp).valueOf()).fromNow()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <MonitorSSLCertificate tls={tls} />
-      </>
-    );
-  } else {
-    return null;
-  }
+  return (
+    <>
+      <StatusByLocations locations={monitorLocations?.locations ?? []} />
+      <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
+        {full}
+      </EuiLink>
+      <EuiTitle size="xs">
+        <EuiTextColor color="subdued">
+          <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
+        </EuiTextColor>
+      </EuiTitle>
+      <EuiSpacer />
+      <MostRecentCheck timestamp={monitorStatus?.timestamp} duration={duration} status={status} />
+      <MonitorSSLCertificate tls={monitorStatus?.tls} />
+    </>
+  );
 };

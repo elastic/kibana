@@ -10,6 +10,7 @@ import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemet
 import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteFactory } from './types';
 import {
+  createGetMonitorRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
@@ -21,6 +22,7 @@ export { uptimeRouteWrapper } from './uptime_route_wrapper';
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetAllRoute,
   createGetIndexPatternRoute,
+  createGetMonitorRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,

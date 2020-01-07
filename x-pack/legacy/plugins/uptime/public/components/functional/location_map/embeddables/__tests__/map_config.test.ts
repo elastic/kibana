@@ -33,9 +33,9 @@ describe('map_config', () => {
       { lat: '54.487239', lon: '14.399262' },
     ];
     colors = {
-      danger: euiLightVars.euiColorDanger,
+      danger: '#BC261E',
+      gray: '#000',
       mean: euiLightVars.euiColorPrimary,
-      gray: euiLightVars.euiColorLightShade,
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,

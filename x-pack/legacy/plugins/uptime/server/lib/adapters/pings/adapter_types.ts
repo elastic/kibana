@@ -33,16 +33,13 @@ export interface GetAllParams {
 
 export interface GetLatestMonitorDocsParams {
   /** @member dateRangeStart timestamp bounds */
-  dateStart: string;
+  dateStart?: string;
 
   /** @member dateRangeEnd timestamp bounds */
-  dateEnd: string;
+  dateEnd?: string;
 
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
-
-  /** @member location optional location value for use in filtering*/
-  location?: string | null;
 }
 
 export interface GetPingHistogramParams {
@@ -63,6 +60,8 @@ export interface GetPingHistogramParams {
  */
 export interface UMPingsAdapter {
   getAll: UMElasticsearchQueryFn<GetAllParams, PingResults>;
+
+  getMonitor: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping>;
 
   getLatestMonitorStatus: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping>;
 

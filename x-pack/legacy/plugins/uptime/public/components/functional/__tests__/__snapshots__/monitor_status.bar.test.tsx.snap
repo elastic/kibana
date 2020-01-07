@@ -38,6 +38,9 @@ Array [
     </h5>
   </div>,
   <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
   >
     <div
