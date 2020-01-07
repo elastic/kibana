@@ -17,8 +17,6 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
-jest.mock('../../../../lib/kibana');
-
 describe('plain_column_renderer', () => {
   const mount = useMountAppended();
 

@@ -14,8 +14,6 @@ import { TestProviders } from '../../mock';
 import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
-jest.mock('../../lib/kibana');
-
 let localSource: Array<{
   request: {};
   result: {

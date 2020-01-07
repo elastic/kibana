@@ -20,6 +20,7 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_BYTES_FORMAT,
 } from '../../common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
@@ -37,6 +38,7 @@ export const mockUiSettings: Record<string, any> = {
     value: DEFAULT_INTERVAL_VALUE,
   },
   [DEFAULT_INDEX_KEY]: defaultIndexPattern,
+  [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
   [DEFAULT_DARK_MODE]: false,
@@ -83,11 +85,15 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const kibana = createUseKibanaMock()();
+  const uiSettings = {
+    ...kibana.services.uiSettings,
+    get: createUseUiSettingMock(),
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return ({ services, ...rest }: any) =>
     React.createElement(KibanaContextProvider, {
       ...rest,
-      services: { ...kibana.services, ...services },
+      services: { ...kibana.services, uiSettings, ...services },
     });
 };
