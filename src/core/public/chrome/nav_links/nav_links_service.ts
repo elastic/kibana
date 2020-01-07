@@ -110,6 +110,10 @@ export class NavLinksService {
         );
       })
     );
+
+    // now that availableApps$ is an observable, we need to keep record of all
+    // manual link modifications to be able to re-apply then after every
+    // availableApps$ changes.
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
@@ -191,11 +195,12 @@ export class NavLinksService {
 function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
   return new NavLinkWrapper({
     ...app,
+    hidden: false,
     disabled: app.status === AppStatus.inaccessibleWithDisabledNavLink,
     legacy: isLegacyApp(app),
     baseUrl: isLegacyApp(app)
       ? relativeToAbsolute(basePath.prepend(app.appUrl))
-      : relativeToAbsolute(basePath.prepend(`/app/${app.id}`)),
+      : relativeToAbsolute(basePath.prepend(app.appRoute || `/app/${app.id}`)),
   });
 }
 
