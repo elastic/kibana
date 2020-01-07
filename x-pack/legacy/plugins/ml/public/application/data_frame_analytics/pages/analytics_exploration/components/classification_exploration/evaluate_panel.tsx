@@ -310,28 +310,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                     <Fragment>
                       <EuiFlexGroup direction="column" justifyContent="center" gutterSize="s">
                         <EuiFlexItem grow={false}>
-                          <EuiFlexGroup>
-                            <EuiFlexItem>
-                              <EuiSpacer />
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiSpacer />
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiFormRow
-                                helpText={i18n.translate(
-                                  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel',
-                                  {
-                                    defaultMessage: 'Predicted label',
-                                  }
-                                )}
-                              >
-                                <Fragment />
-                              </EuiFormRow>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
+                          <EuiFormRow
+                            helpText={i18n.translate(
+                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel',
+                              {
+                                defaultMessage: 'Predicted label',
+                              }
+                            )}
+                          >
+                            <Fragment />
+                          </EuiFormRow>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false} style={{ width: '90%' }}>
+                        <EuiFlexItem grow={false}>
                           <EuiDataGrid
                             aria-label="Data grid demo"
                             columns={columns}
