@@ -51,8 +51,8 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     },
     async getSnapshotCount() {
       return {
-        up: await testSubjects.getVisibleText('xpack.uptime.donutChart.up'),
-        down: await testSubjects.getVisibleText('xpack.uptime.donutChart.down'),
+        up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
+        down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
       };
     },
   };
