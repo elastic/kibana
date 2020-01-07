@@ -23,6 +23,13 @@ test('returns value by default', () => {
   expect(schema.boolean().validate(true)).toBe(true);
 });
 
+test('handles boolean strings', () => {
+  expect(schema.boolean().validate('true')).toBe(true);
+  expect(schema.boolean().validate('TRUE')).toBe(true);
+  expect(schema.boolean().validate('false')).toBe(false);
+  expect(schema.boolean().validate('FALSE')).toBe(false);
+});
+
 test('is required by default', () => {
   expect(() => schema.boolean().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
@@ -49,4 +56,8 @@ test('returns error when not boolean', () => {
   expect(() => schema.boolean().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => schema.boolean().validate('abc')).toThrowErrorMatchingSnapshot();
+
+  expect(() => schema.boolean().validate(0)).toThrowErrorMatchingSnapshot();
+
+  expect(() => schema.boolean().validate('no')).toThrowErrorMatchingSnapshot();
 });
