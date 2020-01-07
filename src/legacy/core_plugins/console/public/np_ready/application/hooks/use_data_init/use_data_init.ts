@@ -36,7 +36,7 @@ export const useDataInit = () => {
       try {
         await migrateToTextObjects({ history, objectStorageClient });
         const results = await objectStorageClient.text.findAll();
-        if (!results) {
+        if (!results.length) {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
