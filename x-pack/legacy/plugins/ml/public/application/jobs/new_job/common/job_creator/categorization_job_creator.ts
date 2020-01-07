@@ -16,7 +16,6 @@ import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
 import { CategorizationAnalyzer } from '../../../../services/ml_server_info';
 
-// type DETECTOR_TYPE = ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE;
 type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
 
 export class CategorizationJobCreator extends JobCreator {
@@ -126,8 +125,6 @@ export class CategorizationJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
-
-    // this.removeAllDetectors();
 
     const dtr = detectors[0];
     if (detectors.length && dtr.agg !== null && dtr.field !== null) {

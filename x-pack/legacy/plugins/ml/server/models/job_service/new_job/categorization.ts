@@ -6,17 +6,9 @@
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CATEGORY_EXAMPLES_MULTIPLIER } from '../../../../common/constants/new_job';
-import { CategoryId, Category } from '../../../../common/types/categories';
+import { CategoryId, Category, Token } from '../../../../common/types/categories';
 
 type callWithRequestType = (action: string, params: any) => Promise<any>;
-
-interface Token {
-  token: string;
-  start_offset: number;
-  end_offset: number;
-  type: string;
-  position: number;
-}
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
   async function categorizationExamples(
@@ -65,18 +57,12 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       ?.map((doc: any) => doc._source[categorizationFieldName])
       .filter((example: string | undefined) => example !== undefined);
 
-    let tokens: Token[] = [];
-    try {
-      const { tokens: tempTokens } = await callWithRequest('indices.analyze', {
-        body: {
-          ...getAnalyzer(analyzer),
-          text: examples,
-        },
-      });
-      tokens = tempTokens;
-    } catch (error) {
-      // do something with this error
-    }
+    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
+      body: {
+        ...getAnalyzer(analyzer),
+        text: examples,
+      },
+    });
 
     const lengths = examples.map(e => e.length);
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));

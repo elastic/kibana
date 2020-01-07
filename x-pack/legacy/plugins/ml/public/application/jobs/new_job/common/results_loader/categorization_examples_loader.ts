@@ -6,17 +6,10 @@
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { Token } from '../../../../../../common/types/categories';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../common/constants/new_job';
-
-export interface Token {
-  token: string;
-  start_offset: number;
-  end_offset: number;
-  type: string;
-  position: number;
-}
 
 export interface CategoryExample {
   text: string;

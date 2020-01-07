@@ -6,22 +6,11 @@
 
 import React, { FC } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { Token } from '../../../../../../../../../common/types/categories';
+import { CategoryExample } from '../../../../../common/results_loader';
 
 interface Props {
-  fieldExamples: Cat[] | null;
-}
-
-interface Token {
-  token: string;
-  start_offset: number;
-  end_offset: number;
-  type: string;
-  position: number;
-}
-
-interface Cat {
-  text: string;
-  tokens: Token[];
+  fieldExamples: CategoryExample[] | null;
 }
 
 const TOKEN_HIGHLIGHT_COLOR = '#b0ccf7';

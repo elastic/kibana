@@ -8,16 +8,12 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
-// import { ml } from '../../../../../../../services/ml_api_service';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
-// import { useKibanaContext } from '../../../../../../../contexts/kibana';
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import { CategoryExample } from '../../../../../common/results_loader';
 import { LoadingWrapper } from '../../../charts/loading_wrapper';
-// import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
-// import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 
 const LOADING_PLACEHOLDER_HEIGHT = '200x';
 
