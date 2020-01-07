@@ -11828,7 +11828,6 @@
     "xpack.uptime.emptyState.loadingMessage": "正在加载……",
     "xpack.uptime.emptyState.noDataTitle": "没有可用的运行时间数据",
     "xpack.uptime.emptyStateError.title": "错误",
-    "xpack.uptime.emptyStatusBar.defaultMessage": "未找到监测 ID {monitorId} 的数据",
     "xpack.uptime.errorMessage": "错误：{message}",
     "xpack.uptime.featureCatalogueDescription": "执行终端节点运行状况检查和运行时间监测。",
     "xpack.uptime.featureRegistry.uptimeFeatureName": "运行时间",

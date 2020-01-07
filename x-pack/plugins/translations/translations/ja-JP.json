@@ -11739,7 +11739,6 @@
     "xpack.uptime.emptyState.loadingMessage": "読み込み中…",
     "xpack.uptime.emptyState.noDataTitle": "利用可能なアップタイムデータがありません",
     "xpack.uptime.emptyStateError.title": "エラー",
-    "xpack.uptime.emptyStatusBar.defaultMessage": "監視 ID {monitorId} のデータが見つかりません",
     "xpack.uptime.errorMessage": "エラー: {message}",
     "xpack.uptime.featureCatalogueDescription": "エンドポイントヘルスチェックとアップタイム監視を行います。",
     "xpack.uptime.featureRegistry.uptimeFeatureName": "アップタイム",
