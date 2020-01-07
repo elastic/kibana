@@ -9,7 +9,7 @@ import { JobDocPayload, ServerFacade, RequestFacade } from '../../types';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
 export interface JobParamsPDF {
-  objectType: string;
+  objectType: string; // visualization, dashboard, etc. Used for job info & telemetry
   title: string;
   relativeUrls: string[];
   browserTimezone: string;
@@ -22,7 +22,5 @@ export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
   browserTimezone: string;
   forceNow?: string;
   layout: LayoutParams;
-  objects: Array<{
-    relativeUrl: string;
-  }>;
+  relativeUrls: string[];
 }
