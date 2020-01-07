@@ -1,0 +1,133 @@
+[[license-expiration]]
+=== License expiration
+
+Your license is time based and expires at a future date. If you're using
+{monitor-features} and your license will expire within 30 days, a license
+expiration warning is displayed prominently. Warnings are also displayed on
+startup and written to the {es} log starting 30 days from the expiration date.
+These error messages tell you when the license expires and what features will be
+disabled if you do not update the license.
+
+IMPORTANT: You should update your license as soon as possible. You are
+essentially flying blind when running with an expired license. Access to the
+cluster health and stats APIs is critical for monitoring and managing an {es}
+cluster.
+
+[[expiration-kibana]]
+==== {kib}
+
+* Users can still log into {kib}.
+* It is still usable for data exploration and visualization, but some features
+are disabled.
+* The license management UI is available to easily upgrade your license. See
+<<update-license>> and <<managing-licenses>>.
+
+[[expiration-elasticsearch]]
+==== {es}
+
+////
+TBD
+ES messages:
+# - deprecation
+#  - Deprecation APIs are disabled
+# - upgrade
+#  - Upgrade API is disabled
+# - sql
+#  - SQL support is disabled
+# - rollup
+#  - Creating and Starting rollup jobs will no longer be allowed.
+#  - Stopping/Deleting existing jobs, RollupCaps API and RollupSearch continue to function.
+# - transform
+#  - Creating, starting, updating transforms will no longer be allowed.
+#  - Stopping/Deleting existing transforms continue to function.
+# - analytics
+#  - Aggregations provided by Analytics plugin are no longer usable.
+////
+
+[[expiration-logstash]]
+==== {ls} pipeline management
+
+* Cannot create new pipelines or edit or delete existing pipelines from the UI.
+* Cannot list or view existing pipelines from the UI.
+* Cannot run Logstash instances which are registered to listen to existing pipelines.
+////
+TBD
+ES message: Logstash will continue to poll centrally-managed pipelines
+////
+
+[[expiration-beats]]
+==== Beats
+
+////
+TBD
+ES message: Beats will continue to poll centrally-managed configuration
+////
+
+[[expiration-watcher]]
+==== {stack} {alert-features}
+
+* The PUT and GET watch APIs are disabled. The DELETE watch API continues to work.
+* Watches execute and write to the history.
+* The actions of the watches do not execute.
+
+[[expiration-monitoring]]
+==== {stack} {monitor-features}
+
+* The agent stops collecting cluster and indices metrics.
+* The agent stops automatically cleaning indices older than
+`xpack.monitoring.history.duration`.
+
+[[expiration-graph]]
+==== {stack} {graph-features}
+
+* Graph explore APIs are disabled.
+
+[[expiration-security]]
+==== {stack} {security-features}
+
+* Cluster health, cluster stats, and indices stats operations are blocked.
+* All data operations (read and write) continue to work.
+
+Once the license expires, calls to the cluster health, cluster stats, and index
+stats APIs fail with a `security_exception` and return a 403 HTTP status code.
+
+[source,sh]
+-----------------------------------------------------
+{
+  "error": {
+    "root_cause": [
+      {
+        "type": "security_exception",
+        "reason": "current license is non-compliant for [security]",
+        "license.expired.feature": "security"
+      }
+    ],
+    "type": "security_exception",
+    "reason": "current license is non-compliant for [security]",
+    "license.expired.feature": "security"
+  },
+  "status": 403
+}
+-----------------------------------------------------
+
+This message enables automatic monitoring systems to easily detect the license
+failure without immediately impacting other users.
+
+[[expiration-ml]]
+==== {stack} {ml-features}
+
+* APIs to create jobs, open jobs, send data to jobs, create {dfeeds}, and start
+{dfeeds} are disabled.
+* All started {dfeeds} are stopped. All open jobs are closed.
+* Existing job results continue to be available by using {kib} or APIs.
+////
+TBD
+ES message: Machine learning APIs are disabled
+////
+
+[[expiration-reporting]]
+==== {kib} {report-features}
+
+* Reporting is no longer be available in {kib}.
+* Report generation URLs stop working.
+* Existing reports are no longer accessible.

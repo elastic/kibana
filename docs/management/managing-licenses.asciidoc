@@ -1,28 +1,45 @@
 [[managing-licenses]]
-== License Management
+== License management
 
-When you install {kib}, it generates a Basic license
-with no expiration date.  Go to *Management > License Management* to view the 
-status of your license, start a 30-day trial, or install a new license. 
+When you install the default distribution of {kib}, you receive a basic license
+with no expiration date. For the full list of free features that are included in
+the basic license, see https://www.elastic.co/subscriptions[the subscription page].
 
-To learn more about the available license levels,
-see https://www.elastic.co/subscriptions[the subscription page]. 
+If you want to try out the full set of platinum features, you can activate a
+30-day trial license. Go to *Management > License Management* to view the 
+status of your license, start a trial, or install a new license.
 
-You can activate a 30-day trial license to try out the full set of 
-https://www.elastic.co/subscriptions[Platinum features], including machine learning, 
-advanced security, alerting, graph capabilities, and more. 
+NOTE: You can start a trial only if your cluster has not already activated a
+trial license for the current major product version. For example, if you have
+already activated a trial for v6.0, you cannot start a new trial until 
+v7.0. You can, however, contact `info@elastic.co` to request an extended trial
+license.
 
-When you activate a new license level, new features will appear in the left sidebar 
+When you activate a new license level, new features appear in the left sidebar 
 of the *Management* page.
 
 [role="screenshot"]
 image::images/management-license.png[]
 
-At the end of the trial period, the Platinum features operate in a 
-{stack-ov}/license-expiration.html[degraded mode]. You can revert to a Basic 
-license, extend the trial, or purchase a subscription. 
+At the end of the trial period, the platinum features operate in a
+<<license-expiration,degraded mode>>. You can revert to a basic license, 
+extend the trial, or purchase a subscription. 
 
+TIP: If {security-features} are enabled, before you revert to a basic license or
+install a gold or platinum license, you must configure Transport Layer Security
+(TLS) in {es}. See {ref}/encrypting-communications.html[Encrypting communications].
+{kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
+the features that will no longer be supported if you revert to a basic license.
 
-TIP: If {security-features} are enabled, before you revert to a Basic license or install 
-a Gold or Platinum license, you must configure Transport Layer Security (TLS) in {es}. 
-See {ref}/encrypting-communications.html[Encrypting communications].
+[discrete]
+[[update-license]]
+=== Update your license
+
+You can update your license at runtime without shutting down your {es} nodes.
+License updates take effect immediately. The license is provided as a _JSON_
+file that you install in {kib} or by using the
+{ref}/update-license.html[update license API].
+
+TIP: If you are using a basic or trial license, {security-features} are disabled
+by default. In all other licenses, {security-features} are enabled by default;
+you must secure the {stack} or disable the {security-features}. 
