@@ -21,7 +21,7 @@ describe('chartSelectors', () => {
     it('should return anomalyScoreSeries', () => {
       const data = [{ x0: 0, x: 10 }];
       expect(getAnomalyScoreSeries(data)).toEqual({
-        areaColor: 'rgba(146,0,0,0.1)',
+        areaColor: 'rgba(231,102,76,0.1)',
         color: 'none',
         data: [{ x0: 0, x: 10 }],
         hideLegend: true,
@@ -57,7 +57,7 @@ describe('chartSelectors', () => {
         getResponseTimeSeries({ apmTimeseries, anomalyTimeseries: undefined })
       ).toEqual([
         {
-          color: '#3185fc',
+          color: '#6092c0',
           data: [
             { x: 0, y: 100 },
             { x: 1000, y: 200 }
@@ -67,7 +67,7 @@ describe('chartSelectors', () => {
           type: 'linemark'
         },
         {
-          color: '#e6c220',
+          color: '#fae181',
           data: [
             { x: 0, y: 200 },
             { x: 1000, y: 300 }
@@ -77,7 +77,7 @@ describe('chartSelectors', () => {
           type: 'linemark'
         },
         {
-          color: '#f98510',
+          color: '#f19f58',
           data: [
             { x: 0, y: 300 },
             { x: 1000, y: 400 }
