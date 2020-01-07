@@ -25,11 +25,11 @@ describe('PreferenceFormattedBytes', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('it renders bytes to hardcoded format when no configuration exists', () => {
+  test('it renders bytes to Numeral formatting when no format setting exists', () => {
     mockUseUiSetting$.mockImplementation(() => [null]);
     const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-    expect(wrapper.text()).toEqual('2.7MB');
+    expect(wrapper.text()).toEqual('2,806,422');
   });
 
   test('it renders bytes according to the default format', () => {

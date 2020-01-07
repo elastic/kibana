@@ -12,7 +12,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 
 export const PreferenceFormattedBytesComponent = ({ value }: { value: string | number }) => {
   const [bytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
-  return <>{numeral(value).format(bytesFormat || '0,0.[0]b')}</>;
+  return <>{numeral(value).format(bytesFormat)}</>;
 };
 
 PreferenceFormattedBytesComponent.displayName = 'PreferenceFormattedBytesComponent';
