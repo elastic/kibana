@@ -6,6 +6,7 @@
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CATEGORY_EXAMPLES_MULTIPLIER } from '../../../../common/constants/new_job';
+import { CategoryId, Category } from '../../../../common/types/categories';
 
 type callWithRequestType = (action: string, params: any) => Promise<any>;
 
@@ -15,18 +16,6 @@ interface Token {
   end_offset: number;
   type: string;
   position: number;
-}
-
-type CategoryId = number;
-
-interface Category {
-  job_id: string;
-  category_id: CategoryId;
-  terms: string;
-  regex: string;
-  max_matching_length: number;
-  examples: string[];
-  grok_pattern: string;
 }
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
@@ -233,10 +222,25 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     return catCounts;
   }
 
-  async function getCategories(jobId: string, catIds: CategoryId[]): Promise<Category[]> {
+  async function getCategories(
+    jobId: string,
+    catIds: CategoryId[],
+    size: number
+  ): Promise<Category[]> {
+    const categoryFilter = catIds.length
+      ? {
+          terms: {
+            category_id: catIds,
+          },
+        }
+      : {
+          exists: {
+            field: 'category_id',
+          },
+        };
     const result = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
-      size: catIds.length,
+      size,
       body: {
         query: {
           bool: {
@@ -246,11 +250,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
                   job_id: jobId,
                 },
               },
-              {
-                terms: {
-                  category_id: catIds,
-                },
-              },
+              categoryFilter,
             ],
           },
         },
@@ -264,7 +264,8 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const catCounts = await getTopCategoryCounts(jobId, numberOfCategories);
     const categories = await getCategories(
       jobId,
-      catCounts.map(c => c.id)
+      catCounts.map(c => c.id),
+      catCounts.length || numberOfCategories
     );
 
     const catsById = categories.reduce((p, c) => {
@@ -274,15 +275,26 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
 
     const total = await getTotalCategories(jobId);
 
-    return {
-      total,
-      categories: catCounts.map(({ id, count }) => {
-        return {
-          count,
-          category: catsById[id] ?? null,
-        };
-      }),
-    };
+    if (catCounts.length) {
+      return {
+        total,
+        categories: catCounts.map(({ id, count }) => {
+          return {
+            count,
+            category: catsById[id] ?? null,
+          };
+        }),
+      };
+    } else {
+      return {
+        total,
+        categories: categories.map(category => {
+          return {
+            category,
+          };
+        }),
+      };
+    }
   }
 
   return {

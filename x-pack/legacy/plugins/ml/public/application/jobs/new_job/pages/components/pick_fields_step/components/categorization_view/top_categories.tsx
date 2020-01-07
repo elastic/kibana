@@ -17,7 +17,7 @@ export const TopCategories: FC = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 
-  const [tableRow, setTableRow] = useState<Array<{ count: number; example: string }>>([]);
+  const [tableRow, setTableRow] = useState<Array<{ count?: number; example: string }>>([]);
   const [totalCategories, setTotalCategories] = useState(0);
 
   function setResultsWrapper(results: Results) {
@@ -44,16 +44,21 @@ export const TopCategories: FC = () => {
   }, []);
 
   const columns = [
-    {
-      field: 'count',
-      name: 'count',
-      width: '100px',
-      render: (count: any) => (
-        <EuiText size="s">
-          <code>{count}</code>
-        </EuiText>
-      ),
-    },
+    // only include counts if model plot is enabled
+    ...(jobCreator.modelPlot
+      ? [
+          {
+            field: 'count',
+            name: 'count',
+            width: '100px',
+            render: (count: any) => (
+              <EuiText size="s">
+                <code>{count}</code>
+              </EuiText>
+            ),
+          },
+        ]
+      : []),
     {
       field: 'example',
       name: 'Example',

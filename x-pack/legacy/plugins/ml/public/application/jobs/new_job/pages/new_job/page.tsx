@@ -125,12 +125,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.createdBy = null;
     }
 
-    if (isCategorizationJobCreator(jobCreator)) {
-      // categorization job will always use a count agg, so give it
-      // to the job creator now
-      jobCreator.modelPlot = true;
-    }
-
     // auto set the time range if creating a new advanced job
     autoSetTimeRange = isAdvancedJobCreator(jobCreator);
   }

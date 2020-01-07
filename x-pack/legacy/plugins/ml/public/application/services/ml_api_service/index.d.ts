@@ -7,6 +7,7 @@
 import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
 import { AggFieldNamePair } from '../../../../common/types/fields';
+import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../../common/types/jobs';
@@ -181,7 +182,10 @@ declare interface Ml {
       end: number,
       analyzer: any
     ): Promise<{ valid: number; examples: any[] }>;
-    topCategories(jobId: string, count: number): Promise<{ total: number; categories: any[] }>;
+    topCategories(
+      jobId: string,
+      count: number
+    ): Promise<{ total: number; categories: Array<{ count?: number; category: Category }> }>;
   };
 
   estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;

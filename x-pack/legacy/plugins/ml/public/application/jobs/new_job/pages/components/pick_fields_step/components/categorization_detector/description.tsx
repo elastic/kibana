@@ -23,7 +23,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.description"
-          defaultMessage="What kind of categorization job will it be? Count or Rare? CHOOSE NOW."
+          defaultMessage="Select which type of detector to use. Count and rare detectors can be used for a categorization job."
         />
       }
     >

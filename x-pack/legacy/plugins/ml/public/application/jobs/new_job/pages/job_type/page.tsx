@@ -163,7 +163,7 @@ export const Page: FC = () => {
         defaultMessage: 'Categorization',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationDescription', {
-        defaultMessage: 'All your categories are belong to us',
+        defaultMessage: 'Group log messages into categories and detect anomalies within them.',
       }),
       id: 'mlJobTypeLinkCategorizationJob',
     },

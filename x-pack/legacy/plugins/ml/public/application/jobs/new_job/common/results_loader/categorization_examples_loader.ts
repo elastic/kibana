@@ -8,8 +8,7 @@ import { IndexPattern } from '../../../../../../../../../../src/plugins/data/pub
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
-
-const NUM_OF_EXAMPLES = 5;
+import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../common/constants/new_job';
 
 export interface Token {
   token: string;
@@ -53,7 +52,7 @@ export class CategorizationExamplesLoader {
     const resp = await ml.jobs.categorizationFieldExamples(
       this._indexPatternTitle,
       this._query,
-      NUM_OF_EXAMPLES,
+      NUMBER_OF_CATEGORY_EXAMPLES,
       categorizationFieldName,
       this._timeFieldName,
       start,
