@@ -117,7 +117,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                           </EuiTitle>
 
                           {/* Field path */}
-                          <EuiCode>{field.path}</EuiCode>
+                          <EuiCode>{field.path.join(' > ')}</EuiCode>
                         </div>
                       </EuiFlexItem>
 
