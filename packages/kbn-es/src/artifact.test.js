@@ -27,7 +27,7 @@ import { Artifact } from './artifact';
 const log = new ToolingLog();
 let MOCKS;
 
-const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
+const EXT = process.platform === 'win32' ? 'zip' : 'tar.gz';
 const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
@@ -43,8 +43,8 @@ const createArchive = (params = {}) => {
     license: 'default',
     version: MOCK_VERSION,
     url: MOCK_URL + `/${license}`,
-    platform: PLATFORM,
-    filename: MOCK_FILENAME + `.${license}`,
+    platform: 'no-jdk',
+    filename: `${MOCK_FILENAME}.${license}.${EXT}`,
     ...params,
   };
 };
@@ -94,7 +94,7 @@ const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) =
     expect(artifact.getUrl()).toEqual(MOCK_URL + `/${expectedLicense}`);
     expect(artifact.getChecksumUrl()).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
     expect(artifact.getChecksumType()).toEqual('sha512');
-    expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `.${expectedLicense}`);
+    expect(artifact.getFilename()).toEqual(`${MOCK_FILENAME}.${expectedLicense}.${EXT}`);
   };
 };
 

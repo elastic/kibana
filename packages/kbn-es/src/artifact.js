@@ -117,17 +117,17 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
 
   const manifest = JSON.parse(json);
 
-  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
   const archive = manifest.archives.find(
     archive =>
       archive.version === desiredVersion &&
-      archive.platform === platform &&
+      archive.filename.endsWith(ext) &&
       archive.license === desiredLicense
   );
 
   if (!archive) {
     throw createCliError(
-      `Snapshots for ${desiredVersion} are available, but couldn't find an artifact in the manifest for [${desiredVersion}, ${desiredLicense}, ${platform}]`
+      `Snapshots for ${desiredVersion} are available, but couldn't find an artifact in the manifest for [${desiredVersion}, ${desiredLicense}, ${ext}]`
     );
   }
 
