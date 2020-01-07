@@ -61,8 +61,10 @@ async function getResults(req, params, shardStats) {
   const response = await callWithRequest(req, 'search', params);
   results.push(...handleResponse(response, shardStats));
 
+  const config = req.server.config();
+  const size = config.get('xpack.monitoring.max_bucket_size');
   const after = get(response, 'aggregations.composite_data.after_key');
-  if (!after) {
+  if (!after || results.length < size) {
     return results;
   }
 
