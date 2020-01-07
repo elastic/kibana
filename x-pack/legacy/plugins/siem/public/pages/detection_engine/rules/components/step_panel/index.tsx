@@ -28,8 +28,4 @@ const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title
   </MyPanel>
 );
 
-StepPanelComponent.displayName = 'StepPanelComponent';
-
 export const StepPanel = memo(StepPanelComponent);
-
-StepPanel.displayName = 'StepPanel';

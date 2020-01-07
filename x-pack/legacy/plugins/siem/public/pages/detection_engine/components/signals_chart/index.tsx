@@ -38,6 +38,4 @@ const SignalsChartsComponent = () => (
   </EuiPanel>
 );
 
-SignalsChartsComponent.displayName = 'SignalsChartsComponent';
-
 export const SignalsCharts = memo(SignalsChartsComponent);

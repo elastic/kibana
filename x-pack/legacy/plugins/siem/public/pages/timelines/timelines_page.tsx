@@ -17,7 +17,6 @@ import * as i18n from './translations';
 const TimelinesContainer = styled.div`
   width: 100%;
 `;
-TimelinesContainer.displayName = 'TimelinesContainer';
 
 interface TimelinesProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -27,7 +26,7 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
+const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
   <>
     <WrapperPage>
       <HeaderPage border title={i18n.PAGE_TITLE} />
@@ -44,6 +43,6 @@ export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
 
     <SpyRoute />
   </>
-));
+);
 
-TimelinesPage.displayName = 'TimelinesPage';
+export const TimelinesPage = React.memo(TimelinesPageComponent);

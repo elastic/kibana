@@ -32,35 +32,39 @@ const getDetailsEvent = memoizeOne(
   (variables: string, detail: DetailItem[]): DetailItem[] => detail
 );
 
-export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
-  ({ children, indexName, eventId, executeQuery, sourceId }) => {
-    const variables: GetTimelineDetailsQuery.Variables = {
-      sourceId,
-      indexName,
-      eventId,
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-    };
-    return executeQuery ? (
-      <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
-        query={timelineDetailsQuery}
-        fetchPolicy="network-only"
-        notifyOnNetworkStatusChange
-        variables={variables}
-      >
-        {({ data, loading, refetch }) => {
-          return children!({
-            loading,
-            detailsData: getDetailsEvent(
-              JSON.stringify(variables),
-              getOr([], 'source.TimelineDetails.data', data)
-            ),
-          });
-        }}
-      </Query>
-    ) : (
-      children!({ loading: false, detailsData: null })
-    );
-  }
-);
+const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
+  children,
+  indexName,
+  eventId,
+  executeQuery,
+  sourceId,
+}) => {
+  const variables: GetTimelineDetailsQuery.Variables = {
+    sourceId,
+    indexName,
+    eventId,
+    defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+  };
+  return executeQuery ? (
+    <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
+      query={timelineDetailsQuery}
+      fetchPolicy="network-only"
+      notifyOnNetworkStatusChange
+      variables={variables}
+    >
+      {({ data, loading, refetch }) =>
+        children!({
+          loading,
+          detailsData: getDetailsEvent(
+            JSON.stringify(variables),
+            getOr([], 'source.TimelineDetails.data', data)
+          ),
+        })
+      }
+    </Query>
+  ) : (
+    children!({ loading: false, detailsData: null })
+  );
+};
 
-TimelineDetailsComponentQuery.displayName = 'TimelineDetailsComponentQuery';
+export const TimelineDetailsQuery = React.memo(TimelineDetailsQueryComponent);

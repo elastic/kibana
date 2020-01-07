@@ -61,30 +61,33 @@ Object.defineProperty(window, 'localStorage', {
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProviders = React.memo<Props>(
-  ({ children, store = createStore(state, apolloClientObservable), onDragEnd = jest.fn() }) => (
-    <I18nProvider>
-      <MockKibanaContextProvider>
-        <ApolloProvider client={apolloClient}>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </ApolloProvider>
-      </MockKibanaContextProvider>
-    </I18nProvider>
-  )
+const TestProvidersComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, apolloClientObservable),
+  onDragEnd = jest.fn(),
+}) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ApolloProvider client={apolloClient}>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </ApolloProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
 );
 
-TestProviders.displayName = 'TestProviders';
+export const TestProviders = React.memo(TestProvidersComponent);
 
-export const TestProviderWithoutDragAndDrop = React.memo<Props>(
-  ({ children, store = createStore(state, apolloClientObservable) }) => (
-    <I18nProvider>
-      <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
-    </I18nProvider>
-  )
+const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, apolloClientObservable),
+}) => (
+  <I18nProvider>
+    <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
+  </I18nProvider>
 );
 
-TestProviderWithoutDragAndDrop.displayName = 'TestProviderWithoutDragAndDrop';
+export const TestProviderWithoutDragAndDrop = React.memo(TestProviderWithoutDragAndDropComponent);

@@ -16,7 +16,7 @@ interface Props {
   valueLabel?: string;
 }
 
-export const FilterLabel = memo<Props>(({ filter, valueLabel }) => {
+const FilterLabelComponent: React.FC<Props> = ({ filter, valueLabel }) => {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('xpack.siem.detectionEngine.createRule.filterLabel.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -90,6 +90,6 @@ export const FilterLabel = memo<Props>(({ filter, valueLabel }) => {
         </>
       );
   }
-});
+};
 
-FilterLabel.displayName = 'FilterLabel';
+export const FilterLabel = memo(FilterLabelComponent);

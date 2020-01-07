@@ -78,8 +78,4 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
   );
 };
 
-AlertsTableComponent.displayName = 'AlertsTableComponent';
-
 export const AlertsTable = React.memo(AlertsTableComponent);
-
-AlertsTable.displayName = 'AlertsTable';

@@ -25,7 +25,7 @@ const RuleStatusIconStyled = styled.div`
   }
 `;
 
-export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
+const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) => {
   const theme = useEuiTheme();
   const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorDarkestShade;
   return (
@@ -34,6 +34,6 @@ export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
       {type === 'valid' ? <EuiIcon type="check" color={theme.euiColorEmptyShade} size="l" /> : null}
     </RuleStatusIconStyled>
   );
-});
+};
 
-RuleStatusIcon.displayName = 'RuleStatusIcon';
+export const RuleStatusIcon = memo(RuleStatusIconComponent);

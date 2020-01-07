@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useReducer } from 'react';
+import React, { FC, memo, useReducer } from 'react';
 
 import { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
 import { RouterSpyStateContext, initRouteSpy } from './helpers';
 
-export const ManageRoutesSpy = memo(({ children }: ManageRoutesSpyProps) => {
+const ManageRoutesSpyComponent: FC<ManageRoutesSpyProps> = ({ children }) => {
   const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction) => {
     switch (action.type) {
       case 'updateRoute':
@@ -28,6 +28,6 @@ export const ManageRoutesSpy = memo(({ children }: ManageRoutesSpyProps) => {
       {children}
     </RouterSpyStateContext.Provider>
   );
-});
+};
 
-ManageRoutesSpy.displayName = 'ManageRoutesSpy';
+export const ManageRoutesSpy = memo(ManageRoutesSpyComponent);

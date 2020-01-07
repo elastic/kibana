@@ -16,7 +16,7 @@ interface RouterProps {
   history: History;
 }
 
-export const PageRouter: FC<RouterProps> = memo(({ history }) => (
+const PageRouterComponent: FC<RouterProps> = ({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
@@ -25,6 +25,6 @@ export const PageRouter: FC<RouterProps> = memo(({ history }) => (
       </Switch>
     </Router>
   </ManageRoutesSpy>
-));
+);
 
-PageRouter.displayName = 'PageRouter';
+export const PageRouter = memo(PageRouterComponent);

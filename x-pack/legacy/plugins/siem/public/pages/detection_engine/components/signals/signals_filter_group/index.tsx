@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from '../translations';
