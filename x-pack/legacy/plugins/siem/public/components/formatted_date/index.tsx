@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { useDateFormat, useTimeZone } from '../../hooks';

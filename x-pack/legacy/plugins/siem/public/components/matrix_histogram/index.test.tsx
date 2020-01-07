@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { MatrixHistogram } from '.';
 
