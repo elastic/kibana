@@ -30,13 +30,6 @@ async function startApp(libs: FrontendLibs) {
   await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
-    libs.framework.registerManagementSection({
-      id: 'ingest',
-      name: i18n.translate('xpack.fleet.fleetSectionLabel', {
-        defaultMessage: 'Agents/Policies',
-      }),
-      iconName: 'logoBeats',
-    });
     libs.framework.registerManagementUI({
       sectionId: 'ingest',
       id: 'ingest_fleet',
