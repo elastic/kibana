@@ -144,4 +144,6 @@ test('returns error when not string or non-safe positive integer', () => {
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate(/abc/)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate('123foo')).toThrowErrorMatchingSnapshot();
 });

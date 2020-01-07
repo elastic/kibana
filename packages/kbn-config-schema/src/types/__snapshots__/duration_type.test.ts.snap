@@ -24,4 +24,6 @@ exports[`returns error when not string or non-safe positive integer 5`] = `"expe
 
 exports[`returns error when not string or non-safe positive integer 6`] = `"expected value of type [moment.Duration] but got [RegExp]"`;
 
+exports[`returns error when not string or non-safe positive integer 7`] = `"Failed to parse [123foo] as time value. Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')"`;
+
 exports[`returns value by default 1`] = `"PT2M3S"`;
