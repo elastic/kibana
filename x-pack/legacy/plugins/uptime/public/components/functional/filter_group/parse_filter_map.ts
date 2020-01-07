@@ -9,11 +9,12 @@ interface FilterField {
   fieldName: string;
 }
 
-export const parseFiltersMap = (
-  filterMapString: string,
-  fields: FilterField[]
-): Record<string, any[]> => {
-  const filterSlices: Record<string, any[]> = {};
+interface FilterSlices {
+  [key: string]: any;
+}
+
+export const parseFiltersMap = (filterMapString: string, fields: FilterField[]): FilterSlices => {
+  const filterSlices: FilterSlices = {};
   try {
     const map = new Map<string, string[]>(JSON.parse(filterMapString));
     fields.forEach(({ name, fieldName }) => {
