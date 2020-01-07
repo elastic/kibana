@@ -21,23 +21,23 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewRenderProps, DocViewInput, getServices } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
+import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => {
-  const docViews: DocViewInput[] = [];
-
-  function addDocView(docView: DocViewInput) {
-    docViews.push(docView);
-  }
-
+  let registry: any[] = [];
   return {
     getServices: () => ({
       docViewsRegistry: {
-        getDocViewsSorted: () => {
-          return docViews;
+        addDocView(view: any) {
+          registry.push(view);
         },
-        addDocView,
-        docViews,
+        getDocViewsSorted() {
+          return registry;
+        },
+      },
+      resetRegistry: () => {
+        registry = [];
       },
     }),
     formatMsg: (x: any) => String(x),
@@ -45,23 +45,16 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 
-const {
-  docViewsRegistry: { docViews, addDocView },
-} = getServices();
-
-function emptyDocViews() {
-  docViews.length = 0;
-}
-
 beforeEach(() => {
-  emptyDocViews();
+  (getServices() as any).resetRegistry();
   jest.clearAllMocks();
 });
 
 test('Render <DocViewer/> with 3 different tabs', () => {
-  addDocView({ order: 10, title: 'Render function', render: jest.fn() });
-  addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
-  addDocView({ order: 30, title: 'Invalid doc view' });
+  const registry = getServices().docViewsRegistry;
+  registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
+  registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
+  registry.addDocView({ order: 30, title: 'Invalid doc view' });
 
   const renderProps = { hit: {} } as DocViewRenderProps;
 
@@ -76,7 +69,8 @@ test('Render <DocViewer/> with 1 tab displaying error message', () => {
     return null;
   }
 
-  addDocView({
+  const registry = getServices().docViewsRegistry;
+  registry.addDocView({
     order: 10,
     title: 'React component',
     component: SomeComponent,

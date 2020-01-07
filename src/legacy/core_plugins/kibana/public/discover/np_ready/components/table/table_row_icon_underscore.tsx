@@ -20,22 +20,29 @@ import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function DocViewTableRowIconNoMapping() {
-  const ariaLabel = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldAriaLabel', {
-    defaultMessage: 'Warning',
-  });
-  const tooltipContent = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldTooltip', {
-    defaultMessage:
-      'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
-  });
+export function DocViewTableRowIconUnderscore() {
+  const ariaLabel = i18n.translate(
+    'kbn.discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedAriaLabel',
+    {
+      defaultMessage: 'Warning',
+    }
+  );
+  const tooltipContent = i18n.translate(
+    'kbn.discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip',
+    {
+      defaultMessage: 'Field names beginning with {underscoreSign} are not supported',
+      values: { underscoreSign: '_' },
+    }
+  );
+
   return (
     <EuiIconTip
       aria-label={ariaLabel}
-      color="warning"
       content={tooltipContent}
+      color="warning"
       iconProps={{
         className: 'kbnDocViewer__warning',
-        'data-test-subj': 'noMappingWarning',
+        'data-test-subj': 'underscoreWarning',
       }}
       size="s"
       type="alert"
