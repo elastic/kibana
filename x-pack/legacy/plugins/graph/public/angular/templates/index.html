@@ -81,6 +81,7 @@
         <button
           class="kuiButton kuiButton--basic kuiButton--small"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.undoButtonTooltip' | i18n: { defaultMessage: 'Undo' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.undoButtonTooltip' | i18n: { defaultMessage: 'Undo' } }}"
           type="button"
           ng-click="workspace.undo()"
           ng-disabled="workspace === null||workspace.undoLog.length <1"
@@ -91,6 +92,7 @@
         <button
           class="kuiButton kuiButton--basic kuiButton--small"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.redoButtonTooltip' | i18n: { defaultMessage: 'Redo' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.redoButtonTooltip' | i18n: { defaultMessage: 'Redo' } }}"
           type="button"
           ng-disabled="workspace === null ||workspace.redoLog.length === 0"
           ng-click="workspace.redo()"
@@ -100,48 +102,56 @@
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||liveResponseFields.length === 0||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip' | i18n: { defaultMessage: 'Expand selection' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip' | i18n: { defaultMessage: 'Expand selection' } }}"
           ng-click="setDetail(null);workspace.expandSelecteds({toFields:liveResponseFields});">
           <span class="kuiIcon fa-plus"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.addLinksButtonTooltip' | i18n: { defaultMessage: 'Add links between existing terms' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.addLinksButtonTooltip' | i18n: { defaultMessage: 'Add links between existing terms' } }}"
           ng-click="workspace.fillInGraph();">
           <span class="kuiIcon fa-link"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
           ng-click="setDetail(null);workspace.deleteSelection();" data-test-subj="graphRemoveSelection">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
           ng-click="workspace.blacklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.customStyleButtonTooltip' | i18n: { defaultMessage: 'Custom style selected vertices' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.customStyleButtonTooltip' | i18n: { defaultMessage: 'Custom style selected vertices' } }}"
           ng-click="setDetail({showStyle:true})">
           <span class="kuiIcon fa-paint-brush"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null||workspace.nodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.drillDownButtonTooltip' | i18n: { defaultMessage: 'Drill down' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.drillDownButtonTooltip' | i18n: { defaultMessage: 'Drill down' } }}"
           ng-click="setDetail({showDrillDowns:true})">
           <span class="kuiIcon fa-info"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
           ng-click="workspace.runLayout()" data-test-subj="graphResumeLayout">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
           ng-click="workspace.stopLayout()" data-test-subj="graphPauseLayout">
           <span class="kuiIcon fa-pause"></span>
         </button>

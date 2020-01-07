@@ -16,6 +16,7 @@ import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
+import { GraphTitle } from './graph_title';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -52,6 +53,7 @@ export function GraphApp(props: GraphAppProps) {
       >
         <Provider store={reduxStore}>
           <>
+            {props.isInitialized && <GraphTitle />}
             <div className="gphGraph__bar">
               <SearchBar {...searchBarProps} />
               <EuiSpacer size="s" />

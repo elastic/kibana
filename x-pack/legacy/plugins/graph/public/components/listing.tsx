@@ -67,14 +67,14 @@ function getNoItemsMessage(
     return (
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="graphApp"
           title={
-            <h2>
+            <h1>
               <FormattedMessage
                 id="xpack.graph.listing.noItemsMessage"
                 defaultMessage="Looks like you don't have any graphs."
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -88,12 +88,12 @@ function getNoItemsMessage(
       <EuiEmptyPrompt
         iconType="graphApp"
         title={
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.graph.listing.createNewGraph.title"
               defaultMessage="Create your first graph"
             />
-          </h2>
+          </h1>
         }
         body={
           <Fragment>
