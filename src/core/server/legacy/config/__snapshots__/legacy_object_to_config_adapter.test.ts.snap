@@ -8,9 +8,13 @@ Object {
     "enabled": true,
   },
   "cors": false,
+  "customResponseHeaders": Object {
+    "custom-header": "custom-value",
+  },
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
+  "name": "kibana-hostname",
   "port": 1234,
   "rewriteBasePath": false,
   "socketTimeout": 2000,
@@ -18,6 +22,11 @@ Object {
     "enabled": true,
     "keyPassphrase": "some-phrase",
     "someNewValue": "new",
+  },
+  "uuid": undefined,
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
   },
 }
 `;
@@ -30,9 +39,13 @@ Object {
     "enabled": true,
   },
   "cors": false,
+  "customResponseHeaders": Object {
+    "custom-header": "custom-value",
+  },
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
+  "name": "kibana-hostname",
   "port": 1234,
   "rewriteBasePath": false,
   "socketTimeout": 2000,
@@ -40,6 +53,11 @@ Object {
     "certificate": "cert",
     "enabled": false,
     "key": "key",
+  },
+  "uuid": undefined,
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
   },
 }
 `;

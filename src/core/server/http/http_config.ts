@@ -18,10 +18,13 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { Env } from '../config';
+import { hostname } from 'os';
+
+import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
+const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
@@ -32,13 +35,13 @@ export const config = {
   path: 'server',
   schema: schema.object(
     {
+      name: schema.string({ defaultValue: () => hostname() }),
       autoListen: schema.boolean({ defaultValue: true }),
       basePath: schema.maybe(
         schema.string({
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      defaultRoute: schema.maybe(schema.string()),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
@@ -54,6 +57,9 @@ export const config = {
         ),
         schema.boolean({ defaultValue: false })
       ),
+      customResponseHeaders: schema.recordOf(schema.string(), schema.string(), {
+        defaultValue: {},
+      }),
       host: schema.string({
         defaultValue: 'localhost',
         hostname: true,
@@ -81,6 +87,18 @@ export const config = {
             }),
             { minSize: 1 }
           )
+        ),
+      }),
+      uuid: schema.maybe(
+        schema.string({
+          validate: match(uuidRegexp, 'must be a valid uuid'),
+        })
+      ),
+      xsrf: schema.object({
+        disableProtection: schema.boolean({ defaultValue: false }),
+        whitelist: schema.arrayOf(
+          schema.string({ validate: match(/^\//, 'must start with a slash') }),
+          { defaultValue: [] }
         ),
       }),
     },
@@ -111,36 +129,40 @@ export const config = {
 export type HttpConfigType = TypeOf<typeof config.schema>;
 
 export class HttpConfig {
+  public name: string;
   public autoListen: boolean;
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
+  public customResponseHeaders: Record<string, string>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
-  public publicDir: string;
-  public defaultRoute?: string;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public csp: ICspConfig;
+  public xsrf: { disableProtection: boolean; whitelist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawConfig: HttpConfigType, env: Env) {
-    this.autoListen = rawConfig.autoListen;
-    this.host = rawConfig.host;
-    this.port = rawConfig.port;
-    this.cors = rawConfig.cors;
-    this.maxPayload = rawConfig.maxPayload;
-    this.basePath = rawConfig.basePath;
-    this.keepaliveTimeout = rawConfig.keepaliveTimeout;
-    this.socketTimeout = rawConfig.socketTimeout;
-    this.rewriteBasePath = rawConfig.rewriteBasePath;
-    this.publicDir = env.staticFilesDir;
-    this.ssl = new SslConfig(rawConfig.ssl || {});
-    this.defaultRoute = rawConfig.defaultRoute;
-    this.compression = rawConfig.compression;
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+    this.autoListen = rawHttpConfig.autoListen;
+    this.host = rawHttpConfig.host;
+    this.port = rawHttpConfig.port;
+    this.cors = rawHttpConfig.cors;
+    this.customResponseHeaders = rawHttpConfig.customResponseHeaders;
+    this.maxPayload = rawHttpConfig.maxPayload;
+    this.name = rawHttpConfig.name;
+    this.basePath = rawHttpConfig.basePath;
+    this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
+    this.socketTimeout = rawHttpConfig.socketTimeout;
+    this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
+    this.ssl = new SslConfig(rawHttpConfig.ssl || {});
+    this.compression = rawHttpConfig.compression;
+    this.csp = new CspConfig(rawCspConfig);
+    this.xsrf = rawHttpConfig.xsrf;
   }
 }

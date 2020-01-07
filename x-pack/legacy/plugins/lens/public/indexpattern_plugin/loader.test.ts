@@ -114,8 +114,9 @@ const sampleIndexPatterns = {
       {
         name: 'source',
         type: 'string',
-        aggregatable: true,
-        searchable: true,
+        aggregatable: false,
+        searchable: false,
+        scripted: true,
         aggregationRestrictions: {
           terms: {
             agg: 'terms',
@@ -129,7 +130,19 @@ const sampleIndexPatterns = {
 };
 
 function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns }) {
-  const pattern = sampleIndexPatterns[id];
+  const pattern = {
+    ...sampleIndexPatterns[id],
+    fields: [
+      ...sampleIndexPatterns[id].fields,
+      {
+        name: 'description',
+        type: 'string',
+        aggregatable: false,
+        searchable: true,
+        esTypes: ['text'],
+      },
+    ],
+  };
   return {
     id,
     type: 'index-pattern',
@@ -177,6 +190,16 @@ describe('loader', () => {
         cache: {
           b: sampleIndexPatterns.b,
         },
+        patterns: ['a', 'b'],
+        savedObjectsClient: mockClient(),
+      });
+
+      expect(cache).toMatchObject(sampleIndexPatterns);
+    });
+
+    it('should allow scripted, but not full text fields', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
         patterns: ['a', 'b'],
         savedObjectsClient: mockClient(),
       });
@@ -258,6 +281,26 @@ describe('loader', () => {
         ],
         indexPatterns: {
           a: sampleIndexPatterns.a,
+        },
+        layers: {},
+        showEmptyFields: false,
+      });
+    });
+
+    it('should use the default index pattern id, if provided', async () => {
+      const state = await loadInitialState({
+        defaultIndexPatternId: 'b',
+        savedObjectsClient: mockClient(),
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: 'b',
+        indexPatternRefs: [
+          { id: 'a', title: sampleIndexPatterns.a.title },
+          { id: 'b', title: sampleIndexPatterns.b.title },
+        ],
+        indexPatterns: {
+          b: sampleIndexPatterns.b,
         },
         layers: {},
         showEmptyFields: false,
@@ -506,7 +549,8 @@ describe('loader', () => {
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fetchJson: fetchJson as any,
         indexPatterns: [{ title: 'a' }, { title: 'b' }, { title: 'c' }],
         setState,
       });

@@ -5,13 +5,15 @@
  */
 
 import { KibanaTelemetryAdapter } from '../../lib/adapters/telemetry';
+import { UMRestApiRouteFactory } from '../types';
 
-export const createLogOverviewPageRoute = () => ({
+export const createLogOverviewPageRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
   path: '/api/uptime/logOverview',
-  handler: async (request: any, h: any): Promise<void> => {
+  validate: false,
+  handler: async (_customParams, _context, _request, response): Promise<any> => {
     await KibanaTelemetryAdapter.countOverview();
-    return h.response().code(200);
+    return response.ok();
   },
   options: {
     tags: ['access:uptime'],

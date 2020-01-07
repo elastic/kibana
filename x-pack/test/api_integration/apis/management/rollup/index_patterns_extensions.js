@@ -11,16 +11,14 @@ import { registerHelpers } from './rollup.test_helpers';
 import { INDEX_TO_ROLLUP_MAPPINGS, INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const {
-    createIndexWithMappings,
-    getJobPayload,
-    createJob,
-    cleanUp,
-  } = registerHelpers({ supertest, es });
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers({
+    supertest,
+    es,
+  });
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
@@ -62,7 +60,7 @@ export default function ({ getService }) {
           params = {
             pattern: 'foo',
             params: JSON.stringify({ rollup_index: 'bar' }),
-            meta_fields: 'stringValue'
+            meta_fields: 'stringValue',
           };
           uri = `${BASE_URI}?${querystring.stringify(params)}`;
           ({ body } = await supertest.get(uri).expect(400));
@@ -70,7 +68,10 @@ export default function ({ getService }) {
         });
 
         it('should return 404 the rollup index to query does not exist', async () => {
-          uri = `${BASE_URI}?${querystring.stringify({ pattern: 'foo', params: JSON.stringify({ rollup_index: 'bar' }) })}`;
+          uri = `${BASE_URI}?${querystring.stringify({
+            pattern: 'foo',
+            params: JSON.stringify({ rollup_index: 'bar' }),
+          })}`;
           ({ body } = await supertest.get(uri).expect(404));
           expect(body.message).to.contain('no such index [bar]');
         });
@@ -86,7 +87,7 @@ export default function ({ getService }) {
         // Query for wildcard
         const params = {
           pattern: indexName,
-          params: JSON.stringify({ rollup_index: rollupIndex })
+          params: JSON.stringify({ rollup_index: rollupIndex }),
         };
         const uri = `${BASE_URI}?${querystring.stringify(params)}`;
         const { body } = await supertest.get(uri).expect(200);

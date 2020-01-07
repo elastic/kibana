@@ -24,44 +24,42 @@ export function ClusterStatus({ stats }) {
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.kibana.clusterStatus.instancesLabel', {
-        defaultMessage: 'Instances'
+        defaultMessage: 'Instances',
       }),
       value: instances,
-      'data-test-subj': 'instances'
+      'data-test-subj': 'instances',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.clusterStatus.memoryLabel', {
-        defaultMessage: 'Memory'
+        defaultMessage: 'Memory',
       }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
-      'data-test-subj': 'memory'
+      'data-test-subj': 'memory',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.clusterStatus.requestsLabel', {
-        defaultMessage: 'Requests'
+        defaultMessage: 'Requests',
       }),
       value: requests,
-      'data-test-subj': 'requests'
+      'data-test-subj': 'requests',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.clusterStatus.connectionsLabel', {
-        defaultMessage: 'Connections'
+        defaultMessage: 'Connections',
       }),
       value: connections,
-      'data-test-subj': 'connections'
+      'data-test-subj': 'connections',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel', {
-        defaultMessage: 'Max. Response Time'
+        defaultMessage: 'Max. Response Time',
       }),
       value: formatMetric(maxResponseTime, '0', 'ms'),
-      'data-test-subj': 'maxResponseTime'
-    }
+      'data-test-subj': 'maxResponseTime',
+    },
   ];
 
-  const IconComponent = ({ status }) => (
-    <KibanaStatusIcon status={status} />
-  );
+  const IconComponent = ({ status }) => <KibanaStatusIcon status={status} />;
 
   return (
     <SummaryStatus

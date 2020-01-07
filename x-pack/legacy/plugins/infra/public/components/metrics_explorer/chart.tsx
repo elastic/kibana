@@ -7,19 +7,9 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -37,6 +27,7 @@ import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   title?: string | null;
@@ -49,132 +40,130 @@ interface Props {
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
-  uiCapabilities: UICapabilities;
 }
 
-export const MetricsExplorerChart = injectUICapabilities(
-  ({
-    source,
-    options,
-    chartOptions,
-    series,
-    title,
-    onFilter,
-    height = 200,
-    width = '100%',
-    timeRange,
-    onTimeChange,
-    uiCapabilities,
-  }: Props) => {
-    const { metrics } = options;
-    const [dateFormat] = useKibanaUiSetting('dateFormat');
-    const handleTimeChange = (from: number, to: number) => {
-      onTimeChange(moment(from).toISOString(), moment(to).toISOString());
-    };
-    const dateFormatter = useMemo(
-      () =>
-        series.rows.length > 0
-          ? niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp])
-          : (value: number) => `${value}`,
-      [series.rows]
-    );
-    const tooltipProps = {
-      headerFormatter: useCallback(
-        (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
-        [dateFormat]
-      ),
-    };
-    const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
-    const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
-    const domain =
-      chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
-        ? { ...dataDomain, min: 0 }
-        : dataDomain;
-    return (
-      <div style={{ padding: 24 }}>
-        {options.groupBy ? (
-          <EuiTitle size="xs">
-            <EuiFlexGroup alignItems="center">
-              <ChartTitle>
-                <EuiToolTip content={title}>
-                  <span>{title}</span>
-                </EuiToolTip>
-              </ChartTitle>
-              <EuiFlexItem grow={false}>
-                <MetricsExplorerChartContextMenu
-                  timeRange={timeRange}
-                  options={options}
-                  chartOptions={chartOptions}
-                  series={series}
-                  onFilter={onFilter}
-                  source={source}
-                  uiCapabilities={uiCapabilities}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-        ) : (
-          <EuiFlexGroup justifyContent="flexEnd">
+export const MetricsExplorerChart = ({
+  source,
+  options,
+  chartOptions,
+  series,
+  title,
+  onFilter,
+  height = 200,
+  width = '100%',
+  timeRange,
+  onTimeChange,
+}: Props) => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { metrics } = options;
+  const [dateFormat] = useKibanaUiSetting('dateFormat');
+  const handleTimeChange = (from: number, to: number) => {
+    onTimeChange(moment(from).toISOString(), moment(to).toISOString());
+  };
+  const dateFormatter = useMemo(
+    () =>
+      series.rows.length > 0
+        ? niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp])
+        : (value: number) => `${value}`,
+    [series.rows]
+  );
+  const tooltipProps = {
+    headerFormatter: useCallback(
+      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+      [dateFormat]
+    ),
+  };
+  const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
+  const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
+  const domain =
+    chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
+      ? { ...dataDomain, min: 0 }
+      : dataDomain;
+  return (
+    <div style={{ padding: 24 }}>
+      {options.groupBy ? (
+        <EuiTitle size="xs">
+          <EuiFlexGroup alignItems="center">
+            <ChartTitle>
+              <EuiToolTip content={title}>
+                <span>{title}</span>
+              </EuiToolTip>
+            </ChartTitle>
             <EuiFlexItem grow={false}>
               <MetricsExplorerChartContextMenu
+                timeRange={timeRange}
                 options={options}
                 chartOptions={chartOptions}
                 series={series}
+                onFilter={onFilter}
                 source={source}
-                timeRange={timeRange}
                 uiCapabilities={uiCapabilities}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiTitle>
+      ) : (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <MetricsExplorerChartContextMenu
+              options={options}
+              chartOptions={chartOptions}
+              series={series}
+              source={source}
+              timeRange={timeRange}
+              uiCapabilities={uiCapabilities}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <div className="infrastructureChart" style={{ height, width }}>
+        {series.rows.length > 0 ? (
+          <Chart>
+            {metrics.map((metric, id) => (
+              <MetricExplorerSeriesChart
+                type={chartOptions.type}
+                key={id}
+                metric={metric}
+                id={id}
+                series={series}
+                stack={chartOptions.stack}
+              />
+            ))}
+            <Axis
+              id={'timestamp'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={dateFormatter}
+            />
+            <Axis
+              id={'values'}
+              position={Position.Left}
+              tickFormat={yAxisFormater}
+              domain={domain}
+            />
+            <Settings
+              tooltip={tooltipProps}
+              onBrushEnd={handleTimeChange}
+              theme={getChartTheme(isDarkMode)}
+            />
+          </Chart>
+        ) : options.metrics.length > 0 ? (
+          <MetricsExplorerEmptyChart />
+        ) : (
+          <MetricsExplorerNoMetrics />
         )}
-        <div className="infrastructureChart" style={{ height, width }}>
-          {series.rows.length > 0 ? (
-            <Chart>
-              {metrics.map((metric, id) => (
-                <MetricExplorerSeriesChart
-                  type={chartOptions.type}
-                  key={id}
-                  metric={metric}
-                  id={id}
-                  series={series}
-                  stack={chartOptions.stack}
-                />
-              ))}
-              <Axis
-                id={getAxisId('timestamp')}
-                position={Position.Bottom}
-                showOverlappingTicks={true}
-                tickFormat={dateFormatter}
-              />
-              <Axis
-                id={getAxisId('values')}
-                position={Position.Left}
-                tickFormat={yAxisFormater}
-                domain={domain}
-              />
-              <Settings
-                tooltip={tooltipProps}
-                onBrushEnd={handleTimeChange}
-                theme={getChartTheme()}
-              />
-            </Chart>
-          ) : options.metrics.length > 0 ? (
-            <MetricsExplorerEmptyChart />
-          ) : (
-            <MetricsExplorerNoMetrics />
-          )}
-        </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+};
 
 const ChartTitle = euiStyled.div`
-            width: 100%
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
-            flex: 1 1 auto;
-            margin: 12px;
-          `;
+  width: 100%
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  flex: 1 1 auto;
+  margin: 12px;
+`;

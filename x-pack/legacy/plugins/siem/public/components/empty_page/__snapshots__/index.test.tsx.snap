@@ -1,9 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders correctly 1`] = `
-<Component
-  actionPrimaryLabel="Do Something"
-  actionPrimaryUrl="my/url/from/nowwhere"
-  title="My Super Title"
+<EmptyPrompt
+  actions={
+    <ForwardRef
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          href="my/url/from/nowwhere"
+        >
+          Do Something
+        </EuiButton>
+      </EuiFlexItem>
+    </ForwardRef>
+  }
+  title={
+    <h2>
+      My Super Title
+    </h2>
+  }
 />
 `;

@@ -6,12 +6,10 @@
 
 import { services as kibanaCommonServices } from '../../../../test/common/services';
 
-import { SecurityServiceProvider } from './security';
 import { SpacesServiceProvider } from './spaces';
 
 export const services = {
   ...kibanaCommonServices,
 
-  security: SecurityServiceProvider,
   spaces: SpacesServiceProvider,
 };

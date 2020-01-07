@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiDescriptionList,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 
 export function AnalysisSummary({ results }) {
   const items = createDisplayItems(results);
@@ -30,11 +25,7 @@ export function AnalysisSummary({ results }) {
 
       <EuiSpacer size="m" />
 
-      <EuiDescriptionList
-        type="column"
-        listItems={items}
-        className="analysis-summary-list"
-      />
+      <EuiDescriptionList type="column" listItems={items} className="analysis-summary-list" />
     </React.Fragment>
   );
 }
@@ -87,7 +78,6 @@ function createDisplayItems(results) {
         ),
         description: `${results.has_header_row}`,
       });
-
     }
   }
 

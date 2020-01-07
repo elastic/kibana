@@ -82,6 +82,7 @@ import { traefikMetricsSpecProvider } from './traefik_metrics';
 import { awsLogsSpecProvider } from './aws_logs';
 import { activemqLogsSpecProvider } from './activemq_logs';
 import { activemqMetricsSpecProvider } from './activemq_metrics';
+import { azureMetricsSpecProvider } from './azure_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -115,7 +116,9 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(aerospikeMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchbaseMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(dropwizardMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(elasticsearchMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(
+    elasticsearchMetricsSpecProvider
+  );
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(etcdMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(haproxyMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kafkaMetricsSpecProvider);
@@ -150,4 +153,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(azureMetricsSpecProvider);
 }

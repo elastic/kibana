@@ -35,13 +35,21 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
 import {
+  hashedItemStore,
+  isStateHash,
   createStateHash,
-  isStateHash
-} from './state_hashing';
+} from '../../../../plugins/kibana_utils/public';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
+export function StateProvider(
+  Private,
+  $rootScope,
+  $location,
+  stateManagementConfig,
+  config,
+  kbnUrl,
+  $injector
+) {
   const Events = Private(EventsProvider);
 
   const isDummyRoute = () =>
@@ -50,11 +58,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     $injector.get('$route').current.outerAngularWrapperRoute;
 
   createLegacyClass(State).inherits(Events);
-  function State(
-    urlParam,
-    defaults,
-    _hashedItemStore = hashedItemStore
-  ) {
+  function State(urlParam, defaults, _hashedItemStore = hashedItemStore) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
@@ -80,14 +84,14 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
         if (this._persistAcrossApps) {
           this.fetch();
         }
-      })
+      }),
     ]);
 
     // Initialize the State with fetch
     this.fetch();
   }
 
-  State.prototype._readFromURL = function () {
+  State.prototype._readFromURL = function() {
     const search = $location.search();
     const urlVal = search[this._urlParam];
 
@@ -108,9 +112,11 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
-        defaultMessage: 'Unable to parse URL'
-      }));
+      toastNotifications.addDanger(
+        i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
+          defaultMessage: 'Unable to parse URL',
+        })
+      );
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -134,7 +140,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * Fetches the state from the url
    * @returns {void}
    */
-  State.prototype.fetch = function () {
+  State.prototype.fetch = function() {
     if (!stateManagementConfig.enabled) {
       return;
     }
@@ -163,7 +169,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * Saves the state to the url
    * @returns {void}
    */
-  State.prototype.save = function (replace) {
+  State.prototype.save = function(replace) {
     if (!stateManagementConfig.enabled) {
       return;
     }
@@ -202,7 +208,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * Calls save with a forced replace
    * @returns {void}
    */
-  State.prototype.replace = function () {
+  State.prototype.replace = function() {
     if (!stateManagementConfig.enabled) {
       return;
     }
@@ -215,7 +221,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *
    * @returns {void}
    */
-  State.prototype.reset = function () {
+  State.prototype.reset = function() {
     if (!stateManagementConfig.enabled) {
       return;
     }
@@ -234,12 +240,12 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * Cleans up the state object
    * @returns {void}
    */
-  State.prototype.destroy = function () {
+  State.prototype.destroy = function() {
     this.off(); // removes all listeners
     this._cleanUpListeners(); // Removes the $routeUpdate listener
   };
 
-  State.prototype.setDefaults = function (defaults) {
+  State.prototype.setDefaults = function(defaults) {
     this._defaults = defaults || {};
   };
 
@@ -250,12 +256,15 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *  @param  {string} stateHash - state hash value from the query string.
    *  @return {any} - the stored value, or null if hash does not resolve.
    */
-  State.prototype._parseStateHash = function (stateHash) {
+  State.prototype._parseStateHash = function(stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
-        defaultMessage: 'Unable to completely restore the URL, be sure to use the share functionality.'
-      }));
+      toastNotifications.addDanger(
+        i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+          defaultMessage:
+            'Unable to completely restore the URL, be sure to use the share functionality.',
+        })
+      );
     }
 
     return JSON.parse(json);
@@ -268,7 +277,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *  @param  {string} stateHashOrRison - either state hash value or rison string.
    *  @return {string} rison
    */
-  State.prototype.translateHashToRison = function (stateHashOrRison) {
+  State.prototype.translateHashToRison = function(stateHashOrRison) {
     if (isStateHash(stateHashOrRison)) {
       return rison.encode(this._parseStateHash(stateHashOrRison));
     }
@@ -276,7 +285,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     return stateHashOrRison;
   };
 
-  State.prototype.isHashingEnabled = function () {
+  State.prototype.isHashingEnabled = function() {
     return !!config.get('state:storeInSessionStorage');
   };
 
@@ -285,7 +294,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *
    *  @return {string}
    */
-  State.prototype.toQueryParam = function (state = this.toObject()) {
+  State.prototype.toQueryParam = function(state = this.toObject()) {
     if (!this.isHashingEnabled()) {
       return rison.encode(state);
     }
@@ -300,15 +309,19 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    const message = i18n.translate('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
-      defaultMessage: 'Kibana is unable to store history items in your session ' +
-        `because it is full and there don't seem to be items any items safe ` +
-        'to delete.\n\n' +
-        'This can usually be fixed by moving to a fresh tab, but could ' +
-        'be caused by a larger issue. If you are seeing this message regularly, ' +
-        'please file an issue at {gitHubIssuesUrl}.',
-      values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' }
-    });
+    const message = i18n.translate(
+      'common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage',
+      {
+        defaultMessage:
+          'Kibana is unable to store history items in your session ' +
+          `because it is full and there don't seem to be items any items safe ` +
+          'to delete.\n\n' +
+          'This can usually be fixed by moving to a fresh tab, but could ' +
+          'be caused by a larger issue. If you are seeing this message regularly, ' +
+          'please file an issue at {gitHubIssuesUrl}.',
+        values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' },
+      }
+    );
     fatalError(new Error(message));
   };
 
@@ -316,10 +329,30 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *  Get the query string parameter name where this state writes and reads
    *  @return {string}
    */
-  State.prototype.getQueryParamName = function () {
+  State.prototype.getQueryParamName = function() {
     return this._urlParam;
   };
 
-  return State;
+  /**
+   * Returns an object with each property name and value corresponding to the entries in this collection
+   * excluding fields started from '$', '_' and all methods
+   *
+   * @return {object}
+   */
+  State.prototype.toObject = function() {
+    return _.omit(this, (value, key) => {
+      return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
+    });
+  };
 
+  /** Alias for method 'toObject'
+   *
+   * @obsolete Please use 'toObject' method instead
+   * @return {object}
+   */
+  State.prototype.toJSON = function() {
+    return this.toObject();
+  };
+
+  return State;
 }

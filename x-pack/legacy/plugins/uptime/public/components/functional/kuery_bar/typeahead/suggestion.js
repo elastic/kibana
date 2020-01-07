@@ -60,7 +60,7 @@ const ListItem = styled.li`
   ${Description} {
     p span {
       background: ${props =>
-    props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
+        props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
     @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
       margin-left: auto;

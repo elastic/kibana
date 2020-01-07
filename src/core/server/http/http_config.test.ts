@@ -17,12 +17,16 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { config, HttpConfig } from '.';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
+
+jest.mock('os', () => ({
+  ...jest.requireActual('os'),
+  hostname: () => 'kibana-hostname',
+}));
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;
@@ -75,6 +79,32 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
     rewriteBasePath: true,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
+});
+
+test('uses os.hostname() as default for server.name', () => {
+  const httpSchema = config.schema;
+  const validated = httpSchema.validate({});
+  expect(validated.name).toEqual('kibana-hostname');
+});
+
+test('throws if xsrf.whitelist element does not start with a slash', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    xsrf: {
+      whitelist: ['/valid-path', 'invalid-path'],
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[xsrf.whitelist.1]: must start with a slash"`
+  );
 });
 
 describe('with TLS', () => {
@@ -256,7 +286,7 @@ describe('with TLS', () => {
           clientAuthentication: 'none',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(false);
@@ -273,7 +303,7 @@ describe('with TLS', () => {
           clientAuthentication: 'optional',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);
@@ -290,7 +320,7 @@ describe('with TLS', () => {
           clientAuthentication: 'required',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);

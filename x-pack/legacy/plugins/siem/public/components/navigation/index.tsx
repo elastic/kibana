@@ -77,3 +77,5 @@ export const SiemNavigation = React.memo<SiemNavigationProps>(props => {
   };
   return <SiemNavigationRedux {...stateNavReduxProps} />;
 });
+
+SiemNavigation.displayName = 'SiemNavigation';

@@ -18,15 +18,25 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardEmptyScreen, Props } from '../dashboard_empty_screen';
+import {
+  DashboardEmptyScreen,
+  DashboardEmptyScreenProps,
+} from '../np_ready/dashboard_empty_screen';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { coreMock } from '../../../../../../core/public/mocks';
 
 describe('DashboardEmptyScreen', () => {
+  const setupMock = coreMock.createSetup();
+
   const defaultProps = {
     showLinkToVisualize: true,
     onLinkClick: jest.fn(),
+    uiSettings: setupMock.uiSettings,
+    http: setupMock.http,
   };
 
-  function mountComponent(props?: Props) {
+  function mountComponent(props?: DashboardEmptyScreenProps) {
     const compProps = props || defaultProps;
     const comp = mountWithIntl(<DashboardEmptyScreen {...compProps} />);
     return comp;
@@ -35,14 +45,25 @@ describe('DashboardEmptyScreen', () => {
   test('renders correctly with visualize paragraph', () => {
     const component = mountComponent();
     expect(component).toMatchSnapshot();
-    const paragraph = component.find('.linkToVisualizeParagraph');
+    const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(1);
   });
 
   test('renders correctly without visualize paragraph', () => {
     const component = mountComponent({ ...defaultProps, ...{ showLinkToVisualize: false } });
     expect(component).toMatchSnapshot();
-    const paragraph = component.find('.linkToVisualizeParagraph');
+    const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(0);
+  });
+
+  test('when specified, prop onVisualizeClick is called correctly', () => {
+    const onVisualizeClick = jest.fn();
+    const component = mountComponent({
+      ...defaultProps,
+      ...{ showLinkToVisualize: true, onVisualizeClick },
+    });
+    const button = findTestSubject(component, 'addVisualizationButton');
+    button.simulate('click');
+    expect(onVisualizeClick).toHaveBeenCalled();
   });
 });

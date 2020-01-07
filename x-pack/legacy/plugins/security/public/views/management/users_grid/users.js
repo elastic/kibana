@@ -8,7 +8,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import template from 'plugins/security/views/management/users_grid/users.html';
-import 'plugins/security/services/shield_user';
 import { SECURITY_PATH, USERS_PATH } from '../management_urls';
 import { UsersListPage } from './components';
 import { UserAPIClient } from '../../../lib/api';
@@ -20,7 +19,12 @@ routes.when(SECURITY_PATH, {
 });
 
 const renderReact = (elem, changeUrl) => {
-  render(<I18nContext><UsersListPage changeUrl={changeUrl} apiClient={new UserAPIClient()} /></I18nContext>, elem);
+  render(
+    <I18nContext>
+      <UsersListPage changeUrl={changeUrl} apiClient={new UserAPIClient()} />
+    </I18nContext>,
+    elem
+  );
 };
 
 routes.when(USERS_PATH, {
@@ -33,7 +37,7 @@ routes.when(USERS_PATH, {
     });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('usersReactRoot');
-      const changeUrl = (url) => {
+      const changeUrl = url => {
         kbnUrl.change(url);
         $scope.$apply();
       };

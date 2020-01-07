@@ -8,10 +8,10 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 
 import { timelineDetailsQuery } from './index.gql_query';
 
@@ -38,7 +38,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
       sourceId,
       indexName,
       eventId,
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
     };
     return executeQuery ? (
       <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>

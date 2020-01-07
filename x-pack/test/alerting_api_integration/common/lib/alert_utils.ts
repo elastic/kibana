@@ -17,7 +17,7 @@ export interface AlertUtilsOpts {
   objectRemover?: ObjectRemover;
 }
 
-export interface CreateAlwaysFiringActionOpts {
+export interface CreateAlertWithActionOpts {
   indexRecordActionId?: string;
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
@@ -159,7 +159,7 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
-  }: CreateAlwaysFiringActionOpts) {
+  }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
 
@@ -179,10 +179,11 @@ export class AlertUtils {
     const response = await request.send({
       enabled: true,
       name: 'abc',
-      interval: '1m',
+      schedule: { interval: '1m' },
       throttle: '1m',
       tags: [],
       alertTypeId: 'test.always-firing',
+      consumer: 'bar',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,
@@ -199,6 +200,49 @@ export class AlertUtils {
           },
         },
       ],
+      ...overwrites,
+    });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'alert');
+    }
+    return response;
+  }
+
+  public async createAlwaysFailingAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+  }: CreateAlertWithActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const response = await request.send({
+      enabled: true,
+      name: 'fail',
+      schedule: { interval: '30s' },
+      throttle: '30s',
+      tags: [],
+      alertTypeId: 'test.failing',
+      consumer: 'bar',
+      params: {
+        index: ES_TEST_INDEX_NAME,
+        reference,
+      },
+      actions: [],
       ...overwrites,
     });
     if (response.statusCode === 200) {

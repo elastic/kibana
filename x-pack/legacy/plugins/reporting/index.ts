@@ -13,8 +13,7 @@ import { registerRoutes } from './server/routes';
 import {
   LevelLogger,
   checkLicenseFactory,
-  createQueueFactory,
-  exportTypesRegistryFactory,
+  getExportTypesRegistry,
   runValidations,
 } from './server/lib';
 import { config as reportingConfig } from './config';
@@ -74,25 +73,28 @@ export const reporting = (kibana: any) => {
     // TODO: Decouple Hapi: Build a server facade object based on the server to
     // pass through to the libs. Do not pass server directly
     async init(server: ServerFacade) {
+      const exportTypesRegistry = getExportTypesRegistry();
+
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
       const { usageCollection } = server.newPlatform.setup.plugins;
-      registerReportingUsageCollector(usageCollection, server, () => isCollectorReady);
+      registerReportingUsageCollector(
+        usageCollection,
+        server,
+        () => isCollectorReady,
+        exportTypesRegistry
+      );
 
       const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
-      const [exportTypesRegistry, browserFactory] = await Promise.all([
-        exportTypesRegistryFactory(server),
-        createBrowserDriverFactory(server),
-      ]);
-      server.expose('exportTypesRegistry', exportTypesRegistry);
+      const browserDriverFactory = await createBrowserDriverFactory(server);
 
       logConfiguration(server, logger);
-      runValidations(server, logger, browserFactory);
+      runValidations(server, logger, browserDriverFactory);
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
-      xpackMainPlugin.status.once('green', () => {
+      (xpackMainPlugin as any).status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
@@ -101,11 +103,8 @@ export const reporting = (kibana: any) => {
       // Post initialization of the above code, the collector is now ready to fetch its data
       isCollectorReady = true;
 
-      server.expose('browserDriverFactory', browserFactory);
-      server.expose('queue', createQueueFactory(server));
-
       // Reporting routes
-      registerRoutes(server, logger);
+      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {

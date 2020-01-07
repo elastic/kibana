@@ -4,26 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { union } from 'lodash';
+import { union, uniq } from 'lodash';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-} from '../../../lib/adapters/framework';
-import {
-  MetricsExplorerColumnType,
-  MetricsExplorerRequest,
   MetricsExplorerRow,
   MetricsExplorerSeries,
-  MetricsExplorerWrappedRequest,
+  MetricsExplorerRequestBody,
+  MetricsExplorerColumn,
 } from '../types';
 import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
+import { getDatasetForField } from './get_dataset_for_field';
 
 export const populateSeriesWithTSVBData = (
-  req: InfraFrameworkRequest<MetricsExplorerWrappedRequest>,
-  options: MetricsExplorerRequest,
-  framework: InfraBackendFrameworkAdapter
+  request: KibanaRequest,
+  options: MetricsExplorerRequestBody,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext
 ) => async (series: MetricsExplorerSeries) => {
   // IF there are no metrics selected then we should return an empty result.
   if (options.metrics.length === 0) {
@@ -55,22 +54,21 @@ export const populateSeriesWithTSVBData = (
 
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
+  const modules = await Promise.all(
+    uniq(options.metrics.filter(m => m.field)).map(
+      async m =>
+        await getDatasetForField(framework, requestContext, m.field as string, options.indexPattern)
+    )
+  );
   const calculatedInterval = await calculateMetricInterval(
     framework,
-    req,
+    requestContext,
     {
       indexPattern: options.indexPattern,
       timestampField: options.timerange.field,
       timerange: options.timerange,
     },
-    options.metrics
-      .filter(metric => metric.field)
-      .map(metric => {
-        return metric
-          .field!.split(/\./)
-          .slice(0, 2)
-          .join('.');
-      })
+    modules.filter(m => m) as string[]
   );
 
   if (calculatedInterval) {
@@ -78,7 +76,7 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Get TSVB results using the model, timerange and filters
-  const tsvbResults = await framework.makeTSVBRequest(req, model, timerange, filters);
+  const tsvbResults = await framework.makeTSVBRequest(requestContext, model, timerange, filters);
 
   // If there is no data `custom` will not exist.
   if (!tsvbResults.custom) {
@@ -91,11 +89,11 @@ export const populateSeriesWithTSVBData = (
 
   // Setup the dynamic columns and row attributes depending on if the user is doing a group by
   // and multiple metrics
-  const attributeColumns =
-    options.groupBy != null ? [{ name: 'groupBy', type: MetricsExplorerColumnType.string }] : [];
-  const metricColumns = options.metrics.map((m, i) => ({
+  const attributeColumns: MetricsExplorerColumn[] =
+    options.groupBy != null ? [{ name: 'groupBy', type: 'string' }] : [];
+  const metricColumns: MetricsExplorerColumn[] = options.metrics.map((m, i) => ({
     name: `metric_${i}`,
-    type: MetricsExplorerColumnType.number,
+    type: 'number',
   }));
   const rowAttributes = options.groupBy != null ? { groupBy: series.id } : {};
 
@@ -128,7 +126,7 @@ export const populateSeriesWithTSVBData = (
     ...series,
     rows,
     columns: [
-      { name: 'timestamp', type: MetricsExplorerColumnType.date },
+      { name: 'timestamp', type: 'date' } as MetricsExplorerColumn,
       ...metricColumns,
       ...attributeColumns,
     ],

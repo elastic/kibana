@@ -1,124 +1,240 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Columns it renders the expected columns 1`] = `
-<Component>
-  <DataDrivenColumns
-    _id="1"
-    columnHeaders={
-      Array [
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "message",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "event.category",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "event.action",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "host.name",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "source.ip",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "destination.ip",
-          "width": 180,
-        },
-        Object {
-          "columnHeaderType": "not-filtered",
-          "id": "user.name",
-          "width": 180,
-        },
-      ]
+<EventsTdGroupData
+  data-test-subj="data-driven-columns"
+>
+  <EventsTd
+    key="message"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
     }
-    columnRenderers={
-      Array [
-        Object {
-          "isInstance": [Function],
-          "renderColumn": [Function],
-        },
-        Object {
-          "isInstance": [Function],
-          "renderColumn": [Function],
-        },
-        Object {
-          "isInstance": [Function],
-          "renderColumn": [Function],
-        },
-      ]
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": true,
+            "id": "empty-column-renderer-draggable-wrapper-test-message-1-message",
+            "kqlQuery": "",
+            "name": "message: ",
+            "queryMatch": Object {
+              "displayValue": "—",
+              "field": "message",
+              "operator": ":*",
+              "value": "",
+            },
+          }
+        }
+        key="empty-column-renderer-draggable-wrapper-test-message-1-message"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="event.category"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
     }
-    data={
-      Array [
-        Object {
-          "field": "@timestamp",
-          "value": Array [
-            "2018-11-05T19:03:25.937Z",
-          ],
-        },
-        Object {
-          "field": "event.severity",
-          "value": Array [
-            "3",
-          ],
-        },
-        Object {
-          "field": "event.category",
-          "value": Array [
-            "Access",
-          ],
-        },
-        Object {
-          "field": "event.action",
-          "value": Array [
-            "Action",
-          ],
-        },
-        Object {
-          "field": "host.name",
-          "value": Array [
-            "apache",
-          ],
-        },
-        Object {
-          "field": "source.ip",
-          "value": Array [
-            "192.168.0.1",
-          ],
-        },
-        Object {
-          "field": "destination.ip",
-          "value": Array [
-            "192.168.0.3",
-          ],
-        },
-        Object {
-          "field": "destination.bytes",
-          "value": Array [
-            "123456",
-          ],
-        },
-        Object {
-          "field": "user.name",
-          "value": Array [
-            "john.dee",
-          ],
-        },
-      ]
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-event_category-1-event_category-Access",
+            "kqlQuery": "",
+            "name": "event.category: Access",
+            "queryMatch": Object {
+              "field": "event.category",
+              "operator": ":",
+              "value": "Access",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-event.category-1-event.category-Access"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="event.action"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
     }
-    onColumnResized={[MockFunction]}
-    timelineId="test"
-  />
-</Component>
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-event_action-1-event_action-Action",
+            "kqlQuery": "",
+            "name": "event.action: Action",
+            "queryMatch": Object {
+              "field": "event.action",
+              "operator": ":",
+              "value": "Action",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-event.action-1-event.action-Action"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="host.name"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-host_name-1-host_name-apache",
+            "kqlQuery": "",
+            "name": "host.name: apache",
+            "queryMatch": Object {
+              "field": "host.name",
+              "operator": ":",
+              "value": "apache",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-host.name-1-host.name-apache"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="source.ip"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-source_ip-1-source_ip-192_168_0_1",
+            "kqlQuery": "",
+            "name": "source.ip: 192.168.0.1",
+            "queryMatch": Object {
+              "field": "source.ip",
+              "operator": ":",
+              "value": "192.168.0.1",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-source.ip-1-source.ip-192.168.0.1"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="destination.ip"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-destination_ip-1-destination_ip-192_168_0_3",
+            "kqlQuery": "",
+            "name": "destination.ip: 192.168.0.3",
+            "queryMatch": Object {
+              "field": "destination.ip",
+              "operator": ":",
+              "value": "192.168.0.3",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-destination.ip-1-destination.ip-192.168.0.3"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+  <EventsTd
+    key="user.name"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <EventsTdContent
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": false,
+            "id": "plain-column-renderer-data-provider-test-user_name-1-user_name-john_dee",
+            "kqlQuery": "",
+            "name": "user.name: john.dee",
+            "queryMatch": Object {
+              "field": "user.name",
+              "operator": ":",
+              "value": "john.dee",
+            },
+          }
+        }
+        key="plain-column-renderer-draggable-wrapper-test-user.name-1-user.name-john.dee"
+        render={[Function]}
+        truncate={true}
+      />
+    </EventsTdContent>
+  </EventsTd>
+</EventsTdGroupData>
 `;

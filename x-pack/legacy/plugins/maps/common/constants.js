@@ -23,9 +23,11 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'ems/tiles/vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
+export const TELEMETRY_TYPE = 'maps-telemetry';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
@@ -37,7 +39,7 @@ export const LAYER_TYPE = {
   TILE: 'TILE',
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP'
+  HEATMAP: 'HEATMAP',
 };
 
 export const SORT_ORDER = {
@@ -53,10 +55,14 @@ export const ES_PEW_PEW = 'ES_PEW_PEW';
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
-  JOIN: 'join'
+  JOIN: 'join',
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
+export const META_ID_ORIGIN_SUFFIX = 'meta';
+export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
+export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
+export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
@@ -65,7 +71,9 @@ export const MAX_ZOOM = 24;
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-export const ES_SIZE_LIMIT = 10000;
+export const DEFAULT_MAX_RESULT_WINDOW = 10000;
+export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
@@ -74,7 +82,7 @@ export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
 export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape'
+  GEO_SHAPE: 'geo_shape',
 };
 
 export const ES_SPATIAL_RELATIONS = {
@@ -99,12 +107,12 @@ export const LAT_INDEX = 1;
 
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
-  features: []
+  features: [],
 };
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
-  POLYGON: 'POLYGON'
+  POLYGON: 'POLYGON',
 };
 
 export const METRIC_TYPE = {
@@ -117,13 +125,18 @@ export const METRIC_TYPE = {
 };
 
 export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
-export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLabel', {
-  defaultMessage: 'count'
+export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
+  defaultMessage: 'count',
 });
 
 export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = {
-  'STATIC': 'STATIC',
-  'DYNAMIC': 'DYNAMIC'
+  STATIC: 'STATIC',
+  DYNAMIC: 'DYNAMIC',
+};
+
+export const LAYER_STYLE_TYPE = {
+  VECTOR: 'VECTOR',
+  HEATMAP: 'HEATMAP',
 };

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FIELD_ORIGIN } from '../../../common/constants';
 
 export class AbstractField {
-
   constructor({ fieldName, source, origin }) {
     this._fieldName = fieldName;
     this._source = source;
@@ -41,5 +39,13 @@ export class AbstractField {
 
   getOrigin() {
     return this._origin;
+  }
+
+  supportsFieldMeta() {
+    return false;
+  }
+
+  async getFieldMetaRequest(/* config */) {
+    return null;
   }
 }

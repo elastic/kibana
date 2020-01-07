@@ -40,6 +40,7 @@ export type GetSuggestions = (args: {
   query: string;
   selectionStart: number;
   selectionEnd: number;
+  signal?: AbortSignal;
 }) => Promise<AutocompleteSuggestion[]>;
 
 /** @public **/

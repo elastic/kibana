@@ -11,11 +11,11 @@ import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-  MockPluginContextWrapper
+  MockApmPluginContextWrapper
 } from '../../../../../utils/testHelpers';
 
 const renderOptions = {
-  wrapper: MockPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper
 };
 
 function getTransaction() {
@@ -35,6 +35,10 @@ function getTransaction() {
       notIncluded: 'transaction not included value',
       custom: {
         someKey: 'custom value'
+      },
+      message: {
+        age: { ms: 1577958057123 },
+        queue: { name: 'queue name' }
       }
     }
   } as unknown) as Transaction;
@@ -59,7 +63,8 @@ describe('TransactionMetadata', () => {
       'Agent',
       'URL',
       'User',
-      'Custom'
+      'Custom',
+      'Message'
     ]);
   });
 
@@ -81,7 +86,9 @@ describe('TransactionMetadata', () => {
       'agent.someKey',
       'url.someKey',
       'user.someKey',
-      'transaction.custom.someKey'
+      'transaction.custom.someKey',
+      'transaction.message.age.ms',
+      'transaction.message.queue.name'
     ]);
 
     // excluded keys
@@ -109,7 +116,9 @@ describe('TransactionMetadata', () => {
       'agent value',
       'url value',
       'user value',
-      'custom value'
+      'custom value',
+      '1577958057123',
+      'queue name'
     ]);
 
     // excluded values
@@ -138,7 +147,8 @@ describe('TransactionMetadata', () => {
       'Process',
       'Agent',
       'URL',
-      'Custom'
+      'Custom',
+      'Message'
     ]);
   });
 });

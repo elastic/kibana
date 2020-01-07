@@ -171,8 +171,6 @@ export const getColumns = (
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
     },
-    // Description is not supported yet by API
-    /*
     {
       field: DataFrameAnalyticsListColumn.description,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.description', {
@@ -181,7 +179,6 @@ export const getColumns = (
       sortable: true,
       truncateText: true,
     },
-    */
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.sourceIndex', {
@@ -240,7 +237,7 @@ export const getColumns = (
         defaultMessage: 'Actions',
       }),
       actions,
-      width: isManagementTable === true ? '100px' : '200px',
+      width: isManagementTable === true ? '100px' : '150px',
     },
   ];
 

@@ -5,10 +5,8 @@
  */
 
 export {
-  logFilterActions,
   logPositionActions,
   waffleFilterActions,
   waffleTimeActions,
   waffleOptionsActions,
 } from './local';
-export { logEntriesActions } from './remote';

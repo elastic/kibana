@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpacesDescription renders without crashing 1`] = `
+<EuiContextMenuPanel
+  className="spcDescription"
+  hasFocus={true}
+  items={Array []}
+  title="Spaces"
+>
+  <EuiText
+    className="spcDescription__text"
+  >
+    <p>
+      Organize your dashboards and other saved objects into meaningful categories.
+    </p>
+  </EuiText>
+  <div
+    className="spcDescription__manageButtonWrapper"
+    key="manageSpacesButton"
+  >
+    <ManageSpacesButton
+      capabilities={
+        Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "spaces": Object {
+            "manage": true,
+          },
+        }
+      }
+      onClick={[MockFunction]}
+      size="s"
+      style={
+        Object {
+          "width": "100%",
+        }
+      }
+    />
+  </div>
+</EuiContextMenuPanel>
+`;

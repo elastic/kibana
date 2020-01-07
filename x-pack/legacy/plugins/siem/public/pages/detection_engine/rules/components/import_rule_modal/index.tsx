@@ -19,20 +19,20 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
+import { noop } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import { failure } from 'io-ts/lib/PathReporter';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import uuid from 'uuid';
-import * as i18n from './translations';
-import { duplicateRules } from '../../../../../containers/detection_engine/rules/api';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
+
+import { duplicateRules, RulesSchema } from '../../../../../containers/detection_engine/rules';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
-import { ndjsonToJSON } from '../json_downloader';
-import { RulesSchema } from '../../../../../containers/detection_engine/rules/types';
 import { useStateToaster } from '../../../../../components/toasters';
+import { ndjsonToJSON } from '../json_downloader';
+import * as i18n from './translations';
 
 interface ImportRuleModalProps {
   showModal: boolean;
@@ -54,7 +54,7 @@ export const ImportRuleModalComponent = ({
 }: ImportRuleModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   const cleanupAndCloseModal = () => {
@@ -138,7 +138,7 @@ export const ImportRuleModalComponent = ({
                 id="rule-overwrite-saved-object"
                 label={i18n.OVERWRITE_WITH_SAME_NAME}
                 disabled={true}
-                onChange={() => {}}
+                onChange={() => noop}
               />
             </EuiModalBody>
 

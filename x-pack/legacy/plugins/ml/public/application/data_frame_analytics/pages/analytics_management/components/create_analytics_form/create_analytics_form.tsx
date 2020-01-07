@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
-import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 
@@ -36,12 +35,12 @@ import {
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
 import { JobType } from './job_type';
+import { JobDescriptionInput } from './job_description';
 import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
-
-// based on code used by `ui/index_patterns` internally
-// remove the space character from the list of illegal characters
-INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
-const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
+import {
+  IndexPattern,
+  indexPatterns,
+} from '../../../../../../../../../../../src/plugins/data/public';
 
 const NUMERICAL_FIELD_TYPES = new Set([
   'long',
@@ -62,7 +61,6 @@ const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
   const kibanaContext = useKibanaContext();
-
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
@@ -70,6 +68,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     dependentVariable,
     dependentVariableFetchFail,
     dependentVariableOptions,
+    description,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -91,6 +90,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     sourceIndexFieldsCheckFailed,
     trainingPercent,
   } = form;
+  const characterList = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(', ');
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
@@ -322,6 +322,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               data-test-subj="mlAnalyticsCreateJobFlyoutJobIdInput"
             />
           </EuiFormRow>
+          <JobDescriptionInput description={description} setFormState={setFormState} />
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',

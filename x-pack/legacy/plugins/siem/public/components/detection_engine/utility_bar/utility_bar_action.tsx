@@ -37,6 +37,7 @@ const Popover = React.memo<UtilityBarActionProps>(
     );
   }
 );
+
 Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
@@ -71,4 +72,5 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     </BarAction>
   )
 );
+
 UtilityBarAction.displayName = 'UtilityBarAction';

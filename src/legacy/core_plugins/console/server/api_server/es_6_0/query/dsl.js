@@ -30,7 +30,7 @@ import {
   fuzzyTemplate,
   prefixTemplate,
   rangeTemplate,
-  regexpTemplate
+  regexpTemplate,
 } from './templates';
 const matchOptions = {
   cutoff_frequency: 0.001,
@@ -120,35 +120,35 @@ const SPAN_QUERIES = {
   field_masking_span: {
     __template: {
       query: {
-        SPAN_QUERY: {}
-      }
+        SPAN_QUERY: {},
+      },
     },
     query: SPAN_QUERIES_NO_FIELD_MASK,
-    field: ''
-  }
+    field: '',
+  },
 };
 
 const SPAN_MULTI_QUERIES = {
   wildcard: {
     __template: wildcardTemplate,
-    __scope_link: '.wildcard'
+    __scope_link: '.wildcard',
   },
   fuzzy: {
     __template: fuzzyTemplate,
-    __scope_link: '.fuzzy'
+    __scope_link: '.fuzzy',
   },
   prefix: {
     __template: prefixTemplate,
-    __scope_link: '.prefix'
+    __scope_link: '.prefix',
   },
   range: {
     __template: rangeTemplate,
-    __scope_link: '.range'
+    __scope_link: '.range',
   },
   regexp: {
     __template: regexpTemplate,
-    __scope_link: '.regexp'
-  }
+    __scope_link: '.regexp',
+  },
 };
 
 const DECAY_FUNC_DESC = {
@@ -168,7 +168,7 @@ const DECAY_FUNC_DESC = {
 const SCORING_FUNCS = {
   script_score: {
     __template: {
-      script: '_score * doc[\'f\'].value',
+      script: "_score * doc['f'].value",
     },
     script: {
       //populated by a global rule
@@ -244,15 +244,7 @@ export function queryDsl(api) {
       '{field}': {
         value: '',
         flags: {
-          __one_of: [
-            'ALL',
-            'ANYSTRING',
-            'COMPLEMENT',
-            'EMPTY',
-            'INTERSECTION',
-            'INTERVAL',
-            'NONE',
-          ],
+          __one_of: ['ALL', 'ANYSTRING', 'COMPLEMENT', 'EMPTY', 'INTERSECTION', 'INTERVAL', 'NONE'],
         },
         max_determinized_states: 10000,
       },
@@ -270,13 +262,7 @@ export function queryDsl(api) {
       },
       tie_breaker: 0.0,
       type: {
-        __one_of: [
-          'best_fields',
-          'most_fields',
-          'cross_fields',
-          'phrase',
-          'phrase_prefix',
-        ],
+        __one_of: ['best_fields', 'most_fields', 'cross_fields', 'phrase', 'phrase_prefix'],
       },
     },
     bool: {
@@ -481,7 +467,7 @@ export function queryDsl(api) {
         __one_of: [true, false],
       },
       tie_breaker: 0,
-      time_zone: '+1:00',
+      time_zone: '+01:00',
     },
     simple_query_string: {
       __template: {
@@ -507,7 +493,7 @@ export function queryDsl(api) {
         gt: 10,
         lte: 20,
         lt: 20,
-        time_zone: '+1:00',
+        time_zone: '+01:00',
         boost: 1.0,
         format: 'dd/MM/yyyy||yyyy',
       },
@@ -519,10 +505,10 @@ export function queryDsl(api) {
     span_multi: {
       __template: {
         match: {
-          MULTI_TERM_QUERY: {}
-        }
+          MULTI_TERM_QUERY: {},
+        },
       },
-      match: SPAN_MULTI_QUERIES
+      match: SPAN_MULTI_QUERIES,
     },
     span_near: {
       __template: spanNearTemplate,
@@ -600,7 +586,7 @@ export function queryDsl(api) {
     percolate: {
       __template: {
         field: '',
-        document: {}
+        document: {},
       },
       field: '',
       document: {},
@@ -611,7 +597,7 @@ export function queryDsl(api) {
       type: '',
       id: '',
       routing: '',
-      preference: ''
+      preference: '',
     },
     common: {
       __template: {
@@ -704,7 +690,7 @@ export function queryDsl(api) {
     ),
     script: {
       __template: {
-        script: '_score * doc[\'f\'].value',
+        script: "_score * doc['f'].value",
       },
       script: {
         //populated by a global rule
@@ -714,7 +700,7 @@ export function queryDsl(api) {
       __template: {
         query: 'QUERY_BASE64_ENCODED',
       },
-      query: ''
-    }
+      query: '',
+    },
   });
 }
