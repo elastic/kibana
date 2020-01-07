@@ -5,7 +5,7 @@
  */
 
 import { rgba } from 'polished';
-import * as React from 'react';
+import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 

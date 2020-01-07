@@ -12,5 +12,6 @@ import { uiReducer } from './ui';
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
   snapshot: snapshotReducer,
+  // @ts-ignore for now TODO: refactor to use redux-action
   ui: uiReducer,
 });
