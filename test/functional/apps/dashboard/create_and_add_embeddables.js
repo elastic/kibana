@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
+import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 
 export default function({ getService, getPageObjects }) {
   const retry = getService('retry');

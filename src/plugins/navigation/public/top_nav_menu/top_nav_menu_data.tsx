@@ -29,3 +29,7 @@ export interface TopNavMenuData {
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string);
 }
+
+export interface RegisteredTopNavMenuData extends TopNavMenuData {
+  appName?: string;
+}

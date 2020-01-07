@@ -6,15 +6,7 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
 import { getChartTheme } from '../../../components/metrics_explorer/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
@@ -28,6 +20,7 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({
@@ -42,6 +35,7 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
     formatter,
@@ -104,12 +98,12 @@ export const ChartSectionVis = ({
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
-            id={getAxisId('timestamp')}
+            id="timestamp"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={getAxisId('values')} position={Position.Left} tickFormat={valueFormatter} />
+          <Axis id="values" position={Position.Left} tickFormat={valueFormatter} />
           {metric &&
             metric.series.map(series => (
               <SeriesChart
@@ -125,7 +119,7 @@ export const ChartSectionVis = ({
           <Settings
             tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme()}
+            theme={getChartTheme(isDarkMode)}
             showLegend={true}
             legendPosition="right"
           />

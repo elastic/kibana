@@ -72,6 +72,18 @@ export type OnChangeDroppableAndProvider = (providerId: string) => void;
 /** Invoked when a user pins an event */
 export type OnPinEvent = (eventId: string) => void;
 
+/** Invoked when a user checks/un-checks a row */
+export type OnRowSelected = ({
+  eventIds,
+  isSelected,
+}: {
+  eventIds: string[];
+  isSelected: boolean;
+}) => void;
+
+/** Invoked when a user checks/un-checks the select all checkbox  */
+export type OnSelectAll = ({ isSelected }: { isSelected: boolean }) => void;
+
 /** Invoked when columns are updated */
 export type OnUpdateColumns = (columns: ColumnHeader[]) => void;
 
