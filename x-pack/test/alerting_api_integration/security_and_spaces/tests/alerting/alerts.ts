@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../scenarios';
+import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
@@ -151,6 +151,56 @@ export default function alertTests({ getService }: FtrProviderContext) {
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
+        });
+
+        it('should pass updated alert params to executor', async () => {
+          // create an alert
+          const reference = alertUtils.generateReference();
+          const overwrites = {
+            throttle: '1s',
+            schedule: { interval: '1s' },
+          };
+          const response = await alertUtils.createAlwaysFiringAction({ reference, overwrites });
+
+          // only need to test creation success paths
+          if (response.statusCode !== 200) return;
+
+          // update the alert with super user
+          const alertId = response.body.id;
+          const reference2 = alertUtils.generateReference();
+          const response2 = await alertUtils.updateAlwaysFiringAction({
+            alertId,
+            actionId: indexRecordActionId,
+            user: Superuser,
+            reference: reference2,
+            overwrites: {
+              name: 'def',
+              tags: ['fee', 'fi', 'fo'],
+              throttle: '1s',
+              schedule: { interval: '1s' },
+            },
+          });
+
+          expect(response2.statusCode).to.eql(200);
+
+          // make sure alert info passed to executor is correct
+          await esTestIndexTool.waitForDocs('alert:test.always-firing', reference2);
+          await alertUtils.disable(alertId);
+          const alertSearchResult = await esTestIndexTool.search(
+            'alert:test.always-firing',
+            reference2
+          );
+
+          expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+            alertId,
+            spaceId: space.id,
+            namespace: space.id,
+            name: 'def',
+            tags: ['fee', 'fi', 'fo'],
+            createdBy: user.fullName,
+            updatedBy: Superuser.fullName,
+          });
         });
 
         it('should handle custom retry logic when appropriate', async () => {
