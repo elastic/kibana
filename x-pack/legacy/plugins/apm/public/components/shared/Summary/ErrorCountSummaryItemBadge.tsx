@@ -6,28 +6,25 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { EuiBadge } from '@elastic/eui';
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { px } from '../../../../public/style/variables';
-import { ErrorCountBadge } from '../../app/TransactionDetails/WaterfallWithSummmary/ErrorCountBadge';
 import { units } from '../../../style/variables';
 
 interface Props {
   count: number;
 }
 
-const Badge = styled(ErrorCountBadge)`
+const Badge = styled(EuiBadge)`
   margin-top: ${px(units.eighth)};
 `;
 
-const ErrorCountSummaryItem = ({ count }: Props) => {
-  return (
-    <Badge>
-      {i18n.translate('xpack.apm.transactionDetails.errorCount', {
-        defaultMessage:
-          '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
-        values: { errorCount: count }
-      })}
-    </Badge>
-  );
-};
-
-export { ErrorCountSummaryItem };
+export const ErrorCountSummaryItemBadge = ({ count }: Props) => (
+  <Badge color={euiThemeLight.euiColorDanger}>
+    {i18n.translate('xpack.apm.transactionDetails.errorCount', {
+      defaultMessage:
+        '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
+      values: { errorCount: count }
+    })}
+  </Badge>
+);
