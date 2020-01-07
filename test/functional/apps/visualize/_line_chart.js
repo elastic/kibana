@@ -24,7 +24,13 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('line charts', function() {
     const vizName1 = 'Visualization LineChart';
@@ -37,14 +43,14 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split chart');
-      await PageObjects.visualize.clickBucket('Split chart');
+      await PageObjects.visEditor.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
-      await PageObjects.visualize.selectAggregation('Terms');
+      await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = extension');
-      await PageObjects.visualize.selectField('extension.raw');
+      await PageObjects.visEditor.selectField('extension.raw');
       log.debug('switch from Rows to Columns');
-      await PageObjects.visualize.clickSplitDirection('Columns');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.clickSplitDirection('Columns');
+      await PageObjects.visEditor.clickGo();
     };
 
     before(initLineChart);
@@ -60,7 +66,7 @@ export default function({ getService, getPageObjects }) {
 
       // sleep a bit before trying to get the chart data
       await PageObjects.common.sleep(3000);
-      const data = await PageObjects.visualize.getLineChartData();
+      const data = await PageObjects.visChart.getLineChartData();
       log.debug('data=' + data);
       const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
       for (let x = 0; x < data.length; x++) {
@@ -91,10 +97,10 @@ export default function({ getService, getPageObjects }) {
       const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       log.debug('Order By = Term');
-      await PageObjects.visualize.selectOrderByMetric(2, '_key');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectOrderByMetric(2, '_key');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function() {
-        const data = await PageObjects.visualize.getLineChartData();
+        const data = await PageObjects.visChart.getLineChartData();
         log.debug('data=' + data);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
@@ -172,7 +178,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     describe.skip('switch between Y axis scale types', () => {
@@ -180,13 +186,13 @@ export default function({ getService, getPageObjects }) {
       const axisId = 'ValueAxis-1';
 
       it('should show ticks on selecting log scale', async () => {
-        await PageObjects.visualize.clickMetricsAndAxes();
-        await PageObjects.visualize.clickYAxisOptions(axisId);
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.clickYAxisOptions(axisId);
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visEditor.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = [
           '2',
           '3',
@@ -212,9 +218,9 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = [
           '2',
           '3',
@@ -240,36 +246,36 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show ticks on selecting square root scale', async () => {
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });

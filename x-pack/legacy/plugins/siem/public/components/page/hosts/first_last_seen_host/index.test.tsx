@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render, act } from '@testing-library/react';
 

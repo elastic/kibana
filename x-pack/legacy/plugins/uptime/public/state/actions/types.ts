@@ -10,3 +10,10 @@ export interface QueryParams {
   filters?: string;
   statusFilter?: string;
 }
+
+export interface MonitorDetailsActionPayload {
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+  location?: string;
+}

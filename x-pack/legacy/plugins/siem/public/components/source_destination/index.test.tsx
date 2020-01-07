@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';

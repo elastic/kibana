@@ -23,7 +23,7 @@ Object {
 
 exports[`ui reducer updates the refresh value 1`] = `
 Object {
-  "basePath": "",
+  "basePath": "abc",
   "esKuery": "",
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
