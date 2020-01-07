@@ -19,13 +19,25 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function VisualizeListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function ListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
-  const { header } = getPageObjects(['header']);
+  const retry = getService('retry');
+  const { common, header } = getPageObjects(['common', 'header']);
 
-  class VisualizeListingTable {
+  class ListingTable {
+    public async getSearchFilter() {
+      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      return searchFilter[0];
+    }
+
+    public async clearFilter() {
+      const searchFilter = await this.getSearchFilter();
+      await searchFilter.clearValue();
+      await searchFilter.click();
+    }
+
     public async getAllVisualizationNamesOnCurrentPage(): Promise<string[]> {
       const visualizationNames = [];
       const links = await find.allByCssSelector('.kuiLink');
@@ -36,8 +48,44 @@ export function VisualizeListingTableProvider({ getService, getPageObjects }: Ft
       return visualizationNames;
     }
 
+    public async getItemsCount(appName: 'visualize' | 'dashboard'): Promise<number> {
+      const prefixMap = { visualize: 'vis', dashboard: 'dashboard' };
+      const elements = await find.allByCssSelector(
+        `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
+      );
+      return elements.length;
+    }
+
+    public async searchForItemWithName(name: string) {
+      log.debug(`searchForItemWithName: ${name}`);
+
+      await retry.try(async () => {
+        const searchFilter = await this.getSearchFilter();
+        await searchFilter.clearValue();
+        await searchFilter.click();
+        // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+        await searchFilter.type(name.replace('-', ' '));
+        await common.pressEnterKey();
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    }
+
+    public async clickDeleteSelected() {
+      await testSubjects.click('deleteSelectedItems');
+    }
+
+    public async checkListingSelectAllCheckbox() {
+      const element = await testSubjects.find('checkboxSelectAll');
+      const isSelected = await element.isSelected();
+      if (!isSelected) {
+        log.debug(`checking checkbox "checkboxSelectAll"`);
+        await testSubjects.click('checkboxSelectAll');
+      }
+    }
+
     public async getAllVisualizationNames(): Promise<string[]> {
-      log.debug('VisualizeListingTable.getAllVisualizationNames');
+      log.debug('ListingTable.getAllVisualizationNames');
       let morePages = true;
       let visualizationNames: string[] = [];
       while (morePages) {
@@ -54,5 +102,5 @@ export function VisualizeListingTableProvider({ getService, getPageObjects }: Ft
     }
   }
 
-  return new VisualizeListingTable();
+  return new ListingTable();
 }
