@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
