@@ -133,7 +133,7 @@ export function DashboardEmptyScreen({
   const readonlyMode = page(
     constants.emptyDashboardTitle,
     false,
-    constants.emptyDashboardContactOwner
+    constants.emptyDashboardAdditionalPrivilege
   );
   const viewMode = page(constants.fillDashboardTitle, true);
   const editMode = (
