@@ -16,10 +16,10 @@ import {
   getExportTypesRegistry,
   runValidations,
 } from './server/lib';
-import { config as reportingConfig } from './config';
 import { createBrowserDriverFactory } from './server/browsers';
 import { registerReportingUsageCollector } from './server/usage';
 import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
+import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
 import { makeServerFacade } from './make_server_facade';
 
@@ -73,7 +73,6 @@ export const reporting = (kibana: any) => {
 
     async init(server: ServerFacade) {
       const serverFacade = makeServerFacade(server);
-
       const exportTypesRegistry = getExportTypesRegistry();
 
       let isCollectorReady = false;
