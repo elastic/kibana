@@ -12754,7 +12754,6 @@
     "xpack.lens.xyChart.chartTypeLegend": "图表类型",
     "xpack.lens.xyChart.help": "X/Y 图表",
     "xpack.lens.xyChart.isVisible.help": "指定图例是否可见。",
-    "xpack.lens.xyChart.layerSettings": "编辑图层设置",
     "xpack.lens.xyChart.legend.help": "配置图表图例。",
     "xpack.lens.xyChart.nestUnderRoot": "整个数据集",
     "xpack.lens.xyChart.position.help": "指定图例位置。",

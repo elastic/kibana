@@ -12665,7 +12665,6 @@
     "xpack.lens.xyChart.chartTypeLegend": "チャートタイプ",
     "xpack.lens.xyChart.help": "X/Y チャート",
     "xpack.lens.xyChart.isVisible.help": "判例の表示・非表示を指定します。",
-    "xpack.lens.xyChart.layerSettings": "レイヤー設定を編集",
     "xpack.lens.xyChart.legend.help": "チャートの凡例を構成します。",
     "xpack.lens.xyChart.nestUnderRoot": "データセット全体",
     "xpack.lens.xyChart.position.help": "凡例の配置を指定します。",
