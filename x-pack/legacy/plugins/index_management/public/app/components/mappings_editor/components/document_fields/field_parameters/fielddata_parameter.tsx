@@ -110,6 +110,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
               <EuiSpacer size="s" />
 
               <EuiSwitch
+                compressed
                 label={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.fielddata.useAbsoluteValuesFieldLabel',
                   {

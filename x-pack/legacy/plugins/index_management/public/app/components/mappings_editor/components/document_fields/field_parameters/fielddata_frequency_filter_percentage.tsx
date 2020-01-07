@@ -26,7 +26,7 @@ export const FielddataFrequencyFilterPercentage = ({ min, max }: Props) => {
       label={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterPercentageFieldLabel"
-          defaultMessage="Min/max frequency percentage"
+          defaultMessage="Percentage-based frequency range"
         />
       }
     >

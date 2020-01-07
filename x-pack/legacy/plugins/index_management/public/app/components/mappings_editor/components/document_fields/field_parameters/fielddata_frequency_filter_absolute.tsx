@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormControlLayoutDelimited,
@@ -34,7 +35,7 @@ export const FielddataFrequencyFilterAbsolute = ({ min, max }: Props) => {
       label={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterAbsoluteFieldLabel"
-          defaultMessage="Min/max frequency absolute"
+          defaultMessage="Absolute frequency range"
         />
       }
     >
@@ -47,7 +48,13 @@ export const FielddataFrequencyFilterAbsolute = ({ min, max }: Props) => {
             isInvalid={minIsInvalid}
             fullWidth
             data-test-subj="input"
-            controlOnly={true}
+            controlOnly
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterAbsoluteMinAriaLabel',
+              {
+                defaultMessage: 'Minimum absolute frequency',
+              }
+            )}
           />
         }
         endControl={
@@ -58,7 +65,13 @@ export const FielddataFrequencyFilterAbsolute = ({ min, max }: Props) => {
             isInvalid={maxIsInvalid}
             fullWidth
             data-test-subj="input"
-            controlOnly={true}
+            controlOnly
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterAbsoluteMaxAriaLabel',
+              {
+                defaultMessage: 'Maximum absolute frequency',
+              }
+            )}
           />
         }
       />
