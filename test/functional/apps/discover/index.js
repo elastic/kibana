@@ -34,7 +34,6 @@ export default function({ getService, loadTestFile }) {
 
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
-    loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
