@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
-import Legend from '../Legend';
-import { units, px } from '../../../../style/variables';
-import styled from 'styled-components';
-import { asDuration } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import React from 'react';
+import styled from 'styled-components';
+import { px, units } from '../../../../../style/variables';
+import { asDuration } from '../../../../../utils/formatters';
+import { Legend } from '../../Legend';
+import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${theme.euiColorMediumShade};
@@ -23,33 +23,25 @@ const TimeContainer = styled.div`
   padding-top: ${px(units.half)};
 `;
 
-export default function AgentMarker({ agentMark, x }) {
-  const legendWidth = 11;
+interface Props {
+  mark: AgentMark;
+}
+
+export const AgentMarker: React.FC<Props> = ({ mark }) => {
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: px(x - legendWidth / 2),
-        bottom: 0
-      }}
-    >
+    <>
       <EuiToolTip
-        id={agentMark.name}
+        id={mark.id}
         position="top"
         content={
           <div>
-            <NameContainer>{agentMark.name}</NameContainer>
-            <TimeContainer>{asDuration(agentMark.us)}</TimeContainer>
+            <NameContainer>{mark.id}</NameContainer>
+            <TimeContainer>{asDuration(mark.offset)}</TimeContainer>
           </div>
         }
       >
         <Legend clickable color={theme.euiColorMediumShade} />
       </EuiToolTip>
-    </div>
+    </>
   );
-}
-
-AgentMarker.propTypes = {
-  agentMark: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired
 };
