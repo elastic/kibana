@@ -29,6 +29,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
   const listingTable = getService('listingTable');
   const { common, header, visEditor } = getPageObjects(['common', 'header', 'visEditor']);
 
+  /**
+   * This page object contains the visualization type selection, the landing page,
+   * and the open/save dialog functions
+   */
   class VisualizePage {
     index = {
       LOGSTASH_TIME_BASED: 'logstash-*',
@@ -53,6 +57,19 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
+    }
+
+    public async getChartTypes() {
+      const chartTypeField = await testSubjects.find('visNewDialogTypes');
+      const $ = await chartTypeField.parseDomContent();
+      return $('button')
+        .toArray()
+        .map(chart =>
+          $(chart)
+            .findTestSubject('visTypeTitle')
+            .text()
+            .trim()
+        );
     }
 
     public async waitForVisualizationSelectPage() {

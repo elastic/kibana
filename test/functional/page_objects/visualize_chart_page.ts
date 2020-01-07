@@ -226,19 +226,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       await testSubjects.existOrFail('visLibVisualizeError');
     }
 
-    public async getChartTypes() {
-      const chartTypeField = await testSubjects.find('visNewDialogTypes');
-      const $ = await chartTypeField.parseDomContent();
-      return $('button')
-        .toArray()
-        .map(chart =>
-          $(chart)
-            .findTestSubject('visTypeTitle')
-            .text()
-            .trim()
-        );
-    }
-
     public async getVisualizationRenderingCount() {
       const visualizationLoader = await testSubjects.find('visualizationLoader');
       const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
