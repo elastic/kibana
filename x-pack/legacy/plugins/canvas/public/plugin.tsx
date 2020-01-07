@@ -91,7 +91,7 @@ export class CanvasPlugin
     initLoadingIndicator(core.http.addLoadingCountSource);
 
     core.chrome.setBadge(
-      core.application.capabilities.canvas.save
+      core.application.capabilities.canvas && core.application.capabilities.canvas.save
         ? undefined
         : {
             text: strings.getText(),
