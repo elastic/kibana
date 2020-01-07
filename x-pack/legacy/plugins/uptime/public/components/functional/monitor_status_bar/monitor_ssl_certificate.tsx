@@ -9,7 +9,6 @@ import moment from 'moment';
 import { EuiSpacer, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 
 import { PingTls } from '../../../../common/graphql/types';
 
@@ -19,10 +18,6 @@ interface Props {
    */
   tls: PingTls | null | undefined;
 }
-
-const TextContainer = styled.div`
-  margin-left: 20px;
-`;
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
   const certValidityDate = new Date(tls?.certificate_not_valid_after ?? '');
@@ -36,31 +31,29 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
   return isValidDate ? (
     <>
       <EuiSpacer size="s" />
-      <TextContainer>
-        <EuiText
-          grow={false}
-          size="s"
-          aria-label={i18n.translate(
-            'xpack.uptime.monitorStatusBar.sslCertificateExpiry.label.ariaLabel',
-            {
-              defaultMessage: 'SSL certificate expires {validityDate}',
-              values: { validityDate: moment(certValidityDate.valueOf()).fromNow() },
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
-            defaultMessage="SSL certificate expires {emphasizedText}"
-            values={{
-              emphasizedText: (
-                <EuiBadge color={isExpiringInMonth ? 'warning' : 'default'}>
-                  {moment(certValidityDate.valueOf()).fromNow()}
-                </EuiBadge>
-              ),
-            }}
-          />
-        </EuiText>
-      </TextContainer>
+      <EuiText
+        grow={false}
+        size="s"
+        aria-label={i18n.translate(
+          'xpack.uptime.monitorStatusBar.sslCertificateExpiry.label.ariaLabel',
+          {
+            defaultMessage: 'SSL certificate expires {validityDate}',
+            values: { validityDate: moment(certValidityDate.valueOf()).fromNow() },
+          }
+        )}
+      >
+        <FormattedMessage
+          id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
+          defaultMessage="SSL certificate expires {emphasizedText}"
+          values={{
+            emphasizedText: (
+              <EuiBadge color={isExpiringInMonth ? 'warning' : 'default'}>
+                {moment(certValidityDate.valueOf()).fromNow()}
+              </EuiBadge>
+            ),
+          }}
+        />
+      </EuiText>
     </>
   ) : null;
 };
