@@ -46,9 +46,16 @@ describe('Events Viewer', () => {
       clickEventsTab();
     });
 
-    it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
+    beforeEach(() => {
       openEventsViewerFieldsBrowser();
+    });
 
+    afterEach(() => {
+      clickOutsideFieldsBrowser();
+      cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
+    });
+
+    it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
       cy.get(FIELDS_BROWSER_TITLE)
         .invoke('text')
         .should('eq', 'Customize Columns');
@@ -61,18 +68,21 @@ describe('Events Viewer', () => {
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
-      openEventsViewerFieldsBrowser();
-
       defaultHeadersInDefaultEcsCategory.forEach(header =>
         cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked')
       );
     });
   });
 
-  context('Events viewer behaviour', () => {
+  context('Events viewer query modal', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
       clickEventsTab();
+    });
+
+    after(() => {
+      cy.get(CLOSE_MODAL).click();
+      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('not.exist');
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {
@@ -89,17 +99,21 @@ describe('Events Viewer', () => {
 
       cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('exist');
     });
+  });
 
-    it('closes the inspect query modal when the user clicks outside of it', () => {
-      cy.get(CLOSE_MODAL).click();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('not.exist');
+  context('Events viewer fields behaviour', () => {
+    before(() => {
+      loginAndWaitForPage(HOSTS_PAGE);
+      clickEventsTab();
+    });
+
+    beforeEach(() => {
+      openEventsViewerFieldsBrowser();
     });
 
     it('adds a field to the events viewer when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
       const toggleField = 'host.geo.city_name';
-
-      openEventsViewerFieldsBrowser();
 
       filterFieldsBrowser(filterInput);
 
@@ -119,9 +133,18 @@ describe('Events Viewer', () => {
     });
 
     it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
-      const toggleField = 'host.geo.city_name';
+      const filterInput = 'host.geo.c';
+      const toggleField = 'host.geo.country_name';
 
-      openEventsViewerFieldsBrowser();
+      filterFieldsBrowser(filterInput);
+
+      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should(
+        'not.exist'
+      );
+
+      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="field-${toggleField}-checkbox"]`).check({
+        force: true,
+      });
 
       cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="reset-fields"]`).click({ force: true });
 
@@ -129,11 +152,12 @@ describe('Events Viewer', () => {
         'not.exist'
       );
     });
+  });
 
-    it('closes the fields browser when the user clicks outside of it', () => {
-      clickOutsideFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
+  context('Events behaviour', () => {
+    before(() => {
+      loginAndWaitForPage(HOSTS_PAGE);
+      clickEventsTab();
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
