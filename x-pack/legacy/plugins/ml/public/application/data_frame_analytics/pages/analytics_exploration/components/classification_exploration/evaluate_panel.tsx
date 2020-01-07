@@ -8,6 +8,7 @@ import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { metadata } from 'ui/metadata';
 import { ErrorCallout } from '../error_callout';
 import {
   getDependentVar,
@@ -210,7 +212,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     <EuiPanel style={{ width: `${panelWidth}px` }}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <span>
@@ -226,6 +228,20 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>{getTaskStateBadge(jobStatus)}</span>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                target="_blank"
+                iconType="help"
+                iconSide="left"
+                color="primary"
+                href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`}
+              >
+                Classification evaluation docs
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
