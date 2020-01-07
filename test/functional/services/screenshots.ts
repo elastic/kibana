@@ -51,7 +51,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
      * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
      */
-    async compareAgainstBaseline(name: string, updateBaselines: boolean, el: WebElementWrapper) {
+    async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
       await this._take(sessionPath, el);

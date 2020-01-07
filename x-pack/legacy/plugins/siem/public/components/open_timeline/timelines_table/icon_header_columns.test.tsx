@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
