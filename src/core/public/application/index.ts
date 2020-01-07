@@ -29,6 +29,7 @@ export {
   AppMountParameters,
   ApplicationSetup,
   ApplicationStart,
+  AppLeaveHandler,
   // Internal types
   InternalApplicationStart,
   LegacyApp,

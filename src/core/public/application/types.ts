@@ -230,7 +230,48 @@ export interface AppMountParameters {
    * ```
    */
   appBasePath: string;
+
+  /**
+   * A function that can be used to register a handler that will be called
+   * when the user is leaving the current application, allowing to
+   * prompt a confirmation message before actually changing the page.
+   *
+   * This will be called either when the user goes to another application, or when
+   * trying to close the tab or manually changing the url.
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { BrowserRouter, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+   *    const { renderApp, hasUnsavedChanges } = await import('./application');
+   *    onAppLeave(() => {
+   *      if(hasUnsavedChanges()) {
+   *        return 'Some changes were not saved. Are you sure you want to leave?';
+   *      }
+   *    });
+   *    return renderApp(params);
+   * }
+   * ```
+   */
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
+
+/**
+ * A handler that will be executed before leaving the application, either when
+ * going to another application or when closing the browser tab or manually changing
+ * the url.
+ * Should return a message to prompt to the user before leaving the page, or undefined
+ * to not show any message.
+ *
+ * See {@link AppMountParameters} for detailed usage examples.
+ */
+export type AppLeaveHandler = () => string | undefined;
 
 /**
  * A function called when an application should be unmounted from the page. This function should be synchronous.
@@ -317,13 +358,13 @@ export interface ApplicationStart {
   capabilities: RecursiveReadonly<Capabilities>;
 
   /**
-   * Navigiate to a given app
+   * Navigate to a given app
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to
    * @param options.state - optional state to forward to the application
    */
-  navigateToApp(appId: string, options?: { path?: string; state?: any }): void;
+  navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
 
   /**
    * Returns a relative URL to a given app, including the global base path.

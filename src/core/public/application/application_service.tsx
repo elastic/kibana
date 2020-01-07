@@ -22,13 +22,14 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
-import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
 import { CapabilitiesService, Capabilities } from './capabilities';
 import {
   App,
+  AppLeaveHandler,
   LegacyApp,
   AppMount,
   AppMountDeprecated,
@@ -43,6 +44,7 @@ interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
+  showConfirmation?: (msg: string | undefined) => boolean;
   /**
    * Only necessary for redirecting to legacy apps
    * @deprecated
@@ -51,7 +53,6 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  injectedMetadata: InjectedMetadataStart;
   http: HttpStart;
 }
 
@@ -80,24 +81,29 @@ export class ApplicationService {
   private readonly legacyApps = new Map<string, LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
+  private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private stop$ = new Subject();
   private registrationClosed = false;
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: any) => void;
+  private showConfirmation?: (msg: string | undefined) => boolean;
 
   public setup({
     context,
     http: { basePath },
     injectedMetadata,
     redirectTo = (path: string) => (window.location.href = path),
+    showConfirmation = (msg: string | undefined) => window.confirm(msg),
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
     // Only setup history if we're not in legacy mode
     if (!injectedMetadata.getLegacyMode()) {
       this.history = createBrowserHistory({ basename });
     }
+
+    this.showConfirmation = showConfirmation;
 
     // If we do not have history available, use redirectTo to do a full page refresh.
     this.navigate = (url, state) =>
@@ -171,12 +177,14 @@ export class ApplicationService {
     };
   }
 
-  public async start({ injectedMetadata, http }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
     this.registrationClosed = true;
+    window.addEventListener('beforeunload', this.onBeforeUnload);
+
     const { capabilities } = await this.capabilities.start({
       appIds: [...this.mounters.keys()],
       http,
@@ -191,17 +199,59 @@ export class ApplicationService {
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
-      navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        this.navigate!(getAppUrl(availableMounters, appId, path), state);
-        this.currentAppId$.next(appId);
+      navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
+        if (await this.shouldNavigateTo(appId)) {
+          this.appLeaveHandlers.delete(this.currentAppId$.value!);
+          this.navigate!(getAppUrl(availableMounters, appId, path), state);
+          this.currentAppId$.next(appId);
+        }
       },
-      getComponent: () =>
-        this.history ? <AppRouter history={this.history} mounters={availableMounters} /> : null,
+      getComponent: () => {
+        if (!this.history) {
+          return null;
+        }
+
+        const setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
+          this.appLeaveHandlers.set(appId, handler);
+        };
+
+        return (
+          <AppRouter
+            history={this.history}
+            mounters={availableMounters}
+            setAppLeaveHandler={setAppLeaveHandler}
+          />
+        );
+      },
     };
   }
+
+  private async shouldNavigateTo(_appId: string): Promise<boolean> {
+    const currentAppId = this.currentAppId$.value;
+    const appLeaveHandler = currentAppId ? this.appLeaveHandlers.get(currentAppId) : undefined;
+
+    if (appLeaveHandler && appLeaveHandler()) {
+      const confirmed = this.showConfirmation!(appLeaveHandler());
+      if (!confirmed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private onBeforeUnload = (event: Event) => {
+    const currentAppId = this.currentAppId$.value;
+    const appLeaveHandler = currentAppId ? this.appLeaveHandlers.get(currentAppId) : undefined;
+    const appLeaveMessage = appLeaveHandler && appLeaveHandler();
+    if (appLeaveMessage) {
+      event.preventDefault();
+      event.returnValue = 'appLeaveMessage' as any;
+    }
+  };
 
   public stop() {
     this.stop$.next();
     this.currentAppId$.complete();
+    window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }

@@ -89,6 +89,7 @@ export {
   AppUnmount,
   AppMountContext,
   AppMountParameters,
+  AppLeaveHandler,
 } from './application';
 
 export {
