@@ -91,7 +91,7 @@ export function useEsDocSearch({
 
   useEffect(() => {
     requestData();
-  }, []);
+  });
 
   return [status, hit, indexPattern];
 }
