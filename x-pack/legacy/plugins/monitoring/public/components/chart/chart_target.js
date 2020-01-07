@@ -46,7 +46,7 @@ export class ChartTarget extends React.Component {
         return seriesToShow.some(id => id.toLowerCase() === metric.id.toLowerCase());
       };
     }
-    return _metric => true;
+    return () => true;
   }
 
   UNSAFE_componentWillReceiveProps(newProps) {

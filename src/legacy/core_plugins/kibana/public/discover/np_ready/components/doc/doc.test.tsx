@@ -25,7 +25,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
 jest.mock('../doc_viewer/doc_viewer', () => ({
-  DocViewer: 'test',
+  DocViewer: () => null,
 }));
 
 jest.mock('../../../kibana_services', () => {
@@ -67,7 +67,7 @@ async function mountDoc(search: () => void, update = false, indexPatternGetter: 
     indexPatternService,
   } as DocProps;
   let comp!: ReactWrapper;
-  act(() => {
+  await act(async () => {
     comp = mountWithIntl(<Doc {...props} />);
     if (update) comp.update();
   });

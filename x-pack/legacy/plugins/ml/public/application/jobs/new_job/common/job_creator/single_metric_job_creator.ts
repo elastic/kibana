@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
@@ -17,6 +16,7 @@ import {
 } from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;

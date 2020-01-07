@@ -61,7 +61,7 @@ const allRulesNdJson = 'index.ts';
 const walk = dir => {
   const list = fs.readdirSync(dir);
   return list.reduce((accum, file) => {
-    const fileWithDir = dir + '/' + file;
+    const fileWithDir = `${dir}/${file}`;
     const stat = fs.statSync(fileWithDir);
     if (stat && stat.isDirectory()) {
       return [...accum, ...walk(fileWithDir)];
