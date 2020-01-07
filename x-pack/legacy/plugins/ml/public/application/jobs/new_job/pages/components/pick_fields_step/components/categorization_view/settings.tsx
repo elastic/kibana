@@ -19,7 +19,7 @@ export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
     <>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
-          <BucketSpan setIsValid={setIsValid} />
+          <BucketSpan setIsValid={setIsValid} hideEstimateButton={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <SparseDataSwitch />
