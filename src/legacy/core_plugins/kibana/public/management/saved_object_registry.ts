@@ -18,15 +18,24 @@
  */
 
 import _ from 'lodash';
-const registry = [];
+import { SavedObjectLoader } from 'ui/saved_objects';
+
+interface SavedObjectRegistryEntry {
+  id: string;
+  service: SavedObjectLoader;
+  title: string;
+}
+
+const registry: SavedObjectRegistryEntry[] = [];
+
 export const savedObjectManagementRegistry = {
-  register: function(service) {
+  register: (service: SavedObjectRegistryEntry) => {
     registry.push(service);
   },
-  all: function() {
+  all: () => {
     return registry;
   },
-  get: function(id) {
-    return _.find(registry, { service: id });
+  get: (id: string) => {
+    return _.find(registry, { id });
   },
 };
