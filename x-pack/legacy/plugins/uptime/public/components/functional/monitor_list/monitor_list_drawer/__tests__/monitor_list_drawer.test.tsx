@@ -8,11 +8,12 @@ import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
+import { MonitorDetails } from '../../../../../../common/runtime_types';
 
 describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;
   let loadMonitorDetails: any;
-  let monitorDetails: any;
+  let monitorDetails: MonitorDetails;
 
   beforeEach(() => {
     summary = {
