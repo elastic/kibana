@@ -47,6 +47,7 @@ export interface Core extends npCore {
     esDocBasePath: string;
     esPluginDocBasePath: string;
     esStackOverviewDocBasePath: string;
+    esMLDocBasePath: string;
   };
   docTitle: {
     change: typeof docTitle.change;
