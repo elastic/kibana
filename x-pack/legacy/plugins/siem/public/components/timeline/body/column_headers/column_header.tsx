@@ -46,78 +46,78 @@ interface ColumneHeaderProps {
   timelineId: string;
 }
 
-export const ColumnHeader = React.memo<ColumneHeaderProps>(
-  ({
-    draggableIndex,
-    header,
-    timelineId,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
-    onFilterChange,
-    sort,
-  }) => {
-    const [isDragging, setIsDragging] = React.useState(false);
-    const handleResizeStop: ResizeCallback = (e, direction, ref, delta) => {
-      onColumnResized({ columnId: header.id, delta: delta.width });
-    };
+const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
+  draggableIndex,
+  header,
+  timelineId,
+  onColumnRemoved,
+  onColumnResized,
+  onColumnSorted,
+  onFilterChange,
+  sort,
+}) => {
+  const [isDragging, setIsDragging] = React.useState(false);
+  const handleResizeStop: ResizeCallback = (e, direction, ref, delta) => {
+    onColumnResized({ columnId: header.id, delta: delta.width });
+  };
 
-    return (
-      <Resizable
-        enable={{ right: true }}
-        size={{
-          width: header.width,
-          height: 'auto',
-        }}
-        style={{
-          position: isDragging ? 'absolute' : 'relative',
-        }}
-        handleComponent={{
-          right: <EventsHeadingHandle />,
-        }}
-        onResizeStop={handleResizeStop}
+  return (
+    <Resizable
+      enable={{ right: true }}
+      size={{
+        width: header.width,
+        height: 'auto',
+      }}
+      style={{
+        position: isDragging ? 'absolute' : 'relative',
+      }}
+      handleComponent={{
+        right: <EventsHeadingHandle />,
+      }}
+      onResizeStop={handleResizeStop}
+    >
+      <Draggable
+        data-test-subj="draggable"
+        // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
+        disableInteractiveElementBlocking
+        draggableId={getDraggableFieldId({
+          contextId: `timeline-column-headers-${timelineId}`,
+          fieldId: header.id,
+        })}
+        index={draggableIndex}
+        key={header.id}
+        type={DRAG_TYPE_FIELD}
       >
-        <Draggable
-          data-test-subj="draggable"
-          // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
-          disableInteractiveElementBlocking
-          draggableId={getDraggableFieldId({
-            contextId: `timeline-column-headers-${timelineId}`,
-            fieldId: header.id,
-          })}
-          index={draggableIndex}
-          key={header.id}
-          type={DRAG_TYPE_FIELD}
-        >
-          {(dragProvided, dragSnapshot) => (
-            <EventsTh
-              data-test-subj="draggable-header"
-              {...dragProvided.draggableProps}
-              {...dragProvided.dragHandleProps}
-              ref={dragProvided.innerRef}
-            >
-              {!dragSnapshot.isDragging ? (
-                <EventsThContent>
-                  <Header
-                    timelineId={timelineId}
-                    header={header}
-                    onColumnRemoved={onColumnRemoved}
-                    onColumnSorted={onColumnSorted}
-                    onFilterChange={onFilterChange}
-                    sort={sort}
-                  />
-                </EventsThContent>
-              ) : (
-                <DraggingContainer onDragging={setIsDragging}>
-                  <DragEffects>
-                    <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
-                  </DragEffects>
-                </DraggingContainer>
-              )}
-            </EventsTh>
-          )}
-        </Draggable>
-      </Resizable>
-    );
-  }
-);
+        {(dragProvided, dragSnapshot) => (
+          <EventsTh
+            data-test-subj="draggable-header"
+            {...dragProvided.draggableProps}
+            {...dragProvided.dragHandleProps}
+            ref={dragProvided.innerRef}
+          >
+            {!dragSnapshot.isDragging ? (
+              <EventsThContent>
+                <Header
+                  timelineId={timelineId}
+                  header={header}
+                  onColumnRemoved={onColumnRemoved}
+                  onColumnSorted={onColumnSorted}
+                  onFilterChange={onFilterChange}
+                  sort={sort}
+                />
+              </EventsThContent>
+            ) : (
+              <DraggingContainer onDragging={setIsDragging}>
+                <DragEffects>
+                  <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
+                </DragEffects>
+              </DraggingContainer>
+            )}
+          </EventsTh>
+        )}
+      </Draggable>
+    </Resizable>
+  );
+};
+
+export const ColumnHeader = React.memo(ColumnHeaderComponent);

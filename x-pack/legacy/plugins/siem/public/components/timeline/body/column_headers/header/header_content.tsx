@@ -25,48 +25,52 @@ interface HeaderContentProps {
   sort: Sort;
 }
 
-export const HeaderContent = React.memo<HeaderContentProps>(
-  ({ children, header, isResizing, onClick, sort }) => {
-    const isLoading = useTimelineContext();
+const HeaderContentComponent: React.FC<HeaderContentProps> = ({
+  children,
+  header,
+  isResizing,
+  onClick,
+  sort,
+}) => {
+  const isLoading = useTimelineContext();
 
-    return (
-      <EventsHeading data-test-subj="header" isLoading={isLoading}>
-        {header.aggregatable ? (
-          <EventsHeadingTitleButton
-            data-test-subj="header-sort-button"
-            onClick={!isResizing && !isLoading ? onClick : noop}
-          >
-            <TruncatableText data-test-subj={`header-text-${header.id}`}>
-              <EuiToolTip
-                data-test-subj="header-tooltip"
-                content={<HeaderToolTipContent header={header} />}
-              >
-                <>{header.label ?? header.id}</>
-              </EuiToolTip>
-            </TruncatableText>
+  return (
+    <EventsHeading data-test-subj="header" isLoading={isLoading}>
+      {header.aggregatable ? (
+        <EventsHeadingTitleButton
+          data-test-subj="header-sort-button"
+          onClick={!isResizing && !isLoading ? onClick : noop}
+        >
+          <TruncatableText data-test-subj={`header-text-${header.id}`}>
+            <EuiToolTip
+              data-test-subj="header-tooltip"
+              content={<HeaderToolTipContent header={header} />}
+            >
+              <>{header.label ?? header.id}</>
+            </EuiToolTip>
+          </TruncatableText>
 
-            <SortIndicator
-              data-test-subj="header-sort-indicator"
-              sortDirection={getSortDirection({ header, sort })}
-            />
-          </EventsHeadingTitleButton>
-        ) : (
-          <EventsHeadingTitleSpan>
-            <TruncatableText data-test-subj={`header-text-${header.id}`}>
-              <EuiToolTip
-                data-test-subj="header-tooltip"
-                content={<HeaderToolTipContent header={header} />}
-              >
-                <>{header.label ?? header.id}</>
-              </EuiToolTip>
-            </TruncatableText>
-          </EventsHeadingTitleSpan>
-        )}
+          <SortIndicator
+            data-test-subj="header-sort-indicator"
+            sortDirection={getSortDirection({ header, sort })}
+          />
+        </EventsHeadingTitleButton>
+      ) : (
+        <EventsHeadingTitleSpan>
+          <TruncatableText data-test-subj={`header-text-${header.id}`}>
+            <EuiToolTip
+              data-test-subj="header-tooltip"
+              content={<HeaderToolTipContent header={header} />}
+            >
+              <>{header.label ?? header.id}</>
+            </EuiToolTip>
+          </TruncatableText>
+        </EventsHeadingTitleSpan>
+      )}
 
-        {children}
-      </EventsHeading>
-    );
-  }
-);
+      {children}
+    </EventsHeading>
+  );
+};
 
-HeaderContent.displayName = 'HeaderContent';
+export const HeaderContent = React.memo(HeaderContentComponent);

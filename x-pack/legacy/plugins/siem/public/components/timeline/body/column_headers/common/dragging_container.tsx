@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { FC, memo, useEffect } from 'react';
 
 interface DraggingContainerProps {
   children: JSX.Element;
   onDragging: Function;
 }
 
-export const DraggingContainer = ({ children, onDragging }: DraggingContainerProps) => {
+const DraggingContainerComponent: FC<DraggingContainerProps> = ({ children, onDragging }) => {
   useEffect(() => {
     onDragging(true);
 
@@ -20,3 +20,5 @@ export const DraggingContainer = ({ children, onDragging }: DraggingContainerPro
 
   return children;
 };
+
+export const DraggingContainer = memo(DraggingContainerComponent);

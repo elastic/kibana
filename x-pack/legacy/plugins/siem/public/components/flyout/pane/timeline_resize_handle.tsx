@@ -18,4 +18,3 @@ export const TimelineResizeHandle = styled.div<{ height: number }>`
   height: ${({ height }) => `${height}px`};
   position: absolute;
 `;
-TimelineResizeHandle.displayName = 'TimelineResizeHandle';

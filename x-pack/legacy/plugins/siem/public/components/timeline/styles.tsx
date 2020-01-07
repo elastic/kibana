@@ -60,7 +60,6 @@ export const EventsTable = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable ${className}`,
   role: 'table',
 }))``;
-EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */
 
@@ -75,7 +74,6 @@ export const EventsThead = styled.div.attrs(({ className = '' }) => ({
   top: 0;
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
 `;
-EventsThead.displayName = 'EventsThead';
 
 export const EventsTrHeader = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable__trHeader ${className}`,
@@ -83,7 +81,6 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 }))`
   display: flex;
 `;
-EventsTrHeader.displayName = 'EventsTrHeader';
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
@@ -93,7 +90,6 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   justify-content: ${({ justifyContent }) => justifyContent};
   min-width: 0;
 `;
-EventsThGroupActions.displayName = 'EventsThGroupActions';
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupData ${className}`,
@@ -106,7 +102,6 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
     visibility: visible;
   }
 `;
-EventsThGroupData.displayName = 'EventsThGroupData';
 
 export const EventsTh = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__th ${className}`,
@@ -136,7 +131,6 @@ export const EventsTh = styled.div.attrs(({ className = '' }) => ({
     display: none !important;
   }
 `;
-EventsTh.displayName = 'EventsTh';
 
 export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
@@ -149,7 +143,6 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   text-align: ${({ textAlign }) => textAlign};
   width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
-EventsThContent.displayName = 'EventsThContent';
 
 /* EVENTS BODY */
 
@@ -159,7 +152,6 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
 }))`
   overflow-x: hidden;
 `;
-EventsTbody.displayName = 'EventsTbody';
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trGroup ${className}`,
@@ -171,7 +163,6 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
 `;
-EventsTrGroup.displayName = 'EventsTrGroup';
 
 export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trData ${className}`,
@@ -179,7 +170,6 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 }))`
   display: flex;
 `;
-EventsTrData.displayName = 'EventsTrData';
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}`,
@@ -189,7 +179,6 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0
     ${({ theme }) => theme.eui.paddingSizes.xl};
 `;
-EventsTrSupplement.displayName = 'EventsTrSupplement';
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
@@ -199,14 +188,12 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;
 `;
-EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
 export const EventsTdGroupData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupData ${className}`,
 }))`
   display: flex;
 `;
-EventsTdGroupData.displayName = 'EventsTdGroupData';
 
 export const EventsTd = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__td ${className}`,
@@ -221,7 +208,6 @@ export const EventsTd = styled.div.attrs(({ className = '' }) => ({
     flex: 1;
   }
 `;
-EventsTd.displayName = 'EventsTd';
 
 export const EventsTdContent = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable__tdContent ${className}`,
@@ -233,7 +219,6 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   text-align: ${({ textAlign }) => textAlign};
   width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
-EventsTdContent.displayName = 'EventsTdContent';
 
 /**
  * EVENTS HEADING
@@ -249,7 +234,6 @@ export const EventsHeading = styled.div.attrs(({ className = '' }) => ({
     cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'grab')};
   }
 `;
-EventsHeading.displayName = 'EventsHeading';
 
 export const EventsHeadingTitleButton = styled.button.attrs(({ className = '' }) => ({
   className: `siemEventsHeading__title siemEventsHeading__title--aggregatable ${className}`,
@@ -274,14 +258,12 @@ export const EventsHeadingTitleButton = styled.button.attrs(({ className = '' })
     margin-left: ${({ theme }) => theme.eui.euiSizeXS};
   }
 `;
-EventsHeadingTitleButton.displayName = 'EventsHeadingTitleButton';
 
 export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
   className: `siemEventsHeading__title siemEventsHeading__title--notAggregatable ${className}`,
 }))`
   min-width: 0;
 `;
-EventsHeadingTitleSpan.displayName = 'EventsHeadingTitleSpan';
 
 export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsHeading__extra ${className}`,
@@ -299,7 +281,6 @@ export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
     }
   }
 `;
-EventsHeadingExtra.displayName = 'EventsHeadingExtra';
 
 export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsHeading__handle ${className}`,
@@ -316,7 +297,6 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
     cursor: col-resize;
   }
 `;
-EventsHeadingHandle.displayName = 'EventsHeadingHandle';
 
 /**
  * EVENTS LOADING

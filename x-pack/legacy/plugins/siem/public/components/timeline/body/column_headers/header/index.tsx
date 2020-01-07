@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
@@ -24,14 +24,14 @@ interface Props {
   timelineId: string;
 }
 
-export const HeaderComponent = ({
+export const HeaderComponent: React.FC<Props> = ({
   header,
   onColumnRemoved,
   onColumnSorted,
   onFilterChange = noop,
   sort,
-}: Props) => {
-  const onClick = () => {
+}) => {
+  const onClick = useCallback(() => {
     onColumnSorted!({
       columnId: header.id,
       sortDirection: getNewSortDirectionOnClick({
@@ -39,7 +39,7 @@ export const HeaderComponent = ({
         currentSort: sort,
       }),
     });
-  };
+  }, [onColumnSorted, header, sort]);
 
   return (
     <>
@@ -52,8 +52,4 @@ export const HeaderComponent = ({
   );
 };
 
-HeaderComponent.displayName = 'HeaderComponent';
-
 export const Header = React.memo(HeaderComponent);
-
-Header.displayName = 'Header';

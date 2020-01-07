@@ -114,22 +114,6 @@ export const ColumnHeadersComponent = ({
             />
           </EventsThContent>
         </EventsTh>
-
-        <EventsTh>
-          <EventsThContent textAlign="center">
-            <StatefulFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              isEventViewer={isEventViewer}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-              width={FIELD_BROWSER_WIDTH}
-            />
-          </EventsThContent>
-        </EventsTh>
       </EventsThGroupActions>
 
       <Droppable
@@ -168,8 +152,4 @@ export const ColumnHeadersComponent = ({
   </EventsThead>
 );
 
-ColumnHeadersComponent.displayName = 'ColumnHeadersComponent';
-
 export const ColumnHeaders = React.memo(ColumnHeadersComponent);
-
-ColumnHeaders.displayName = 'ColumnHeaders';
