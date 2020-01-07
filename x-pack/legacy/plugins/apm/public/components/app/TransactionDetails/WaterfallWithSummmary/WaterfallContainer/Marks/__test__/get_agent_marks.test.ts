@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import { getAgentMarks } from './get_agent_marks';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { getAgentMarks } from '../get_agent_marks';
 
 describe('getAgentMarks', () => {
   it('should sort the marks by time', () => {
@@ -21,9 +21,24 @@ describe('getAgentMarks', () => {
       }
     } as any;
     expect(getAgentMarks(transaction)).toEqual([
-      { name: 'timeToFirstByte', us: 10000 },
-      { name: 'domInteractive', us: 117000 },
-      { name: 'domComplete', us: 118000 }
+      {
+        id: 'timeToFirstByte',
+        offset: 10000,
+        type: 'agentMark',
+        verticalLine: true
+      },
+      {
+        id: 'domInteractive',
+        offset: 117000,
+        type: 'agentMark',
+        verticalLine: true
+      },
+      {
+        id: 'domComplete',
+        offset: 118000,
+        type: 'agentMark',
+        verticalLine: true
+      }
     ]);
   });
 
