@@ -84,10 +84,11 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
+  let docValueFields: any[] | undefined;
   if (jobParams.post && jobParams.post.state) {
     ({
       post: {
-        state: { query: payloadQuery, sort: payloadSort = [] },
+        state: { query: payloadQuery, sort: payloadSort = [], docvalue_fields: docValueFields },
       },
     } = jobParams);
   }
@@ -119,7 +120,15 @@ export async function generateCsvSearch(
         },
       };
     }, {});
-  const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
+
+  if (indexPatternTimeField) {
+    if (docValueFields) {
+      docValueFields = [indexPatternTimeField].concat(docValueFields);
+    } else {
+      docValueFields = [indexPatternTimeField];
+    }
+  }
+
   const searchRequest: SearchRequest = {
     index: esIndex,
     body: {

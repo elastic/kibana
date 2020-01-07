@@ -113,7 +113,7 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
         display="rowCompressed"
       >
         <div>
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem>{stopInput}</EuiFlexItem>
             <EuiFlexItem>{colorInput}</EuiFlexItem>
           </EuiFlexGroup>
