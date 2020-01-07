@@ -1,0 +1,196 @@
+
+<h4>Relationship style</h4>
+
+<h5><strong>Default colors</strong></h5>
+<div>
+  <span>Background Color:</span>
+  <input type="color" ng-model="vis.params.canvasBackgroundColor" class="form-control"/>
+</div>
+
+<div>
+  <span>Node:</span>
+  <!-- div colorpicker ng-model="vis.params.firstNodeColor"-->
+  <input type="color" ng-model="vis.params.firstNodeColor" class="form-control"/>
+  <!--/div-->
+</div>
+
+<div class="secondNode">
+  <span>Second Node:</span>
+  <input type="color" ng-model="vis.params.secondNodeColor" class="form-control"/>
+</div>
+
+<div>
+  <span>Labels:</span>
+  <input type="color" ng-model="vis.params.labelColor" class="form-control"/>
+</div>
+
+
+<br>
+
+<h5><strong>Size</strong></h5>
+<table>
+    <tbody>
+        <tr>
+            <td>Max Node Size&nbsp;</td>
+            <td><input type="number" ng-model="vis.params.maxNodeSize" min="1"></td>
+        </tr>
+        <tr>
+            <td>Min Node Size&nbsp;</td>
+            <td><input type="number" ng-model="vis.params.minNodeSize" min="1"></td>
+        </tr>
+        <tr>
+            <td>Max Edge Width&nbsp;</td>
+            <td><input type="number" ng-model="vis.params.maxEdgeSize" min="1"></td>
+        </tr>
+        <tr>
+            <td>Min Edge Width&nbsp;</td>
+            <td><input type="number" ng-model="vis.params.minEdgeSize" min="0.1"></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h5><strong>Shapes</strong></h5>
+<div class="form-group">
+  <label for="sel1">Node: </label>
+   <select class="form-control" ng-model="vis.params.shapeFirstNode" id="sel1">
+     <option value="circle">Circle</option>
+     <option value="dot">Dot</option>
+     <option value="ellipse">Ellipse</option>
+     <option value="database">DataBase</option>
+     <option value="box">Box</option>
+     <option value="text">Only Text </option>
+     <option value="diamond">Diamond</option>
+     <option value="star">Star</option>
+     <option value="triangle">Triangle</option>
+     <option value="triangleDown">Triangle Down</option>
+     <option value="square">Square</option>
+   </select>
+</div>
+
+<div class="form-group secondNode">
+  <label for="sel2">Second Node: </label>
+   <select class="form-control" ng-model="vis.params.shapeSecondNode" id="sel2">
+     <option value="circle">Circle</option>
+     <option value="dot">Dot</option>
+     <option value="ellipse">Ellipse</option>
+     <option value="database">DataBase</option>
+     <option value="box">Box</option>
+     <option value="text">Only Text </option>
+     <option value="diamond">Diamond</option>
+     <option value="star">Star</option>
+     <option value="triangle">Triangle</option>
+     <option value="triangleDown">Triangle Down</option>
+     <option value="square">Square</option>
+   </select>
+</div>
+
+<br>
+
+<h5><strong>Directional Edges</strong></h5>
+<table>
+    <tbody>
+        <tr>
+            <td>Display directional edge:&nbsp;</td>
+            <td><input type="checkbox" ng-model="vis.params.displayArrow"></td>
+        </tr>
+        <tr>
+            <td>Endpoint position:&nbsp;</td>
+            <td>
+                <select class="form-control" ng-model="vis.params.posArrow" id="sel4">
+                    <option value="from">Beginning</option>
+                    <option value="middle">Middle</option>
+                    <option value="to">End side</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Endpoint Type:</td>
+            <td>
+                <select class="form-control" ng-model="vis.params.shapeArrow" id="sel3">
+                    <option value="arrow">Arrow</option>
+                    <option value="circle">Circle</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Scale Factor:</td>
+            <td><input type="number" ng-model="vis.params.scaleArrow" min="0"></td>
+        </tr>
+        <tr>
+            <td>Smooth type:</td>
+            <td>
+                <select class="form-control" ng-model="vis.params.smoothType" id="sel5">
+                    <option value="dynamic">Dynamic</option>
+                    <option value="continuous">Continuous Anchor</option>
+                    <option value="discrete">Discrete Anchor</option>
+                    <option value="diagonalCross">Diagonal Anchor</option>
+                    <option value="straightCross">Straight Line</option>
+                    <option value="horizontal">Horizontal Anchor</option>
+                    <option value="vertical">Vertical Anchor</option>
+                    <option value="curvedCW">Clock-wise Curve</option>
+                    <option value="curvedCCW">Counter-Clock-wise Curve</option>
+                    <option value="cubicBezier">Cubic Bezier</option>
+                </select>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h5><strong>Extra</strong></h5>
+<div class="checkbox">
+  <label>
+    <input type="checkbox" ng-model="vis.params.showLabels">
+    Show labels
+  </label>
+  <label>
+    <input type="checkbox" ng-model="vis.params.showPopup">
+    Show Popup
+  </label>
+  <label>
+    <input type="checkbox" ng-model="vis.params.showColorLegend">
+    Show Color Legend (Node Color selected)
+  </label>
+  <label>
+    <input type="checkbox" ng-model="vis.params.nodePhysics">
+    Nodes Acting like Springs
+  </label>
+</div>
+
+<br>
+
+<h5><strong>Network constants</strong></h5>
+<div>
+  Attraction Force
+  <input type="number" ng-model="vis.params.gravitationalConstant" id="gravC">
+</div>
+<div>
+  Spring Force
+  <input type="number" ng-model="vis.params.springConstant" id="springC">
+</div>
+
+<hr>
+
+<h4>Top Values</h4>
+<div>
+  Node Size
+  <input type="number" ng-model="vis.params.maxCutMetricSizeNode" min="1">
+</div>
+<div>
+  Edge Size
+  <input type="number" ng-model="vis.params.maxCutMetricSizeEdge" min="1">
+</div>
+<hr>
+
+<h4>Don't show nodes below this value:</h4>
+<div>
+  Node Size
+  <input type="number" ng-model="vis.params.minCutMetricSizeNode" min="0">
+</div>
+<hr>
+
+
+<hr>
