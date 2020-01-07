@@ -71,27 +71,27 @@ export const reporting = (kibana: any) => {
       },
     },
 
-    async init(server: ServerFacade) {
-      const serverFacade = makeServerFacade(server);
+    async init(originalServer: ServerFacade) {
+      const server = makeServerFacade(originalServer);
       const exportTypesRegistry = getExportTypesRegistry();
 
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      const { usageCollection } = serverFacade.newPlatform.setup.plugins;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerReportingUsageCollector(
         usageCollection,
-        serverFacade,
+        server,
         () => isCollectorReady,
         exportTypesRegistry
       );
 
-      const logger = LevelLogger.createForServer(serverFacade, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(serverFacade);
+      const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
+      const browserDriverFactory = await createBrowserDriverFactory(server);
 
-      logConfiguration(serverFacade, logger);
-      runValidations(serverFacade, logger, browserDriverFactory);
+      logConfiguration(server, logger);
+      runValidations(server, logger, browserDriverFactory);
 
-      const { xpack_main: xpackMainPlugin } = serverFacade.plugins;
+      const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       (xpackMainPlugin as any).status.once('green', () => {
@@ -104,7 +104,7 @@ export const reporting = (kibana: any) => {
       isCollectorReady = true;
 
       // Reporting routes
-      registerRoutes(serverFacade, exportTypesRegistry, browserDriverFactory, logger);
+      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {
