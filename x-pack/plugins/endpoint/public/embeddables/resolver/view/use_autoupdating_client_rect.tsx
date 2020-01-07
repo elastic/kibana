@@ -16,6 +16,11 @@ import ResizeObserver from 'resize-observer-polyfill';
  * Note that the changes to the position of the element aren't automatically
  * tracked. So if the element's position moves for some reason, be sure to
  * handle that.
+ *
+ * Future performance improvement ideas:
+ * If `getBoundingClientRect` calls are happening frequently and this is causing performance issues
+ * we could call getBoundingClientRect less and instead invalidate a cached version of it.
+ * When needed, we could call `getBoundingClientRect` and store it. TODO more deets
  */
 export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
   const [rect, setRect] = useState<DOMRect | null>(null);

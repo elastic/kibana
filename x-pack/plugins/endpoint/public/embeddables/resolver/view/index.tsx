@@ -160,7 +160,6 @@ const Diagnostic = styled(
     );
   })
 )`
-  /* TODO, this is not a concern of Resolver. its parent needs to do this probably? */
   display: flex;
   flex-grow: 1;
   position: relative;
