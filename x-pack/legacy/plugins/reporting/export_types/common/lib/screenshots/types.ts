@@ -10,7 +10,7 @@ import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
-  url: string;
+  urls: string[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone: string;
@@ -36,6 +36,6 @@ export interface Screenshot {
 }
 
 export interface ScreenshotResults {
-  timeRange: TimeRange;
+  timeRange: TimeRange | null;
   screenshots: Screenshot[];
 }
