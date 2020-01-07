@@ -83,6 +83,7 @@ import { awsLogsSpecProvider } from './aws_logs';
 import { activemqLogsSpecProvider } from './activemq_logs';
 import { activemqMetricsSpecProvider } from './activemq_metrics';
 import { azureMetricsSpecProvider } from './azure_metrics';
+import { stanMetricsSpecProvider } from './stan_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -154,4 +155,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(azureMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(stanMetricsSpecProvider);
 }
