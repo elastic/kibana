@@ -94,6 +94,7 @@ export {
   IndexPatternsContract,
   IIndexPattern,
   IndexPattern,
+  indexPatterns,
   IFieldType,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
