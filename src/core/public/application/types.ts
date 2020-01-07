@@ -154,7 +154,7 @@ export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'too
 
 /**
  * Updater for applications.
- * see {@link ApplicationSetup}∏
+ * see {@link ApplicationSetup}
  * @public
  */
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;

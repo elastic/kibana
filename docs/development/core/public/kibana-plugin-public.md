@@ -116,7 +116,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-public.appupdater.md)<!-- -->. |
-|  [AppUpdater](./kibana-plugin-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md)<!-- -->∏ |
+|  [AppUpdater](./kibana-plugin-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-public.chromehelpextensionmenucustomlink.md) |  |
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-public.chromehelpextensionmenudiscusslink.md) |  |

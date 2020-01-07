@@ -4,7 +4,7 @@
 
 ## AppUpdater type
 
-Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md)<!-- -->∏
+Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md)
 
 <b>Signature:</b>
 
