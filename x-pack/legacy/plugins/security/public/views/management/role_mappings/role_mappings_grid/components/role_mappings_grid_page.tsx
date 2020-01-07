@@ -35,6 +35,7 @@ import {
   PermissionDenied,
   SectionLoading,
 } from '../../components';
+import { documentationLinks } from '../../services/documentation_links';
 
 interface Props {
   roleMappingsAPI: RoleMappingsAPI;
@@ -140,7 +141,21 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.roleMappings.roleMappingDescription"
-                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider."
+                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        href={documentationLinks.getRoleMappingDocUrl()}
+                        external={true}
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="xpack.security.management.roleMappings.learnMoreLinkText"
+                          defaultMessage="Learn more."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </p>
             </EuiText>
@@ -322,6 +337,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         name: i18n.translate('xpack.security.management.roleMappings.enabledColumnName', {
           defaultMessage: 'Enabled',
         }),
+        sortable: true,
         render: (enabled: boolean) => {
           if (enabled) {
             return (

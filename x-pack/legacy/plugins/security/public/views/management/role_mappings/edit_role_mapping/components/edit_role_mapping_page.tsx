@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,6 +32,7 @@ import {
 import { ROLE_MAPPINGS_PATH } from '../../../management_urls';
 import { validateRoleMappingForSave } from '../services/role_mapping_validation';
 import { MappingInfoPanel } from './mapping_info_panel';
+import { documentationLinks } from '../../services/documentation_links';
 
 interface State {
   loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';
@@ -143,7 +145,21 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.roleMappingDescription"
-              defaultMessage="Use role mappings to control which roles are assigned to your users."
+              defaultMessage="Use role mappings to control which roles are assigned to your users. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={documentationLinks.getRoleMappingDocUrl()}
+                    external={true}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.editRoleMapping.learnMoreLinkText"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
         </EuiText>
