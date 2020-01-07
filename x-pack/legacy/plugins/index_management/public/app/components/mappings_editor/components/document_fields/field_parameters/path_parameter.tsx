@@ -35,7 +35,7 @@ const getSuggestedFields = (
     })
     .map(([id, field]) => ({
       id,
-      label: field.path,
+      label: field.path.join(' > '),
     }))
     .sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0));
 
@@ -46,7 +46,7 @@ const getDeserializer = (allFields: NormalizedFields['byId']): SerializerFunc =>
     return [
       {
         id: value,
-        label: allFields[value].path,
+        label: allFields[value].path.join(' > '),
       },
     ];
   }

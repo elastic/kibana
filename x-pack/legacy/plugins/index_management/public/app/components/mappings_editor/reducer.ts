@@ -97,7 +97,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   updatedFields.maxNestedDepth = Math.max(updatedFields.maxNestedDepth, nestedDepth);
 
   const { name } = field;
-  const path = parentField ? `${parentField.path}.${name}` : name;
+  const path = parentField ? [...parentField.path, name] : [name];
 
   const newField: NormalizedField = {
     id,
