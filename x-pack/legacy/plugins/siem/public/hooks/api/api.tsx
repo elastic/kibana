@@ -19,17 +19,19 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  * @param signal
  */
 export const getIndexPatterns = async (signal: AbortSignal): Promise<IndexPatternSavedObject[]> => {
-  // TODO (rylnd): refactor to savedObjects client request?
-  const response = await npStart.core.http.fetch<IndexPatternResponse>(
-    '/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000',
-    {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: { 'kbn-system-api': 'true' },
-      signal,
-      asResponse: true,
-    }
-  );
+  // TODO: Refactor to use savedObjects client
+  const response = await npStart.core.http.fetch<IndexPatternResponse>('/api/saved_objects/_find', {
+    query: {
+      type: 'index-pattern',
+      fields: 'title',
+      per_page: 10000,
+    },
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: { 'kbn-system-api': 'true' },
+    signal,
+    asResponse: true,
+  });
 
   await throwIfNotOk(response.response!);
   const results = response.body!;
