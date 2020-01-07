@@ -6,7 +6,7 @@
 
 import { EuiButtonIcon, IconSize } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import * as i18n from '../../components/timeline/body/translations';
 

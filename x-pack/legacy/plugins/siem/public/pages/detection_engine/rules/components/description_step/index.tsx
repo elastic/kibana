@@ -68,34 +68,35 @@ const MyEuiTextArea = styled(EuiTextArea)`
   height: 80px;
 `;
 
-export const StepRuleDescription = memo<StepRuleDescriptionProps>(
-  ({ data, direction = 'row', indexPatterns, schema }) => {
-    const kibana = useKibana();
-    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
+const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+  data,
+  direction = 'row',
+  indexPatterns,
+  schema,
+}) => {
+  const kibana = useKibana();
+  const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
-    const keys = Object.keys(schema);
-    const listItems = keys.reduce(
-      (acc: ListItems[], key: string) => [
-        ...acc,
-        ...buildListItems(data, pick(key, schema), filterManager, indexPatterns),
-      ],
-      []
-    );
-    return (
-      <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
-        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
-          <EuiFlexItemWidth
-            direction={direction}
-            key={`description-step-rule-${index}`}
-            grow={false}
-          >
-            <EuiDescriptionList listItems={chunckListItems} compressed />
-          </EuiFlexItemWidth>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-);
+  const keys = Object.keys(schema);
+  const listItems = keys.reduce(
+    (acc: ListItems[], key: string) => [
+      ...acc,
+      ...buildListItems(data, pick(key, schema), filterManager, indexPatterns),
+    ],
+    []
+  );
+  return (
+    <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
+      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
+        <EuiFlexItemWidth direction={direction} key={`description-step-rule-${index}`} grow={false}>
+          <EuiDescriptionList listItems={chunckListItems} compressed />
+        </EuiFlexItemWidth>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 interface ListItems {
   title: NonNullable<ReactNode>;
