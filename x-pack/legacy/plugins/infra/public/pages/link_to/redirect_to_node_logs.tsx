@@ -14,18 +14,22 @@ import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { InfraNodeType, SourceConfigurationFields } from '../../graphql/types';
+import { SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
 import { findInventoryFields } from '../../../common/inventory_models';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   sourceId?: string;
 }>;
 
-const getFieldByNodeType = (nodeType: InfraNodeType, fields: SourceConfigurationFields.Fields) => {
+const getFieldByNodeType = (
+  nodeType: InventoryItemType,
+  fields: SourceConfigurationFields.Fields
+) => {
   const inventoryFields = findInventoryFields(nodeType, fields);
   return inventoryFields.id;
 };
@@ -75,6 +79,6 @@ export const getNodeLogsUrl = ({
   time,
 }: {
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   time?: number;
 }) => [`#/link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');

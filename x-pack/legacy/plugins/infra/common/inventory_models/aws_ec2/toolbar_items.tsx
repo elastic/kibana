@@ -7,16 +7,16 @@
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { InfraSnapshotMetricType } from '../../graphql/types';
 import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { SnapshotMetricType } from '../types';
 
 export const AwsEC2ToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.cpu,
-    InfraSnapshotMetricType.rx,
-    InfraSnapshotMetricType.tx,
-    InfraSnapshotMetricType.diskIOReadBytes,
-    InfraSnapshotMetricType.diskIOWriteBytes,
+  const metricTypes: SnapshotMetricType[] = [
+    'cpu',
+    'rx',
+    'tx',
+    'diskIOReadBytes',
+    'diskIOWriteBytes',
   ];
   const groupByFields = [
     'cloud.availability_zone',

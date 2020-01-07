@@ -11,7 +11,6 @@ import { get, max, min } from 'lodash';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraSnapshotMetricType, InfraSnapshotNode, InfraNodeType } from '../../graphql/types';
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
@@ -22,10 +21,11 @@ import { ViewSwitcher } from '../waffle/view_switcher';
 import { TableView } from './table';
 import { SnapshotNode } from '../../../common/http_api/snapshot_api';
 import { convertIntervalToString } from '../../utils/convert_interval_to_string';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   options: InfraWaffleMapOptions;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   nodes: SnapshotNode[];
   loading: boolean;
   reload: () => void;
@@ -49,56 +49,56 @@ interface MetricFormatters {
 }
 
 const METRIC_FORMATTERS: MetricFormatters = {
-  [InfraSnapshotMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
-  [InfraSnapshotMetricType.cpu]: {
+  ['count']: { formatter: InfraFormatterType.number, template: '{{value}}' },
+  ['cpu']: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.memory]: {
+  ['memory']: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraSnapshotMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraSnapshotMetricType.logRate]: {
+  ['rx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  ['tx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  ['logRate']: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
-  [InfraSnapshotMetricType.diskIOReadBytes]: {
+  ['diskIOReadBytes']: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',
   },
-  [InfraSnapshotMetricType.diskIOWriteBytes]: {
+  ['diskIOWriteBytes']: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',
   },
-  [InfraSnapshotMetricType.s3BucketSize]: {
+  ['s3BucketSize']: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.s3TotalRequests]: {
+  ['s3TotalRequests']: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.s3NumberOfObjects]: {
+  ['s3NumberOfObjects']: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.s3UploadBytes]: {
+  ['s3UploadBytes']: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.s3DownloadBytes]: {
+  ['s3DownloadBytes']: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
-  [InfraSnapshotMetricType.sqsOldestMessage]: {
+  ['sqsOldestMessage']: {
     formatter: InfraFormatterType.number,
     template: '{{value}} seconds',
   },
 };
 
-const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {
+const calculateBoundsFromNodes = (nodes: SnapshotNode[]): InfraWaffleMapBounds => {
   const maxValues = nodes.map(node => node.metric.max);
   const minValues = nodes.map(node => node.metric.value);
   // if there is only one value then we need to set the bottom range to zero for min
@@ -211,11 +211,7 @@ export const NodesOverview = class extends React.Component<Props, {}> {
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
   private formatter = (val: string | number) => {
     const { metric } = this.props.options;
-    const metricFormatter = get(
-      METRIC_FORMATTERS,
-      metric.type,
-      METRIC_FORMATTERS[InfraSnapshotMetricType.count]
-    );
+    const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
     if (val == null) {
       return '';
     }

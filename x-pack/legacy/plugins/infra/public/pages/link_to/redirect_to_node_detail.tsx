@@ -8,12 +8,12 @@ import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { replaceMetricTimeInQueryString } from '../metrics/containers/with_metrics_time';
-import { InfraNodeType } from '../../graphql/types';
 import { getFromFromLocation, getToFromLocation } from './query_params';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 type RedirectToNodeDetailProps = RouteComponentProps<{
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
 }>;
 
 export const RedirectToNodeDetail = ({
@@ -36,7 +36,7 @@ export const getNodeDetailUrl = ({
   to,
   from,
 }: {
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   nodeId: string;
   to?: number;
   from?: number;

@@ -54,6 +54,10 @@ export const SnapshotGroupByRT = rt.array(
   })
 );
 
+export const SnapshotMetricInputRT = rt.type({
+  type: SnapshotMetricTypeRT,
+});
+
 export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
@@ -71,6 +75,8 @@ export const SnapshotRequestRT = rt.intersection([
   }),
 ]);
 
+export type SnapshotNodePath = rt.TypeOf<typeof SnapshotNodePathRT>;
+export type SnapshotMetricInput = rt.TypeOf<typeof SnapshotMetricInputRT>;
 export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
 export type SnapshotNodeMetric = rt.TypeOf<typeof SnapshotNodeMetricRT>;
 export type SnapshotGroupBy = rt.TypeOf<typeof SnapshotGroupByRT>;

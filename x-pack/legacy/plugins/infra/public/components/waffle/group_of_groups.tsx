@@ -7,7 +7,6 @@
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
@@ -15,6 +14,7 @@ import {
 } from '../../lib/lib';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;
@@ -22,7 +22,7 @@ interface Props {
   group: InfraWaffleMapGroupOfGroups;
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   currentTime: number;
 }
 

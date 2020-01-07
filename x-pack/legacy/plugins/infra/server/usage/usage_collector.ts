@@ -5,7 +5,6 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { InfraNodeType } from '../graphql/types';
 import { InventoryItemType } from '../../common/inventory_models/types';
 
 const KIBANA_REPORTING_TYPE = 'infraops';
@@ -38,10 +37,10 @@ export class UsageCollector {
     this.maybeInitializeBucket(bucket);
 
     switch (nodeType) {
-      case InfraNodeType.pod:
+      case 'pod':
         this.counters[bucket].infraopsKubernetes += 1;
         break;
-      case InfraNodeType.container:
+      case 'container':
         this.counters[bucket].infraopsDocker += 1;
         break;
       default:
