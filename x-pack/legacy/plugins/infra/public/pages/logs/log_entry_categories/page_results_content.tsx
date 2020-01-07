@@ -187,14 +187,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
                 timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
               />
-              {/* {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
-            <LogRateResults
-              isLoading={isLoading}
-              results={logEntryRate}
-              setTimeRange={handleChartTimeRangeChange}
-              timeRange={queryTimeRange.value}
-            />
-            */}
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
