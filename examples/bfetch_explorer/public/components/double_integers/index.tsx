@@ -34,6 +34,7 @@ interface ResultItem {
 
 const defaultNumbers = `2000
 300
+-1
 1000
 `;
 

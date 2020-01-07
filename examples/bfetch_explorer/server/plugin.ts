@@ -51,6 +51,8 @@ export class BfetchExplorerPlugin implements Plugin {
       '/bfetch_explorer/double',
       () => ({
         onBatchItem: async ({ num }) => {
+          // Validate inputs.
+          if (num < 0) throw new Error('Invalid number');
           // Wait number of specified milliseconds.
           await new Promise(r => setTimeout(r, num));
           // Double the number and send it back.
