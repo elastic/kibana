@@ -22,7 +22,13 @@ import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+import { plugin } from './np_ready';
+import { DevToolsSetup } from '../../../../plugins/dev_tools/public';
+import { HomePublicPluginSetup } from '../../../../plugins/home/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+
 export interface XPluginSet {
+  usageCollection: UsageCollectionSetup;
   dev_tools: DevToolsSetup;
   home: HomePublicPluginSetup;
   __LEGACY: {
@@ -31,10 +37,6 @@ export interface XPluginSet {
     category: FeatureCatalogueCategory;
   };
 }
-
-import { plugin } from './np_ready';
-import { DevToolsSetup } from '../../../../plugins/dev_tools/public';
-import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 
 const pluginInstance = plugin({} as any);
 

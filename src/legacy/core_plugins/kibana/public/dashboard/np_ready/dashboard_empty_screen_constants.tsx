@@ -19,40 +19,30 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const addVisualizationDescription1: string = i18n.translate(
-  'kbn.dashboard.addVisualizationDescription1',
+/** READONLY VIEW CONSTANTS **/
+export const emptyDashboardTitle: string = i18n.translate('kbn.dashboard.emptyDashboardTitle', {
+  defaultMessage: 'This dashboard is empty.',
+});
+export const emptyDashboardAdditionalPrivilege = i18n.translate(
+  'kbn.dashboard.emptyDashboardAdditionalPrivilege',
   {
-    defaultMessage: 'Click the ',
+    defaultMessage: 'You need additional privileges to edit this dashboard.',
   }
 );
-export const addVisualizationDescription2: string = i18n.translate(
-  'kbn.dashboard.addVisualizationDescription2',
-  {
-    defaultMessage: ' button in the menu bar above to add a visualization to the dashboard.',
-  }
-);
-export const addVisualizationLinkText: string = i18n.translate(
-  'kbn.dashboard.addVisualizationLinkText',
-  {
-    defaultMessage: 'Add',
-  }
-);
-export const addVisualizationLinkAriaLabel: string = i18n.translate(
-  'kbn.dashboard.addVisualizationLinkAriaLabel',
-  {
-    defaultMessage: 'Add visualization',
-  }
-);
+/** VIEW MODE CONSTANTS **/
+export const fillDashboardTitle: string = i18n.translate('kbn.dashboard.fillDashboardTitle', {
+  defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
+});
 export const howToStartWorkingOnNewDashboardDescription1: string = i18n.translate(
   'kbn.dashboard.howToStartWorkingOnNewDashboardDescription1',
   {
-    defaultMessage: 'Click the ',
+    defaultMessage: 'Click',
   }
 );
 export const howToStartWorkingOnNewDashboardDescription2: string = i18n.translate(
   'kbn.dashboard.howToStartWorkingOnNewDashboardDescription2',
   {
-    defaultMessage: ' button in the menu bar above to start working on your new dashboard.',
+    defaultMessage: 'in the menu bar above to start adding panels.',
   }
 );
 export const howToStartWorkingOnNewDashboardEditLinkText: string = i18n.translate(
@@ -67,18 +57,34 @@ export const howToStartWorkingOnNewDashboardEditLinkAriaLabel: string = i18n.tra
     defaultMessage: 'Edit dashboard',
   }
 );
-export const fillDashboardTitle: string = i18n.translate('kbn.dashboard.fillDashboardTitle', {
-  defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
-});
-export const visualizeAppLinkTest: string = i18n.translate(
-  'kbn.dashboard.visitVisualizeAppLinkText',
+/** EDIT MODE CONSTANTS **/
+export const addExistingVisualizationLinkText: string = i18n.translate(
+  'kbn.dashboard.addExistingVisualizationLinkText',
   {
-    defaultMessage: 'visit the Visualize app',
+    defaultMessage: 'Add an existing',
+  }
+);
+export const addExistingVisualizationLinkAriaLabel: string = i18n.translate(
+  'kbn.dashboard.addVisualizationLinkAriaLabel',
+  {
+    defaultMessage: 'Add an existing visualization',
+  }
+);
+export const addNewVisualizationDescription: string = i18n.translate(
+  'kbn.dashboard.addNewVisualizationText',
+  {
+    defaultMessage: 'or new object to this dashboard',
   }
 );
 export const createNewVisualizationButton: string = i18n.translate(
   'kbn.dashboard.createNewVisualizationButton',
   {
     defaultMessage: 'Create new',
+  }
+);
+export const createNewVisualizationButtonAriaLabel: string = i18n.translate(
+  'kbn.dashboard.createNewVisualizationButtonAriaLabel',
+  {
+    defaultMessage: 'Create new visualization button',
   }
 );

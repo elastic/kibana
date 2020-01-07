@@ -21,7 +21,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getPageObjects }: FtrProviderContext) {
-  const { visualBuilder, visualize } = getPageObjects(['visualBuilder', 'visualize']);
+  const { visualBuilder, visualize, visChart } = getPageObjects([
+    'visualBuilder',
+    'visualize',
+    'visChart',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
     describe('table', () => {
@@ -32,7 +36,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.checkTableTabIsPresent();
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
-        await visualize.waitForVisualizationRenderingStabilized();
+        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       it('should display correct values on changing group by field and column name', async () => {

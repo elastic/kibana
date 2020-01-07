@@ -3,53 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
-export const SET_BASE_PATH = 'SET_BASE_PATH';
-export const REFRESH_APP = 'REFRESH_APP';
+import { createAction } from 'redux-actions';
 
 export interface PopoverState {
   id: string;
   open: boolean;
 }
 
-interface SetBasePathAction {
-  type: typeof SET_BASE_PATH;
-  payload: string;
-}
+export type UiPayload = PopoverState & string & number & Map<string, string[]>;
 
-interface SetIntegrationPopoverAction {
-  type: typeof SET_INTEGRATION_POPOVER_STATE;
-  payload: PopoverState;
-}
+export const setBasePath = createAction<string>('SET BASE PATH');
 
-interface TriggerAppRefreshAction {
-  type: typeof REFRESH_APP;
-  payload: number;
-}
+export const triggerAppRefresh = createAction<number>('REFRESH APP');
 
-export type UiActionTypes =
-  | SetIntegrationPopoverAction
-  | SetBasePathAction
-  | TriggerAppRefreshAction;
-
-export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
-  return {
-    type: SET_INTEGRATION_POPOVER_STATE,
-    payload: popoverState,
-  };
-}
-
-export function setBasePath(basePath: string): SetBasePathAction {
-  return {
-    type: SET_BASE_PATH,
-    payload: basePath,
-  };
-}
-
-export function triggerAppRefresh(refreshTime: number): TriggerAppRefreshAction {
-  return {
-    type: REFRESH_APP,
-    payload: refreshTime,
-  };
-}
+export const toggleIntegrationsPopover = createAction<PopoverState>(
+  'TOGGLE INTEGRATION POPOVER STATE'
+);
