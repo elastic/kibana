@@ -17,12 +17,12 @@ import { DiagnosticDot } from './diagnostic_dot';
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
     <Provider store={store}>
-      <Diagnostic />
+      <Resolver />
     </Provider>
   );
 });
 
-const Diagnostic = styled(
+const Resolver = styled(
   React.memo(({ className }: { className?: string }) => {
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
 
