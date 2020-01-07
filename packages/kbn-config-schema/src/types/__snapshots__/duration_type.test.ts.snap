@@ -6,6 +6,8 @@ exports[`#defaultValue can be a number 1`] = `"PT0.6S"`;
 
 exports[`#defaultValue can be a string 1`] = `"PT1H"`;
 
+exports[`#defaultValue can be a string-formatted number 1`] = `"PT0.6S"`;
+
 exports[`includes namespace in failure 1`] = `"[foo-namespace]: expected value of type [moment.Duration] but got [undefined]"`;
 
 exports[`is required by default 1`] = `"expected value of type [moment.Duration] but got [undefined]"`;

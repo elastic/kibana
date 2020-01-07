@@ -21,14 +21,20 @@ import { Duration, duration as momentDuration, DurationInputArg2, isDuration } f
 export { Duration, isDuration };
 
 const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
+const numberRegex = /^(0|[1-9][0-9]*)$/;
 
 function stringToDuration(text: string) {
   const result = timeFormatRegex.exec(text);
   if (!result) {
-    throw new Error(
-      `Failed to parse [${text}] as time value. ` +
-        `Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')`
-    );
+    const numberResult = numberRegex.exec(text);
+    if (!numberResult) {
+      throw new Error(
+        `Failed to parse [${text}] as time value. ` +
+          `Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')`
+      );
+    }
+    const count = parseInt(numberResult[1], 0);
+    return momentDuration(count, 'ms');
   }
 
   const count = parseInt(result[1], 0);

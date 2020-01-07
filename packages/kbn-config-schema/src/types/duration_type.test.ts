@@ -51,6 +51,14 @@ describe('#defaultValue', () => {
     ).toMatchSnapshot();
   });
 
+  test('can be a string-formatted number', () => {
+    expect(
+      duration({
+        defaultValue: '600',
+      }).validate(undefined)
+    ).toMatchSnapshot();
+  });
+
   test('can be a number', () => {
     expect(
       duration({
