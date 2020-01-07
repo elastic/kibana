@@ -160,7 +160,7 @@ export function buildFieldList(
   mappings: MappingResult,
   fieldDescriptors: FieldDescriptor[]
 ): Field[] {
-  const aliasMap = Object.entries(mappings[indexPattern.attributes.title].mappings.properties)
+  const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
     .map(([name, v]) => ({ ...v, name }))
     .filter(f => f.type === 'alias')
     .reduce((acc, f) => {
