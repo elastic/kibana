@@ -7,15 +7,23 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { KibanaAssetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
-import { Field } from '../../fields/field';
 import { loadFieldsFromYaml } from '../../elasticsearch/template/install';
 import * as Registry from '../../../registry';
+
+export interface Field {
+  name: string;
+  type: string;
+  required?: boolean;
+  description?: string;
+  fields?: Field[];
+}
 
 interface IndexPatternField extends Field {
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues: boolean;
 }
+
 export async function installIndexPatterns(
   pkgkey: string,
   savedObjectsClient: SavedObjectsClientContract
@@ -79,7 +87,7 @@ const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
   return transformedFields;
 };
 
-const dedupFields = (fields: Field[]) => {
+export const dedupFields = (fields: Field[]) => {
   const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
     if (!acc[field.name]) {
       acc[field.name] = field;
@@ -90,7 +98,7 @@ const dedupFields = (fields: Field[]) => {
   return Object.values(uniqueObj);
 };
 
-const transformField = (field: Field): IndexPatternField => {
+export const transformField = (field: Field): IndexPatternField => {
   const newField = { ...field };
 
   // map this type to field type
@@ -112,7 +120,7 @@ const transformField = (field: Field): IndexPatternField => {
  *
  * flattens fields and renames them with a path of the parent names
  */
-const flattenFields = (fields: Field[]): Field[] =>
+export const flattenFields = (fields: Field[]): Field[] =>
   fields.reduce<Field[]>((acc, field) => {
     if (field.fields?.length) {
       const flattenedFields = flattenFields(field.fields);
@@ -125,6 +133,7 @@ const flattenFields = (fields: Field[]): Field[] =>
     return acc;
   }, []);
 
+/* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
 interface TypeMap {
   [key: string]: string;
 }
