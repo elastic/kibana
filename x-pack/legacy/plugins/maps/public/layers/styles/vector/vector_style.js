@@ -38,6 +38,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
@@ -100,13 +101,14 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
       VECTOR_STYLES.LABEL_COLOR
     );
-    this._labelBorderWidthStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_WIDTH],
-      VECTOR_STYLES.LABEL_BORDER_WIDTH
-    );
     this._labelBorderColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
       VECTOR_STYLES.LABEL_BORDER_COLOR
+    );
+    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE],
+      VECTOR_STYLES.LABEL_BORDER_SIZE,
+      this._labelSizeStyleProperty
     );
   }
 
@@ -120,8 +122,8 @@ export class VectorStyle extends AbstractStyle {
       this._labelStyleProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
-      this._labelBorderWidthStyleProperty,
       this._labelBorderColorStyleProperty,
+      this._labelBorderSizeStyleProperty,
     ];
   }
 
@@ -548,7 +550,7 @@ export class VectorStyle extends AbstractStyle {
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
-    this._labelBorderWidthStyleProperty.syncLabelBorderWidthWithMb(textLayerId, mbMap);
+    this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);
     this._labelBorderColorStyleProperty.syncLabelBorderColorWithMb(textLayerId, mbMap);
   }
 

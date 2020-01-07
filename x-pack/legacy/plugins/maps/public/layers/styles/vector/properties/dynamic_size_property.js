@@ -5,7 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getComputedFieldName } from '../style_util';
+
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
@@ -76,7 +76,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
-      const targetName = getComputedFieldName(VECTOR_STYLES.ICON_SIZE, this._options.field.name);
+      const targetName = this.getComputedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -113,15 +113,10 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
-  syncLabelBorderWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
-    mbMap.setPaintProperty(mbLayerId, 'text-halo-width', lineWidth);
-  }
-
   _getMbSize() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({
-        targetName: getComputedFieldName(this._styleName, this._options.field.name),
+        targetName: this.getComputedFieldName(),
         minSize: this._options.minSize,
         maxSize: this._options.maxSize,
       });

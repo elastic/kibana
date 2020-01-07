@@ -46,7 +46,7 @@ export function getVectorStyleLabel(styleName) {
       return i18n.translate('xpack.maps.styles.vector.labelBorderColorLabel', {
         defaultMessage: 'Label border color',
       });
-    case VECTOR_STYLES.LABEL_BORDER_WIDTH:
+    case VECTOR_STYLES.LABEL_BORDER_SIZE:
       return i18n.translate('xpack.maps.styles.vector.labelBorderWidthLabel', {
         defaultMessage: 'Label border width',
       });

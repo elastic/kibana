@@ -16,6 +16,14 @@ export const MAX_SIZE = 64;
 export const DEFAULT_MIN_SIZE = 4;
 export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
+export const DEFAULT_LABEL_SIZE = 14;
+
+export const LABEL_BORDER_SIZES = {
+  NONE: 'NONE',
+  SMALL: 'SMALL',
+  MEDIUM: 'MEDIUM',
+  LARGE: 'LARGE',
+};
 
 export const VECTOR_STYLES = {
   SYMBOL: 'symbol',
@@ -28,7 +36,7 @@ export const VECTOR_STYLES = {
   LABEL_COLOR: 'labelColor',
   LABEL_SIZE: 'labelSize',
   LABEL_BORDER_COLOR: 'labelBorderColor',
-  LABEL_BORDER_WIDTH: 'labelBorderWidth',
+  LABEL_BORDER_SIZE: 'labelBorderSize',
 };
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
@@ -45,6 +53,11 @@ export function getDefaultProperties(mapColors = []) {
       options: {
         symbolizeAs: SYMBOLIZE_AS_CIRCLE,
         symbolId: DEFAULT_ICON,
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
+      options: {
+        size: LABEL_BORDER_SIZES.SMALL,
       },
     },
   };
@@ -105,19 +118,13 @@ export function getDefaultStaticProperties(mapColors = []) {
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 14,
+        size: DEFAULT_LABEL_SIZE,
       },
     },
     [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: isDarkMode ? '#000000' : '#FFFFFF',
-      },
-    },
-    [VECTOR_STYLES.LABEL_BORDER_WIDTH]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
-      options: {
-        size: 2,
       },
     },
   };
@@ -214,18 +221,6 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
-        field: undefined,
-        fieldMetaOptions: {
-          isEnabled: true,
-          sigma: DEFAULT_SIGMA,
-        },
-      },
-    },
-    [VECTOR_STYLES.LABEL_BORDER_WIDTH]: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
-      options: {
-        minSize: 1,
-        maxSize: 10,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
