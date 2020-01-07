@@ -34,7 +34,6 @@ export interface ServerFacade {
   config: Legacy.Server['config'];
   info: Legacy.Server['info'];
   log: Legacy.Server['log'];
-  newPlatform: Legacy.Server['newPlatform'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
     security: LegacyPlugins['security'];
@@ -96,7 +95,6 @@ export const reporting = (kibana: any) => {
         config: server.config,
         info: server.info,
         route: server.route.bind(server),
-        newPlatform: server.newPlatform,
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
           xpack_main: server.plugins.xpack_main,
