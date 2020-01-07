@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { OverviewHostStats } from '.';
 import { mockData } from './mock';

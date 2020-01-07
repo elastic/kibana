@@ -5,7 +5,7 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { isChecked, isFailure, isJobLoading, JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';

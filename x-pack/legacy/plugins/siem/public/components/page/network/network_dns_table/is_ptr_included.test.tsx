@@ -5,7 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { FlowDirection } from '../../../../graphql/types';
 

@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';

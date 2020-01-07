@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { useMountAppended } from '../../../../../utils/use_mount_appended';

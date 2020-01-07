@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';

@@ -6,7 +6,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';

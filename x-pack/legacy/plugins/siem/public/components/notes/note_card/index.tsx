@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { NoteCardBody } from './note_card_body';

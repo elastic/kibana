@@ -10,7 +10,7 @@ import {
   getRowItemDraggable,
   OverflowFieldComponent,
 } from './helpers';
-import * as React from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';

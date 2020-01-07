@@ -116,7 +116,7 @@ export const Body = React.memo<BodyProps>(
           <EventsTable
             data-test-subj="events-table"
             // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            style={{ minWidth: columnWidths + 'px' }}
+            style={{ minWidth: `${columnWidths}px` }}
           >
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}

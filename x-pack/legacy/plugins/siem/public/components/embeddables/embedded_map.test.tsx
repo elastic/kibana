@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';

@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 
 import { useUiSetting$ } from '../../lib/kibana';
 

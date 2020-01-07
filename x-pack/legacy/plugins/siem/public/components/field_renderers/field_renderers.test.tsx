@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
 import { TestProviders } from '../../mock';

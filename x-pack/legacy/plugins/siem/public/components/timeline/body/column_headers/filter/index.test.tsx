@@ -5,7 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { ColumnHeaderType } from '../column_header';
 import { defaultHeaders } from '../default_headers';

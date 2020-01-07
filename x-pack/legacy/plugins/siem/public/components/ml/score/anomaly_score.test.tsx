@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';

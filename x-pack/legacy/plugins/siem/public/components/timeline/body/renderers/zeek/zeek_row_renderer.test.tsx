@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';

@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';

@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { defaultHeaders } from '../../../../../mock';
 import { ColumnHeader } from '../column_header';

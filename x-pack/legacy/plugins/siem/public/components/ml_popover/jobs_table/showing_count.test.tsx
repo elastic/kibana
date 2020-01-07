@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { ShowingCountComponent } from './showing_count';
 
 describe('ShowingCount', () => {

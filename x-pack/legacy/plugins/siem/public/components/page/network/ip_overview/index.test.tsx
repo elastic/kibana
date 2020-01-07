@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../../graphql/types';

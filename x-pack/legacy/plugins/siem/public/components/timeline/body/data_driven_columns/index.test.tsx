@@ -5,7 +5,7 @@
  */
 import { shallow } from 'enzyme';
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockTimelineData } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';

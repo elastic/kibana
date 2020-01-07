@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';

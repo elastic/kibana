@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { defaultHeaders } from './default_headers';

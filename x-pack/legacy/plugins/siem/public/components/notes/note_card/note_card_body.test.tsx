@@ -5,7 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 

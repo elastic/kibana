@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import {

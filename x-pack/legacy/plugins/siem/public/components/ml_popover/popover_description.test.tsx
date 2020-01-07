@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { PopoverDescriptionComponent } from './popover_description';
 
 describe('JobsTableFilters', () => {

@@ -5,7 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 
