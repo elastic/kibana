@@ -11,11 +11,12 @@ import { UrlState } from '../util/url_state';
 import { JobSelection } from '../components/job_selector/use_job_selection';
 
 import { ExplorerState } from '../explorer/reducers';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
 
 declare interface ExplorerProps {
-  annotationsRefresh: boolean;
   explorerState: ExplorerState;
   showCharts: boolean;
+  setSelectedCells: (swimlaneSelectedCells: AppStateSelectedCells) => void;
 }
 
 export const Explorer: FC<ExplorerProps>;

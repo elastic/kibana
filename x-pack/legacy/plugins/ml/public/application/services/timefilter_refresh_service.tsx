@@ -6,4 +6,10 @@
 
 import { Subject } from 'rxjs';
 
-export const mlTimefilterRefresh$ = new Subject();
+interface MlTimeFilterUpdate {
+  lastRefresh: number;
+  timeRange: { start: string; end: string };
+}
+
+export const mlTimefilterRefresh$ = new Subject<MlTimeFilterUpdate>();
+export const mlTimefilterTimeChange$ = new Subject<MlTimeFilterUpdate>();

@@ -1084,6 +1084,7 @@ export class TimeSeriesExplorer extends React.Component {
     ) {
       const fullRefresh =
         previousProps === undefined ||
+        !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         !isEqual(previousProps.selectedJobIds, this.props.selectedJobIds);
@@ -1154,7 +1155,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   render() {
-    const { bounds, dateFormatTz, selectedDetectorIndex, selectedJobIds } = this.props;
+    const { bounds, dateFormatTz, lastRefresh, selectedDetectorIndex, selectedJobIds } = this.props;
 
     const {
       autoZoomDuration,
@@ -1253,12 +1254,14 @@ export class TimeSeriesExplorer extends React.Component {
       isEqual(this.previousChartProps.focusAnnotationData, chartProps.focusAnnotationData) &&
       this.previousShowAnnotations === showAnnotations &&
       this.previousShowForecast === showForecast &&
-      this.previousShowModelBounds === showModelBounds
+      this.previousShowModelBounds === showModelBounds &&
+      this.previousLastRefresh === lastRefresh
     ) {
       renderFocusChartOnly = false;
     }
 
     this.previousChartProps = chartProps;
+    this.previousLastRefresh = lastRefresh;
     this.previousShowAnnotations = showAnnotations;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;

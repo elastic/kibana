@@ -77,4 +77,5 @@ export const annotation$ = new BehaviorSubject<AnnotationState>(null);
   Instead of passing around callbacks or deeply nested props, it can be imported for both
   angularjs controllers/directives and React components.
 */
-export const annotationsRefresh$ = new BehaviorSubject(false);
+export const annotationsRefresh$ = new BehaviorSubject(Date.now());
+export const annotationsRefreshed = () => annotationsRefresh$.next(Date.now());

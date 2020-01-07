@@ -7,7 +7,7 @@
 import mockAnnotations from '../components/annotations/annotations_table/__mocks__/mock_annotations.json';
 
 import { Annotation } from '../../../common/types/annotations';
-import { annotation$, annotationsRefresh$ } from './annotations_service';
+import { annotation$, annotationsRefresh$, annotationsRefreshed } from './annotations_service';
 
 describe('annotations_service', () => {
   test('annotation$', () => {
@@ -34,7 +34,7 @@ describe('annotations_service', () => {
 
     expect(subscriber.mock.calls).toHaveLength(1);
 
-    annotationsRefresh$.next(true);
+    annotationsRefreshed();
 
     expect(subscriber.mock.calls).toHaveLength(2);
   });

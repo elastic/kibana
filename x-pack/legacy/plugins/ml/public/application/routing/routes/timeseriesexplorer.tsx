@@ -7,7 +7,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { Subscription } from 'rxjs';
 
 // @ts-ignore
 import queryString from 'query-string';
@@ -17,12 +16,11 @@ import { timefilter } from 'ui/timefilter';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
+import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { annotationsRefresh$ } from '../../services/annotations_service';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
@@ -74,22 +72,26 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
 }) => {
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
-
   const [lastRefresh, setLastRefresh] = useState(0);
-  const refreshHandler = () => setLastRefresh(Date.now());
+
+  const refresh = useRefresh();
+  useEffect(() => {
+    if (refresh !== undefined) {
+      setLastRefresh(refresh?.lastRefresh);
+
+      if (refresh.timeRange !== undefined) {
+        const { start, end } = refresh.timeRange;
+        setGlobalState('time', {
+          from: start,
+          to: end,
+        });
+      }
+    }
+  }, [refresh?.lastRefresh]);
 
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-
-    const subscriptions = new Subscription();
-
-    subscriptions.add(annotationsRefresh$.subscribe(refreshHandler));
-    subscriptions.add(mlTimefilterRefresh$.subscribe(refreshHandler));
-
-    subscriptions.add(timefilter.getTimeUpdate$().subscribe(refreshHandler));
-
-    return () => subscriptions.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -100,6 +102,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
       });
     }
   }, [JSON.stringify(globalState?.time)]);
+
   let bounds;
   if (globalState?.time !== undefined) {
     bounds = {

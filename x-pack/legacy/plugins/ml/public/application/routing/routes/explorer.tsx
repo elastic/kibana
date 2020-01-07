@@ -5,9 +5,8 @@
  */
 
 import moment from 'moment';
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { merge, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,14 +15,13 @@ import { timefilter } from 'ui/timefilter';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
+import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
 import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
-import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
@@ -72,8 +70,20 @@ interface ExplorerUrlStateManagerProps {
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const [, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
+  const [lastRefresh, setLastRefresh] = useState(0);
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
+
+  const refresh = useRefresh();
+  useEffect(() => {
+    if (refresh !== undefined) {
+      setLastRefresh(refresh?.lastRefresh);
+      const activeBounds = timefilter.getActiveBounds();
+      if (activeBounds !== undefined) {
+        explorerService.setBounds(activeBounds);
+      }
+    }
+  }, [refresh?.lastRefresh]);
 
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
@@ -101,24 +111,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(jobIds)]);
 
-  useEffect(() => {
-    const subscriptions = new Subscription();
-
-    // Refresh all the data when the time range is altered.
-    subscriptions.add(
-      merge(mlTimefilterRefresh$, timefilter.getFetch$()).subscribe(() => {
-        const activeBounds = timefilter.getActiveBounds();
-        if (activeBounds !== undefined) {
-          explorerService.setBounds(activeBounds);
-        }
-      })
-    );
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, []);
-
   const [explorerData, loadExplorerData] = useExplorerData();
   useEffect(() => {
     if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
@@ -136,7 +128,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(explorerAppState)]);
 
-  const annotationsRefresh = useObservable(annotationsRefresh$);
   const explorerState = useObservable(explorerService.state$);
 
   const [showCharts] = useShowCharts();
@@ -151,6 +142,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const loadExplorerDataConfig =
     (explorerState !== undefined && {
       bounds: explorerState.bounds,
+      lastRefresh,
       influencersFilterQuery: explorerState.influencersFilterQuery,
       noInfluencersConfigured: explorerState.noInfluencersConfigured,
       selectedCells,
@@ -167,9 +159,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   if (
-    annotationsRefresh === undefined ||
     explorerState === undefined ||
     jobIds.length === 0 ||
+    refresh === undefined ||
     showCharts === undefined
   ) {
     return null;
@@ -179,7 +171,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     <div className="ml-explorer">
       <Explorer
         {...{
-          annotationsRefresh,
           explorerState,
           setSelectedCells,
           showCharts,

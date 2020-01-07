@@ -10,7 +10,10 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 
-import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import {
+  mlTimefilterRefresh$,
+  mlTimefilterTimeChange$,
+} from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
 
 interface Duration {
@@ -74,6 +77,7 @@ export const TopNav: FC = () => {
     timefilter.setTime(newTime);
     setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges());
+    mlTimefilterTimeChange$.next({ lastRefresh: Date.now(), timeRange: { start, end } });
   }
 
   function updateInterval({
@@ -104,7 +108,9 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={timeRange => {
+              mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
+            }}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

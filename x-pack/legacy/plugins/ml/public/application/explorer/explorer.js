@@ -25,7 +25,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { annotationsRefresh$ } from '../services/annotations_service';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import {
@@ -95,9 +94,8 @@ const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
 
 export class Explorer extends React.Component {
   static propTypes = {
-    annotationsRefresh: PropTypes.bool,
     explorerState: PropTypes.object.isRequired,
-    explorer: PropTypes.object,
+    setSelectedCells: PropTypes.func.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
 
@@ -171,13 +169,6 @@ export class Explorer extends React.Component {
 
   resetCache() {
     this.anomaliesTablePreviousArgs = null;
-  }
-
-  componentDidUpdate() {
-    // TODO migrate annotations update
-    if (this.props.annotationsRefresh === true) {
-      annotationsRefresh$.next(false);
-    }
   }
 
   viewByChangeHandler = e => explorerService.setViewBySwimlaneFieldName(e.target.value);
