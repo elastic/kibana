@@ -25,10 +25,6 @@ jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},
-    METRIC_TYPE: {
-      LOADED: 'loaded',
-      CLICK: 'click',
-    },
   }),
 }));
 

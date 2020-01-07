@@ -16,5 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
-export * from './np_ready/dashboard_constants';
+// Core will be looking for this when loading our plugin in the new platform
+export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = () => {
+  return new DiscoverPlugin();
+};
+
+// Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
+export const pluginInstance = plugin({} as PluginInitializerContext);
+(async () => {
+  pluginInstance.setup(npSetup.core, npSetup.plugins);
+  pluginInstance.start(npStart.core, npStart.plugins);
+})();

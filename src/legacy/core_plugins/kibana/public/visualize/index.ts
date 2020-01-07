@@ -17,53 +17,7 @@
  * under the License.
  */
 
-import 'ui/collapsible_sidebar'; // used in default editor
-import 'ui/vis/editors/default/sidebar';
-
-import {
-  IPrivate,
-  legacyChrome,
-  npSetup,
-  npStart,
-  VisEditorTypesRegistryProvider,
-} from './legacy_imports';
-import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-
 export * from './np_ready/visualize_constants';
 export { showNewVisModal } from './np_ready/wizard';
-
-/**
- * Get dependencies relying on the global angular context.
- * They also have to get resolved together with the legacy imports above
- */
-async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
-  const injector = await legacyChrome.dangerouslyGetActiveInjector();
-
-  const Private = injector.get<IPrivate>('Private');
-
-  const editorTypes = Private(VisEditorTypesRegistryProvider);
-
-  return {
-    legacyChrome,
-    editorTypes,
-  };
-}
-
-(() => {
-  const instance = new VisualizePlugin();
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      getAngularDependencies,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    embeddables,
-    visualizations,
-  });
-})();
 
 export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
