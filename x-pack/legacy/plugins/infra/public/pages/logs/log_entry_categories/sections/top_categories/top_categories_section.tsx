@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -13,15 +13,24 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
+import { DatasetsSelector } from './datasets_selector';
 import { TopCategoriesTable } from './top_categories_table';
 
 export const TopCategoriesSection: React.FunctionComponent<{
+  availableDatasets: string[];
+  isLoading: boolean;
   jobId: string;
   onRequestRecreateMlJob: () => void;
   timeRange: TimeRange;
-  isLoading: boolean;
   topCategories: LogEntryCategory[];
-}> = ({ isLoading, jobId, onRequestRecreateMlJob, timeRange, topCategories }) => {
+}> = ({
+  availableDatasets,
+  isLoading,
+  jobId,
+  onRequestRecreateMlJob,
+  timeRange,
+  topCategories,
+}) => {
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -38,6 +47,8 @@ export const TopCategoriesSection: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <DatasetsSelector availableDatasets={availableDatasets} />
+      <EuiSpacer />
       <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
         <TopCategoriesTable timeRange={timeRange} topCategories={topCategories} />
       </LoadingOverlayWrapper>

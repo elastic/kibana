@@ -15,23 +15,18 @@ import {
   EuiPageBody,
   // EuiText,
 } from '@elastic/eui';
-// import numeral from '@elastic/numeral';
-// import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
-// import { bucketSpan } from '../../../../common/log_analysis';
-// import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 // import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 // import { FirstUseCallout } from './first_use';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
-// import { useLogEntryRateResults } from './use_log_entry_rate_results';
 import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
@@ -90,8 +85,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   );
 
   const {
+    getLogEntryCategoryDatasets,
     getTopLogEntryCategories,
-    isLoading,
+    isLoadingTopLogEntryCategories,
+    logEntryCategoryDatasets,
     topLogEntryCategories,
   } = useLogEntryCategoriesResults({
     sourceId,
@@ -153,8 +150,9 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
   useEffect(() => {
+    getLogEntryCategoryDatasets();
     getTopLogEntryCategories();
-  }, [getTopLogEntryCategories, queryTimeRange.lastChangedTime]);
+  }, [getLogEntryCategoryDatasets, getTopLogEntryCategories, queryTimeRange.lastChangedTime]);
 
   useInterval(() => {
     fetchJobStatus();
@@ -194,7 +192,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="l">
               <TopCategoriesSection
-                isLoading={isLoading}
+                availableDatasets={logEntryCategoryDatasets}
+                isLoading={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}
                 onRequestRecreateMlJob={viewSetupForReconfiguration}
                 timeRange={queryTimeRange.value}
@@ -229,23 +228,6 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
     })
   ).valueOf(),
 });
-
-// /**
-//  * This function takes the current time range in ms,
-//  * works out the bucket interval we'd need to always
-//  * display 100 data points, and then takes that new
-//  * value and works out the nearest multiple of
-//  * 900000 (15 minutes) to it, so that we don't end up with
-//  * jaggy bucket boundaries between the ML buckets and our
-//  * aggregation buckets.
-//  */
-// const getBucketDuration = (startTime: number, endTime: number) => {
-//   const msRange = moment(endTime).diff(moment(startTime));
-//   const bucketIntervalInMs = msRange / 100;
-//   const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
-//   const roundedResult = parseInt(Number(result).toFixed(0), 10);
-//   return roundedResult < bucketSpan ? bucketSpan : roundedResult;
-// };
 
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"

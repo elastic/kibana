@@ -6,11 +6,16 @@
 
 import { useMemo, useState } from 'react';
 
-import { GetLogEntryCategoriesSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
+import {
+  GetLogEntryCategoriesSuccessResponsePayload,
+  GetLogEntryCategoryDatasetsSuccessResponsePayload,
+} from '../../../../common/http_api/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
+import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
+type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
 
 export const useLogEntryCategoriesResults = ({
   sourceId,
@@ -18,16 +23,19 @@ export const useLogEntryCategoriesResults = ({
   endTime,
   categoriesCount,
   onGetTopLogEntryCategoriesError,
-}: // bucketDuration = 15 * 60 * 1000,
-{
+  onGetLogEntryCategoryDatasetsError,
+}: {
   sourceId: string;
   startTime: number;
   endTime: number;
   categoriesCount: number;
   onGetTopLogEntryCategoriesError?: (error: Error) => void;
-  // bucketDuration: number;
+  onGetLogEntryCategoryDatasetsError?: (error: Error) => void;
 }) => {
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
+  const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] = useState<
+    LogEntryCategoryDatasets
+  >([]);
 
   const [getTopLogEntryCategoriesRequest, getTopLogEntryCategories] = useTrackedPromise(
     {
@@ -47,13 +55,46 @@ export const useLogEntryCategoriesResults = ({
     [sourceId, startTime, endTime, categoriesCount]
   );
 
-  const isLoading = useMemo(() => getTopLogEntryCategoriesRequest.state === 'pending', [
-    getTopLogEntryCategoriesRequest.state,
-  ]);
+  const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callGetLogEntryCategoryDatasetsAPI(sourceId, startTime, endTime);
+      },
+      onResolve: ({ data: { datasets } }) => {
+        setLogEntryCategoryDatasets(datasets);
+      },
+      onReject: error => {
+        if (error instanceof Error && onGetLogEntryCategoryDatasetsError) {
+          onGetLogEntryCategoryDatasetsError(error);
+        }
+      },
+    },
+    [sourceId, startTime, endTime, categoriesCount]
+  );
+
+  const isLoadingTopLogEntryCategories = useMemo(
+    () => getTopLogEntryCategoriesRequest.state === 'pending',
+    [getTopLogEntryCategoriesRequest.state]
+  );
+
+  const isLoadingLogEntryCategoryDatasets = useMemo(
+    () => getLogEntryCategoryDatasetsRequest.state === 'pending',
+    [getLogEntryCategoryDatasetsRequest.state]
+  );
+
+  const isLoading = useMemo(
+    () => isLoadingTopLogEntryCategories || isLoadingLogEntryCategoryDatasets,
+    [isLoadingLogEntryCategoryDatasets, isLoadingTopLogEntryCategories]
+  );
 
   return {
+    getLogEntryCategoryDatasets,
     getTopLogEntryCategories,
     isLoading,
+    isLoadingLogEntryCategoryDatasets,
+    isLoadingTopLogEntryCategories,
+    logEntryCategoryDatasets,
     topLogEntryCategories,
   };
 };

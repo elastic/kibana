@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -32,22 +32,12 @@ export const TopCategoriesTable = euiStyled(
   }) => {
     const columns = useMemo(() => createColumns(timeRange), [timeRange]);
 
-    const datasetFilterPlaceholder = i18n.translate(
-      'xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder',
-      {
-        defaultMessage: 'Select data sets',
-      }
-    );
     return (
-      <>
-        <EuiComboBox placeholder={datasetFilterPlaceholder} />
-        <EuiSpacer />
-        <EuiBasicTable
-          columns={columns}
-          items={topCategories}
-          rowProps={{ className: `${className} euiTableRow--topAligned` }}
-        />
-      </>
+      <EuiBasicTable
+        columns={columns}
+        items={topCategories}
+        rowProps={{ className: `${className} euiTableRow--topAligned` }}
+      />
     );
   }
 )`
