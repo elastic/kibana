@@ -212,12 +212,16 @@ export class Server {
 
     await this.http.start();
 
+    // Starting it after http because it relies on the the HTTP service
+    await this.pulse.start();
+
     return coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
 
+    await this.pulse.stop();
     await this.legacy.stop();
     await this.plugins.stop();
     await this.savedObjects.stop();

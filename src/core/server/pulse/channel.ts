@@ -18,6 +18,7 @@
  */
 
 import { Subject } from 'rxjs';
+import { IClusterClient } from '../elasticsearch';
 
 export interface PulseInstruction {
   owner: string;
@@ -31,7 +32,7 @@ interface ChannelConfig {
 }
 
 export class PulseChannel {
-  public readonly getRecords: () => Promise<Record<string, any>>;
+  public readonly getRecords: (elasticsearch: IClusterClient) => Promise<Record<string, any>>;
 
   constructor(private readonly config: ChannelConfig) {
     this.getRecords = require(`${__dirname}/collectors/${this.id}`).getRecords;
