@@ -94,7 +94,7 @@ export const reporting = (kibana: any) => {
       const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
-      xpackMainPlugin.status.once('green', () => {
+      (xpackMainPlugin as any).status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);

@@ -49,12 +49,12 @@ export const spaces = (kibana: Record<string, any>) =>
 
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/spaces/views/management'],
+      managementSections: [],
       apps: [
         {
           id: 'space_selector',
           title: 'Spaces',
-          main: 'plugins/spaces/views/space_selector',
+          main: 'plugins/spaces/space_selector',
           url: 'space_selector',
           hidden: true,
         },

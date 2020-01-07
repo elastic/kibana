@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize']);
+  const PageObjects = getPageObjects(['visualize']);
 
   describe('visualize app', function() {
     this.tags('smoke');
