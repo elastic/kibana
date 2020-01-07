@@ -439,9 +439,11 @@ export const PARAMETERS_DEFINITION = {
       helpText: () => (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.localeHelpText"
-          defaultMessage="Example locale: {code}. Locales can have a maximum of 3 parts."
+          defaultMessage="You can separate the language, country and variant using {hypen} or {underscore} characters. Locales can have a maximum of 3 separators. Example locale: {locale}."
           values={{
-            code: <EuiCode>en-US</EuiCode>,
+            locale: <EuiCode>en-US</EuiCode>,
+            hypen: <EuiCode>-</EuiCode>,
+            underscore: <EuiCode>_</EuiCode>,
           }}
         />
       ),
@@ -574,7 +576,7 @@ export const PARAMETERS_DEFINITION = {
       helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.formatHelpText"
-          defaultMessage="Custom formats are allowed using {dateSyntax} syntax."
+          defaultMessage="Specify custom formats using {dateSyntax} syntax."
           values={{
             dateSyntax: <EuiCode>yyyy/MM/dd</EuiCode>,
           }}

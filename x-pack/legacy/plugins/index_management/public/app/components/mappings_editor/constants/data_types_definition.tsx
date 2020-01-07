@@ -126,7 +126,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.dateLongDescription"
-          defaultMessage='Date fields accept strings containing formatted dates, e.g. "2015-01-01" or "2015/01/01 12:10:30", a long number representing milliseconds-since-the-epoch, or an integer representing seconds-since-the-epoch. Multiple date formats can be specified. Dates with timezone information will be converted to UTC internally.'
+          defaultMessage='Date fields accept strings containing formatted dates (e.g. "2015-01-01" or "2015/01/01 12:10:30"), long numbers representing milliseconds-since-the-epoch, and integers representing seconds-since-the-epoch. You can specify multiple date formats. Dates with timezone information will be converted to UTC internally.'
         />
       </p>
     ),
@@ -143,7 +143,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.dateNanosLongDescription"
-          defaultMessage="Date nanoseconds fields store dates in nanosecond resolution, which limits its range of dates. Aggregations are still on the millisecond resolution. If you need to store dates in millisecond resolution, use the {date}."
+          defaultMessage="Date nanoseconds fields store dates in nanosecond resolution. Aggregations are still on the millisecond resolution. If you need to store dates in millisecond resolution, use the {date}."
           values={{
             date: (
               <EuiLink href={documentationService.getTypeDocLink('date')} target="_blank">
