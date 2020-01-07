@@ -120,7 +120,7 @@ export class Plugin {
       );
     }
 
-    core.injectUiAppVars('monitoring', core => {
+    core.injectUiAppVars('monitoring', () => {
       const config = core.config();
       return {
         maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),

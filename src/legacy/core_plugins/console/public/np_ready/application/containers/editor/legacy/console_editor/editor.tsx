@@ -211,9 +211,9 @@ function EditorUI() {
               <button
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
-                // aria-label={i18n.translate('console.sendRequestButtonTooltip', {
-                //   defaultMessage: 'click to send request',
-                // })}
+                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                  defaultMessage: 'click to send request',
+                })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
               >
                 <EuiIcon type="play" />

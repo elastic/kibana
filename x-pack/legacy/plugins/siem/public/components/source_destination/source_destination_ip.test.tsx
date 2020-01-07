@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -34,8 +34,6 @@ import {
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('SourceDestinationIp', () => {
   const mount = useMountAppended();

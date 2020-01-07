@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';

@@ -27,7 +27,7 @@ export const monitoring = kibana =>
     id: 'monitoring',
     configPrefix: 'xpack.monitoring',
     publicDir: resolve(__dirname, 'public'),
-    init(server, _options) {
+    init(server) {
       const configs = [
         'xpack.monitoring.ui.enabled',
         'xpack.monitoring.kibana.collection.enabled',

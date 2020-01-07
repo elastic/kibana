@@ -19,15 +19,16 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useServicesContext } from '../../contexts';
+import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
-import { useRequestActionContext } from '../../contexts';
+import { track } from './track';
+
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: { history, settings, notifications },
+    services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -45,9 +46,10 @@ export const useSendCurrentRequestToES = () => {
         return;
       }
 
-      const results = await sendRequestToES({
-        requests,
-      });
+      // Fire and forget
+      setTimeout(() => track(requests, editor, trackUiMetric), 0);
+
+      const results = await sendRequestToES({ requests });
 
       results.forEach(({ request: { path, method, data } }) => {
         history.addToHistory(path, method, data);
@@ -82,5 +84,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications]);
+  }, [dispatch, settings, history, notifications, trackUiMetric]);
 };

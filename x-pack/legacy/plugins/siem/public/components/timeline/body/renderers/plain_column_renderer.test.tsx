@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
@@ -18,7 +18,7 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/kibana');
 
 const mockFramework = mockFrameworks.default_UTC;
 

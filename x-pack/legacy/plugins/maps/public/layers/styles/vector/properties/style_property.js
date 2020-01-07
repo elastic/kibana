@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getVectorStyleLabel } from '../components/get_vector_style_label';
 export class AbstractStyleProperty {
   constructor(options, styleName) {
     this._options = options;
@@ -36,11 +37,15 @@ export class AbstractStyleProperty {
     return this._options || {};
   }
 
-  renderLegendHeader() {
+  renderRangeLegendHeader() {
     return null;
   }
 
   renderLegendDetailRow() {
     return null;
+  }
+
+  getDisplayStyleName() {
+    return getVectorStyleLabel(this.getStyleName());
   }
 }

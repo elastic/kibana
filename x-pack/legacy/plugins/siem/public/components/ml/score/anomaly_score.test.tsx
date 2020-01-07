@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
@@ -16,8 +16,6 @@ import { Anomalies } from '../types';
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);

@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
 import { TestProviders } from '../../mock';

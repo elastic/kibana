@@ -27,8 +27,6 @@ export default function({ loadTestFile, getService }) {
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
 
-    loadTestFile(require.resolve('./bwc_existing_indexes'));
-    loadTestFile(require.resolve('./bwc_generation_urls'));
     loadTestFile(require.resolve('./usage'));
   });
 }

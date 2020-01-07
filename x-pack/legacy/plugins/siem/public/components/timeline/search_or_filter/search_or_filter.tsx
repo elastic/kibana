@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';

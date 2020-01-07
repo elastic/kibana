@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { MlPopover } from './ml_popover';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('ui/new_platform');
+jest.mock('../../lib/kibana');
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,

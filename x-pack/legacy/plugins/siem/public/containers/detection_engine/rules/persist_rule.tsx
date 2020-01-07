@@ -6,7 +6,7 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { useStateToaster } from '../../../components/toasters';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
@@ -26,7 +26,7 @@ export const usePersistRule = (): Return => {
   const [rule, setRule] = useState<NewRule | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {

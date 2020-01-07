@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
@@ -14,7 +14,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/kibana');
 
 describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();

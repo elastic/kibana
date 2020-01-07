@@ -5,9 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { validateIndexPattern } from 'ui/index_patterns';
-
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
@@ -26,6 +23,7 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
 } from '../../../../common/analytics';
+import { indexPatterns } from '../../../../../../../../../../../src/plugins/data/public';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '
@@ -56,7 +54,15 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
+  const {
+    jobIdEmpty,
+    jobIdValid,
+    jobIdExists,
+    jobType,
+    createIndexPattern,
+    excludes,
+    maxDistinctValuesError,
+  } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -66,9 +72,9 @@ export const validateAdvancedEditor = (state: State): State => {
   // general check against Kibana index pattern names, but since this is about the advanced editor
   // with support for arrays in the job config, we also need to check that each individual name
   // doesn't include a comma if index names are supplied as an array.
-  // `validateIndexPattern()` returns a map of messages, we're only interested here if it's valid or not.
+  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
   // If there are no messages, it means the index pattern is valid.
-  let sourceIndexNameValid = Object.keys(validateIndexPattern(sourceIndexName)).length === 0;
+  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
   const sourceIndex = jobConfig?.source?.index;
   if (sourceIndexNameValid) {
     if (typeof sourceIndex === 'string') {
@@ -92,6 +98,7 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   let dependentVariableEmpty = false;
+  let excludesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -106,6 +113,20 @@ export const validateAdvancedEditor = (state: State): State => {
   ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
+
+    if (!dependentVariableEmpty && excludes.includes(dependentVariableName)) {
+      excludesValid = false;
+
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.excludesInvalid',
+          {
+            defaultMessage: 'The dependent variable cannot be excluded.',
+          }
+        ),
+        message: '',
+      });
+    }
   }
 
   if (sourceIndexNameEmpty) {
@@ -184,6 +205,8 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
+    excludesValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -212,6 +235,7 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
+    maxDistinctValuesError,
     modelMemoryLimit,
   } = state.form;
 
@@ -227,6 +251,7 @@ const validateForm = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
     !jobTypeEmpty &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
@@ -293,7 +318,7 @@ export function reducer(state: State, action: Action): State {
 
       if (action.payload.sourceIndex !== undefined) {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
-        const validationMessages = validateIndexPattern(newFormState.sourceIndex);
+        const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
       }
 

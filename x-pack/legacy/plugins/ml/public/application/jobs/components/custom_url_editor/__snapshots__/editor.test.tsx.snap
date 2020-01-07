@@ -1019,7 +1019,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
         compressed={true}
         fullWidth={true}
         onChange={[Function]}
-        resize="vertical"
         rows={2}
         value="https://www.google.co.uk/search?q=airline+code+$airline$"
       />
@@ -1135,7 +1134,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
         compressed={true}
         fullWidth={true}
         onChange={[Function]}
-        resize="vertical"
         rows={2}
         value="https://www.google.co.uk/search?q=airline+code+$airline$"
       />
