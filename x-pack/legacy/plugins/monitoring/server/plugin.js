@@ -134,35 +134,29 @@ export class Plugin {
       };
     });
 
-    return {
-      initializeAlerting: (coreContext, alerting) => {
-        if (KIBANA_ALERTING_ENABLED && alerting) {
-          // this is not ready right away but we need to register alerts right away
-          async function getMonitoringCluster() {
-            const configs = config.get('xpack.monitoring.elasticsearch');
-            if (configs.hosts) {
-              const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
-              const { username, password } = configs;
-              const fakeRequest = {
-                headers: {
-                  authorization: `Basic ${Buffer.from(`${username}:${password}`).toString(
-                    'base64'
-                  )}`,
-                },
-              };
-              return {
-                callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args),
-              };
-            }
-            return null;
-          }
-
-          function getLogger(contexts) {
-            return coreContext.logger.get('plugins', LOGGING_TAG, ...contexts);
-          }
-          alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, getLogger));
+    if (KIBANA_ALERTING_ENABLED && plugins.alerting) {
+      // this is not ready right away but we need to register alerts right away
+      async function getMonitoringCluster() {
+        const configs = config.get('xpack.monitoring.elasticsearch');
+        if (configs.hosts) {
+          const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
+          const { username, password } = configs;
+          const fakeRequest = {
+            headers: {
+              authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+            },
+          };
+          return {
+            callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args),
+          };
         }
-      },
-    };
+        return null;
+      }
+
+      function getLogger(contexts) {
+        return core.logger.get('plugins', LOGGING_TAG, ...contexts);
+      }
+      plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, getLogger));
+    }
   }
 }

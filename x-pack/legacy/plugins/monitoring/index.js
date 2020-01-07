@@ -18,12 +18,7 @@ import { initInfraSource } from './server/lib/logs/init_infra_source';
  */
 export const monitoring = kibana =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-    // Uncomment these lines to turn on alerting and action for kibana alerting and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting', 'actions'],
     id: 'monitoring',
     configPrefix: 'xpack.monitoring',
     publicDir: resolve(__dirname, 'public'),
@@ -64,6 +59,7 @@ export const monitoring = kibana =>
         }),
         injectUiAppVars: server.injectUiAppVars,
         log: (...args) => server.log(...args),
+        logger: server.newPlatform.coreContext.logger,
         getOSInfo: server.getOSInfo,
         events: {
           on: (...args) => server.events.on(...args),
@@ -78,16 +74,13 @@ export const monitoring = kibana =>
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
+        alerting: server.plugins.alerting,
         usageCollection,
         licensing,
       };
 
       const plugin = new Plugin();
-      const { initializeAlerting } = plugin.setup(serverFacade, plugins);
-      const { kbnServer } = server.plugins.xpack_main.status.plugin;
-      kbnServer.afterPluginsInit(() => {
-        initializeAlerting(server.newPlatform.coreContext, server.plugins.alerting);
-      });
+      plugin.setup(serverFacade, plugins);
     },
     config,
     deprecations,

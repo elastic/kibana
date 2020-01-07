@@ -131,13 +131,6 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
               </p>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              size="s"
-              title={i18n.translate('xpack.monitoring.alerts.status.flyoutNote', {
-                defaultMessage: 'Note: These alerts work across all monitored clusters.',
-              })}
-              iconType="pin"
-            />
             {getSecurityConfigurationErrorUi()}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
