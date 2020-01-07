@@ -1,10 +1,10 @@
-# `bfetch` browser reference
+# `bfetch` server reference
 
-- [`batchedFunction`](#batchedFunction)
-- [`fetchStreaming`](#fetchStreaming)
+- [`addBatchProcessingRoute`](#addBatchProcessingRoute)
+- [`addStreamingResponseRoute`](#addStreamingResponseRoute)
 
 
-## `batchedFunction`
+## `addBatchProcessingRoute`
 
 Creates a function that will buffer its calls (until timeout&mdash;10ms default&mdash; or capacity reached&mdash;25 default)
 and send all calls in one batch to the specified endpoint. The endpoint is expected
@@ -21,7 +21,7 @@ const result = await fn({ foo: 'bar' });
 ```
 
 
-## `fetchStreaming`
+## `addStreamingResponseRoute`
 
 Executes an HTTP request and expects that server streams back results using
 HTTP/1 `Transfer-Encoding: chunked`.
