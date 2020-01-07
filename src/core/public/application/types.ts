@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -108,6 +108,13 @@ export interface App extends AppBase {
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
+
+  /**
+   * Override the application's routing path from `/app/${id}`.
+   * Must be unique across registered applications. Should not include the
+   * base path from HTTP.
+   */
+  appRoute?: string;
 }
 
 /** @internal */
@@ -196,7 +203,8 @@ export interface AppMountParameters {
   element: HTMLElement;
 
   /**
-   * The base path for configuring the application's router.
+   * The route path for configuring navigation to the application.
+   * This string should not include the base path from HTTP.
    *
    * @example
    *
@@ -208,6 +216,7 @@ export interface AppMountParameters {
    *   setup({ application }) {
    *     application.register({
    *      id: 'my-app',
+   *      appRoute: '/my-app',
    *      async mount(params) {
    *        const { renderApp } = await import('./application');
    *        return renderApp(params);
@@ -247,6 +256,23 @@ export interface AppMountParameters {
  * @public
  */
 export type AppUnmount = () => void;
+
+/** @internal */
+export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
+
+/** @internal */
+export type LegacyAppMounter = (params: AppMountParameters) => void;
+
+/** @internal */
+export type Mounter<T = App | LegacyApp> = SelectivePartial<
+  {
+    appRoute: string;
+    appBasePath: string;
+    mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    unmountBeforeMounting: T extends LegacyApp ? true : boolean;
+  },
+  T extends LegacyApp ? never : 'unmountBeforeMounting'
+>;
 
 /** @public */
 export interface ApplicationSetup {
@@ -371,6 +397,12 @@ export interface InternalApplicationStart
   ): void;
 
   // Internal APIs
-  currentAppId$: Subject<string | undefined>;
+  currentAppId$: Observable<string | undefined>;
   getComponent(): JSX.Element | null;
 }
+
+/** @internal */
+type SelectivePartial<T, K extends keyof T> = Partial<Pick<T, K>> &
+  Required<Pick<T, Exclude<keyof T, K>>> extends infer U
+  ? { [P in keyof U]: U[P] }
+  : never;

@@ -24,6 +24,7 @@ export const executeScript = async ({
   lang,
   script,
   indexPatternTitle,
+  query,
   additionalFields = [],
 }) => {
   // Using _msearch because _search with index name in path dorks everything up
@@ -50,6 +51,10 @@ export const executeScript = async ({
 
   if (additionalFields.length > 0) {
     search._source = additionalFields;
+  }
+
+  if (query) {
+    search.query = query;
   }
 
   const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;

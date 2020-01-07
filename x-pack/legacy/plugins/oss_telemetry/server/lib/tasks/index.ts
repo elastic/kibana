@@ -5,12 +5,12 @@
  */
 
 import { CoreSetup, Logger } from 'kibana/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../task_manager/plugin';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../task_manager/server/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 import { LegacyConfig } from '../../plugin';
-import { TaskInstance } from '../../../../task_manager';
+import { TaskInstance } from '../../../../task_manager/server';
 
 export function registerTasks({
   taskManager,
