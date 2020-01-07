@@ -30,8 +30,10 @@ export const sampleRuleAlertParams = (
   maxSignals: maxSignals ? maxSignals : 10000,
   filters: undefined,
   savedId: undefined,
+  timelineId: undefined,
   meta: undefined,
   threats: undefined,
+  version: 1,
   updatedAt: '2019-12-17T15:04:25.343Z',
   createdAt: '2019-12-17T15:04:37.105Z',
 });
@@ -133,6 +135,28 @@ export const sampleBulkCreateDuplicateResult = {
         error: {
           type: 'version_conflict_engine_exception',
           reason: '[4]: version conflict, document already exists (current version [1])',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+  ],
+};
+
+export const sampleBulkCreateErrorResult = {
+  ...sampleBulkCreateDuplicateResult,
+  items: [
+    ...sampleBulkCreateDuplicateResult.items,
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '5',
+        status: 500,
+        error: {
+          type: 'internal_server_error',
+          reason: '[4]: internal server error',
           index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
           shard: '0',
           index: 'test',

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiCheckbox, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import * as React from 'react';
@@ -170,13 +172,13 @@ export const getFieldColumns = () => [
     field: 'field',
     name: i18n.FIELD,
     sortable: true,
-    render: (field: React.ReactNode) => <>{field}</>,
+    render: (field: React.ReactNode, _: FieldItem) => <>{field}</>,
     width: '250px',
   },
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description: string) => (
+    render: (description: string, _: FieldItem) => (
       <TruncatableText>
         <EuiToolTip position="top" content={description}>
           <>{description}</>

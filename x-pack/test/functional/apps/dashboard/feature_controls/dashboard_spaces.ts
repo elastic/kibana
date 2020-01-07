@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
@@ -73,7 +73,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardAddPanelButton', { timeout: 10000 });
+        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {

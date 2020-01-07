@@ -76,9 +76,11 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={
             Object {
               "fill": "#cc3b54",
@@ -106,9 +108,11 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={
             Object {
               "fill": "#9b3067",
@@ -136,9 +140,11 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={
             Object {
               "fill": "#d41e93",

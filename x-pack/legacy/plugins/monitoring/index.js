@@ -22,7 +22,7 @@ export const monitoring = kibana =>
     id: 'monitoring',
     configPrefix: 'xpack.monitoring',
     publicDir: resolve(__dirname, 'public'),
-    init(server, _options) {
+    init(server) {
       const configs = [
         'xpack.monitoring.ui.enabled',
         'xpack.monitoring.kibana.collection.enabled',
@@ -68,12 +68,13 @@ export const monitoring = kibana =>
         _hapi: server,
         _kbnServer: this.kbnServer,
       };
-      const { usageCollection } = server.newPlatform.setup.plugins;
+      const { usageCollection, licensing } = server.newPlatform.setup.plugins;
       const plugins = {
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
         usageCollection,
+        licensing,
       };
 
       new Plugin().setup(serverFacade, plugins);

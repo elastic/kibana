@@ -31,13 +31,28 @@ export interface UpdateRulesRequest extends RequestFacade {
   payload: UpdateRuleAlertParamsRest;
 }
 
-export type RuleAlertType = Alert & {
-  id: string;
+export interface BulkUpdateRulesRequest extends RequestFacade {
+  payload: UpdateRuleAlertParamsRest[];
+}
+
+export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
-};
+}
 
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
+}
+
+export interface BulkRulesRequest extends RequestFacade {
+  payload: RuleAlertParamsRest[];
+}
+
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
+  query: { id: string | undefined; rule_id: string | undefined };
+};
+
+export interface QueryBulkRequest extends RequestFacade {
+  payload: Array<QueryRequest['query']>;
 }
 
 export interface FindRuleParams {

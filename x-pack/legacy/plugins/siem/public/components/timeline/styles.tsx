@@ -30,7 +30,7 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 export const TimelineBody = styled.div.attrs(({ className }) => ({
   className: `siemTimeline__body ${className}`,
 }))<{ bodyHeight: number }>`
-  height: ${({ bodyHeight }) => bodyHeight + 'px'};
+  height: ${({ bodyHeight }) => `${bodyHeight}px`};
   overflow: auto;
   scrollbar-width: thin;
 
@@ -87,10 +87,10 @@ EventsTrHeader.displayName = 'EventsTrHeader';
 
 export const EventsThGroupActions = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number; justifyContent: string }>`
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
-  justify-content: space-between;
+  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  justify-content: ${({ justifyContent }) => justifyContent};
   min-width: 0;
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';
@@ -182,7 +182,7 @@ export const EventsTdGroupActions = styled.div.attrs(({ className }) => ({
 }))<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
-  flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
+  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;
 `;
 EventsTdGroupActions.displayName = 'EventsTdGroupActions';

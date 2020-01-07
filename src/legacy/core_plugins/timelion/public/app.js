@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
@@ -36,12 +35,15 @@ require('ui/autoload/all');
 
 // TODO: remove ui imports completely (move to plugins)
 import 'ui/directives/input_focus';
-import 'ui/directives/saved_object_finder';
+import './directives/saved_object_finder';
 import 'ui/directives/listen';
 import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import '../../data/public/legacy';
+import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
+import { createSavedVisLoader } from '../../kibana/public/visualize';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -57,12 +59,7 @@ document.title = 'Timelion - Kibana';
 
 const app = require('ui/modules').get('apps/timelion', []);
 
-require('plugins/timelion/services/saved_sheets');
-require('plugins/timelion/services/_saved_sheet');
-
 require('./vis');
-
-SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
 
 require('ui/routes').enable();
 
@@ -131,8 +128,12 @@ app.controller('timelion', function(
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName
-    .visualizations;
+  const savedVisualizations = createSavedVisLoader({
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  });
   const timezone = Private(timezoneProvider)();
 
   const defaultExpression = '.es(*)';

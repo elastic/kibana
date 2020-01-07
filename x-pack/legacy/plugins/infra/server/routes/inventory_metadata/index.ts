@@ -11,11 +11,12 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { throwErrors } from '../../../common/runtime_types';
-import { getAWSMetadata } from './lib/get_aws_metadata';
+
 import {
   InventoryMetaRequestRT,
   InventoryMetaResponseRT,
 } from '../../../common/http_api/inventory_meta_api';
+import { getCloudMetadata } from './lib/get_cloud_metadata';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
@@ -41,7 +42,7 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
           requestContext,
           sourceId
         );
-        const awsMetadata = await getAWSMetadata(
+        const awsMetadata = await getCloudMetadata(
           framework,
           requestContext,
           configuration,

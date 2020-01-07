@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { debounce, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -362,6 +362,12 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
+  entityFieldSearchChanged = debounce((entity, queryTerm) => {
+    this.loadEntityValues({
+      [entity.fieldType]: queryTerm,
+    });
+  }, 500);
+
   loadAnomaliesTableData = (earliestMs, latestMs) => {
     const { dateFormatTz } = this.props;
     const { selectedJob } = this.state;
@@ -419,58 +425,56 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  loadEntityValues = (callback = () => {}) => {
+  /**
+   * Loads available entity values.
+   * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
+   * @param callback - Callback to execute after component state update.
+   */
+  loadEntityValues = async (searchTerm = {}, callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
-    // Populate the entity input datalists with the values from the top records by score
-    // for the selected detector across the full time range. No need to pass through finish().
+    // Populate the entity input datalists with aggregated values. No need to pass through finish().
     const bounds = timefilter.getActiveBounds();
     const detectorIndex = +detectorId;
 
-    mlResultsService
-      .getRecordsForCriteria(
-        [selectedJob.job_id],
-        [{ fieldName: 'detector_index', fieldValue: detectorIndex }],
-        0,
+    const {
+      partition_field: partitionField,
+      over_field: overField,
+      by_field: byField,
+    } = await mlResultsService
+      .fetchPartitionFieldsValues(
+        selectedJob.job_id,
+        searchTerm,
+        [
+          {
+            fieldName: 'detector_index',
+            fieldValue: detectorIndex,
+          },
+        ],
         bounds.min.valueOf(),
-        bounds.max.valueOf(),
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+        bounds.max.valueOf()
       )
-      .toPromise()
-      .then(resp => {
-        if (resp.records && resp.records.length > 0) {
-          const firstRec = resp.records[0];
+      .toPromise();
 
-          this.setState(
-            {
-              entities: entities.map(entity => {
-                const newEntity = { ...entity };
-                if (firstRec.partition_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('partition_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.over_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('over_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.by_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('by_field_value')
-                    .uniq()
-                    .value();
-                }
-                return newEntity;
-              }),
-            },
-            callback
-          );
-        }
-      });
+    this.setState(
+      {
+        entities: entities.map(entity => {
+          const newEntity = { ...entity };
+          if (partitionField?.name === entity.fieldName) {
+            newEntity.fieldValues = partitionField.values;
+          }
+          if (overField?.name === entity.fieldName) {
+            newEntity.fieldValues = overField.values;
+          }
+          if (byField?.name === entity.fieldName) {
+            newEntity.fieldValues = byField.values;
+          }
+          return newEntity;
+        }),
+      },
+      callback
+    );
   };
 
   loadForForecastId = forecastId => {
@@ -796,11 +800,19 @@ export class TimeSeriesExplorer extends React.Component {
     const byFieldName = get(detector, 'by_field_name');
     if (partitionFieldName !== undefined) {
       const partitionFieldValue = get(entitiesState, partitionFieldName, '');
-      entities.push({ fieldName: partitionFieldName, fieldValue: partitionFieldValue });
+      entities.push({
+        fieldType: 'partition_field',
+        fieldName: partitionFieldName,
+        fieldValue: partitionFieldValue,
+      });
     }
     if (overFieldName !== undefined) {
       const overFieldValue = get(entitiesState, overFieldName, '');
-      entities.push({ fieldName: overFieldName, fieldValue: overFieldValue });
+      entities.push({
+        fieldType: 'over_field',
+        fieldName: overFieldName,
+        fieldValue: overFieldValue,
+      });
     }
 
     // For jobs with by and over fields, don't add the 'by' field as this
@@ -810,7 +822,7 @@ export class TimeSeriesExplorer extends React.Component {
     // from filter for the anomaly records.
     if (byFieldName !== undefined && overFieldName === undefined) {
       const byFieldValue = get(entitiesState, byFieldName, '');
-      entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
+      entities.push({ fieldType: 'by_field', fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
     this.updateCriteriaFields(detectorIndex, entities);
@@ -1338,6 +1350,7 @@ export class TimeSeriesExplorer extends React.Component {
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  onSearchChange={this.entityFieldSearchChanged}
                   forceSelection={forceSelection}
                   key={entityKey}
                 />
@@ -1530,13 +1543,11 @@ export class TimeSeriesExplorer extends React.Component {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              <AnomaliesTable
-                tableData={tableData}
-                filter={this.tableFilter}
-                timefilter={timefilter}
-              />
             </EuiText>
           )}
+        {arePartitioningFieldsProvided && jobs.length > 0 && (
+          <AnomaliesTable tableData={tableData} filter={this.tableFilter} timefilter={timefilter} />
+        )}
       </TimeSeriesExplorerPage>
     );
   }

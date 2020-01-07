@@ -105,12 +105,9 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <Content
-              children={children}
-              field={field}
-              tooltipContent={tooltipContent}
-              value={value}
-            />
+            <Content field={field} tooltipContent={tooltipContent} value={value}>
+              {children}
+            </Content>
           )
         }
       />

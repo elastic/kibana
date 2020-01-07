@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCheckbox } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
@@ -11,9 +12,9 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import {
+  DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
   getDraggableFieldId,
-  DRAG_TYPE_FIELD,
 } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
@@ -24,6 +25,7 @@ import {
   OnColumnResized,
   OnColumnSorted,
   OnFilterChange,
+  OnSelectAll,
   OnUpdateColumns,
 } from '../../events';
 import {
@@ -44,12 +46,15 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   isEventViewer?: boolean;
+  isSelectAllChecked: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
+  onSelectAll: OnSelectAll;
   onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
+  showSelectAllCheckbox: boolean;
   sort: Sort;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
@@ -61,12 +66,15 @@ export const ColumnHeadersComponent = ({
   browserFields,
   columnHeaders,
   isEventViewer = false,
+  isSelectAllChecked,
   onColumnRemoved,
   onColumnResized,
   onColumnSorted,
+  onSelectAll,
   onUpdateColumns,
   onFilterChange = noop,
   showEventsSelect,
+  showSelectAllCheckbox,
   sort,
   timelineId,
   toggleColumn,
@@ -78,6 +86,7 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
+          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
         >
           {showEventsSelect && (
@@ -88,8 +97,23 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
+          {showSelectAllCheckbox && (
+            <EventsTh>
+              <EventsThContent textAlign="center">
+                <EuiCheckbox
+                  data-test-subj="select-all-events"
+                  id={'select-all-events'}
+                  checked={isSelectAllChecked}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    onSelectAll({ isSelected: event.currentTarget.checked });
+                  }}
+                />
+              </EventsThContent>
+            </EventsTh>
+          )}
+
           <EventsTh>
-            <EventsThContent textAlign="center">
+            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
               <StatefulFieldsBrowser
                 browserFields={browserFields}
                 columnHeaders={columnHeaders}
@@ -141,7 +165,7 @@ export const ColumnHeadersComponent = ({
                       position="relative"
                       // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
                       style={{
-                        flexBasis: header.width + 'px',
+                        flexBasis: `${header.width}px`,
                         ...dragProvided.draggableProps.style,
                       }}
                     >
@@ -162,7 +186,7 @@ export const ColumnHeadersComponent = ({
                         <DragEffects>
                           <DraggableFieldBadge
                             fieldId={header.id}
-                            fieldWidth={header.width + 'px'}
+                            fieldWidth={`${header.width}px`}
                           />
                         </DragEffects>
                       )}
