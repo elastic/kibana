@@ -16,3 +16,5 @@ Object {
   "tags": Array [],
 }
 `;
+
+exports[`parseFiltersMap returns an empty object for invalid filter 1`] = `"Unable to parse invalid filter string"`;

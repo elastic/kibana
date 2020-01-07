@@ -22,6 +22,6 @@ export const parseFiltersMap = (filterMapString: string, fields: FilterField[]):
     });
     return filterSlices;
   } catch (e) {
-    return {};
+    throw new Error('Unable to parse invalid filter string');
   }
 };

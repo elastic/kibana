@@ -22,8 +22,8 @@ describe('parseFiltersMap', () => {
   });
 
   it('returns an empty object for invalid filter', () => {
-    expect(
+    expect(() =>
       parseFiltersMap('some invalid string', [{ name: 'location', fieldName: 'observer.geo.name' }])
-    ).toEqual({});
+    ).toThrowErrorMatchingSnapshot();
   });
 });
