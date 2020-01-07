@@ -1301,6 +1301,52 @@ Array [
         "name": "opbeans-java",
       },
       "span": Object {
+        "id": "b2",
+        "name": "GET [0:0:0:0:0:0:0:1]",
+      },
+      "timestamp": Object {
+        "us": 1536763736367000,
+      },
+      "transaction": Object {
+        "id": "a",
+      },
+    },
+    "docType": "span",
+    "duration": 4694,
+    "id": "b2",
+    "offset": 1000,
+    "parent": Object {
+      "doc": Object {
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "timestamp": Object {
+          "us": 1536763736366000,
+        },
+        "transaction": Object {
+          "id": "a",
+          "name": "APIRestController#products",
+        },
+      },
+      "docType": "transaction",
+      "duration": 9480,
+      "id": "a",
+      "offset": 0,
+      "parent": undefined,
+      "skew": 0,
+    },
+    "parentId": "a",
+    "skew": 0,
+  },
+  Object {
+    "doc": Object {
+      "parent": Object {
+        "id": "a",
+      },
+      "service": Object {
+        "name": "opbeans-java",
+      },
+      "span": Object {
         "id": "b",
         "name": "GET [0:0:0:0:0:0:0:1]",
       },
@@ -1500,52 +1546,6 @@ Array [
       "skew": 0,
     },
     "parentId": "c",
-    "skew": 0,
-  },
-  Object {
-    "doc": Object {
-      "parent": Object {
-        "id": "a",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "span": Object {
-        "id": "b2",
-        "name": "GET [0:0:0:0:0:0:0:1]",
-      },
-      "timestamp": Object {
-        "us": 1536763736367000,
-      },
-      "transaction": Object {
-        "id": "a",
-      },
-    },
-    "docType": "span",
-    "duration": 4694,
-    "id": "b2",
-    "offset": 1000,
-    "parent": Object {
-      "doc": Object {
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "timestamp": Object {
-          "us": 1536763736366000,
-        },
-        "transaction": Object {
-          "id": "a",
-          "name": "APIRestController#products",
-        },
-      },
-      "docType": "transaction",
-      "duration": 9480,
-      "id": "a",
-      "offset": 0,
-      "parent": undefined,
-      "skew": 0,
-    },
-    "parentId": "a",
     "skew": 0,
   },
 ]

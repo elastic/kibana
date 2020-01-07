@@ -161,7 +161,7 @@ export function getOrderedWaterfallItems(
 
     const children = sortBy(
       childrenByParentId[item.id] || [],
-      'custom.timestamp.us'
+      'doc.timestamp.us'
     );
 
     item.parent = parentItem;
