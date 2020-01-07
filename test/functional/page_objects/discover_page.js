@@ -63,6 +63,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async inputSavedSearchTitle(searchName) {
+      await testSubjects.setValue('savedObjectTitle', searchName);
+    }
+
+    async clickConfirmSavedSearch() {
+      await testSubjects.click('confirmSaveSavedObjectButton');
+    }
+
+    async openAddFilterPanel() {
+      await testSubjects.click('addFilter');
+    }
+
     async waitUntilSearchingHasFinished() {
       const spinner = await testSubjects.find('loadingSpinner');
       await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
