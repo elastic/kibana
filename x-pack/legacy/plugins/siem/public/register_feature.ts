@@ -6,8 +6,7 @@
 
 import { npSetup } from 'ui/new_platform';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-
-const APP_ID = 'siem';
+import { APP_ID } from '../common/constants';
 
 // TODO(rylnd): move this into Plugin.setup once we're on NP
 npSetup.plugins.home.featureCatalogue.register({
