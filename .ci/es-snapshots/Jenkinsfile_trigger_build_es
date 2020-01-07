@@ -1,0 +1,19 @@
+#!/bin/groovy
+
+if (!params.branches_yaml) {
+  error "'branches_yaml' parameter must be specified"
+}
+
+def branches = readYaml text: params.branches_yaml
+
+branches.each { branch ->
+  build(
+    propagate: false,
+    wait: false,
+    job: 'elasticsearch+snapshots+build',
+    parameters: [
+      string(name: 'branch_specifier', value: branch),
+      string(name: 'ES_BRANCH', value: branch),
+    ]
+  )
+}
