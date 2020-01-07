@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IndexPatternSavedObject {
-  attributes: {
-    title: string;
-  };
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
-}
+import { SimpleSavedObject } from '../../../../../../src/core/public';
 
-export interface IndexPatternResponse {
-  page: number;
-  per_page: number;
-  saved_objects: IndexPatternSavedObject[];
-  total: number;
-}
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IndexPatternSavedObjectAttributes = { title: string };
+
+export type IndexPatternSavedObject = Pick<
+  SimpleSavedObject<IndexPatternSavedObjectAttributes>,
+  'type' | 'id' | 'attributes' | '_version'
+>;

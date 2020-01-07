@@ -193,16 +193,6 @@ export interface CloseJobsResponse {
   };
 }
 
-export interface IndexPatternSavedObject {
-  attributes: {
-    title: string;
-  };
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
-}
-
 export interface JobsFilters {
   filterQuery: string;
   showCustomJobs: boolean;
