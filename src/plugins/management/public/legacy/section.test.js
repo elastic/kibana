@@ -16,62 +16,59 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('ui/capabilities', () => ({
-  capabilities: {
-    get: () => ({
-      navLinks: {},
-      management: {
-        kibana: {
-          sampleFeature1: true,
-          sampleFeature2: false,
-        },
-      },
-    }),
-  },
-}));
 
 import { ManagementSection } from './section';
-import { IndexedArray } from '../indexed_array';
+import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
+
+const capabilitiesMock = {
+  management: {
+    kibana: { sampleFeature2: false },
+  },
+};
 
 describe('ManagementSection', () => {
   describe('constructor', () => {
     it('defaults display to id', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.display).toBe('kibana');
     });
 
     it('defaults visible to true', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.visible).toBe(true);
     });
 
     it('defaults disabled to false', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.disabled).toBe(false);
     });
 
     it('defaults tooltip to empty string', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.tooltip).toBe('');
     });
 
     it('defaults url to empty string', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.url).toBe('');
     });
 
     it('exposes items', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.items).toHaveLength(0);
     });
 
     it('exposes visibleItems', () => {
-      const section = new ManagementSection('kibana');
+      const section = new ManagementSection('kibana', {}, capabilitiesMock);
       expect(section.visibleItems).toHaveLength(0);
     });
 
     it('assigns all options', () => {
-      const section = new ManagementSection('kibana', { description: 'test', url: 'foobar' });
+      const section = new ManagementSection(
+        'kibana',
+        { description: 'test', url: 'foobar' },
+        capabilitiesMock
+      );
       expect(section.description).toBe('test');
       expect(section.url).toBe('foobar');
     });
@@ -81,7 +78,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('returns a ManagementSection', () => {
@@ -129,7 +126,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
       section.register('about');
     });
 
@@ -160,7 +157,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
       section.register('about');
     });
 
@@ -187,7 +184,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
 
       section.register('three', { order: 3 });
       section.register('one', { order: 1 });
@@ -217,7 +214,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('hide sets visible to false', () => {
@@ -236,7 +233,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('disable sets disabled to true', () => {
@@ -254,7 +251,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana');
+      section = new ManagementSection('kibana', {}, capabilitiesMock);
 
       section.register('three', { order: 3 });
       section.register('one', { order: 1 });

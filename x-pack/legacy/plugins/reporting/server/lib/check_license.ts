@@ -4,19 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
+import { XPackInfoLicense } from '../../../xpack_main/server/lib/xpack_info_license';
+import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
+
+interface LicenseCheckResult {
+  showLinks: boolean;
+  enableLinks: boolean;
+  message?: string;
+}
+
 const messages = {
   getUnavailable: () => {
     return 'You cannot use Reporting because license information is not available at this time.';
   },
-  getExpired: license => {
+  getExpired: (license: XPackInfoLicense) => {
     return `You cannot use Reporting because your ${license.getType()} license has expired.`;
   },
 };
 
-const makeManagementFeature = exportTypes => {
+const makeManagementFeature = (
+  exportTypes: Array<ExportTypeDefinition<unknown, unknown, unknown, unknown>>
+) => {
   return {
     id: 'management',
-    checkLicense: license => {
+    checkLicense: (license: XPackInfoLicense | null) => {
       if (!license) {
         return {
           showLinks: true,
@@ -46,10 +58,12 @@ const makeManagementFeature = exportTypes => {
   };
 };
 
-const makeExportTypeFeature = exportType => {
+const makeExportTypeFeature = (
+  exportType: ExportTypeDefinition<unknown, unknown, unknown, unknown>
+) => {
   return {
     id: exportType.id,
-    checkLicense: license => {
+    checkLicense: (license: XPackInfoLicense | null) => {
       if (!license) {
         return {
           showLinks: true,
@@ -84,13 +98,9 @@ const makeExportTypeFeature = exportType => {
   };
 };
 
-export function checkLicenseFactory(exportTypesRegistry) {
-  return function checkLicense(xpackLicenseInfo) {
-    const license =
-      xpackLicenseInfo === null || !xpackLicenseInfo.isAvailable()
-        ? null
-        : xpackLicenseInfo.license;
-
+export function checkLicenseFactory(exportTypesRegistry: ExportTypesRegistry) {
+  return function checkLicense(xpackInfo: XPackInfo) {
+    const license = xpackInfo === null || !xpackInfo.isAvailable() ? null : xpackInfo.license;
     const exportTypes = Array.from(exportTypesRegistry.getAll());
     const reportingFeatures = [
       ...exportTypes.map(makeExportTypeFeature),
@@ -100,6 +110,6 @@ export function checkLicenseFactory(exportTypesRegistry) {
     return reportingFeatures.reduce((result, feature) => {
       result[feature.id] = feature.checkLicense(license);
       return result;
-    }, {});
+    }, {} as Record<string, LicenseCheckResult>);
   };
 }
