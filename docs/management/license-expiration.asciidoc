@@ -25,24 +25,10 @@ are disabled.
 [[expiration-elasticsearch]]
 ==== {es}
 
-////
-TBD
-ES messages:
-# - deprecation
-#  - Deprecation APIs are disabled
-# - upgrade
-#  - Upgrade API is disabled
-# - sql
-#  - SQL support is disabled
-# - rollup
-#  - Creating and Starting rollup jobs will no longer be allowed.
-#  - Stopping/Deleting existing jobs, RollupCaps API and RollupSearch continue to function.
-# - transform
-#  - Creating, starting, updating transforms will no longer be allowed.
-#  - Stopping/Deleting existing transforms continue to function.
-# - analytics
-#  - Aggregations provided by Analytics plugin are no longer usable.
-////
+// Upgrade API is disabled
+* The deprecation API is disabled.
+* SQL support is disabled.
+* Aggregations provided by the analytics plugin are no longer usable.
 
 [[expiration-logstash]]
 ==== {ls} pipeline management
@@ -131,3 +117,16 @@ ES message: Machine learning APIs are disabled
 * Reporting is no longer be available in {kib}.
 * Report generation URLs stop working.
 * Existing reports are no longer accessible.
+
+[[expiration-transforms]]
+==== {transforms-cap}
+
+*  {transforms-cap} cannot be created, started, or updated.
+*  Existing {transforms} can be stopped and deleted.
+
+[[expiration-rollups]]
+==== {rollups-cap}
+
+* {rollup-jobs-cap} cannot be created or started.
+* Existing {rollup-jobs} can be stopped and deleted.
+* The get rollup caps and rollup search APIs continue to function.
