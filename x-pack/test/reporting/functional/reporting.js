@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }) {
     'header',
     'discover',
     'visualize',
+    'visEditor',
   ]);
   const log = getService('log');
 
@@ -267,9 +268,9 @@ export default function({ getService, getPageObjects }) {
 
         it('becomes available when saved', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.visualize.clickBucket('X-axis');
-          await PageObjects.visualize.selectAggregation('Date Histogram');
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.clickBucket('X-axis');
+          await PageObjects.visEditor.selectAggregation('Date Histogram');
+          await PageObjects.visEditor.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();

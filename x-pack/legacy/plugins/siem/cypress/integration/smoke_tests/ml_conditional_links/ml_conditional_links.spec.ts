@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   mlNetworkSingleIpNullKqlQuery,
   mlNetworkSingleIpKqlQuery,
@@ -24,10 +23,6 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { KQL_INPUT } from '../../lib/url_state';
 
 describe('ml conditional links', () => {
-  afterEach(() => {
-    return logout();
-  });
-
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
