@@ -123,6 +123,11 @@ export const MatrixHistogram = React.memo(
             }
 
             setQuery({ id, inspect, loading, refetch });
+            return () => {
+              if (deleteQuery) {
+                deleteQuery({ id });
+              }
+            };
           }, [totalCount, isInspected, loading]);
 
           const barChartData: ChartSeriesData[] = useMemo(() => getCustomChartData(data, mapping), [

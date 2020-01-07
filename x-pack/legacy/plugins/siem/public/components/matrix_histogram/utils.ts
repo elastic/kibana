@@ -201,5 +201,5 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, isInspected]);
+  }, [query, isInspected, startDate, endDate]);
 };
