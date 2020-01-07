@@ -87,14 +87,8 @@ export function copyToSpaceTestSuiteFactory(
       body: {
         size: 0,
         query: {
-          bool: {
-            must_not: {
-              term: {
-                // exclude spaces from the result set.
-                // we don't assert on these.
-                type: 'space',
-              },
-            },
+          terms: {
+            type: ['visualization', 'dashboard', 'index-pattern'],
           },
         },
         aggs: {
