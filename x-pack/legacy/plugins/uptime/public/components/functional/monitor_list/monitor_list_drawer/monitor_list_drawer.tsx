@@ -49,12 +49,16 @@ export function MonitorListDrawerComponent({
   loadMonitorDetails,
   monitorDetails,
 }: MonitorListDrawerProps) {
+  const monitorId = summary?.monitor_id;
+  useEffect(() => {
+    if (monitorId) {
+      loadMonitorDetails(monitorId);
+    }
+  }, [loadMonitorDetails, monitorId]);
+
   if (!summary || !summary.state.checks) {
     return null;
   }
-  useEffect(() => {
-    loadMonitorDetails(summary.monitor_id);
-  }, []);
 
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
 

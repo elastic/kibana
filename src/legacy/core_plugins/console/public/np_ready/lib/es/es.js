@@ -18,7 +18,6 @@
  */
 
 import { stringify as formatQueryString } from 'querystring';
-
 import $ from 'jquery';
 
 const esVersion = [];
