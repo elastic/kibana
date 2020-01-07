@@ -66,7 +66,7 @@ export const FieldsConfigurationPanel = ({
         <p>
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.deprecationMessage"
-            defaultMessage="Configuring these fields have been depreciated and will be removed in 8.0.0. This application is designed to work with {ecsLink}, you should adjust your indexing to use the {documentationLink}."
+            defaultMessage="Configuring these fields have been deprecated and will be removed in 8.0.0. This application is designed to work with {ecsLink}, you should adjust your indexing to use the {documentationLink}."
             values={{
               documentationLink: (
                 <EuiLink
