@@ -148,13 +148,15 @@ export const EndpointsPage = () => {
             defaultFields={[`_source`]}
             updateOnChange={handleUserFilteredData}
           />
-          <EuiBasicTable
-            items={showFiltered ? filteredEndpoints : endpoints}
-            columns={columns}
-            pagination={paginationSetup}
-            sorting={sortingSetup}
-            onChange={handleTableChange}
-          />
+          <div data-test-subj="endpointsListTable">
+            <EuiBasicTable
+              items={showFiltered ? filteredEndpoints : endpoints}
+              columns={columns}
+              pagination={paginationSetup}
+              sorting={sortingSetup}
+              onChange={handleTableChange}
+            />
+          </div>
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>

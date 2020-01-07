@@ -7,9 +7,9 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Endpoint app', function() {
+  describe.only('Endpoint app', function() {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./home_page'));
-    loadTestFile(require.resolve('./endpoints_page'));
+    loadTestFile(require.resolve('./search_bar'));
   });
 };

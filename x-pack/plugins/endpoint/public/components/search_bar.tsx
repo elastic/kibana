@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 
+// @ts-ignore
 import { EuiSearchBar } from '@elastic/eui';
 
 interface SearchBarProps {
