@@ -31,7 +31,7 @@ Object {
   },
   "items": Array [
     Object {
-      "custom": Object {
+      "doc": Object {
         "processor": Object {
           "event": "transaction",
         },
@@ -61,7 +61,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "myTransactionId1",
         },
@@ -93,7 +93,7 @@ Object {
       "id": "mySpanIdD",
       "offset": 1754,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "processor": Object {
             "event": "transaction",
           },
@@ -126,7 +126,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
         },
@@ -162,7 +162,7 @@ Object {
       "id": "myTransactionId2",
       "offset": 39298,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "myTransactionId1",
           },
@@ -194,7 +194,7 @@ Object {
         "id": "mySpanIdD",
         "offset": 1754,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "processor": Object {
               "event": "transaction",
             },
@@ -230,7 +230,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
         },
@@ -262,7 +262,7 @@ Object {
       "id": "mySpanIdA",
       "offset": 40498,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
           },
@@ -298,7 +298,7 @@ Object {
         "id": "myTransactionId2",
         "offset": 39298,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "parent": Object {
               "id": "myTransactionId1",
             },
@@ -330,7 +330,7 @@ Object {
           "id": "mySpanIdD",
           "offset": 1754,
           "parent": Object {
-            "custom": Object {
+            "doc": Object {
               "processor": Object {
                 "event": "transaction",
               },
@@ -369,7 +369,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
         },
@@ -401,7 +401,7 @@ Object {
       "id": "mySpanIdB",
       "offset": 41627,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -433,7 +433,7 @@ Object {
         "id": "mySpanIdA",
         "offset": 40498,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
             },
@@ -469,7 +469,7 @@ Object {
           "id": "myTransactionId2",
           "offset": 39298,
           "parent": Object {
-            "custom": Object {
+            "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
               },
@@ -501,7 +501,7 @@ Object {
             "id": "mySpanIdD",
             "offset": 1754,
             "parent": Object {
-              "custom": Object {
+              "doc": Object {
                 "processor": Object {
                   "event": "transaction",
                 },
@@ -543,7 +543,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
         },
@@ -575,7 +575,7 @@ Object {
       "id": "mySpanIdC",
       "offset": 43899,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -607,7 +607,7 @@ Object {
         "id": "mySpanIdA",
         "offset": 40498,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
             },
@@ -643,7 +643,7 @@ Object {
           "id": "myTransactionId2",
           "offset": 39298,
           "parent": Object {
-            "custom": Object {
+            "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
               },
@@ -675,7 +675,7 @@ Object {
             "id": "mySpanIdD",
             "offset": 1754,
             "parent": Object {
-              "custom": Object {
+              "doc": Object {
                 "processor": Object {
                   "event": "transaction",
                 },
@@ -717,7 +717,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "agent": Object {
           "name": "ruby",
           "version": "2",
@@ -753,7 +753,7 @@ Object {
       "id": "error1",
       "offset": 25994,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "processor": Object {
             "event": "transaction",
           },
@@ -783,7 +783,6 @@ Object {
         "skew": 0,
       },
       "parentId": "myTransactionId1",
-      "serviceColor": "#00b3a4",
       "skew": 0,
     },
   ],
@@ -856,7 +855,7 @@ Object {
   },
   "items": Array [
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
         },
@@ -896,7 +895,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
         },
@@ -928,7 +927,7 @@ Object {
       "id": "mySpanIdA",
       "offset": 1200,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
           },
@@ -971,7 +970,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
         },
@@ -1003,7 +1002,7 @@ Object {
       "id": "mySpanIdB",
       "offset": 2329,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -1035,7 +1034,7 @@ Object {
         "id": "mySpanIdA",
         "offset": 1200,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
             },
@@ -1081,7 +1080,7 @@ Object {
       "skew": 0,
     },
     Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
         },
@@ -1113,7 +1112,7 @@ Object {
       "id": "mySpanIdC",
       "offset": 4601,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -1145,7 +1144,7 @@ Object {
         "id": "mySpanIdA",
         "offset": 1200,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
             },
@@ -1221,7 +1220,7 @@ Object {
 exports[`waterfall_helpers getWaterfallItems should handle cyclic references 1`] = `
 Array [
   Object {
-    "custom": Object {
+    "doc": Object {
       "timestamp": Object {
         "us": 10,
       },
@@ -1236,7 +1235,7 @@ Array [
     "skew": 0,
   },
   Object {
-    "custom": Object {
+    "doc": Object {
       "parent": Object {
         "id": "a",
       },
@@ -1251,7 +1250,7 @@ Array [
     "id": "b",
     "offset": 10,
     "parent": Object {
-      "custom": Object {
+      "doc": Object {
         "timestamp": Object {
           "us": 10,
         },
@@ -1274,7 +1273,7 @@ Array [
 exports[`waterfall_helpers getWaterfallItems should order items correctly 1`] = `
 Array [
   Object {
-    "custom": Object {
+    "doc": Object {
       "service": Object {
         "name": "opbeans-java",
       },
@@ -1294,53 +1293,7 @@ Array [
     "skew": 0,
   },
   Object {
-    "custom": Object {
-      "parent": Object {
-        "id": "a",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "span": Object {
-        "id": "b2",
-        "name": "GET [0:0:0:0:0:0:0:1]",
-      },
-      "timestamp": Object {
-        "us": 1536763736367000,
-      },
-      "transaction": Object {
-        "id": "a",
-      },
-    },
-    "docType": "span",
-    "duration": 4694,
-    "id": "b2",
-    "offset": 1000,
-    "parent": Object {
-      "custom": Object {
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "timestamp": Object {
-          "us": 1536763736366000,
-        },
-        "transaction": Object {
-          "id": "a",
-          "name": "APIRestController#products",
-        },
-      },
-      "docType": "transaction",
-      "duration": 9480,
-      "id": "a",
-      "offset": 0,
-      "parent": undefined,
-      "skew": 0,
-    },
-    "parentId": "a",
-    "skew": 0,
-  },
-  Object {
-    "custom": Object {
+    "doc": Object {
       "parent": Object {
         "id": "a",
       },
@@ -1363,7 +1316,7 @@ Array [
     "id": "b",
     "offset": 2000,
     "parent": Object {
-      "custom": Object {
+      "doc": Object {
         "service": Object {
           "name": "opbeans-java",
         },
@@ -1386,7 +1339,7 @@ Array [
     "skew": 0,
   },
   Object {
-    "custom": Object {
+    "doc": Object {
       "parent": Object {
         "id": "b",
       },
@@ -1406,7 +1359,7 @@ Array [
     "id": "c",
     "offset": 3000,
     "parent": Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "a",
         },
@@ -1429,7 +1382,7 @@ Array [
       "id": "b",
       "offset": 2000,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "service": Object {
             "name": "opbeans-java",
           },
@@ -1455,7 +1408,7 @@ Array [
     "skew": 0,
   },
   Object {
-    "custom": Object {
+    "doc": Object {
       "parent": Object {
         "id": "c",
       },
@@ -1478,7 +1431,7 @@ Array [
     "id": "d",
     "offset": 5000,
     "parent": Object {
-      "custom": Object {
+      "doc": Object {
         "parent": Object {
           "id": "b",
         },
@@ -1498,7 +1451,7 @@ Array [
       "id": "c",
       "offset": 3000,
       "parent": Object {
-        "custom": Object {
+        "doc": Object {
           "parent": Object {
             "id": "a",
           },
@@ -1521,7 +1474,7 @@ Array [
         "id": "b",
         "offset": 2000,
         "parent": Object {
-          "custom": Object {
+          "doc": Object {
             "service": Object {
               "name": "opbeans-java",
             },
@@ -1547,6 +1500,52 @@ Array [
       "skew": 0,
     },
     "parentId": "c",
+    "skew": 0,
+  },
+  Object {
+    "doc": Object {
+      "parent": Object {
+        "id": "a",
+      },
+      "service": Object {
+        "name": "opbeans-java",
+      },
+      "span": Object {
+        "id": "b2",
+        "name": "GET [0:0:0:0:0:0:0:1]",
+      },
+      "timestamp": Object {
+        "us": 1536763736367000,
+      },
+      "transaction": Object {
+        "id": "a",
+      },
+    },
+    "docType": "span",
+    "duration": 4694,
+    "id": "b2",
+    "offset": 1000,
+    "parent": Object {
+      "doc": Object {
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "timestamp": Object {
+          "us": 1536763736366000,
+        },
+        "transaction": Object {
+          "id": "a",
+          "name": "APIRestController#products",
+        },
+      },
+      "docType": "transaction",
+      "duration": 9480,
+      "id": "a",
+      "offset": 0,
+      "parent": undefined,
+      "skew": 0,
+    },
+    "parentId": "a",
     "skew": 0,
   },
 ]

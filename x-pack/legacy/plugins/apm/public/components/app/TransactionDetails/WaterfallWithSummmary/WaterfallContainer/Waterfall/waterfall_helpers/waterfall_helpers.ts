@@ -42,8 +42,6 @@ interface IWaterfallItemBase<T, U> {
   docType: U;
   doc: T;
 
-  serviceColor?: string;
-
   id: string;
 
   parent?: IWaterfallItem;
@@ -101,10 +99,7 @@ function getSpanItem(span: Span): IWaterfallSpan {
   };
 }
 
-function getErrorItem(
-  error: APMError,
-  serviceColors: IServiceColors
-): IWaterfallError {
+function getErrorItem(error: APMError): IWaterfallError {
   return {
     docType: 'error',
     doc: error,
@@ -112,8 +107,7 @@ function getErrorItem(
     parentId: error.parent?.id,
     offset: 0,
     skew: 0,
-    duration: 0,
-    serviceColor: serviceColors[error.service.name]
+    duration: 0
   };
 }
 
@@ -194,8 +188,8 @@ function getRootTransaction(childrenByParentId: IWaterfallGroup) {
 
 export type IServiceColors = Record<string, string>;
 
-function getServiceColors(traceItems: TraceAPIResponse['trace']['items']) {
-  const services = uniq(traceItems.map(item => item.service.name));
+function getServiceColors(waterfallItems: IWaterfallItem[]) {
+  const services = uniq(waterfallItems.map(item => item.doc.service.name));
 
   const assignedColors = [
     theme.euiColorVis1,
@@ -216,10 +210,7 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
     0
   );
 
-const getWaterfallItems = (
-  items: TraceAPIResponse['trace']['items'],
-  serviceColors: IServiceColors
-) =>
+const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
   items.map(item => {
     const docType = item.processor.event;
     switch (docType) {
@@ -228,7 +219,7 @@ const getWaterfallItems = (
       case 'transaction':
         return getTransactionItem(item as Transaction);
       case 'error':
-        return getErrorItem(item as APMError, serviceColors);
+        return getErrorItem(item as APMError);
     }
   });
 
@@ -257,12 +248,7 @@ export function getWaterfall(
     };
   }
 
-  const serviceColors = getServiceColors(trace.items);
-
-  const waterfallItems: IWaterfallItem[] = getWaterfallItems(
-    trace.items,
-    serviceColors
-  );
+  const waterfallItems: IWaterfallItem[] = getWaterfallItems(trace.items);
 
   const childrenByParentId = getChildrenGroupedByParentId(waterfallItems);
 
@@ -278,6 +264,7 @@ export function getWaterfall(
 
   const rootTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);
+  const serviceColors = getServiceColors(items);
 
   const entryTransaction = entryWaterfallTransaction?.doc;
 

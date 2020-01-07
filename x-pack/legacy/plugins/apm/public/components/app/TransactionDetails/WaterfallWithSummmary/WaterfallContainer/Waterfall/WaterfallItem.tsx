@@ -124,9 +124,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
 }) => {
   if (item?.docType === 'span') {
     return (
-      <EuiToolTip
-        content={`${item.doc.span.subtype}.${item.doc.span.action}`}
-      >
+      <EuiToolTip content={`${item.doc.span.subtype}.${item.doc.span.action}`}>
         <>{children}</>
       </EuiToolTip>
     );
