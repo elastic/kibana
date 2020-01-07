@@ -18,7 +18,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { localStorageToSavedObjects } from './migrate_from_local_storage_to_saved_objects';
+import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
 export const useDataInit = () => {
@@ -26,7 +26,7 @@ export const useDataInit = () => {
   const [done, setDone] = useState<boolean>(false);
 
   const {
-    services: { db, history },
+    services: { objectStorageClient, history },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
@@ -34,11 +34,10 @@ export const useDataInit = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        await localStorageToSavedObjects({ history, database: db });
-        const results = await db.text.findByUserId('n');
+        await migrateToTextObjects({ history, objectStorageClient });
+        const results = await objectStorageClient.text.findAll();
         if (!results) {
-          const newObject = await db.text.create({
-            userId: 'n',
+          const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
             text: '',
@@ -55,7 +54,7 @@ export const useDataInit = () => {
     };
 
     load();
-  }, [dispatch, db, history]);
+  }, [dispatch, objectStorageClient, history]);
 
   return {
     error,

@@ -55,7 +55,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      async mount({ core: { docLinks, savedObjects } }, { element }) {
+      async mount({ core: { docLinks } }, { element }) {
         const { boot } = await import('./application');
         render(
           boot({
@@ -63,7 +63,6 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
             I18nContext,
             notifications,
             elasticsearchUrl,
-            savedObjects: savedObjects.client,
           }),
           element
         );

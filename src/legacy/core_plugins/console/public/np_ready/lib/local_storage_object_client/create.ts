@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { ConsoleServerPlugin } from './plugin';
+import { Storage } from '../../services';
+import { ObjectStorageClient } from '../../../../common/types';
+import { TextObject, type } from '../../../../common/text_object';
+import { LocalObjectStorage } from './local_storage_object_client';
 
-export const plugin = (ctx: PluginInitializerContext) => {
-  return new ConsoleServerPlugin();
+export const create = (storage: Storage): ObjectStorageClient => {
+  return {
+    text: new LocalObjectStorage<TextObject>(storage, type),
+  };
 };

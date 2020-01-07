@@ -17,6 +17,18 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { TextObject } from './text_object';
 
-export const anonymousUserId = schema.string({ defaultValue: '' });
+export interface IdObject {
+  id: string;
+}
+
+export interface ObjectStorage<A extends IdObject> {
+  create(obj: Omit<A, 'id'>): Promise<A>;
+  update(obj: A): Promise<void>;
+  findAll(): Promise<A[]>;
+}
+
+export interface ObjectStorageClient {
+  text: ObjectStorage<TextObject>;
+}

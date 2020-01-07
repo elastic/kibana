@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
-
 export const type = 'text-object';
 
-export interface TextObject extends SavedObjectAttributes {
+export interface TextObject {
   createdAt: number;
   updatedAt: number;
   text: string;
-  userId: string;
   id: string;
 }

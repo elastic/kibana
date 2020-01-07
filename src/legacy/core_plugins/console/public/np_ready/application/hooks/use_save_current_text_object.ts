@@ -21,13 +21,13 @@ import { useRef, useCallback } from 'react';
 import { throttle } from 'lodash';
 import { useEditorReadContext, useServicesContext } from '../contexts';
 
-const WAIT_MS = 1000;
+const WAIT_MS = 500;
 
 export const useSaveCurrentTextObject = () => {
   const promiseChainRef = useRef(Promise.resolve());
 
   const {
-    services: { db },
+    services: { objectStorageClient },
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
@@ -37,11 +37,13 @@ export const useSaveCurrentTextObject = () => {
       (text: string) => {
         const { current: promise } = promiseChainRef;
         if (!currentTextObject) return;
-        promise.finally(() => db.text.update({ ...currentTextObject, text }));
+        promise.finally(() =>
+          objectStorageClient.text.update({ ...currentTextObject, text, updatedAt: Date.now() })
+        );
       },
       WAIT_MS,
       { trailing: true }
     ),
-    [db, currentTextObject]
+    [objectStorageClient, currentTextObject]
   );
 };

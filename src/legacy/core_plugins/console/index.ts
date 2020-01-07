@@ -23,11 +23,6 @@ import { resolve, join } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
-import { plugin } from './server/np_ready';
-
-// @ts-ignore
-import mappings from './mappings.json';
-
 // @ts-ignore
 import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
 // @ts-ignore
@@ -180,10 +175,6 @@ export default function(kibana: any) {
           return resolveApi(version, apis.split(','), h);
         },
       });
-
-      const instance = plugin({} as any);
-      instance.setup(server.newPlatform.setup.core, server.newPlatform.setup.plugins);
-      instance.setup(server.newPlatform.start.core, server.newPlatform.start.plugins);
     },
 
     uiExports: {
@@ -191,7 +182,6 @@ export default function(kibana: any) {
       styleSheetPaths: resolve(npSrc, 'application/styles/index.scss'),
       injectDefaultVars: () => defaultVars,
       noParse: [join(npSrc, 'application/models/legacy_core_editor/mode/worker/worker.js')],
-      mappings,
     },
   } as any);
 }

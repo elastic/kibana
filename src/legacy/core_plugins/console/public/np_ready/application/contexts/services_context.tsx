@@ -20,7 +20,7 @@
 import React, { createContext, useContext } from 'react';
 import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
-import { ObjectsClient } from '../../lib/objects_client';
+import { ObjectStorageClient } from '../../../../common/types';
 
 interface ContextValue {
   services: {
@@ -28,7 +28,7 @@ interface ContextValue {
     storage: Storage;
     settings: Settings;
     notifications: NotificationsSetup;
-    objectsClient: ObjectsClient;
+    objectStorageClient: ObjectStorageClient;
   };
   elasticsearchUrl: string;
   docLinkVersion: string;

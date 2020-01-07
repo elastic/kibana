@@ -22,6 +22,7 @@ import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import * as localStorageObjectClient from '../lib/local_storage_object_client';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -42,6 +43,7 @@ export function boot(deps: {
   });
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
+  const objectStorageClient = localStorageObjectClient.create(storage);
   settingsRef = settings;
 
   return (
@@ -50,7 +52,7 @@ export function boot(deps: {
         value={{
           elasticsearchUrl,
           docLinkVersion,
-          services: { storage, history, settings, notifications, db },
+          services: { storage, history, settings, notifications, objectStorageClient },
         }}
       >
         <RequestContextProvider>

@@ -16,18 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { HttpSetup } from 'src/core/public';
-import { TEXT_OBJECT_API_PATH } from '../../../common/constants';
-import { TextObject } from '../../../common/text_object';
 
-export type ObjectsClient = ReturnType<typeof create>;
+import { History } from '../../../services';
+import { ObjectStorageClient } from '../../../../../common/types';
 
-export const create = (http: HttpSetup, anonymousUser: string) => {
-  return {
-    text: {
-      async create(object: Exclude<TextObject, 'id'>) {
-        await http.put(TEXT_OBJECT_API_PATH, { body: JSON.stringify(object) });
-      },
-    },
-  };
-};
+export interface Dependencies {
+  history: History;
+  objectStorageClient: ObjectStorageClient;
+}
+
+/**
+ * Once off migration to new text object data structure
+ */
+export async function migrateToTextObjects({
+  history,
+  objectStorageClient: objectStorageClient,
+}: Dependencies): Promise<void> {
+  const legacyTextContent = history.getLegacySavedEditorState();
+
+  if (!legacyTextContent) return;
+
+  await objectStorageClient.text.create({
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    text: legacyTextContent.content,
+  });
+
+  history.deleteLegacySavedEditorState();
+}
