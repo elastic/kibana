@@ -7,7 +7,12 @@
 import { RequestFacade } from '../../../types';
 
 export function makeRequestFacade(request: RequestFacade): RequestFacade {
+  // This condition is for unit tests
+  const getSavedObjectsClient = request.getSavedObjectsClient
+    ? request.getSavedObjectsClient.bind(request)
+    : request.getSavedObjectsClient;
   return {
+    getSavedObjectsClient,
     headers: request.headers,
     auth: request.auth, // for getUser
     params: request.params,
@@ -15,7 +20,6 @@ export function makeRequestFacade(request: RequestFacade): RequestFacade {
     query: request.query,
     pre: request.pre,
     getBasePath: request.getBasePath,
-    getSavedObjectsClient: request.getSavedObjectsClient.bind(request),
     route: request.route,
   };
 }

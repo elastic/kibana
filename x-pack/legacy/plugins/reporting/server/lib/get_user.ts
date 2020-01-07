@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
 import { RequestFacade, ServerFacade } from '../../types';
 
 export function getUserFactory(server: ServerFacade) {
@@ -13,7 +14,7 @@ export function getUserFactory(server: ServerFacade) {
     }
 
     try {
-      return await server.plugins.security.getUser(request);
+      return await server.plugins.security.getUser((request as unknown) as Request);
     } catch (err) {
       server.log(['reporting', 'getUser', 'debug'], err);
       return null;
