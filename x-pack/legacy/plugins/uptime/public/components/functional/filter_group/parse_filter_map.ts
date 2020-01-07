@@ -13,15 +13,27 @@ interface FilterSlices {
   [key: string]: any;
 }
 
-export const parseFiltersMap = (filterMapString: string, fields: FilterField[]): FilterSlices => {
+/**
+ * These are the only filter fields we are looking to catch at the moment.
+ * If your code needs to support custom fields, introduce a second parameter to
+ * `parseFiltersMap` to take a list of FilterField objects.
+ */
+const filterWhitelist: FilterField[] = [
+  { name: 'ports', fieldName: 'url.port' },
+  { name: 'locations', fieldName: 'observer.geo.name' },
+  { name: 'tags', fieldName: 'tags' },
+  { name: 'schemes', fieldName: 'monitor.type' },
+];
+
+export const parseFiltersMap = (filterMapString: string): FilterSlices => {
   const filterSlices: FilterSlices = {};
   try {
     const map = new Map<string, string[]>(JSON.parse(filterMapString));
-    fields.forEach(({ name, fieldName }) => {
+    filterWhitelist.forEach(({ name, fieldName }) => {
       filterSlices[name] = map.get(fieldName) ?? [];
     });
     return filterSlices;
-  } catch (e) {
+  } catch {
     throw new Error('Unable to parse invalid filter string');
   }
 };

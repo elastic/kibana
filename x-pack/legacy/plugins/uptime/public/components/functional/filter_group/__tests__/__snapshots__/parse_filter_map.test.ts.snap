@@ -2,14 +2,14 @@
 
 exports[`parseFiltersMap provides values from valid filter string 1`] = `
 Object {
-  "location": Array [
+  "locations": Array [
     "us-east-2",
   ],
   "ports": Array [
     "5601",
     "80",
   ],
-  "scheme": Array [
+  "schemes": Array [
     "http",
     "tcp",
   ],

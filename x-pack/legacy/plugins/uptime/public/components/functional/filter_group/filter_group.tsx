@@ -152,13 +152,6 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   );
 };
 
-const filterWhitelist = [
-  { name: 'ports', fieldName: 'url.port' },
-  { name: 'locations', fieldName: 'observer.geo.name' },
-  { name: 'tags', fieldName: 'tags' },
-  { name: 'schemes', fieldName: 'monitor.type' },
-];
-
 export const Container: React.FC<Props> = ({
   currentFilter,
   esKuery,
@@ -174,7 +167,7 @@ export const Container: React.FC<Props> = ({
   const [getUrlParams] = useUrlParams();
   const { filters: urlFilters } = getUrlParams();
   useEffect(() => {
-    const filterSelections = parseFiltersMap(urlFilters, filterWhitelist);
+    const filterSelections = parseFiltersMap(urlFilters);
     loadFilterGroup({
       dateRangeStart,
       dateRangeEnd,
@@ -185,7 +178,7 @@ export const Container: React.FC<Props> = ({
       statusFilter,
       tags: filterSelections.tags ?? [],
     });
-  }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter]);
+  }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter, urlFilters, loadFilterGroup]);
   return (
     <PresentationalComponent
       currentFilter={currentFilter}

@@ -10,20 +10,12 @@ describe('parseFiltersMap', () => {
   it('provides values from valid filter string', () => {
     expect(
       parseFiltersMap(
-        '[["url.port",["5601","80"]],["observer.geo.name",["us-east-2"]],["monitor.type",["http","tcp"]]]',
-        [
-          { name: 'location', fieldName: 'observer.geo.name' },
-          { name: 'ports', fieldName: 'url.port' },
-          { name: 'scheme', fieldName: 'monitor.type' },
-          { name: 'tags', fieldName: 'tags' },
-        ]
+        '[["url.port",["5601","80"]],["observer.geo.name",["us-east-2"]],["monitor.type",["http","tcp"]]]'
       )
     ).toMatchSnapshot();
   });
 
   it('returns an empty object for invalid filter', () => {
-    expect(() =>
-      parseFiltersMap('some invalid string', [{ name: 'location', fieldName: 'observer.geo.name' }])
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => parseFiltersMap('some invalid string')).toThrowErrorMatchingSnapshot();
   });
 });
