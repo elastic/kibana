@@ -11,6 +11,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CategorizationAnalyzer } from '../../../../../../../services/ml_server_info';
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
+import {
+  NUMBER_OF_CATEGORY_EXAMPLES,
+  CATEGORY_EXAMPLES_MULTIPLIER,
+} from '../../../../../../../../../common/constants/new_job';
 
 type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
 
@@ -62,8 +66,11 @@ const PercentageText: FC<{ examplesValid: number }> = ({ examplesValid }) => (
   <div>
     <FormattedMessage
       id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldPercentage"
-      defaultMessage="{percentage}% of field values tested contain valid tokens."
-      values={{ percentage: Math.floor(examplesValid * 100) }}
+      defaultMessage="{number} field values analyzed, {percentage}% contain valid tokens."
+      values={{
+        number: NUMBER_OF_CATEGORY_EXAMPLES * CATEGORY_EXAMPLES_MULTIPLIER,
+        percentage: Math.floor(examplesValid * 100),
+      }}
     />
   </div>
 );

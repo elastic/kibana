@@ -5,6 +5,7 @@
  */
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
+import { CATEGORY_EXAMPLES_MULTIPLIER } from '../../../../common/constants/new_job';
 
 type callWithRequestType = (action: string, params: any) => Promise<any>;
 
@@ -131,11 +132,10 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     end: number,
     analyzer?: any
   ) {
-    const MULTIPLIER = 20;
     const examples = await categorizationExamples(
       indexPatternTitle,
       query,
-      size * MULTIPLIER,
+      size * CATEGORY_EXAMPLES_MULTIPLIER,
       categorizationFieldName,
       timeField,
       start,
@@ -151,7 +151,10 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     return {
       valid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
       examples: sortedExamples
-        .filter((e, i) => i / MULTIPLIER - Math.floor(i / MULTIPLIER) === 0)
+        .filter(
+          (e, i) =>
+            i / CATEGORY_EXAMPLES_MULTIPLIER - Math.floor(i / CATEGORY_EXAMPLES_MULTIPLIER) === 0
+        )
         .sort((a, b) => a.origIndex - b.origIndex)
         .map(e => ({ text: e.text, tokens: e.tokens })),
     };

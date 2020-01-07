@@ -24,3 +24,6 @@ export const DEFAULT_BUCKET_SPAN = '15m';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
+
+export const NUMBER_OF_CATEGORY_EXAMPLES = 5;
+export const CATEGORY_EXAMPLES_MULTIPLIER = 20;

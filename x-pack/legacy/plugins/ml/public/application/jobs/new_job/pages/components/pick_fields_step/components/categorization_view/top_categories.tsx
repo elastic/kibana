@@ -11,6 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
+import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/new_job';
 
 export const TopCategories: FC = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
@@ -24,7 +25,7 @@ export const TopCategories: FC = () => {
   }
 
   async function loadTopCats() {
-    const results = await ml.jobs.topCategories(jobCreator.jobId, 5);
+    const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
     setTableRow(
       results.categories.map(c => ({
         count: c.count,
