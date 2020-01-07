@@ -7,22 +7,25 @@
 import { initTelemetryCollection } from './maps_usage_collector';
 
 describe('buildCollectorObj#fetch', () => {
+  let server;
   let makeUsageCollectorStub;
   let registerStub;
-  let usageCollection;
 
   beforeEach(() => {
     makeUsageCollectorStub = jest.fn();
     registerStub = jest.fn();
-    usageCollection = {
-      makeUsageCollector: makeUsageCollectorStub,
-      registerCollector: registerStub,
+    server = {
+      usage: {
+        collectorSet: {
+          makeUsageCollector: makeUsageCollectorStub,
+          register: registerStub,
+        },
+      },
     };
   });
 
   test('makes and registers maps usage collector', async () => {
-    const serverPlaceholder = {};
-    initTelemetryCollection(usageCollection, serverPlaceholder);
+    initTelemetryCollection(server);
 
     expect(registerStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
