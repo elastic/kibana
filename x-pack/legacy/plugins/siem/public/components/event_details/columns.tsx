@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 

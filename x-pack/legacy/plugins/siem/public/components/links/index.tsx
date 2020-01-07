@@ -5,7 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { getHostDetailsUrl, getIPDetailsUrl } from '../link_to';
