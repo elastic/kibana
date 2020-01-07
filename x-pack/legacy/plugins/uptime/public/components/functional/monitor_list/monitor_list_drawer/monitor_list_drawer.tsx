@@ -6,7 +6,6 @@
 
 import React, { useEffect } from 'react';
 import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { get } from 'lodash';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { MonitorSummary } from '../../../../../common/graphql/types';
@@ -16,6 +15,8 @@ import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
+import { useUrlParams } from '../../../../hooks';
+import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
 import { MonitorListActionsPopover } from '../monitor_list_actions_popover';
 
 const ContainerDiv = styled.div`
@@ -50,19 +51,20 @@ export function MonitorListDrawerComponent({
   monitorDetails,
 }: MonitorListDrawerProps) {
   const monitorId = summary?.monitor_id;
+  const [getUrlParams] = useUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
+
   useEffect(() => {
-    if (monitorId) {
-      loadMonitorDetails(monitorId);
-    }
-  }, [loadMonitorDetails, monitorId]);
+    loadMonitorDetails({
+      dateStart,
+      dateEnd,
+      monitorId,
+    });
+  }, [dateStart, dateEnd, monitorId, loadMonitorDetails]);
 
-  if (!summary || !summary.state.checks) {
-    return null;
-  }
+  const monitorUrl = summary?.state?.url?.full || '';
 
-  const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
-
-  return (
+  return summary && summary.state.checks ? (
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
@@ -87,7 +89,7 @@ export function MonitorListDrawerComponent({
         />
       )}
     </ContainerDiv>
-  );
+  ) : null;
 }
 
 const mapStateToProps = (state: AppState, { summary }: any) => ({
@@ -95,7 +97,8 @@ const mapStateToProps = (state: AppState, { summary }: any) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (monitorId: string) => dispatch(fetchMonitorDetails(monitorId)),
+  loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
+    dispatch(fetchMonitorDetails(actionPayload)),
 });
 
 export const MonitorListDrawer = connect(

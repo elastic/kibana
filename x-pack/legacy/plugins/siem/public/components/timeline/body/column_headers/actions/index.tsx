@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
