@@ -13,8 +13,9 @@ import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { I18nStart, ChromeBreadcrumb } from 'src/core/public';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
+import { I18nStart, ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
@@ -37,15 +38,14 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   client: UMGraphQLClient;
+  core: LegacyCoreStart;
   darkMode: boolean;
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   kibanaBreadcrumbs: ChromeBreadcrumb[];
-  logMonitorPageLoad: () => void;
-  logOverviewPageLoad: () => void;
+  plugins: PluginsStart;
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
@@ -55,18 +55,17 @@ export interface UptimeAppProps {
 
 const Application = (props: UptimeAppProps) => {
   const {
-    autocomplete,
     basePath,
     canSave,
     client,
+    core,
     darkMode,
     commonlyUsedRanges,
     i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
     isLogsAvailable,
-    logMonitorPageLoad,
-    logOverviewPageLoad,
+    plugins,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
@@ -154,45 +153,44 @@ const Application = (props: UptimeAppProps) => {
   return (
     <i18nCore.Context>
       <ReduxProvider store={store}>
-        <Router basename={routerBasename}>
-          <Route
-            path="/"
-            render={(rootRouteProps: RouteComponentProps) => {
-              return (
-                <ApolloProvider client={client}>
-                  <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
-                    <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
-                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <main>
-                          <Switch>
-                            <Route path="/monitor/:monitorId/:location?">
-                              <MonitorPage
-                                logMonitorPageLoad={logMonitorPageLoad}
-                                setBreadcrumbs={setBreadcrumbs}
-                                refreshApp={refreshApp}
-                                commonlyUsedRanges={commonlyUsedRanges}
-                              />
-                            </Route>
-                            <Route path="/">
-                              <OverviewPage
-                                autocomplete={autocomplete}
-                                basePath={basePath}
-                                logOverviewPageLoad={logOverviewPageLoad}
-                                setBreadcrumbs={setBreadcrumbs}
-                                commonlyUsedRanges={commonlyUsedRanges}
-                              />
-                            </Route>
-                            <Route component={NotFoundPage} />
-                          </Switch>
-                        </main>
-                      </EuiPage>
-                    </UptimeSettingsContext.Provider>
-                  </UptimeRefreshContext.Provider>
-                </ApolloProvider>
-              );
-            }}
-          />
-        </Router>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <Router basename={routerBasename}>
+            <Route
+              path="/"
+              render={(rootRouteProps: RouteComponentProps) => {
+                return (
+                  <ApolloProvider client={client}>
+                    <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
+                      <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <main>
+                            <Switch>
+                              <Route path="/monitor/:monitorId/:location?">
+                                <MonitorPage
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  commonlyUsedRanges={commonlyUsedRanges}
+                                />
+                              </Route>
+                              <Route path="/">
+                                <OverviewPage
+                                  autocomplete={plugins.data.autocomplete}
+                                  basePath={basePath}
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  commonlyUsedRanges={commonlyUsedRanges}
+                                />
+                              </Route>
+                              <Route component={NotFoundPage} />
+                            </Switch>
+                          </main>
+                        </EuiPage>
+                      </UptimeSettingsContext.Provider>
+                    </UptimeRefreshContext.Provider>
+                  </ApolloProvider>
+                );
+              }}
+            />
+          </Router>
+        </KibanaContextProvider>
       </ReduxProvider>
     </i18nCore.Context>
   );

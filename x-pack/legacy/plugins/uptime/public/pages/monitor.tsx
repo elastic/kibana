@@ -5,28 +5,22 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../infra/public';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 import { PageHeader } from './page_header';
 
 interface MonitorPageProps {
-  logMonitorPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
-  refreshApp: any;
   commonlyUsedRanges: any;
 }
 
-export const MonitorPage = ({
-  logMonitorPageLoad,
-  setBreadcrumbs,
-  commonlyUsedRanges,
-}: MonitorPageProps) => {
+export const MonitorPage = ({ setBreadcrumbs, commonlyUsedRanges }: MonitorPageProps) => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
@@ -46,9 +40,7 @@ export const MonitorPage = ({
     monitorId,
   };
 
-  useEffect(() => {
-    logMonitorPageLoad();
-  }, [logMonitorPageLoad]);
+  useUptimeTelemetry(UptimePage.Monitor);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });

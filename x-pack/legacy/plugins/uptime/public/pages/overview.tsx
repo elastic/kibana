@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import styled from 'styled-components';
 import {
   EmptyState,
@@ -17,10 +17,9 @@ import {
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 import { PageHeader } from './page_header';
@@ -29,7 +28,6 @@ interface OverviewPageProps {
   commonlyUsedRanges: any;
   basePath: string;
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -52,7 +50,6 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 export const OverviewPage = ({
   basePath,
   autocomplete,
-  logOverviewPageLoad,
   setBreadcrumbs,
   commonlyUsedRanges,
 }: Props) => {
@@ -68,11 +65,8 @@ export const OverviewPage = ({
     filters: urlFilters,
   } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
-
-  useEffect(() => {
-    getIndexPattern(basePath, setIndexPattern);
-    logOverviewPageLoad();
-  }, [basePath, logOverviewPageLoad]);
+  useUptimeTelemetry(UptimePage.Overview);
+  useIndexPattern(setIndexPattern);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
