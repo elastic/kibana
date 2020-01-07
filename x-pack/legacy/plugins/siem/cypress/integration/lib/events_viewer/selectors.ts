@@ -19,6 +19,8 @@ export const HEADER_SUBTITLE = `${EVENTS_VIEWER_PANEL} [data-test-subj="header-p
 /** The inspect query modal */
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 
+export const CLOSE_MODAL = '[data-test-subj="modal-inspect-close"]';
+
 /** The inspect query button that launches the inspect query modal */
 export const INSPECT_QUERY = `${EVENTS_VIEWER_PANEL} [data-test-subj="inspect-icon-button"]`;
 
