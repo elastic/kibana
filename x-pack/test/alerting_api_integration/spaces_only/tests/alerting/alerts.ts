@@ -75,6 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     it('should schedule task, run alert and schedule actions', async () => {
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFiringAction({ reference });
+      const alertId = response.body.id;
 
       expect(response.statusCode).to.eql(200);
       const alertTestRecord = (
@@ -87,6 +88,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         params: {
           index: ES_TEST_INDEX_NAME,
           reference,
+        },
+        alertInfo: {
+          alertId,
+          spaceId: Spaces.space1,
+          namespace: Spaces.space1,
+          name: 'abc',
+          tags: [],
         },
       });
       const actionTestRecord = (

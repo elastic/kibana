@@ -96,7 +96,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference);
-              await alertUtils.disable(response.body.id);
+
+              const alertId = response.body.id;
+              await alertUtils.disable(alertId);
               await taskManagerUtils.waitForIdle(testStart);
 
               // Ensure only 1 alert executed with proper params
@@ -112,6 +114,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
+                },
+                alertInfo: {
+                  alertId,
+                  spaceId: space.id,
+                  namespace: space.id,
+                  name: 'abc',
+                  tags: [],
+                  createdBy: user.fullName,
+                  updatedBy: user.fullName,
                 },
               });
 

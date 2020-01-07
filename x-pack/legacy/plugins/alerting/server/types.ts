@@ -114,7 +114,7 @@ export interface RawAlert extends SavedObjectAttributes {
   mutedInstanceIds: string[];
 }
 
-export type AlertInfoExecutionParams = Pick<
+export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'

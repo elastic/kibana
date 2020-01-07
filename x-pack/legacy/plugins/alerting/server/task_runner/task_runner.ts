@@ -13,14 +13,7 @@ import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import {
-  AlertType,
-  RawAlert,
-  IntervalSchedule,
-  Services,
-  State,
-  AlertInfoExecutionParams,
-} from '../types';
+import { AlertType, RawAlert, IntervalSchedule, Services, State, AlertInfoParams } from '../types';
 import { promiseResult, map } from '../lib/result_type';
 
 type AlertInstances = Record<string, AlertInstance>;
@@ -125,7 +118,11 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    {
+    alertInfoParams: AlertInfoParams,
+    executionHandler: ReturnType<typeof createExecutionHandler>,
+    spaceId: string
+  ): Promise<State> {
+    const {
       params,
       throttle,
       muteAll,
@@ -134,10 +131,7 @@ export class TaskRunner {
       tags,
       createdBy,
       updatedBy,
-    }: AlertInfoExecutionParams,
-    executionHandler: ReturnType<typeof createExecutionHandler>,
-    spaceId: string
-  ): Promise<State> {
+    } = alertInfoParams;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },

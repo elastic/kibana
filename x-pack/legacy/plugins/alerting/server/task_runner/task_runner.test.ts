@@ -75,6 +75,10 @@ describe('Task Runner', () => {
       enabled: true,
       alertTypeId: '123',
       schedule: { interval: '10s' },
+      name: 'alert-name',
+      tags: ['alert-', '-tags'],
+      createdBy: 'alert-creator',
+      updatedBy: 'alert-updater',
       mutedInstanceIds: [],
       params: {
         bar: true,
@@ -138,6 +142,10 @@ describe('Task Runner', () => {
                     `);
     expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
     expect(call.state).toMatchInlineSnapshot(`Object {}`);
+    expect(call.name).toBe('alert-name');
+    expect(call.tags).toEqual(['alert-', '-tags']);
+    expect(call.createdBy).toBe('alert-creator');
+    expect(call.updatedBy).toBe('alert-updater');
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.callCluster).toBeTruthy();
     expect(call.services).toBeTruthy();
