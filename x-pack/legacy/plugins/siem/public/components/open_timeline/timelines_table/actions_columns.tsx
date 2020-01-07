@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';

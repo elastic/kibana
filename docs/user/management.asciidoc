@@ -13,8 +13,6 @@ visualizations, and dashboards.
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/index-patterns.asciidoc[]
-
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
@@ -40,5 +38,3 @@ include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
 
 include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
-
-

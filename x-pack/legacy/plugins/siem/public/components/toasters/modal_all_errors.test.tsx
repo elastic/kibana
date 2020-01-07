@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 
-import * as React from 'react';
+import React from 'react';
 
 import { ModalAllErrors } from './modal_all_errors';
 import { AppToast } from '.';
