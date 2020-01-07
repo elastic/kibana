@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import { OVERVIEW_PAGE } from '../../lib/urls';
 import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
 import { HOST_STATS, NETWORK_STATS, STAT_AUDITD } from '../../lib/overview/selectors';
@@ -15,10 +14,6 @@ describe('Overview Page', () => {
     clearFetch();
     stubApi('overview');
     loginAndWaitForPage(OVERVIEW_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('Host and Network stats render with correct values', () => {
