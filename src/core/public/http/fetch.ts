@@ -133,7 +133,11 @@ export class Fetch {
     try {
       response = await window.fetch(request);
     } catch (err) {
-      throw new HttpFetchError(err.message, request);
+      if (err.name === 'AbortError') {
+        throw err;
+      } else {
+        throw new HttpFetchError(err.message, request);
+      }
     }
 
     const contentType = response.headers.get('Content-Type') || '';
