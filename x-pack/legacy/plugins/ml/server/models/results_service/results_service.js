@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import _ from 'lodash';
 import moment from 'moment';
 
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -403,152 +403,12 @@ export function resultsServiceProvider(callWithRequest) {
     return definition;
   }
 
-  /**
-   * Gets an object for aggregation query to retrieve field name and values.
-   * @param {string} fieldType - Field type, e.g. partition_field, over_field or by_field
-   * @param {string} query - Optional query string for partition value
-   * @returns {Object}
-   */
-  function getFieldAgg(fieldType, query) {
-    const AGG_SIZE = 100;
-
-    const fieldNameKey = `${fieldType}_name`;
-    const fieldValueKey = `${fieldType}_value`;
-
-    return {
-      [fieldNameKey]: {
-        terms: {
-          field: fieldNameKey,
-        },
-      },
-      [fieldValueKey]: {
-        filter: {
-          wildcard: {
-            [fieldValueKey]: {
-              value: query ? `*${query}*` : '*',
-            },
-          },
-        },
-        aggs: {
-          values: {
-            terms: {
-              size: AGG_SIZE,
-              field: fieldValueKey,
-            },
-          },
-        },
-      },
-    };
-  }
-
-  /**
-   * Gets formatted result for particular field from aggregation response.
-   * @param {string} fieldType - Field type, e.g. partition_field, over_field or by_field
-   * @param {Object} aggs - Aggregation response
-   * @returns {Object}
-   */
-  function getFieldObject(fieldType, aggs) {
-    const fieldNameKey = `${fieldType}_name`;
-    const fieldValueKey = `${fieldType}_value`;
-
-    return aggs[fieldNameKey].buckets.length > 0
-      ? {
-          [fieldType]: {
-            name: aggs[fieldNameKey].buckets[0].key,
-            values: aggs[fieldValueKey].values.buckets.map(({ key }) => key),
-          },
-        }
-      : {};
-  }
-
-  /**
-   * Gets the record of partition fields with possible values that fit the provided queries.
-   * @param {string} jobId - Job ID
-   * @param {Object} searchTerm - object of queries for partition fields, e.g. { partition_field: 'query' }
-   * @param {Object} criteriaFields - key - value pairs of the term field, e.g. { job_id: 'ml-job', detector_index: 0 }
-   * @param {number} earliestMs
-   * @param {number} latestMs
-   * @returns {Promise<*>}
-   */
-  async function getPartitionFieldsValues(
-    jobId,
-    searchTerm = {},
-    criteriaFields,
-    earliestMs,
-    latestMs
-  ) {
-    const jobsResponse = await callWithRequest('ml.jobs', { jobId: [jobId] });
-    if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
-      throw Boom.notFound(`Job with the id "${jobId}" not found`);
-    }
-
-    const job = jobsResponse.jobs[0];
-    // eslint-disable-next-line camelcase
-    const isModelPlotEnabled = job?.model_plot_config?.enabled;
-
-    const fields = ['partition_field', 'over_field', 'by_field'];
-
-    const resp = await callWithRequest('search', {
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...criteriaFields.map(({ fieldName, fieldValue }) => {
-                return {
-                  term: {
-                    [fieldName]: fieldValue,
-                  },
-                };
-              }),
-              {
-                term: {
-                  job_id: jobId,
-                },
-              },
-              {
-                range: {
-                  timestamp: {
-                    gte: earliestMs,
-                    lte: latestMs,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
-              {
-                term: {
-                  result_type: isModelPlotEnabled ? 'model_plot' : 'record',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          ...fields.reduce((acc, key) => {
-            return {
-              ...acc,
-              ...getFieldAgg(key, searchTerm[key]),
-            };
-          }, {}),
-        },
-      },
-    });
-
-    return fields.reduce((acc, key) => {
-      return {
-        ...acc,
-        ...getFieldObject(key, resp.aggregations),
-      };
-    }, {});
-  }
-
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues,
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callWithRequest),
   };
 }
