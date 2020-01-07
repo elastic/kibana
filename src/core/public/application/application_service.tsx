@@ -19,15 +19,17 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
-import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
 import { CapabilitiesService, Capabilities } from './capabilities';
 import {
+  AppBase,
   App,
   LegacyApp,
   AppMount,
@@ -54,19 +56,19 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  injectedMetadata: InjectedMetadataStart;
   http: HttpStart;
 }
 
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
 const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
   mount.length === 2;
-const filterAvailable = (map: Map<string, any>, capabilities: Capabilities) =>
-  new Map(
-    [...map].filter(
+function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
+  return new Map(
+    [...m].filter(
       ([id]) => capabilities.navLinks[id] === undefined || capabilities.navLinks[id] === true
     )
   );
+}
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') =>
@@ -74,9 +76,11 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
     .replace(/\/{2,}/g, '/') // Remove duplicate slashes
     .replace(/\/$/, ''); // Remove trailing slash
 
+/*
 function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
   return (app as AppBox).mount === undefined;
 }
+*/
 
 const allApplicationsFilter = '__ALL__';
 
@@ -90,11 +94,12 @@ interface AppUpdaterWrapper {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App>();
-  private readonly legacyApps = new Map<string, LegacyApp>();
+  private readonly apps = new Map<string, App | LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject();
   private registrationClosed = false;
   private history?: History<any>;
@@ -117,6 +122,7 @@ export class ApplicationService {
     this.navigate = (url, state) =>
       // basePath not needed here because `history` is configured with basename
       this.history ? this.history.push(url, state) : redirectTo(basePath.prepend(url));
+
     this.mountContext = context.createContextContainer();
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
@@ -166,52 +172,37 @@ export class ApplicationService {
           this.currentAppId$.next(app.id);
           return unmount;
         };
-        this.apps.set(app.id, app);
+
+        const { status, updater$, ...appProps } = app;
+        this.apps.set(app.id, {
+          ...appProps,
+          status: app.status !== undefined ? app.status : AppStatus.accessible,
+          legacy: false,
+        });
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
+        }
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
           mount,
           unmountBeforeMounting: false,
         });
-
-        ////
-        const { status, updater$, ...appProps } = app;
-        const appBox: AppBox = {
-          app: {
-            ...appProps,
-            status: app.status !== undefined ? app.status : AppStatus.accessible,
-            legacy: false,
-          },
-          mount: this.mountContext!.createHandler(plugin, app.mount),
-        };
-        this.apps.set(app.id, appBox);
-        if (updater$) {
-          registerStatusUpdater(app.id, updater$);
-        }
-        ////
       },
       registerLegacyApp: app => {
         const appRoute = `/app/${app.id.split(':')[0]}`;
 
         if (this.registrationClosed) {
           throw new Error('Applications cannot be registered after "setup"');
-        } else if (this.legacyApps.has(app.id)) {
-          throw new Error(`A legacy application is already registered with the id "${app.id}"`);
+        } else if (this.apps.has(app.id)) {
+          throw new Error(`An application is already registered with the id "${app.id}"`);
         } else if (basename && appRoute!.startsWith(basename)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
         const appBasePath = basePath.prepend(appRoute);
         const mount: LegacyAppMounter = () => redirectTo(appBasePath);
-        this.legacyApps.set(app.id, app);
-        this.mounters.set(app.id, {
-          appRoute,
-          appBasePath,
-          mount,
-          unmountBeforeMounting: true,
-        });
 
-        ////
         const { status, updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
@@ -221,14 +212,19 @@ export class ApplicationService {
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
         }
-        ///
+        this.mounters.set(app.id, {
+          appRoute,
+          appBasePath,
+          mount,
+          unmountBeforeMounting: true,
+        });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
         registerStatusUpdater(allApplicationsFilter, appUpdater$),
     };
   }
 
-  public async start({ injectedMetadata, http }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -240,8 +236,8 @@ export class ApplicationService {
     });
     const availableMounters = filterAvailable(this.mounters, capabilities);
 
-    ////
-    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(enabledApps);
+    const enabledApps = filterAvailable(this.apps, capabilities);
+    const availableApps$ = new BehaviorSubject(enabledApps);
 
     combineLatest([
       of(enabledApps),
@@ -256,18 +252,16 @@ export class ApplicationService {
         })
       )
       .subscribe(apps => availableApps$.next(apps));
-    ////
 
     return {
-      availableApps: filterAvailable(this.apps, capabilities),
-      availableLegacyApps: filterAvailable(this.legacyApps, capabilities),
+      availableApps$,
       capabilities,
       currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        ////
+        /*
         if (this.apps.get(appId) === undefined) {
           throw new Error(`Trying to navigate to an unknown application: ${appId}`);
         }
@@ -275,7 +269,7 @@ export class ApplicationService {
         if (app === undefined || app.status !== AppStatus.accessible) {
           throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
         }
-        ////
+         */
         this.navigate!(getAppUrl(availableMounters, appId, path), state);
         this.currentAppId$.next(appId);
       },

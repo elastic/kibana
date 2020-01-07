@@ -213,13 +213,14 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps, navigateToApp } = startDeps.application;
+      const { availableApps$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
+      const availableApps = await availableApps$.pipe(take(1)).toPromise();
       [...availableApps.keys()].forEach(appId => navigateToApp(appId));
       service.stop();
 
