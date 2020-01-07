@@ -139,23 +139,23 @@ const FlyoutPaneComponent = React.memo<Props>(
       [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
     );
     return (
-      <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
+      <EuiFlyoutContainer data-test-subj="flyout-pane" headerHeight={headerHeight} width={width}>
         <EuiFlyout
           aria-label={i18n.TIMELINE_DESCRIPTION}
           className="timeline-flyout"
           data-test-subj="eui-flyout"
           hideCloseButton={true}
           maxWidth={`${maxWidthPercent}%`}
-          onClose={onClose}
           size="l"
+          onClose={onClose}
         >
           <Resizeable
             handle={
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
             }
             id={timelineId}
-            onResize={onResize}
             render={renderFlyout}
+            onResize={onResize}
           />
           <EuiFlyoutHeader
             className="timeline-flyout-header"
@@ -163,12 +163,12 @@ const FlyoutPaneComponent = React.memo<Props>(
             hasBorder={false}
           >
             <FlyoutHeaderWithCloseButton
-              onClose={onClose}
               timelineId={timelineId}
               usersViewing={usersViewing}
+              onClose={onClose}
             />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+          <EuiFlyoutBody className="timeline-flyout-body" data-test-subj="eui-flyout-body">
             {children}
           </EuiFlyoutBody>
         </EuiFlyout>

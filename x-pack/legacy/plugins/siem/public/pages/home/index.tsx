@@ -58,7 +58,7 @@ const calculateFlyoutHeight = ({
 export const HomePage: React.FC = () => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
+      <WrappedByAutoSizer ref={measureRef} data-test-subj="wrapped-by-auto-sizer">
         <HeaderGlobal />
 
         <main data-test-subj="pageContainer">
@@ -87,7 +87,7 @@ export const HomePage: React.FC = () => (
                 </Flyout>
 
                 <Switch>
-                  <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
+                  <Redirect from="/" to={`/${SiemPageName.overview}`} exact />
                   <Route
                     path={`/:pageName(${SiemPageName.overview})`}
                     render={() => <Overview />}

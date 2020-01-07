@@ -39,7 +39,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         detailName: undefined,
       }).noSearch.definedQuery;
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hook={args => useUrlStateHooks(args)} hookProps={mockProps} />
       );
 
       const newUrlState = {
@@ -90,7 +90,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         detailName: undefined,
       }).noSearch.undefinedQuery;
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hook={args => useUrlStateHooks(args)} hookProps={mockProps} />
       );
       const newUrlState = {
         ...mockProps.urlState,
@@ -122,7 +122,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       }).noSearch.undefinedQuery;
 
       const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+        <HookWrapper hook={args => useUrlStateHooks(args)} hookProps={mockProps} />
       );
       const newUrlState = {
         ...mockProps.urlState,
@@ -154,7 +154,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .noSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hook={args => useUrlStateHooks(args)} hookProps={mockProps} />);
 
             expect(mockHistory.replace.mock.calls[0][0]).toEqual({
               hash: '',
@@ -191,7 +191,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             detailName: undefined,
           }).noSearch.definedQuery;
           const wrapper = mount(
-            <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+            <HookWrapper hook={args => useUrlStateHooks(args)} hookProps={mockProps} />
           );
 
           expect(

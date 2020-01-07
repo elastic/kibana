@@ -108,7 +108,7 @@ describe('ZeekSignature', () => {
     });
 
     test('should render value and link', () => {
-      const wrapper = mount(<Link value={'abcdefg'} link={'somethingelse'} />);
+      const wrapper = mount(<Link link={'somethingelse'} value={'abcdefg'} />);
       expect(wrapper.find('a').prop('href')).toEqual(
         'https://www.google.com/search?q=somethingelse'
       );
@@ -119,7 +119,7 @@ describe('ZeekSignature', () => {
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+          <DraggableZeekElement field="zeek.notice" id="id-123" value={null} />
         </TestProviders>
       );
       expect(
@@ -133,7 +133,7 @@ describe('ZeekSignature', () => {
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+          <DraggableZeekElement field="zeek.notice" id="id-123" value={'mynote'} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -143,10 +143,10 @@ describe('ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement
-            id="id-123"
             field="zeek.notice"
-            value={'mynote'}
+            id="id-123"
             stringRenderer={value => `->${value}<-`}
+            value={'mynote'}
           />
         </TestProviders>
       );
@@ -158,7 +158,7 @@ describe('ZeekSignature', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
+            <DraggableZeekElement field={field} id="id-123" value={'the people you love'} />
           </TestProviders>
         );
 

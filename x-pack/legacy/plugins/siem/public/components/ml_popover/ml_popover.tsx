@@ -160,19 +160,19 @@ export const MlPopover = React.memo(() => {
     return (
       <EuiPopover
         anchorPosition="downRight"
-        id="integrations-popover"
         button={
           <EuiButtonEmpty
             data-test-subj="integrations-button"
-            iconType="arrowDown"
             iconSide="right"
+            iconType="arrowDown"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {i18n.ANOMALY_DETECTION}
           </EuiButtonEmpty>
         }
-        isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        id="integrations-popover"
+        isOpen={isPopoverOpen}
       >
         <UpgradeContents />
       </EuiPopover>
@@ -182,12 +182,11 @@ export const MlPopover = React.memo(() => {
     return (
       <EuiPopover
         anchorPosition="downRight"
-        id="integrations-popover"
         button={
           <EuiButtonEmpty
             data-test-subj="integrations-button"
-            iconType="arrowDown"
             iconSide="right"
+            iconType="arrowDown"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
               dispatch({ type: 'refresh' });
@@ -196,8 +195,9 @@ export const MlPopover = React.memo(() => {
             {i18n.ANOMALY_DETECTION}
           </EuiButtonEmpty>
         }
-        isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        id="integrations-popover"
+        isOpen={isPopoverOpen}
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
           <EuiPopoverTitle>{i18n.ANOMALY_DETECTION_TITLE}</EuiPopoverTitle>
@@ -214,10 +214,10 @@ export const MlPopover = React.memo(() => {
           {incompatibleJobCount > 0 && (
             <>
               <EuiCallOut
-                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 color="warning"
                 iconType="alert"
                 size="s"
+                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
               >
                 <p>
                   <FormattedMessage

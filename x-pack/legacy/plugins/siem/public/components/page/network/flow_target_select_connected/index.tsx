@@ -38,13 +38,13 @@ type FlowTargetSelectProps = FlowTargetSelectReduxProps & FlowTargetSelectDispat
 
 const FlowTargetSelectComponent = React.memo<FlowTargetSelectProps>(
   ({ flowTarget, updateIpDetailsFlowTarget }) => (
-    <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
+    <SelectTypeItem data-test-subj={`${IpOverviewId}-select-flow-target`} grow={false}>
       <FlowTargetSelect
+        displayTextOverride={[i18nIp.AS_SOURCE, i18nIp.AS_DESTINATION]}
         id={IpOverviewId}
         isLoading={!flowTarget}
         selectedDirection={FlowDirection.uniDirectional}
         selectedTarget={flowTarget}
-        displayTextOverride={[i18nIp.AS_SOURCE, i18nIp.AS_DESTINATION]}
         updateFlowTargetAction={updateIpDetailsFlowTarget}
       />
     </SelectTypeItem>

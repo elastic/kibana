@@ -82,11 +82,11 @@ export const getAnomaliesHostTableColumns = (
     sortable: true,
     render: (entityValue, anomaliesByHost) => (
       <EntityDraggable
+        entityName={anomaliesByHost.anomaly.entityName}
+        entityValue={entityValue}
         idPrefix={`anomalies-host-table-entityValue${createCompoundHostKey(
           anomaliesByHost
         )}-entity`}
-        entityName={anomaliesByHost.anomaly.entityName}
-        entityValue={entityValue}
       />
     ),
   },
@@ -108,11 +108,11 @@ export const getAnomaliesHostTableColumns = (
                 <EuiFlexGroup gutterSize="none" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EntityDraggable
+                      entityName={entityName}
+                      entityValue={entityValue}
                       idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
                         anomaliesByHost
                       )}`}
-                      entityName={entityName}
-                      entityValue={entityValue}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

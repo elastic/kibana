@@ -94,10 +94,10 @@ export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
     const hasAndItem = dataProvider.and.length > 0;
     return (
       <EuiFlexGroup
+        alignItems="center"
         direction="row"
         gutterSize="none"
         justifyContent="flexStart"
-        alignItems="center"
       >
         <DropAndTargetDataProvidersContainer className="drop-and-provider-timeline">
           <DropAndTargetDataProviders
@@ -120,12 +120,12 @@ export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
           browserFields={browserFields}
           dataProvidersAnd={dataProvider.and}
           providerId={dataProvider.id}
+          timelineId={timelineId}
           onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
           onDataProviderEdited={onDataProviderEdited}
           onDataProviderRemoved={onDataProviderRemoved}
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-          timelineId={timelineId}
         />
       </EuiFlexGroup>
     );

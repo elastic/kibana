@@ -31,8 +31,8 @@ describe('Resizeable', () => {
           handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           height="100%"
           id="test"
-          onResize={jest.fn()}
           render={() => <></>}
+          onResize={jest.fn()}
         />
       </TestProviders>
     );
@@ -51,11 +51,11 @@ describe('Resizeable', () => {
           handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           id="test"
           left={0}
-          onResize={jest.fn()}
-          positionAbsolute
           render={() => <></>}
           right={0}
           top={0}
+          positionAbsolute
+          onResize={jest.fn()}
         />
       </TestProviders>
     );
@@ -78,10 +78,10 @@ describe('Resizeable', () => {
           handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           id="test"
           left={0}
-          onResize={jest.fn()}
           render={() => <></>}
           right={0}
           top={0}
+          onResize={jest.fn()}
         />
       </TestProviders>
     );
@@ -102,8 +102,8 @@ describe('Resizeable', () => {
         handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
         height="100%"
         id="test"
-        onResize={jest.fn()}
         render={() => <></>}
+        onResize={jest.fn()}
       />
     );
 
@@ -118,8 +118,8 @@ describe('Resizeable', () => {
             handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
             height="100%"
             id="test"
-            onResize={jest.fn()}
             render={() => <></>}
+            onResize={jest.fn()}
           />
         </TestProviders>
       );
@@ -135,8 +135,8 @@ describe('Resizeable', () => {
               handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
-              onResize={jest.fn()}
               render={() => <></>}
+              onResize={jest.fn()}
             />
           </TestProviders>
         );
@@ -155,8 +155,8 @@ describe('Resizeable', () => {
               handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
-              onResize={jest.fn()}
               render={() => <></>}
+              onResize={jest.fn()}
             />
           </TestProviders>
         );

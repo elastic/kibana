@@ -39,7 +39,7 @@ describe('Overview', () => {
       localSource[0].result.data.source.status.indicesExist = false;
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={localSource}>
             <MemoryRouter>
               <Overview />
             </MemoryRouter>
@@ -56,7 +56,7 @@ describe('Overview', () => {
       localSource[0].result.data.source.status.indicesExist = true;
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={localSource}>
             <MemoryRouter>
               <Overview />
             </MemoryRouter>

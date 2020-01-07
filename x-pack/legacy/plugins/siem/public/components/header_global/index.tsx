@@ -42,7 +42,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
         <EuiFlexGroup alignItems="center" responsive={false}>
           <FlexItem grow={false}>
             <EuiLink href={getOverviewUrl()}>
-              <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
+              <EuiIcon aria-label={i18n.SIEM} size="l" type="securityAnalyticsApp" />
             </EuiLink>
           </FlexItem>
 

@@ -40,8 +40,8 @@ export const getBatchItems = (
   return [
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_VIEW_SELECTED_IN_TIMELINE}
-      icon="editorUnorderedList"
       disabled={allDisabled || sendToTimelineDisabled}
+      icon="editorUnorderedList"
       onClick={async () => {
         closePopover();
         sendSignalsToTimeline();
@@ -52,8 +52,8 @@ export const getBatchItems = (
 
     <EuiContextMenuItem
       key={filterString}
-      icon={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
       disabled={allDisabled}
+      icon={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
       onClick={async () => {
         closePopover();
         await updateSignalsStatus({

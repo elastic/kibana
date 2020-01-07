@@ -33,19 +33,11 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          deleteTimelines={jest.fn()}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -55,6 +47,14 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -71,19 +71,11 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          deleteTimelines={jest.fn()}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -93,6 +85,14 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -109,19 +109,11 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          deleteTimelines={jest.fn()}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -131,6 +123,14 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -147,19 +147,11 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          deleteTimelines={jest.fn()}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -169,6 +161,14 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -185,18 +185,11 @@ describe('OpenTimeline', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          deleteTimelines={jest.fn()}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -206,6 +199,13 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -225,15 +225,7 @@ describe('OpenTimeline', () => {
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -243,6 +235,14 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -262,14 +262,7 @@ describe('OpenTimeline', () => {
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
           onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
@@ -279,6 +272,13 @@ describe('OpenTimeline', () => {
           sortField={DEFAULT_SORT_FIELD}
           title={title}
           totalSearchResultsCount={mockResults.length}
+          onAddTimelinesToFavorites={jest.fn()}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );

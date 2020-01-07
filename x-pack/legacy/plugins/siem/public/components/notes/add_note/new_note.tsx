@@ -46,15 +46,15 @@ export const NewNote = React.memo<{
       name: i18n.NOTE,
       content: (
         <TextArea
-          autoFocus
           aria-label={i18n.NOTE}
           data-test-subj="add-a-note"
           fullWidth={true}
           height={noteInputHeight}
-          onChange={e => updateNewNote(e.target.value)}
           placeholder={i18n.ADD_A_NOTE}
           spellCheck={true}
           value={note}
+          autoFocus
+          onChange={e => updateNewNote(e.target.value)}
         />
       ),
     },
@@ -73,7 +73,7 @@ export const NewNote = React.memo<{
     },
   ];
 
-  return <NewNoteTabs data-test-subj="new-note-tabs" tabs={tabs} initialSelectedTab={tabs[0]} />;
+  return <NewNoteTabs data-test-subj="new-note-tabs" initialSelectedTab={tabs[0]} tabs={tabs} />;
 });
 
 NewNote.displayName = 'NewNote';

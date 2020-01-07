@@ -19,7 +19,7 @@ const AccordionTitleComponent: React.FC<AccordionTitleProps> = ({ name, title, t
       <RuleStatusIcon name={name} type={type} />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle size="s" className="euiAccordionForm__title">
+      <EuiTitle className="euiAccordionForm__title" size="s">
         <h6>{title}</h6>
       </EuiTitle>
     </EuiFlexItem>

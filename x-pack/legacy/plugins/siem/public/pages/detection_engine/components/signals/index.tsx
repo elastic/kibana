@@ -291,13 +291,13 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     return (
       <StatefulEventsViewer
         defaultIndices={defaultIndices}
-        pageFilters={defaultFiltersMemo}
         defaultModel={signalsDefaultModel}
         end={to}
         headerFilterGroup={
           <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
         }
         id={SIGNALS_PAGE_TIMELINE_ID}
+        pageFilters={defaultFiltersMemo}
         start={from}
         timelineTypeContext={timelineTypeContext}
         utilityBar={utilityBarCallback}

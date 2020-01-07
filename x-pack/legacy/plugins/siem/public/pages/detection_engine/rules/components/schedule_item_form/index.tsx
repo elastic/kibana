@@ -82,14 +82,14 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
 
   return (
     <StyledEuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
+      error={errorMessage}
+      helpText={field.helpText}
+      isInvalid={isInvalid}
+      label={field.label}
+      labelAppend={field.labelAppend}
+      fullWidth
     >
       <EuiFieldNumber
         append={
@@ -97,16 +97,16 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
             compressed={true}
             fullWidth={false}
             options={timeTypeOptions}
-            onChange={onChangeTimeType}
             value={timeType}
+            onChange={onChangeTimeType}
             {...rest}
           />
         }
+        min={0}
+        value={timeVal}
         compressed
         fullWidth
-        min={0}
         onChange={onChangeTimeVal}
-        value={timeVal}
         {...rest}
       />
     </StyledEuiFormRow>

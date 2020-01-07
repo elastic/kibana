@@ -21,8 +21,8 @@ export const Updated = React.memo<{ date: number; prefix: string; updatedAt: num
       {prefix}
       {
         <FormattedRelative
-          data-test-subj="last-updated-at-date"
           key={`formatedRelative-${date}`}
+          data-test-subj="last-updated-at-date"
           value={new Date(updatedAt)}
         />
       }
@@ -50,12 +50,12 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(({ compact = false, 
 
   return (
     <EuiToolTip
-      data-test-subj="timeline-stream-tool-tip"
       content={
         <>
           <Updated date={date} prefix={prefix} updatedAt={updatedAt} />
         </>
       }
+      data-test-subj="timeline-stream-tool-tip"
     >
       <EuiText size="s">
         <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />

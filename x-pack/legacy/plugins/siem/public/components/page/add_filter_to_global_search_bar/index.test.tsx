@@ -108,7 +108,6 @@ describe('AddFilterToGlobalSearchBar Component', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddFilterToGlobalSearchBar
-          onFilterAdded={onFilterAdded}
           filter={{
             meta: {
               alias: null,
@@ -130,6 +129,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
               },
             },
           }}
+          onFilterAdded={onFilterAdded}
         >
           <>{'siem-kibana'}</>
         </AddFilterToGlobalSearchBar>

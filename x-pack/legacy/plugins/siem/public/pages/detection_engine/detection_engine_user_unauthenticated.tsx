@@ -14,10 +14,10 @@ export const DetectionEngineUserUnauthenticated = React.memo(() => (
   <EmptyPage
     actionPrimaryIcon="documents"
     actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-    actionPrimaryUrl={documentationLinks.siem}
     actionPrimaryTarget="_blank"
-    message={i18n.USER_UNAUTHENTICATED_MSG_BODY}
+    actionPrimaryUrl={documentationLinks.siem}
     data-test-subj="no_index"
+    message={i18n.USER_UNAUTHENTICATED_MSG_BODY}
     title={i18n.USER_UNAUTHENTICATED_TITLE}
   />
 ));

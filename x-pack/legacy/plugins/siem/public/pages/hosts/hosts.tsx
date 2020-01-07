@@ -83,14 +83,14 @@ const HostsComponent = React.memo<HostsComponentProps>(
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                  <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
 
                 <WrapperPage>
                   <HeaderPage
-                    border
                     subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
                     title={i18n.PAGE_TITLE}
+                    border
                   />
 
                   <KpiHostsQuery
@@ -107,10 +107,10 @@ const HostsComponent = React.memo<HostsComponentProps>(
                         id={id}
                         inspect={inspect}
                         loading={loading}
+                        narrowDateRange={narrowDateRange}
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostsQuery>
@@ -123,21 +123,21 @@ const HostsComponent = React.memo<HostsComponentProps>(
 
                   <HostsTabs
                     deleteQuery={deleteQuery}
-                    to={to}
                     filterQuery={filterQuery}
-                    isInitializing={isInitializing}
-                    setQuery={setQuery}
                     from={from}
-                    type={hostsModel.HostsType.page}
-                    indexPattern={indexPattern}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     hostsPagePath={hostsPagePath}
+                    indexPattern={indexPattern}
+                    isInitializing={isInitializing}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    setQuery={setQuery}
+                    to={to}
+                    type={hostsModel.HostsType.page}
                   />
                 </WrapperPage>
               </StickyContainer>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <HeaderPage title={i18n.PAGE_TITLE} border />
 
                 <HostsEmptyPage />
               </WrapperPage>

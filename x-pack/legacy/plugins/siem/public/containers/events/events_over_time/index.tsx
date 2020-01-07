@@ -61,9 +61,8 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
     } = this.props;
     return (
       <Query<GetEventsOverTimeQuery.Query, GetEventsOverTimeQuery.Variables>
-        query={EventsOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={EventsOverTimeGqlQuery}
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,
@@ -75,6 +74,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
           defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, refetch }) => {
           const source = getOr({}, `source.EventsOverTime`, data);

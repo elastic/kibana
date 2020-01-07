@@ -57,8 +57,8 @@ const Content = React.memo<{
 }>(({ children, field, tooltipContent, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
-      data-test-subj={`${field}-tooltip`}
       content={getDefaultWhenTooltipIsUnspecified({ tooltipContent, field })}
+      data-test-subj={`${field}-tooltip`}
     >
       <>{children ? children : value}</>
     </EuiToolTip>
@@ -163,14 +163,14 @@ export const DraggableBadge = React.memo<BadgeDraggableType>(
   }) =>
     value != null ? (
       <DefaultDraggable
-        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
         field={field}
+        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
         name={name}
-        value={value}
-        tooltipContent={tooltipContent}
         queryValue={queryValue}
+        tooltipContent={tooltipContent}
+        value={value}
       >
-        <Badge iconType={iconType} color={color}>
+        <Badge color={color} iconType={iconType}>
           {children ? children : value !== '' ? value : getEmptyStringTag()}
         </Badge>
       </DefaultDraggable>

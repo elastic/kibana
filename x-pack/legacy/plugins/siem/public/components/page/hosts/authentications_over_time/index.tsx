@@ -20,9 +20,9 @@ export const AuthenticationsOverTimeHistogram = (
 
   return (
     <MatrixHistogram
-      mapping={authMatrixDataMappingFields}
-      dataKey={dataKey}
       data={data}
+      dataKey={dataKey}
+      mapping={authMatrixDataMappingFields}
       title={i18n.AUTHENTICATIONS_COUNT}
       {...matrixOverTimeProps}
     />

@@ -15,9 +15,9 @@ describe('ImportRuleModal', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <ImportRuleModalComponent
-        showModal={true}
         closeModal={jest.fn()}
         importComplete={jest.fn()}
+        showModal={true}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();

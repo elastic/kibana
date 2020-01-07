@@ -68,9 +68,9 @@ export const MatrixHistogram = ({
     >
       <HeaderSection
         id={id}
-        title={title}
         showInspect={!loadingInitial && showInspect}
         subtitle={!loadingInitial && subtitle}
+        title={title}
       />
 
       {loadingInitial ? (
@@ -81,11 +81,11 @@ export const MatrixHistogram = ({
 
           {loading && (
             <Loader
-              overlay
               overlayBackground={
                 darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
               }
               size="xl"
+              overlay
             />
           )}
         </>

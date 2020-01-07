@@ -73,6 +73,7 @@ export const FlowTargetSelect = React.memo<FlowTargetSelectProps>(
 
     return (
       <EuiSuperSelect
+        isLoading={isLoading}
         options={
           selectedDirection
             ? toggleTargetOptions(id, displayTextOverride).filter(option =>
@@ -82,7 +83,6 @@ export const FlowTargetSelect = React.memo<FlowTargetSelectProps>(
         }
         valueOfSelected={selectedTarget}
         onChange={handleChange}
-        isLoading={isLoading}
       />
     );
   }

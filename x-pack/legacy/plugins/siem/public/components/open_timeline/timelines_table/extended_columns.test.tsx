@@ -35,14 +35,10 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
-            deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
+            deleteTimelines={jest.fn()}
             itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
+            loading={false}
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={mockResults}
@@ -50,6 +46,10 @@ describe('#getExtendedColumns', () => {
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={mockResults.length}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -66,14 +66,10 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
-            deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
+            deleteTimelines={jest.fn()}
             itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
+            loading={false}
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={mockResults}
@@ -81,6 +77,10 @@ describe('#getExtendedColumns', () => {
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={mockResults.length}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -99,14 +99,10 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
-            deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
+            deleteTimelines={jest.fn()}
             itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
+            loading={false}
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={missingUpdatedBy}
@@ -114,6 +110,10 @@ describe('#getExtendedColumns', () => {
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={missingUpdatedBy.length}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
           />
         </ThemeProvider>
       );

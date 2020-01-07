@@ -67,7 +67,7 @@ describe('HeaderSection', () => {
   test('it renders a transparent inspect button when showInspect is false', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" id="test" showInspect={false} />
+        <HeaderSection id="test" showInspect={false} title="Test title" />
       </TestProviders>
     );
 
@@ -82,7 +82,7 @@ describe('HeaderSection', () => {
   test('it renders an opaque inspect button when showInspect is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection title="Test title" id="test" showInspect={true} />
+        <HeaderSection id="test" showInspect={true} title="Test title" />
       </TestProviders>
     );
 
@@ -129,7 +129,7 @@ describe('HeaderSection', () => {
   test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection border title="Test title" />
+        <HeaderSection title="Test title" border />
       </TestProviders>
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
@@ -153,7 +153,7 @@ describe('HeaderSection', () => {
   test('it splits the title and supplement areas evenly when split is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderSection split title="Test title">
+        <HeaderSection title="Test title" split>
           <p>{'Test children'}</p>
         </HeaderSection>
       </TestProviders>

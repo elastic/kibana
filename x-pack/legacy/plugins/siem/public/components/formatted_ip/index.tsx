@@ -67,13 +67,13 @@ const NonDecoratedIp = React.memo<{
   value: string | object | null | undefined;
 }>(({ contextId, eventId, fieldName, truncate, value }) => (
   <DraggableWrapper
-    dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
     key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
       contextId,
       eventId,
       fieldName,
       address: value,
     })}`}
+    dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
     render={(dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
@@ -101,13 +101,13 @@ const AddressLinks = React.memo<{
   <>
     {uniq(addresses).map(address => (
       <DraggableWrapper
-        dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
         key={`address-links-draggable-wrapper-${getUniqueId({
           contextId,
           eventId,
           fieldName,
           address,
         })}`}
+        dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
         render={(_, __, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>

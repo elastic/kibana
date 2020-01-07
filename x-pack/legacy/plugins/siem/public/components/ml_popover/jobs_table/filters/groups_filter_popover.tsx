@@ -50,27 +50,27 @@ export const GroupsFilterPopoverComponent = ({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <EuiFilterButton
           data-test-subj={'groups-filter-popover-button'}
-          iconType="arrowDown"
-          onClick={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
-          isSelected={isGroupPopoverOpen}
           hasActiveFilters={selectedGroups.length > 0}
+          iconType="arrowDown"
+          isSelected={isGroupPopoverOpen}
           numActiveFilters={selectedGroups.length}
+          onClick={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
         >
           {i18n.GROUPS}
         </EuiFilterButton>
       }
-      isOpen={isGroupPopoverOpen}
       closePopover={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
+      isOpen={isGroupPopoverOpen}
       panelPaddingSize="none"
+      ownFocus
     >
       {uniqueGroups.map((group, index) => (
         <EuiFilterSelectItem
-          checked={selectedGroups.includes(group) ? 'on' : undefined}
           key={`${index}-${group}`}
+          checked={selectedGroups.includes(group) ? 'on' : undefined}
           onClick={() => toggleSelectedGroup(group, selectedGroups, setSelectedGroups)}
         >
           {`${group} (${groups.filter(g => g === group).length})`}

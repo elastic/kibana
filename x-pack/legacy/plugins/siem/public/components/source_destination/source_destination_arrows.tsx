@@ -235,18 +235,18 @@ export const SourceDestinationArrows = React.memo<{
     <SourceDestinationArrowsContainer
       alignItems="center"
       data-test-subj="source-destination-arrows-container"
-      justifyContent="center"
       direction="column"
       gutterSize="none"
+      justifyContent="center"
     >
       {maybeSourceBytes != null ? (
         <EuiFlexItem grow={false}>
           <SourceArrow
             contextId={contextId}
-            sourceBytes={maybeSourceBytes}
-            sourcePackets={maybeSourcePackets}
-            sourceBytesPercent={maybeSourceBytesPercent}
             eventId={eventId}
+            sourceBytes={maybeSourceBytes}
+            sourceBytesPercent={maybeSourceBytesPercent}
+            sourcePackets={maybeSourcePackets}
           />
         </EuiFlexItem>
       ) : null}
@@ -256,8 +256,8 @@ export const SourceDestinationArrows = React.memo<{
           <DestinationArrow
             contextId={contextId}
             destinationBytes={maybeDestinationBytes}
-            destinationPackets={maybeDestinationPackets}
             destinationBytesPercent={maybeDestinationBytesPercent}
+            destinationPackets={maybeDestinationPackets}
             eventId={eventId}
           />
         </EuiFlexItem>

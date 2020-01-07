@@ -33,8 +33,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatAuditTitle"
         defaultMessage="Auditbeat Audit"
+        id="xpack.siem.overview.auditBeatAuditTitle"
       />
     ),
     id: 'auditbeatAuditd',
@@ -46,8 +46,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatFimTitle"
         defaultMessage="Auditbeat File Integrity Module"
+        id="xpack.siem.overview.auditBeatFimTitle"
       />
     ),
     id: 'auditbeatFIM',
@@ -59,8 +59,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatLoginTitle"
         defaultMessage="Auditbeat Login"
+        id="xpack.siem.overview.auditBeatLoginTitle"
       />
     ),
     id: 'auditbeatLogin',
@@ -72,8 +72,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatPackageTitle"
         defaultMessage="Auditbeat Package"
+        id="xpack.siem.overview.auditBeatPackageTitle"
       />
     ),
     id: 'auditbeatPackage',
@@ -85,8 +85,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatProcessTitle"
         defaultMessage="Auditbeat Process"
+        id="xpack.siem.overview.auditBeatProcessTitle"
       />
     ),
     id: 'auditbeatProcess',
@@ -98,8 +98,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatUserTitle"
         defaultMessage="Auditbeat User"
+        id="xpack.siem.overview.auditBeatUserTitle"
       />
     ),
     id: 'auditbeatUser',
@@ -110,7 +110,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         ? numeral(data.endgameDns).format('0,0')
         : getEmptyTagValue(),
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameDnsTitle" defaultMessage="Endgame DNS" />
+      <FormattedMessage defaultMessage="Endgame DNS" id="xpack.siem.overview.endgameDnsTitle" />
     ),
     id: 'endgameDns',
   },
@@ -120,7 +120,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         ? numeral(data.endgameFile).format('0,0')
         : getEmptyTagValue(),
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameFileTitle" defaultMessage="Endgame File" />
+      <FormattedMessage defaultMessage="Endgame File" id="xpack.siem.overview.endgameFileTitle" />
     ),
     id: 'endgameFile',
   },
@@ -131,8 +131,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameImageLoadTitle"
         defaultMessage="Endgame Image Load"
+        id="xpack.siem.overview.endgameImageLoadTitle"
       />
     ),
     id: 'endgameImageLoad',
@@ -144,8 +144,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameNetworkTitle"
         defaultMessage="Endgame Network"
+        id="xpack.siem.overview.endgameNetworkTitle"
       />
     ),
     id: 'endgameNetwork',
@@ -157,8 +157,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameProcessTitle"
         defaultMessage="Endgame Process"
+        id="xpack.siem.overview.endgameProcessTitle"
       />
     ),
     id: 'endgameProcess',
@@ -170,8 +170,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameRegistryTitle"
         defaultMessage="Endgame Registry"
+        id="xpack.siem.overview.endgameRegistryTitle"
       />
     ),
     id: 'endgameRegistry',
@@ -183,8 +183,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameSecurityTitle"
         defaultMessage="Endgame Security"
+        id="xpack.siem.overview.endgameSecurityTitle"
       />
     ),
     id: 'endgameSecurity',
@@ -196,8 +196,8 @@ const overviewHostStats = (data: OverviewHostData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatSystemModuleTitle"
         defaultMessage="Filebeat System Module"
+        id="xpack.siem.overview.filebeatSystemModuleTitle"
       />
     ),
     id: 'filebeatSystemModule',
@@ -208,7 +208,7 @@ const overviewHostStats = (data: OverviewHostData) => [
         ? numeral(data.winlogbeat).format('0,0')
         : getEmptyTagValue(),
     title: (
-      <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
+      <FormattedMessage defaultMessage="Winlogbeat" id="xpack.siem.overview.winlogbeatTitle" />
     ),
     id: 'winlogbeat',
   },

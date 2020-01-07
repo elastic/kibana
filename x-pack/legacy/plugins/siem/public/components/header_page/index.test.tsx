@@ -20,10 +20,10 @@ describe('HeaderPage', () => {
     const wrapper = shallow(
       <HeaderPage
         badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        border
         subtitle="Test subtitle"
         subtitle2="Test subtitle 2"
         title="Test title"
+        border
       >
         <p>{'Test supplement'}</p>
       </HeaderPage>
@@ -172,7 +172,7 @@ describe('HeaderPage', () => {
   test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPage border title="Test title" />
+        <HeaderPage title="Test title" border />
       </TestProviders>
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();

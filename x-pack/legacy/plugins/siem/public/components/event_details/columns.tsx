@@ -107,10 +107,10 @@ export const getColumns = ({
 
         <EuiFlexItem grow={false}>
           <DroppableWrapper
-            droppableId={getDroppableId(
+            key={getDroppableId(
               `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
             )}
-            key={getDroppableId(
+            droppableId={getDroppableId(
               `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
             )}
             isDropDisabled={true}
@@ -132,11 +132,11 @@ export const getColumns = ({
                 >
                   {!snapshot.isDragging ? (
                     <FieldName
-                      categoryId={data.category}
                       categoryColumns={getColumnsWithTimestamp({
                         browserFields,
                         category: data.category,
                       })}
+                      categoryId={data.category}
                       data-test-subj="field-name"
                       fieldId={field}
                       onUpdateColumns={onUpdateColumns}
@@ -160,13 +160,13 @@ export const getColumns = ({
     sortable: true,
     truncateText: false,
     render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
-      <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
+      <EuiFlexGroup alignItems="flexStart" component="span" direction="column" gutterSize="none">
         {values != null &&
           values.map((value, i) => (
             <EuiFlexItem
-              grow={false}
-              component="span"
               key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+              component="span"
+              grow={false}
             >
               <WithHoverActions
                 hoverContent={

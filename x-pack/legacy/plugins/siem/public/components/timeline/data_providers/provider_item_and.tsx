@@ -53,10 +53,9 @@ export class ProviderItemAnd extends React.PureComponent<ProviderItemAndPopoverP
             browserFields={browserFields}
             deleteProvider={() => this.deleteAndProvider(providerId, providerAnd.id)}
             field={providerAnd.queryMatch.displayField || providerAnd.queryMatch.field}
-            kqlQuery={providerAnd.kqlQuery}
             isEnabled={providerAnd.enabled}
             isExcluded={providerAnd.excluded}
-            onDataProviderEdited={onDataProviderEdited}
+            kqlQuery={providerAnd.kqlQuery}
             operator={providerAnd.queryMatch.operator || IS_OPERATOR}
             providerId={providerId}
             timelineId={timelineId}
@@ -67,6 +66,7 @@ export class ProviderItemAnd extends React.PureComponent<ProviderItemAndPopoverP
               this.toggleExcludedAndProvider(providerId, !providerAnd.excluded, providerAnd.id)
             }
             val={providerAnd.queryMatch.displayValue || providerAnd.queryMatch.value}
+            onDataProviderEdited={onDataProviderEdited}
           />
         </EuiFlexItem>
       </React.Fragment>

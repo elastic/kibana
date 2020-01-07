@@ -206,17 +206,17 @@ export const EmbeddedMapComponent = ({
             data-test-subj="embeddable-panel"
             embeddable={embeddable}
             getActions={services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={start.getEmbeddableFactory}
             getAllEmbeddableFactories={start.getEmbeddableFactories}
+            getEmbeddableFactory={start.getEmbeddableFactory}
+            inspector={services.inspector}
             notifications={services.notifications}
             overlays={services.overlays}
-            inspector={services.inspector}
             SavedObjectFinder={SavedObjectFinder}
           />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (
-          <Loader data-test-subj="loading-panel" overlay size="xl" />
+          <Loader data-test-subj="loading-panel" size="xl" overlay />
         )}
       </EmbeddableMap>
     </Embeddable>

@@ -41,31 +41,27 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
       <TitleRow
         data-test-subj="title-row"
-        onDeleteSelected={onDeleteSelected}
-        onAddTimelinesToFavorites={onAddTimelinesToFavorites}
         selectedTimelinesCount={selectedItems.length}
         title={title}
+        onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+        onDeleteSelected={onDeleteSelected}
       />
 
       <SearchRow
         data-test-subj="search-row"
         onlyFavorites={onlyFavorites}
-        onQueryChange={onQueryChange}
-        onToggleOnlyFavorites={onToggleOnlyFavorites}
         query={query}
         totalSearchResultsCount={totalSearchResultsCount}
+        onQueryChange={onQueryChange}
+        onToggleOnlyFavorites={onToggleOnlyFavorites}
       />
 
       <TimelinesTable
         data-test-subj="timelines-table"
-        deleteTimelines={deleteTimelines}
         defaultPageSize={defaultPageSize}
-        loading={isLoading}
+        deleteTimelines={deleteTimelines}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-        onOpenTimeline={onOpenTimeline}
-        onSelectionChange={onSelectionChange}
-        onTableChange={onTableChange}
-        onToggleShowNotes={onToggleShowNotes}
+        loading={isLoading}
         pageIndex={pageIndex}
         pageSize={pageSize}
         searchResults={searchResults}
@@ -73,6 +69,10 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         sortDirection={sortDirection}
         sortField={sortField}
         totalSearchResultsCount={totalSearchResultsCount}
+        onOpenTimeline={onOpenTimeline}
+        onSelectionChange={onSelectionChange}
+        onTableChange={onTableChange}
+        onToggleShowNotes={onToggleShowNotes}
       />
     </EuiPanel>
   )

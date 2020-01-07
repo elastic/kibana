@@ -39,7 +39,7 @@ export const ToolTipFooterComponent = ({
   return (
     <>
       <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {i18n.MAP_TOOL_TIP_FEATURES_FOOTER(featureIndex + 1, totalFeatures)}
@@ -48,20 +48,20 @@ export const ToolTipFooterComponent = ({
         <EuiFlexItem grow={false}>
           <span>
             <EuiButtonIcon
-              data-test-subj={'previous-feature-button'}
-              color={'text'}
-              onClick={previousFeature}
-              iconType="arrowLeft"
               aria-label="Next"
+              color={'text'}
+              data-test-subj={'previous-feature-button'}
               disabled={featureIndex <= 0}
+              iconType="arrowLeft"
+              onClick={previousFeature}
             />
             <EuiButtonIcon
-              data-test-subj={'next-feature-button'}
-              color={'text'}
-              onClick={nextFeature}
-              iconType="arrowRight"
               aria-label="Next"
+              color={'text'}
+              data-test-subj={'next-feature-button'}
               disabled={featureIndex >= totalFeatures - 1}
+              iconType="arrowRight"
+              onClick={nextFeature}
             />
           </span>
         </EuiFlexItem>

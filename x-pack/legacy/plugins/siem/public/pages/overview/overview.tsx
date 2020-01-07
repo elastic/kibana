@@ -38,9 +38,9 @@ export const OverviewComponent = React.memo(() => {
             text: i18n.PAGE_BADGE_LABEL,
             tooltip: i18n.PAGE_BADGE_TOOLTIP,
           }}
-          border
           subtitle={i18n.PAGE_SUBTITLE}
           title={i18n.PAGE_TITLE}
+          border
         />
 
         <WithSource sourceId="default">
@@ -50,8 +50,8 @@ export const OverviewComponent = React.memo(() => {
                 {({ setQuery }) => (
                   <EuiFlexGroup>
                     <Summary />
-                    <OverviewHost endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
-                    <OverviewNetwork endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
+                    <OverviewHost endDate={dateEnd} setQuery={setQuery} startDate={dateStart} />
+                    <OverviewNetwork endDate={dateEnd} setQuery={setQuery} startDate={dateStart} />
                   </EuiFlexGroup>
                 )}
               </GlobalTime>

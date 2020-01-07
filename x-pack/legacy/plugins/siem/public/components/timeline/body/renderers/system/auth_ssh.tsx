@@ -19,24 +19,24 @@ interface Props {
 export const AuthSsh = React.memo<Props>(({ contextId, eventId, sshSignature, sshMethod }) => (
   <>
     {sshSignature != null && (
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <DraggableBadge
           contextId={contextId}
           eventId={eventId}
           field="system.audit.package.name"
-          value={sshSignature}
           iconType="document"
+          value={sshSignature}
         />
       </TokensFlexItem>
     )}
     {sshMethod != null && (
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <DraggableBadge
           contextId={contextId}
           eventId={eventId}
           field="system.audit.package.version"
-          value={sshMethod}
           iconType="document"
+          value={sshMethod}
         />
       </TokensFlexItem>
     )}

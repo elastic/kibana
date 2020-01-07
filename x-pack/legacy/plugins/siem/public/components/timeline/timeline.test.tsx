@@ -52,18 +52,23 @@ describe('Timeline', () => {
         <TimelineComponent
           browserFields={mockBrowserFields}
           columns={defaultHeaders}
-          id="foo"
           dataProviders={mockDataProviders}
           end={endDate}
           filters={[]}
-          flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
+          flyoutHeight={testFlyoutHeight}
+          id="foo"
           indexPattern={indexPattern}
           isLive={false}
           itemsPerPage={5}
           itemsPerPageOptions={[5, 10, 20]}
           kqlMode="search"
           kqlQueryExpression=""
+          show={true}
+          showCallOutUnauthorizedMsg={false}
+          sort={sort}
+          start={startDate}
+          toggleColumn={jest.fn()}
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
           onChangeItemsPerPage={jest.fn()}
@@ -71,11 +76,6 @@ describe('Timeline', () => {
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
-          show={true}
-          showCallOutUnauthorizedMsg={false}
-          start={startDate}
-          sort={sort}
-          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -88,18 +88,23 @@ describe('Timeline', () => {
             <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
-              id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
               filters={[]}
-              flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
+              flyoutHeight={testFlyoutHeight}
+              id="foo"
               indexPattern={indexPattern}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              sort={sort}
+              start={startDate}
+              toggleColumn={jest.fn()}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -107,11 +112,6 @@ describe('Timeline', () => {
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -127,18 +127,23 @@ describe('Timeline', () => {
             <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
-              id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
               filters={[]}
-              flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
+              flyoutHeight={testFlyoutHeight}
+              id="foo"
               indexPattern={indexPattern}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              sort={sort}
+              start={startDate}
+              toggleColumn={jest.fn()}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -146,11 +151,6 @@ describe('Timeline', () => {
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -166,18 +166,23 @@ describe('Timeline', () => {
             <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
-              id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
               filters={[]}
-              flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
+              flyoutHeight={testFlyoutHeight}
+              id="foo"
               indexPattern={indexPattern}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              sort={sort}
+              start={startDate}
+              toggleColumn={jest.fn()}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -185,11 +190,6 @@ describe('Timeline', () => {
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -210,18 +210,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -229,11 +234,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -256,18 +256,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -275,11 +280,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -310,18 +310,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -329,11 +334,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -368,18 +368,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -387,11 +392,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -429,18 +429,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -448,11 +453,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -480,18 +480,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -499,11 +504,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -537,18 +537,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -556,11 +561,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -598,18 +598,23 @@ describe('Timeline', () => {
               <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
-                id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
                 filters={[]}
-                flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
+                flyoutHeight={testFlyoutHeight}
+                id="foo"
                 indexPattern={indexPattern}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                show={true}
+                showCallOutUnauthorizedMsg={false}
+                sort={sort}
+                start={startDate}
+                toggleColumn={jest.fn()}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -617,11 +622,6 @@ describe('Timeline', () => {
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>

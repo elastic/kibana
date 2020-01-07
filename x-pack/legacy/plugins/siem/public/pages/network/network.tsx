@@ -81,22 +81,22 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                  <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
 
                 <WrapperPage>
                   <HeaderPage
-                    border
                     subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
                     title={i18n.PAGE_TITLE}
+                    border
                   />
 
                   <EmbeddedMap
-                    query={query}
-                    filters={filters}
-                    startDate={from}
                     endDate={to}
+                    filters={filters}
+                    query={query}
                     setQuery={setQuery}
+                    startDate={from}
                   />
 
                   <EuiSpacer />
@@ -110,15 +110,15 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   >
                     {({ kpiNetwork, loading, id, inspect, refetch }) => (
                       <KpiNetworkComponentManage
+                        data={kpiNetwork}
+                        from={from}
                         id={id}
                         inspect={inspect}
-                        setQuery={setQuery}
-                        refetch={refetch}
-                        data={kpiNetwork}
                         loading={loading}
-                        from={from}
-                        to={to}
                         narrowDateRange={narrowDateRange}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        to={to}
                       />
                     )}
                   </KpiNetworkQuery>
@@ -132,15 +132,15 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiSpacer />
 
                       <NetworkRoutes
-                        to={to}
                         filterQuery={filterQuery}
-                        isInitializing={isInitializing}
                         from={from}
-                        type={networkModel.NetworkType.page}
                         indexPattern={indexPattern}
-                        setQuery={setQuery}
-                        setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                        isInitializing={isInitializing}
                         networkPagePath={networkPagePath}
+                        setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                        setQuery={setQuery}
+                        to={to}
+                        type={networkModel.NetworkType.page}
                       />
                     </>
                   ) : (
@@ -152,7 +152,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               </StickyContainer>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <HeaderPage title={i18n.PAGE_TITLE} border />
                 <NetworkEmptyPage />
               </WrapperPage>
             );

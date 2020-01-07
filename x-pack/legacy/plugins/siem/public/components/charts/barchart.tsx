@@ -63,18 +63,18 @@ export const BarChartBaseComponent = ({
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries
-            id={barSeriesKey}
             key={barSeriesKey}
-            name={series.key}
-            xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
-            yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
-            xAccessor="x"
-            yAccessors={['y']}
-            timeZone={timeZone}
-            splitSeriesAccessors={['g']}
-            data={series.value!}
-            stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             customSeriesColors={series.color ? [series.color] : undefined}
+            data={series.value!}
+            id={barSeriesKey}
+            name={series.key}
+            splitSeriesAccessors={['g']}
+            stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
+            timeZone={timeZone}
+            xAccessor="x"
+            xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+            yAccessors={['y']}
+            yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
           />
         ) : null;
       })}
@@ -83,11 +83,11 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        tickSize={tickSize}
         tickFormat={xTickFormatter}
+        tickSize={tickSize}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+      <Axis id={yAxisId} position={Position.Left} tickFormat={yTickFormatter} tickSize={tickSize} />
     </Chart>
   ) : null;
 };
@@ -113,19 +113,19 @@ export const BarChartComponent = ({
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
           <BarChartBaseComponent
+            configs={configs}
+            data={barChart}
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
-            data={barChart}
-            configs={configs}
           />
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
   ) : (
     <ChartPlaceHolder
+      data={barChart}
       height={getChartHeight(customHeight)}
       width={getChartWidth(customWidth)}
-      data={barChart}
     />
   );
 };

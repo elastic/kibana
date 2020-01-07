@@ -94,11 +94,11 @@ class TlsComponentQuery extends QueryTemplatePaginated<
     };
     return (
       <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
-        query={tlsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={tlsQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const tls = getOr([], 'source.Tls.edges', data);

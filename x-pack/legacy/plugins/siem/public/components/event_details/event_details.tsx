@@ -58,9 +58,9 @@ export const EventDetails = React.memo<Props>(
             columnHeaders={columnHeaders}
             data={data}
             eventId={id}
-            onUpdateColumns={onUpdateColumns}
             timelineId={timelineId}
             toggleColumn={toggleColumn}
+            onUpdateColumns={onUpdateColumns}
           />
         ),
       },
@@ -74,8 +74,8 @@ export const EventDetails = React.memo<Props>(
     return (
       <Details data-test-subj="eventDetails">
         <EuiTabbedContent
-          tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
+          tabs={tabs}
           onTabClick={e => onViewSelected(e.id as View)}
         />
       </Details>

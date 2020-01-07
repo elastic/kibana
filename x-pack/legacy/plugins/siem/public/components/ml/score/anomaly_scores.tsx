@@ -44,13 +44,13 @@ export const AnomalyScoresComponent = ({
             return (
               <AnomalyScore
                 key={jobKey}
-                jobKey={jobKey}
-                startDate={startDate}
                 endDate={endDate}
                 index={index}
-                score={score}
                 interval={anomalies.interval}
+                jobKey={jobKey}
                 narrowDateRange={narrowDateRange}
+                score={score}
+                startDate={startDate}
               />
             );
           })}

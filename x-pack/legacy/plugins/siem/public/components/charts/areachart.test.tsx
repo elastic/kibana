@@ -165,9 +165,9 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
+          data={mockAreaChartData}
           height={customHeight}
           width={customWidth}
-          data={mockAreaChartData}
         />
       );
     });
@@ -194,10 +194,10 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
+          configs={configs}
+          data={mockAreaChartData}
           height={customHeight}
           width={customWidth}
-          data={mockAreaChartData}
-          configs={configs}
         />
       );
     });
@@ -248,9 +248,9 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
+          data={mockAreaChartData}
           height={customHeight}
           width={customWidth}
-          data={mockAreaChartData}
         />
       );
     });
@@ -300,7 +300,7 @@ describe('AreaChartBaseComponent', () => {
   describe('no render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />
+        <AreaChartBaseComponent data={mockAreaChartData} height={null} width={null} />
       );
     });
 
@@ -327,7 +327,7 @@ describe('AreaChart', () => {
   };
   describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', data => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+      shallowWrapper = shallow(<AreaChartComponent areaChart={data} configs={mockConfig} />);
     });
 
     it(`should render area chart`, () => {
@@ -340,7 +340,7 @@ describe('AreaChart', () => {
     'with invalid data [%o]',
     data => {
       beforeAll(() => {
-        shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+        shallowWrapper = shallow(<AreaChartComponent areaChart={data} configs={mockConfig} />);
       });
 
       it(`should render a chart place holder`, () => {

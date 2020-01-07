@@ -25,7 +25,7 @@ describe('DroppableWrapper', () => {
 
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={{}}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
@@ -41,7 +41,7 @@ describe('DroppableWrapper', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
@@ -57,9 +57,9 @@ describe('DroppableWrapper', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DroppableWrapper render={() => null} droppableId="testing">
+              <DroppableWrapper droppableId="testing" render={() => null}>
                 <div data-test-subj="this-should-not-render">{message}</div>
               </DroppableWrapper>
             </DragDropContextWrapper>
@@ -73,11 +73,11 @@ describe('DroppableWrapper', () => {
     test('it renders the render prop contents when a render prop is provided', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper
-                render={({ isDraggingOver }) => <div>{`isDraggingOver is: ${isDraggingOver}`}</div>}
                 droppableId="testing"
+                render={({ isDraggingOver }) => <div>{`isDraggingOver is: ${isDraggingOver}`}</div>}
               />
             </DragDropContextWrapper>
           </MockedProvider>

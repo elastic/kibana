@@ -213,20 +213,20 @@ describe('Table Helpers', () => {
     test('it returns correctly against snapshot', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
       const wrapper = shallow(
-        <OverflowFieldComponent value={overflowString} showToolTip={false} />
+        <OverflowFieldComponent showToolTip={false} value={overflowString} />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is short';
-      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent overflowLength={20} value={overflowString} />);
       expect(wrapper.text()).toBe('This string is short');
     });
 
     test('it truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent overflowLength={20} value={overflowString} />);
       expect(wrapper.text()).toBe('This string is exact');
     });
   });

@@ -96,16 +96,19 @@ export const EventColumnView = React.memo<Props>(
           additionalActions={additionalActions}
           associateNote={associateNote}
           checked={Object.keys(selectedEventIds).includes(id)}
-          onRowSelected={onRowSelected}
-          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
           eventIsPinned={isEventPinned}
+          expanded={expanded}
           getNotesByIds={getNotesByIds}
           isEventViewer={isEventViewer}
           loading={loading}
           loadingEventIds={loadingEventIds}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
+          showCheckboxes={showCheckboxes}
+          showNotes={showNotes}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={updateNote}
           onEventToggled={onEventToggled}
           onPinClicked={getPinOnClick({
             allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
@@ -114,10 +117,7 @@ export const EventColumnView = React.memo<Props>(
             onUnPinEvent,
             isEventPinned,
           })}
-          showCheckboxes={showCheckboxes}
-          showNotes={showNotes}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={updateNote}
+          onRowSelected={onRowSelected}
         />
 
         <DataDrivenColumns
@@ -125,8 +125,8 @@ export const EventColumnView = React.memo<Props>(
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
-          onColumnResized={onColumnResized}
           timelineId={timelineId}
+          onColumnResized={onColumnResized}
         />
       </EventsTrData>
     );

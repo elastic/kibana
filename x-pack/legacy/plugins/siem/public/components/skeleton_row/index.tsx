@@ -62,7 +62,7 @@ export const SkeletonRow = React.memo<SkeletonRowProps>(
     const cells = useMemo(
       () =>
         [...Array(cellCount)].map(
-          (_, i) => <Cell cellColor={cellColor} cellMargin={cellMargin} key={i} />,
+          (_, i) => <Cell key={i} cellColor={cellColor} cellMargin={cellMargin} />,
           [cellCount]
         ),
       [cellCount, cellColor, cellMargin]

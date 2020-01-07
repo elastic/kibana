@@ -40,10 +40,10 @@ describe('MapToolTip', () => {
         addFilters={addFilters}
         closeTooltip={closeTooltip}
         features={features}
-        isLocked={false}
         getLayerName={getLayerName}
-        loadFeatureProperties={loadFeatureProperties}
+        isLocked={false}
         loadFeatureGeometry={loadFeatureGeometry}
+        loadFeatureProperties={loadFeatureProperties}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();

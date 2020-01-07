@@ -173,8 +173,8 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
                 className={fieldsButtonClassName}
                 data-test-subj="show-field-browser"
                 iconType="list"
-                onClick={toggleShow}
                 size="xs"
+                onClick={toggleShow}
               >
                 {i18n.FIELDS}
               </EuiButtonEmpty>
@@ -193,17 +193,17 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
               height={height}
               isEventViewer={isEventViewer}
               isSearching={isSearching}
+              searchInput={filterInput}
+              selectedCategoryId={selectedCategoryId}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+              width={width}
               onCategorySelected={updateSelectedCategoryId}
               onFieldSelected={onFieldSelected}
               onHideFieldBrowser={hideFieldBrowser}
               onOutsideClick={show ? hideFieldBrowser : noop}
               onSearchInputChange={updateFilter}
               onUpdateColumns={updateColumnsAndSelectCategoryId}
-              searchInput={filterInput}
-              selectedCategoryId={selectedCategoryId}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-              width={width}
             />
           )}
         </FieldsBrowserButtonContainer>

@@ -51,15 +51,15 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     sourcePort,
     transport,
   }) => (
-    <EuiFlexGroup alignItems="center" direction="column" justifyContent="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" direction="column" gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
         <Network
           bytes={networkBytes}
-          packets={networkPackets}
           communityId={networkCommunityId}
           contextId={contextId}
-          eventId={eventId}
           direction={networkDirection}
+          eventId={eventId}
+          packets={networkPackets}
           protocol={networkProtocol}
           transport={transport}
         />
@@ -69,21 +69,21 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
         <SourceDestinationWithArrows
           contextId={contextId}
           destinationBytes={destinationBytes}
-          destinationGeoContinentName={destinationGeoContinentName}
-          destinationGeoCountryName={destinationGeoCountryName}
-          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
-          destinationGeoRegionName={destinationGeoRegionName}
           destinationGeoCityName={destinationGeoCityName}
+          destinationGeoContinentName={destinationGeoContinentName}
+          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
+          destinationGeoCountryName={destinationGeoCountryName}
+          destinationGeoRegionName={destinationGeoRegionName}
           destinationIp={destinationIp}
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
           sourceBytes={sourceBytes}
-          sourceGeoContinentName={sourceGeoContinentName}
-          sourceGeoCountryName={sourceGeoCountryName}
-          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
-          sourceGeoRegionName={sourceGeoRegionName}
           sourceGeoCityName={sourceGeoCityName}
+          sourceGeoContinentName={sourceGeoContinentName}
+          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
+          sourceGeoCountryName={sourceGeoCountryName}
+          sourceGeoRegionName={sourceGeoRegionName}
           sourceIp={sourceIp}
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}

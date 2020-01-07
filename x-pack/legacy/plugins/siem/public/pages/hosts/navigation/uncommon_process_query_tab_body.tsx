@@ -42,8 +42,8 @@ export const UncommonProcessQueryTabBody = ({
       refetch,
     }) => (
       <UncommonProcessTableManage
-        deleteQuery={deleteQuery}
         data={uncommonProcesses}
+        deleteQuery={deleteQuery}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         id={id}
         inspect={inspect}

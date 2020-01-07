@@ -39,34 +39,34 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
     {({ to, from, setQuery, deleteQuery, isInitializing }) => (
       <Switch>
         <Route
-          strict
-          exact
           path={getHostsTabPath(hostsPagePath)}
           render={() => (
             <Hosts
-              hostsPagePath={hostsPagePath}
-              from={from}
-              to={to}
-              setQuery={setQuery}
-              isInitializing={isInitializing}
               deleteQuery={deleteQuery}
+              from={from}
+              hostsPagePath={hostsPagePath}
+              isInitializing={isInitializing}
+              setQuery={setQuery}
+              to={to}
             />
           )}
+          exact
+          strict
         />
         <Route
-          strict
           path={getHostDetailsTabPath(hostsPagePath)}
           render={props => (
             <HostDetails
-              hostDetailsPagePath={hostDetailsPagePath}
+              deleteQuery={deleteQuery}
               detailName={props.match.params.detailName}
               from={from}
-              to={to}
-              setQuery={setQuery}
+              hostDetailsPagePath={hostDetailsPagePath}
               isInitializing={isInitializing}
-              deleteQuery={deleteQuery}
+              setQuery={setQuery}
+              to={to}
             />
           )}
+          strict
         />
         <Route
           path={hostDetailsPagePath}

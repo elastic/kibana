@@ -51,15 +51,15 @@ describe('QueryBar ', () => {
         <QueryBar
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filters={[]}
           hideSavedQuery={false}
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
           onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
+          onSubmitQuery={mockOnSubmitQuery}
         />
       </TestProviders>
     );
@@ -203,15 +203,15 @@ describe('QueryBar ', () => {
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filters={[]}
           hideSavedQuery={false}
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
           onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
+          onSubmitQuery={mockOnSubmitQuery}
         />
       );
       const searchBarProps = wrapper.find(SearchBar).props();
@@ -241,15 +241,15 @@ describe('QueryBar ', () => {
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filters={[]}
           hideSavedQuery={false}
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
           onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
+          onSubmitQuery={mockOnSubmitQuery}
         />
       );
       const searchBarProps = wrapper.find(SearchBar).props();
@@ -276,15 +276,15 @@ describe('QueryBar ', () => {
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filters={[]}
           hideSavedQuery={false}
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
           onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
+          onSubmitQuery={mockOnSubmitQuery}
         />
       );
       const searchBarProps = wrapper.find(SearchBar).props();
@@ -313,15 +313,15 @@ describe('QueryBar ', () => {
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filters={[]}
           hideSavedQuery={false}
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
           onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
+          onSubmitQuery={mockOnSubmitQuery}
         />
       );
       const searchBarProps = wrapper.find(SearchBar).props();

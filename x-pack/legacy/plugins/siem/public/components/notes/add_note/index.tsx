@@ -77,8 +77,8 @@ export const AddNote = React.memo<{
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="add-note"
-            isDisabled={newNote.trim().length === 0}
             fill={true}
+            isDisabled={newNote.trim().length === 0}
             onClick={handleClick}
           >
             {i18n.ADD_NOTE}

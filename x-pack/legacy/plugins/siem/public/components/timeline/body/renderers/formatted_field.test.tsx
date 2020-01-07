@@ -25,8 +25,8 @@ describe('Events', () => {
     const wrapper = shallow(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="timestamp"
           fieldType="date"
           value={get('timestamp', mockTimelineData[0].ecs)}
@@ -40,8 +40,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="timestamp"
           fieldType="date"
           value={get('timestamp', mockTimelineData[0].ecs)}
@@ -56,8 +56,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="timestamp"
           fieldType="text"
           value={get('timestamp', mockTimelineData[0].ecs)}
@@ -77,8 +77,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="timestamp"
           fieldType="date"
           value={get('timestamp', hasBadDate)}
@@ -93,8 +93,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="event.module"
           fieldType="text"
           value={get('event.module[0]', mockTimelineData[0].ecs)}
@@ -109,8 +109,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="fake.field"
           fieldType="text"
           value={get('fake.field', mockTimelineData[0].ecs)}
@@ -129,8 +129,8 @@ describe('Events', () => {
           eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
-          truncate
           value={'some message'}
+          truncate
         />
       </TestProviders>
     );
@@ -146,8 +146,8 @@ describe('Events', () => {
           eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
-          truncate
           value={null}
+          truncate
         />
       </TestProviders>
     );
@@ -162,8 +162,8 @@ describe('Events', () => {
           eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
-          truncate
           value={undefined}
+          truncate
         />
       </TestProviders>
     );
@@ -178,8 +178,8 @@ describe('Events', () => {
           eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
-          truncate
           value={''}
+          truncate
         />
       </TestProviders>
     );
@@ -190,8 +190,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
           value={'some message'}
@@ -209,8 +209,8 @@ describe('Events', () => {
           eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
-          truncate
           value={'some message'}
+          truncate
         />
       </TestProviders>
     );
@@ -221,8 +221,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="NOT-message"
           fieldType="text"
           value={'a NON-message value'}
@@ -236,8 +236,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName={HOST_NAME_FIELD_NAME}
           fieldType="text"
           value={'some-hostname'}
@@ -251,8 +251,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName={HOST_NAME_FIELD_NAME}
           fieldType="text"
           value={undefined}
@@ -266,8 +266,8 @@ describe('Events', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName={HOST_NAME_FIELD_NAME}
           fieldType="text"
           value={undefined}

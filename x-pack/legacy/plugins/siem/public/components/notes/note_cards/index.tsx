@@ -79,7 +79,7 @@ export const NoteCards = React.memo<Props>(
         {noteIds.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
             {getNotesByIds(noteIds).map(note => (
-              <NoteContainer data-test-subj="note-container" key={note.id}>
+              <NoteContainer key={note.id} data-test-subj="note-container">
                 <NoteCard created={note.created} rawNote={note.note} user={note.user} />
               </NoteContainer>
             ))}
@@ -92,9 +92,9 @@ export const NoteCards = React.memo<Props>(
               associateNote={associateNoteAndToggleShow}
               getNewNoteId={getNewNoteId}
               newNote={newNote}
-              onCancelAddNote={toggleShowAddNote}
               updateNewNote={setNewNote}
               updateNote={updateNote}
+              onCancelAddNote={toggleShowAddNote}
             />
           </AddNoteContainer>
         ) : null}

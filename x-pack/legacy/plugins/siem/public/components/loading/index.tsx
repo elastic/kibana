@@ -35,8 +35,8 @@ export const LoadingPanel = React.memo<LoadingProps>(
     <LoadingStaticPanel
       className="app-loading"
       height={height}
-      width={width}
       position={position}
+      width={width}
       zIndex={zIndex}
     >
       <LoadingStaticContentPanel>

@@ -112,7 +112,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+        <TimelineBody bodyHeight={height} data-test-subj="timeline-body">
           <EventsTable
             data-test-subj="events-table"
             // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -124,17 +124,17 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
+              showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
+              sort={sort}
+              timelineId={id}
+              toggleColumn={toggleColumn}
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}
               onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              timelineId={id}
-              toggleColumn={toggleColumn}
             />
 
             <Events
@@ -149,17 +149,17 @@ export const Body = React.memo<BodyProps>(
               id={id}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               toggleColumn={toggleColumn}
               updateNote={updateNote}
+              onColumnResized={onColumnResized}
+              onPinEvent={onPinEvent}
+              onRowSelected={onRowSelected}
+              onUnPinEvent={onUnPinEvent}
+              onUpdateColumns={onUpdateColumns}
             />
           </EventsTable>
         </TimelineBody>

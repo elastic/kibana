@@ -37,7 +37,7 @@ describe('StatefulEventsViewer', () => {
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}
@@ -62,7 +62,7 @@ describe('StatefulEventsViewer', () => {
   test('it renders a transparent inspect button when it does NOT have mouse focus', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}
@@ -87,7 +87,7 @@ describe('StatefulEventsViewer', () => {
   test('it renders an opaque inspect button when it has mouse focus', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}

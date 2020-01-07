@@ -81,8 +81,8 @@ export const AuthenticationsQueryTabBody = ({
           loading={loading}
           loadPage={loadPage}
           refetch={refetch}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           setQuery={setQuery}
+          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
           totalCount={totalCount}
           type={type}
         />

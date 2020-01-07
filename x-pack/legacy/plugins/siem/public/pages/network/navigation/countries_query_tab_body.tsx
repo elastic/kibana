@@ -27,8 +27,8 @@ export const CountriesQueryTabBody = ({
 }: CountriesQueryTabBodyProps) => (
   <NetworkTopCountriesQuery
     endDate={endDate}
-    flowTarget={flowTarget}
     filterQuery={filterQuery}
+    flowTarget={flowTarget}
     skip={skip}
     sourceId="default"
     startDate={startDate}

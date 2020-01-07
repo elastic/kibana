@@ -110,12 +110,12 @@ export const DataProviders = React.memo<Props>(
       >
         <TimelineContext.Consumer>
           {isLoading => (
-            <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
+            <DroppableWrapper droppableId={getDroppableId(id)} isDropDisabled={!show || isLoading}>
               {dataProviders != null && dataProviders.length ? (
                 <Providers
                   browserFields={browserFields}
-                  id={id}
                   dataProviders={dataProviders}
+                  id={id}
                   onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                   onChangeDroppableAndProvider={onChangeDroppableAndProvider}
                   onDataProviderEdited={onDataProviderEdited}

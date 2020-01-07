@@ -13,7 +13,7 @@ describe('pageroute', () => {
   const fakeComponent = () => <div className="fakeComponent">{'fake component'}</div>;
   let wrapper: ReactWrapper;
   beforeAll(() => {
-    wrapper = mount(<PageRoute title="test" component={fakeComponent} />);
+    wrapper = mount(<PageRoute component={fakeComponent} title="test" />);
   });
 
   afterAll(() => {

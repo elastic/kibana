@@ -164,8 +164,8 @@ export const getRowItemOverflow = (
                 <EuiTextColor color="subdued">
                   {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
-                    id="xpack.siem.tables.rowItemHelper.moreDescription"
                     defaultMessage="more not shown"
+                    id="xpack.siem.tables.rowItemHelper.moreDescription"
                   />
                 </EuiTextColor>
               </p>
@@ -219,7 +219,7 @@ export const OverflowFieldComponent = ({
 }) => (
   <span>
     {showToolTip ? (
-      <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
+      <EuiToolTip content={'message'} data-test-subj={'message-tooltip'}>
         <>{value.substring(0, overflowLength)}</>
       </EuiToolTip>
     ) : (

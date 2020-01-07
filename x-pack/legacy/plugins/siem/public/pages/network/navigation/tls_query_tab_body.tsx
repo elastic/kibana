@@ -35,15 +35,15 @@ export const TlsQueryTabBody = ({
     {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
       <TlsTableManage
         data={tls}
+        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         id={id}
         inspect={inspect}
         isInspect={isInspected}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         loading={loading}
         loadPage={loadPage}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
         refetch={refetch}
         setQuery={setQuery}
+        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
         totalCount={totalCount}
         type={type}
       />

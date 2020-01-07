@@ -63,9 +63,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
 
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
-        rowItems={getOr([], fieldName, fieldData)}
         attrName={fieldName}
         idPrefix="host-overview"
+        rowItems={getOr([], fieldName, fieldData)}
       />
     );
 
@@ -109,10 +109,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
             description: (
               <AnomalyScores
                 anomalies={anomaliesData}
-                startDate={startDate}
                 endDate={endDate}
                 isLoading={isLoadingAnomaliesData}
                 narrowDateRange={narrowDateRange}
+                startDate={startDate}
               />
             ),
           },
@@ -126,10 +126,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.IP_ADDRESSES,
           description: (
             <DefaultFieldRenderer
-              rowItems={getOr([], 'host.ip', data)}
               attrName={'host.ip'}
               idPrefix="host-overview"
               render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
+              rowItems={getOr([], 'host.ip', data)}
             />
           ),
         },
@@ -171,10 +171,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     return (
       <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <InspectButton
+          inspectIndex={0}
           queryId={id}
           show={showInspect}
           title={i18n.INSPECT_TITLE}
-          inspectIndex={0}
         />
 
         {descriptionLists.map((descriptionList, index) =>
@@ -183,11 +183,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
 
         {loading && (
           <Loader
-            overlay
             overlayBackground={
               darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
             }
             size="xl"
+            overlay
           />
         )}
       </OverviewWrapper>

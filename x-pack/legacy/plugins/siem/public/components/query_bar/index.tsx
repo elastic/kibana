@@ -124,6 +124,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     return (
       <SearchBar
         customSubmitButton={CustomButton}
+        dataTestSubj={dataTestSubj}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
@@ -131,21 +132,20 @@ export const QueryBar = memo<QueryBarComponentProps>(
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={draftQuery}
+        refreshInterval={refreshInterval}
+        showAutoRefreshOnly={false}
+        showDatePicker={false}
+        showFilterBar={!hideSavedQuery}
+        showQueryBar={true}
+        showQueryInput={true}
+        showSaveQuery={true}
+        timeHistory={new TimeHistory(new Storage(localStorage))}
         onClearSavedQuery={onClearSavedQuery}
         onFiltersUpdated={onFiltersUpdated}
         onQueryChange={onQueryChange}
         onQuerySubmit={onQuerySubmit}
         onSaved={onSaved}
         onSavedQueryUpdated={onSavedQueryUpdated}
-        refreshInterval={refreshInterval}
-        showAutoRefreshOnly={false}
-        showFilterBar={!hideSavedQuery}
-        showDatePicker={false}
-        showQueryBar={true}
-        showQueryInput={true}
-        showSaveQuery={true}
-        timeHistory={new TimeHistory(new Storage(localStorage))}
-        dataTestSubj={dataTestSubj}
         {...searchBarProps}
       />
     );

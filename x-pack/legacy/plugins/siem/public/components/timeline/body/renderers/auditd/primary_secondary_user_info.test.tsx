@@ -21,9 +21,9 @@ describe('UserPrimarySecondary', () => {
         <PrimarySecondaryUserInfo
           contextId="context-123"
           eventId="event-123"
-          userName="user-name-1"
           primary="primary-1"
           secondary="secondary-1"
+          userName="user-name-1"
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -35,9 +35,9 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            userName="user-name-1"
             primary={undefined}
             secondary={undefined}
+            userName="user-name-1"
           />
         </TestProviders>
       );
@@ -50,9 +50,9 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            userName="user-name-1"
             primary="unset"
             secondary="unset"
+            userName="user-name-1"
           />
         </TestProviders>
       );
@@ -66,8 +66,8 @@ describe('UserPrimarySecondary', () => {
             contextId="context-123"
             eventId="event-123"
             primary="primary-1"
-            userName={undefined}
             secondary={undefined}
+            userName={undefined}
           />
         </TestProviders>
       );
@@ -81,8 +81,8 @@ describe('UserPrimarySecondary', () => {
             contextId="context-123"
             eventId="event-123"
             primary="primary-1"
-            userName="unset"
             secondary="unset"
+            userName="unset"
           />
         </TestProviders>
       );
@@ -95,9 +95,9 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            userName={undefined}
             primary={undefined}
             secondary="secondary-1"
+            userName={undefined}
           />
         </TestProviders>
       );
@@ -110,8 +110,8 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            secondary="secondary-1"
             primary="unset"
+            secondary="secondary-1"
             userName="unset"
           />
         </TestProviders>
@@ -125,9 +125,9 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            userName="username-1"
             primary="username-1"
             secondary="username-1"
+            userName="username-1"
           />
         </TestProviders>
       );
@@ -140,9 +140,9 @@ describe('UserPrimarySecondary', () => {
           <PrimarySecondaryUserInfo
             contextId="context-123"
             eventId="event-123"
-            userName="[username]"
             primary="[primary]"
             secondary="[secondary]"
+            userName="[username]"
           />
         </TestProviders>
       );

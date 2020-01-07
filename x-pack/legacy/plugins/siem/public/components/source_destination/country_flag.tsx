@@ -36,7 +36,7 @@ export const CountryFlag = memo<{
 
   if (flag !== null) {
     return displayCountryNameOnHover ? (
-      <EuiToolTip position="top" content={countries.getName(countryCode, 'en')}>
+      <EuiToolTip content={countries.getName(countryCode, 'en')} position="top">
         <span data-test-subj="country-flag">{flag}</span>
       </EuiToolTip>
     ) : (
@@ -65,7 +65,7 @@ export const CountryFlagAndName = memo<{
 
   if (flag !== null && localesLoaded) {
     return displayCountryNameOnHover ? (
-      <EuiToolTip position="top" content={countries.getName(countryCode, 'en')}>
+      <EuiToolTip content={countries.getName(countryCode, 'en')} position="top">
         <span data-test-subj="country-flag">{flag}</span>
       </EuiToolTip>
     ) : (

@@ -41,9 +41,8 @@ export interface IpOverviewProps extends QueryTemplateProps {
 const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxProps>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
-      query={ipOverviewQuery}
       fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
+      query={ipOverviewQuery}
       skip={skip}
       variables={{
         sourceId,
@@ -52,6 +51,7 @@ const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxPro
         defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
+      notifyOnNetworkStatusChange
     >
       {({ data, loading, refetch }) => {
         const init: IpOverviewData = { host: {} };

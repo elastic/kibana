@@ -84,11 +84,11 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
     };
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
-        query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={authenticationsQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);

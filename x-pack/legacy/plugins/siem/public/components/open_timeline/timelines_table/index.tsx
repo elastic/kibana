@@ -148,7 +148,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onToggleShowNotes,
           showExtendedColumnsAndActions,
         })}
-        compressed
         data-test-subj="timelines-table"
         isExpandable={true}
         isSelectable={showExtendedColumnsAndActions}
@@ -157,10 +156,11 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         items={searchResults}
         loading={isLoading}
         noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
-        onChange={onTableChange}
         pagination={pagination}
         selection={showExtendedColumnsAndActions ? selection : undefined}
         sorting={sorting}
+        compressed
+        onChange={onTableChange}
       />
     );
   }

@@ -84,7 +84,7 @@ describe('rendering - rendering', () => {
     localSource[0].result.data.source.status.indicesExist = false;
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={localSource}>
           <Router history={mockHistory}>
             <Network {...getMockProps()} />
           </Router>
@@ -101,7 +101,7 @@ describe('rendering - rendering', () => {
     localSource[0].result.data.source.status.indicesExist = true;
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={localSource}>
           <Router history={mockHistory}>
             <Network {...getMockProps()} />
           </Router>

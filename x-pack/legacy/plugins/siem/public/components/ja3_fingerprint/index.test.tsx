@@ -18,8 +18,8 @@ describe('Ja3Fingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <Ja3Fingerprint
-          eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
+          eventId="KzNOvGkBqd-n62SwSPa4"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
@@ -38,8 +38,8 @@ describe('Ja3Fingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <Ja3Fingerprint
-          eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
+          eventId="KzNOvGkBqd-n62SwSPa4"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
@@ -58,8 +58,8 @@ describe('Ja3Fingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <Ja3Fingerprint
-          eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
+          eventId="KzNOvGkBqd-n62SwSPa4"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />

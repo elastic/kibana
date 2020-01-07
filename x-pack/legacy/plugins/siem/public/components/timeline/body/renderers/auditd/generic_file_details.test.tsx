@@ -23,11 +23,11 @@ describe('GenericFileDetails', () => {
       const browserFields: BrowserFields = {};
       const wrapper = shallow(
         <AuditdGenericFileDetails
-          contextId="contextid-123"
-          text="generic-text-123"
           browserFields={browserFields}
+          contextId="contextid-123"
           data={mockTimelineData[27].ecs}
           fileIcon="document"
+          text="generic-text-123"
           timelineId="test"
         />
       );
@@ -38,11 +38,11 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileDetails
-            contextId="contextid-123"
-            text="generic-text-123"
             browserFields={mockBrowserFields}
+            contextId="contextid-123"
             data={mockTimelineData[19].ecs}
             fileIcon="document"
+            text="generic-text-123"
             timelineId="test"
           />
         </TestProviders>
@@ -55,11 +55,11 @@ describe('GenericFileDetails', () => {
     test('it returns null for text if the data contains no auditd data', () => {
       const wrapper = shallow(
         <AuditdGenericFileDetails
-          contextId="contextid-123"
-          text="generic-text-123"
           browserFields={mockBrowserFields}
+          contextId="contextid-123"
           data={mockTimelineData[0].ecs}
           fileIcon="document"
+          text="generic-text-123"
           timelineId="test"
         />
       );
@@ -72,23 +72,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            userName="username-1"
-            session="session-1"
-            primary="username-1"
-            secondary="username-1"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="username-1"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="username-1"
+            session="session-1"
+            text="generic-text-123"
+            userName="username-1"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -101,23 +101,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            userName="username-1"
-            primary="username-1"
-            secondary="username-1"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="username-1"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="username-1"
+            session="session-1"
+            text="generic-text-123"
+            userName="username-1"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -130,23 +130,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            userName="username-1"
-            primary="unset"
-            secondary="unset"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="unset"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="unset"
+            session="session-1"
+            text="generic-text-123"
+            userName="username-1"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -159,23 +159,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            userName="username-1"
-            session="session-1"
-            primary="Unset"
-            secondary="uNseT"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="Unset"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="uNseT"
+            session="session-1"
+            text="generic-text-123"
+            userName="username-1"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -188,23 +188,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            primary={undefined}
-            secondary={undefined}
-            userName="username-1"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary={undefined}
+            session="session-1"
+            text="generic-text-123"
+            userName="username-1"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -217,23 +217,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            userName="[username-1]"
-            primary="[username-2]"
-            secondary="[username-3]"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="[username-2]"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="[username-3]"
+            session="session-1"
+            text="generic-text-123"
+            userName="[username-1]"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -246,23 +246,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            userName="[username-1]"
-            primary="[username-1]"
-            secondary="[username-2]"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="[username-1]"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="[username-2]"
+            session="session-1"
+            text="generic-text-123"
+            userName="[username-1]"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -275,23 +275,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            userName="unseT"
-            session="session-1"
-            primary="[username-primary]"
-            secondary="unset"
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="[username-primary]"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary="unset"
+            session="session-1"
+            text="generic-text-123"
+            userName="unseT"
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -304,23 +304,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
-            hostName="host-1"
-            session="session-1"
-            primary="[username-primary]"
-            userName={undefined}
-            secondary={undefined}
-            processPid={123}
-            processName="process-name-1"
-            processExecutable="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
-            filePath="/somepath"
+            contextId="contextid-123"
             fileIcon="document"
+            filePath="/somepath"
+            hostName="host-1"
+            id="hello-i-am-an-id"
+            primary="[username-primary]"
+            processExecutable="process-1"
+            processName="process-name-1"
+            processPid={123}
+            processTitle="process-title-1"
             result="success"
+            secondary={undefined}
+            session="session-1"
+            text="generic-text-123"
+            userName={undefined}
+            workingDirectory="working-directory-1"
           />
         </TestProviders>
       );
@@ -333,23 +333,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
             fileIcon="document"
-            userName={undefined}
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
-            processTitle={undefined}
+            text="generic-text-123"
+            userName={undefined}
             workingDirectory={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );
@@ -360,23 +360,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
             fileIcon="document"
+            filePath={undefined}
             hostName="some-host-name"
-            userName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
-            processTitle={undefined}
+            text="generic-text-123"
+            userName={undefined}
             workingDirectory={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );
@@ -387,23 +387,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
-            userName="some-user-name"
             fileIcon="document"
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
-            processTitle={undefined}
+            text="generic-text-123"
+            userName="some-user-name"
             workingDirectory={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );
@@ -414,23 +414,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
             fileIcon="document"
-            userName={undefined}
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
             processExecutable="some-process-name"
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processTitle={undefined}
+            text="generic-text-123"
+            userName={undefined}
             workingDirectory={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );
@@ -441,23 +441,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
-            processTitle="some-process-title"
-            userName="some-user-name"
             fileIcon="document"
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle="some-process-title"
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
+            text="generic-text-123"
+            userName="some-user-name"
             workingDirectory={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );
@@ -468,23 +468,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
+            args={undefined}
             contextId="contextid-123"
-            text="generic-text-123"
-            workingDirectory="some-working-directory"
             fileIcon="document"
-            userName={undefined}
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
-            processTitle={undefined}
-            args={undefined}
-            result={undefined}
-            filePath={undefined}
+            text="generic-text-123"
+            userName={undefined}
+            workingDirectory="some-working-directory"
           />
         </TestProviders>
       );
@@ -495,23 +495,23 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
-            id="hello-i-am-an-id"
-            contextId="contextid-123"
-            text="generic-text-123"
             args={['arg1', 'arg2', 'arg 3']}
+            contextId="contextid-123"
             fileIcon="document"
-            userName={undefined}
+            filePath={undefined}
+            hostName={undefined}
+            id="hello-i-am-an-id"
+            primary={undefined}
+            processExecutable={undefined}
+            processName={undefined}
+            processPid={undefined}
+            processTitle={undefined}
+            result={undefined}
             secondary={undefined}
             session={undefined}
-            hostName={undefined}
-            primary={undefined}
-            processPid={undefined}
-            processName={undefined}
-            processExecutable={undefined}
-            processTitle={undefined}
+            text="generic-text-123"
+            userName={undefined}
             workingDirectory={undefined}
-            result={undefined}
-            filePath={undefined}
           />
         </TestProviders>
       );

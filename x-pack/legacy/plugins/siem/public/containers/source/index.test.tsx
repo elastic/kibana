@@ -19,7 +19,7 @@ jest.mock('../../lib/kibana');
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
     mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
+      <MockedProvider addTypename={false} mocks={mocksSource}>
         <WithSource sourceId="default">
           {({ indexPattern }) => {
             if (!isEqual(indexPattern.fields, [])) {
@@ -38,7 +38,7 @@ describe('Index Fields & Browser Fields', () => {
 
   test('Browser Fields', async () => {
     mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
+      <MockedProvider addTypename={false} mocks={mocksSource}>
         <WithSource sourceId="default">
           {({ browserFields }) => {
             if (!isEqual(browserFields, {})) {

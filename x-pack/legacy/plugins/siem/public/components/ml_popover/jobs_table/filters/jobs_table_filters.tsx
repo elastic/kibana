@@ -61,11 +61,11 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
         <EuiSearchBar
-          data-test-subj="jobs-filter-bar"
           box={{
             placeholder: i18n.FILTER_PLACEHOLDER,
             incremental: true,
           }}
+          data-test-subj="jobs-filter-bar"
           onChange={handleChange}
         />
       </EuiFlexItem>
@@ -79,17 +79,17 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
-            hasActiveFilters={showElasticJobs}
-            onClick={handleElasticJobsClick}
             data-test-subj="show-elastic-jobs-filter-button"
+            hasActiveFilters={showElasticJobs}
             withNext
+            onClick={handleElasticJobsClick}
           >
             {i18n.SHOW_ELASTIC_JOBS}
           </EuiFilterButton>
           <EuiFilterButton
+            data-test-subj="show-custom-jobs-filter-button"
             hasActiveFilters={showCustomJobs}
             onClick={handleCustomJobsClick}
-            data-test-subj="show-custom-jobs-filter-button"
           >
             {i18n.SHOW_CUSTOM_JOBS}
           </EuiFilterButton>

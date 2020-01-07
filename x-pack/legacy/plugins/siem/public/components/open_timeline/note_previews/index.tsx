@@ -35,8 +35,8 @@ export const NotePreviews = React.memo<{
       {uniqueNotes.map(({ note, savedObjectId, updated, updatedBy }) =>
         savedObjectId != null ? (
           <NotePreview
-            data-test-subj={`note-preview-${savedObjectId}`}
             key={savedObjectId}
+            data-test-subj={`note-preview-${savedObjectId}`}
             note={note}
             updated={updated}
             updatedBy={updatedBy}

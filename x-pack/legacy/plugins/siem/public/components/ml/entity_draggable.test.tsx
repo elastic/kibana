@@ -17,9 +17,9 @@ describe('entity_draggable', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EntityDraggableComponent
-        idPrefix="id-prefix"
         entityName="entity-name"
         entityValue="entity-value"
+        idPrefix="id-prefix"
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -29,9 +29,9 @@ describe('entity_draggable', () => {
     const wrapper = mount(
       <TestProviders>
         <EntityDraggableComponent
-          idPrefix="id-prefix"
           entityName="entity-name"
           entityValue="entity-value"
+          idPrefix="id-prefix"
         />
       </TestProviders>
     );

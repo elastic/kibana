@@ -91,11 +91,11 @@ export const EditRuleComponent = memo(() => {
             <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
               {myDefineRuleForm.data != null && (
                 <StepDefineRule
-                  isReadOnlyView={false}
-                  isLoading={isLoading}
-                  isUpdateView
                   defaultValues={myDefineRuleForm.data}
+                  isLoading={isLoading}
+                  isReadOnlyView={false}
                   setForm={setStepsForm}
+                  isUpdateView
                 />
               )}
               <EuiSpacer />
@@ -112,11 +112,11 @@ export const EditRuleComponent = memo(() => {
             <StepPanel loading={loading} title={ruleI18n.ABOUT}>
               {myAboutRuleForm.data != null && (
                 <StepAboutRule
-                  isReadOnlyView={false}
-                  isLoading={isLoading}
-                  isUpdateView
                   defaultValues={myAboutRuleForm.data}
+                  isLoading={isLoading}
+                  isReadOnlyView={false}
                   setForm={setStepsForm}
+                  isUpdateView
                 />
               )}
               <EuiSpacer />
@@ -133,11 +133,11 @@ export const EditRuleComponent = memo(() => {
             <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
               {myScheduleRuleForm.data != null && (
                 <StepScheduleRule
-                  isReadOnlyView={false}
-                  isLoading={isLoading}
-                  isUpdateView
                   defaultValues={myScheduleRuleForm.data}
+                  isLoading={isLoading}
+                  isReadOnlyView={false}
                   setForm={setStepsForm}
+                  isUpdateView
                 />
               )}
               <EuiSpacer />
@@ -264,10 +264,10 @@ export const EditRuleComponent = memo(() => {
           title={i18n.PAGE_TITLE}
         />
         {tabHasError.length > 0 && (
-          <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+          <EuiCallOut color="danger" iconType="alert" title={i18n.SORRY_ERRORS}>
             <FormattedMessage
-              id="xpack.siem.detectionEngine.rule.editRule.errorMsgDescription"
               defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+              id="xpack.siem.detectionEngine.rule.editRule.errorMsgDescription"
               values={{
                 countError: tabHasError.length,
                 tabHasError: tabHasError
@@ -290,8 +290,8 @@ export const EditRuleComponent = memo(() => {
         <EuiTabbedContent
           initialSelectedTab={tabs[0]}
           selectedTab={tabs.find(t => t.id === selectedTab?.id)}
-          onTabClick={onTabClick}
           tabs={tabs}
+          onTabClick={onTabClick}
         />
 
         <EuiSpacer />
@@ -303,13 +303,13 @@ export const EditRuleComponent = memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`}>
+            <EuiButton href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} iconType="cross">
               {i18n.CANCEL}
             </EuiButton>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onSubmit} iconType="save" isLoading={isLoading}>
+            <EuiButton iconType="save" isLoading={isLoading} fill onClick={onSubmit}>
               {i18n.SAVE_CHANGES}
             </EuiButton>
           </EuiFlexItem>

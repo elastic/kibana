@@ -314,10 +314,8 @@ export const ActivityMonitor = React.memo(() => {
         }
         <EuiBasicTable
           columns={columns}
-          isSelectable
           itemId="id"
           items={sampleTableData}
-          onChange={handleChange}
           pagination={{
             pageIndex: pageState.index,
             pageSize: pageState.size,
@@ -335,6 +333,8 @@ export const ActivityMonitor = React.memo(() => {
           sorting={{
             sort: sortState,
           }}
+          isSelectable
+          onChange={handleChange}
         />
       </EuiPanel>
     </>

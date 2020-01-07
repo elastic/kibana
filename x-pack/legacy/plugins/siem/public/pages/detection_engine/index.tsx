@@ -43,23 +43,23 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
 
   return (
     <Switch>
-      <Route exact path={detectionEnginePath} strict>
+      <Route path={detectionEnginePath} exact strict>
         <DetectionEngineComponent
-          loading={indexNameLoading || privilegeLoading}
           isSignalIndexExists={isSignalIndexExists}
           isUserAuthenticated={isAuthenticated}
+          loading={indexNameLoading || privilegeLoading}
           signalsIndex={signalIndexName}
         />
       </Route>
       {isSignalIndexExists && isAuthenticated && (
         <>
-          <Route exact path={`${detectionEnginePath}/rules`}>
+          <Route path={`${detectionEnginePath}/rules`} exact>
             <RulesComponent />
           </Route>
           <Route path={`${detectionEnginePath}/rules/create`}>
             <CreateRuleComponent />
           </Route>
-          <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
+          <Route path={`${detectionEnginePath}/rules/:ruleId`} exact>
             <RuleDetailsComponent signalsIndex={signalIndexName} />
           </Route>
           <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>

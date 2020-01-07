@@ -26,8 +26,8 @@ describe('kpiHostsComponent', () => {
           from={from}
           id={ID}
           loading={true}
-          to={to}
           narrowDateRange={narrowDateRange}
+          to={to}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -40,8 +40,8 @@ describe('kpiHostsComponent', () => {
           from={from}
           id={ID}
           loading={false}
-          to={to}
           narrowDateRange={narrowDateRange}
+          to={to}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -54,8 +54,8 @@ describe('kpiHostsComponent', () => {
           from={from}
           id={ID}
           loading={false}
-          to={to}
           narrowDateRange={narrowDateRange}
+          to={to}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -85,8 +85,8 @@ describe('kpiHostsComponent', () => {
             from={from}
             id={ID}
             loading={false}
-            to={to}
             narrowDateRange={narrowDateRange}
+            to={to}
           />
         );
       });

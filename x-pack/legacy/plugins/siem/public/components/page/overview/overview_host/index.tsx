@@ -45,33 +45,33 @@ export const OverviewHost = React.memo<OverviewHostProps>(({ endDate, startDate,
     <EuiFlexItem>
       <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <HeaderSection
-          border
           id={OverviewHostQueryId}
           showInspect={isHover}
           subtitle={
             <FormattedMessage
-              id="xpack.siem.overview.hostsSubtitle"
               defaultMessage="Showing: Last 24 hours"
+              id="xpack.siem.overview.hostsSubtitle"
             />
           }
           title={
-            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
+            <FormattedMessage defaultMessage="Host events" id="xpack.siem.overview.hostsTitle" />
           }
+          border
         >
           <EuiButton href={getHostsUrl()}>
-            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
+            <FormattedMessage defaultMessage="View hosts" id="xpack.siem.overview.hostsAction" />
           </EuiButton>
         </HeaderSection>
 
         <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewHost, loading, id, inspect, refetch }) => (
             <OverviewHostStatsManage
-              loading={loading}
               data={overviewHost}
-              setQuery={setQuery}
               id={id}
               inspect={inspect}
+              loading={loading}
               refetch={refetch}
+              setQuery={setQuery}
             />
           )}
         </OverviewHostQuery>

@@ -17,9 +17,16 @@ export const IndexPatternsMissingPromptComponent = () => {
 
   return (
     <EuiEmptyPrompt
-      iconType="gisApp"
-      title={<h2>{i18n.ERROR_TITLE}</h2>}
-      titleSize="xs"
+      actions={
+        <EuiButton
+          color="primary"
+          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
+          target="_blank"
+          fill
+        >
+          {i18n.ERROR_BUTTON}
+        </EuiButton>
+      }
       body={
         <>
           <p>
@@ -59,16 +66,9 @@ export const IndexPatternsMissingPromptComponent = () => {
           </p>
         </>
       }
-      actions={
-        <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
-          color="primary"
-          target="_blank"
-          fill
-        >
-          {i18n.ERROR_BUTTON}
-        </EuiButton>
-      }
+      iconType="gisApp"
+      title={<h2>{i18n.ERROR_TITLE}</h2>}
+      titleSize="xs"
     />
   );
 };

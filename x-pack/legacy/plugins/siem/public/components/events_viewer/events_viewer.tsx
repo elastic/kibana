@@ -181,8 +181,8 @@ export const EventsViewer = React.memo<Props>(
                         >
                           <ManageTimelineContext
                             loading={loading}
-                            width={width}
                             type={timelineTypeContext}
+                            width={width}
                           >
                             <TimelineRefetch
                               id={id}
@@ -195,9 +195,9 @@ export const EventsViewer = React.memo<Props>(
                             <StatefulBody
                               browserFields={browserFields}
                               data={events.filter(e => !deletedEventIds.includes(e._id))}
+                              height={height}
                               id={id}
                               isEventViewer={true}
-                              height={height}
                               sort={sort}
                               toggleColumn={toggleColumn}
                             />
@@ -213,11 +213,11 @@ export const EventsViewer = React.memo<Props>(
                               itemsCount={events.length}
                               itemsPerPage={itemsPerPage}
                               itemsPerPageOptions={itemsPerPageOptions}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              onLoadMore={loadMore}
                               nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                               serverSideEventCount={totalCountMinusDeleted}
                               tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                              onChangeItemsPerPage={onChangeItemsPerPage}
+                              onLoadMore={loadMore}
                             />
                           </ManageTimelineContext>
                         </div>

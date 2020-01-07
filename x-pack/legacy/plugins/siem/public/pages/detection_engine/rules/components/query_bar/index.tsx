@@ -191,14 +191,14 @@ export const QueryBarDefineRule = ({
 
   return (
     <StyledEuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
+      error={errorMessage}
+      helpText={field.helpText}
+      isInvalid={isInvalid}
+      label={field.label}
+      labelAppend={field.labelAppend}
+      fullWidth
     >
       <EuiMutationObserver
         observerOptions={{ subtree: true, attributes: true, childList: true }}
@@ -207,17 +207,17 @@ export const QueryBarDefineRule = ({
         {mutationRef => (
           <div ref={mutationRef}>
             <QueryBar
+              filterManager={filterManager}
+              filterQuery={queryDraft}
+              filters={filterManager.getFilters() || []}
+              hideSavedQuery={false}
               indexPattern={indexPattern}
               isLoading={isLoading}
               isRefreshPaused={false}
-              filterQuery={queryDraft}
-              filterManager={filterManager}
-              filters={filterManager.getFilters() || []}
-              onChangedQuery={onChangedQuery}
-              onSubmitQuery={onSubmitQuery}
               savedQuery={savedQuery}
+              onChangedQuery={onChangedQuery}
               onSavedQuery={onSavedQuery}
-              hideSavedQuery={false}
+              onSubmitQuery={onSubmitQuery}
             />
           </div>
         )}

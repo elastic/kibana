@@ -36,8 +36,8 @@ describe('KpiNetwork Component', () => {
             from={from}
             id="kpiNetwork"
             loading={true}
-            to={to}
             narrowDateRange={narrowDateRange}
+            to={to}
           />
         </ReduxStoreProvider>
       );
@@ -53,8 +53,8 @@ describe('KpiNetwork Component', () => {
             from={from}
             id="kpiNetwork"
             loading={false}
-            to={to}
             narrowDateRange={narrowDateRange}
+            to={to}
           />
         </ReduxStoreProvider>
       );

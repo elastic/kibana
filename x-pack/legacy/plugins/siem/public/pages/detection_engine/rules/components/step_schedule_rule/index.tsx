@@ -84,12 +84,11 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
     }, [form]);
 
     return isReadOnlyView && myStepData != null ? (
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription data={myStepData} direction={descriptionDirection} schema={schema} />
     ) : (
       <>
-        <Form form={form} data-test-subj="stepScheduleRule">
+        <Form data-test-subj="stepScheduleRule" form={form}>
           <UseField
-            path="interval"
             component={ScheduleItem}
             componentProps={{
               compressed: true,
@@ -97,9 +96,9 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
             }}
+            path="interval"
           />
           <UseField
-            path="from"
             component={ScheduleItem}
             componentProps={{
               compressed: true,
@@ -107,6 +106,7 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
             }}
+            path="from"
           />
         </Form>
 
@@ -115,8 +115,8 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
             <EuiHorizontalRule margin="s" />
             <EuiFlexGroup
               alignItems="center"
-              justifyContent="flexEnd"
               gutterSize="xs"
+              justifyContent="flexEnd"
               responsive={false}
             >
               <EuiFlexItem grow={false}>
@@ -131,9 +131,9 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  fill
                   isDisabled={isLoading}
                   isLoading={isLoading}
+                  fill
                   onClick={onSubmit.bind(null, true)}
                 >
                   {I18n.COMPLETE_WITH_ACTIVATING}

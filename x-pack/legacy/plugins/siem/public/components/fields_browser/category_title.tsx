@@ -47,7 +47,7 @@ export const CategoryTitle = React.memo<Props>(
 
       <EuiFlexItem grow={false}>
         <CountBadgeContainer>
-          <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
+          <CountBadge color="hollow" data-test-subj="selected-category-count-badge">
             {getFieldCount(filteredBrowserFields[categoryId])}
           </CountBadge>
         </CountBadgeContainer>

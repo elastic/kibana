@@ -16,9 +16,9 @@ interface Props {
 
 export const IsPtrIncluded = React.memo<Props>(({ isPtrIncluded, onChange }) => (
   <EuiSwitch
-    name="switch-ptr-included"
-    label={i18n.INCLUDE_PTR_RECORDS}
     checked={isPtrIncluded}
+    label={i18n.INCLUDE_PTR_RECORDS}
+    name="switch-ptr-included"
     onChange={onChange}
   />
 ));

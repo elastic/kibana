@@ -32,12 +32,12 @@ describe('Header', () => {
     const wrapper = shallow(
       <HeaderComponent
         header={columnHeader}
-        onColumnRemoved={jest.fn()}
-        onColumnResized={jest.fn()}
-        onColumnSorted={jest.fn()}
         setIsResizing={jest.fn()}
         sort={sort}
         timelineId={timelineId}
+        onColumnRemoved={jest.fn()}
+        onColumnResized={jest.fn()}
+        onColumnSorted={jest.fn()}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -49,12 +49,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -74,12 +74,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerWithLabel}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -98,12 +98,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -126,12 +126,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={columnWithFilter}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -153,12 +153,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
           />
         </TestProviders>
       );
@@ -181,12 +181,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
           />
         </TestProviders>
       );
@@ -201,12 +201,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
           />
         </TestProviders>
       );
@@ -221,12 +221,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
           />
         </TestProviders>
       );
@@ -334,12 +334,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -357,12 +357,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );
@@ -378,12 +378,12 @@ describe('Header', () => {
         <TestProviders>
           <HeaderComponent
             header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
             setIsResizing={mockSetIsResizing}
             sort={sort}
             timelineId={timelineId}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
           />
         </TestProviders>
       );

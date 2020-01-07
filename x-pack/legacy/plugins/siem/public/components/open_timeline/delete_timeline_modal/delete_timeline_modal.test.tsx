@@ -15,9 +15,9 @@ describe('DeleteTimelineModal', () => {
   test('it renders the expected title when a title is specified', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
+        closeModal={jest.fn()}
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        closeModal={jest.fn()}
       />
     );
 
@@ -32,9 +32,9 @@ describe('DeleteTimelineModal', () => {
   test('it trims leading and trailing whitespace around the title', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
+        closeModal={jest.fn()}
         title="    Leading and trailing whitespace    "
         onDelete={jest.fn()}
-        closeModal={jest.fn()}
       />
     );
 
@@ -48,7 +48,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} closeModal={jest.fn()} />
+      <DeleteTimelineModal closeModal={jest.fn()} onDelete={jest.fn()} />
     );
 
     expect(
@@ -61,7 +61,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is null', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={null} closeModal={jest.fn()} />
+      <DeleteTimelineModal closeModal={jest.fn()} title={null} onDelete={jest.fn()} />
     );
 
     expect(
@@ -74,7 +74,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is just whitespace', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={'    '} closeModal={jest.fn()} />
+      <DeleteTimelineModal closeModal={jest.fn()} title={'    '} onDelete={jest.fn()} />
     );
 
     expect(
@@ -88,9 +88,9 @@ describe('DeleteTimelineModal', () => {
   test('it renders a deletion warning', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
+        closeModal={jest.fn()}
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        closeModal={jest.fn()}
       />
     );
 
@@ -107,9 +107,9 @@ describe('DeleteTimelineModal', () => {
 
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
+        closeModal={closeModal}
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        closeModal={closeModal}
       />
     );
 
@@ -126,9 +126,9 @@ describe('DeleteTimelineModal', () => {
 
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
+        closeModal={jest.fn()}
         title="Privilege Escalation"
         onDelete={onDelete}
-        closeModal={jest.fn()}
       />
     );
 

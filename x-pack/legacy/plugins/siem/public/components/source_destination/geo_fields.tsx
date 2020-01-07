@@ -77,7 +77,7 @@ const GeoFieldValues = React.memo<{
   values != null ? (
     <>
       {uniq(values).map(value => (
-        <GeoFlexItem grow={false} key={`${contextId}-${eventId}-${fieldName}-${value}`}>
+        <GeoFlexItem key={`${contextId}-${eventId}-${fieldName}-${value}`} grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none">
             {fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
             fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME ? (
@@ -120,10 +120,10 @@ export const GeoFields = React.memo<GeoFieldsProps>(props => {
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {uniq(propNameToFieldName).map(geo => (
         <GeoFieldValues
+          key={geo.fieldName}
           contextId={contextId}
           eventId={eventId}
           fieldName={geo.fieldName}
-          key={geo.fieldName}
           values={get(geo.prop, props)}
         />
       ))}

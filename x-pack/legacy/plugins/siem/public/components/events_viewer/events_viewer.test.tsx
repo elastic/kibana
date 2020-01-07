@@ -38,7 +38,7 @@ describe('EventsViewer', () => {
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}
@@ -63,7 +63,7 @@ describe('EventsViewer', () => {
   test('it renders the Fields Browser as a settings gear', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}
@@ -88,7 +88,7 @@ describe('EventsViewer', () => {
   test('it renders the footer containing the Load More button', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
           <StatefulEventsViewer
             defaultModel={eventsDefaultModel}
             end={to}
@@ -114,7 +114,7 @@ describe('EventsViewer', () => {
     test(`it renders the ${header.id} default EventsViewer column header`, async () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mockEventViewerResponse}>
             <StatefulEventsViewer
               defaultModel={eventsDefaultModel}
               end={to}

@@ -27,37 +27,37 @@ interface Props {
 export const SessionUserHostWorkingDir = React.memo<Props>(
   ({ eventId, contextId, hostName, userName, primary, secondary, workingDirectory, session }) => (
     <>
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         {i18n.SESSION}
       </TokensFlexItem>
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <DraggableBadge
           contextId={contextId}
           eventId={eventId}
           field="auditd.session"
-          value={session}
           iconType="number"
+          value={session}
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <PrimarySecondaryUserInfo
           contextId={contextId}
           eventId={eventId}
-          userName={userName}
           primary={primary}
           secondary={secondary}
+          userName={userName}
         />
       </TokensFlexItem>
       {hostName != null && (
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {'@'}
         </TokensFlexItem>
       )}
       <HostWorkingDir
         contextId={contextId}
         eventId={eventId}
-        workingDirectory={workingDirectory}
         hostName={hostName}
+        workingDirectory={workingDirectory}
       />
     </>
   )

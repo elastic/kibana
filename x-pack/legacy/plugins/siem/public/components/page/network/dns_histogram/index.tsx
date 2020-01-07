@@ -21,11 +21,11 @@ export const NetworkDnsHistogram = (
 
   return (
     <MatrixHistogram
-      title={i18n.NETWORK_DNS_HISTOGRAM}
       dataKey={dataKey}
       scaleType={ScaleType.Ordinal}
-      yTickFormatter={bytesFormatter}
       showLegend={false}
+      title={i18n.NETWORK_DNS_HISTOGRAM}
+      yTickFormatter={bytesFormatter}
       {...matrixOverTimeProps}
     />
   );

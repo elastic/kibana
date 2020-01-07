@@ -81,11 +81,11 @@ export const getAnomaliesNetworkTableColumns = (
     sortable: true,
     render: (entityValue, anomaliesByNetwork) => (
       <EntityDraggable
+        entityName={anomaliesByNetwork.anomaly.entityName}
+        entityValue={entityValue}
         idPrefix={`anomalies-network-table-entityValue-${createCompoundNetworkKey(
           anomaliesByNetwork
         )}`}
-        entityName={anomaliesByNetwork.anomaly.entityName}
-        entityValue={entityValue}
       />
     ),
   },
@@ -105,11 +105,11 @@ export const getAnomaliesNetworkTableColumns = (
                 grow={false}
               >
                 <EntityDraggable
+                  entityName={entityName}
+                  entityValue={entityValue}
                   idPrefix={`anomalies-network-table-influencers-${entityName}-${entityValue}-${createCompoundNetworkKey(
                     anomaliesByNetwork
                   )}`}
-                  entityName={entityName}
-                  entityValue={entityValue}
                 />
               </EuiFlexItem>
             );

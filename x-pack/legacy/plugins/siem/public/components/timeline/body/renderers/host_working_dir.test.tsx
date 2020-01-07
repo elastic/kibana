@@ -18,8 +18,8 @@ describe('HostWorkingDir', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <HostWorkingDir
-        eventId={mockTimelineData[0].ecs._id}
         contextId="test"
+        eventId={mockTimelineData[0].ecs._id}
         hostName="[hostname-123]"
         workingDirectory="[working-directory-123]"
       />
@@ -32,8 +32,8 @@ describe('HostWorkingDir', () => {
       <TestProviders>
         <div>
           <HostWorkingDir
-            eventId={mockTimelineData[0].ecs._id}
             contextId="test"
+            eventId={mockTimelineData[0].ecs._id}
             hostName="[hostname-123]"
             workingDirectory={undefined}
           />
@@ -49,8 +49,8 @@ describe('HostWorkingDir', () => {
       <TestProviders>
         <div>
           <HostWorkingDir
-            eventId={mockTimelineData[0].ecs._id}
             contextId="test"
+            eventId={mockTimelineData[0].ecs._id}
             hostName="[hostname-123]"
             workingDirectory={null}
           />
@@ -66,8 +66,8 @@ describe('HostWorkingDir', () => {
       <TestProviders>
         <div>
           <HostWorkingDir
-            eventId={mockTimelineData[0].ecs._id}
             contextId="test"
+            eventId={mockTimelineData[0].ecs._id}
             hostName={undefined}
             workingDirectory="[working-directory-123]"
           />
@@ -83,8 +83,8 @@ describe('HostWorkingDir', () => {
       <TestProviders>
         <div>
           <HostWorkingDir
-            eventId={mockTimelineData[0].ecs._id}
             contextId="test"
+            eventId={mockTimelineData[0].ecs._id}
             hostName={null}
             workingDirectory="[working-directory-123]"
           />

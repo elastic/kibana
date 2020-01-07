@@ -25,7 +25,7 @@ export const FormattedDurationTooltipContent = React.memo<{
     {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
     <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
     <P data-test-subj="raw-value">
-      <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
+      <FormattedMessage defaultMessage="raw" id="xpack.siem.formattedDuration.tooltipLabel" />
       {': '}
       {maybeDurationNanoseconds}
     </P>
@@ -40,13 +40,13 @@ export const FormattedDurationTooltip = React.memo<{
   tooltipTitle?: string;
 }>(({ children, maybeDurationNanoseconds, tooltipTitle }) => (
   <EuiToolTip
-    data-test-subj="formatted-duration-tooltip"
     content={
       <FormattedDurationTooltipContent
         maybeDurationNanoseconds={maybeDurationNanoseconds}
         tooltipTitle={tooltipTitle}
       />
     }
+    data-test-subj="formatted-duration-tooltip"
   >
     <>{children}</>
   </EuiToolTip>

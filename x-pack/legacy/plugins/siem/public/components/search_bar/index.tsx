@@ -258,21 +258,21 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
-          isLoading={isLoading}
+          dataTestSubj={dataTestSubj}
           indexPatterns={indexPatterns}
+          isLoading={isLoading}
           query={filterQuery}
+          savedQuery={savedQuery}
+          showDatePicker={true}
+          showFilterBar={true}
+          showQueryBar={true}
+          showQueryInput={true}
+          showSaveQuery={true}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
           onSaved={onSaved}
           onSavedQueryUpdated={onSavedQueryUpdated}
-          savedQuery={savedQuery}
-          showFilterBar={true}
-          showDatePicker={true}
-          showQueryBar={true}
-          showQueryInput={true}
-          showSaveQuery={true}
-          dataTestSubj={dataTestSubj}
         />
       </SearchBarContainer>
     );

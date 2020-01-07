@@ -65,7 +65,7 @@ const AutoSaveWarningMsgComponent = React.memo<OwnProps>(
         text: (
           <>
             <p>{i18n.DESCRIPTION}</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"

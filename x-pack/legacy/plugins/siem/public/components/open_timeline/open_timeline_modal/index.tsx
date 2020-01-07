@@ -33,8 +33,8 @@ export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(({ onClose }
         <StatefulOpenTimeline
           apolloClient={apolloClient}
           closeModalTimeline={onClose}
-          isModal={true}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isModal={true}
           title={i18n.OPEN_TIMELINE_TITLE}
         />
       </EuiModal>

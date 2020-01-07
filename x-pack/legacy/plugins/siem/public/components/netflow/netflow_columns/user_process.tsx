@@ -28,19 +28,19 @@ export const UserProcess = React.memo<{
     alignItems="flexStart"
     data-test-subj="user-process"
     direction="column"
-    justifyContent="center"
     gutterSize="none"
+    justifyContent="center"
   >
     {userName != null
       ? uniq(userName).map(user => (
-          <EuiFlexItem grow={false} key={user}>
+          <EuiFlexItem key={user} grow={false}>
             <DraggableBadge
               contextId={contextId}
               data-test-subj="user-name"
               eventId={eventId}
               field={USER_NAME_FIELD_NAME}
-              value={user}
               iconType="user"
+              value={user}
             />
           </EuiFlexItem>
         ))
@@ -48,14 +48,14 @@ export const UserProcess = React.memo<{
 
     {processName != null
       ? uniq(processName).map(process => (
-          <EuiFlexItem grow={false} key={process}>
+          <EuiFlexItem key={process} grow={false}>
             <DraggableBadge
               contextId={contextId}
               data-test-subj="process-name"
               eventId={eventId}
               field={PROCESS_NAME_FIELD_NAME}
-              value={process}
               iconType="console"
+              value={process}
             />
           </EuiFlexItem>
         ))

@@ -61,27 +61,27 @@ const getNetflowInstance = () => (
   <Netflow
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
+    destinationGeoCityName={asArrayIfExists(
+      get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+    )}
     destinationGeoContinentName={asArrayIfExists(
       get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-    )}
-    destinationGeoCountryName={asArrayIfExists(
-      get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
     )}
     destinationGeoCountryIsoCode={asArrayIfExists(
       get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
     )}
+    destinationGeoCountryName={asArrayIfExists(
+      get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+    )}
     destinationGeoRegionName={asArrayIfExists(
       get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-    )}
-    destinationGeoCityName={asArrayIfExists(
-      get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
     )}
     destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
     destinationPackets={asArrayIfExists(get(DESTINATION_PACKETS_FIELD_NAME, getMockNetflowData()))}
     destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
     eventDuration={asArrayIfExists(get(EVENT_DURATION_FIELD_NAME, getMockNetflowData()))}
-    eventId={get(ID_FIELD_NAME, getMockNetflowData())}
     eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, getMockNetflowData()))}
+    eventId={get(ID_FIELD_NAME, getMockNetflowData())}
     eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, getMockNetflowData()))}
     networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, getMockNetflowData()))}
     networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, getMockNetflowData()))}
@@ -90,19 +90,19 @@ const getNetflowInstance = () => (
     networkProtocol={asArrayIfExists(get(NETWORK_PROTOCOL_FIELD_NAME, getMockNetflowData()))}
     processName={asArrayIfExists(get(PROCESS_NAME_FIELD_NAME, getMockNetflowData()))}
     sourceBytes={asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, getMockNetflowData()))}
+    sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData()))}
     sourceGeoContinentName={asArrayIfExists(
       get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-    )}
-    sourceGeoCountryName={asArrayIfExists(
-      get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
     )}
     sourceGeoCountryIsoCode={asArrayIfExists(
       get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
     )}
+    sourceGeoCountryName={asArrayIfExists(
+      get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+    )}
     sourceGeoRegionName={asArrayIfExists(
       get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
     )}
-    sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData()))}
     sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
     sourcePackets={asArrayIfExists(get(SOURCE_PACKETS_FIELD_NAME, getMockNetflowData()))}
     sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}

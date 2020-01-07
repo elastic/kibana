@@ -34,7 +34,7 @@ describe('FirstLastSeen Component', () => {
   test('Loading', async () => {
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockFirstLastSeenHostQuery}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -47,7 +47,7 @@ describe('FirstLastSeen Component', () => {
   test('First Seen', async () => {
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockFirstLastSeenHostQuery}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -63,7 +63,7 @@ describe('FirstLastSeen Component', () => {
   test('Last Seen', async () => {
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockFirstLastSeenHostQuery}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -79,7 +79,7 @@ describe('FirstLastSeen Component', () => {
     badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = null;
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={badDateTime}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -97,7 +97,7 @@ describe('FirstLastSeen Component', () => {
     badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = null;
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={badDateTime}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -115,7 +115,7 @@ describe('FirstLastSeen Component', () => {
     badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={badDateTime}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
@@ -129,7 +129,7 @@ describe('FirstLastSeen Component', () => {
     badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
-        <MockedProvider mocks={badDateTime} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={badDateTime}>
           <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>

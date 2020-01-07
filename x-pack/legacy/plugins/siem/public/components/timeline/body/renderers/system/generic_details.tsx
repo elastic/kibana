@@ -63,35 +63,35 @@ export const SystemGenericLine = React.memo<Props>(
     workingDirectory,
   }) => (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center" wrap={true}>
         <UserHostWorkingDir
           contextId={contextId}
           eventId={id}
+          hostName={hostName}
           userDomain={userDomain}
           userName={userName}
-          hostName={hostName}
           workingDirectory={workingDirectory}
         />
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {text}
         </TokensFlexItem>
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <ProcessDraggable
             contextId={contextId}
             endgamePid={undefined}
             endgameProcessName={undefined}
             eventId={id}
-            processPid={processPid}
-            processName={processName}
             processExecutable={processExecutable}
+            processName={processName}
+            processPid={processPid}
           />
         </TokensFlexItem>
         {outcome != null && (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             {i18n.WITH_RESULT}
           </TokensFlexItem>
         )}
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={id}
@@ -103,8 +103,8 @@ export const SystemGenericLine = React.memo<Props>(
         <AuthSsh
           contextId={contextId}
           eventId={id}
-          sshSignature={sshSignature}
           sshMethod={sshMethod}
+          sshSignature={sshSignature}
         />
         <Package
           contextId={contextId}
@@ -117,9 +117,9 @@ export const SystemGenericLine = React.memo<Props>(
       {message != null && (
         <>
           <EuiSpacer size="xs" />
-          <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-            <TokensFlexItem grow={false} component="span">
-              <Badge iconType="editorComment" color="hollow">
+          <EuiFlexGroup gutterSize="none" justifyContent="center" wrap={true}>
+            <TokensFlexItem component="span" grow={false}>
+              <Badge color="hollow" iconType="editorComment">
                 <OverflowField value={message} />
               </Badge>
             </TokensFlexItem>
@@ -170,8 +170,8 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
           packageSummary={packageSummary}
           packageVersion={packageVersion}
           processExecutable={processExecutable}
-          processPid={processPid}
           processName={processName}
+          processPid={processPid}
           sshMethod={sshMethod}
           sshSignature={sshSignature}
           text={text}

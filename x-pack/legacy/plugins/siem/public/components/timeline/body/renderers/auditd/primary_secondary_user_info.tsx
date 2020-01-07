@@ -31,8 +31,8 @@ export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary
         contextId={contextId}
         eventId={eventId}
         field="auditd.summary.actor.primary"
-        value={primary}
         iconType="user"
+        value={primary}
       />
     );
   } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
@@ -41,8 +41,8 @@ export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary
         contextId={contextId}
         eventId={eventId}
         field="auditd.summary.actor.secondary"
-        value={secondary}
         iconType="user"
+        value={secondary}
       />
     );
   } else if (primary === secondary) {
@@ -51,32 +51,32 @@ export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary
         contextId={contextId}
         eventId={eventId}
         field="auditd.summary.actor.secondary"
-        value={secondary}
         iconType="user"
+        value={secondary}
       />
     );
   } else {
     return (
       <EuiFlexGroup gutterSize="none">
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
             field="auditd.summary.actor.primary"
-            value={primary}
             iconType="user"
+            value={primary}
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {i18n.AS}
         </TokensFlexItem>
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
             field="auditd.summary.actor.secondary"
-            value={secondary}
             iconType="user"
+            value={secondary}
           />
         </TokensFlexItem>
       </EuiFlexGroup>
@@ -110,8 +110,8 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          value={userName}
           iconType="user"
+          value={userName}
         />
       );
     } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
@@ -120,8 +120,8 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          value={userName}
           iconType="user"
+          value={userName}
         />
       );
     } else {

@@ -138,32 +138,32 @@ export const TimelineComponent = ({
           <WrappedByAutoSizer ref={measureRef}>
             <TimelineHeader
               browserFields={browserFields}
+              dataProviders={dataProviders}
               id={id}
               indexPattern={indexPattern}
-              dataProviders={dataProviders}
+              show={show}
+              showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+              sort={sort}
               onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
               onChangeDroppableAndProvider={onChangeDroppableAndProvider}
               onDataProviderEdited={onDataProviderEdited}
               onDataProviderRemoved={onDataProviderRemoved}
               onToggleDataProviderEnabled={onToggleDataProviderEnabled}
               onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-              show={show}
-              showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-              sort={sort}
             />
           </WrappedByAutoSizer>
           <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
           {combinedQueries != null ? (
             <TimelineQuery
-              id={id}
               fields={columnsHeader.map(c => c.id)}
-              sourceId="default"
-              limit={itemsPerPage}
               filterQuery={combinedQueries.filterQuery}
+              id={id}
+              limit={itemsPerPage}
               sortField={{
                 sortFieldId: sort.columnId,
                 direction: sort.sortDirection as Direction,
               }}
+              sourceId="default"
             >
               {({
                 events,
@@ -186,18 +186,19 @@ export const TimelineComponent = ({
                   <StatefulBody
                     browserFields={browserFields}
                     data={events}
-                    id={id}
                     height={calculateBodyHeight({
                       flyoutHeight,
                       flyoutHeaderHeight,
                       timelineHeaderHeight,
                       timelineFooterHeight: footerHeight,
                     })}
+                    id={id}
                     sort={sort}
                     toggleColumn={toggleColumn}
                   />
                   <Footer
-                    serverSideEventCount={totalCount}
+                    compact={isCompactFooter(width)}
+                    getUpdatedAt={getUpdatedAt}
                     hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     height={footerHeight}
                     isLive={isLive}
@@ -205,12 +206,11 @@ export const TimelineComponent = ({
                     itemsCount={events.length}
                     itemsPerPage={itemsPerPage}
                     itemsPerPageOptions={itemsPerPageOptions}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    serverSideEventCount={totalCount}
+                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                     onChangeItemsPerPage={onChangeItemsPerPage}
                     onLoadMore={loadMore}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                    getUpdatedAt={getUpdatedAt}
-                    compact={isCompactFooter(width)}
                   />
                 </ManageTimelineContext>
               )}

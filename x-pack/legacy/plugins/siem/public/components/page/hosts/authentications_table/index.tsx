@@ -138,8 +138,8 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         totalCount={fakeTotalCount}
-        updateLimitPagination={updateLimitPagination}
         updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }

@@ -30,10 +30,10 @@ describe('anomaly_scores', () => {
     const wrapper = shallow(
       <AnomalyScoresComponent
         anomalies={anomalies}
-        startDate={0}
         endDate={endDate}
         isLoading={false}
         narrowDateRange={narrowDateRange}
+        startDate={0}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -44,10 +44,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
           endDate={endDate}
           isLoading={true}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );
@@ -59,10 +59,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );
@@ -74,10 +74,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={null}
-          startDate={0}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );
@@ -90,10 +90,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );
@@ -110,10 +110,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );
@@ -125,10 +125,10 @@ describe('anomaly_scores', () => {
       <TestProviders>
         <AnomalyScoresComponent
           anomalies={anomalies}
-          startDate={0}
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          startDate={0}
         />
       </TestProviders>
     );

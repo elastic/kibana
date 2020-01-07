@@ -24,8 +24,8 @@ export const getBatchItems = (
   return [
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_ACTIVATE_SELECTED}
-      icon="checkInCircleFilled"
       disabled={containsLoading || !containsDisabled}
+      icon="checkInCircleFilled"
       onClick={async () => {
         closePopover();
         const deactivatedIds = selectedState.filter(s => !s.activate).map(s => s.id);
@@ -36,8 +36,8 @@ export const getBatchItems = (
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DEACTIVATE_SELECTED}
-      icon="crossInACircleFilled"
       disabled={containsLoading || !containsEnabled}
+      icon="crossInACircleFilled"
       onClick={async () => {
         closePopover();
         const activatedIds = selectedState.filter(s => s.activate).map(s => s.id);
@@ -48,8 +48,8 @@ export const getBatchItems = (
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EXPORT_SELECTED}
-      icon="exportAction"
       disabled={containsLoading || selectedState.length === 0}
+      icon="exportAction"
       onClick={async () => {
         closePopover();
         await exportRulesAction(
@@ -62,8 +62,8 @@ export const getBatchItems = (
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EDIT_INDEX_PATTERNS}
-      icon="indexEdit"
       disabled={true}
+      icon="indexEdit"
       onClick={async () => {
         closePopover();
       }}
@@ -72,8 +72,8 @@ export const getBatchItems = (
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DELETE_SELECTED}
-      icon="trash"
       disabled={containsLoading || selectedState.length === 0}
+      icon="trash"
       onClick={async () => {
         closePopover();
         await deleteRulesAction(

@@ -17,8 +17,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature="[ssh-signature]"
           sshMethod="[ssh-method]"
+          sshSignature="[ssh-signature]"
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -29,8 +29,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature={null}
           sshMethod={null}
+          sshSignature={null}
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -41,8 +41,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature={undefined}
           sshMethod={undefined}
+          sshSignature={undefined}
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -53,8 +53,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature={null}
           sshMethod={undefined}
+          sshSignature={null}
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -65,8 +65,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature={undefined}
           sshMethod={null}
+          sshSignature={undefined}
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -77,8 +77,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature="[sshSignature-1]"
           sshMethod={null}
+          sshSignature="[sshSignature-1]"
         />
       );
       expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshSignature-1]');
@@ -89,8 +89,8 @@ describe('AuthSsh', () => {
         <AuthSsh
           contextId="[context-123]"
           eventId="[event-123]"
-          sshSignature={null}
           sshMethod="[sshMethod-1]"
+          sshSignature={null}
         />
       );
       expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshMethod-1]');

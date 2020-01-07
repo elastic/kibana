@@ -204,7 +204,7 @@ describe('Field Renderers', () => {
     test('it should render a single item', () => {
       const wrapper = mount(
         <TestProviders>
-          <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
+          <DefaultFieldRenderer attrName={'item1'} idPrefix={'prefix-1'} rowItems={['item1']} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('item1 ');
@@ -214,10 +214,10 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2']}
             attrName={'item1'}
+            displayCount={5}
             idPrefix={'prefix-1'}
+            rowItems={['item1', 'item2']}
           />
         </TestProviders>
       );
@@ -228,10 +228,10 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2', 'item3', 'item4', 'item5']}
             attrName={'item1'}
+            displayCount={5}
             idPrefix={'prefix-1'}
+            rowItems={['item1', 'item2', 'item3', 'item4', 'item5']}
           />
         </TestProviders>
       );
@@ -243,10 +243,10 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7']}
             attrName={'item1'}
+            displayCount={5}
             idPrefix={'prefix-1'}
+            rowItems={['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7']}
           />
         </TestProviders>
       );
@@ -263,9 +263,9 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
-          rowItems={rowItems}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -276,9 +276,9 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
-          rowItems={rowItems}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={0}
+          rowItems={rowItems}
         />
       );
 
@@ -289,9 +289,9 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
-          rowItems={rowItems}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -307,9 +307,9 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
-          rowItems={rowItems}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -327,10 +327,10 @@ describe('Field Renderers', () => {
       mount(
         <MoreContainer
           idPrefix={idPrefix}
-          render={render}
-          rowItems={rowItems}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          render={render}
+          rowItems={rowItems}
         />
       );
 

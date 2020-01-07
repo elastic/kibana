@@ -38,14 +38,14 @@ export const DnsQueryTabBody = ({
     >
       {({ totalCount, loading, id, inspect, refetch, histogram }) => (
         <NetworkDnsHistogramManage
-          id={id}
-          loading={loading}
           data={histogram}
           endDate={endDate}
-          startDate={startDate}
+          id={id}
           inspect={inspect}
+          loading={loading}
           refetch={refetch}
           setQuery={setQuery}
+          startDate={startDate}
           totalCount={totalCount}
           updateDateRange={updateDateRange}
         />

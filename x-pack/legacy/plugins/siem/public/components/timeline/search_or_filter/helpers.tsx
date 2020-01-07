@@ -59,7 +59,7 @@ export const options = [
         <AndOrBadge type="and" />
         <strong>{modes.filter.selectText}</strong>
         <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
+        <EuiText color="subdued" size="s">
           <p className="euiTextColor--subdued">{modes.filter.description}</p>
         </EuiText>
       </>
@@ -78,7 +78,7 @@ export const options = [
         <AndOrBadge type="or" />
         <strong>{modes.search.selectText}</strong>
         <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
+        <EuiText color="subdued" size="s">
           <p className="euiTextColor--subdued">{modes.search.description}</p>
         </EuiText>
       </>

@@ -233,8 +233,8 @@ describe('Flyout', () => {
             show={false}
             showTimeline={showTimeline}
             timelineId="test"
-            width={100}
             usersViewing={usersViewing}
+            width={100}
           />
         </TestProviders>
       );
@@ -259,10 +259,10 @@ describe('Flyout', () => {
             flyoutHeight={testFlyoutHeight}
             headerHeight={flyoutHeaderHeight}
             show={true}
-            width={100}
             showTimeline={showTimeline}
             timelineId="test"
             usersViewing={usersViewing}
+            width={100}
           />
         </TestProviders>
       );

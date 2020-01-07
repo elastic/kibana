@@ -30,7 +30,7 @@ export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
+    <EuiFlexGroup alignItems="center" data-test-subj="location-field" gutterSize="none">
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
@@ -38,8 +38,8 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
               <DefaultDraggable
-                id={`location-renderer-default-draggable-${IpOverviewId}-${fieldName}`}
                 field={fieldName}
+                id={`location-renderer-default-draggable-${IpOverviewId}-${fieldName}`}
                 value={locationValue}
               />
             </EuiFlexItem>
@@ -63,16 +63,16 @@ export const autonomousSystemRenderer = (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.organization.name`}
           field={`${flowTarget}.as.organization.name`}
+          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.organization.name`}
           value={as.organization.name}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{'/'}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.number`}
           field={`${flowTarget}.as.number`}
+          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${flowTarget}.as.number`}
           value={`${as.number}`}
         />
       </EuiFlexItem>
@@ -96,8 +96,8 @@ export const hostIdRenderer = ({
     <>
       {host.name && host.name[0] != null ? (
         <DefaultDraggable
-          id={`host-id-renderer-default-draggable-${IpOverviewId}-host-id`}
           field="host.id"
+          id={`host-id-renderer-default-draggable-${IpOverviewId}-host-id`}
           value={host.id[0]}
         >
           {noLink ? (
@@ -117,8 +117,8 @@ export const hostIdRenderer = ({
 export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <DefaultDraggable
-      id={`host-name-renderer-default-draggable-${IpOverviewId}-host-name`}
       field={'host.name'}
+      id={`host-name-renderer-default-draggable-${IpOverviewId}-host-name`}
       value={host.name[0]}
     >
       <HostDetailsLink hostName={host.name[0]}>
@@ -172,7 +172,7 @@ export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
                 <Spacer />
               </>
             )}
-            <DefaultDraggable id={id} field={attrName} value={rowItem}>
+            <DefaultDraggable field={attrName} id={id} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           </EuiFlexItem>
@@ -180,15 +180,15 @@ export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
       });
 
       return draggables.length > 0 ? (
-        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+        <DraggableContainerFlexGroup alignItems="center" component="span" gutterSize="none">
           {draggables}{' '}
           {
             <DefaultFieldRendererOverflow
-              rowItems={rowItems}
               idPrefix={idPrefix}
-              render={render}
-              overflowIndexStart={displayCount}
               moreMaxHeight={moreMaxHeight}
+              overflowIndexStart={displayCount}
+              render={render}
+              rowItems={rowItems}
             />
           }
         </DraggableContainerFlexGroup>
@@ -248,28 +248,28 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
       <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
-            id="popover"
             button={
               <>
                 {' ,'}
                 <EuiButtonEmpty size="xs" onClick={() => setIsOpen(!isOpen)}>
                   {`+${rowItems.length - overflowIndexStart} `}
                   <FormattedMessage
-                    id="xpack.siem.fieldRenderers.moreLabel"
                     defaultMessage="More"
+                    id="xpack.siem.fieldRenderers.moreLabel"
                   />
                 </EuiButtonEmpty>
               </>
             }
-            isOpen={isOpen}
             closePopover={() => setIsOpen(!isOpen)}
+            id="popover"
+            isOpen={isOpen}
           >
             <MoreContainer
               idPrefix={idPrefix}
-              render={render}
-              rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
+              render={render}
+              rowItems={rowItems}
             />
           </EuiPopover>
         )}

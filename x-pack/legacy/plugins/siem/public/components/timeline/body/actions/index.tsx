@@ -81,12 +81,12 @@ export const Actions = React.memo<Props>(
         <EventsTd data-test-subj="select-event-container">
           <EventsTdContent textAlign="center">
             {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+              <EuiLoadingSpinner data-test-subj="event-loader" size="m" />
             ) : (
               <EuiCheckbox
+                checked={checked}
                 data-test-subj="select-event"
                 id={eventId}
-                checked={checked}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   onRowSelected({
                     eventIds: [eventId],
@@ -122,17 +122,17 @@ export const Actions = React.memo<Props>(
           <EventsTd>
             <EventsTdContent textAlign="center">
               <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
                 content={getPinTooltip({
                   isPinned: eventIsPinned,
                   eventHasNotes: eventHasNotes(noteIds),
                 })}
+                data-test-subj="timeline-action-pin-tool-tip"
               >
                 <Pin
                   allowUnpinning={!eventHasNotes(noteIds)}
                   data-test-subj="pin-event"
-                  onClick={onPinClicked}
                   pinned={eventIsPinned}
+                  onClick={onPinClicked}
                 />
               </EuiToolTip>
             </EventsTdContent>

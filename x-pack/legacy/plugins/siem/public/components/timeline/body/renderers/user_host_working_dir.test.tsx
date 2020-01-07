@@ -21,9 +21,9 @@ describe('UserHostWorkingDir', () => {
         <UserHostWorkingDir
           contextId="context-123"
           eventId="event-123"
+          hostName="[hostName-123]"
           userDomain="[userDomain-123]"
           userName="[userName-123]"
-          hostName="[hostName-123]"
           workingDirectory="[working-directory-123]"
         />
       );
@@ -35,9 +35,9 @@ describe('UserHostWorkingDir', () => {
         <UserHostWorkingDir
           contextId="context-123"
           eventId="event-123"
+          hostName={null}
           userDomain={null}
           userName={null}
-          hostName={null}
           workingDirectory={null}
         />
       );
@@ -49,9 +49,9 @@ describe('UserHostWorkingDir', () => {
         <UserHostWorkingDir
           contextId="context-123"
           eventId="event-123"
+          hostName={undefined}
           userDomain={undefined}
           userName={undefined}
-          hostName={undefined}
           workingDirectory={undefined}
         />
       );
@@ -65,9 +65,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain="[user-domain-123]"
               userName={undefined}
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>
@@ -83,9 +83,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain={undefined}
               userName="[user-name-123]"
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>
@@ -101,9 +101,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName="[host-name-123]"
               userDomain={undefined}
               userName={null}
-              hostName="[host-name-123]"
               workingDirectory={undefined}
             />
           </div>
@@ -119,9 +119,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={null}
               userDomain={null}
               userName={null}
-              hostName={null}
               workingDirectory="[working-directory-123]"
             />
           </div>
@@ -137,9 +137,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={null}
               userDomain={null}
               userName="[user-name-123]"
-              hostName={null}
               workingDirectory="[working-directory-123]"
             />
           </div>
@@ -155,9 +155,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName="[host-name-123]"
               userDomain={null}
               userName={null}
-              hostName="[host-name-123]"
               workingDirectory="[working-directory-123]"
             />
           </div>
@@ -173,9 +173,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName="[host-name-123]"
               userDomain="[user-domain-123]"
               userName="[user-name-123]"
-              hostName="[host-name-123]"
               workingDirectory={null}
             />
           </div>
@@ -191,9 +191,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName="[host-name-123]"
               userDomain={null}
               userName="[user-name-123]"
-              hostName="[host-name-123]"
               workingDirectory={undefined}
             />
           </div>
@@ -210,10 +210,10 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName="[host-name-123]"
               hostNameSeparator="custom separator"
               userDomain={null}
               userName="[user-name-123]"
-              hostName="[host-name-123]"
               workingDirectory={undefined}
             />
           </div>
@@ -230,9 +230,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain="[user-domain-123]"
               userName={undefined}
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>
@@ -249,10 +249,10 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain="[user-domain-123]"
               userDomainField="overridden.field.name"
               userName={undefined}
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>
@@ -271,9 +271,9 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain={undefined}
               userName="[user-name-123]"
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>
@@ -290,10 +290,10 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              hostName={undefined}
               userDomain={undefined}
               userName="[user-name-123]"
               userNameField="overridden.field.name"
-              hostName={undefined}
               workingDirectory={undefined}
             />
           </div>

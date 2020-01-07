@@ -38,8 +38,8 @@ export const createGenericAuditRowRenderer = ({
       <RowRendererContainer>
         <AuditdGenericDetails
           browserFields={browserFields}
-          data={data}
           contextId={`${actionName}-${timelineId}`}
+          data={data}
           text={text}
           timelineId={timelineId}
         />
@@ -73,10 +73,10 @@ export const createGenericFileRowRenderer = ({
       <RowRendererContainer>
         <AuditdGenericFileDetails
           browserFields={browserFields}
-          data={data}
           contextId={`${actionName}-${timelineId}`}
-          text={text}
+          data={data}
           fileIcon={fileIcon}
+          text={text}
           timelineId={timelineId}
         />
       </RowRendererContainer>

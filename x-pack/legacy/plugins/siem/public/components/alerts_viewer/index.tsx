@@ -52,7 +52,7 @@ export const AlertsView = ({
       )}
     </AlertsOverTimeQuery>
     <EuiSpacer size="l" />
-    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+    <AlertsTable endDate={endDate} pageFilters={pageFilters} startDate={startDate} />
   </>
 );
 

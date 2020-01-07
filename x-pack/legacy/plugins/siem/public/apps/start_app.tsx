@@ -83,7 +83,7 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
   );
 
   return (
-    <AppPluginRoot store={store} apolloClient={libs.apolloClient} history={history} theme={theme} />
+    <AppPluginRoot apolloClient={libs.apolloClient} history={history} store={store} theme={theme} />
   );
 };
 

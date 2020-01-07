@@ -92,10 +92,10 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetNetworkHttpQuery.Query, GetNetworkHttpQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
         query={networkHttpQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkHttp = getOr([], `source.NetworkHttp.edges`, data);

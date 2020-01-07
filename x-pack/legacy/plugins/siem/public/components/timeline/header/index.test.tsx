@@ -30,18 +30,18 @@ describe('Header', () => {
           dataProviders={mockDataProviders}
           id="foo"
           indexPattern={indexPattern}
-          onChangeDataProviderKqlQuery={jest.fn()}
-          onChangeDroppableAndProvider={jest.fn()}
-          onDataProviderEdited={jest.fn()}
-          onDataProviderRemoved={jest.fn()}
-          onToggleDataProviderEnabled={jest.fn()}
-          onToggleDataProviderExcluded={jest.fn()}
           show={true}
           showCallOutUnauthorizedMsg={false}
           sort={{
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           }}
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderEdited={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -55,18 +55,18 @@ describe('Header', () => {
             dataProviders={mockDataProviders}
             id="foo"
             indexPattern={indexPattern}
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={false}
             sort={{
               columnId: '@timestamp',
               sortDirection: Direction.desc,
             }}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
           />
         </TestProviders>
       );
@@ -82,18 +82,18 @@ describe('Header', () => {
             dataProviders={mockDataProviders}
             id="foo"
             indexPattern={indexPattern}
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={true}
             sort={{
               columnId: '@timestamp',
               sortDirection: Direction.desc,
             }}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
           />
         </TestProviders>
       );

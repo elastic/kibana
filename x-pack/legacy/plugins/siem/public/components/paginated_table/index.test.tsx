@@ -228,13 +228,13 @@ describe('Paginated Table Component', () => {
             limit={2}
             loading={false}
             loadPage={jest.fn()}
-            onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
+            onChange={mockOnChange}
           />
         </ThemeProvider>
       );
@@ -498,13 +498,13 @@ describe('Paginated Table Component', () => {
             limit={2}
             loading={false}
             loadPage={jest.fn()}
-            onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
+            onChange={mockOnChange}
           />
         </ThemeProvider>
       );

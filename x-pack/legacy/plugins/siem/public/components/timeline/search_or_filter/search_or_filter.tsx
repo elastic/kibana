@@ -115,12 +115,12 @@ export const SearchOrFilter = React.memo<Props>(
               <EuiSuperSelect
                 data-test-subj="timeline-select-search-or-filter"
                 hasDividers={true}
-                itemLayoutAlign="top"
                 itemClassName={timelineSelectModeItemsClassName}
-                onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
+                itemLayoutAlign="top"
                 options={options}
                 popoverClassName={searchOrFilterPopoverClassName}
                 valueOfSelected={kqlMode}
+                onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
               />
             </EuiToolTip>
           </ModeFlexItem>
@@ -129,14 +129,14 @@ export const SearchOrFilter = React.memo<Props>(
               applyKqlFilterQuery={applyKqlFilterQuery}
               browserFields={browserFields}
               dataProviders={dataProviders}
-              filters={filters}
               filterQuery={filterQuery}
               filterQueryDraft={filterQueryDraft}
+              filters={filters}
               from={from}
               fromStr={fromStr}
-              kqlMode={kqlMode}
               indexPattern={indexPattern}
               isRefreshPaused={isRefreshPaused}
+              kqlMode={kqlMode}
               refreshInterval={refreshInterval}
               savedQueryId={savedQueryId}
               setFilters={setFilters}

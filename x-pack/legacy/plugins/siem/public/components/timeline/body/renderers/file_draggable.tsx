@@ -37,51 +37,51 @@ export const FileDraggable = React.memo<Props>(
     return (
       <>
         {!isNillEmptyOrNotFinite(fileName) ? (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="file.name"
-              value={fileName}
               iconType="document"
+              value={fileName}
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFileName) ? (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_name"
-              value={endgameFileName}
               iconType="document"
+              value={endgameFileName}
             />
           </TokensFlexItem>
         ) : null}
 
         {filePathIsKnown && (
-          <TokensFlexItem data-test-subj="in" grow={false} component="span">
+          <TokensFlexItem component="span" data-test-subj="in" grow={false}>
             {i18n.IN}
           </TokensFlexItem>
         )}
 
         {!isNillEmptyOrNotFinite(filePath) ? (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="file.path"
-              value={filePath}
               iconType="document"
+              value={filePath}
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFilePath) ? (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_path"
-              value={endgameFilePath}
               iconType="document"
+              value={endgameFilePath}
             />
           </TokensFlexItem>
         ) : null}

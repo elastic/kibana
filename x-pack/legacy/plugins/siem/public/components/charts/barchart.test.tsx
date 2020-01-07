@@ -134,7 +134,7 @@ describe('BarChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
+        <BarChartBaseComponent data={mockBarChartData} height={customHeight} width={customWidth} />
       );
     });
 
@@ -158,10 +158,10 @@ describe('BarChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <BarChartBaseComponent
+          configs={configs}
+          data={mockBarChartData}
           height={customHeight}
           width={customWidth}
-          data={mockBarChartData}
-          configs={configs}
         />
       );
     });
@@ -211,7 +211,7 @@ describe('BarChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
+        <BarChartBaseComponent data={mockBarChartData} height={customHeight} width={customWidth} />
       );
     });
 
@@ -260,7 +260,7 @@ describe('BarChartBaseComponent', () => {
   describe('no render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <BarChartBaseComponent height={null} width={null} data={mockBarChartData} />
+        <BarChartBaseComponent data={mockBarChartData} height={null} width={null} />
       );
     });
 
@@ -274,7 +274,7 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
+    shallowWrapper = shallow(<BarChartComponent barChart={data} configs={mockConfig} />);
   });
 
   it(`should render chart`, () => {
@@ -287,7 +287,7 @@ describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
+    shallowWrapper = shallow(<BarChartComponent barChart={data} configs={mockConfig} />);
   });
 
   it(`should render chart holder`, () => {

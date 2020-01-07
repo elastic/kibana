@@ -84,10 +84,10 @@ export const getFieldItems = ({
     ),
     field: (
       <DroppableWrapper
+        key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         droppableId={getDroppableId(
           `field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`
         )}
-        key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
@@ -139,11 +139,11 @@ export const getFieldItems = ({
 
                   <EuiFlexItem grow={false}>
                     <FieldName
-                      categoryId={field.category || categoryId}
                       categoryColumns={getColumnsWithTimestamp({
                         browserFields,
                         category: field.category || categoryId,
                       })}
+                      categoryId={field.category || categoryId}
                       fieldId={field.name || ''}
                       highlight={highlight}
                       onUpdateColumns={onUpdateColumns}
@@ -180,7 +180,7 @@ export const getFieldColumns = () => [
     name: i18n.DESCRIPTION,
     render: (description: string, _: FieldItem) => (
       <TruncatableText>
-        <EuiToolTip position="top" content={description}>
+        <EuiToolTip content={description} position="top">
           <>{description}</>
         </EuiToolTip>
       </TruncatableText>

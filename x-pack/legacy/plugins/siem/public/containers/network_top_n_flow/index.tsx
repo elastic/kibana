@@ -96,10 +96,10 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
         query={networkTopNFlowQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);

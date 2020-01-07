@@ -24,8 +24,8 @@ export const Filter = React.memo<Props>(({ header, onFilterChange = noop }) => {
         <TextFilter
           columnId={header.id}
           minWidth={header.width}
-          onFilterChange={onFilterChange}
           placeholder={header.placeholder}
+          onFilterChange={onFilterChange}
         />
       );
     case 'not-filtered': // fall through

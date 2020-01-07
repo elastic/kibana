@@ -168,13 +168,13 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: sort.direction }}
         totalCount={fakeTotalCount}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

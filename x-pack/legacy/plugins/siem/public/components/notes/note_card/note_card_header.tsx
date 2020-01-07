@@ -40,10 +40,10 @@ const User = styled.span`
 export const NoteCardHeader = React.memo<{ created: Date; user: string }>(({ created, user }) => (
   <EuiPanel data-test-subj="note-card-header" hasShadow={false} paddingSize="s">
     <HeaderContainer>
-      <Avatar data-test-subj="avatar" size="s" name={user} />
+      <Avatar data-test-subj="avatar" name={user} size="s" />
       <User data-test-subj="user">{user}</User>
       <Action data-test-subj="action">{i18n.ADDED_A_NOTE}</Action>
-      <NoteCreated data-test-subj="created" created={created} />
+      <NoteCreated created={created} data-test-subj="created" />
     </HeaderContainer>
   </EuiPanel>
 ));

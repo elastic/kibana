@@ -50,12 +50,12 @@ export const AnomalyScoreComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          button={<Icon type="iInCircle" />}
+          closePopover={() => setIsOpen(!isOpen)}
           data-test-subj="anomaly-score-popover"
           id="anomaly-score-popover"
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
-          closePopover={() => setIsOpen(!isOpen)}
-          button={<Icon type="iInCircle" />}
         >
           <EuiDescriptionList
             data-test-subj="anomaly-description-list"

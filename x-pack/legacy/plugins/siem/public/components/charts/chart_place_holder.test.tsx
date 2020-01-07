@@ -62,7 +62,7 @@ describe('ChartPlaceHolder', () => {
     const height = `100px`;
     const width = `100px`;
     shallowWrapper = shallow(
-      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
+      <ChartPlaceHolder data={mockDataAllZeros} height={height} width={width} />
     );
     expect(shallowWrapper.props()).toMatchObject({
       height,
@@ -74,7 +74,7 @@ describe('ChartPlaceHolder', () => {
     const height = `100px`;
     const width = `100px`;
     shallowWrapper = shallow(
-      <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
+      <ChartPlaceHolder data={mockDataAllZeros} height={height} width={width} />
     );
     expect(
       shallowWrapper
@@ -89,9 +89,9 @@ describe('ChartPlaceHolder', () => {
     const width = `100px`;
     shallowWrapper = shallow(
       <ChartPlaceHolder
+        data={mockDataUnexpectedValue as ChartSeriesData[]}
         height={height}
         width={width}
-        data={mockDataUnexpectedValue as ChartSeriesData[]}
       />
     );
     expect(

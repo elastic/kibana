@@ -98,29 +98,29 @@ export const EventsCountComponent = ({
   return (
     <h5>
       <PopoverRowItems
-        className="footer-popover"
-        id="customizablePagination"
-        data-test-subj="timelineSizeRowPopover"
         button={
           <>
-            <EuiBadge data-test-subj="local-events-count" color="hollow">
+            <EuiBadge color="hollow" data-test-subj="local-events-count">
               {itemsCount}
               <EuiButtonEmpty
-                size="s"
                 color="text"
-                iconType="arrowDown"
                 iconSide="right"
+                iconType="arrowDown"
+                size="s"
                 onClick={onClick}
               />
             </EuiBadge>
             {` ${i18n.OF} `}
           </>
         }
-        isOpen={isOpen}
+        className="footer-popover"
         closePopover={closePopover}
+        data-test-subj="timelineSizeRowPopover"
+        id="customizablePagination"
+        isOpen={isOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
+        <EuiContextMenuPanel data-test-subj="timelinePickSizeRow" items={items} />
       </PopoverRowItems>
       <EuiToolTip
         content={`${serverSideEventCount} ${timelineTypeContext.footerText ??
@@ -157,8 +157,8 @@ export const PagingControlComponent = ({
       <EuiButton
         data-test-subj="TimelineMoreButton"
         isLoading={isLoading}
-        onClick={loadMore}
         size="s"
+        onClick={loadMore}
       >
         {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
       </EuiButton>
@@ -290,23 +290,23 @@ export const FooterComponent = ({
                 isOpen={isPopoverOpen}
                 items={rowItems}
                 itemsCount={itemsCount}
-                onClick={onButtonClick}
                 serverSideEventCount={serverSideEventCount}
+                onClick={onButtonClick}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
 
           <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
             {isLive ? (
-              <EuiText size="s" data-test-subj="is-live-on-message">
+              <EuiText data-test-subj="is-live-on-message" size="s">
                 <b>
                   {i18n.AUTO_REFRESH_ACTIVE}{' '}
                   <EuiIconTip
                     color="subdued"
                     content={
                       <FormattedMessage
-                        id="xpack.siem.footer.autoRefreshActiveTooltip"
                         defaultMessage="While auto-refresh is enabled, timeline will show you the latest {numberOfItems} events that match your query."
+                        id="xpack.siem.footer.autoRefreshActiveTooltip"
                         values={{
                           numberOfItems: itemsCount,
                         }}
@@ -327,8 +327,8 @@ export const FooterComponent = ({
           </EuiFlexItem>
 
           <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-            <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-              <LastUpdatedAt updatedAt={updatedAt || getUpdatedAt()} compact={compact} />
+            <FixedWidthLastUpdated compact={compact} data-test-subj="fixed-width-last-updated">
+              <LastUpdatedAt compact={compact} updatedAt={updatedAt || getUpdatedAt()} />
             </FixedWidthLastUpdated>
           </EuiFlexItem>
         </FooterFlexGroup>

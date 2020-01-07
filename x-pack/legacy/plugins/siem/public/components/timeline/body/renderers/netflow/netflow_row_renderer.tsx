@@ -92,27 +92,27 @@ export const netflowRowRenderer: RowRenderer = {
           <Netflow
             contextId={`netflow-row-renderer-render-row-${timelineId}-${data._id}`}
             destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
+            destinationGeoCityName={asArrayIfExists(
+              get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, data)
+            )}
             destinationGeoContinentName={asArrayIfExists(
               get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
-            )}
-            destinationGeoCountryName={asArrayIfExists(
-              get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, data)
             )}
             destinationGeoCountryIsoCode={asArrayIfExists(
               get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data)
             )}
+            destinationGeoCountryName={asArrayIfExists(
+              get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, data)
+            )}
             destinationGeoRegionName={asArrayIfExists(
               get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, data)
-            )}
-            destinationGeoCityName={asArrayIfExists(
-              get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, data)
             )}
             destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, data))}
             destinationPackets={asArrayIfExists(get(DESTINATION_PACKETS_FIELD_NAME, data))}
             destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, data))}
             eventDuration={asArrayIfExists(get(EVENT_DURATION_FIELD_NAME, data))}
-            eventId={get(ID_FIELD_NAME, data)}
             eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
+            eventId={get(ID_FIELD_NAME, data)}
             eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
             networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
             networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
@@ -121,15 +121,15 @@ export const netflowRowRenderer: RowRenderer = {
             networkProtocol={asArrayIfExists(get(NETWORK_PROTOCOL_FIELD_NAME, data))}
             processName={asArrayIfExists(get(PROCESS_NAME_FIELD_NAME, data))}
             sourceBytes={asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, data))}
+            sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, data))}
             sourceGeoContinentName={asArrayIfExists(
               get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, data)
             )}
-            sourceGeoCountryName={asArrayIfExists(get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, data))}
             sourceGeoCountryIsoCode={asArrayIfExists(
               get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data)
             )}
+            sourceGeoCountryName={asArrayIfExists(get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, data))}
             sourceGeoRegionName={asArrayIfExists(get(SOURCE_GEO_REGION_NAME_FIELD_NAME, data))}
-            sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, data))}
             sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, data))}
             sourcePackets={asArrayIfExists(get(SOURCE_PACKETS_FIELD_NAME, data))}
             sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, data))}

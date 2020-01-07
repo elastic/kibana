@@ -25,7 +25,7 @@ describe('DraggableWrapper', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={{}} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={{}}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>
@@ -39,7 +39,7 @@ describe('DraggableWrapper', () => {
     test('it renders the children passed to the render prop', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>
@@ -55,7 +55,7 @@ describe('DraggableWrapper', () => {
     test('it applies text truncation styling when truncate IS specified (implicit: and the user is not dragging)', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
             </DragDropContextWrapper>
@@ -71,7 +71,7 @@ describe('DraggableWrapper', () => {
     test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mocksSource}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>

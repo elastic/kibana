@@ -29,11 +29,11 @@ export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip 
   if (errorMessage != null) {
     return (
       <EuiToolTip
-        position="top"
+        aria-label="last_event_time_error"
         content={errorMessage}
         data-test-subj="last_event_time_error"
-        aria-label="last_event_time_error"
         id={`last_event_time_error-${indexKey}`}
+        position="top"
       >
         <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="alert" />
       </EuiToolTip>
@@ -48,8 +48,8 @@ export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip 
         : !loading &&
           lastSeen != null && (
             <FormattedMessage
-              id="xpack.siem.headerPage.pageSubtitle"
               defaultMessage="Last event: {beat}"
+              id="xpack.siem.headerPage.pageSubtitle"
               values={{
                 beat: <FormattedRelativePreferenceDate value={lastSeen} />,
               }}

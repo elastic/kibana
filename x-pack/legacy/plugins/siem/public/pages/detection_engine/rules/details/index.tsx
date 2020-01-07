@@ -61,28 +61,28 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
       ) : (
         [
           <FormattedMessage
-            id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
             defaultMessage="Created by: {by} on {date}"
+            id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
             values={{
               by: rule?.created_by ?? i18n.UNKNOWN,
               date: (
                 <FormattedDate
-                  value={rule?.created_at ?? new Date().toISOString()}
                   fieldName="createdAt"
+                  value={rule?.created_at ?? new Date().toISOString()}
                 />
               ),
             }}
           />,
           rule?.updated_by != null ? (
             <FormattedMessage
-              id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
               defaultMessage="Updated by: {by} on {date}"
+              id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
               values={{
                 by: rule?.updated_by ?? i18n.UNKNOWN,
                 date: (
                   <FormattedDate
-                    value={rule?.updated_at ?? new Date().toISOString()}
                     fieldName="updatedAt"
+                    value={rule?.updated_at ?? new Date().toISOString()}
                   />
                 ),
               }}
@@ -115,7 +115,6 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
                     <HeaderPage
                       backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
                       badgeOptions={{ text: i18n.EXPERIMENTAL }}
-                      border
                       subtitle={subTitle}
                       subtitle2={[
                         lastSignals != null ? (
@@ -128,12 +127,13 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
                         'Status: Comming Soon',
                       ]}
                       title={title}
+                      border
                     >
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem grow={false}>
                           <RuleSwitch
-                            id={rule?.id ?? '-1'}
                             enabled={rule?.enabled ?? false}
+                            id={rule?.id ?? '-1'}
                             optionLabel={i18n.ACTIVATE_RULE}
                           />
                         </EuiFlexItem>
@@ -161,10 +161,10 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
                         <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
                           {defineRuleData != null && (
                             <StepDefineRule
-                              descriptionDirection="column"
-                              isReadOnlyView={true}
-                              isLoading={false}
                               defaultValues={defineRuleData}
+                              descriptionDirection="column"
+                              isLoading={false}
+                              isReadOnlyView={true}
                             />
                           )}
                         </StepPanel>
@@ -174,10 +174,10 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
                         <StepPanel loading={loading} title={ruleI18n.ABOUT}>
                           {aboutRuleData != null && (
                             <StepAboutRule
-                              descriptionDirection="column"
-                              isReadOnlyView={true}
-                              isLoading={false}
                               defaultValues={aboutRuleData}
+                              descriptionDirection="column"
+                              isLoading={false}
+                              isReadOnlyView={true}
                             />
                           )}
                         </StepPanel>
@@ -187,10 +187,10 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
                         <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
                           {scheduleRuleData != null && (
                             <StepScheduleRule
-                              descriptionDirection="column"
-                              isReadOnlyView={true}
-                              isLoading={false}
                               defaultValues={scheduleRuleData}
+                              descriptionDirection="column"
+                              isLoading={false}
+                              isReadOnlyView={true}
                             />
                           )}
                         </StepPanel>
@@ -217,7 +217,7 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIn
             </GlobalTime>
           ) : (
             <WrapperPage>
-              <HeaderPage border title={i18n.PAGE_TITLE} />
+              <HeaderPage title={i18n.PAGE_TITLE} border />
 
               <DetectionEngineEmptyPage />
             </WrapperPage>

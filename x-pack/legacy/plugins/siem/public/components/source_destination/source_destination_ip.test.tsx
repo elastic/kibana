@@ -330,38 +330,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={undefined}
@@ -384,38 +384,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={undefined}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -438,38 +438,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={undefined}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -492,38 +492,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={undefined}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -547,38 +547,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -601,38 +601,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -655,38 +655,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={[]}
           sourcePort={[]}
@@ -704,38 +704,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={[]}
           destinationPort={[]}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -753,38 +753,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -807,38 +807,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={[]}
@@ -861,38 +861,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -915,38 +915,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={[]}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -969,38 +969,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -1023,38 +1023,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -1077,38 +1077,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={undefined}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -1132,38 +1132,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={undefined}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -1187,38 +1187,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={undefined}
           sourcePort={undefined}
@@ -1237,38 +1237,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={undefined}
           destinationPort={undefined}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
@@ -1286,38 +1286,38 @@ describe('SourceDestinationIp', () => {
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
+          destinationGeoCityName={asArrayIfExists(
+            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCountryName={asArrayIfExists(
-            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationGeoCountryIsoCode={asArrayIfExists(
             get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          destinationGeoCountryName={asArrayIfExists(
+            get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           destinationGeoRegionName={asArrayIfExists(
             get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          destinationGeoCityName={asArrayIfExists(
-            get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          sourceGeoCityName={asArrayIfExists(
+            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCountryName={asArrayIfExists(
-            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceGeoCountryIsoCode={asArrayIfExists(
             get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, getMockNetflowData())
           )}
+          sourceGeoCountryName={asArrayIfExists(
+            get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, getMockNetflowData())
+          )}
           sourceGeoRegionName={asArrayIfExists(
             get(SOURCE_GEO_REGION_NAME_FIELD_NAME, getMockNetflowData())
-          )}
-          sourceGeoCityName={asArrayIfExists(
-            get(SOURCE_GEO_CITY_NAME_FIELD_NAME, getMockNetflowData())
           )}
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}

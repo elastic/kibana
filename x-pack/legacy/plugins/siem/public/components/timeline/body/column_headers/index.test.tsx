@@ -42,16 +42,16 @@ describe('ColumnHeaders', () => {
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
           isSelectAllChecked={false}
-          onColumnSorted={jest.fn()}
-          onColumnRemoved={jest.fn()}
-          onColumnResized={jest.fn()}
-          onSelectAll={jest.fn}
-          onUpdateColumns={jest.fn()}
           showEventsSelect={false}
           showSelectAllCheckbox={false}
           sort={sort}
           timelineId={'test'}
           toggleColumn={jest.fn()}
+          onColumnRemoved={jest.fn()}
+          onColumnResized={jest.fn()}
+          onColumnSorted={jest.fn()}
+          onSelectAll={jest.fn}
+          onUpdateColumns={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -65,16 +65,16 @@ describe('ColumnHeaders', () => {
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
+            onSelectAll={jest.fn}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -95,16 +95,16 @@ describe('ColumnHeaders', () => {
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
+            onSelectAll={jest.fn}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -127,16 +127,16 @@ describe('ColumnHeaders', () => {
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
+            onSelectAll={jest.fn}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );

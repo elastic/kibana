@@ -17,9 +17,9 @@ describe('CertificateFingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <CertificateFingerprint
-          eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"
+          eventId="Tgwnt2kBqd-n62SwPZDP"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />
@@ -37,9 +37,9 @@ describe('CertificateFingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <CertificateFingerprint
-          eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"
+          eventId="Tgwnt2kBqd-n62SwPZDP"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />
@@ -57,9 +57,9 @@ describe('CertificateFingerprint', () => {
     const wrapper = mount(
       <TestProviders>
         <CertificateFingerprint
-          eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"
+          eventId="Tgwnt2kBqd-n62SwPZDP"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />

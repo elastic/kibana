@@ -84,11 +84,11 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
     };
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
-        query={uncommonProcessesQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={uncommonProcessesQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);

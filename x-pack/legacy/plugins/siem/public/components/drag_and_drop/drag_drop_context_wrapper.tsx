@@ -86,7 +86,7 @@ export const DragDropContextWrapperComponent = React.memo<Props>(
     );
     return (
       // @ts-ignore
-      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
+      <DragDropContext onBeforeCapture={onBeforeCapture} onDragEnd={onDragEnd}>
         {children}
       </DragDropContext>
     );

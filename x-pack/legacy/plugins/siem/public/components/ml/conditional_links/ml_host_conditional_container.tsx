@@ -25,8 +25,6 @@ type MlHostConditionalProps = Partial<RouteComponentProps<{}>> & { url: string }
 export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ url }) => (
   <Switch>
     <Route
-      strict
-      exact
       path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
@@ -38,6 +36,8 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
         const reEncoded = QueryString.encode(queryStringDecoded);
         return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
+      exact
+      strict
     />
     <Route
       path={`${url}/:hostName`}

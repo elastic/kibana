@@ -144,12 +144,11 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         headerTooltip={i18n.TOOLTIP}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
-        itemsPerRow={rowItems}
         isInspect={isInspect}
+        itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{
@@ -159,6 +158,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         totalCount={fakeTotalCount}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

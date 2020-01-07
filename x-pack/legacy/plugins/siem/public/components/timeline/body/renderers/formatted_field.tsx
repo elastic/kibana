@@ -39,8 +39,8 @@ export const FormattedFieldValue = React.memo<{
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
-        eventId={eventId}
         contextId={contextId}
+        eventId={eventId}
         fieldName={fieldName}
         value={!isNumber(value) ? value : String(value)}
       />
@@ -89,7 +89,6 @@ export const FormattedFieldValue = React.memo<{
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
-          data-test-subj="message-tool-tip"
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -100,6 +99,7 @@ export const FormattedFieldValue = React.memo<{
               </EuiFlexItem>
             </EuiFlexGroup>
           }
+          data-test-subj="message-tool-tip"
         >
           <>{value}</>
         </EuiToolTip>
@@ -115,12 +115,12 @@ export const FormattedFieldValue = React.memo<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        value={`${value}`}
         tooltipContent={
           fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME
             ? null
             : fieldName
         }
+        value={`${value}`}
       >
         {content}
       </DefaultDraggable>

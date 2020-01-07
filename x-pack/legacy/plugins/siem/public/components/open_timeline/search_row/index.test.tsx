@@ -22,10 +22,10 @@ describe('SearchRow', () => {
       <ThemeProvider theme={theme}>
         <SearchRow
           onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
           query=""
           totalSearchResultsCount={0}
+          onQueryChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -44,10 +44,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={0}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -67,10 +67,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={onToggleOnlyFavorites}
             query=""
             totalSearchResultsCount={0}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={onToggleOnlyFavorites}
           />
         </ThemeProvider>
       );
@@ -88,10 +88,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={true}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={0}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -109,10 +109,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={0}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -134,10 +134,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={onQueryChange}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={32}
+            onQueryChange={onQueryChange}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -156,10 +156,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -177,10 +177,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query="   "
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -198,10 +198,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query="How was your day?"
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -221,10 +221,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query=""
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -242,10 +242,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query="   "
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -263,10 +263,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query="Would you like to go to Denver?"
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -284,10 +284,10 @@ describe('SearchRow', () => {
         <ThemeProvider theme={theme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
             query="   Is it starting to feel cramped in here?   "
             totalSearchResultsCount={32}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
           />
         </ThemeProvider>
       );

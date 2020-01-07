@@ -23,7 +23,7 @@ export const suricataRowRenderer: RowRenderer = {
         {children}
 
         <RowRendererContainer>
-          <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
+          <SuricataDetails browserFields={browserFields} data={data} timelineId={timelineId} />
         </RowRendererContainer>
       </>
     );

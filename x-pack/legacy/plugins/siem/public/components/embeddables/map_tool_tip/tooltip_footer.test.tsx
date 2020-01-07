@@ -21,9 +21,9 @@ describe('ToolTipFilter', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <ToolTipFooterComponent
+        featureIndex={0}
         nextFeature={nextFeature}
         previousFeature={previousFeature}
-        featureIndex={0}
         totalFeatures={100}
       />
     );
@@ -34,9 +34,9 @@ describe('ToolTipFilter', () => {
     test('previousButton is disabled when featureIndex is 0', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={5}
         />
       );
@@ -52,9 +52,9 @@ describe('ToolTipFilter', () => {
     test('previousFeature is not called when featureIndex is 0', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={5}
         />
       );
@@ -69,9 +69,9 @@ describe('ToolTipFilter', () => {
     test('nextButton is enabled when featureIndex is < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={5}
         />
       );
@@ -87,9 +87,9 @@ describe('ToolTipFilter', () => {
     test('nextFeature is called when featureIndex is < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={5}
         />
       );
@@ -106,9 +106,9 @@ describe('ToolTipFilter', () => {
     test('previousButton is enabled when featureIndex >== totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={4}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={4}
           totalFeatures={5}
         />
       );
@@ -124,9 +124,9 @@ describe('ToolTipFilter', () => {
     test('previousFunction is called when featureIndex >== totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={4}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={4}
           totalFeatures={5}
         />
       );
@@ -141,9 +141,9 @@ describe('ToolTipFilter', () => {
     test('nextButton is disabled when featureIndex >== totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={4}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={4}
           totalFeatures={5}
         />
       );
@@ -159,9 +159,9 @@ describe('ToolTipFilter', () => {
     test('nextFunction is not called when featureIndex >== totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={4}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={4}
           totalFeatures={5}
         />
       );
@@ -177,9 +177,9 @@ describe('ToolTipFilter', () => {
     test('previousButton is not enabled when only a single feature is provided', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={1}
         />
       );
@@ -195,9 +195,9 @@ describe('ToolTipFilter', () => {
     test('previousFunction is not called when only a single feature is provided', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={1}
         />
       );
@@ -212,9 +212,9 @@ describe('ToolTipFilter', () => {
     test('nextButton is not enabled when only a single feature is provided', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={1}
         />
       );
@@ -230,9 +230,9 @@ describe('ToolTipFilter', () => {
     test('nextFunction is not called when only a single feature is provided', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={0}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={0}
           totalFeatures={1}
         />
       );
@@ -249,9 +249,9 @@ describe('ToolTipFilter', () => {
     test('previousButton is enabled when featureIndex > 0 && featureIndex < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={1}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={1}
           totalFeatures={5}
         />
       );
@@ -267,9 +267,9 @@ describe('ToolTipFilter', () => {
     test('previousFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={1}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={1}
           totalFeatures={5}
         />
       );
@@ -284,9 +284,9 @@ describe('ToolTipFilter', () => {
     test('nextButton is enabled when featureIndex > 0 && featureIndex < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={1}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={1}
           totalFeatures={5}
         />
       );
@@ -302,9 +302,9 @@ describe('ToolTipFilter', () => {
     test('nextFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
       const wrapper = mount(
         <ToolTipFooterComponent
+          featureIndex={1}
           nextFeature={nextFeature}
           previousFeature={previousFeature}
-          featureIndex={1}
           totalFeatures={5}
         />
       );

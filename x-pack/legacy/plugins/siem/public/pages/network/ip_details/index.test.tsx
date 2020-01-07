@@ -139,7 +139,7 @@ describe('Ip Details', () => {
     const ip = 'fe80--24ce-f7ff-fede-a571';
     const wrapper = mount(
       <TestProviders store={store}>
-        <MockedProvider mocks={localSource} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={localSource}>
           <Router history={getMockHistory(ip)}>
             <IPDetails {...getMockProps(ip)} />
           </Router>

@@ -16,7 +16,7 @@ const FlexGroup = styled(EuiFlexGroup)`
 FlexGroup.displayName = 'FlexGroup';
 
 export const NetworkRoutesLoading = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
+  <FlexGroup alignItems="center" justifyContent="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>

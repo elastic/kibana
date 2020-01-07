@@ -27,7 +27,6 @@ describe('Category', () => {
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
-          filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
             browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
@@ -38,9 +37,10 @@ describe('Category', () => {
             timelineId,
             toggleColumn: jest.fn(),
           })}
+          filteredBrowserFields={mockBrowserFields}
+          timelineId={timelineId}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -59,7 +59,6 @@ describe('Category', () => {
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
-          filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
             browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
@@ -70,9 +69,10 @@ describe('Category', () => {
             timelineId,
             toggleColumn: jest.fn(),
           })}
+          filteredBrowserFields={mockBrowserFields}
+          timelineId={timelineId}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -91,7 +91,6 @@ describe('Category', () => {
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
-          filteredBrowserFields={mockBrowserFields}
           fieldItems={getFieldItems({
             browserFields: mockBrowserFields,
             category: mockBrowserFields[selectedCategoryId],
@@ -102,9 +101,10 @@ describe('Category', () => {
             timelineId,
             toggleColumn: jest.fn(),
           })}
+          filteredBrowserFields={mockBrowserFields}
+          timelineId={timelineId}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          timelineId={timelineId}
         />
       </TestProviders>
     );

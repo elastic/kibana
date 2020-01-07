@@ -20,8 +20,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[2].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[2].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -33,8 +33,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[13].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[13].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -48,8 +48,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[14].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[14].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -63,8 +63,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[15].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[15].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -78,8 +78,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[16].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[16].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -93,8 +93,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[17].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[17].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -108,8 +108,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[18].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[18].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -123,8 +123,8 @@ describe('ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <ZeekDetails
-            data={mockTimelineData[0].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[0].ecs}
             timelineId="test"
           />
         </TestProviders>

@@ -79,30 +79,30 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
               <ProviderBadge
                 deleteProvider={!isLoading ? deleteProvider : noop}
                 field={field}
-                kqlQuery={kqlQuery}
                 isEnabled={isEnabled}
                 isExcluded={isExcluded}
+                kqlQuery={kqlQuery}
+                operator={operator}
                 providerId={providerId}
                 togglePopover={togglePopover}
                 val={val}
-                operator={operator}
               />
             }
             closePopover={closePopover}
             deleteProvider={deleteProvider}
             field={field}
-            kqlQuery={kqlQuery}
             isEnabled={isEnabled}
             isExcluded={isExcluded}
             isLoading={isLoading}
             isOpen={isPopoverOpen}
-            onDataProviderEdited={onDataProviderEdited}
+            kqlQuery={kqlQuery}
             operator={operator}
             providerId={providerId}
             timelineId={timelineId}
             toggleEnabledProvider={onToggleEnabledProvider}
             toggleExcludedProvider={onToggleExcludedProvider}
             value={val}
+            onDataProviderEdited={onDataProviderEdited}
           />
         )}
       </TimelineContext.Consumer>

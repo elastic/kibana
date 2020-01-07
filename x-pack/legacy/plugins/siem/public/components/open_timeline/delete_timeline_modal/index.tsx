@@ -43,8 +43,8 @@ export const DeleteTimelineModalButton = React.memo<Props>(
             iconSize="s"
             iconType="trash"
             isDisabled={deleteTimelines == null || savedObjectId == null || savedObjectId === ''}
-            onClick={openModal}
             size="s"
+            onClick={openModal}
           />
         </EuiToolTip>
 
@@ -52,10 +52,10 @@ export const DeleteTimelineModalButton = React.memo<Props>(
           <EuiOverlayMask>
             <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={closeModal}>
               <DeleteTimelineModal
-                data-test-subj="delete-timeline-modal"
-                onDelete={onDelete}
-                title={title}
                 closeModal={closeModal}
+                data-test-subj="delete-timeline-modal"
+                title={title}
+                onDelete={onDelete}
               />
             </EuiModal>
           </EuiOverlayMask>

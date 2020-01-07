@@ -222,7 +222,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.every(item => item.value != null && item.value.length > 0);
 
     return (
-      <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
+      <FlexItem data-test-subj={`stat-${statKey}`} grow={grow}>
         <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
@@ -232,10 +232,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <InspectButton
-                queryId={id}
-                title={`KPI ${description}`}
                 inspectIndex={index}
+                queryId={id}
                 show={isHover}
+                title={`KPI ${description}`}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -247,10 +247,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
-                        type={field.icon}
                         color={field.color}
-                        size="l"
                         data-test-subj="stat-icon"
+                        size="l"
+                        type={field.icon}
                       />
                     </FlexItem>
                   )}

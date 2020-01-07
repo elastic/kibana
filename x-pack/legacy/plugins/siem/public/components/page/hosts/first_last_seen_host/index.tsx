@@ -30,11 +30,11 @@ export const FirstLastSeenHost = React.memo<{ hostname: string; type: FirstLastS
           if (errorMessage != null) {
             return (
               <EuiToolTip
-                position="top"
+                aria-label={`firstLastSeenError-${type}`}
                 content={errorMessage}
                 data-test-subj="firstLastSeenErrorToolTip"
-                aria-label={`firstLastSeenError-${type}`}
                 id={`firstLastSeenError-${hostname}-${type}`}
+                position="top"
               >
                 <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
               </EuiToolTip>

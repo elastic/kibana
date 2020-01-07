@@ -224,23 +224,23 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
-        onColumnRemoved={onColumnRemoved}
-        onColumnResized={onColumnResized}
-        onColumnSorted={onColumnSorted}
-        onRowSelected={onRowSelected}
-        onSelectAll={onSelectAll}
-        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
-        onPinEvent={onPinEvent}
-        onUnPinEvent={onUnPinEvent}
-        onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         range={range!}
         rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
-        sort={sort}
+        sort={sort} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
+        onColumnRemoved={onColumnRemoved}
+        onColumnResized={onColumnResized}
+        onColumnSorted={onColumnSorted}
+        onFilterChange={noop}
+        onPinEvent={onPinEvent}
+        onRowSelected={onRowSelected}
+        onSelectAll={onSelectAll}
+        onUnPinEvent={onUnPinEvent}
+        onUpdateColumns={onUpdateColumns}
       />
     );
   },

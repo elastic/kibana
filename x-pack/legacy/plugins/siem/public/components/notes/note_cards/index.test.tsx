@@ -43,8 +43,8 @@ describe('NoteCards', () => {
       <ThemeProvider theme={theme}>
         <NoteCards
           associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
           getNewNoteId={jest.fn()}
+          getNotesByIds={getNotesByIds}
           noteIds={noteIds}
           showAddNote={true}
           toggleShowAddNote={jest.fn()}
@@ -61,8 +61,8 @@ describe('NoteCards', () => {
       <ThemeProvider theme={theme}>
         <NoteCards
           associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
           getNewNoteId={jest.fn()}
+          getNotesByIds={getNotesByIds}
           noteIds={[]}
           showAddNote={true}
           toggleShowAddNote={jest.fn()}
@@ -79,8 +79,8 @@ describe('NoteCards', () => {
       <ThemeProvider theme={theme}>
         <NoteCards
           associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
           getNewNoteId={jest.fn()}
+          getNotesByIds={getNotesByIds}
           noteIds={noteIds}
           showAddNote={true}
           toggleShowAddNote={jest.fn()}
@@ -104,8 +104,8 @@ describe('NoteCards', () => {
       <ThemeProvider theme={theme}>
         <NoteCards
           associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
           getNewNoteId={jest.fn()}
+          getNotesByIds={getNotesByIds}
           noteIds={noteIds}
           showAddNote={true}
           toggleShowAddNote={jest.fn()}
@@ -122,8 +122,8 @@ describe('NoteCards', () => {
       <ThemeProvider theme={theme}>
         <NoteCards
           associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
           getNewNoteId={jest.fn()}
+          getNotesByIds={getNotesByIds}
           noteIds={noteIds}
           showAddNote={false}
           toggleShowAddNote={jest.fn()}

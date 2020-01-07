@@ -50,7 +50,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
   }) => {
     return (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center" wrap={true}>
           <UserHostWorkingDir
             contextId={contextId}
             eventId={id}
@@ -140,9 +140,9 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
-              processPid={processPid}
-              processName={processName}
               processExecutable={processExecutable}
+              processName={processName}
+              processPid={processPid}
             />
           </TokensFlexItem>
 
@@ -162,8 +162,8 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   <DraggableBadge
                     contextId={contextId}
                     eventId={id}
-                    iconType="logoWindows"
                     field="winlog.event_id"
+                    iconType="logoWindows"
                     value={winlogEventId}
                   />
                 </TokensFlexItem>

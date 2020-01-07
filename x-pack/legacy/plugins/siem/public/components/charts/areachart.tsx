@@ -89,17 +89,17 @@ export const AreaChartBaseComponent = ({
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
             <AreaSeries
-              id={seriesKey}
               key={seriesKey}
-              name={series.key.replace('Histogram', '')}
-              data={series.value || []}
-              xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
-              yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
-              timeZone={timeZone}
-              xAccessor="x"
-              yAccessors={['y']}
               areaSeriesStyle={getSeriesLineStyle()}
               customSeriesColors={series.color ? [series.color] : undefined}
+              data={series.value || []}
+              id={seriesKey}
+              name={series.key.replace('Histogram', '')}
+              timeZone={timeZone}
+              xAccessor="x"
+              xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+              yAccessors={['y']}
+              yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             />
           ) : null;
         })}
@@ -112,7 +112,7 @@ export const AreaChartBaseComponent = ({
           tickSize={0}
         />
 
-        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+        <Axis id={yAxisId} position={Position.Left} tickFormat={yTickFormatter} tickSize={0} />
       </Chart>
     </div>
   ) : null;
@@ -139,19 +139,19 @@ export const AreaChartComponent = ({
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
           <AreaChartBase
+            configs={configs}
             data={areaChart}
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
-            configs={configs}
           />
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
   ) : (
     <ChartPlaceHolder
+      data={areaChart}
       height={getChartHeight(customHeight)}
       width={getChartWidth(customWidth)}
-      data={areaChart}
     />
   );
 };

@@ -61,9 +61,8 @@ class AlertsOverTimeComponentQuery extends QueryTemplate<
     } = this.props;
     return (
       <Query<GetAlertsOverTimeQuery.Query, GetAlertsOverTimeQuery.Variables>
-        query={AlertsOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={AlertsOverTimeGqlQuery}
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,
@@ -75,6 +74,7 @@ class AlertsOverTimeComponentQuery extends QueryTemplate<
           defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, refetch }) => {
           const source = getOr({}, `source.AlertsHistogram`, data);

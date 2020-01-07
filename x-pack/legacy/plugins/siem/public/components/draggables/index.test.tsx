@@ -26,10 +26,10 @@ describe('draggables', () => {
     test('it renders the default DefaultDraggable', () => {
       const wrapper = shallow(
         <DefaultDraggable
-          id="draggable-id"
           field="some-field"
-          value="some-value"
+          id="draggable-id"
           queryValue="some-query-value"
+          value="some-value"
         >
           <span>{'A child of this'}</span>
         </DefaultDraggable>
@@ -43,9 +43,9 @@ describe('draggables', () => {
           contextId="context-id"
           eventId="event-id"
           field="some-field"
-          value="some-value"
-          queryValue="some-query-value"
           iconType="number"
+          queryValue="some-query-value"
+          value="some-value"
         >
           <span>{'A child of this'}</span>
         </DraggableBadge>
@@ -103,7 +103,7 @@ describe('draggables', () => {
     test('it works with just an id, field, and value and is some value', () => {
       const wrapper = mount(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field="some-field" value="some value" />
+          <DefaultDraggable field="some-field" id="draggable-id" value="some value" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('some value');
@@ -111,14 +111,14 @@ describe('draggables', () => {
 
     test('it returns null if value is undefined', () => {
       const wrapper = shallow(
-        <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
+        <DefaultDraggable field="some-field" id="draggable-id" value={undefined} />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
       const wrapper = shallow(
-        <DefaultDraggable id="draggable-id" field="some-field" value={null} />
+        <DefaultDraggable field="some-field" id="draggable-id" value={null} />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
@@ -126,7 +126,7 @@ describe('draggables', () => {
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
       const wrapper = mount(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field="source.bytes" value="a default draggable" />
+          <DefaultDraggable field="source.bytes" id="draggable-id" value="a default draggable" />
         </TestProviders>
       );
 
@@ -142,8 +142,8 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
+            id="draggable-id"
             tooltipContent="default draggable string tooltip"
             value="a default draggable"
           />
@@ -162,8 +162,8 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
+            id="draggable-id"
             tooltipContent={<span>{'default draggable tooltip'}</span>}
             value="a default draggable"
           />
@@ -182,8 +182,8 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
-            id="draggable-id"
             field="source.bytes"
+            id="draggable-id"
             tooltipContent={null}
             value="a default draggable"
           />
@@ -207,8 +207,8 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value="some value"
             iconType="number"
+            value="some value"
           />
         </TestProviders>
       );
@@ -234,8 +234,8 @@ describe('draggables', () => {
           contextId="context-id"
           eventId="event-id"
           field="some-field"
-          value={null}
           iconType="number"
+          value={null}
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -248,8 +248,8 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value=""
             iconType="document"
+            value=""
           />
         </TestProviders>
       );
@@ -263,8 +263,8 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value="some value"
             iconType="number"
+            value="some value"
           />
         </TestProviders>
       );
@@ -284,9 +284,9 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value="some value"
             iconType="number"
             tooltipContent="draggable badge string tooltip"
+            value="some value"
           />
         </TestProviders>
       );
@@ -306,9 +306,9 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value="some value"
             iconType="number"
             tooltipContent={<span>{'draggable badge tooltip'}</span>}
+            value="some value"
           />
         </TestProviders>
       );
@@ -328,9 +328,9 @@ describe('draggables', () => {
             contextId="context-id"
             eventId="event-id"
             field="some-field"
-            value="some value"
             iconType="number"
             tooltipContent={null}
+            value="some value"
           />
         </TestProviders>
       );

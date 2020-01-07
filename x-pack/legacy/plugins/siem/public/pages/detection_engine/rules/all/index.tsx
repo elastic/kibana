@@ -140,12 +140,12 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
           <>
-            <HeaderSection split title={i18n.ALL_RULES}>
+            <HeaderSection title={i18n.ALL_RULES} split>
               <EuiFieldSearch
                 aria-label={i18n.SEARCH_RULES}
-                fullWidth
                 incremental={false}
                 placeholder={i18n.SEARCH_PLACEHOLDER}
+                fullWidth
                 onSearch={filterString => {
                   dispatch({
                     type: 'updateFilterOptions',
@@ -186,9 +186,21 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
             <EuiBasicTable
               columns={getColumns(dispatch, kbnVersion, history)}
-              isSelectable
               itemId="rule_id"
               items={tableData}
+              pagination={{
+                pageIndex: pagination.page - 1,
+                pageSize: pagination.perPage,
+                totalItemCount: pagination.total,
+                pageSizeOptions: [5, 10, 20],
+              }}
+              selection={{
+                selectable: (item: TableData) => !item.isLoading,
+                onSelectionChange: (selected: TableData[]) =>
+                  dispatch({ type: 'setSelected', selectedItems: selected }),
+              }}
+              sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+              isSelectable
               onChange={({ page, sort }: EuiBasicTableOnChange) => {
                 dispatch({
                   type: 'updatePagination',
@@ -203,20 +215,8 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
                   },
                 });
               }}
-              pagination={{
-                pageIndex: pagination.page - 1,
-                pageSize: pagination.perPage,
-                totalItemCount: pagination.total,
-                pageSizeOptions: [5, 10, 20],
-              }}
-              selection={{
-                selectable: (item: TableData) => !item.isLoading,
-                onSelectionChange: (selected: TableData[]) =>
-                  dispatch({ type: 'setSelected', selectedItems: selected }),
-              }}
-              sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
             />
-            {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+            {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" size="xl" overlay />}
           </>
         )}
       </Panel>

@@ -102,8 +102,8 @@ const InspectButtonComponent = React.memo<InspectButtonProps>(
         {inputId === 'timeline' && !compact && (
           <EuiButtonEmpty
             aria-label={i18n.INSPECT}
-            data-test-subj="inspect-empty-button"
             color="text"
+            data-test-subj="inspect-empty-button"
             iconSide="left"
             iconType="inspect"
             isDisabled={loading || isDisabled}
@@ -126,13 +126,13 @@ const InspectButtonComponent = React.memo<InspectButtonProps>(
         )}
         <ModalInspectQuery
           closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
           isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
           request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
           response={
             inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
           }
           title={title}
-          data-test-subj="inspect-modal"
         />
       </InspectContainer>
     );

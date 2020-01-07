@@ -81,6 +81,7 @@ export const Events = React.memo<Props>(
     <EventsTbody data-test-subj="events">
       {data.map((event, i) => (
         <StatefulEvent
+          key={event._id}
           actionsColumnWidth={actionsColumnWidth}
           addNoteToEvent={addNoteToEvent}
           browserFields={browserFields}
@@ -91,20 +92,19 @@ export const Events = React.memo<Props>(
           getNotesByIds={getNotesByIds}
           isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
           isEventViewer={isEventViewer}
-          key={event._id}
           loadingEventIds={loadingEventIds}
           maxDelay={maxDelay(i)}
-          onColumnResized={onColumnResized}
-          onPinEvent={onPinEvent}
-          onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
-          onUpdateColumns={onUpdateColumns}
           rowRenderers={rowRenderers}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
           timelineId={id}
           toggleColumn={toggleColumn}
           updateNote={updateNote}
+          onColumnResized={onColumnResized}
+          onPinEvent={onPinEvent}
+          onRowSelected={onRowSelected}
+          onUnPinEvent={onUnPinEvent}
+          onUpdateColumns={onUpdateColumns}
         />
       ))}
     </EventsTbody>

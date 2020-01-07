@@ -84,8 +84,8 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
         <DurationEventStartEnd
           contextId={contextId}
           eventDuration={eventDuration}
-          eventId={eventId}
           eventEnd={eventEnd}
+          eventId={eventId}
           eventStart={eventStart}
         />
       </EuiFlexItemMarginRight>
@@ -94,11 +94,11 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
         <SourceDestination
           contextId={contextId}
           destinationBytes={destinationBytes}
-          destinationGeoContinentName={destinationGeoContinentName}
-          destinationGeoCountryName={destinationGeoCountryName}
-          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
-          destinationGeoRegionName={destinationGeoRegionName}
           destinationGeoCityName={destinationGeoCityName}
+          destinationGeoContinentName={destinationGeoContinentName}
+          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
+          destinationGeoCountryName={destinationGeoCountryName}
+          destinationGeoRegionName={destinationGeoRegionName}
           destinationIp={destinationIp}
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
@@ -109,11 +109,11 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           networkPackets={networkPackets}
           networkProtocol={networkProtocol}
           sourceBytes={sourceBytes}
-          sourceGeoContinentName={sourceGeoContinentName}
-          sourceGeoCountryName={sourceGeoCountryName}
-          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
-          sourceGeoRegionName={sourceGeoRegionName}
           sourceGeoCityName={sourceGeoCityName}
+          sourceGeoContinentName={sourceGeoContinentName}
+          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
+          sourceGeoCountryName={sourceGeoCountryName}
+          sourceGeoRegionName={sourceGeoRegionName}
           sourceIp={sourceIp}
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}

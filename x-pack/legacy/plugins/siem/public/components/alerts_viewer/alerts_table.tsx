@@ -61,10 +61,10 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   return (
     <StatefulEventsViewer
-      pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
       id={ALERTS_TABLE_ID}
+      pageFilters={alertsFilter}
       start={startDate}
       timelineTypeContext={useMemo(
         () => ({

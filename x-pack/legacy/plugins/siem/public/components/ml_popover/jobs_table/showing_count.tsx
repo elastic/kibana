@@ -26,8 +26,8 @@ export const ShowingCountComponent = ({ filterResultsLength }: ShowingCountProps
     <EuiText color="subdued" size="xs">
       <FormattedMessage
         data-test-subj="query-message"
-        id="xpack.siem.components.mlPopup.showingLabel"
         defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
+        id="xpack.siem.components.mlPopup.showingLabel"
         values={{
           filterResultsLength,
         }}

@@ -28,9 +28,9 @@ const SignalsChartsComponent = () => (
     <HeaderSection title="Signal detection frequency">
       <EuiSelect
         options={sampleChartOptions}
-        onChange={() => noop}
         prepend="Stack by"
         value={sampleChartOptions[0].value}
+        onChange={() => noop}
       />
     </HeaderSection>
 

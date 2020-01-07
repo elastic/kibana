@@ -58,7 +58,7 @@ export const KpiHostsComponentBase = ({
     narrowDateRange
   );
   return loading ? (
-    <FlexGroupSpinner justifyContent="center" alignItems="center">
+    <FlexGroupSpinner alignItems="center" justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>

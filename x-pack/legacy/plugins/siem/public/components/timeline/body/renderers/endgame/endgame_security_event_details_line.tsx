@@ -74,7 +74,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
 
     return (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center" wrap={true}>
           {eventAction === 'admin_logon' && (
             <TokensFlexItem component="span" data-test-subj="with-special-privileges" grow={false}>
               {i18n.WITH_SPECIAL_PRIVILEGES}
@@ -152,9 +152,9 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
-              processPid={processPid}
-              processName={processName}
               processExecutable={processExecutable}
+              processName={processName}
+              processPid={processPid}
             />
           </TokensFlexItem>
 
@@ -238,8 +238,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   <DraggableBadge
                     contextId={contextId}
                     eventId={id}
-                    iconType="logoWindows"
                     field="winlog.event_id"
+                    iconType="logoWindows"
                     value={winlogEventId}
                   />
                 </TokensFlexItem>

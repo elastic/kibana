@@ -33,8 +33,8 @@ const SignalsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChange
     <EuiFilterGroup>
       <EuiFilterButton
         hasActiveFilters={filterGroup === FILTER_OPEN}
-        onClick={onClickOpenFilterCallback}
         withNext
+        onClick={onClickOpenFilterCallback}
       >
         {i18n.OPEN_SIGNALS}
       </EuiFilterButton>

@@ -95,10 +95,10 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
         query={networkDnsQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkDns = getOr([], `source.NetworkDns.edges`, data);

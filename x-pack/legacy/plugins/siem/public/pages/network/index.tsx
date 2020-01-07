@@ -38,20 +38,20 @@ export const NetworkContainer = React.memo<Props>(() => {
       {({ to, from, setQuery, deleteQuery, isInitializing }) => (
         <Switch>
           <Route
-            strict
             path={networkRoutePath}
             render={() => (
               <Network
-                networkPagePath={networkPagePath}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
                 capabilitiesFetched={capabilities.capabilitiesFetched}
+                deleteQuery={deleteQuery}
+                from={from}
                 hasMlUserPermissions={userHasMlUserPermissions}
+                isInitializing={isInitializing}
+                networkPagePath={networkPagePath}
+                setQuery={setQuery}
+                to={to}
               />
             )}
+            strict
           />
           <Route
             path={ipDetailsPagePath}
@@ -61,12 +61,12 @@ export const NetworkContainer = React.memo<Props>(() => {
               },
             }) => (
               <IPDetails
-                detailName={detailName}
-                to={to}
-                from={from}
-                setQuery={setQuery}
                 deleteQuery={deleteQuery}
+                detailName={detailName}
+                from={from}
                 isInitializing={isInitializing}
+                setQuery={setQuery}
+                to={to}
               />
             )}
           />

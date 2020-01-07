@@ -58,21 +58,21 @@ export const ExpandableEvent = React.memo<Props>(
     return (
       <ExpandableDetails hideExpandButton={true}>
         <LazyAccordion
-          style={{ width: `${width}px` }}
+          forceExpand={forceExpand}
           id={`timeline-${timelineId}-row-${id}`}
+          paddingSize="none"
           renderExpandedContent={() => (
             <StatefulEventDetails
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={event}
               id={id}
-              onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               toggleColumn={toggleColumn}
+              onUpdateColumns={onUpdateColumns}
             />
           )}
-          forceExpand={forceExpand}
-          paddingSize="none"
+          style={{ width: `${width}px` }}
         />
       </ExpandableDetails>
     );

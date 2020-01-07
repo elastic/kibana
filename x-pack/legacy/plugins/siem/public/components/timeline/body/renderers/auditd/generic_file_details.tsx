@@ -59,54 +59,54 @@ export const AuditdGenericFileLine = React.memo<Props>(
     text,
     fileIcon,
   }) => (
-    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center" wrap={true}>
       <SessionUserHostWorkingDir
-        eventId={id}
         contextId={contextId}
+        eventId={id}
         hostName={hostName}
-        userName={userName}
         primary={primary}
         secondary={secondary}
-        workingDirectory={workingDirectory}
         session={session}
+        userName={userName}
+        workingDirectory={workingDirectory}
       />
       {(filePath != null || processExecutable != null) && (
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {text}
         </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <DraggableBadge
           contextId={contextId}
           eventId={id}
           field="file.path"
-          value={filePath}
           iconType={fileIcon}
+          value={filePath}
         />
       </TokensFlexItem>
       {processExecutable != null && (
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {i18n.USING}
         </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <ProcessDraggable
           contextId={contextId}
           endgamePid={undefined}
           endgameProcessName={undefined}
           eventId={id}
-          processPid={processPid}
-          processName={processName}
           processExecutable={processExecutable}
+          processName={processName}
+          processPid={processPid}
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      <Args args={args} contextId={contextId} eventId={id} processTitle={processTitle} />
       {result != null && (
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {i18n.WITH_RESULT}
         </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem component="span" grow={false}>
         <DraggableBadge
           contextId={contextId}
           eventId={id}
@@ -151,23 +151,23 @@ export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
       return (
         <Details>
           <AuditdGenericFileLine
-            id={id}
+            args={args}
             contextId={contextId}
-            text={text}
-            hostName={hostName}
-            userName={userName}
+            fileIcon={fileIcon}
             filePath={filePath}
+            hostName={hostName}
+            id={id}
+            primary={primary}
+            processExecutable={processExecutable}
             processName={processName}
             processPid={processPid}
-            processExecutable={processExecutable}
             processTitle={processTitle}
-            workingDirectory={workingDirectory}
-            args={args}
-            session={session}
-            primary={primary}
-            secondary={secondary}
-            fileIcon={fileIcon}
             result={result}
+            secondary={secondary}
+            session={session}
+            text={text}
+            userName={userName}
+            workingDirectory={workingDirectory}
           />
           <EuiSpacer size="s" />
           <NetflowRenderer data={data} timelineId={timelineId} />

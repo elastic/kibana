@@ -163,25 +163,25 @@ const StatefulEventsViewerComponent = React.memo<Props>(
         <EventsViewer
           browserFields={browserFields ?? {}}
           columns={columns}
-          id={id}
           dataProviders={dataProviders!}
           deletedEventIds={deletedEventIds}
           end={end}
           filters={filters}
           headerFilterGroup={headerFilterGroup}
+          id={id}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
           itemsPerPage={itemsPerPage!}
           itemsPerPageOptions={itemsPerPageOptions!}
           kqlMode={kqlMode}
-          onChangeItemsPerPage={onChangeItemsPerPage}
           query={query}
           showInspect={showInspect}
-          start={start}
           sort={sort!}
+          start={start}
           timelineTypeContext={timelineTypeContext}
           toggleColumn={toggleColumn}
           utilityBar={utilityBar}
+          onChangeItemsPerPage={onChangeItemsPerPage}
         />
       </div>
     );

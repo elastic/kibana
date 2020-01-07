@@ -89,10 +89,10 @@ export const FlyoutComponent = React.memo<Props>(
         <Pane
           flyoutHeight={flyoutHeight}
           headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
           timelineId={timelineId}
           usersViewing={usersViewing}
           width={width}
+          onClose={() => showTimeline({ id: timelineId, show: false })}
         >
           {children}
         </Pane>

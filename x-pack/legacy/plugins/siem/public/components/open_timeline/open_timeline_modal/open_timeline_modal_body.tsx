@@ -49,19 +49,19 @@ export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
         <HeaderContainer>
           <TitleRow
             data-test-subj="title-row"
-            onDeleteSelected={onDeleteSelected}
-            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
             selectedTimelinesCount={selectedItems.length}
             title={title}
+            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+            onDeleteSelected={onDeleteSelected}
           />
 
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}
-            onQueryChange={onQueryChange}
-            onToggleOnlyFavorites={onToggleOnlyFavorites}
             query={query}
             totalSearchResultsCount={totalSearchResultsCount}
+            onQueryChange={onQueryChange}
+            onToggleOnlyFavorites={onToggleOnlyFavorites}
           />
         </HeaderContainer>
       </EuiModalHeader>
@@ -69,14 +69,10 @@ export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
       <EuiModalBody>
         <TimelinesTable
           data-test-subj="timelines-table"
-          deleteTimelines={deleteTimelines}
           defaultPageSize={defaultPageSize}
-          loading={isLoading}
+          deleteTimelines={deleteTimelines}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={onOpenTimeline}
-          onSelectionChange={onSelectionChange}
-          onTableChange={onTableChange}
-          onToggleShowNotes={onToggleShowNotes}
+          loading={isLoading}
           pageIndex={pageIndex}
           pageSize={pageSize}
           searchResults={searchResults}
@@ -84,6 +80,10 @@ export const OpenTimelineModalBody = React.memo<OpenTimelineProps>(
           sortDirection={sortDirection}
           sortField={sortField}
           totalSearchResultsCount={totalSearchResultsCount}
+          onOpenTimeline={onOpenTimeline}
+          onSelectionChange={onSelectionChange}
+          onTableChange={onTableChange}
+          onToggleShowNotes={onToggleShowNotes}
         />
       </EuiModalBody>
     </>

@@ -47,7 +47,7 @@ export interface EventsSelectOption {
 }
 
 export const DropdownDisplay = React.memo<{ text: string }>(({ text }) => (
-  <EuiText size="s" color="subdued">
+  <EuiText color="subdued" size="s">
     {text}
   </EuiText>
 ));

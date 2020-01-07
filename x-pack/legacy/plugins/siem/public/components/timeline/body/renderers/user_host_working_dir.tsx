@@ -36,26 +36,26 @@ export const UserHostWorkingDir = React.memo<Props>(
   }) =>
     userName != null || userDomain != null || hostName != null || workingDirectory != null ? (
       <>
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
             field={userNameField}
-            value={userName}
             iconType="user"
+            value={userName}
           />
         </TokensFlexItem>
 
         {userDomain != null && (
           <>
             <TokensFlexItem
+              component="span"
               data-test-subj="user-host-working-dir-domain-separator-text"
               grow={false}
-              component="span"
             >
               {'\\'}
             </TokensFlexItem>
-            <TokensFlexItem grow={false} component="span">
+            <TokensFlexItem component="span" grow={false}>
               <DraggableBadge
                 contextId={contextId}
                 eventId={eventId}
@@ -67,7 +67,7 @@ export const UserHostWorkingDir = React.memo<Props>(
         )}
 
         {hostName != null && userName != null && (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             {hostNameSeparator}
           </TokensFlexItem>
         )}

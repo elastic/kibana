@@ -39,9 +39,8 @@ export interface KpiNetworkProps extends QueryTemplateProps {
 const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & KpiNetworkReducer>(
   ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
-      query={kpiNetworkQuery}
       fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
+      query={kpiNetworkQuery}
       skip={skip}
       variables={{
         sourceId,
@@ -54,6 +53,7 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & KpiNetworkReducer>
         defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
+      notifyOnNetworkStatusChange
     >
       {({ data, loading, refetch }) => {
         const kpiNetwork = getOr({}, `source.KpiNetwork`, data);

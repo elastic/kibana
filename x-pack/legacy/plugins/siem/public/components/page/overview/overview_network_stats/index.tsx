@@ -32,8 +32,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatSocketTitle"
         defaultMessage="Auditbeat Socket"
+        id="xpack.siem.overview.auditBeatSocketTitle"
       />
     ),
     id: 'auditbeatSocket',
@@ -45,8 +45,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatCiscoTitle"
         defaultMessage="Filebeat Cisco"
+        id="xpack.siem.overview.filebeatCiscoTitle"
       />
     ),
     id: 'filebeatCisco',
@@ -58,8 +58,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatNetflowTitle"
         defaultMessage="Filebeat Netflow"
+        id="xpack.siem.overview.filebeatNetflowTitle"
       />
     ),
     id: 'filebeatNetflow',
@@ -71,8 +71,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatPanwTitle"
         defaultMessage="Filebeat Palo Alto Networks"
+        id="xpack.siem.overview.filebeatPanwTitle"
       />
     ),
     id: 'filebeatPanw',
@@ -84,8 +84,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.fileBeatSuricataTitle"
         defaultMessage="Filebeat Suricata"
+        id="xpack.siem.overview.fileBeatSuricataTitle"
       />
     ),
     id: 'filebeatSuricata',
@@ -96,7 +96,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         ? numeral(data.filebeatZeek).format('0,0')
         : getEmptyTagValue(),
     title: (
-      <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Filebeat Zeek" />
+      <FormattedMessage defaultMessage="Filebeat Zeek" id="xpack.siem.overview.fileBeatZeekTitle" />
     ),
     id: 'filebeatZeek',
   },
@@ -107,8 +107,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.packetBeatDnsTitle"
         defaultMessage="Packetbeat DNS"
+        id="xpack.siem.overview.packetBeatDnsTitle"
       />
     ),
     id: 'packetbeatDNS',
@@ -120,8 +120,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.packetBeatFlowTitle"
         defaultMessage="Packetbeat Flow"
+        id="xpack.siem.overview.packetBeatFlowTitle"
       />
     ),
     id: 'packetbeatFlow',
@@ -133,8 +133,8 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
         : getEmptyTagValue(),
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.packetbeatTLSTitle"
         defaultMessage="Packetbeat TLS"
+        id="xpack.siem.overview.packetbeatTLSTitle"
       />
     ),
     id: 'packetbeatTLS',

@@ -56,8 +56,8 @@ export const HistogramSignals = React.memo(() => {
     <Chart size={['100%', 259]}>
       <Settings
         legendPosition="bottom"
-        showLegend
         theme={npStart.plugins.eui_utils.useChartsTheme()}
+        showLegend
       />
 
       <Axis id="signalAxisX" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
@@ -65,13 +65,13 @@ export const HistogramSignals = React.memo(() => {
       <Axis id="signalAxisY" position="left" />
 
       <HistogramBarSeries
-        id="signalBar"
-        xScaleType="time"
-        yScaleType="linear"
-        xAccessor="x"
-        yAccessors={['y']}
-        splitSeriesAccessors={['a', 'b']}
         data={sampleChartData}
+        id="signalBar"
+        splitSeriesAccessors={['a', 'b']}
+        xAccessor="x"
+        xScaleType="time"
+        yAccessors={['y']}
+        yScaleType="linear"
       />
     </Chart>
   );

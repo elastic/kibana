@@ -28,16 +28,16 @@ export const ParentProcessDraggable = React.memo<Props>(
       <>
         {!isNillEmptyOrNotFinite(text) && (
           <TokensFlexItem
+            component="span"
             data-test-subj="parent-process-draggable-text"
             grow={false}
-            component="span"
           >
             {text}
           </TokensFlexItem>
         )}
 
         {!isNillEmptyOrNotFinite(endgameParentProcessName) && (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
@@ -48,7 +48,7 @@ export const ParentProcessDraggable = React.memo<Props>(
         )}
 
         {!isNillEmptyOrNotFinite(processPpid) && (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}

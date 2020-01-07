@@ -21,9 +21,9 @@ export const AlertsOverTimeHistogram = (
 
   return (
     <MatrixHistogram
-      title={i18n.ALERTS_COUNT_FREQUENCY_BY_MODULE}
-      subtitle={subtitle}
       dataKey={dataKey}
+      subtitle={subtitle}
+      title={i18n.ALERTS_COUNT_FREQUENCY_BY_MODULE}
       {...matrixOverTimeProps}
     />
   );

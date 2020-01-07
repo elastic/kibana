@@ -22,11 +22,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -45,11 +45,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -70,11 +70,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -95,11 +95,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={onOutsideClick}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -118,11 +118,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -143,11 +143,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput={searchInput}
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput={searchInput}
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -161,11 +161,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={true}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -186,11 +186,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={onSearchInputChange}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -210,11 +210,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={{}}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -233,11 +233,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -256,11 +256,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={{}}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -279,11 +279,11 @@ describe('Header', () => {
         <Header
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
+          searchInput=""
+          timelineId={timelineId}
           onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
           onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );

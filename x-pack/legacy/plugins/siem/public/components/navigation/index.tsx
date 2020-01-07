@@ -40,12 +40,12 @@ export const SiemNavigationComponent = React.memo<
 
     return (
       <TabNavigation
-        query={urlState.query}
         display={display}
         filters={urlState.filters}
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
+        query={urlState.query}
         savedQuery={urlState.savedQuery}
         tabName={tabName}
         timeline={urlState.timeline}

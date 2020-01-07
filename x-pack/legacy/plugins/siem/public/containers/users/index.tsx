@@ -95,11 +95,11 @@ class UsersComponentQuery extends QueryTemplatePaginated<
     };
     return (
       <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
-        query={usersQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={usersQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const users = getOr([], `source.Users.edges`, data);

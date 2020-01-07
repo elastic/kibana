@@ -126,9 +126,9 @@ export const Providers = React.memo<Props>(
     <PanelProviders className="timeline-drop-area" data-test-subj="providers">
       <Empty showSmallMsg={dataProviders.length > 0} />
       <PanelProvidersGroupContainer
-        direction="column"
-        className="provider-items-container"
         alignItems="flexStart"
+        className="provider-items-container"
+        direction="column"
         gutterSize="none"
       >
         <EuiFlexItem grow={true}>
@@ -149,10 +149,10 @@ export const Providers = React.memo<Props>(
               // to another destination, so it doesn't use our DraggableWrapper
               <PanelProviderGroupContainer
                 key={dataProvider.id}
+                alignItems="center"
                 direction="row"
                 gutterSize="none"
                 justifyContent="flexStart"
-                alignItems="center"
               >
                 <PanelProviderItemContainer className="provider-item-filter-container" grow={false}>
                   <Draggable
@@ -168,22 +168,22 @@ export const Providers = React.memo<Props>(
                       >
                         <ProviderItemBadge
                           browserFields={browserFields}
+                          deleteProvider={deleteProvider}
                           field={
                             dataProvider.queryMatch.displayField || dataProvider.queryMatch.field
                           }
-                          kqlQuery={dataProvider.kqlQuery}
                           isEnabled={dataProvider.enabled}
                           isExcluded={dataProvider.excluded}
-                          deleteProvider={deleteProvider}
+                          kqlQuery={dataProvider.kqlQuery}
                           operator={dataProvider.queryMatch.operator || IS_OPERATOR}
-                          onDataProviderEdited={onDataProviderEdited}
+                          providerId={dataProvider.id}
                           timelineId={id}
                           toggleEnabledProvider={toggleEnabledProvider}
                           toggleExcludedProvider={toggleExcludedProvider}
-                          providerId={dataProvider.id}
                           val={
                             dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
                           }
+                          onDataProviderEdited={onDataProviderEdited}
                         />
                       </div>
                     )}
@@ -193,13 +193,13 @@ export const Providers = React.memo<Props>(
                   <ProviderItemAndDragDrop
                     browserFields={browserFields}
                     dataProvider={dataProvider}
+                    timelineId={id}
                     onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                     onChangeDroppableAndProvider={onChangeDroppableAndProvider}
                     onDataProviderEdited={onDataProviderEdited}
                     onDataProviderRemoved={onDataProviderRemoved}
                     onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                     onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                    timelineId={id}
                   />
                 </EuiFlexItem>
               </PanelProviderGroupContainer>

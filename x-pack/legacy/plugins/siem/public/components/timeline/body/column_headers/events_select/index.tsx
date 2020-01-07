@@ -56,17 +56,17 @@ export const EventsSelect = React.memo<Props>(({ checkState, timelineId }) => {
         className="eventsSelectDropdown"
         data-test-subj="events-select-dropdown"
         itemClassName="eventsSelectItem"
-        onChange={noop}
         options={getEventsSelectOptions()}
+        onChange={noop}
       />
       <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
         <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">
           <EuiCheckbox
             checked={checkState === 'checked'}
             data-test-subj="events-select-checkbox"
-            disabled
             id={`timeline-${timelineId}-events-select`}
             indeterminate={checkState === 'indeterminate'}
+            disabled
             onChange={noop}
           />
         </PositionedCheckbox>

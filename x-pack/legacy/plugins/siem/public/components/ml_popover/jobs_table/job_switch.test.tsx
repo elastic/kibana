@@ -24,8 +24,8 @@ describe('JobSwitch', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <JobSwitchComponent
-        job={siemJobs[0]}
         isSiemJobsLoading={false}
+        job={siemJobs[0]}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -35,8 +35,8 @@ describe('JobSwitch', () => {
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {
     const wrapper = mount(
       <JobSwitchComponent
-        job={siemJobs[0]}
         isSiemJobsLoading={false}
+        job={siemJobs[0]}
         onJobStateChange={onJobStateChangeMock}
       />
     );

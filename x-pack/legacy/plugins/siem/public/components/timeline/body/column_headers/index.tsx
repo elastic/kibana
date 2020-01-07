@@ -86,8 +86,8 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
-          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
+          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
         >
           {showEventsSelect && (
             <EventsTh>
@@ -101,9 +101,9 @@ export const ColumnHeadersComponent = ({
             <EventsTh>
               <EventsThContent textAlign="center">
                 <EuiCheckbox
+                  checked={isSelectAllChecked}
                   data-test-subj="select-all-events"
                   id={'select-all-events'}
-                  checked={isSelectAllChecked}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     onSelectAll({ isSelected: event.currentTarget.checked });
                   }}
@@ -120,10 +120,10 @@ export const ColumnHeadersComponent = ({
                 data-test-subj="field-browser"
                 height={FIELD_BROWSER_HEIGHT}
                 isEventViewer={isEventViewer}
-                onUpdateColumns={onUpdateColumns}
                 timelineId={timelineId}
                 toggleColumn={toggleColumn}
                 width={FIELD_BROWSER_WIDTH}
+                onUpdateColumns={onUpdateColumns}
               />
             </EventsThContent>
           </EventsTh>
@@ -137,30 +137,30 @@ export const ColumnHeadersComponent = ({
         >
           {dropProvided => (
             <EventsThGroupData
-              data-test-subj="headers-group"
               ref={dropProvided.innerRef}
+              data-test-subj="headers-group"
               {...dropProvided.droppableProps}
             >
               {columnHeaders.map((header, i) => (
                 <Draggable
-                  data-test-subj="draggable"
+                  key={header.id}
                   // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
-                  disableInteractiveElementBlocking
+                  data-test-subj="draggable"
                   draggableId={getDraggableFieldId({
                     contextId: `timeline-column-headers-${timelineId}`,
                     fieldId: header.id,
                   })}
                   index={i}
                   isDragDisabled={isResizing}
-                  key={header.id}
                   type={DRAG_TYPE_FIELD}
+                  disableInteractiveElementBlocking
                 >
                   {(dragProvided, dragSnapshot) => (
                     <EventsTh
                       {...dragProvided.draggableProps}
                       {...dragProvided.dragHandleProps}
-                      data-test-subj="draggable-header"
                       ref={dragProvided.innerRef}
+                      data-test-subj="draggable-header"
                       isDragging={dragSnapshot.isDragging}
                       position="relative"
                       // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -172,14 +172,14 @@ export const ColumnHeadersComponent = ({
                       {!dragSnapshot.isDragging ? (
                         <EventsThContent>
                           <Header
-                            timelineId={timelineId}
                             header={header}
+                            setIsResizing={setIsResizing}
+                            sort={sort}
+                            timelineId={timelineId}
                             onColumnRemoved={onColumnRemoved}
                             onColumnResized={onColumnResized}
                             onColumnSorted={onColumnSorted}
                             onFilterChange={onFilterChange}
-                            setIsResizing={setIsResizing}
-                            sort={sort}
                           />
                         </EventsThContent>
                       ) : (

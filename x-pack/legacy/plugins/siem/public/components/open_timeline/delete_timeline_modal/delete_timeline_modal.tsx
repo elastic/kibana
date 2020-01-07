@@ -23,11 +23,15 @@ export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
  */
 export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => (
   <EuiConfirmModal
+    buttonColor="danger"
+    cancelButtonText={i18n.CANCEL}
+    confirmButtonText={i18n.DELETE}
+    defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
     title={
       <FormattedMessage
-        id="xpack.siem.open.timeline.deleteTimelineModalTitle"
         data-test-subj="title"
         defaultMessage='Delete "{title}"?'
+        id="xpack.siem.open.timeline.deleteTimelineModalTitle"
         values={{
           title: title != null && title.trim().length > 0 ? title.trim() : i18n.UNTITLED_TIMELINE,
         }}
@@ -35,10 +39,6 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
     }
     onCancel={closeModal}
     onConfirm={onDelete}
-    cancelButtonText={i18n.CANCEL}
-    confirmButtonText={i18n.DELETE}
-    buttonColor="danger"
-    defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
   >
     <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
   </EuiConfirmModal>

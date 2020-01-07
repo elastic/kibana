@@ -97,7 +97,7 @@ const TitleRow = React.memo<{
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
 }>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" direction="row" gutterSize="none">
+  <EuiFlexGroup alignItems="center" direction="row" gutterSize="none" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       <EuiTitle data-test-subj="field-browser-title" size="s">
         <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
@@ -134,17 +134,17 @@ export const Header = React.memo<Props>(
     <HeaderContainer>
       <TitleRow
         isEventViewer={isEventViewer}
-        onUpdateColumns={onUpdateColumns}
         onOutsideClick={onOutsideClick}
+        onUpdateColumns={onUpdateColumns}
       />
       <SearchContainer>
         <EuiFieldSearch
           className={getFieldBrowserSearchInputClassName(timelineId)}
           data-test-subj="field-search"
           isLoading={isSearching}
-          onChange={onSearchInputChange}
           placeholder={i18n.FILTER_PLACEHOLDER}
           value={searchInput}
+          onChange={onSearchInputChange}
         />
       </SearchContainer>
       <CountRow filteredBrowserFields={filteredBrowserFields} />

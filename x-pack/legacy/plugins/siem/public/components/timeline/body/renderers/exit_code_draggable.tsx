@@ -26,12 +26,12 @@ export const ExitCodeDraggable = React.memo<Props>(
     return (
       <>
         {!isNillEmptyOrNotFinite(text) && (
-          <TokensFlexItem data-test-subj="exit-code-draggable-text" grow={false} component="span">
+          <TokensFlexItem component="span" data-test-subj="exit-code-draggable-text" grow={false}>
             {text}
           </TokensFlexItem>
         )}
 
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}

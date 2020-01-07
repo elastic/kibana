@@ -47,10 +47,10 @@ const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
   };
   return executeQuery ? (
     <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
-      query={timelineDetailsQuery}
       fetchPolicy="network-only"
-      notifyOnNetworkStatusChange
+      query={timelineDetailsQuery}
       variables={variables}
+      notifyOnNetworkStatusChange
     >
       {({ data, loading, refetch }) =>
         children!({

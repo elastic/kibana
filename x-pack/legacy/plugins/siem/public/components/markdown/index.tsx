@@ -35,7 +35,7 @@ export const Markdown = React.memo<{ raw?: string; size?: 'xs' | 's' | 'm' }>(
         </EuiText>
       ),
       table: ({ children }: { children: React.ReactNode[] }) => (
-        <table data-test-subj="markdown-table" className="euiTable euiTable--responsive">
+        <table className="euiTable euiTable--responsive" data-test-subj="markdown-table">
           {children}
         </table>
       ),
@@ -51,8 +51,8 @@ export const Markdown = React.memo<{ raw?: string; size?: 'xs' | 's' | 'm' }>(
       link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
         <EuiToolTip content={href}>
           <EuiLink
-            href={href}
             data-test-subj="markdown-link"
+            href={href}
             rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
             target="_blank"
           >

@@ -19,9 +19,9 @@ describe('Args', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <ArgsComponent
+          args={['arg1', 'arg2', 'arg3']}
           contextId="context-123"
           eventId="event-123"
-          args={['arg1', 'arg2', 'arg3']}
           processTitle="process-title-1"
         />
       );
@@ -32,9 +32,9 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            args={undefined}
             contextId="context-123"
             eventId="event-123"
-            args={undefined}
             processTitle={undefined}
           />
         </TestProviders>
@@ -46,9 +46,9 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            args={null}
             contextId="context-123"
             eventId="event-123"
-            args={null}
             processTitle={null}
           />
         </TestProviders>
@@ -59,7 +59,7 @@ describe('Args', () => {
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
-          <ArgsComponent contextId="context-123" eventId="event-123" args={[]} processTitle="" />
+          <ArgsComponent args={[]} contextId="context-123" eventId="event-123" processTitle="" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
@@ -69,9 +69,9 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            args={['arg1', 'arg2', 'arg3']}
             contextId="context-123"
             eventId="event-123"
-            args={['arg1', 'arg2', 'arg3']}
             processTitle={undefined}
           />
         </TestProviders>
@@ -83,9 +83,9 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            args={null}
             contextId="context-123"
             eventId="event-123"
-            args={null}
             processTitle="process-title-1"
           />
         </TestProviders>
@@ -97,9 +97,9 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            args={['arg1', 'arg2', 'arg3']}
             contextId="context-123"
             eventId="event-123"
-            args={['arg1', 'arg2', 'arg3']}
             processTitle="process-title-1"
           />
         </TestProviders>

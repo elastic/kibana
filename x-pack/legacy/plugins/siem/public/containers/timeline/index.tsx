@@ -92,10 +92,10 @@ class TimelineQueryComponent extends QueryTemplate<
     };
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
-        query={timelineQuery}
         fetchPolicy="network-only"
-        notifyOnNetworkStatusChange
+        query={timelineQuery}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, refetch }) => {
           const timelineEdges = getOr([], 'source.Timeline.edges', data);

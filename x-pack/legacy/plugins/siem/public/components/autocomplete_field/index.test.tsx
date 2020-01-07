@@ -110,11 +110,11 @@ describe('Autocomplete', () => {
           isLoadingSuggestions={false}
           isValid={false}
           loadSuggestions={noop}
-          onChange={noop}
-          onSubmit={noop}
           placeholder={placeholder}
           suggestions={[]}
           value={''}
+          onChange={noop}
+          onSubmit={noop}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -128,11 +128,11 @@ describe('Autocomplete', () => {
           isLoadingSuggestions={false}
           isValid={false}
           loadSuggestions={noop}
-          onChange={noop}
-          onSubmit={noop}
           placeholder={placeholder}
           suggestions={[]}
           value={''}
+          onChange={noop}
+          onSubmit={noop}
         />
       );
       const input = wrapper.find('input[type="search"]');
@@ -146,11 +146,11 @@ describe('Autocomplete', () => {
             isLoadingSuggestions={false}
             isValid={false}
             loadSuggestions={noop}
-            onChange={noop}
-            onSubmit={noop}
             placeholder=""
             suggestions={mockAutoCompleteData}
             value={''}
+            onChange={noop}
+            onSubmit={noop}
           />
         </ThemeProvider>
       );
@@ -168,11 +168,11 @@ describe('Autocomplete', () => {
             isLoadingSuggestions={true}
             isValid={false}
             loadSuggestions={noop}
-            onChange={noop}
-            onSubmit={noop}
             placeholder=""
             suggestions={mockAutoCompleteData}
             value={''}
+            onChange={noop}
+            onSubmit={noop}
           />
         </ThemeProvider>
       );
@@ -193,11 +193,11 @@ describe('Autocomplete', () => {
           isLoadingSuggestions={false}
           isValid={false}
           loadSuggestions={noop}
-          onChange={onChange}
-          onSubmit={noop}
           placeholder=""
           suggestions={[]}
           value={''}
+          onChange={onChange}
+          onSubmit={noop}
         />
       );
       const wrapperFixedEuiFieldSearch = wrapper.find('input');
@@ -214,11 +214,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={true}
         loadSuggestions={noop}
-        onChange={noop}
-        onSubmit={onSubmit}
         placeholder=""
         suggestions={mockAutoCompleteData}
         value={'filter: query'}
+        onChange={noop}
+        onSubmit={onSubmit}
       />
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
@@ -236,11 +236,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={true}
         loadSuggestions={noop}
-        onChange={noop}
-        onSubmit={onSubmit}
         placeholder=""
         suggestions={mockAutoCompleteData}
         value={'filter: query'}
+        onChange={noop}
+        onSubmit={onSubmit}
       />
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
@@ -260,11 +260,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={false}
         loadSuggestions={noop}
-        onChange={onChange}
-        onSubmit={noop}
         placeholder=""
         suggestions={mockAutoCompleteData}
         value={''}
+        onChange={onChange}
+        onSubmit={noop}
       />
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
@@ -282,11 +282,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={false}
         loadSuggestions={noop}
-        onChange={onChange}
-        onSubmit={noop}
         placeholder=""
         suggestions={mockAutoCompleteData}
         value={''}
+        onChange={onChange}
+        onSubmit={noop}
       />
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
@@ -304,11 +304,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={false}
         loadSuggestions={noop}
-        onChange={onChange}
-        onSubmit={noop}
         placeholder=""
         suggestions={mockAutoCompleteData}
         value={''}
+        onChange={onChange}
+        onSubmit={noop}
       />
     );
 
@@ -327,11 +327,11 @@ describe('Autocomplete', () => {
           isLoadingSuggestions={false}
           isValid={false}
           loadSuggestions={noop}
-          onChange={onChange}
-          onSubmit={noop}
           placeholder=""
           suggestions={onlyOneSuggestion}
           value={''}
+          onChange={onChange}
+          onSubmit={noop}
         />
       </TestProviders>
     );
@@ -351,11 +351,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={false}
         loadSuggestions={noop}
-        onChange={onChange}
-        onSubmit={noop}
         placeholder=""
         suggestions={[]}
         value={''}
+        onChange={onChange}
+        onSubmit={noop}
       />
     );
 
@@ -372,11 +372,11 @@ describe('Autocomplete', () => {
         isLoadingSuggestions={false}
         isValid={false}
         loadSuggestions={loadSuggestions}
-        onChange={noop}
-        onSubmit={noop}
         placeholder=""
         suggestions={[]}
         value={''}
+        onChange={noop}
+        onSubmit={noop}
       />
     );
     const wrapperFixedEuiFieldSearch = wrapper.find('input');

@@ -164,11 +164,11 @@ export const ModalInspectQuery = ({
         <>
           <EuiSpacer />
           <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
             color="dark"
+            fontSize="m"
+            language="js"
             overflowHeight={300}
+            paddingSize="m"
             isCopyable
           >
             {inspectRequest != null
@@ -185,11 +185,11 @@ export const ModalInspectQuery = ({
         <>
           <EuiSpacer />
           <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
             color="dark"
+            fontSize="m"
+            language="js"
             overflowHeight={300}
+            paddingSize="m"
             isCopyable
           >
             {response}
@@ -201,7 +201,7 @@ export const ModalInspectQuery = ({
 
   return (
     <EuiOverlayMask>
-      <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+      <MyEuiModal data-test-subj="modal-inspect-euiModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.INSPECT} {title}
@@ -209,11 +209,11 @@ export const ModalInspectQuery = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+          <EuiTabbedContent autoFocus="selected" initialSelectedTab={tabs[0]} tabs={tabs} />
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill data-test-subj="modal-inspect-close">
+          <EuiButton data-test-subj="modal-inspect-close" fill onClick={closeModal}>
             {i18n.CLOSE}
           </EuiButton>
         </EuiModalFooter>

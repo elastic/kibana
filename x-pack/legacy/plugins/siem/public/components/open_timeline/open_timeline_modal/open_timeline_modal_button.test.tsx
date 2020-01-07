@@ -23,7 +23,7 @@ describe('OpenTimelineModalButton', () => {
   test('it renders the expected button text', async () => {
     const wrapper = mount(
       <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+        <MockedProvider addTypename={false} mocks={mockOpenTimelineQueryResults}>
           <OpenTimelineModalButton onClick={jest.fn()} />
         </MockedProvider>
       </TestProviderWithoutDragAndDrop>
@@ -47,7 +47,7 @@ describe('OpenTimelineModalButton', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <MockedProvider addTypename={false} mocks={mockOpenTimelineQueryResults}>
               <OpenTimelineModalButton onClick={onClick} />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>

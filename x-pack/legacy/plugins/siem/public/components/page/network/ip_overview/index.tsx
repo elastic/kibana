@@ -100,10 +100,10 @@ export const IpOverview = React.memo<IpOverviewProps>(
             description: (
               <AnomalyScores
                 anomalies={anomaliesData}
-                startDate={startDate}
                 endDate={endDate}
                 isLoading={isLoadingAnomaliesData}
                 narrowDateRange={narrowDateRange}
+                startDate={startDate}
               />
             ),
           },
@@ -146,10 +146,10 @@ export const IpOverview = React.memo<IpOverviewProps>(
     return (
       <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <InspectButton
+          inspectIndex={0}
           queryId={id}
           show={showInspect}
           title={i18n.INSPECT_TITLE}
-          inspectIndex={0}
         />
 
         {descriptionLists.map((descriptionList, index) =>
@@ -158,11 +158,11 @@ export const IpOverview = React.memo<IpOverviewProps>(
 
         {loading && (
           <Loader
-            overlay
             overlayBackground={
               darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
             }
             size="xl"
+            overlay
           />
         )}
       </OverviewWrapper>

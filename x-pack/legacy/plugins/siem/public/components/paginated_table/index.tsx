@@ -201,10 +201,10 @@ export const PaginatedTable = memo<SiemTables>(
 
     const button = (
       <EuiButtonEmpty
-        size="xs"
         color="text"
-        iconType="arrowDown"
         iconSide="right"
+        iconType="arrowDown"
+        size="xs"
         onClick={onButtonClick}
       >
         {`${i18n.ROWS}: ${limit}`}
@@ -260,10 +260,7 @@ export const PaginatedTable = memo<SiemTables>(
             <BasicTable
               // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
-              compressed
               items={pageOfItems}
-              onChange={onChange}
-              // @ts-ignore TS complains sorting.field is type `never`
               sorting={
                 sorting
                   ? {
@@ -274,34 +271,37 @@ export const PaginatedTable = memo<SiemTables>(
                     }
                   : undefined
               }
+              compressed
+              // @ts-ignore TS complains sorting.field is type `never`
+              onChange={onChange}
             />
             <FooterAction>
               <EuiFlexItem>
                 {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
                   <EuiPopover
-                    id="customizablePagination"
-                    data-test-subj="loadingMoreSizeRowPopover"
                     button={button}
-                    isOpen={isPopoverOpen}
                     closePopover={closePopover}
+                    data-test-subj="loadingMoreSizeRowPopover"
+                    id="customizablePagination"
+                    isOpen={isPopoverOpen}
                     panelPaddingSize="none"
                   >
-                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
+                    <EuiContextMenuPanel data-test-subj="loadingMorePickSizeRow" items={rowItems} />
                   </EuiPopover>
                 )}
               </EuiFlexItem>
 
               <PaginationWrapper grow={false}>
                 <EuiPagination
+                  activePage={myActivePage}
                   data-test-subj="numberedPagination"
                   pageCount={pageCount}
-                  activePage={myActivePage}
                   onPageClick={goToPage}
                 />
               </PaginationWrapper>
             </FooterAction>
             {(isInspect || myLoading) && (
-              <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
+              <Loader data-test-subj="loadingPanelPaginatedTable" size="xl" overlay />
             )}
           </>
         )}

@@ -117,16 +117,15 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
 
     return isReadOnlyView && myStepData != null ? (
       <StepRuleDescription
+        data={myStepData}
         direction={descriptionDirection}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
         schema={schema}
-        data={myStepData}
       />
     ) : (
       <>
-        <Form form={form} data-test-subj="stepDefineRule">
+        <Form data-test-subj="stepDefineRule" form={form}>
           <CommonUseField
-            path="useIndicesConfig"
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleUseIndicesConfig',
               'data-test-subj': 'detectionEngineStepDefineRuleUseIndicesConfig',
@@ -144,9 +143,9 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
                 ],
               },
             }}
+            path="useIndicesConfig"
           />
           <CommonUseField
-            path="index"
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleIndices',
               'data-test-subj': 'detectionEngineStepDefineRuleIndices',
@@ -156,9 +155,9 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
                 isDisabled: isLoading,
               },
             }}
+            path="index"
           />
           <UseField
-            path="queryBar"
             component={QueryBarDefineRule}
             componentProps={{
               compressed: true,
@@ -170,6 +169,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
               resizeParentContainer,
             }}
+            path="queryBar"
           />
           <FormDataProvider pathsToWatch="useIndicesConfig">
             {({ useIndicesConfig }) => {
@@ -202,12 +202,12 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
             <EuiHorizontalRule margin="m" />
             <EuiFlexGroup
               alignItems="center"
-              justifyContent="flexEnd"
               gutterSize="xs"
+              justifyContent="flexEnd"
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                <EuiButton isDisabled={isLoading} fill onClick={onSubmit}>
                   {myStepData.isNew ? RuleI18n.CONTINUE : RuleI18n.UPDATE}
                 </EuiButton>
               </EuiFlexItem>

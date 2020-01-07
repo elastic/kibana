@@ -36,16 +36,16 @@ export const UsersQueryTable = ({
     {({ id, inspect, isInspected, users, totalCount, pageInfo, loading, loadPage, refetch }) => (
       <UsersTableManage
         data={users}
+        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+        flowTarget={flowTarget}
         id={id}
         inspect={inspect}
         isInspect={isInspected}
-        flowTarget={flowTarget}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         loading={loading}
         loadPage={loadPage}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
         refetch={refetch}
         setQuery={setQuery}
+        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
         totalCount={totalCount}
         type={type}
       />

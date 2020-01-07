@@ -78,7 +78,7 @@ export const IPDetailsComponent = ({
 
   return (
     <>
-      <WithSource sourceId="default" data-test-subj="ip-details-page">
+      <WithSource data-test-subj="ip-details-page" sourceId="default">
         {({ indicesExist, indexPattern }) => {
           const ip = decodeIpv6(detailName);
           const filterQuery = convertToBuildEsQuery({
@@ -91,50 +91,50 @@ export const IPDetailsComponent = ({
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
               <FiltersGlobal>
-                <SiemSearchBar indexPattern={indexPattern} id="global" />
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
               </FiltersGlobal>
 
               <WrapperPage>
                 <HeaderPage
-                  border
                   data-test-subj="ip-details-headline"
                   draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
                   subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                   title={ip}
+                  border
                 >
                   <FlowTargetSelectConnected />
                 </HeaderPage>
 
                 <IpOverviewQuery
+                  filterQuery={filterQuery}
+                  ip={ip}
                   skip={isInitializing}
                   sourceId="default"
-                  filterQuery={filterQuery}
                   type={type}
-                  ip={ip}
                 >
                   {({ id, inspect, ipOverviewData, loading, refetch }) => (
                     <AnomalyTableProvider
                       criteriaFields={networkToCriteria(detailName, flowTarget)}
-                      startDate={from}
                       endDate={to}
                       skip={isInitializing}
+                      startDate={from}
                     >
                       {({ isLoadingAnomaliesData, anomaliesData }) => (
                         <IpOverviewManage
+                          anomaliesData={anomaliesData}
+                          data={ipOverviewData}
+                          endDate={to}
+                          flowTarget={flowTarget}
                           id={id}
                           inspect={inspect}
                           ip={ip}
-                          data={ipOverviewData}
-                          anomaliesData={anomaliesData}
-                          loading={loading}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
-                          type={type}
-                          flowTarget={flowTarget}
+                          loading={loading}
+                          narrowDateRange={narrowDateRange}
                           refetch={refetch}
                           setQuery={setQuery}
                           startDate={from}
-                          endDate={to}
-                          narrowDateRange={narrowDateRange}
+                          type={type}
                         />
                       )}
                     </AnomalyTableProvider>
@@ -149,26 +149,26 @@ export const IPDetailsComponent = ({
                       endDate={to}
                       filterQuery={filterQuery}
                       flowTarget={FlowTargetSourceDest.source}
+                      indexPattern={indexPattern}
                       ip={ip}
+                      setQuery={setQuery}
                       skip={isInitializing}
                       startDate={from}
                       type={type}
-                      setQuery={setQuery}
-                      indexPattern={indexPattern}
                     />
                   </EuiFlexItem>
 
                   <EuiFlexItem>
                     <NetworkTopNFlowQueryTable
                       endDate={to}
-                      flowTarget={FlowTargetSourceDest.destination}
                       filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      indexPattern={indexPattern}
                       ip={ip}
+                      setQuery={setQuery}
                       skip={isInitializing}
                       startDate={from}
                       type={type}
-                      setQuery={setQuery}
-                      indexPattern={indexPattern}
                     />
                   </EuiFlexItem>
                 </ConditionalFlexGroup>
@@ -181,26 +181,26 @@ export const IPDetailsComponent = ({
                       endDate={to}
                       filterQuery={filterQuery}
                       flowTarget={FlowTargetSourceDest.source}
+                      indexPattern={indexPattern}
                       ip={ip}
+                      setQuery={setQuery}
                       skip={isInitializing}
                       startDate={from}
                       type={type}
-                      setQuery={setQuery}
-                      indexPattern={indexPattern}
                     />
                   </EuiFlexItem>
 
                   <EuiFlexItem>
                     <NetworkTopCountriesQueryTable
                       endDate={to}
-                      flowTarget={FlowTargetSourceDest.destination}
                       filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      indexPattern={indexPattern}
                       ip={ip}
+                      setQuery={setQuery}
                       skip={isInitializing}
                       startDate={from}
                       type={type}
-                      setQuery={setQuery}
-                      indexPattern={indexPattern}
                     />
                   </EuiFlexItem>
                 </ConditionalFlexGroup>
@@ -212,10 +212,10 @@ export const IPDetailsComponent = ({
                   filterQuery={filterQuery}
                   flowTarget={flowTarget}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
                 />
 
                 <EuiSpacer />
@@ -224,10 +224,10 @@ export const IPDetailsComponent = ({
                   endDate={to}
                   filterQuery={filterQuery}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
                 />
 
                 <EuiSpacer />
@@ -246,23 +246,23 @@ export const IPDetailsComponent = ({
                 <EuiSpacer />
 
                 <AnomaliesQueryTabBody
-                  filterQuery={filterQuery}
-                  setQuery={setQuery}
-                  startDate={from}
-                  endDate={to}
-                  skip={isInitializing}
-                  ip={ip}
-                  type={type}
-                  flowTarget={flowTarget}
-                  narrowDateRange={narrowDateRange}
-                  hideHistogramIfEmpty={true}
                   AnomaliesTableComponent={AnomaliesNetworkTable}
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  hideHistogramIfEmpty={true}
+                  ip={ip}
+                  narrowDateRange={narrowDateRange}
+                  setQuery={setQuery}
+                  skip={isInitializing}
+                  startDate={from}
+                  type={type}
                 />
               </WrapperPage>
             </StickyContainer>
           ) : (
             <WrapperPage>
-              <HeaderPage border title={ip} />
+              <HeaderPage title={ip} border />
 
               <NetworkEmptyPage />
             </WrapperPage>

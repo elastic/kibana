@@ -39,7 +39,7 @@ export const LineToolTipContentComponent = ({
   );
 
   return (
-    <EuiFlexGroup justifyContent="center" gutterSize="none">
+    <EuiFlexGroup gutterSize="none" justifyContent="center">
       <EuiFlexItem>
         <FlowBadge color="hollow">
           <EuiFlexGroupStyled direction="column">

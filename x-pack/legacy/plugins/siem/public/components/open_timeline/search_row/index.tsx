@@ -48,11 +48,11 @@ export const SearchRow = React.memo<Props>(
       <SearchRowFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiSearchBar
-            data-test-subj="search-bar"
             box={{
               placeholder: i18n.SEARCH_PLACEHOLDER,
               incremental: false,
             }}
+            data-test-subj="search-bar"
             onChange={onQueryChange}
           />
         </EuiFlexItem>
@@ -74,8 +74,8 @@ export const SearchRow = React.memo<Props>(
         <p>
           <FormattedMessage
             data-test-subj="query-message"
-            id="xpack.siem.open.timeline.showingNTimelinesLabel"
             defaultMessage="Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
+            id="xpack.siem.open.timeline.showingNTimelinesLabel"
             values={{
               totalSearchResultsCount,
               with: (

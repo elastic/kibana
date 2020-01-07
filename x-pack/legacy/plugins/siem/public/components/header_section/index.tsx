@@ -64,7 +64,7 @@ export const HeaderSection = React.memo<HeaderSectionProps>(
 
             {id && (
               <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
+                <InspectButton inspectIndex={0} queryId={id} show={showInspect} title={title} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

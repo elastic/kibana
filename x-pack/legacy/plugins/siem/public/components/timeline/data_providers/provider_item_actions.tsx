@@ -138,11 +138,11 @@ export const getProviderActions = ({
           browserFields={browserFields}
           field={field}
           isExcluded={isExcluded}
-          onDataProviderEdited={onDataProviderEdited}
           operator={operator}
           providerId={providerId}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={onDataProviderEdited}
         />
       ) : null,
     id: 1,
@@ -192,15 +192,15 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
 
     return (
       <MyEuiPopover
+        anchorPosition="downCenter"
+        button={button}
+        closePopover={closePopover}
         id={`popoverFor_${providerId}-${field}-${value}`}
         isOpen={isOpen}
-        closePopover={closePopover}
-        button={button}
-        anchorPosition="downCenter"
         panelPaddingSize="none"
       >
         <div style={{ userSelect: 'none' }}>
-          <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
+          <EuiContextMenu data-test-subj="providerActions" initialPanelId={0} panels={panelTree} />
         </div>
       </MyEuiPopover>
     );

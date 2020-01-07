@@ -120,10 +120,10 @@ const ViewCategory = React.memo<ToolTipProps>(
             aria-label={i18n.VIEW_CATEGORY(categoryId)}
             color="text"
             data-test-subj="view-category"
+            iconType="visTable"
             onClick={() => {
               onUpdateColumns(categoryColumns);
             }}
-            iconType="visTable"
           />
         ) : (
           <LoadingSpinner size="m" />
@@ -165,8 +165,8 @@ export const FieldName = React.memo<{
           {categoryColumns.length > 0 && (
             <EuiFlexItem grow={false}>
               <ViewCategory
-                categoryId={categoryId}
                 categoryColumns={categoryColumns}
+                categoryId={categoryId}
                 onUpdateColumns={onUpdateColumns}
               />
             </EuiFlexItem>

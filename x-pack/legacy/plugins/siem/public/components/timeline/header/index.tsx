@@ -64,24 +64,24 @@ export const TimelineHeaderComponent = ({
   <TimelineHeaderContainer data-test-subj="timelineHeader">
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
-        data-test-subj="timelineCallOutUnauthorized"
-        title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
         color="warning"
+        data-test-subj="timelineCallOutUnauthorized"
         iconType="alert"
         size="s"
+        title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
       />
     )}
     <DataProviders
       browserFields={browserFields}
-      id={id}
       dataProviders={dataProviders}
-      onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+      id={id}
+      show={show}
       onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+      onChangeDroppableAndProvider={onChangeDroppableAndProvider}
       onDataProviderEdited={onDataProviderEdited}
       onDataProviderRemoved={onDataProviderRemoved}
       onToggleDataProviderEnabled={onToggleDataProviderEnabled}
       onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-      show={show}
     />
     <StatefulSearchOrFilter
       browserFields={browserFields}

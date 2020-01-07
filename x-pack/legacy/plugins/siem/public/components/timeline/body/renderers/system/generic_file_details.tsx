@@ -100,16 +100,16 @@ export const SystemGenericFileLine = React.memo<Props>(
     workingDirectory,
   }) => (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center" wrap={true}>
         <UserHostWorkingDir
-          eventId={id}
           contextId={contextId}
+          eventId={id}
+          hostName={hostName}
           userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
-          hostName={hostName}
         />
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           {text}
         </TokensFlexItem>
         <FileDraggable
@@ -121,19 +121,19 @@ export const SystemGenericFileLine = React.memo<Props>(
           filePath={filePath}
         />
         {showVia(eventAction) && (
-          <TokensFlexItem data-test-subj="via" grow={false} component="span">
+          <TokensFlexItem component="span" data-test-subj="via" grow={false}>
             {i18n.VIA}
           </TokensFlexItem>
         )}
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <ProcessDraggableWithNonExistentProcess
             contextId={contextId}
             endgamePid={endgamePid}
             endgameProcessName={endgameProcessName}
             eventId={id}
-            processPid={processPid}
-            processName={processName}
             processExecutable={processExecutable}
+            processName={processName}
+            processPid={processPid}
           />
         </TokensFlexItem>
         <Args args={args} contextId={contextId} eventId={id} processTitle={processTitle} />
@@ -153,11 +153,11 @@ export const SystemGenericFileLine = React.memo<Props>(
           />
         )}
         {outcome != null && (
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             {i18n.WITH_RESULT}
           </TokensFlexItem>
         )}
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={id}
@@ -169,8 +169,8 @@ export const SystemGenericFileLine = React.memo<Props>(
         <AuthSsh
           contextId={contextId}
           eventId={id}
-          sshSignature={sshSignature}
           sshMethod={sshMethod}
+          sshSignature={sshSignature}
         />
         <Package
           contextId={contextId}
@@ -191,9 +191,9 @@ export const SystemGenericFileLine = React.memo<Props>(
       {message != null && showMessage && (
         <>
           <EuiSpacer size="xs" />
-          <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-            <TokensFlexItem grow={false} component="span">
-              <Badge iconType="editorComment" color="hollow">
+          <EuiFlexGroup gutterSize="none" justifyContent="center" wrap={true}>
+            <TokensFlexItem component="span" grow={false}>
+              <Badge color="hollow" iconType="editorComment">
                 <OverflowField value={message} />
               </Badge>
             </TokensFlexItem>
@@ -254,10 +254,8 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     return (
       <Details>
         <SystemGenericFileLine
-          id={id}
+          args={args}
           contextId={contextId}
-          text={text}
-          hostName={hostName}
           endgameExitCode={endgameExitCode}
           endgameFileName={endgameFileName}
           endgameFilePath={endgameFilePath}
@@ -267,26 +265,28 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
           eventAction={eventAction}
           fileName={fileName}
           filePath={filePath}
-          userDomain={userDomain}
-          userName={userName}
+          hostName={hostName}
+          id={id}
           message={message}
-          processTitle={processTitle}
-          workingDirectory={workingDirectory}
-          args={args}
+          outcome={outcome}
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
+          processExecutable={processExecutable}
           processHashMd5={processHashMd5}
           processHashSha1={processHashSha1}
           processHashSha256={processHashSha256}
           processName={processName}
           processPid={processPid}
           processPpid={processPpid}
-          processExecutable={processExecutable}
+          processTitle={processTitle}
           showMessage={showMessage}
-          sshSignature={sshSignature}
           sshMethod={sshMethod}
-          outcome={outcome}
+          sshSignature={sshSignature}
+          text={text}
+          userDomain={userDomain}
+          userName={userName}
+          workingDirectory={workingDirectory}
         />
         <EuiSpacer size="s" />
         <NetflowRenderer data={data} timelineId={timelineId} />

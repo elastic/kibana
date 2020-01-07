@@ -124,7 +124,6 @@ const TlsTableComponent = React.memo<TlsTableProps>(
         activePage={activePage}
         columns={getTlsColumns(tlsTableId)}
         dataTestSubj={`table-${tableType}`}
-        showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
@@ -134,12 +133,13 @@ const TlsTableComponent = React.memo<TlsTableProps>(
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
         sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

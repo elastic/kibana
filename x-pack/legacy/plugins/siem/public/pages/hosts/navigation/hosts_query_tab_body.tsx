@@ -33,8 +33,8 @@ export const HostsQueryTabBody = ({
   >
     {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, isInspected, refetch }) => (
       <HostsTableManage
-        deleteQuery={deleteQuery}
         data={hosts}
+        deleteQuery={deleteQuery}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         id={id}
         indexPattern={indexPattern}

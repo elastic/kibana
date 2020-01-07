@@ -25,10 +25,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -43,10 +43,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -62,10 +62,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -86,10 +86,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -110,10 +110,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -134,10 +134,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -158,10 +158,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
@@ -182,10 +182,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={jest.fn()}
         >
           <span>{'I am a mock body'}</span>
         </Pane>
@@ -206,10 +206,10 @@ describe('Pane', () => {
         <Pane
           flyoutHeight={testFlyoutHeight}
           headerHeight={flyoutHeaderHeight}
-          onClose={closeMock}
           timelineId={'test'}
           usersViewing={usersViewing}
           width={testWidth}
+          onClose={closeMock}
         >
           <span>{'I am a mock child'}</span>
         </Pane>

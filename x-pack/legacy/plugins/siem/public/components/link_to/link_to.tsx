@@ -33,8 +33,8 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToHostsPage}
-      exact
       path={`${match.url}/:pageName(${SiemPageName.hosts})`}
+      exact
     />
     <Route
       component={RedirectToHostsPage}
@@ -50,8 +50,8 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToNetworkPage}
-      exact
       path={`${match.url}/:pageName(${SiemPageName.network})`}
+      exact
     />
     <Route
       component={RedirectToNetworkPage}
@@ -59,14 +59,14 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToDetectionEnginePage}
-      exact
       path={`${match.url}/:pageName(${SiemPageName.detectionEngine})`}
+      exact
       strict
     />
     <Route
       component={RedirectToRulesPage}
-      exact
       path={`${match.url}/:pageName(${SiemPageName.detectionEngine})/rules`}
+      exact
     />
     <Route
       component={RedirectToCreateRulePage}
@@ -74,8 +74,8 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToRuleDetailsPage}
-      exact
       path={`${match.url}/:pageName(${SiemPageName.detectionEngine})/rules/rule-details`}
+      exact
     />
     <Route
       component={RedirectToEditRulePage}

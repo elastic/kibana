@@ -90,14 +90,14 @@ export const RuleSwitchComponent = ({
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         {myIsLoading ? (
-          <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
+          <EuiLoadingSpinner data-test-subj="rule-switch-loader" size="m" />
         ) : (
           <StaticSwitch
+            checked={myEnabled}
             data-test-subj="rule-switch"
+            disabled={false}
             label={optionLabel ?? ''}
             showLabel={!isEmpty(optionLabel)}
-            disabled={false}
-            checked={myEnabled}
             onChange={onRuleStateChange}
           />
         )}

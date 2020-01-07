@@ -246,31 +246,23 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     return (
       <AllTimelinesQuery
+        onlyUserFavorite={onlyFavorites}
         pageInfo={{
           pageIndex: pageIndex + 1,
           pageSize,
         }}
         search={search}
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
-        onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => {
           return !isModal ? (
             <OpenTimeline
               data-test-subj={'open-timeline'}
-              deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
+              deleteTimelines={onDeleteOneTimeline}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
@@ -280,22 +272,23 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               sortField={sortField}
               title={title}
               totalSearchResultsCount={totalCount}
+              onAddTimelinesToFavorites={undefined}
+              onDeleteSelected={onDeleteSelected}
+              onOpenTimeline={openTimeline}
+              onQueryChange={onQueryChange}
+              onSelectionChange={onSelectionChange}
+              onTableChange={onTableChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              onToggleShowNotes={onToggleShowNotes}
             />
           ) : (
             <OpenTimelineModalBody
               data-test-subj={'open-timeline-modal'}
-              deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
+              deleteTimelines={onDeleteOneTimeline}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
               onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
@@ -305,6 +298,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               sortField={sortField}
               title={title}
               totalSearchResultsCount={totalCount}
+              onAddTimelinesToFavorites={undefined}
+              onOpenTimeline={openTimeline}
+              onQueryChange={onQueryChange}
+              onSelectionChange={onSelectionChange}
+              onTableChange={onTableChange}
+              onToggleOnlyFavorites={onToggleOnlyFavorites}
+              onToggleShowNotes={onToggleShowNotes}
             />
           );
         }}

@@ -96,10 +96,10 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetNetworkTopCountriesQuery.Query, GetNetworkTopCountriesQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
         query={networkTopCountriesQuery}
         skip={skip}
         variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkTopCountries = getOr([], `source.NetworkTopCountries.edges`, data);

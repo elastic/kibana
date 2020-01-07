@@ -72,9 +72,9 @@ export const Notes = React.memo<Props>(
           />
           <EuiSpacer size="s" />
           <InMemoryTable
+            columns={columns}
             data-test-subj="notes-table"
             items={getNotesByIds(noteIds)}
-            columns={columns}
             search={search}
             sorting={true}
           />

@@ -118,26 +118,26 @@ export const MapToolTipComponent = ({
             />
           ) : (
             <PointToolTipContent
+              closeTooltip={closeTooltip}
               contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
               featureProps={featureProps}
-              closeTooltip={closeTooltip}
             />
           )}
           {features.length > 1 && (
             <ToolTipFooter
               featureIndex={featureIndex}
-              totalFeatures={features.length}
-              previousFeature={() => {
-                setFeatureIndex(featureIndex - 1);
-                setIsLoadingNextFeature(true);
-              }}
               nextFeature={() => {
                 setFeatureIndex(featureIndex + 1);
                 setIsLoadingNextFeature(true);
               }}
+              previousFeature={() => {
+                setFeatureIndex(featureIndex - 1);
+                setIsLoadingNextFeature(true);
+              }}
+              totalFeatures={features.length}
             />
           )}
-          {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
+          {isLoadingNextFeature && <Loader data-test-subj="loading-panel" size="m" overlay />}
         </div>
       </EuiOutsideClickDetector>
     </DraggablePortalContext.Provider>

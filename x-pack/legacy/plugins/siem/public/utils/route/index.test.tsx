@@ -64,8 +64,8 @@ describe('Spy Routes', () => {
       mount(
         <ManageRoutesSpy>
           <SpyRouteComponent
-            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
             history={mockHistory}
+            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
             match={{
               isExact: false,
               path: pathname,
@@ -95,8 +95,8 @@ describe('Spy Routes', () => {
       mount(
         <ManageRoutesSpy>
           <SpyRouteComponent
-            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
             history={mockHistory}
+            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
             match={{
               isExact: false,
               path: pathname,
@@ -145,8 +145,8 @@ describe('Spy Routes', () => {
       mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
       const wrapper = mount(
         <SpyRouteComponent
-          location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
           history={mockHistory}
+          location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
           match={{
             isExact: false,
             path: pathname,

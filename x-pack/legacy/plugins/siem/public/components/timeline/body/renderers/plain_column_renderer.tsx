@@ -44,8 +44,8 @@ export const plainColumnRenderer: ColumnRenderer = {
             fieldFormat={field.format || ''}
             fieldName={columnName}
             fieldType={field.type || ''}
-            value={parseValue(value)}
             truncate={truncate}
+            value={parseValue(value)}
           />
         ))
       : getEmptyTagValue(),

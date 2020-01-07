@@ -103,14 +103,14 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isDataInTimeline={isDataInTimeline}
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
-        title={title}
         noteIds={noteIds}
         timelineId={timelineId}
+        title={title}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
         updateIsFavorite={updateIsFavorite}
-        updateTitle={updateTitle}
         updateNote={updateNote}
+        updateTitle={updateTitle}
         usersViewing={usersViewing}
         width={width}
       />

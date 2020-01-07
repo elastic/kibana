@@ -771,8 +771,15 @@ module.exports = {
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
-        // might be introduced after the other warns are fixed
-        // 'react/jsx-sort-props': 'error',
+        'react/jsx-sort-props': [
+          'error',
+          {
+            callbacksLast: true,
+            ignoreCase: true,
+            reservedFirst: true,
+            shorthandLast: true,
+          },
+        ],
         // might be introduced after the other warns are fixed
         'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',

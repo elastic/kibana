@@ -19,15 +19,15 @@ describe('SessionUserHostWorkingDir', () => {
   describe('rendering', () => {
     test('it renders the default SessionUserHostWorkingDir', () => {
       const wrapper = shallow(
-        <EuiFlexItem grow={false} component="span">
+        <EuiFlexItem component="span" grow={false}>
           <SessionUserHostWorkingDir
-            eventId="eventid-123"
-            session="session-123"
             contextId="contextid-123"
+            eventId="eventid-123"
             hostName="hostname-123"
-            userName="username-123"
             primary="primary-123"
             secondary="secondary-123"
+            session="session-123"
+            userName="username-123"
             workingDirectory="workingdir-123"
           />
         </EuiFlexItem>
@@ -38,15 +38,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with just eventId and contextId', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session={undefined}
+              eventId="eventid-123"
               hostName={undefined}
-              userName={undefined}
               primary={undefined}
               secondary={undefined}
+              session={undefined}
+              userName={undefined}
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -58,15 +58,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with only eventId, contextId, session', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName={undefined}
-              userName={undefined}
               primary={undefined}
               secondary={undefined}
+              session="session-123"
+              userName={undefined}
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -78,15 +78,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with only eventId, contextId, session, hostName', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName="hostname-123"
-              userName={undefined}
               primary={undefined}
               secondary={undefined}
+              session="session-123"
+              userName={undefined}
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -98,15 +98,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with only eventId, contextId, session, hostName, userName', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName="hostname-123"
-              userName="username-123"
               primary={undefined}
               secondary={undefined}
+              session="session-123"
+              userName="username-123"
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -118,15 +118,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with only eventId, contextId, session, hostName, userName, primary', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName="hostname-123"
-              userName="username-123"
               primary="primary-123"
               secondary={undefined}
+              session="session-123"
+              userName="username-123"
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -138,15 +138,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with only eventId, contextId, session, hostName, userName, primary, secondary', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName="hostname-123"
-              userName="username-123"
               primary="primary-123"
               secondary="secondary-123"
+              session="session-123"
+              userName="username-123"
               workingDirectory={undefined}
             />
           </EuiFlexItem>
@@ -158,15 +158,15 @@ describe('SessionUserHostWorkingDir', () => {
     test('it renders with everything as expected', () => {
       const wrapper = mount(
         <TestProviders>
-          <EuiFlexItem grow={false} component="span">
+          <EuiFlexItem component="span" grow={false}>
             <SessionUserHostWorkingDir
-              eventId="eventid-123"
               contextId="contextid-123"
-              session="session-123"
+              eventId="eventid-123"
               hostName="hostname-123"
-              userName="username-123"
               primary="primary-123"
               secondary="secondary-123"
+              session="session-123"
+              userName="username-123"
               workingDirectory="workingdirectory-123"
             />
           </EuiFlexItem>

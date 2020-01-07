@@ -130,18 +130,18 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
         headerTitle={i18n.HTTP_REQUESTS}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
-        itemsPerRow={rowItems}
         isInspect={isInspect}
+        itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

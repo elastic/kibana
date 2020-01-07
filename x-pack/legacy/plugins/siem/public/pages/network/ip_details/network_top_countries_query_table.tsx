@@ -26,8 +26,8 @@ export const NetworkTopCountriesQueryTable = ({
 }: NetworkWithIndexComponentsQueryTableProps) => (
   <NetworkTopCountriesQuery
     endDate={endDate}
-    flowTarget={flowTarget}
     filterQuery={filterQuery}
+    flowTarget={flowTarget}
     ip={ip}
     skip={skip}
     sourceId="default"

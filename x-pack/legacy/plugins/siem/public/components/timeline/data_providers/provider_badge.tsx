@@ -78,22 +78,22 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     return (
       <ProviderBadgeStyled
-        id={`${providerId}-${field}-${val}`}
         className={classes}
-        color="hollow"
-        title={title}
-        iconOnClick={deleteFilter}
-        iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
-        iconType="cross"
-        iconSide="right"
-        onClick={togglePopover}
-        onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
           tabIndex: -1,
         }}
+        color="hollow"
         data-test-subj="providerBadge"
+        iconOnClick={deleteFilter}
+        iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
+        iconSide="right"
+        iconType="cross"
+        id={`${providerId}-${field}-${val}`}
+        title={title}
+        onClick={togglePopover}
+        onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
       >
         {prefix}
         {operator !== EXISTS_OPERATOR ? (

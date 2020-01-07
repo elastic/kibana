@@ -113,21 +113,21 @@ export const PropertiesRight = React.memo<Props>(
           button={
             <SettingsIcon
               data-test-subj="settings-gear"
-              type="gear"
               size="l"
+              type="gear"
               onClick={onButtonClick}
             />
           }
+          closePopover={onClosePopover}
           id="timelineSettingsPopover"
           isOpen={showActions}
-          closePopover={onClosePopover}
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <NewTimeline
                 createTimeline={createTimeline}
-                onClosePopover={onClosePopover}
                 timelineId={timelineId}
+                onClosePopover={onClosePopover}
               />
             </EuiFlexItem>
 
@@ -137,13 +137,13 @@ export const PropertiesRight = React.memo<Props>(
 
             <EuiFlexItem grow={false}>
               <InspectButton
-                queryId={timelineId}
                 inputId="timeline"
                 inspectIndex={0}
                 isDisabled={!isDataInTimeline}
-                onCloseInspect={onClosePopover}
+                queryId={timelineId}
                 show={true}
                 title={i18n.INSPECT_TIMELINE_TITLE}
+                onCloseInspect={onClosePopover}
               />
             </EuiFlexItem>
 
@@ -185,10 +185,10 @@ export const PropertiesRight = React.memo<Props>(
             // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
             <HiddenFlexItem key={user}>
               <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
                 content={`${user} ${i18n.IS_VIEWING}`}
+                data-test-subj="timeline-action-pin-tool-tip"
               >
-                <Avatar data-test-subj="avatar" size="s" name={user} />
+                <Avatar data-test-subj="avatar" name={user} size="s" />
               </EuiToolTip>
             </HiddenFlexItem>
           ))

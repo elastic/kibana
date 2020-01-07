@@ -44,7 +44,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} inputId="timeline" show={true} title="My title" />
+          <InspectButton inputId="timeline" queryId={newQuery.id} show={true} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(
@@ -60,8 +60,8 @@ describe('Inspect Button', () => {
         <TestProviderWithoutDragAndDrop store={store}>
           <InspectButton
             compact={true}
-            queryId={newQuery.id}
             inputId="timeline"
+            queryId={newQuery.id}
             show={true}
             title="My title"
           />

@@ -19,18 +19,18 @@ interface Props {
 export const FlowDirectionSelect = React.memo<Props>(({ onChangeDirection, selectedDirection }) => (
   <EuiFilterGroup>
     <EuiFilterButton
-      withNext
-      hasActiveFilters={selectedDirection === FlowDirection.uniDirectional}
-      onClick={() => onChangeDirection(FlowDirection.uniDirectional)}
       data-test-subj={FlowDirection.uniDirectional}
+      hasActiveFilters={selectedDirection === FlowDirection.uniDirectional}
+      withNext
+      onClick={() => onChangeDirection(FlowDirection.uniDirectional)}
     >
       {i18n.UNIDIRECTIONAL}
     </EuiFilterButton>
 
     <EuiFilterButton
+      data-test-subj={FlowDirection.biDirectional}
       hasActiveFilters={selectedDirection === FlowDirection.biDirectional}
       onClick={() => onChangeDirection(FlowDirection.biDirectional)}
-      data-test-subj={FlowDirection.biDirectional}
     >
       {i18n.BIDIRECTIONAL}
     </EuiFilterButton>

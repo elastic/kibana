@@ -217,13 +217,13 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         end={endDate}
         isLoading={isLoading}
         isPaused={policy === 'manual'}
-        onRefresh={onRefresh}
-        onRefreshChange={onRefreshChange}
-        onTimeChange={onTimeChange}
         recentlyUsedRanges={recentlyUsedRanges}
         refreshInterval={duration}
         showUpdateButton={true}
         start={startDate}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
+        onTimeChange={onTimeChange}
       />
     );
   }

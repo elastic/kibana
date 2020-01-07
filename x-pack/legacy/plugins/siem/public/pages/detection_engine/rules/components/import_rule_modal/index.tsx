@@ -111,7 +111,7 @@ export const ImportRuleModalComponent = ({
     <>
       {showModal && (
         <EuiOverlayMask>
-          <EuiModal onClose={closeModal} maxWidth={'750px'}>
+          <EuiModal maxWidth={'750px'} onClose={closeModal}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>{i18n.IMPORT_RULE}</EuiModalHeaderTitle>
             </EuiModalHeader>
@@ -123,28 +123,28 @@ export const ImportRuleModalComponent = ({
 
               <EuiSpacer size="s" />
               <EuiFilePicker
+                display={'large'}
+                fullWidth={true}
                 id="rule-file-picker"
-                multiple
                 initialPromptText={i18n.INITIAL_PROMPT_TEXT}
+                isLoading={isImporting}
+                multiple
                 onChange={(files: FileList) => {
                   setSelectedFiles(Object.keys(files).length > 0 ? files : null);
                 }}
-                display={'large'}
-                fullWidth={true}
-                isLoading={isImporting}
               />
               <EuiSpacer size="s" />
               <EuiCheckbox
+                disabled={true}
                 id="rule-overwrite-saved-object"
                 label={i18n.OVERWRITE_WITH_SAME_NAME}
-                disabled={true}
                 onChange={() => noop}
               />
             </EuiModalBody>
 
             <EuiModalFooter>
               <EuiButtonEmpty onClick={closeModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
-              <EuiButton onClick={importRules} disabled={selectedFiles == null || isImporting} fill>
+              <EuiButton disabled={selectedFiles == null || isImporting} fill onClick={importRules}>
                 {i18n.IMPORT_RULE}
               </EuiButton>
             </EuiModalFooter>

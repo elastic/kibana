@@ -93,8 +93,8 @@ export const DraggableZeekElement = React.memo<{
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-              <Badge iconType="tag" color="hollow">
+            <EuiToolTip content={field} data-test-subj="badge-tooltip">
+              <Badge color="hollow" iconType="tag">
                 {stringRenderer(value)}
               </Badge>
             </EuiToolTip>
@@ -226,47 +226,47 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, timelineId 
   const stateValue: string | null | undefined = extractStateValue(state);
   return (
     <>
-      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-        <DraggableZeekElement id={id} field="zeek.session_id" value={sessionId} />
+      <EuiFlexGroup gutterSize="none" justifyContent="center" wrap={true}>
+        <DraggableZeekElement field="zeek.session_id" id={id} value={sessionId} />
         <DraggableZeekElement
-          id={id}
           field="event.dataset"
-          value={dataSet}
+          id={id}
           stringRenderer={moduleStringRenderer}
+          value={dataSet}
         />
         <DraggableZeekElement
-          id={id}
           field="zeek.files.sha1"
-          value={fileSha1}
+          id={id}
           stringRenderer={sha1StringRenderer}
+          value={fileSha1}
         />
         <DraggableZeekElement
-          id={id}
           field="zeek.files.md5"
-          value={filemd5}
+          id={id}
           stringRenderer={md5StringRenderer}
+          value={filemd5}
         />
         <DraggableZeekElement
-          id={id}
           field="zeek.notice.dropped"
-          value={dropped}
-          stringRenderer={droppedStringRenderer}
-        />
-        <DraggableZeekElement id={id} field="zeek.ssl.version" value={sslVersion} />
-        <DraggableZeekElement id={id} field="zeek.ssl.cipher" value={cipher} />
-        <DraggableZeekElement id={id} field="zeek.connection.state" value={state} />
-        <DraggableZeekElement id={id} field="http.request.method" value={httpMethod} />
-        <DraggableZeekElement id={id} field="zeek.connection.history" value={history} />
-        <DraggableZeekElement id={id} field="zeek.notice.note" value={note} />
-        <DraggableZeekElement id={id} field="zeek.dns.query" value={dnsQuery} />
-        <DraggableZeekElement id={id} field="zeek.dns.qclass_name" value={qClassName} />
-        <DraggableZeekElement
           id={id}
+          stringRenderer={droppedStringRenderer}
+          value={dropped}
+        />
+        <DraggableZeekElement field="zeek.ssl.version" id={id} value={sslVersion} />
+        <DraggableZeekElement field="zeek.ssl.cipher" id={id} value={cipher} />
+        <DraggableZeekElement field="zeek.connection.state" id={id} value={state} />
+        <DraggableZeekElement field="http.request.method" id={id} value={httpMethod} />
+        <DraggableZeekElement field="zeek.connection.history" id={id} value={history} />
+        <DraggableZeekElement field="zeek.notice.note" id={id} value={note} />
+        <DraggableZeekElement field="zeek.dns.query" id={id} value={dnsQuery} />
+        <DraggableZeekElement field="zeek.dns.qclass_name" id={id} value={qClassName} />
+        <DraggableZeekElement
           field="http.response.status_code"
+          id={id}
           value={httpResponseStatusCode}
         />
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexGroup gutterSize="none" justifyContent="center">
         <Link link={stateLink} value={stateValue} />
         <Link value={cipher} />
         <Link value={dnsQuery} />

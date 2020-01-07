@@ -32,14 +32,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -47,6 +43,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -63,14 +63,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -78,6 +74,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -94,14 +94,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -109,6 +105,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -125,14 +125,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -140,6 +136,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -158,14 +158,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -173,6 +169,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -189,14 +189,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -204,6 +200,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -220,14 +220,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -235,6 +231,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -251,14 +251,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -266,6 +262,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -284,14 +284,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={defaultPageSize}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={defaultPageSize}
           searchResults={mockResults}
@@ -299,6 +295,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -315,14 +315,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -330,6 +326,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -346,14 +346,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -361,6 +357,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -376,14 +376,10 @@ describe('TimelinesTable', () => {
   test('it displays the expected message when no search results are found', () => {
     const wrapper = mountWithIntl(
       <TimelinesTable
-        deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-        loading={false}
+        deleteTimelines={jest.fn()}
         itemIdToExpandedNotesRowMap={{}}
-        onOpenTimeline={jest.fn()}
-        onSelectionChange={jest.fn()}
-        onTableChange={jest.fn()}
-        onToggleShowNotes={jest.fn()}
+        loading={false}
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={[]}
@@ -391,6 +387,10 @@ describe('TimelinesTable', () => {
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={0}
+        onOpenTimeline={jest.fn()}
+        onSelectionChange={jest.fn()}
+        onTableChange={jest.fn()}
+        onToggleShowNotes={jest.fn()}
       />
     );
 
@@ -408,14 +408,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={onTableChange}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -423,6 +419,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={onTableChange}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -446,14 +446,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={onSelectionChange}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -461,6 +457,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={onSelectionChange}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -479,14 +479,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={true}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={true}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -494,6 +490,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -510,14 +510,10 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
+          deleteTimelines={jest.fn()}
           itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
+          loading={false}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
@@ -525,6 +521,10 @@ describe('TimelinesTable', () => {
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
+          onOpenTimeline={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
         />
       </ThemeProvider>
     );

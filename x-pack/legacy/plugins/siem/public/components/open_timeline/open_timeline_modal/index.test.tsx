@@ -28,7 +28,7 @@ describe('OpenTimelineModal', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <MockedProvider addTypename={false} mocks={mockOpenTimelineQueryResults}>
             <OpenTimelineModal onClose={jest.fn()} />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>

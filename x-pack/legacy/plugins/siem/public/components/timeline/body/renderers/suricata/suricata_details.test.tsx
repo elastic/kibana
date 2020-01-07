@@ -21,8 +21,8 @@ describe('SuricataDetails', () => {
     test('it renders the default SuricataDetails', () => {
       const wrapper = shallow(
         <SuricataDetails
-          data={mockTimelineData[2].ecs}
           browserFields={mockBrowserFields}
+          data={mockTimelineData[2].ecs}
           timelineId="test"
         />
       );
@@ -33,8 +33,8 @@ describe('SuricataDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <SuricataDetails
-            data={mockTimelineData[2].ecs}
             browserFields={mockBrowserFields}
+            data={mockTimelineData[2].ecs}
             timelineId="test"
           />
         </TestProviders>
@@ -47,8 +47,8 @@ describe('SuricataDetails', () => {
     test('it returns null for text if the data contains no suricata data', () => {
       const wrapper = shallow(
         <SuricataDetails
-          data={mockTimelineData[0].ecs}
           browserFields={mockBrowserFields}
+          data={mockTimelineData[0].ecs}
           timelineId="test"
         />
       );

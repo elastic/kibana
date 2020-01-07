@@ -19,9 +19,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -33,9 +33,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -50,9 +50,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={onCancelAddNote}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={onCancelAddNote}
       />
     );
 
@@ -72,9 +72,9 @@ describe('AddNote', () => {
         associateNote={associateNote}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -106,9 +106,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -128,9 +128,9 @@ describe('AddNote', () => {
         associateNote={associateNote}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -150,9 +150,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={getNewNoteId}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -172,9 +172,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={updateNewNote}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -194,9 +194,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={note}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={updateNote}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -214,9 +214,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={''}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 
@@ -232,9 +232,9 @@ describe('AddNote', () => {
         associateNote={jest.fn()}
         getNewNoteId={jest.fn()}
         newNote={'We should see a formatting hint now'}
-        onCancelAddNote={jest.fn()}
         updateNewNote={jest.fn()}
         updateNote={jest.fn()}
+        onCancelAddNote={jest.fn()}
       />
     );
 

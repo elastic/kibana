@@ -40,21 +40,21 @@ describe('FieldsBrowser', () => {
           onMouseUp={triggerDocumentMouseUp}
         >
           <FieldsBrowser
-            columnHeaders={[]}
             browserFields={mockBrowserFields}
+            columnHeaders={[]}
             filteredBrowserFields={mockBrowserFields}
-            searchInput={''}
             height={FIELD_BROWSER_HEIGHT}
             isSearching={false}
-            onCategorySelected={jest.fn()}
-            onHideFieldBrowser={jest.fn()}
-            onOutsideClick={onOutsideClick}
-            onUpdateColumns={jest.fn()}
-            onSearchInputChange={jest.fn()}
+            searchInput={''}
             selectedCategoryId={''}
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            onCategorySelected={jest.fn()}
+            onHideFieldBrowser={jest.fn()}
+            onOutsideClick={onOutsideClick}
+            onSearchInputChange={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </div>
       </TestProviders>
@@ -77,22 +77,22 @@ describe('FieldsBrowser', () => {
           onMouseUp={triggerDocumentMouseUp}
         >
           <FieldsBrowser
-            columnHeaders={[]}
             browserFields={mockBrowserFields}
+            columnHeaders={[]}
             filteredBrowserFields={mockBrowserFields}
-            searchInput={''}
             height={FIELD_BROWSER_HEIGHT}
             isSearching={false}
-            onCategorySelected={jest.fn()}
-            onFieldSelected={jest.fn()}
-            onHideFieldBrowser={jest.fn()}
-            onOutsideClick={onOutsideClick}
-            onUpdateColumns={jest.fn()}
-            onSearchInputChange={jest.fn()}
+            searchInput={''}
             selectedCategoryId={''}
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            onCategorySelected={jest.fn()}
+            onFieldSelected={jest.fn()}
+            onHideFieldBrowser={jest.fn()}
+            onOutsideClick={onOutsideClick}
+            onSearchInputChange={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </div>
       </TestProviders>
@@ -108,21 +108,21 @@ describe('FieldsBrowser', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
-          columnHeaders={[]}
           browserFields={mockBrowserFields}
+          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
           height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          onSearchInputChange={jest.fn()}
+          searchInput={''}
           selectedCategoryId={''}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          onCategorySelected={jest.fn()}
+          onHideFieldBrowser={jest.fn()}
+          onOutsideClick={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -134,21 +134,21 @@ describe('FieldsBrowser', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
-          columnHeaders={[]}
           browserFields={mockBrowserFields}
+          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
           height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          onSearchInputChange={jest.fn()}
+          searchInput={''}
           selectedCategoryId={''}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          onCategorySelected={jest.fn()}
+          onHideFieldBrowser={jest.fn()}
+          onOutsideClick={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -160,21 +160,21 @@ describe('FieldsBrowser', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
-          columnHeaders={[]}
           browserFields={mockBrowserFields}
+          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
           height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          onSearchInputChange={jest.fn()}
+          searchInput={''}
           selectedCategoryId={''}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          onCategorySelected={jest.fn()}
+          onHideFieldBrowser={jest.fn()}
+          onOutsideClick={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -186,21 +186,21 @@ describe('FieldsBrowser', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
-          columnHeaders={[]}
           browserFields={mockBrowserFields}
+          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
           height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          onSearchInputChange={jest.fn()}
+          searchInput={''}
           selectedCategoryId={''}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          onCategorySelected={jest.fn()}
+          onHideFieldBrowser={jest.fn()}
+          onOutsideClick={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -220,21 +220,21 @@ describe('FieldsBrowser', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser
-          columnHeaders={[]}
           browserFields={mockBrowserFields}
+          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
           height={FIELD_BROWSER_HEIGHT}
           isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHideFieldBrowser={jest.fn()}
-          onOutsideClick={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          onSearchInputChange={onSearchInputChange}
+          searchInput={''}
           selectedCategoryId={''}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          onCategorySelected={jest.fn()}
+          onHideFieldBrowser={jest.fn()}
+          onOutsideClick={jest.fn()}
+          onSearchInputChange={onSearchInputChange}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );

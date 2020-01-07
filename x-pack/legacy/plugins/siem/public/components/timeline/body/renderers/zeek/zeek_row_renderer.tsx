@@ -21,7 +21,7 @@ export const zeekRowRenderer: RowRenderer = {
     <>
       {children}
       <RowRendererContainer>
-        <ZeekDetails data={data} browserFields={browserFields} timelineId={timelineId} />
+        <ZeekDetails browserFields={browserFields} data={data} timelineId={timelineId} />
       </RowRendererContainer>
     </>
   ),

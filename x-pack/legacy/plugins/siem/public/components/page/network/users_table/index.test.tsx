@@ -42,8 +42,8 @@ describe('Users Table Component', () => {
         <ReduxStoreProvider store={store}>
           <UsersTable
             data={mockUsersData.edges}
-            flowTarget={FlowTarget.source}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            flowTarget={FlowTarget.source}
             id="user"
             isInspect={false}
             loading={false}
@@ -66,8 +66,8 @@ describe('Users Table Component', () => {
           <TestProviders store={store}>
             <UsersTable
               data={mockUsersData.edges}
-              flowTarget={FlowTarget.source}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+              flowTarget={FlowTarget.source}
               id="user"
               isInspect={false}
               loading={false}

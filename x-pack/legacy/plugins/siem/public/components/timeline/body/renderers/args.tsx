@@ -25,7 +25,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
     <>
       {args != null &&
         args.map((arg, i) => (
-          <TokensFlexItem key={`${contextId}-args-${i}-${arg}`} grow={false} component="span">
+          <TokensFlexItem key={`${contextId}-args-${i}-${arg}`} component="span" grow={false}>
             <DraggableBadge
               contextId={`${contextId}-args-${i}-${arg}`}
               eventId={eventId}
@@ -36,7 +36,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
         ))}
 
       {!isNillEmptyOrNotFinite(processTitle) && (
-        <TokensFlexItem grow={false} component="span">
+        <TokensFlexItem component="span" grow={false}>
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}

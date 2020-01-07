@@ -40,7 +40,7 @@ export type AndOr = 'and' | 'or';
 // Ref: https://github.com/elastic/eui/issues/1655
 export const AndOrBadge = React.memo<{ type: AndOr }>(({ type }) => {
   return (
-    <RoundedBadge data-test-subj="and-or-badge" color="hollow">
+    <RoundedBadge color="hollow" data-test-subj="and-or-badge">
       {type === 'and' ? i18n.AND : i18n.OR}
     </RoundedBadge>
   );

@@ -48,8 +48,8 @@ export const Category = React.memo<Props>(
         width={width}
       >
         <EuiInMemoryTable
-          items={fieldItems}
           columns={getFieldColumns()}
+          items={fieldItems}
           pagination={false}
           sorting={true}
         />

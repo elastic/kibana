@@ -48,24 +48,24 @@ export const ProcessDraggable = React.memo<Props>(
             contextId={contextId}
             eventId={eventId}
             field="process.name"
-            value={processName}
             iconType="console"
+            value={processName}
           />
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
             field="process.executable"
-            value={processExecutable}
             iconType="console"
+            value={processExecutable}
           />
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
             field="endgame.process_name"
-            value={endgameProcessName}
             iconType="console"
+            value={endgameProcessName}
           />
         ) : null}
 

@@ -110,7 +110,7 @@ export const Properties = React.memo<Props>(
     // being calculated and is recommended by Styled Components for performance
     // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
+      <TimelineProperties data-test-subj="timeline-properties" style={{ width }}>
         <PropertiesLeft
           associateNote={associateNote}
           datePickerWidth={
@@ -121,7 +121,6 @@ export const Properties = React.memo<Props>(
           isDatepickerLocked={isDatepickerLocked}
           isFavorite={isFavorite}
           noteIds={noteIds}
-          onToggleShowNotes={onToggleShowNotes}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
@@ -134,6 +133,7 @@ export const Properties = React.memo<Props>(
           updateIsFavorite={updateIsFavorite}
           updateNote={updateNote}
           updateTitle={updateTitle}
+          onToggleShowNotes={onToggleShowNotes}
         />
         <PropertiesRight
           associateNote={associateNote}
@@ -142,11 +142,6 @@ export const Properties = React.memo<Props>(
           getNotesByIds={getNotesByIds}
           isDataInTimeline={isDataInTimeline}
           noteIds={noteIds}
-          onButtonClick={onButtonClick}
-          onClosePopover={onClosePopover}
-          onCloseTimelineModal={onCloseTimelineModal}
-          onOpenTimelineModal={onOpenTimelineModal}
-          onToggleShowNotes={onToggleShowNotes}
           showActions={showActions}
           showDescription={width < showDescriptionThreshold}
           showNotes={showNotes}
@@ -157,6 +152,11 @@ export const Properties = React.memo<Props>(
           updateDescription={updateDescription}
           updateNote={updateNote}
           usersViewing={usersViewing}
+          onButtonClick={onButtonClick}
+          onClosePopover={onClosePopover}
+          onCloseTimelineModal={onCloseTimelineModal}
+          onOpenTimelineModal={onOpenTimelineModal}
+          onToggleShowNotes={onToggleShowNotes}
         />
       </TimelineProperties>
     );

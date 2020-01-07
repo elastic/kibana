@@ -174,13 +174,13 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
-        updateLimitPagination={updateLimitPagination}
         updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

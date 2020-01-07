@@ -26,9 +26,9 @@ export const RulesComponent = React.memo(() => {
   return (
     <>
       <ImportRuleModal
-        showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
         importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
+        showModal={showImportModal}
       />
       <WrapperPage>
         <HeaderPage
@@ -36,8 +36,8 @@ export const RulesComponent = React.memo(() => {
           subtitle={
             lastCompletedRun ? (
               <FormattedMessage
-                id="xpack.siem.headerPage.rules.pageSubtitle"
                 defaultMessage="Last completed run: {lastCompletedRun}"
+                id="xpack.siem.headerPage.rules.pageSubtitle"
                 values={{
                   lastCompletedRun: <FormattedRelativePreferenceDate value={lastCompletedRun} />,
                 }}
@@ -61,7 +61,7 @@ export const RulesComponent = React.memo(() => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton fill href="#/detection-engine/rules/create" iconType="plusInCircle">
+              <EuiButton href="#/detection-engine/rules/create" iconType="plusInCircle" fill>
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
             </EuiFlexItem>

@@ -21,9 +21,9 @@ export const EventsOverTimeHistogram = (
 
   return (
     <MatrixHistogram
-      title={i18n.EVENT_COUNT_FREQUENCY_BY_ACTION}
-      subtitle={subtitle}
       dataKey={dataKey}
+      subtitle={subtitle}
+      title={i18n.EVENT_COUNT_FREQUENCY_BY_ACTION}
       {...matrixOverTimeProps}
     />
   );

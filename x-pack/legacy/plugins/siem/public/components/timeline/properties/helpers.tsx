@@ -57,12 +57,12 @@ export const StarIcon = React.memo<{
   // eslint-disable-next-line
   <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
     {isFavorite ? (
-      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
+      <EuiToolTip content={i18n.FAVORITE} data-test-subj="timeline-favorite-filled-star-tool-tip">
+        <StyledStar data-test-subj="timeline-favorite-filled-star" size="l" type="starFilled" />
       </EuiToolTip>
     ) : (
       <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
+        <StyledStar data-test-subj="timeline-favorite-empty-star" size="l" type="starEmpty" />
       </EuiToolTip>
     )}
   </div>
@@ -77,16 +77,16 @@ interface DescriptionProps {
 
 export const Description = React.memo<DescriptionProps>(
   ({ description, timelineId, updateDescription }) => (
-    <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
+    <EuiToolTip content={i18n.DESCRIPTION_TOOL_TIP} data-test-subj="timeline-description-tool-tip">
       <DescriptionContainer data-test-subj="description-container">
         <EuiFieldText
           aria-label={i18n.TIMELINE_DESCRIPTION}
           data-test-subj="timeline-description"
           fullWidth={true}
-          onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
           placeholder={i18n.DESCRIPTION}
           spellCheck={true}
           value={description}
+          onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
         />
       </DescriptionContainer>
     </EuiToolTip>
@@ -101,14 +101,14 @@ interface NameProps {
 }
 
 export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) => (
-  <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+  <EuiToolTip content={i18n.TITLE} data-test-subj="timeline-title-tool-tip">
     <NameField
       aria-label={i18n.TIMELINE_TITLE}
       data-test-subj="timeline-title"
-      onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
       placeholder={i18n.UNTITLED_TIMELINE}
       spellCheck={true}
       value={title}
+      onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
     />
   </EuiToolTip>
 ));
@@ -123,8 +123,8 @@ interface NewTimelineProps {
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ createTimeline, onClosePopover, timelineId }) => (
     <EuiButtonEmpty
-      data-test-subj="timeline-new"
       color="text"
+      data-test-subj="timeline-new"
       iconSide="left"
       iconType="plusInCircle"
       onClick={() => {
@@ -162,8 +162,8 @@ interface LargeNotesButtonProps {
 const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
   <EuiButton
     data-test-subj="timeline-notes-button-large"
-    onClick={() => toggleShowNotes()}
     size="m"
+    onClick={() => toggleShowNotes()}
   >
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -173,7 +173,7 @@ const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, tog
         {text && text.length ? <LabelText>{text}</LabelText> : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
+        <NotesCountBadge color="hollow" data-test-subj="timeline-notes-count">
           {noteIds.length}
         </NotesCountBadge>
       </EuiFlexItem>
@@ -224,9 +224,9 @@ const NotesButtonComponent = React.memo<NotesButtonProps>(
             <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
+                getNewNoteId={getNewNoteId}
                 getNotesByIds={getNotesByIds}
                 noteIds={noteIds}
-                getNewNoteId={getNewNoteId}
                 updateNote={updateNote}
               />
             </EuiModal>
@@ -259,8 +259,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
         noteIds={noteIds}
         showNotes={showNotes}
         size={size}
-        toggleShowNotes={toggleShowNotes}
         text={text}
+        toggleShowNotes={toggleShowNotes}
         updateNote={updateNote}
       />
     ) : (
@@ -272,8 +272,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
           noteIds={noteIds}
           showNotes={showNotes}
           size={size}
-          toggleShowNotes={toggleShowNotes}
           text={text}
+          toggleShowNotes={toggleShowNotes}
           updateNote={updateNote}
         />
       </EuiToolTip>

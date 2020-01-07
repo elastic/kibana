@@ -118,7 +118,7 @@ const IpAdressesWithPorts = React.memo<{
       {uniqWith(isEqual, ipPortPairs).map(
         ipPortPair =>
           ipPortPair.ip != null && (
-            <EuiFlexItem grow={false} key={ipPortPair.ip}>
+            <EuiFlexItem key={ipPortPair.ip} grow={false}>
               <IpWithPort
                 contextId={contextId}
                 data-test-subj={`${type}-ip-and-port`}
@@ -170,7 +170,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
 
     return isIpFieldPopulated({ destinationIp, sourceIp, type }) ||
       hasPorts({ destinationPort, sourcePort, type }) ? (
-      <EuiBadge data-test-subj={`${type}-ip-badge`} color="hollow">
+      <EuiBadge color="hollow" data-test-subj={`${type}-ip-badge`}>
         <EuiFlexGroup
           alignItems="center"
           data-test-subj={`${type}-ip-group`}
@@ -210,17 +210,17 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
           <EuiFlexItem>
             <GeoFields
               contextId={contextId}
-              destinationGeoContinentName={destinationGeoContinentName}
-              destinationGeoCountryName={destinationGeoCountryName}
-              destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
-              destinationGeoRegionName={destinationGeoRegionName}
               destinationGeoCityName={destinationGeoCityName}
+              destinationGeoContinentName={destinationGeoContinentName}
+              destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
+              destinationGeoCountryName={destinationGeoCountryName}
+              destinationGeoRegionName={destinationGeoRegionName}
               eventId={eventId}
-              sourceGeoContinentName={sourceGeoContinentName}
-              sourceGeoCountryName={sourceGeoCountryName}
-              sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
-              sourceGeoRegionName={sourceGeoRegionName}
               sourceGeoCityName={sourceGeoCityName}
+              sourceGeoContinentName={sourceGeoContinentName}
+              sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
+              sourceGeoCountryName={sourceGeoCountryName}
+              sourceGeoRegionName={sourceGeoRegionName}
               type={type}
             />
           </EuiFlexItem>

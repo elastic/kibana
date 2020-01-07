@@ -66,9 +66,8 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
     } = this.props;
     return (
       <Query<GetAuthenticationsOverTimeQuery.Query, GetAuthenticationsOverTimeQuery.Variables>
-        query={AuthenticationsOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={AuthenticationsOverTimeGqlQuery}
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,
@@ -80,6 +79,7 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
           defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, refetch }) => {
           const source = getOr({}, `source.AuthenticationsOverTime`, data);

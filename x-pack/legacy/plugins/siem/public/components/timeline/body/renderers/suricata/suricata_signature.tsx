@@ -46,7 +46,7 @@ export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
     {tokens.map(token => (
       <TokensFlexItem key={token} grow={false}>
-        <EuiBadge iconType="tag" color="hollow">
+        <EuiBadge color="hollow" iconType="tag">
           {token}
         </EuiBadge>
       </TokensFlexItem>
@@ -80,10 +80,10 @@ export const DraggableSignatureId = React.memo<{ id: string; signatureId: number
             </DragEffects>
           ) : (
             <EuiToolTip
-              data-test-subj="signature-id-tooltip"
               content={SURICATA_SIGNATURE_ID_FIELD_NAME}
+              data-test-subj="signature-id-tooltip"
             >
-              <Badge iconType="number" color="hollow">
+              <Badge color="hollow" iconType="number">
                 {signatureId}
               </Badge>
             </EuiToolTip>
@@ -104,7 +104,7 @@ export const SuricataSignature = React.memo<{
 }>(({ contextId, id, signature, signatureId }) => {
   const tokens = getBeginningTokens(signature);
   return (
-    <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+    <EuiFlexGroup gutterSize="none" justifyContent="center" wrap={true}>
       <DraggableSignatureId
         id={`draggable-signature-id-${contextId}-${id}`}
         signatureId={signatureId}

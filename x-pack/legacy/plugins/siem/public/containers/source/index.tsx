@@ -85,13 +85,13 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
-      query={sourceQuery}
       fetchPolicy="cache-first"
-      notifyOnNetworkStatusChange
+      query={sourceQuery}
       variables={{
         sourceId,
         defaultIndex,
       }}
+      notifyOnNetworkStatusChange
     >
       {({ data }) =>
         children({

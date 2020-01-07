@@ -120,8 +120,8 @@ export const HeaderPage = React.memo<HeaderPageProps>(
               ) : (
                 <DefaultDraggable
                   data-test-subj="header-page-draggable"
-                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
                   field={draggableArguments.field}
+                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
                   value={`${draggableArguments.value}`}
                 />
               )}
@@ -144,7 +144,7 @@ export const HeaderPage = React.memo<HeaderPageProps>(
 
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
+          {border && isLoading && <EuiProgress color="accent" size="xs" />}
         </FlexItem>
 
         {children && (

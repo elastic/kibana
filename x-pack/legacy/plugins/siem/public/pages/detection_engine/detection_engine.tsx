@@ -39,7 +39,7 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
     if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
       return (
         <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <HeaderPage title={i18n.PAGE_TITLE} border />
           <DetectionEngineUserUnauthenticated />
         </WrapperPage>
       );
@@ -47,7 +47,7 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
     if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
       return (
         <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <HeaderPage title={i18n.PAGE_TITLE} border />
           <DetectionEngineNoIndex />
         </WrapperPage>
       );
@@ -64,7 +64,6 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
 
                 <WrapperPage>
                   <HeaderPage
-                    border
                     subtitle={
                       lastSignals != null && (
                         <>
@@ -75,8 +74,9 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                       )
                     }
                     title={i18n.PAGE_TITLE}
+                    border
                   >
-                    <EuiButton fill href="#/detection-engine/rules" iconType="gear">
+                    <EuiButton href="#/detection-engine/rules" iconType="gear" fill>
                       {i18n.BUTTON_MANAGE_RULES}
                     </EuiButton>
                   </HeaderPage>
@@ -102,7 +102,7 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
               </StickyContainer>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <HeaderPage title={i18n.PAGE_TITLE} border />
                 <DetectionEngineEmptyPage />
               </WrapperPage>
             );

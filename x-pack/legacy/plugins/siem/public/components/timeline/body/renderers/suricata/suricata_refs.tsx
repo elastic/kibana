@@ -23,7 +23,7 @@ export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }
     <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
       {links.map(link => (
         <LinkEuiFlexItem key={link} grow={false}>
-          <EuiLink href={link} color="subdued" target="_blank">
+          <EuiLink color="subdued" href={link} target="_blank">
             {link}
           </EuiLink>
           <ExternalLinkIcon />

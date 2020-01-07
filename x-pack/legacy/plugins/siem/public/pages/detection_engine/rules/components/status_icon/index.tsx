@@ -31,7 +31,7 @@ const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) 
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" />
-      {type === 'valid' ? <EuiIcon type="check" color={theme.euiColorEmptyShade} size="l" /> : null}
+      {type === 'valid' ? <EuiIcon color={theme.euiColorEmptyShade} size="l" type="check" /> : null}
     </RuleStatusIconStyled>
   );
 };

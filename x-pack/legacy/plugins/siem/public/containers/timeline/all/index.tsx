@@ -86,10 +86,10 @@ const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
   };
   return (
     <Query<GetAllTimeline.Query, GetAllTimeline.Variables>
-      query={allTimelinesQuery}
       fetchPolicy="network-only"
-      notifyOnNetworkStatusChange
+      query={allTimelinesQuery}
       variables={variables}
+      notifyOnNetworkStatusChange
     >
       {({ data, loading }) =>
         children!({

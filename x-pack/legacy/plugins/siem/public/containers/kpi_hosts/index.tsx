@@ -39,9 +39,8 @@ export interface KpiHostsProps extends QueryTemplateProps {
 const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
       fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
+      query={kpiHostsQuery}
       skip={skip}
       variables={{
         sourceId,
@@ -54,6 +53,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
         defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
+      notifyOnNetworkStatusChange
     >
       {({ data, loading, refetch }) => {
         const kpiHosts = getOr({}, `source.KpiHosts`, data);

@@ -24,8 +24,6 @@ type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: strin
 export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ url }) => (
   <Switch>
     <Route
-      strict
-      exact
       path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
@@ -37,6 +35,8 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         const reEncoded = QueryString.encode(queryStringDecoded);
         return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
+      exact
+      strict
     />
     <Route
       path={`${url}/ip/:ip`}

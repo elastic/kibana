@@ -26,14 +26,14 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          onCategorySelected={jest.fn()}
-          onFieldSelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          onFieldSelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -54,14 +54,14 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          onCategorySelected={jest.fn()}
-          onFieldSelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          onFieldSelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -82,14 +82,14 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={{}}
-          onCategorySelected={jest.fn()}
-          onFieldSelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          onFieldSelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );
@@ -110,14 +110,14 @@ describe('FieldsPane', () => {
         <FieldsPane
           columnHeaders={[]}
           filteredBrowserFields={{}}
-          onCategorySelected={jest.fn()}
-          onFieldSelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          onFieldSelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
         />
       </TestProviders>
     );

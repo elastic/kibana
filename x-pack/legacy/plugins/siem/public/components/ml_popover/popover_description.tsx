@@ -12,14 +12,14 @@ import chrome from 'ui/chrome';
 export const PopoverDescriptionComponent = () => (
   <EuiText size="s">
     <FormattedMessage
-      id="xpack.siem.components.mlPopup.anomalyDetectionDescription"
       defaultMessage="Run any of the Machine Learning jobs below to view anomalous events throughout the SIEM application. We’ve provided a few common detection jobs to get you started. If you wish to add your own custom jobs, simply create and tag them with “SIEM” from the {machineLearning} application for inclusion here."
+      id="xpack.siem.components.mlPopup.anomalyDetectionDescription"
       values={{
         machineLearning: (
           <EuiLink href={`${chrome.getBasePath()}/app/ml`} target="_blank">
             <FormattedMessage
-              id="xpack.siem.components.mlPopup.machineLearningLink"
               defaultMessage="Machine Learning"
+              id="xpack.siem.components.mlPopup.machineLearningLink"
             />
           </EuiLink>
         ),

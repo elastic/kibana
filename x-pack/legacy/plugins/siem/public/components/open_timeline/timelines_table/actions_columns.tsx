@@ -35,16 +35,16 @@ export const getActionsColumns = ({
         <EuiButtonIcon
           aria-label={i18n.OPEN_AS_DUPLICATE}
           data-test-subj="open-duplicate"
-          isDisabled={savedObjectId == null}
           iconSize="s"
           iconType="copy"
+          isDisabled={savedObjectId == null}
+          size="s"
           onClick={() =>
             onOpenTimeline({
               duplicate: true,
               timelineId: `${timelineResult.savedObjectId}`,
             })
           }
-          size="s"
         />
       </EuiToolTip>
     ),

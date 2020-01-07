@@ -21,11 +21,11 @@ describe('FieldName', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName
-          categoryId={categoryId}
           categoryColumns={getColumnsWithTimestamp({
             browserFields: mockBrowserFields,
             category: categoryId,
           })}
+          categoryId={categoryId}
           fieldId={timestampFieldId}
           onUpdateColumns={jest.fn()}
         />
@@ -44,11 +44,11 @@ describe('FieldName', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName
-          categoryId={categoryId}
           categoryColumns={getColumnsWithTimestamp({
             browserFields: mockBrowserFields,
             category: categoryId,
           })}
+          categoryId={categoryId}
           fieldId={timestampFieldId}
           onUpdateColumns={jest.fn()}
         />
@@ -64,11 +64,11 @@ describe('FieldName', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName
-          categoryId={categoryId}
           categoryColumns={getColumnsWithTimestamp({
             browserFields: mockBrowserFields,
             category: categoryId,
           })}
+          categoryId={categoryId}
           fieldId={timestampFieldId}
           onUpdateColumns={jest.fn()}
         />
@@ -86,11 +86,11 @@ describe('FieldName', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName
-          categoryId={categoryId}
           categoryColumns={getColumnsWithTimestamp({
             browserFields: mockBrowserFields,
             category: categoryId,
           })}
+          categoryId={categoryId}
           fieldId={timestampFieldId}
           onUpdateColumns={onUpdateColumns}
         />
@@ -125,11 +125,11 @@ describe('FieldName', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldName
-          categoryId={categoryId}
           categoryColumns={getColumnsWithTimestamp({
             browserFields: mockBrowserFields,
             category: categoryId,
           })}
+          categoryId={categoryId}
           fieldId={timestampFieldId}
           highlight={highlight}
           onUpdateColumns={jest.fn()}

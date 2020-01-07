@@ -71,12 +71,12 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
         return (
           <TabNavigationItem
             key={`navigation-${tab.id}`}
-            id={tab.id}
-            href={tab.href}
-            name={tab.name}
             disabled={tab.disabled}
+            href={tab.href}
             hrefWithSearch={hrefWithSearch}
+            id={tab.id}
             isSelected={isSelected}
+            name={tab.name}
           />
         );
       }),

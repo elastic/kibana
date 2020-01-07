@@ -27,11 +27,11 @@ describe('EventDetails', () => {
           columnHeaders={defaultHeaders}
           data={mockDetailItemData}
           id={mockDetailItemDataId}
+          timelineId="test"
+          toggleColumn={jest.fn()}
           view="table-view"
           onUpdateColumns={jest.fn()}
           onViewSelected={jest.fn()}
-          timelineId="test"
-          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -48,11 +48,11 @@ describe('EventDetails', () => {
               columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               id={mockDetailItemDataId}
+              timelineId="test"
+              toggleColumn={jest.fn()}
               view="table-view"
               onUpdateColumns={jest.fn()}
               onViewSelected={jest.fn()}
-              timelineId="test"
-              toggleColumn={jest.fn()}
             />
           </TestProviders>
         );
@@ -74,11 +74,11 @@ describe('EventDetails', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             id={mockDetailItemDataId}
+            timelineId="test"
+            toggleColumn={jest.fn()}
             view="table-view"
             onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}
-            timelineId="test"
-            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

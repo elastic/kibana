@@ -80,12 +80,11 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
     }, [form]);
 
     return isReadOnlyView && myStepData != null ? (
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription data={myStepData} direction={descriptionDirection} schema={schema} />
     ) : (
       <>
-        <Form form={form} data-test-subj="stepAboutRule">
+        <Form data-test-subj="stepAboutRule" form={form}>
           <CommonUseField
-            path="name"
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleName',
               'data-test-subj': 'detectionEngineStepAboutRuleName',
@@ -95,9 +94,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 disabled: isLoading,
               },
             }}
+            path="name"
           />
           <CommonUseField
-            path="description"
             componentProps={{
               compressed: true,
               idAria: 'detectionEngineStepAboutRuleDescription',
@@ -107,9 +106,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 disabled: isLoading,
               },
             }}
+            path="description"
           />
           <CommonUseField
-            path="severity"
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleSeverity',
               'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
@@ -120,9 +119,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 options: severityOptions,
               },
             }}
+            path="severity"
           />
           <CommonUseField
-            path="riskScore"
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleRiskScore',
               'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
@@ -135,9 +134,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 options: severityOptions,
               },
             }}
+            path="riskScore"
           />
           <UseField
-            path="references"
             component={AddItem}
             componentProps={{
               compressed: true,
@@ -146,9 +145,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
             }}
+            path="references"
           />
           <UseField
-            path="falsePositives"
             component={AddItem}
             componentProps={{
               compressed: true,
@@ -157,9 +156,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
             }}
+            path="falsePositives"
           />
           <UseField
-            path="threats"
             component={AddMitreThreat}
             componentProps={{
               compressed: true,
@@ -167,9 +166,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
             }}
+            path="threats"
           />
           <CommonUseField
-            path="tags"
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleTags',
               'data-test-subj': 'detectionEngineStepAboutRuleTags',
@@ -179,6 +178,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 isDisabled: isLoading,
               },
             }}
+            path="tags"
           />
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
@@ -196,12 +196,12 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
             <EuiHorizontalRule margin="m" />
             <EuiFlexGroup
               alignItems="center"
-              justifyContent="flexEnd"
               gutterSize="xs"
+              justifyContent="flexEnd"
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                <EuiButton isDisabled={isLoading} fill onClick={onSubmit}>
                   {myStepData.isNew ? RuleI18n.CONTINUE : RuleI18n.UPDATE}
                 </EuiButton>
               </EuiFlexItem>

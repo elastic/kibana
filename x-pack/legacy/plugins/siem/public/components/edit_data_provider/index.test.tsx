@@ -30,11 +30,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -55,11 +55,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field=""
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -80,11 +80,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -105,11 +105,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={true}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -130,11 +130,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={EXISTS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -155,11 +155,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={true}
-          onDataProviderEdited={jest.fn()}
           operator={EXISTS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -180,11 +180,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -207,11 +207,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={reallyAnArray}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -232,11 +232,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={true}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -257,11 +257,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value=""
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -282,11 +282,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={EXISTS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -302,11 +302,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={true}
-          onDataProviderEdited={jest.fn()}
           operator={EXISTS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -322,11 +322,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -347,11 +347,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field=""
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -372,11 +372,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field="not-in-browser-fields"
           isExcluded={false}
-          onDataProviderEdited={jest.fn()}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={jest.fn()}
         />
       </TestProviders>
     );
@@ -399,11 +399,11 @@ describe('StatefulEditDataProvider', () => {
           browserFields={mockBrowserFields}
           field={field}
           isExcluded={false}
-          onDataProviderEdited={onDataProviderEdited}
           operator={IS_OPERATOR}
           providerId={`hosts-table-hostName-${value}`}
           timelineId={timelineId}
           value={value}
+          onDataProviderEdited={onDataProviderEdited}
         />
       </TestProviders>
     );

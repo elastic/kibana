@@ -58,14 +58,14 @@ describe('Stat Items Component', () => {
         <ThemeProvider theme={theme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
+              key="mock-keys"
               description="HOSTS"
               fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
               from={from}
               id="statItems"
               index={0}
-              key="mock-keys"
-              to={to}
               narrowDateRange={mockNarrowDateRange}
+              to={to}
             />
           </ReduxStoreProvider>
         </ThemeProvider>
@@ -76,6 +76,7 @@ describe('Stat Items Component', () => {
         <ThemeProvider theme={theme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
+              key="mock-keys"
               areaChart={[]}
               barChart={[]}
               description="HOSTS"
@@ -83,9 +84,8 @@ describe('Stat Items Component', () => {
               from={from}
               id="statItems"
               index={0}
-              key="mock-keys"
-              to={to}
               narrowDateRange={mockNarrowDateRange}
+              to={to}
             />
           </ReduxStoreProvider>
         </ThemeProvider>
@@ -266,7 +266,7 @@ describe('useKpiMatrixStatus', () => {
   test('it updates status correctly', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} data={mockKpiNetworkData} />
+        <MockHookWrapperComponent data={mockKpiNetworkData} fieldsMapping={mockNetworkMappings} />
       </>
     );
 
@@ -276,7 +276,7 @@ describe('useKpiMatrixStatus', () => {
   test('it should not append areaChart if enableAreaChart is off', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockKpiNetworkData} />
+        <MockHookWrapperComponent data={mockKpiNetworkData} fieldsMapping={mockNoChartMappings} />
       </>
     );
 
@@ -286,7 +286,7 @@ describe('useKpiMatrixStatus', () => {
   test('it should not append barChart if enableBarChart is off', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockKpiNetworkData} />
+        <MockHookWrapperComponent data={mockKpiNetworkData} fieldsMapping={mockNoChartMappings} />
       </>
     );
 

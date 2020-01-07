@@ -29,9 +29,9 @@ describe('EventFieldsBrowser', () => {
               columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              onUpdateColumns={jest.fn()}
               timelineId="test"
               toggleColumn={jest.fn()}
+              onUpdateColumns={jest.fn()}
             />
           </TestProviders>
         );
@@ -50,9 +50,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -76,9 +76,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -101,9 +101,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -127,9 +127,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={toggleColumn}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -160,9 +160,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -187,9 +187,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -211,9 +211,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );
@@ -235,9 +235,9 @@ describe('EventFieldsBrowser', () => {
             columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
             toggleColumn={jest.fn()}
+            onUpdateColumns={jest.fn()}
           />
         </TestProviders>
       );

@@ -78,13 +78,13 @@ export const AnomaliesQueryTabBody = ({
         }}
       </AnomaliesOverTimeQuery>
       <AnomaliesTableComponent
-        startDate={startDate}
         endDate={endDate}
-        skip={skip}
-        type={type as never}
-        narrowDateRange={narrowDateRange}
         flowTarget={flowTarget}
         ip={ip}
+        narrowDateRange={narrowDateRange}
+        skip={skip}
+        startDate={startDate}
+        type={type as never}
       />
     </>
   );

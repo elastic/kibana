@@ -17,13 +17,13 @@ describe('NewNote', () => {
 
   test('renders correctly', () => {
     const wrapper = shallow(
-      <NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />
+      <NewNote note={note} noteInputHeight={200} updateNewNote={jest.fn()} />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('it renders a tab labeled "Note"', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote note={note} noteInputHeight={200} updateNewNote={jest.fn()} />);
 
     expect(
       wrapper
@@ -34,7 +34,7 @@ describe('NewNote', () => {
   });
 
   test('it renders a tab labeled "Preview (Markdown)"', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote note={note} noteInputHeight={200} updateNewNote={jest.fn()} />);
 
     expect(
       wrapper
@@ -45,13 +45,13 @@ describe('NewNote', () => {
   });
 
   test('it renders the expected placeholder when a note is NOT provided', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={''} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote note={''} noteInputHeight={200} updateNewNote={jest.fn()} />);
 
     expect(wrapper.find(`textarea[placeholder="${i18n.ADD_A_NOTE}"]`).exists()).toEqual(true);
   });
 
   test('it renders a text area containing the contents of a new (raw) note', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote note={note} noteInputHeight={200} updateNewNote={jest.fn()} />);
 
     expect(
       wrapper
@@ -62,7 +62,7 @@ describe('NewNote', () => {
   });
 
   test('it renders a markdown preview when the user clicks Preview (Markdown)', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote note={note} noteInputHeight={200} updateNewNote={jest.fn()} />);
 
     // click the preview tab:
     wrapper

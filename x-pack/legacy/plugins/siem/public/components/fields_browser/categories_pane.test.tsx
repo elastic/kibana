@@ -25,11 +25,11 @@ describe('CategoriesPane', () => {
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
+          selectedCategoryId={''}
+          timelineId={timelineId}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
         />
       </ThemeProvider>
     );
@@ -48,11 +48,11 @@ describe('CategoriesPane', () => {
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={{}}
+          selectedCategoryId={''}
+          timelineId={timelineId}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
         />
       </ThemeProvider>
     );

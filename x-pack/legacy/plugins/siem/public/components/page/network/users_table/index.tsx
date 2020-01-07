@@ -129,7 +129,6 @@ const UsersTableComponent = React.memo<UsersTableProps>(
         activePage={activePage}
         columns={getUsersColumns(flowTarget, usersTableId)}
         dataTestSubj={`table-${tableType}`}
-        showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
@@ -139,12 +138,13 @@ const UsersTableComponent = React.memo<UsersTableProps>(
         limit={limit}
         loading={loading}
         loadPage={loadPage}
-        onChange={onChange}
         pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
         sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}
+        onChange={onChange}
       />
     );
   }

@@ -266,6 +266,11 @@ const StatefulTimelineComponent = React.memo<Props>(
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
+            show={show!}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            sort={sort!}
+            start={start}
+            toggleColumn={toggleColumn}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
@@ -273,11 +278,6 @@ const StatefulTimelineComponent = React.memo<Props>(
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
           />
         )}
       </WithSource>

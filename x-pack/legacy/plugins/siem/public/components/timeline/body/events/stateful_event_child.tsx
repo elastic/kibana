@@ -86,30 +86,30 @@ export const StatefulEventChild = React.memo<Props>(
     return (
       <>
         <EventColumnView
-          id={id}
           actionsColumnWidth={actionsColumnWidth}
           associateNote={associateNote}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
-          expanded={expanded}
           eventIdToNoteIds={eventIdToNoteIds}
+          expanded={expanded}
           getNotesByIds={getNotesByIds}
+          id={id}
           isEventPinned={isEventPinned}
           isEventViewer={isEventViewer}
           loading={loading}
           loadingEventIds={loadingEventIds}
-          onColumnResized={onColumnResized}
-          onEventToggled={onToggleExpanded}
-          onPinEvent={onPinEvent}
-          onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
           showNotes={showNotes}
           timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes}
           updateNote={updateNote}
+          onColumnResized={onColumnResized}
+          onEventToggled={onToggleExpanded}
+          onPinEvent={onPinEvent}
+          onRowSelected={onRowSelected}
+          onUnPinEvent={onUnPinEvent}
         />
 
         <EventsTrSupplement

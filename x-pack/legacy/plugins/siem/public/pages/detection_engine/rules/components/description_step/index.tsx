@@ -86,9 +86,9 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
     []
   );
   return (
-    <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
+    <EuiFlexGroup direction={direction} gutterSize="none" justifyContent="spaceAround">
       {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
-        <EuiFlexItemWidth direction={direction} key={`description-step-rule-${index}`} grow={false}>
+        <EuiFlexItemWidth key={`description-step-rule-${index}`} direction={direction} grow={false}>
           <EuiDescriptionList listItems={chunckListItems} compressed />
         </EuiFlexItemWidth>
       ))}
@@ -144,9 +144,9 @@ const getDescriptionItem = (
         {
           title: <>{I18n.FILTERS_LABEL}</>,
           description: (
-            <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {filterManager.getFilters().map((filter, index) => (
-                <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
+                <EuiFlexItem key={`${field}-filter-${index}`} grow={false}>
                   <EuiBadgeWrap color="hollow">
                     {indexPatterns != null ? (
                       <FilterLabel
@@ -204,8 +204,8 @@ const getDescriptionItem = (
                         </EuiLink>
                       </h5>
                       <MyEuiListGroup
-                        flush={false}
                         bordered={false}
+                        flush={false}
                         listItems={threat.techniques.map(technique => {
                           const myTechnique = techniquesOptions.find(
                             t => t.name === technique.name
@@ -231,7 +231,7 @@ const getDescriptionItem = (
     return [
       {
         title: label,
-        description: <MyEuiTextArea value={get(field, value)} readOnly={true} />,
+        description: <MyEuiTextArea readOnly={true} value={get(field, value)} />,
       },
     ];
   } else if (Array.isArray(get(field, value))) {
@@ -241,10 +241,10 @@ const getDescriptionItem = (
         {
           title: label,
           description: (
-            <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {values.map((val: string) =>
                 isEmpty(val) ? null : (
-                  <EuiFlexItem grow={false} key={`${field}-${val}`}>
+                  <EuiFlexItem key={`${field}-${val}`} grow={false}>
                     <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
                   </EuiFlexItem>
                 )

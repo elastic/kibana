@@ -108,47 +108,44 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                  <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
 
                 <WrapperPage>
                   <HeaderPage
-                    border
                     subtitle={
                       <LastEventTime
-                        indexKey={LastEventIndexKey.hostDetails}
                         hostName={detailName}
+                        indexKey={LastEventIndexKey.hostDetails}
                       />
                     }
                     title={detailName}
+                    border
                   />
 
                   <HostOverviewByNameQuery
-                    sourceId="default"
+                    endDate={to}
                     hostName={detailName}
                     skip={isInitializing}
+                    sourceId="default"
                     startDate={from}
-                    endDate={to}
                   >
                     {({ hostOverview, loading, id, inspect, refetch }) => (
                       <AnomalyTableProvider
                         criteriaFields={hostToCriteria(hostOverview)}
-                        startDate={from}
                         endDate={to}
                         skip={isInitializing}
+                        startDate={from}
                       >
                         {({ isLoadingAnomaliesData, anomaliesData }) => (
                           <HostOverviewManage
+                            anomaliesData={anomaliesData}
+                            data={hostOverview}
+                            endDate={to}
                             id={id}
                             inspect={inspect}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            anomaliesData={anomaliesData}
                             isLoadingAnomaliesData={isLoadingAnomaliesData}
                             loading={loading}
-                            startDate={from}
-                            endDate={to}
                             narrowDateRange={(score, interval) => {
                               const fromTo = scoreIntervalToDateTime(score, interval);
                               setAbsoluteRangeDatePicker({
@@ -157,6 +154,9 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                                 to: fromTo.to,
                               });
                             }}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            startDate={from}
                           />
                         )}
                       </AnomalyTableProvider>
@@ -166,11 +166,11 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <EuiHorizontalRule />
 
                   <KpiHostDetailsQuery
-                    sourceId="default"
+                    endDate={to}
                     filterQuery={filterQuery}
                     skip={isInitializing}
+                    sourceId="default"
                     startDate={from}
-                    endDate={to}
                   >
                     {({ kpiHostDetails, id, inspect, loading, refetch }) => (
                       <KpiHostDetailsManage
@@ -179,10 +179,10 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                         id={id}
                         inspect={inspect}
                         loading={loading}
+                        narrowDateRange={narrowDateRange}
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostDetailsQuery>
@@ -196,24 +196,24 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <EuiSpacer />
 
                   <HostDetailsTabs
-                    isInitializing={isInitializing}
                     deleteQuery={deleteQuery}
-                    pageFilters={hostDetailsPageFilters}
-                    to={to}
-                    from={from}
                     detailName={detailName}
-                    type={type}
-                    setQuery={setQuery}
                     filterQuery={filterQuery}
+                    from={from}
                     hostDetailsPagePath={hostDetailsPagePath}
                     indexPattern={indexPattern}
+                    isInitializing={isInitializing}
+                    pageFilters={hostDetailsPageFilters}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    setQuery={setQuery}
+                    to={to}
+                    type={type}
                   />
                 </WrapperPage>
               </StickyContainer>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={detailName} />
+                <HeaderPage title={detailName} border />
 
                 <HostsEmptyPage />
               </WrapperPage>

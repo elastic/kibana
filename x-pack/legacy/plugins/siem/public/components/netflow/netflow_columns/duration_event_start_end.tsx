@@ -42,12 +42,12 @@ export const DurationEventStartEnd = React.memo<{
     alignItems="flexStart"
     data-test-subj="duration-and-start-group"
     direction="column"
-    justifyContent="center"
     gutterSize="none"
+    justifyContent="center"
   >
     {eventDuration != null
       ? uniq(eventDuration).map(duration => (
-          <EuiFlexItem grow={false} key={duration}>
+          <EuiFlexItem key={duration} grow={false}>
             <DefaultDraggable
               data-test-subj="event-duration"
               field={EVENT_DURATION_FIELD_NAME}
@@ -69,7 +69,7 @@ export const DurationEventStartEnd = React.memo<{
       : null}
     {eventStart != null
       ? uniq(eventStart).map(start => (
-          <EuiFlexItem grow={false} key={start}>
+          <EuiFlexItem key={start} grow={false}>
             <DefaultDraggable
               data-test-subj="event-start"
               field={EVENT_START_FIELD_NAME}
@@ -87,7 +87,7 @@ export const DurationEventStartEnd = React.memo<{
       : null}
     {eventEnd != null
       ? uniq(eventEnd).map(end => (
-          <EuiFlexItem grow={false} key={end}>
+          <EuiFlexItem key={end} grow={false}>
             <DefaultDraggable
               data-test-subj="event-end"
               field={EVENT_END_FIELD_NAME}

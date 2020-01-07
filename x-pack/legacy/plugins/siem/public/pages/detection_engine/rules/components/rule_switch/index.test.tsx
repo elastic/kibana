@@ -14,7 +14,7 @@ jest.mock('../../../../../lib/kibana');
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <RuleSwitchComponent optionLabel="rule-switch" enabled={true} id={'7'} isLoading={false} />
+      <RuleSwitchComponent enabled={true} id={'7'} isLoading={false} optionLabel="rule-switch" />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

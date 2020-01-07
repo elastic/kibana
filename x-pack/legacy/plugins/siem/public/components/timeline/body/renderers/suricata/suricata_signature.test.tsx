@@ -26,8 +26,8 @@ describe('SuricataSignature', () => {
         <SuricataSignature
           contextId="test"
           id="doc-id-123"
-          signatureId={123}
           signature="ET SCAN ATTACK Hello"
+          signatureId={123}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();

@@ -88,13 +88,13 @@ const DraggableWrapperComponent = React.memo<Props>(
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
-        <Droppable isDropDisabled={true} droppableId={getDroppableId(dataProvider.id)}>
+        <Droppable droppableId={getDroppableId(dataProvider.id)} isDropDisabled={true}>
           {droppableProvided => (
             <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
               <Draggable
+                key={getDraggableId(dataProvider.id)}
                 draggableId={getDraggableId(dataProvider.id)}
                 index={0}
-                key={getDraggableId(dataProvider.id)}
               >
                 {(provided, snapshot) => (
                   <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>

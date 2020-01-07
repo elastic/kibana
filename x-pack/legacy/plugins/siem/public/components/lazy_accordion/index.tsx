@@ -67,8 +67,8 @@ export const LazyAccordion = React.memo<Props>(
               extraAction={extraAction}
               id={id}
               initialIsOpen={true}
-              onClick={onExpandedClick}
               paddingSize={paddingSize}
+              onClick={onExpandedClick}
             >
               <></>
             </EuiAccordion>
@@ -81,8 +81,8 @@ export const LazyAccordion = React.memo<Props>(
             data-test-subj="lazy-accordion-placeholder"
             extraAction={extraAction}
             id={id}
-            onClick={onCollapsedClick}
             paddingSize={paddingSize}
+            onClick={onCollapsedClick}
           />
         )}
       </>

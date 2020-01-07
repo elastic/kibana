@@ -37,9 +37,8 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
 
     return (
       <Query<GetAnomaliesOverTimeQuery.Query, GetAnomaliesOverTimeQuery.Variables>
-        query={AnomaliesOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={AnomaliesOverTimeGqlQuery}
         variables={{
           filterQuery,
           sourceId,
@@ -51,6 +50,7 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
           defaultIndex: ['.ml-anomalies-*'],
           inspect: isInspected,
         }}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, refetch }) => {
           const source = getOr({}, `source.AnomaliesOverTime`, data);

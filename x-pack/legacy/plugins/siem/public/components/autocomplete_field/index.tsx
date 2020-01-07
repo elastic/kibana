@@ -62,27 +62,27 @@ export class AutocompleteField extends React.PureComponent<
         <AutocompleteContainer>
           <FixedEuiFieldSearch
             data-test-subj={dataTestSubj}
-            fullWidth
             inputRef={this.handleChangeInputRef}
-            isLoading={isLoadingSuggestions}
             isInvalid={!isValid}
+            isLoading={isLoadingSuggestions}
+            placeholder={placeholder}
+            value={value}
+            fullWidth
             onChange={this.handleChange}
             onFocus={this.handleFocus}
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
-            placeholder={placeholder}
-            value={value}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <SuggestionsPanel>
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}
-                  suggestion={suggestion}
                   isSelected={suggestionIndex === selectedIndex}
-                  onMouseEnter={this.selectSuggestionAt(suggestionIndex)}
+                  suggestion={suggestion}
                   onClick={this.applySuggestionAt(suggestionIndex)}
+                  onMouseEnter={this.selectSuggestionAt(suggestionIndex)}
                 />
               ))}
             </SuggestionsPanel>

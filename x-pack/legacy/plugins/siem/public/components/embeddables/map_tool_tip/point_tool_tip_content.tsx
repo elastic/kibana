@@ -32,16 +32,16 @@ export const PointToolTipContentComponent = ({
       title: sourceDestinationFieldMappings[key],
       description: (
         <AddFilterToGlobalSearchBar
+          data-test-subj={`add-to-kql-${key}`}
           filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
           onFilterAdded={closeTooltip}
-          data-test-subj={`add-to-kql-${key}`}
         >
           {value != null ? (
             <DefaultFieldRenderer
-              rowItems={Array.isArray(value) ? value : [value]}
               attrName={key}
               idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
               render={item => getRenderedFieldValue(key, item)}
+              rowItems={Array.isArray(value) ? value : [value]}
             />
           ) : (
             getEmptyTagValue()

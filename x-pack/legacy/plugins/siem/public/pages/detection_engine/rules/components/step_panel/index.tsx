@@ -22,7 +22,7 @@ const MyPanel = styled(EuiPanel)`
 
 const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
   <MyPanel>
-    {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+    {loading && <EuiProgress color="accent" position="absolute" size="xs" />}
     <HeaderSection title={title} />
     {children}
   </MyPanel>

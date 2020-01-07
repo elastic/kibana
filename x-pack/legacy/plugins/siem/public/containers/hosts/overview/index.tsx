@@ -63,9 +63,8 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
     } = this.props;
     return (
       <Query<GetHostOverviewQuery.Query, GetHostOverviewQuery.Variables>
-        query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
+        query={HostOverviewQuery}
         skip={skip}
         variables={{
           sourceId,
@@ -78,6 +77,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
           defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, refetch }) => {
           const hostOverview = getOr([], 'source.HostOverview', data);

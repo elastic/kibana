@@ -126,10 +126,10 @@ export const Resizeable = React.memo<Props>(
       <>
         {render(isResizingRef.current)}
         <ResizeHandleContainer
+          ref={ref}
           bottom={bottom}
           data-test-subj="resize-handle-container"
           height={height}
-          ref={ref}
           left={left}
           positionAbsolute={positionAbsolute}
           right={right}

@@ -105,13 +105,13 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
   const values = field.value as string[];
   return (
     <EuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      label={field.label}
+      labelAppend={field.labelAppend}
+      fullWidth
     >
       <>
         {values.map((item, index) => {
@@ -130,16 +130,16 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
               <EuiFieldText
                 append={
                   <EuiButtonIcon
+                    aria-label={RuleI18n.DELETE}
                     color="danger"
                     iconType="trash"
                     isDisabled={isDisabled}
                     onClick={() => removeItem(index)}
-                    aria-label={RuleI18n.DELETE}
                   />
                 }
-                onChange={e => updateItem(e, index)}
                 compressed
                 fullWidth
+                onChange={e => updateItem(e, index)}
                 {...euiFieldProps}
               />
               {values.length - 1 !== index && <EuiSpacer size="s" />}
@@ -147,7 +147,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
           );
         })}
 
-        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
+        <EuiButtonEmpty isDisabled={isDisabled} size="xs" onClick={addItem}>
           {addText}
         </EuiButtonEmpty>
       </>

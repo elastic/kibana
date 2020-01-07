@@ -99,13 +99,13 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
 
   return (
     <EuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      label={field.label}
+      labelAppend={field.labelAppend}
+      fullWidth
     >
       <>
         {values.map((item, index) => {
@@ -114,9 +114,11 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           };
           return (
             <div key={index}>
-              <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    aria-label=""
+                    fullWidth={false}
                     id="selectDocExample"
                     options={[
                       ...(item.tactic.name === 'none'
@@ -124,37 +126,35 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
                         : []),
                       ...tacticsOptions.map(t => ({ text: t.text, value: t.value })),
                     ]}
-                    aria-label=""
-                    onChange={updateTactic.bind(null, index)}
                     prepend={I18n.TACTIC}
-                    compressed
-                    fullWidth={false}
                     value={camelCase(item.tactic.name)}
+                    compressed
+                    onChange={updateTactic.bind(null, index)}
                     {...euiSelectFieldProps}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={true}>
-                  <MyEuiFormControlLayout compressed fullWidth prepend={I18n.TECHNIQUES}>
+                  <MyEuiFormControlLayout prepend={I18n.TECHNIQUES} compressed fullWidth>
                     <EuiComboBox
-                      compressed
-                      placeholder={I18n.TECHNIQUES_PLACEHOLDER}
+                      fullWidth={true}
+                      isDisabled={isDisabled}
                       options={techniquesOptions.filter(t =>
                         t.tactics.includes(kebabCase(item.tactic.name))
                       )}
+                      placeholder={I18n.TECHNIQUES_PLACEHOLDER}
                       selectedOptions={item.techniques}
+                      compressed
                       onChange={updateTechniques.bind(null, index)}
-                      isDisabled={isDisabled}
-                      fullWidth={true}
                     />
                   </MyEuiFormControlLayout>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={RuleI18n.DELETE}
                     color="danger"
                     iconType="trash"
                     isDisabled={isDisabled}
                     onClick={() => removeItem(index)}
-                    aria-label={RuleI18n.DELETE}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -162,7 +162,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
             </div>
           );
         })}
-        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
+        <EuiButtonEmpty isDisabled={isDisabled} size="xs" onClick={addItem}>
           {I18n.ADD_MITRE_ATTACK}
         </EuiButtonEmpty>
       </>

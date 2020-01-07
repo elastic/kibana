@@ -44,9 +44,8 @@ export const OverviewNetworkComponentQuery = React.memo<
   OverviewNetworkProps & OverviewNetworkReducer
 >(({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
   <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
-    query={overviewNetworkQuery}
     fetchPolicy={getDefaultFetchPolicy()}
-    notifyOnNetworkStatusChange
+    query={overviewNetworkQuery}
     variables={{
       sourceId,
       timerange: {
@@ -58,6 +57,7 @@ export const OverviewNetworkComponentQuery = React.memo<
       defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     }}
+    notifyOnNetworkStatusChange
   >
     {({ data, loading, refetch }) => {
       const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);

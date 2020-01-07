@@ -41,8 +41,8 @@ export const createGenericSystemRowRenderer = ({
       <RowRendererContainer>
         <SystemGenericDetails
           browserFields={browserFields}
-          data={data}
           contextId={`${actionName}-${timelineId}`}
+          data={data}
           text={text}
           timelineId={timelineId}
         />
@@ -74,8 +74,8 @@ export const createEndgameProcessRowRenderer = ({
       <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
-          data={data}
           contextId={`endgame-process-${actionName}-${timelineId}`}
+          data={data}
           showMessage={false}
           text={text}
           timelineId={timelineId}
@@ -108,8 +108,8 @@ export const createFimRowRenderer = ({
       <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
-          data={data}
           contextId={`fim-${actionName}-${timelineId}`}
+          data={data}
           showMessage={false}
           text={text}
           timelineId={timelineId}
@@ -142,8 +142,8 @@ export const createGenericFileRowRenderer = ({
       <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
-          data={data}
           contextId={`${actionName}-${timelineId}`}
+          data={data}
           text={text}
           timelineId={timelineId}
         />
@@ -169,8 +169,8 @@ export const createSocketRowRenderer = ({
       <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
-          data={data}
           contextId={`socket-${actionName}-${timelineId}`}
+          data={data}
           text={text}
           timelineId={timelineId}
         />
@@ -200,8 +200,8 @@ export const createSecurityEventRowRenderer = ({
       <RowRendererContainer>
         <EndgameSecurityEventDetails
           browserFields={browserFields}
-          data={data}
           contextId={`authentication-${actionName}-${timelineId}`}
+          data={data}
           timelineId={timelineId}
         />
       </RowRendererContainer>
@@ -221,8 +221,8 @@ export const createDnsRowRenderer = (): RowRenderer => ({
       <RowRendererContainer>
         <DnsRequestEventDetails
           browserFields={browserFields}
-          data={data}
           contextId={`dns-request-${timelineId}`}
+          data={data}
           timelineId={timelineId}
         />
       </RowRendererContainer>

@@ -24,8 +24,8 @@ describe('Columns', () => {
         columnHeaders={headersSansTimestamp}
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
-        onColumnResized={jest.fn()}
         timelineId="test"
+        onColumnResized={jest.fn()}
       />
     );
 

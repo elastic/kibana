@@ -182,18 +182,14 @@ export const CreateRuleComponent = React.memo(() => {
       <WrapperPage restrictWidth>
         <HeaderPage
           backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
-          border
           isLoading={isLoading}
           title={i18n.PAGE_TITLE}
+          border
         />
         <ResizeEuiPanel height={heightAccordion}>
           <EuiAccordion
-            initialIsOpen={true}
-            id={RuleStep.defineRule}
-            buttonContent={defineRuleButton}
-            paddingSize="xs"
             ref={defineRuleRef}
-            onToggle={manageAccordions.bind(null, RuleStep.defineRule)}
+            buttonContent={defineRuleButton}
             extraAction={
               stepsData.current[RuleStep.defineRule].isValid && (
                 <EuiButtonEmpty
@@ -205,25 +201,25 @@ export const CreateRuleComponent = React.memo(() => {
                 </EuiButtonEmpty>
               )
             }
+            id={RuleStep.defineRule}
+            initialIsOpen={true}
+            paddingSize="xs"
+            onToggle={manageAccordions.bind(null, RuleStep.defineRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepDefineRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading}
-              setStepData={setStepData}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               resizeParentContainer={height => setHeightAccordion(height)}
+              setStepData={setStepData}
             />
           </EuiAccordion>
         </ResizeEuiPanel>
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiAccordion
-            initialIsOpen={false}
-            id={RuleStep.aboutRule}
-            buttonContent={aboutRuleButton}
-            paddingSize="xs"
             ref={aboutRuleRef}
-            onToggle={manageAccordions.bind(null, RuleStep.aboutRule)}
+            buttonContent={aboutRuleButton}
             extraAction={
               stepsData.current[RuleStep.aboutRule].isValid && (
                 <EuiButtonEmpty
@@ -235,11 +231,15 @@ export const CreateRuleComponent = React.memo(() => {
                 </EuiButtonEmpty>
               )
             }
+            id={RuleStep.aboutRule}
+            initialIsOpen={false}
+            paddingSize="xs"
+            onToggle={manageAccordions.bind(null, RuleStep.aboutRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepAboutRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               setStepData={setStepData}
             />
           </EuiAccordion>
@@ -247,12 +247,8 @@ export const CreateRuleComponent = React.memo(() => {
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiAccordion
-            initialIsOpen={false}
-            id={RuleStep.scheduleRule}
-            buttonContent={scheduleRuleButton}
-            paddingSize="xs"
             ref={scheduleRuleRef}
-            onToggle={manageAccordions.bind(null, RuleStep.scheduleRule)}
+            buttonContent={scheduleRuleButton}
             extraAction={
               stepsData.current[RuleStep.scheduleRule].isValid && (
                 <EuiButtonEmpty
@@ -264,11 +260,15 @@ export const CreateRuleComponent = React.memo(() => {
                 </EuiButtonEmpty>
               )
             }
+            id={RuleStep.scheduleRule}
+            initialIsOpen={false}
+            paddingSize="xs"
+            onToggle={manageAccordions.bind(null, RuleStep.scheduleRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepScheduleRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               setStepData={setStepData}
             />
           </EuiAccordion>

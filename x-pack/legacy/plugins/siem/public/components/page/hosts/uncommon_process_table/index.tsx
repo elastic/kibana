@@ -136,8 +136,8 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         totalCount={fakeTotalCount}
-        updateLimitPagination={updateLimitPagination}
         updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }

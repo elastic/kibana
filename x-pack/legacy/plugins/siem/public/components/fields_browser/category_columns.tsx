@@ -78,6 +78,7 @@ const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateC
         <EuiIcon
           aria-label={i18n.VIEW_CATEGORY(categoryId)}
           color="text"
+          type="visTable"
           onClick={() => {
             onUpdateColumns(
               getColumnsWithTimestamp({
@@ -86,7 +87,6 @@ const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateC
               })
             );
           }}
-          type="visTable"
         />
       ) : (
         <LoadingSpinner size="m" />
@@ -139,8 +139,8 @@ export const getCategoryColumns = ({
                     >
                       <EuiFlexItem grow={false}>
                         <ToolTip
-                          categoryId={categoryId}
                           browserFields={browserFields}
+                          categoryId={categoryId}
                           onUpdateColumns={onUpdateColumns}
                         />
                       </EuiFlexItem>
@@ -162,7 +162,7 @@ export const getCategoryColumns = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <CountBadge data-test-subj={`${categoryId}-category-count`} color="hollow">
+              <CountBadge color="hollow" data-test-subj={`${categoryId}-category-count`}>
                 {getFieldCount(filteredBrowserFields[categoryId])}
               </CountBadge>
             </EuiFlexItem>

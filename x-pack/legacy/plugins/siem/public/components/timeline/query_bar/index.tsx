@@ -279,20 +279,20 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     return (
       <QueryBar
+        dataTestSubj={'timelineQueryInput'}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
+        filterManager={filterManager}
+        filterQuery={filterQueryConverted}
+        filters={queryBarFilters}
         hideSavedQuery={kqlMode === 'search'}
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
-        filterQuery={filterQueryConverted}
-        filterManager={filterManager}
-        filters={queryBarFilters}
-        onChangedQuery={onChangedQuery}
-        onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
+        onChangedQuery={onChangedQuery}
         onSavedQuery={onSavedQuery}
-        dataTestSubj={'timelineQueryInput'}
+        onSubmitQuery={onSubmitQuery}
       />
     );
   }

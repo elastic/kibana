@@ -52,16 +52,16 @@ describe('body', () => {
         <TestProviders>
           <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
             <HostDetailsTabs
-              from={0}
-              isInitializing={false}
               detailName={'host-1'}
-              setQuery={jest.fn()}
-              to={0}
-              setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
+              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
+              from={0}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}
+              isInitializing={false}
+              setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
+              setQuery={jest.fn()}
+              to={0}
               type={type}
-              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
             />
           </MemoryRouter>
         </TestProviders>

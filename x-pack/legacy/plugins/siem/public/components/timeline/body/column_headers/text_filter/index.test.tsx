@@ -27,7 +27,7 @@ describe('TextFilter', () => {
       test('it renders the default placeholder when no filter is specified, a placeholder is provided', () => {
         const placeholder = 'Make a jazz noise here';
         const wrapper = mount(
-          <TextFilter columnId="foo" placeholder={placeholder} minWidth={100} />
+          <TextFilter columnId="foo" minWidth={100} placeholder={placeholder} />
         );
 
         expect(wrapper.find(`input[placeholder="${placeholder}"]`).exists()).toEqual(true);

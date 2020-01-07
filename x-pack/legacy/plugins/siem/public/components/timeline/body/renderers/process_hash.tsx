@@ -37,7 +37,7 @@ export const ProcessHash = React.memo<Props>(
     return (
       <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
         {!isNillEmptyOrNotFinite(processHashSha256) && (
-          <TokensFlexItem grow={false} component="div">
+          <TokensFlexItem component="div" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
@@ -49,7 +49,7 @@ export const ProcessHash = React.memo<Props>(
         )}
 
         {!isNillEmptyOrNotFinite(processHashSha1) && (
-          <TokensFlexItem grow={false} component="div">
+          <TokensFlexItem component="div" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
@@ -61,7 +61,7 @@ export const ProcessHash = React.memo<Props>(
         )}
 
         {!isNillEmptyOrNotFinite(processHashMd5) && (
-          <TokensFlexItem grow={false} component="div">
+          <TokensFlexItem component="div" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}

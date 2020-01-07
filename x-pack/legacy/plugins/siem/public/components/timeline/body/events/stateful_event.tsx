@@ -198,28 +198,28 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   return (
     <VisibilitySensor
+      offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
       partialVisibility={true}
       scrollCheck={true}
-      offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
         if (isVisible) {
           return (
             <TimelineDetailsQuery
-              sourceId="default"
-              indexName={event._index!}
               eventId={event._id}
               executeQuery={!!expanded[event._id]}
+              indexName={event._index!}
+              sourceId="default"
             >
               {({ detailsData, loading }) => (
                 <EventsTrGroup
-                  className={STATEFUL_EVENT_CSS_CLASS_NAME}
-                  data-test-subj="event"
                   ref={c => {
                     if (c != null) {
                       divElement.current = c;
                     }
                   }}
+                  className={STATEFUL_EVENT_CSS_CLASS_NAME}
+                  data-test-subj="event"
                 >
                   {getRowRenderer(event.ecs, rowRenderers).renderRow({
                     browserFields,
@@ -240,17 +240,17 @@ const StatefulEventComponent: React.FC<Props> = ({
                         isEventViewer={isEventViewer}
                         loading={loading}
                         loadingEventIds={loadingEventIds}
+                        selectedEventIds={selectedEventIds}
+                        showCheckboxes={showCheckboxes}
+                        showNotes={!!showNotes[event._id]}
+                        timelineId={timelineId}
+                        updateNote={updateNote}
                         onColumnResized={onColumnResized}
                         onPinEvent={onPinEvent}
                         onRowSelected={onRowSelected}
                         onToggleExpanded={onToggleExpanded}
                         onToggleShowNotes={onToggleShowNotes}
                         onUnPinEvent={onUnPinEvent}
-                        selectedEventIds={selectedEventIds}
-                        showCheckboxes={showCheckboxes}
-                        showNotes={!!showNotes[event._id]}
-                        timelineId={timelineId}
-                        updateNote={updateNote}
                       />
                     ),
                     timelineId,
@@ -263,9 +263,9 @@ const StatefulEventComponent: React.FC<Props> = ({
                       event={detailsData || emptyDetails}
                       forceExpand={!!expanded[event._id] && !loading}
                       id={event._id}
-                      onUpdateColumns={onUpdateColumns}
                       timelineId={timelineId}
                       toggleColumn={toggleColumn}
+                      onUpdateColumns={onUpdateColumns}
                     />
                   </Attributes>
                 </EventsTrGroup>

@@ -75,7 +75,6 @@ export const FieldsPane = React.memo<Props>(
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
-          filteredBrowserFields={filteredBrowserFields}
           fieldItems={getFieldItems({
             browserFields: filteredBrowserFields,
             category: filteredBrowserFields[selectedCategoryId],
@@ -86,9 +85,10 @@ export const FieldsPane = React.memo<Props>(
             timelineId,
             toggleColumn,
           })}
+          filteredBrowserFields={filteredBrowserFields}
+          timelineId={timelineId}
           width={width}
           onCategorySelected={onCategorySelected}
-          timelineId={timelineId}
         />
       ) : (
         <NoFieldsPanel>

@@ -82,11 +82,11 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
     <>
       {toasts.length > 0 && !isShowing && (
         <EuiGlobalToastList
-          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
           dismissToast={({ id }) => {
             dispatch({ type: 'deleteToaster', id });
           }}
           toastLifeTimeMs={toastLifeTimeMs}
+          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
         />
       )}
       {toastInModal != null && (
@@ -104,9 +104,9 @@ const formatToErrorToastIfNeeded = (
     toast.text = (
       <ErrorToastContainer>
         <EuiButton
+          color="danger"
           data-test-subj="toaster-show-all-error-modal"
           size="s"
-          color="danger"
           onClick={() => toast != null && toggle(toast)}
         >
           {i18n.SEE_ALL_ERRORS}

@@ -13,7 +13,7 @@ import { Loader } from './index';
 describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
-      <Loader overlay overlayBackground="#fff" size="xl">
+      <Loader overlayBackground="#fff" size="xl" overlay>
         {'Loading'}
       </Loader>
     );

@@ -34,8 +34,8 @@ describe('Toaster', () => {
             />
             {toasts.map(toast => (
               <span
-                data-test-subj={`add-toaster-${toast.id}`}
                 key={`add-toaster-${toast.id}`}
+                data-test-subj={`add-toaster-${toast.id}`}
               >{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
@@ -66,8 +66,8 @@ describe('Toaster', () => {
             />
             {toasts.map(toast => (
               <span
-                data-test-subj={`delete-toaster-${toast.id}`}
                 key={`delete-toaster-${toast.id}`}
+                data-test-subj={`delete-toaster-${toast.id}`}
               >{`${toast.title} ${toast.text}`}</span>
             ))}
           </>

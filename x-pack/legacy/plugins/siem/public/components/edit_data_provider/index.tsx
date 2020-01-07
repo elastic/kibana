@@ -158,12 +158,12 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     <EuiComboBox
                       data-test-subj="field"
                       isClearable={false}
-                      onChange={onFieldSelected}
                       options={getCategorizedFieldNames(browserFields)}
                       placeholder={i18n.FIELD_PLACEHOLDER}
                       selectedOptions={updatedField}
                       singleSelection={{ asPlainText: true }}
                       style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
+                      onChange={onFieldSelected}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -174,12 +174,12 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   <EuiComboBox
                     data-test-subj="operator"
                     isClearable={false}
-                    onChange={onOperatorSelected}
                     options={operatorLabels}
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={updatedOperator}
                     singleSelection={{ asPlainText: true }}
                     style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                    onChange={onOperatorSelected}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -198,9 +198,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
                 <EuiFieldText
                   className={VALUE_INPUT_CLASS_NAME}
                   data-test-subj="value"
-                  onChange={onValueChange}
                   placeholder={i18n.VALUE}
                   value={sanatizeValue(updatedValue)}
+                  onChange={onValueChange}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -211,10 +211,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  autoFocus
                   className={SAVE_CLASS_NAME}
                   color="primary"
                   data-test-subj="save"
@@ -226,6 +225,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       selectedOperator: updatedOperator,
                     })
                   }
+                  size="s"
+                  autoFocus
                   onClick={() => {
                     onDataProviderEdited({
                       andProviderId,
@@ -237,7 +238,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       value: updatedValue,
                     });
                   }}
-                  size="s"
                 >
                   {i18n.SAVE}
                 </EuiButton>

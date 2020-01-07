@@ -47,8 +47,8 @@ const HeaderComp = React.memo<HeaderCompProps>(
           >
             <TruncatableText data-test-subj={`header-text-${header.id}`}>
               <EuiToolTip
-                data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
+                data-test-subj="header-tooltip"
               >
                 <>{header.label ?? header.id}</>
               </EuiToolTip>
@@ -63,8 +63,8 @@ const HeaderComp = React.memo<HeaderCompProps>(
           <EventsHeadingTitleSpan>
             <TruncatableText data-test-subj={`header-text-${header.id}`}>
               <EuiToolTip
-                data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
+                data-test-subj="header-tooltip"
               >
                 <>{header.label ?? header.id}</>
               </EuiToolTip>
@@ -118,8 +118,8 @@ export const HeaderComponent = ({
     setIsResizing(isResizing);
     return (
       <>
-        <HeaderComp header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
-          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+        <HeaderComp header={header} isResizing={isResizing} sort={sort} onClick={onClick}>
+          <Actions header={header} sort={sort} onColumnRemoved={onColumnRemoved} />
         </HeaderComp>
 
         <Filter header={header} onFilterChange={onFilterChange} />
@@ -132,11 +132,11 @@ export const HeaderComponent = ({
       bottom={0}
       handle={<EventsHeadingHandle />}
       id={header.id}
-      onResize={onResize}
-      positionAbsolute
       render={renderActions}
       right="-1px"
       top={0}
+      positionAbsolute
+      onResize={onResize}
     />
   );
 };

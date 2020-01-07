@@ -25,15 +25,15 @@ describe('DataProviders', () => {
       const wrapper = shallow(
         <DataProviders
           browserFields={{}}
-          id="foo"
           dataProviders={mockDataProviders}
+          id="foo"
+          show={true}
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
           onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
-          show={true}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -46,15 +46,15 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
             dataProviders={dataProviders}
+            id="foo"
+            show={true}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );
@@ -67,15 +67,15 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
             dataProviders={mockDataProviders}
+            id="foo"
+            show={true}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );
@@ -88,15 +88,15 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
             dataProviders={mockDataProviders}
+            id="foo"
+            show={true}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );

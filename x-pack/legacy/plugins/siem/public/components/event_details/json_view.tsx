@@ -25,7 +25,6 @@ JsonEditor.displayName = 'JsonEditor';
 export const JsonView = React.memo<Props>(({ data }) => (
   <JsonEditor data-test-subj="jsonView">
     <EuiCodeEditor
-      isReadOnly
       mode="javascript"
       setOptions={{ fontSize: '12px' }}
       value={JSON.stringify(
@@ -34,6 +33,7 @@ export const JsonView = React.memo<Props>(({ data }) => (
         2 // indent level
       )}
       width="100%"
+      isReadOnly
     />
   </JsonEditor>
 ));

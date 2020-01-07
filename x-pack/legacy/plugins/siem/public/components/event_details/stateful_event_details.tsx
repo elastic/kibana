@@ -34,11 +34,11 @@ export const StatefulEventDetails = React.memo<Props>(
         columnHeaders={columnHeaders}
         data={data}
         id={id}
-        onUpdateColumns={onUpdateColumns}
-        onViewSelected={handleSetView}
         timelineId={timelineId}
         toggleColumn={toggleColumn}
         view={view}
+        onUpdateColumns={onUpdateColumns}
+        onViewSelected={handleSetView}
       />
     );
   }

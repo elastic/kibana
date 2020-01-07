@@ -22,25 +22,25 @@ export const Package = React.memo<Props>(
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (
         <>
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.name"
-              value={packageName}
               iconType="document"
+              value={packageName}
             />
           </TokensFlexItem>
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.version"
-              value={packageVersion}
               iconType="document"
+              value={packageVersion}
             />
           </TokensFlexItem>
-          <TokensFlexItem grow={false} component="span">
+          <TokensFlexItem component="span" grow={false}>
             <DraggableBadge
               contextId={contextId}
               eventId={eventId}

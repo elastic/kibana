@@ -43,16 +43,14 @@ export const EmptyPage = React.memo<EmptyPageProps>(
     ...rest
   }) => (
     <EmptyPrompt
-      title={<h2>{title}</h2>}
-      body={message && <p>{message}</p>}
       actions={
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiButton
-              fill
               href={actionPrimaryUrl}
               iconType={actionPrimaryIcon}
               target={actionPrimaryTarget}
+              fill
             >
               {actionPrimaryLabel}
             </EuiButton>
@@ -71,6 +69,8 @@ export const EmptyPage = React.memo<EmptyPageProps>(
           )}
         </EuiFlexGroup>
       }
+      body={message && <p>{message}</p>}
+      title={<h2>{title}</h2>}
       {...rest}
     />
   )

@@ -48,18 +48,18 @@ export const Network = React.memo<{
   protocol?: string[] | null;
   transport?: string[] | null;
 }>(({ bytes, communityId, contextId, direction, eventId, packets, protocol, transport }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
+  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
     {direction != null
       ? uniq(direction).map(dir => (
-          <EuiFlexItemMarginRight grow={false} key={dir}>
-            <DirectionBadge contextId={contextId} eventId={eventId} direction={dir} />
+          <EuiFlexItemMarginRight key={dir} grow={false}>
+            <DirectionBadge contextId={contextId} direction={dir} eventId={eventId} />
           </EuiFlexItemMarginRight>
         ))
       : null}
 
     {protocol != null
       ? uniq(protocol).map(proto => (
-          <EuiFlexItemMarginRight grow={false} key={proto}>
+          <EuiFlexItemMarginRight key={proto} grow={false}>
             <DraggableBadge
               contextId={contextId}
               data-test-subj="network-protocol"
@@ -74,7 +74,7 @@ export const Network = React.memo<{
     {bytes != null
       ? uniq(bytes).map(b =>
           !isNaN(Number(b)) ? (
-            <EuiFlexItemMarginRight grow={false} key={b}>
+            <EuiFlexItemMarginRight key={b} grow={false}>
               <DefaultDraggable
                 field={NETWORK_BYTES_FIELD_NAME}
                 id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
@@ -93,7 +93,7 @@ export const Network = React.memo<{
 
     {packets != null
       ? uniq(packets).map(p => (
-          <EuiFlexItemMarginRight grow={false} key={p}>
+          <EuiFlexItemMarginRight key={p} grow={false}>
             <DefaultDraggable
               field={NETWORK_PACKETS_FIELD_NAME}
               id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
@@ -109,7 +109,7 @@ export const Network = React.memo<{
 
     {transport != null
       ? uniq(transport).map(trans => (
-          <EuiFlexItemMarginRight grow={false} key={trans}>
+          <EuiFlexItemMarginRight key={trans} grow={false}>
             <DraggableBadge
               contextId={contextId}
               data-test-subj="network-transport"
@@ -123,7 +123,7 @@ export const Network = React.memo<{
 
     {communityId != null
       ? uniq(communityId).map(trans => (
-          <EuiFlexItem grow={false} key={trans}>
+          <EuiFlexItem key={trans} grow={false}>
             <DraggableBadge
               contextId={contextId}
               data-test-subj="network-community-id"

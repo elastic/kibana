@@ -185,8 +185,8 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   return (
     <EuiOutsideClickDetector
       data-test-subj="outside-click-detector"
-      onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
       isDisabled={false}
+      onOutsideClick={onFieldSelected != null ? noop : onOutsideClick}
     >
       <FieldsBrowserContainer data-test-subj="fields-browser-container" width={width}>
         <Header
@@ -194,11 +194,11 @@ const FieldsBrowserComponent: React.FC<Props> = ({
           filteredBrowserFields={filteredBrowserFields}
           isEventViewer={isEventViewer}
           isSearching={isSearching}
+          searchInput={searchInput}
+          timelineId={timelineId}
           onOutsideClick={onOutsideClick}
           onSearchInputChange={onInputChange}
           onUpdateColumns={onUpdateColumns}
-          searchInput={searchInput}
-          timelineId={timelineId}
         />
 
         <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
@@ -207,11 +207,11 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               browserFields={browserFields}
               data-test-subj="left-categories-pane"
               filteredBrowserFields={filteredBrowserFields}
+              selectedCategoryId={selectedCategoryId}
+              timelineId={timelineId}
               width={CATEGORY_PANE_WIDTH}
               onCategorySelected={onCategorySelected}
               onUpdateColumns={onUpdateColumns}
-              selectedCategoryId={selectedCategoryId}
-              timelineId={timelineId}
             />
           </EuiFlexItem>
 
@@ -220,14 +220,14 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               columnHeaders={columnHeaders}
               data-test-subj="fields-pane"
               filteredBrowserFields={filteredBrowserFields}
-              onCategorySelected={onCategorySelected}
-              onFieldSelected={selectFieldAndHide}
-              onUpdateColumns={onUpdateColumns}
               searchInput={searchInput}
               selectedCategoryId={selectedCategoryId}
               timelineId={timelineId}
               toggleColumn={toggleColumn}
               width={FIELDS_PANE_WIDTH}
+              onCategorySelected={onCategorySelected}
+              onFieldSelected={selectFieldAndHide}
+              onUpdateColumns={onUpdateColumns}
             />
           </EuiFlexItem>
         </PanesFlexGroup>

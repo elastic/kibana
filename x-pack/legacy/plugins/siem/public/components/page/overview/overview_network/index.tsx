@@ -45,26 +45,26 @@ export const OverviewNetwork = React.memo<OwnProps>(({ endDate, startDate, setQu
     <EuiFlexItem>
       <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <HeaderSection
-          border
           id={OverviewNetworkQueryId}
           showInspect={isHover}
           subtitle={
             <FormattedMessage
-              id="xpack.siem.overview.networkSubtitle"
               defaultMessage="Showing: Last 24 hours"
+              id="xpack.siem.overview.networkSubtitle"
             />
           }
           title={
             <FormattedMessage
-              id="xpack.siem.overview.networkTitle"
               defaultMessage="Network events"
+              id="xpack.siem.overview.networkTitle"
             />
           }
+          border
         >
           <EuiButton href={getNetworkUrl()}>
             <FormattedMessage
-              id="xpack.siem.overview.networkAction"
               defaultMessage="View network"
+              id="xpack.siem.overview.networkAction"
             />
           </EuiButton>
         </HeaderSection>
@@ -72,12 +72,12 @@ export const OverviewNetwork = React.memo<OwnProps>(({ endDate, startDate, setQu
         <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewNetwork, loading, id, inspect, refetch }) => (
             <OverviewNetworkStatsManage
-              loading={loading}
               data={overviewNetwork}
               id={id}
               inspect={inspect}
-              setQuery={setQuery}
+              loading={loading}
               refetch={refetch}
+              setQuery={setQuery}
             />
           )}
         </OverviewNetworkQuery>

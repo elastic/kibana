@@ -62,9 +62,9 @@ const getJobsTableColumns = (
   {
     name: i18n.COLUMN_GROUPS,
     render: ({ groups }: SiemJob) => (
-      <EuiFlexGroup wrap responsive={true} gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" responsive={true} wrap>
         {groups.map(group => (
-          <EuiFlexItem grow={false} key={group}>
+          <EuiFlexItem key={group} grow={false}>
             <EuiBadge color={'hollow'}>{group}</EuiBadge>
           </EuiFlexItem>
         ))}
@@ -77,9 +77,9 @@ const getJobsTableColumns = (
     name: i18n.COLUMN_RUN_JOB,
     render: (job: SiemJob) =>
       job.isCompatible ? (
-        <JobSwitch job={job} isSiemJobsLoading={isLoading} onJobStateChange={onJobStateChange} />
+        <JobSwitch isSiemJobsLoading={isLoading} job={job} onJobStateChange={onJobStateChange} />
       ) : (
-        <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
+        <EuiIcon aria-label="Warning" color="warning" size="s" type="alert" />
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
@@ -112,9 +112,9 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
 
   return (
     <EuiBasicTable
-      data-test-subj="jobs-table"
-      compressed={true}
       columns={getJobsTableColumns(isLoading, onJobStateChange)}
+      compressed={true}
+      data-test-subj="jobs-table"
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
       noItemsMessage={<NoItemsMessage />}
@@ -135,19 +135,19 @@ JobsTable.displayName = 'JobsTable';
 
 export const NoItemsMessage = React.memo(() => (
   <EuiEmptyPrompt
-    title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
-    titleSize="xs"
     actions={
       <EuiButton
         href="ml#/jobs/new_job/step/index_or_search"
-        iconType="popout"
         iconSide="right"
+        iconType="popout"
         size="s"
         target="_blank"
       >
         {i18n.CREATE_CUSTOM_JOB}
       </EuiButton>
     }
+    title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
+    titleSize="xs"
   />
 ));
 

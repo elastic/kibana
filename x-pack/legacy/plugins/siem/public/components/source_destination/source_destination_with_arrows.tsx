@@ -41,23 +41,23 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
     sourceIp,
     sourcePort,
   }) => (
-    <EuiFlexGroup justifyContent="center" gutterSize="none">
+    <EuiFlexGroup gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
           contextId={contextId}
-          destinationGeoContinentName={destinationGeoContinentName}
-          destinationGeoCountryName={destinationGeoCountryName}
-          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
-          destinationGeoRegionName={destinationGeoRegionName}
           destinationGeoCityName={destinationGeoCityName}
+          destinationGeoContinentName={destinationGeoContinentName}
+          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
+          destinationGeoCountryName={destinationGeoCountryName}
+          destinationGeoRegionName={destinationGeoRegionName}
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          sourceGeoContinentName={sourceGeoContinentName}
-          sourceGeoCountryName={sourceGeoCountryName}
-          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
-          sourceGeoRegionName={sourceGeoRegionName}
           sourceGeoCityName={sourceGeoCityName}
+          sourceGeoContinentName={sourceGeoContinentName}
+          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
+          sourceGeoCountryName={sourceGeoCountryName}
+          sourceGeoRegionName={sourceGeoRegionName}
           sourceIp={sourceIp}
           sourcePort={sourcePort}
           type="source"
@@ -76,19 +76,19 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
           contextId={contextId}
-          destinationGeoContinentName={destinationGeoContinentName}
-          destinationGeoCountryName={destinationGeoCountryName}
-          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
-          destinationGeoRegionName={destinationGeoRegionName}
           destinationGeoCityName={destinationGeoCityName}
+          destinationGeoContinentName={destinationGeoContinentName}
+          destinationGeoCountryIsoCode={destinationGeoCountryIsoCode}
+          destinationGeoCountryName={destinationGeoCountryName}
+          destinationGeoRegionName={destinationGeoRegionName}
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          sourceGeoContinentName={sourceGeoContinentName}
-          sourceGeoCountryName={sourceGeoCountryName}
-          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
-          sourceGeoRegionName={sourceGeoRegionName}
           sourceGeoCityName={sourceGeoCityName}
+          sourceGeoContinentName={sourceGeoContinentName}
+          sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
+          sourceGeoCountryName={sourceGeoCountryName}
+          sourceGeoRegionName={sourceGeoRegionName}
           sourceIp={sourceIp}
           sourcePort={sourcePort}
           type="destination"

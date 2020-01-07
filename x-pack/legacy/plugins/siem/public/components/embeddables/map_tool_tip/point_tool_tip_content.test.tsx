@@ -43,9 +43,9 @@ describe('PointToolTipContent', () => {
     const wrapper = shallow(
       <TestProviders>
         <PointToolTipContentComponent
+          closeTooltip={closeTooltip}
           contextId={'contextId'}
           featureProps={mockFeatureProps}
-          closeTooltip={closeTooltip}
         />
       </TestProviders>
     );
@@ -58,9 +58,9 @@ describe('PointToolTipContent', () => {
     const wrapper = mount(
       <TestProviders>
         <PointToolTipContentComponent
+          closeTooltip={closeTooltip}
           contextId={'contextId'}
           featureProps={mockFeaturePropsArrayValue}
-          closeTooltip={closeTooltip}
         />
       </TestProviders>
     );

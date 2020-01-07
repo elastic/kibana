@@ -111,11 +111,11 @@ class HostsComponentQuery extends QueryTemplatePaginated<
     };
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
-        query={HostsTableQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        variables={variables}
+        query={HostsTableQuery}
         skip={skip}
+        variables={variables}
+        notifyOnNetworkStatusChange
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
           this.setFetchMore(fetchMore);

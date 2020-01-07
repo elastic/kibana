@@ -19,20 +19,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={true}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -47,20 +47,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -75,20 +75,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -105,20 +105,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={onEventToggled}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={onEventToggled}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -140,21 +140,21 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           isEventViewer={true}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={toggleShowNotes}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -171,20 +171,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={toggleShowNotes}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -206,21 +206,21 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           isEventViewer={true}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -237,20 +237,20 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
-          expanded={false}
           eventId="abc"
           eventIsPinned={false}
+          expanded={false}
           getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
           noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
-          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          onRowSelected={jest.fn()}
         />
       </TestProviders>
     );

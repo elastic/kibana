@@ -20,10 +20,10 @@ describe('TitleRow', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           selectedTimelinesCount={0}
           title={title}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -41,10 +41,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={0}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -60,7 +60,7 @@ describe('TitleRow', () => {
     test('it does NOT render the Favorite Selected button when onAddTimelinesToFavorites is NOT provided', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TitleRow onDeleteSelected={jest.fn()} selectedTimelinesCount={0} title={title} />
+          <TitleRow selectedTimelinesCount={0} title={title} onDeleteSelected={jest.fn()} />
         </ThemeProvider>
       );
 
@@ -76,10 +76,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={0}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -96,10 +96,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={3}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -118,10 +118,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={3}
             title={title}
+            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -140,10 +140,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={0}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -160,9 +160,9 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
             selectedTimelinesCount={0}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -179,10 +179,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={0}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -199,10 +199,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={jest.fn()}
             selectedTimelinesCount={1}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -221,10 +221,10 @@ describe('TitleRow', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TitleRow
-            onAddTimelinesToFavorites={jest.fn()}
-            onDeleteSelected={onDeleteSelected}
             selectedTimelinesCount={1}
             title={title}
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={onDeleteSelected}
           />
         </ThemeProvider>
       );

@@ -23,10 +23,10 @@ describe('SystemGenericFileDetails', () => {
       const browserFields: BrowserFields = {};
       const wrapper = shallow(
         <SystemGenericFileDetails
-          contextId="[contextid-123]"
-          text="[generic-text-123]"
           browserFields={browserFields}
+          contextId="[contextid-123]"
           data={mockTimelineData[29].ecs}
+          text="[generic-text-123]"
           timelineId="test"
         />
       );
@@ -37,10 +37,10 @@ describe('SystemGenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <SystemGenericFileDetails
-            contextId="[contextid-123]"
-            text="[generic-text-123]"
             browserFields={mockBrowserFields}
+            contextId="[contextid-123]"
             data={mockTimelineData[29].ecs}
+            text="[generic-text-123]"
             timelineId="test"
           />
         </TestProviders>
@@ -57,7 +57,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
-              id="[id-123]"
+              args={['[arg-1]', '[arg-2]', '[arg-3]']}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName="[endgameFileName-123]"
@@ -69,10 +69,9 @@ describe('SystemGenericFileDetails', () => {
               fileName="[fileName-123]"
               filePath="[filePath-123]"
               hostName="[hostname-123]"
+              id="[id-123]"
               message="[message-123]"
               outcome="[outcome-123]"
-              processTitle="[some-title-123]"
-              args={['[arg-1]', '[arg-2]', '[arg-3]']}
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
@@ -80,9 +79,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle="[some-title-123]"
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -104,6 +104,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -125,13 +126,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
-              processTitle={null}
-              args={null}
               sshSignature={null}
               text={null}
               userDomain={null}
@@ -149,6 +149,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -170,9 +171,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -180,8 +182,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -194,6 +194,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -215,9 +216,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -225,8 +227,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -239,6 +239,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -260,9 +261,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -270,8 +272,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -286,6 +286,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -307,9 +308,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -317,8 +319,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -333,6 +333,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -354,9 +355,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -364,8 +366,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -380,6 +380,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -401,9 +402,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -411,8 +413,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -427,6 +427,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -448,9 +449,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={null}
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -458,8 +460,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -474,6 +474,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -495,9 +496,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1={null}
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -505,8 +507,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -521,6 +521,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -542,9 +543,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256={null}
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -552,8 +554,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -568,6 +568,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -589,9 +590,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName={null}
               processPid={null}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -599,8 +601,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -615,6 +615,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -636,9 +637,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName={null}
               processPid={123}
               processPpid={null}
-              processName={null}
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -646,8 +648,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -662,6 +662,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -683,9 +684,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod={null}
               sshSignature={null}
@@ -693,8 +695,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -709,6 +709,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -730,9 +731,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature={null}
@@ -740,8 +742,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -756,6 +756,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -777,9 +778,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -787,8 +789,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -803,6 +803,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -824,9 +825,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -834,8 +836,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -850,6 +850,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -871,9 +872,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -881,8 +883,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName={null}
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -897,6 +897,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -918,9 +919,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -928,8 +930,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory={null}
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -944,6 +944,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -965,9 +966,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle={null}
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -975,8 +977,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
-              processTitle={null}
-              args={null}
             />
           </div>
         </TestProviders>
@@ -991,6 +991,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={null}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1012,9 +1013,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle="[process-title-123]"
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -1022,8 +1024,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
-              processTitle="[process-title-123]"
-              args={null}
             />
           </div>
         </TestProviders>
@@ -1038,6 +1038,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={['[arg-1]', '[arg-2]', '[arg-3]']}
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1059,9 +1060,10 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5="[processHashMd5-123]"
               processHashSha1="[processHashSha1-123]"
               processHashSha256="[processHashSha256-123]"
+              processName="[processName-123]"
               processPid={123}
               processPpid={456}
-              processName="[processName-123]"
+              processTitle="[process-title-123]"
               showMessage={true}
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
@@ -1069,8 +1071,6 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
-              processTitle="[process-title-123]"
-              args={['[arg-1]', '[arg-2]', '[arg-3]']}
             />
           </div>
         </TestProviders>
@@ -1085,6 +1085,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName="[endgameFileName]"
@@ -1106,13 +1107,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1130,6 +1130,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName="[endgameFileName]"
@@ -1151,13 +1152,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1177,6 +1177,7 @@ describe('SystemGenericFileDetails', () => {
           <TestProviders>
             <div>
               <SystemGenericFileLine
+                args={undefined}
                 contextId="[context-123]"
                 endgameExitCode={undefined}
                 endgameFileName={undefined}
@@ -1198,13 +1199,12 @@ describe('SystemGenericFileDetails', () => {
                 processHashMd5={undefined}
                 processHashSha1={undefined}
                 processHashSha256={undefined}
+                processName={undefined}
                 processPid={undefined}
                 processPpid={undefined}
-                processName={undefined}
+                processTitle={undefined}
                 showMessage={true}
                 sshMethod={undefined}
-                processTitle={undefined}
-                args={undefined}
                 sshSignature={undefined}
                 text={undefined}
                 userDomain={undefined}
@@ -1226,6 +1226,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1247,13 +1248,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1274,6 +1274,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1295,13 +1296,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={456}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1324,6 +1324,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1345,13 +1346,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={456}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1372,6 +1372,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1393,13 +1394,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={456}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1418,6 +1418,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1439,13 +1440,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1464,6 +1464,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1485,13 +1486,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={false}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1510,6 +1510,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1531,13 +1532,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName={undefined}
               processPid={undefined}
               processPpid={undefined}
-              processName={undefined}
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}
@@ -1556,6 +1556,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              args={undefined}
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1577,13 +1578,12 @@ describe('SystemGenericFileDetails', () => {
               processHashMd5={undefined}
               processHashSha1={undefined}
               processHashSha256={undefined}
+              processName="[processName]"
               processPid={123}
               processPpid={undefined}
-              processName="[processName]"
+              processTitle={undefined}
               showMessage={true}
               sshMethod={undefined}
-              processTitle={undefined}
-              args={undefined}
               sshSignature={undefined}
               text={undefined}
               userDomain={undefined}

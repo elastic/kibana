@@ -71,15 +71,15 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
           <BasicTable
             // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
-            compressed
-            // @ts-ignore ...which leads to `networks` not "matching" the columns
             items={networks}
+            // @ts-ignore ...which leads to `networks` not "matching" the columns
             pagination={pagination}
             sorting={sorting}
+            compressed
           />
 
           {loading && (
-            <Loader data-test-subj="anomalies-network-table-loading-panel" overlay size="xl" />
+            <Loader data-test-subj="anomalies-network-table-loading-panel" size="xl" overlay />
           )}
         </Panel>
       );

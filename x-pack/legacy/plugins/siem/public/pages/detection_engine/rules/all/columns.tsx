@@ -147,7 +147,7 @@ export const getColumns = (
       <div>
         <>
           {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={i}>
+            <EuiBadge key={i} color="hollow">
               {tag}
             </EuiBadge>
           ))}
@@ -164,8 +164,8 @@ export const getColumns = (
     render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
         dispatch={dispatch}
-        id={item.id}
         enabled={item.activate}
+        id={item.id}
         isLoading={item.isLoading}
       />
     ),

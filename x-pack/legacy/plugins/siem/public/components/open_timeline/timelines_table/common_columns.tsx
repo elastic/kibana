@@ -39,7 +39,9 @@ export const getCommonColumns = ({
     render: ({ notes, savedObjectId }: OpenTimelineResult) =>
       notes != null && notes.length > 0 && savedObjectId != null ? (
         <EuiButtonIcon
+          aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
           data-test-subj="expand-notes"
+          iconType={itemIdToExpandedNotesRowMap[savedObjectId] ? 'arrowDown' : 'arrowRight'}
           onClick={() =>
             itemIdToExpandedNotesRowMap[savedObjectId] != null
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
@@ -48,8 +50,6 @@ export const getCommonColumns = ({
                   [savedObjectId]: <NotePreviews notes={notes} />,
                 })
           }
-          aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
-          iconType={itemIdToExpandedNotesRowMap[savedObjectId] ? 'arrowDown' : 'arrowRight'}
         />
       ) : null,
     width: ACTION_COLUMN_WIDTH,

@@ -123,31 +123,31 @@ export const PropertiesLeft = React.memo<Props>(
       <EuiFlexItem grow={1}>
         <EuiFlexGroup
           alignItems="center"
-          gutterSize="none"
           data-test-subj="timeline-date-picker-container"
+          gutterSize="none"
         >
           <LockIconContainer grow={false}>
             <EuiToolTip
-              data-test-subj="timeline-date-picker-lock-tooltip"
-              position="top"
               content={
                 isDatepickerLocked
                   ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
                   : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
               }
+              data-test-subj="timeline-date-picker-lock-tooltip"
+              position="top"
             >
               <EuiButtonIcon
-                data-test-subj={`timeline-date-picker-${
-                  isDatepickerLocked ? 'lock' : 'unlock'
-                }-button`}
-                color="primary"
-                onClick={toggleLock}
-                iconType={isDatepickerLocked ? 'lock' : 'lockOpen'}
                 aria-label={
                   isDatepickerLocked
                     ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
                     : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
                 }
+                color="primary"
+                data-test-subj={`timeline-date-picker-${
+                  isDatepickerLocked ? 'lock' : 'unlock'
+                }-button`}
+                iconType={isDatepickerLocked ? 'lock' : 'lockOpen'}
+                onClick={toggleLock}
               />
             </EuiToolTip>
           </LockIconContainer>

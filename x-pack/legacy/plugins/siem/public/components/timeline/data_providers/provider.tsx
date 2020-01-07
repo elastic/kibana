@@ -18,14 +18,14 @@ export const Provider = React.memo<OwnProps>(({ dataProvider }) => (
   <ProviderItemBadge
     deleteProvider={noop}
     field={dataProvider.queryMatch.displayField || dataProvider.queryMatch.field}
-    kqlQuery={dataProvider.kqlQuery}
     isEnabled={dataProvider.enabled}
     isExcluded={dataProvider.excluded}
-    providerId={dataProvider.id}
-    toggleExcludedProvider={noop}
-    toggleEnabledProvider={noop}
-    val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
+    kqlQuery={dataProvider.kqlQuery}
     operator={dataProvider.queryMatch.operator || IS_OPERATOR}
+    providerId={dataProvider.id}
+    toggleEnabledProvider={noop}
+    toggleExcludedProvider={noop}
+    val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
   />
 ));
 

@@ -151,7 +151,7 @@ KpiNetworkBaseComponent.displayName = 'KpiNetworkBaseComponent';
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
   ({ data, from, id, loading, to, narrowDateRange }) => {
     return loading ? (
-      <FlexGroup justifyContent="center" alignItems="center">
+      <FlexGroup alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
@@ -164,11 +164,11 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
               {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
               <KpiNetworkBaseComponent
                 data={data}
-                id={id}
                 fieldsMapping={mappingsPerLine}
                 from={from}
-                to={to}
+                id={id}
                 narrowDateRange={narrowDateRange}
+                to={to}
               />
             </React.Fragment>
           ))}
@@ -176,11 +176,11 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
         <EuiFlexItem grow={1}>
           <KpiNetworkBaseComponent
             data={data}
-            id={id}
             fieldsMapping={fieldTitleChartMapping}
             from={from}
-            to={to}
+            id={id}
             narrowDateRange={narrowDateRange}
+            to={to}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -183,14 +183,14 @@ export const getSignalsActions = ({
   {
     getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
-        data-test-subj="send-signal-to-timeline-tool-tip"
         content={i18n.ACTION_VIEW_IN_TIMELINE}
+        data-test-subj="send-signal-to-timeline-tool-tip"
       >
         <EuiButtonIcon
-          data-test-subj={'send-signal-to-timeline-tool-tip'}
-          onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
-          iconType="tableDensityNormal"
           aria-label="Next"
+          data-test-subj={'send-signal-to-timeline-tool-tip'}
+          iconType="tableDensityNormal"
+          onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
         />
       </EuiToolTip>
     ),
@@ -200,11 +200,13 @@ export const getSignalsActions = ({
   {
     getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
-        data-test-subj="update-signal-status-tool-tip"
         content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
+        data-test-subj="update-signal-status-tool-tip"
       >
         <EuiButtonIcon
+          aria-label="Next"
           data-test-subj={'update-signal-status-button'}
+          iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
           onClick={() =>
             updateSignalStatusAction({
               signalIds: [eventId],
@@ -214,8 +216,6 @@ export const getSignalsActions = ({
               kbnVersion,
             })
           }
-          iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
-          aria-label="Next"
         />
       </EuiToolTip>
     ),
