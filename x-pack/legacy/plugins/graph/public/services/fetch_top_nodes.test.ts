@@ -13,8 +13,24 @@ describe('fetch_top_nodes', () => {
   it('should build terms agg', async () => {
     const postMock = jest.fn(() => Promise.resolve({ resp: {} }));
     await fetchTopNodes(postMock as any, 'test', [
-      { color: '', hopSize: 5, icon, name: 'field1', selected: false, type: 'string' },
-      { color: '', hopSize: 5, icon, name: 'field2', selected: false, type: 'string' },
+      {
+        color: '',
+        hopSize: 5,
+        icon,
+        name: 'field1',
+        selected: false,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        color: '',
+        hopSize: 5,
+        icon,
+        name: 'field2',
+        selected: false,
+        type: 'string',
+        aggregatable: true,
+      },
     ]);
     expect(postMock).toHaveBeenCalledWith('../api/graph/searchProxy', {
       body: JSON.stringify({
@@ -65,8 +81,24 @@ describe('fetch_top_nodes', () => {
       })
     );
     const result = await fetchTopNodes(postMock as any, 'test', [
-      { color: 'red', hopSize: 5, icon, name: 'field1', selected: false, type: 'string' },
-      { color: 'blue', hopSize: 5, icon, name: 'field2', selected: false, type: 'string' },
+      {
+        color: 'red',
+        hopSize: 5,
+        icon,
+        name: 'field1',
+        selected: false,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        color: 'blue',
+        hopSize: 5,
+        icon,
+        name: 'field2',
+        selected: false,
+        type: 'string',
+        aggregatable: true,
+      },
     ]);
     expect(result.length).toEqual(4);
     expect(result[0]).toEqual({

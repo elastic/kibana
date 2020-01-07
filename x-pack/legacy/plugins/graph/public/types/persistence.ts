@@ -37,7 +37,7 @@ export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'ic
   encoderID: string;
   iconClass?: string;
 }
-export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type'> {
+export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 'aggregatable'> {
   iconClass: string;
 }
 
