@@ -262,4 +262,8 @@ export interface SearchMetadata {
    * The JSX with <strong> tag wrapping the matched string
    */
   display: JSX.Element;
+  /**
+   * The field path substring that matches the search
+   */
+  stringMatch: string | null;
 }

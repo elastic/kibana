@@ -5,7 +5,6 @@
  */
 
 import React, { useReducer, useEffect, createContext, useContext, useMemo, useRef } from 'react';
-import { EuiLink } from '@elastic/eui';
 
 import {
   reducer,
@@ -15,8 +14,8 @@ import {
   State,
   Dispatch,
 } from './reducer';
-import { Field, FieldsEditor, NormalizedField, SearchResult } from './types';
-import { normalize, deNormalize, canUseMappingsEditor, getUniqueId } from './lib';
+import { Field, FieldsEditor } from './types';
+import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
@@ -57,9 +56,9 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     defaultValue.fields,
   ]);
 
-  const { maxNestedDepth } = parsedFieldsDefaultValue;
-
-  const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
+  // const { maxNestedDepth } = parsedFieldsDefaultValue;
+  // const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
+  const canUseDefaultEditor = true;
 
   const initialState: State = {
     isValid: undefined,

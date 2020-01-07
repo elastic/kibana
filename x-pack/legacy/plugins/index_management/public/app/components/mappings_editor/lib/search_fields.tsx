@@ -25,7 +25,18 @@ interface FieldData {
 }
 
 const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
-  return b.metadata.score - a.metadata.score;
+  if (a.metadata.score > b.metadata.score) {
+    return -1;
+  } else if (b.metadata.score > a.metadata.score) {
+    return 1;
+  }
+  if (a.metadata.stringMatch === null) {
+    return 1;
+  } else if (b.metadata.stringMatch === null) {
+    return -1;
+  }
+  // With the same score, the longest match string wins.
+  return b.metadata.stringMatch.length - a.metadata.stringMatch.length;
 };
 
 const calculateScore = (metadata: Omit<SearchMetadata, 'score' | 'display'>): number => {
@@ -79,16 +90,10 @@ const getJSXdisplayFromMeta = (
       </span>
     );
   } else if (metadata.matchPath) {
-    // Execute all the regEx and sort them with the one that has the most
-    // characters match first.
-    const stringMatch = searchData.searchRegexArray
-      .map(regex => regex.exec(path))
-      .filter(Boolean)
-      .sort((a, b) => b![0].length - a![0].length)[0]![0];
-
-    const charIndex = path.toLowerCase().indexOf(stringMatch.toLowerCase());
+    const { stringMatch } = metadata;
+    const charIndex = path.toLowerCase().indexOf(stringMatch!.toLowerCase());
     const startString = path.substr(0, charIndex);
-    const endString = path.substr(charIndex + stringMatch.length);
+    const endString = path.substr(charIndex + stringMatch!.length);
     display = (
       <span>
         {startString}
@@ -106,13 +111,36 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
   const typeToCompare = type ?? term;
 
   const matchStartOfPath = fieldData.path.startsWith(term);
+  const fullyMatchPath = term === fieldData.path;
+  const matchType = fieldData.type.includes(typeToCompare);
+  const fullyMatchType = typeToCompare === fieldData.type;
+
+  let stringMatch: string | null = null;
+
+  if (fullyMatchPath) {
+    stringMatch = fieldData.path;
+  } else {
+    // Execute all the regEx and sort them with the one that has the most
+    // characters match first.
+    const arrayMatch = searchRegexArray
+      .map(regex => regex.exec(fieldData.path))
+      .filter(Boolean)
+      .sort((a, b) => b![0].length - a![0].length);
+
+    if (arrayMatch.length) {
+      stringMatch = arrayMatch[0]![0];
+    }
+  }
+
+  const matchPath = stringMatch !== null;
 
   const metadata = {
-    matchPath: searchRegexArray.some(searchRegex => searchRegex.test(fieldData.path)),
+    matchPath,
     matchStartOfPath,
-    fullyMatchPath: term === fieldData.path,
-    matchType: fieldData.type.includes(typeToCompare),
-    fullyMatchType: typeToCompare === fieldData.type,
+    fullyMatchPath,
+    matchType,
+    fullyMatchType,
+    stringMatch,
   };
 
   const score = calculateScore(metadata);
@@ -179,16 +207,18 @@ const parseSearchTerm = (term: string): SearchData => {
 
 export const searchFields = (term: string, fields: NormalizedFields['byId']): SearchResult[] => {
   const searchData = parseSearchTerm(term);
-
-  return Object.values(fields)
-    .map(field => ({
-      field,
-      metadata: getSearchMetadata(searchData, { path: field.path, type: field.source.type }),
-    }))
-    .filter(({ metadata }) => metadata.score > 0)
-    .sort(sortResult)
-    .map(({ field, metadata: { display } }) => ({
-      display,
-      field,
-    }));
+  return (
+    Object.values(fields)
+      // .filter((_, index) => index < 500)
+      .map(field => ({
+        field,
+        metadata: getSearchMetadata(searchData, { path: field.path, type: field.source.type }),
+      }))
+      .filter(({ metadata }) => metadata.score > 0)
+      .sort(sortResult)
+      .map(({ field, metadata: { display } }) => ({
+        display,
+        field,
+      }))
+  );
 };
