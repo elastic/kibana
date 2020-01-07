@@ -9,10 +9,7 @@ import { wrapError } from '../client/errors';
 import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
-import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { inspect } from 'util' // or directly;
-
 
 export const IMPORT_ROUTE = '/api/fileupload/import';
 
@@ -50,67 +47,62 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
   };
 }
 
-export const importRouteConfig = {
-  validate: {
-    body: Joi.object({
-      app: Joi.string(),
-      index: Joi.string()
-        .min(1)
-        .required(),
-      data: Joi.array()
-        .when(Joi.ref('$query.id'), {
-          is: Joi.exist(),
-          then: Joi.array()
-            .min(1)
-            .required(),
-        })
-        .default([]),
-      fileType: Joi.string().required(),
-      ingestPipeline: Joi.object().default({}),
-      settings: Joi.object()
-        .when(Joi.ref('$query.id'), {
-          is: null,
-          then: Joi.required(),
-        })
-        .default({}),
-      mappings: Joi.object().when(Joi.ref('$query.id'), {
-        is: null,
-        then: Joi.required(),
-      }),
-    }).required(),
-  },
+const validateBodySchema = (data, idRef) => {
+  const idExists = schema.string({ validate: value => !!value ? undefined : 'No id'});
+  const bodySchema = schema.object({
+      app: schema.maybe(schema.string()),
+      index: schema.string(),
+      data: schema.conditional(
+        idRef,
+        idExists,
+        schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 }),
+        schema.any(),
+      ),
+      fileType: schema.string(),
+      ingestPipeline: schema.maybe(schema.object(
+        {},
+        {
+          defaultValue: {},
+          allowUnknowns: true
+        }
+      )),
+      settings: schema.conditional(
+        idRef,
+        idExists,
+        schema.any(),
+        schema.object({}, { allowUnknowns: true }),
+      ),
+      mappings: schema.conditional(
+        idRef,
+        idExists,
+        schema.any(),
+        schema.object({}, { allowUnknowns: true }),
+      ),
+    },
+    { allowUnknowns: true }
+  );
+  return bodySchema.validate(data);
 };
 
 export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
   router.post({
-    path: `${IMPORT_ROUTE}{id?}`,
-    validate: {
-      params: schema.maybe(schema.object({id: schema.string()})),
-      body: schema.object({
-          app: schema.maybe(schema.string()),
-          index: schema.string(),
-          data: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
-          fileType: schema.string(),
-          ingestPipeline: schema.maybe(schema.object(
-            {},
-            {
-              defaultValue: {},
-              allowUnknowns: true
-            }
-          )),
-          settings: schema.maybe(schema.object({}, { allowUnknowns: true })),
-          mappings: schema.maybe(schema.object({}, { allowUnknowns: true })),
+      path: `${IMPORT_ROUTE}{id?}`,
+      validate: {
+        params: schema.maybe(schema.object({id: schema.nullable(schema.string())})),
+        body: (data, { ok, badRequest }) => {
+          const idRef = schema.siblingRef('params.id');
+          return validateBodySchema(data, idRef)
+            ? ok(data)
+            : badRequest('Invalid payload', ['body']);
         },
-        { allowUnknowns: true }
-      ),
-    },
-    options: {
-      body: {
-        maxBytes: MAX_BYTES,
-        accepts: ['application/json'],
+      },
+      options: {
+        body: {
+          maxBytes: MAX_BYTES,
+          accepts: ['application/json'],
+        },
       },
     },
-  },
     getImportRouteHandler(esPlugin, getSavedObjectsRepository)
   );
 };
