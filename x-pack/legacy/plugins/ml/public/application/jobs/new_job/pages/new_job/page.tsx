@@ -170,7 +170,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.newJob.page.createJob"
-                      defaultMessage={`Create job`}
+                      defaultMessage="Create job"
                     />
                     : {jobCreatorTitle}
                   </h2>
