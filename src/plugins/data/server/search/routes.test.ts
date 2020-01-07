@@ -66,7 +66,12 @@ describe('Search service', () => {
   });
 
   it('handler throws an error if the search throws an error', async () => {
-    const mockSearch = jest.fn().mockRejectedValue('oh no');
+    const mockSearch = jest.fn().mockRejectedValue({
+      message: 'oh no',
+      body: {
+        error: 'oops',
+      },
+    });
     const mockContext = {
       core: {
         elasticsearch: {
@@ -94,6 +99,8 @@ describe('Search service', () => {
     expect(mockSearch.mock.calls[0][0]).toStrictEqual(mockBody);
     expect(mockSearch.mock.calls[0][2]).toBe(mockParams.strategy);
     expect(mockResponse.customError).toBeCalled();
-    expect(mockResponse.customError.mock.calls[0][0]).toEqual({ body: 'oh no' });
+    const error: any = mockResponse.customError.mock.calls[0][0];
+    expect(error.body.message).toBe('oh no');
+    expect(error.body.attributes.error).toBe('oops');
   });
 });
