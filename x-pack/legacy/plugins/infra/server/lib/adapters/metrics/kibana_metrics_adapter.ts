@@ -12,7 +12,11 @@ import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { metrics, findInventoryFields } from '../../../../common/inventory_models';
-import { TSVBMetricModelCreator, InventoryMetric } from '../../../../common/inventory_models/types';
+import {
+  TSVBMetricModelCreator,
+  InventoryMetric,
+  InventoryMetricRT,
+} from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -58,8 +62,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           );
 
           return metricIds.map((id: string) => {
-            const infraMetricId = id as InventoryMetric;
-            if (!infraMetricId) {
+            if (!InventoryMetricRT.is(id)) {
               throw new Error(
                 i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
@@ -69,9 +72,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 })
               );
             }
-            const panel = result[infraMetricId];
+            const panel = result[id];
             return {
-              id: infraMetricId,
+              id,
               series: panel.series.map(series => {
                 return {
                   id: series.id,
