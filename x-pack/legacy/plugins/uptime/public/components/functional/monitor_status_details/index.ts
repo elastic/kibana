@@ -32,5 +32,4 @@ export const MonitorStatusDetails = connect(
 )(MonitorStatusDetailsComponent);
 
 export * from './monitor_status_details';
-export { EmptyStatusBar } from './monitor_status_bar/empty_status_bar';
 export { MonitorStatusBar } from './monitor_status_bar';

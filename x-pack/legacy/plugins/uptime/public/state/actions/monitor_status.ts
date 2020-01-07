@@ -6,7 +6,7 @@
 import { createAction } from 'redux-actions';
 import { QueryParams } from './types';
 
-export const getSelectedMonitor = createAction<QueryParams>('GET_SELECTED_MONITOR');
+export const getSelectedMonitor = createAction<{ monitorId: string }>('GET_SELECTED_MONITOR');
 export const getSelectedMonitorSuccess = createAction<QueryParams>('GET_SELECTED_MONITOR_SUCCESS');
 export const getSelectedMonitorFail = createAction<QueryParams>('GET_SELECTED_MONITOR_FAIL');
 

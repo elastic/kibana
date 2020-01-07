@@ -6,7 +6,7 @@
 
 export { DonutChart } from './charts/donut_chart';
 export { EmptyState } from './empty_state';
-export { EmptyStatusBar, MonitorStatusBar } from './monitor_status_details';
+export { MonitorStatusBar } from './monitor_status_details';
 export { FilterGroup } from './filter_group';
 export { IntegrationLink } from './integration_link';
 export { KueryBar } from './kuery_bar';
