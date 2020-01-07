@@ -8,13 +8,13 @@ import {
   EuiBadgeProps,
   EuiButtonEmpty,
   EuiButtonIcon,
-  // @ts-ignore
   EuiInMemoryTable,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { getSpaceColor } from '../../../../../../../../../spaces/public/lib/space_attributes';
+import { getSpaceColor } from '../../../../../../../../../spaces/public/space_avatar';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import {
   FeaturesPrivileges,
@@ -113,7 +113,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       return {};
     };
 
-    const columns: Record<string, any> = [
+    const columns: Array<EuiBasicTableColumn<TableRow>> = [
       {
         field: 'spaces',
         name: 'Spaces',
@@ -274,12 +274,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     }
 
     return (
-      // @ts-ignore missing rowProps from typedef
       <EuiInMemoryTable
         columns={columns}
         items={rows}
         hasActions
-        // @ts-ignore missing rowProps from typedef
         rowProps={(item: TableRow) => {
           return {
             className: isGlobalPrivilegeDefinition(item.privileges)

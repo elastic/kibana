@@ -21,6 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { DisposableAppender } from '../../../logging/appenders/appenders';
 import { LogRecord } from '../../../logging/log_record';
 import { LegacyLoggingServer } from '../legacy_logging_server';
+import { LegacyVars } from '../../types';
 
 /**
  * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
@@ -34,7 +35,7 @@ export class LegacyAppender implements DisposableAppender {
 
   private readonly loggingServer: LegacyLoggingServer;
 
-  constructor(legacyLoggingConfig: Readonly<Record<string, any>>) {
+  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
     this.loggingServer = new LegacyLoggingServer(legacyLoggingConfig);
   }
 

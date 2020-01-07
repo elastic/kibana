@@ -153,7 +153,7 @@ export class RuleActionPanel extends Component {
         title: (
           <FormattedMessage
             id="xpack.ml.ruleEditor.ruleActionPanel.ruleTitle"
-            defaultMessage="rule"
+            defaultMessage="Rule"
           />
         ),
         description: buildRuleDescription(this.rule, this.props.anomaly),
@@ -186,7 +186,12 @@ export class RuleActionPanel extends Component {
       });
     }
 
-    descriptionListItems[1].title = 'actions';
+    descriptionListItems[1].title = (
+      <FormattedMessage
+        id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"
+        defaultMessage="Actions"
+      />
+    );
 
     return (
       <EuiPanel paddingSize="m" className="select-rule-action-panel">

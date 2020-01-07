@@ -70,6 +70,8 @@ export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 export const SET_INTERACTIVE = 'SET_INTERACTIVE';
 export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
 export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
+export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
+export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -830,4 +832,11 @@ export function disableTooltipControl() {
 
 export function hideToolbarOverlay() {
   return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
+}
+
+export function hideLayerControl() {
+  return { type: HIDE_LAYER_CONTROL, hideLayerControl: true };
+}
+export function hideViewControl() {
+  return { type: HIDE_VIEW_CONTROL, hideViewControl: true };
 }

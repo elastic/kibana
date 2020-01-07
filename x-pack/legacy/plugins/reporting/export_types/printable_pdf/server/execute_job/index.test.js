@@ -27,7 +27,8 @@ beforeEach(() => {
     'server.port': 5601,
   };
   mockServer = {
-    expose: () => {},
+    expose: jest.fn(),
+    log: jest.fn(),
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -71,7 +72,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const browserTimezone = 'UTC';
   await executeJob(
     'pdfJobId',
-    { objects: [], browserTimezone, headers: encryptedHeaders },
+    { relativeUrls: [], browserTimezone, headers: encryptedHeaders },
     cancellationToken
   );
 
@@ -96,7 +97,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await executeJob(
     'pdfJobId',
-    { objects: [], timeRange: {}, headers: encryptedHeaders },
+    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
     cancellationToken
   );
   expect(contentType).toBe('application/pdf');
@@ -112,7 +113,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',
-    { objects: [], timeRange: {}, headers: encryptedHeaders },
+    { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },
     cancellationToken
   );
 
