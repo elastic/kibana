@@ -25,6 +25,8 @@ import {
   SimpleParamComponent,
 } from './index';
 
+import { FullRequestComponent } from './full_request_component';
+
 /**
  * @param parametrizedComponentFactories a dict of the following structure
  * that will be used as a fall back for pattern parameters (i.e.: {indices})
@@ -54,6 +56,9 @@ export class UrlPatternMatcher {
     endpoint.methods.forEach(method => {
       let c;
       let activeComponent = this[method].rootComponent;
+      if (endpoint.template) {
+        new FullRequestComponent(pattern + '[body]', activeComponent, endpoint.template);
+      }
       const endpointComponents = endpoint.url_components || {};
       const partList = pattern.split('/');
       _.each(
