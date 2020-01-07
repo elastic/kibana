@@ -6,7 +6,7 @@
 
 import { EuiCheckbox, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 

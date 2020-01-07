@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+/* eslint-disable react/display-name */
+
+import React from 'react';
+
 import { EuiTableDataType } from '@elastic/eui';
 
 import { NoteCard } from './note_card';

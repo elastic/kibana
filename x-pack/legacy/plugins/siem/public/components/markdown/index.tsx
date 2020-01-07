@@ -5,7 +5,7 @@
  */
 
 import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
