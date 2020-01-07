@@ -59,16 +59,36 @@ const createIndexPattern = async ({
   }
 
   const kibanaIndexPatternFields = makeKibanaIndexPatternFields(allFields);
+
   savedObjectsClient.create(KibanaAssetType.indexPattern, {
     title: datasetType + '-*',
     fields: JSON.stringify(kibanaIndexPatternFields),
   });
 };
 
+/**
+ * makeKibanaIndexPatternFields
+ *
+ * dedupes fields, flattens fields, dedupes the previously nested fields, transform with necessary
+ * Kibana index pattern properties
+ */
 const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
-  const flattenedFields = flattenFields(fields);
-  const transformedFields = flattenedFields.map(transformField);
+  const dedupedFields = dedupFields(fields);
+  const flattenedFields = flattenFields(dedupedFields);
+  const dedupedFlattenedFields = dedupFields(flattenedFields);
+  const transformedFields = dedupedFlattenedFields.map(transformField);
   return transformedFields;
+};
+
+const dedupFields = (fields: Field[]) => {
+  const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
+    if (!acc[field.name]) {
+      acc[field.name] = field;
+    }
+    return acc;
+  }, {});
+
+  return Object.values(uniqueObj);
 };
 
 const transformField = (field: Field): IndexPatternField => {
