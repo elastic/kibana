@@ -18,16 +18,22 @@ import { TopCategoriesTable } from './top_categories_table';
 
 export const TopCategoriesSection: React.FunctionComponent<{
   availableDatasets: string[];
-  isLoading: boolean;
+  isLoadingDatasets?: boolean;
+  isLoadingTopCategories?: boolean;
   jobId: string;
+  onChangeDatasetSelection: (datasets: string[]) => void;
   onRequestRecreateMlJob: () => void;
+  selectedDatasets: string[];
   timeRange: TimeRange;
   topCategories: LogEntryCategory[];
 }> = ({
   availableDatasets,
-  isLoading,
+  isLoadingDatasets = false,
+  isLoadingTopCategories = false,
   jobId,
+  onChangeDatasetSelection,
   onRequestRecreateMlJob,
+  selectedDatasets,
   timeRange,
   topCategories,
 }) => {
@@ -47,9 +53,17 @@ export const TopCategoriesSection: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <DatasetsSelector availableDatasets={availableDatasets} />
+      <DatasetsSelector
+        availableDatasets={availableDatasets}
+        isLoading={isLoadingDatasets}
+        onChangeDatasetSelection={onChangeDatasetSelection}
+        selectedDatasets={selectedDatasets}
+      />
       <EuiSpacer />
-      <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
+      <LoadingOverlayWrapper
+        isLoading={isLoadingTopCategories}
+        loadingChildren={<LoadingOverlayContent />}
+      >
         <TopCategoriesTable timeRange={timeRange} topCategories={topCategories} />
       </LoadingOverlayWrapper>
     </>

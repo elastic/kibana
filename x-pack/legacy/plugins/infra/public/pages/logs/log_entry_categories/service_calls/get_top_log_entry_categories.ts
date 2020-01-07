@@ -20,7 +20,8 @@ export const callGetTopLogEntryCategoriesAPI = async (
   sourceId: string,
   startTime: number,
   endTime: number,
-  categoryCount: number
+  categoryCount: number,
+  datasets?: string[]
 ) => {
   const intervalDuration = endTime - startTime;
 
@@ -35,6 +36,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
             endTime,
           },
           categoryCount,
+          datasets,
           histograms: [
             {
               id: 'history',

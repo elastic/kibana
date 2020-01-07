@@ -10,37 +10,33 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
+  EuiPageBody,
   EuiPanel,
   EuiSuperDatePicker,
-  EuiPageBody,
-  // EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-// import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 // import { FirstUseCallout } from './first_use';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
+import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
 import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
-import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
-
-  // const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
 
   const {
     fetchJobStatus,
@@ -59,18 +55,15 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     setAutoRefresh,
   } = useLogEntryCategoriesResultsUrlState();
 
-  const [queryTimeRange, setQueryTimeRange] = useState<{
-    value: TimeRange;
+  const [categoryQueryTimeRange, setCategoryQueryTimeRange] = useState<{
     lastChangedTime: number;
+    timeRange: TimeRange;
   }>(() => ({
-    value: stringToNumericTimeRange(selectedTimeRange),
     lastChangedTime: Date.now(),
+    timeRange: stringToNumericTimeRange(selectedTimeRange),
   }));
 
-  // const bucketDuration = useMemo(
-  //   () => getBucketDuration(queryTimeRange.value.startTime, queryTimeRange.value.endTime),
-  //   [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
-  // );
+  const [categoryQueryDatasets, setCategoryQueryDatasets] = useState<string[]>([]);
 
   const { services } = useKibana<{}>();
 
@@ -87,29 +80,28 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   const {
     getLogEntryCategoryDatasets,
     getTopLogEntryCategories,
+    isLoadingLogEntryCategoryDatasets,
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
   } = useLogEntryCategoriesResults({
-    sourceId,
-    startTime: queryTimeRange.value.startTime,
-    endTime: queryTimeRange.value.endTime,
     categoriesCount: 25,
+    endTime: categoryQueryTimeRange.timeRange.endTime,
+    filteredDatasets: categoryQueryDatasets,
     onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
+    sourceId,
+    startTime: categoryQueryTimeRange.timeRange.startTime,
   });
-
-  // const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
-  //   logEntryRate,
-  // ]);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setQueryTimeRange({
-        value: stringToNumericTimeRange({ startTime, endTime }),
+      setCategoryQueryTimeRange(previousQueryParameters => ({
+        ...previousQueryParameters,
+        timeRange: stringToNumericTimeRange({ startTime, endTime }),
         lastChangedTime: Date.now(),
-      });
+      }));
     },
-    [setQueryTimeRange]
+    [setCategoryQueryTimeRange]
   );
 
   const handleSelectedTimeRangeChange = useCallback(
@@ -126,17 +118,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     [setSelectedTimeRange, handleQueryTimeRangeChange]
   );
 
-  // const handleChartTimeRangeChange = useCallback(
-  //   ({ startTime, endTime }: TimeRange) => {
-  //     handleSelectedTimeRangeChange({
-  //       end: new Date(endTime).toISOString(),
-  //       isInvalid: false,
-  //       start: new Date(startTime).toISOString(),
-  //     });
-  //   },
-  //   [handleSelectedTimeRangeChange]
-  // );
-
   const handleAutoRefreshChange = useCallback(
     ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
       setAutoRefresh({
@@ -150,9 +131,12 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
   useEffect(() => {
-    getLogEntryCategoryDatasets();
     getTopLogEntryCategories();
-  }, [getLogEntryCategoryDatasets, getTopLogEntryCategories, queryTimeRange.lastChangedTime]);
+  }, [getTopLogEntryCategories, categoryQueryDatasets, categoryQueryTimeRange.lastChangedTime]);
+
+  useEffect(() => {
+    getLogEntryCategoryDatasets();
+  }, [getLogEntryCategoryDatasets, categoryQueryTimeRange.lastChangedTime]);
 
   useInterval(() => {
     fetchJobStatus();
@@ -193,10 +177,13 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
             <EuiPanel paddingSize="l">
               <TopCategoriesSection
                 availableDatasets={logEntryCategoryDatasets}
-                isLoading={isLoadingTopLogEntryCategories}
+                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+                isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}
+                onChangeDatasetSelection={setCategoryQueryDatasets}
                 onRequestRecreateMlJob={viewSetupForReconfiguration}
-                timeRange={queryTimeRange.value}
+                selectedDatasets={categoryQueryDatasets}
+                timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
               />
               {/* {isFirstUse && !hasResults ? <FirstUseCallout /> : null}

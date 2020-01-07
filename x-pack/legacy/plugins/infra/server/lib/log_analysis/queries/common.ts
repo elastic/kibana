@@ -14,3 +14,24 @@ export const defaultRequestParameters = {
   trackScores: false,
   trackTotalHits: false,
 };
+
+export const createTimeRangeFilters = (startTime: number, endTime: number) => [
+  {
+    range: {
+      timestamp: {
+        gte: startTime,
+        lte: endTime,
+      },
+    },
+  },
+];
+
+export const createResultTypeFilters = (resultType: 'model_plot' | 'record') => [
+  {
+    term: {
+      result_type: {
+        value: resultType,
+      },
+    },
+  },
+];

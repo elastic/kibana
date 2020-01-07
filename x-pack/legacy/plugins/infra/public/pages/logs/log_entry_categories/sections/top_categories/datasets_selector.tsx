@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
+type DatasetOptionProps = EuiComboBoxOptionProps<string>;
+
 export const DatasetsSelector: React.FunctionComponent<{
   availableDatasets: string[];
-}> = ({ availableDatasets }) => {
-  const options = useMemo(
+  isLoading?: boolean;
+  onChangeDatasetSelection: (datasets: string[]) => void;
+  selectedDatasets: string[];
+}> = ({ availableDatasets, isLoading = false, onChangeDatasetSelection, selectedDatasets }) => {
+  const options = useMemo<DatasetOptionProps[]>(
     () =>
       availableDatasets.map(dataset => ({
         value: dataset,
@@ -21,12 +26,34 @@ export const DatasetsSelector: React.FunctionComponent<{
       })),
     [availableDatasets]
   );
-  return <EuiComboBox options={options} placeholder={datasetFilterPlaceholder} />;
+
+  const selectedOptions = useMemo(
+    () => options.filter(({ value }) => value != null && selectedDatasets.includes(value)),
+    [options, selectedDatasets]
+  );
+
+  const handleChange = useCallback(
+    (newSelectedOptions: DatasetOptionProps[]) =>
+      onChangeDatasetSelection(newSelectedOptions.map(({ value }) => value).filter(isDefined)),
+    [onChangeDatasetSelection]
+  );
+
+  return (
+    <EuiComboBox
+      isLoading={isLoading}
+      onChange={handleChange}
+      options={options}
+      placeholder={datasetFilterPlaceholder}
+      selectedOptions={selectedOptions}
+    />
+  );
 };
 
 const datasetFilterPlaceholder = i18n.translate(
   'xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder',
   {
-    defaultMessage: 'Select data sets',
+    defaultMessage: 'Select datasets',
   }
 );
+
+const isDefined = <Value extends any>(value: Value): value is NonNullable<Value> => value != null;

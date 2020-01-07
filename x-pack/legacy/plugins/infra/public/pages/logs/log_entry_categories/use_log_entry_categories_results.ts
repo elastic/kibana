@@ -10,7 +10,7 @@ import {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
 import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
 
@@ -18,19 +18,21 @@ type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']
 type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
 
 export const useLogEntryCategoriesResults = ({
+  categoriesCount,
+  filteredDatasets: filteredDatasets,
+  endTime,
+  onGetLogEntryCategoryDatasetsError,
+  onGetTopLogEntryCategoriesError,
   sourceId,
   startTime,
-  endTime,
-  categoriesCount,
-  onGetTopLogEntryCategoriesError,
-  onGetLogEntryCategoryDatasetsError,
 }: {
+  categoriesCount: number;
+  filteredDatasets: string[];
+  endTime: number;
+  onGetLogEntryCategoryDatasetsError?: (error: Error) => void;
+  onGetTopLogEntryCategoriesError?: (error: Error) => void;
   sourceId: string;
   startTime: number;
-  endTime: number;
-  categoriesCount: number;
-  onGetTopLogEntryCategoriesError?: (error: Error) => void;
-  onGetLogEntryCategoryDatasetsError?: (error: Error) => void;
 }) => {
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
   const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] = useState<
@@ -39,25 +41,35 @@ export const useLogEntryCategoriesResults = ({
 
   const [getTopLogEntryCategoriesRequest, getTopLogEntryCategories] = useTrackedPromise(
     {
-      cancelPreviousOn: 'resolution',
+      cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetTopLogEntryCategoriesAPI(sourceId, startTime, endTime, categoriesCount);
+        return await callGetTopLogEntryCategoriesAPI(
+          sourceId,
+          startTime,
+          endTime,
+          categoriesCount,
+          filteredDatasets
+        );
       },
       onResolve: ({ data: { categories } }) => {
         setTopLogEntryCategories(categories);
       },
       onReject: error => {
-        if (error instanceof Error && onGetTopLogEntryCategoriesError) {
+        if (
+          error instanceof Error &&
+          !(error instanceof CanceledPromiseError) &&
+          onGetTopLogEntryCategoriesError
+        ) {
           onGetTopLogEntryCategoriesError(error);
         }
       },
     },
-    [sourceId, startTime, endTime, categoriesCount]
+    [categoriesCount, endTime, filteredDatasets, sourceId, startTime]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
     {
-      cancelPreviousOn: 'resolution',
+      cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryCategoryDatasetsAPI(sourceId, startTime, endTime);
       },
@@ -65,12 +77,16 @@ export const useLogEntryCategoriesResults = ({
         setLogEntryCategoryDatasets(datasets);
       },
       onReject: error => {
-        if (error instanceof Error && onGetLogEntryCategoryDatasetsError) {
+        if (
+          error instanceof Error &&
+          !(error instanceof CanceledPromiseError) &&
+          onGetLogEntryCategoryDatasetsError
+        ) {
           onGetLogEntryCategoryDatasetsError(error);
         }
       },
     },
-    [sourceId, startTime, endTime, categoriesCount]
+    [categoriesCount, endTime, sourceId, startTime]
   );
 
   const isLoadingTopLogEntryCategories = useMemo(
@@ -98,46 +114,3 @@ export const useLogEntryCategoriesResults = ({
     topLogEntryCategories,
   };
 };
-
-// const formatLogEntryRateResultsByPartition = (
-//   results: GetLogEntryRateSuccessResponsePayload['data']
-// ): PartitionRecord => {
-//   const partitionedBuckets = results.histogramBuckets.reduce<
-//     Record<string, { buckets: PartitionBucket[] }>
-//   >((partitionResults, bucket) => {
-//     return bucket.partitions.reduce<Record<string, { buckets: PartitionBucket[] }>>(
-//       (_partitionResults, partition) => {
-//         return {
-//           ..._partitionResults,
-//           [partition.partitionId]: {
-//             buckets: _partitionResults[partition.partitionId]
-//               ? [
-//                   ..._partitionResults[partition.partitionId].buckets,
-//                   { startTime: bucket.startTime, ...partition },
-//                 ]
-//               : [{ startTime: bucket.startTime, ...partition }],
-//           },
-//         };
-//       },
-//       partitionResults
-//     );
-//   }, {});
-
-//   const resultsByPartition: PartitionRecord = {};
-
-//   Object.entries(partitionedBuckets).map(([key, value]) => {
-//     const anomalyScores = value.buckets.reduce((scores: number[], bucket) => {
-//       return [...scores, bucket.maximumAnomalyScore];
-//     }, []);
-//     const totalNumberOfLogEntries = value.buckets.reduce((total, bucket) => {
-//       return (total += bucket.numberOfLogEntries);
-//     }, 0);
-//     resultsByPartition[key] = {
-//       topAnomalyScore: Math.max(...anomalyScores),
-//       totalNumberOfLogEntries,
-//       buckets: value.buckets,
-//     };
-//   });
-
-//   return resultsByPartition;
-// };

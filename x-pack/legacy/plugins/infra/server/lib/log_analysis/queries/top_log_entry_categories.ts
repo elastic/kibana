@@ -7,13 +7,19 @@
 import * as rt from 'io-ts';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import {
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
+  getMlResultIndex,
+} from './common';
 
 export const createTopLogEntryCategoriesQuery = (
   logEntryCategoriesJobId: string,
   startTime: number,
   endTime: number,
   size: number,
+  datasets: string[],
   sortDirection: 'asc' | 'desc' = 'desc'
 ) => ({
   ...defaultRequestParameters,
@@ -21,27 +27,15 @@ export const createTopLogEntryCategoriesQuery = (
     query: {
       bool: {
         filter: [
-          {
-            range: {
-              timestamp: {
-                gte: startTime,
-                lte: endTime,
-              },
-            },
-          },
+          ...createTimeRangeFilters(startTime, endTime),
+          ...createDatasetsFilters(datasets),
           {
             bool: {
               should: [
                 {
                   bool: {
                     filter: [
-                      {
-                        term: {
-                          result_type: {
-                            value: 'model_plot',
-                          },
-                        },
-                      },
+                      ...createResultTypeFilters('model_plot'),
                       {
                         range: {
                           actual: {
@@ -54,15 +48,7 @@ export const createTopLogEntryCategoriesQuery = (
                 },
                 {
                   bool: {
-                    filter: [
-                      {
-                        term: {
-                          result_type: {
-                            value: 'record',
-                          },
-                        },
-                      },
-                    ],
+                    filter: createResultTypeFilters('record'),
                   },
                 },
               ],
@@ -123,6 +109,17 @@ export const createTopLogEntryCategoriesQuery = (
   index: getMlResultIndex(logEntryCategoriesJobId),
   size: 0,
 });
+
+const createDatasetsFilters = (datasets: string[]) =>
+  datasets.length > 0
+    ? [
+        {
+          terms: {
+            partition_field_value: datasets,
+          },
+        },
+      ]
+    : [];
 
 const metricAggregationRT = rt.type({
   value: rt.union([rt.number, rt.null]),

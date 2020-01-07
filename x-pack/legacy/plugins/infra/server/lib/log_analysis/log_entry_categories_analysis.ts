@@ -46,6 +46,7 @@ export class LogEntryCategoriesAnalysis {
     startTime: number,
     endTime: number,
     categoryCount: number,
+    datasets: string[],
     histograms: HistogramParameters[]
   ) {
     const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
@@ -64,7 +65,8 @@ export class LogEntryCategoriesAnalysis {
       logEntryCategoriesCountJobId,
       startTime,
       endTime,
-      categoryCount
+      categoryCount,
+      datasets
     );
 
     const categoryIds = topLogEntryCategories.map(({ categoryId }) => categoryId);
@@ -178,7 +180,8 @@ export class LogEntryCategoriesAnalysis {
     logEntryCategoriesCountJobId: string,
     startTime: number,
     endTime: number,
-    categoryCount: number
+    categoryCount: number,
+    datasets: string[]
   ) {
     const finalizeEsSearchSpan = startTracingSpan('Fetch top categories from ES');
 
@@ -190,7 +193,8 @@ export class LogEntryCategoriesAnalysis {
           logEntryCategoriesCountJobId,
           startTime,
           endTime,
-          categoryCount
+          categoryCount,
+          datasets
         )
       )
     );

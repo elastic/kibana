@@ -41,7 +41,7 @@ export const initGetLogEntryCategoriesRoute = ({
           histograms,
           sourceId,
           timeRange: { startTime, endTime },
-          // datasets,
+          datasets,
         },
       } = pipe(
         getLogEntryCategoriesRequestPayloadRT.decode(request.body),
@@ -59,6 +59,7 @@ export const initGetLogEntryCategoriesRoute = ({
           startTime,
           endTime,
           categoryCount,
+          datasets ?? [],
           histograms.map(histogram => ({
             bucketCount: histogram.bucketCount,
             endTime: histogram.timeRange.endTime,

@@ -7,7 +7,12 @@
 import * as rt from 'io-ts';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import {
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
+  getMlResultIndex,
+} from './common';
 
 export const createLogEntryCategoryHistogramsQuery = (
   logEntryCategoriesJobId: string,
@@ -22,13 +27,7 @@ export const createLogEntryCategoryHistogramsQuery = (
       bool: {
         filter: [
           ...createTimeRangeFilters(startTime, endTime),
-          {
-            term: {
-              result_type: {
-                value: 'model_plot',
-              },
-            },
-          },
+          ...createResultTypeFilters('model_plot'),
           ...createCategoryFilters(categoryIds),
         ],
       },
@@ -45,17 +44,6 @@ export const createLogEntryCategoryHistogramsQuery = (
   index: getMlResultIndex(logEntryCategoriesJobId),
   size: 0,
 });
-
-const createTimeRangeFilters = (startTime: number, endTime: number) => [
-  {
-    range: {
-      timestamp: {
-        gte: startTime,
-        lte: endTime,
-      },
-    },
-  },
-];
 
 const createCategoryFilters = (categoryIds: number[]) => [
   {

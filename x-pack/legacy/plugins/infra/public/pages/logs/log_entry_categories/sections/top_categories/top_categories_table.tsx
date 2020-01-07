@@ -15,10 +15,10 @@ import {
   LogEntryCategoryHistogram,
 } from '../../../../../../common/http_api/log_analysis';
 import { TimeRange } from '../../../../../../common/http_api/shared';
+import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
 import { RegularExpressionRepresentation } from './category_expression';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
-import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
 
 export const TopCategoriesTable = euiStyled(
   ({
@@ -87,7 +87,7 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
   {
     field: 'datasets',
     name: i18n.translate('xpack.infra.logs.logEntryCategories.datasetColumnTitle', {
-      defaultMessage: 'Data sets',
+      defaultMessage: 'Datasets',
     }),
     render: (datasets: string[]) => <DatasetsList datasets={datasets} />,
     width: '200px',
