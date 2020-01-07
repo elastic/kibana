@@ -3,19 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { noop } from 'lodash/fp';
 import React, { useEffect } from 'react';
-
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
+
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../containers/helpers';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
-
 const ID = 'alertsOverTimeQuery';
 const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -74,5 +72,4 @@ export const AlertsView = ({
     </>
   );
 };
-
 AlertsView.displayName = 'AlertsView';
