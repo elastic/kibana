@@ -6,7 +6,7 @@
 
 import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
 import { rgba } from 'polished';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';

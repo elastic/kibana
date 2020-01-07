@@ -19,94 +19,130 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiPageContent,
   EuiPageBody,
   EuiPage,
+  EuiImage,
   EuiText,
   EuiButton,
 } from '@elastic/eui';
+import { IUiSettingsClient, HttpStart } from 'kibana/public';
 import * as constants from './dashboard_empty_screen_constants';
 
 export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;
   onLinkClick: () => void;
   onVisualizeClick?: () => void;
+  uiSettings: IUiSettingsClient;
+  http: HttpStart;
+  isReadonlyMode?: boolean;
 }
 
 export function DashboardEmptyScreen({
   showLinkToVisualize,
   onLinkClick,
   onVisualizeClick,
+  uiSettings,
+  http,
+  isReadonlyMode,
 }: DashboardEmptyScreenProps) {
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const emptyStateGraphicURL = IS_DARK_THEME
+    ? '/plugins/kibana/home/assets/welcome_graphic_dark_2x.png'
+    : '/plugins/kibana/home/assets/welcome_graphic_light_2x.png';
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
         iconSide="right"
+        size="s"
         fill
         iconType="arrowDown"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
+        aria-label={constants.createNewVisualizationButtonAriaLabel}
       >
         {constants.createNewVisualizationButton}
       </EuiButton>
     </p>
   );
   const paragraph = (
-    description1: string,
+    description1: string | null,
     description2: string,
     linkText: string,
     ariaLabel: string,
     dataTestSubj?: string
   ) => {
     return (
-      <EuiText size="m">
+      <EuiText size="m" color="subdued">
         <p>
           {description1}
+          {description1 && <span>&nbsp;</span>}
           <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
             {linkText}
           </EuiLink>
+          <span>&nbsp;</span>
           {description2}
         </p>
       </EuiText>
     );
   };
-  const addVisualizationParagraph = (
-    <React.Fragment>
-      {paragraph(
-        constants.addVisualizationDescription1,
-        constants.addVisualizationDescription2,
-        constants.addVisualizationLinkText,
-        constants.addVisualizationLinkAriaLabel,
-        'emptyDashboardAddPanelButton'
-      )}
-      <EuiSpacer size="m" />
-      {linkToVisualizeParagraph}
-    </React.Fragment>
-  );
   const enterEditModeParagraph = paragraph(
     constants.howToStartWorkingOnNewDashboardDescription1,
     constants.howToStartWorkingOnNewDashboardDescription2,
     constants.howToStartWorkingOnNewDashboardEditLinkText,
     constants.howToStartWorkingOnNewDashboardEditLinkAriaLabel
   );
-  return (
-    <I18nProvider>
-      <EuiPage className="dshStartScreen" restrictWidth="36em">
+  const enterViewModeParagraph = paragraph(
+    null,
+    constants.addNewVisualizationDescription,
+    constants.addExistingVisualizationLinkText,
+    constants.addExistingVisualizationLinkAriaLabel
+  );
+  const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
+    return (
+      <EuiPage className="dshStartScreen" restrictWidth="500px">
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center">
-            <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
-            <EuiSpacer size="s" />
-            <EuiText grow={true}>
-              <h2 key={0.5}>{constants.fillDashboardTitle}</h2>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            paddingSize="none"
+            className="dshStartScreen__pageContent"
+          >
+            <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
+            <EuiText size="m">
+              <p style={{ fontWeight: 'bold' }}>{mainText}</p>
             </EuiText>
-            <EuiSpacer size="m" />
-            {showLinkToVisualize ? addVisualizationParagraph : enterEditModeParagraph}
+            {additionalText ? (
+              <EuiText size="m" color="subdued">
+                {additionalText}
+              </EuiText>
+            ) : null}
+            {showAdditionalParagraph ? (
+              <React.Fragment>
+                <EuiSpacer size="m" />
+                <div className="dshStartScreen__panelDesc">{enterEditModeParagraph}</div>
+              </React.Fragment>
+            ) : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
-    </I18nProvider>
+    );
+  };
+  const readonlyMode = page(
+    constants.emptyDashboardTitle,
+    false,
+    constants.emptyDashboardAdditionalPrivilege
   );
+  const viewMode = page(constants.fillDashboardTitle, true);
+  const editMode = (
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
+      {enterViewModeParagraph}
+      <EuiSpacer size="l" />
+      {linkToVisualizeParagraph}
+    </div>
+  );
+  const actionableMode = showLinkToVisualize ? editMode : viewMode;
+  return <I18nProvider>{isReadonlyMode ? readonlyMode : actionableMode}</I18nProvider>;
 }

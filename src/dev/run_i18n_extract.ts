@@ -93,6 +93,7 @@ run(
   {
     flags: {
       allowUnexpected: true,
+      guessTypesForUnexpectedFlags: true,
     },
   }
 );

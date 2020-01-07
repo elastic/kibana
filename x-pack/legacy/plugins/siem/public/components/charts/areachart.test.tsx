@@ -5,7 +5,7 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import { ChartSeriesData } from './common';

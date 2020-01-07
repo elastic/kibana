@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { HookWrapper } from '../../mock';
 import { SiemPageName } from '../../pages/home/types';

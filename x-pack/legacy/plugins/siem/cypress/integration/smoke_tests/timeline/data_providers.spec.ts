@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DROPPED_DATA_PROVIDERS,
@@ -20,10 +19,6 @@ import { drag, dragWithoutDrop } from '../../lib/drag_n_drop/helpers';
 describe('timeline data providers', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
