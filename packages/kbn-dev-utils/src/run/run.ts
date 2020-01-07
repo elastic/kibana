@@ -36,6 +36,7 @@ export interface Options {
   description?: string;
   flags?: {
     allowUnexpected?: boolean;
+    guessTypesForUnexpectedFlags?: boolean;
     help?: string;
     alias?: { [key: string]: string | string[] };
     boolean?: string[];
@@ -46,7 +47,6 @@ export interface Options {
 
 export async function run(fn: RunFn, options: Options = {}) {
   const flags = getFlags(process.argv.slice(2), options);
-  const allowUnexpected = options.flags ? options.flags.allowUnexpected : false;
 
   if (flags.help) {
     process.stderr.write(getHelp(options));
@@ -97,7 +97,7 @@ export async function run(fn: RunFn, options: Options = {}) {
   const cleanupTasks: CleanupTask[] = [unhookExit];
 
   try {
-    if (!allowUnexpected && flags.unexpected.length) {
+    if (!options.flags?.allowUnexpected && flags.unexpected.length) {
       throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
     }
 
