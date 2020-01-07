@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ServerFacade, Logger } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
@@ -23,8 +24,19 @@ export async function runValidations(
       validateMaxContentLength(server, logger),
       validateServerHost(server),
     ]);
-    logger.debug(`Reporting plugin self-check ok!`);
+    logger.debug(
+      i18n.translate('xpack.reporting.selfCheck.ok', {
+        defaultMessage: `Reporting plugin self-check ok!`,
+      })
+    );
   } catch (err) {
-    logger.warning(`Reporting plugin self-check generated a warning: ${err}`);
+    logger.warning(
+      i18n.translate('xpack.reporting.selfCheck.warning', {
+        defaultMessage: `Reporting plugin self-check generated a warning: {err}`,
+        values: {
+          err,
+        },
+      })
+    );
   }
 }

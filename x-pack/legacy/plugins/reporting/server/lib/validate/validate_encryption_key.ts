@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import { ServerFacade, Logger } from '../../../types';
 
@@ -14,8 +15,14 @@ export function validateEncryptionKey(serverFacade: ServerFacade, logger: Logger
   if (encryptionKey == null) {
     // TODO this should simply throw an error and let the handler conver it to a warning mesasge. See validateServerHost.
     logger.warning(
-      `Generating a random key for xpack.reporting.encryptionKey. To prevent pending reports from failing on restart, please set ` +
-        `xpack.reporting.encryptionKey in kibana.yml`
+      i18n.translate('xpack.reporting.selfCheckEncryptionKey.warning', {
+        defaultMessage:
+          `Generating a random key for {setting}. To prevent pending reports ` +
+          `from failing on restart, please set {setting} in kibana.yml`,
+        values: {
+          setting: 'xpack.reporting.encryptionKey',
+        },
+      })
     );
 
     // @ts-ignore: No set() method on KibanaConfig, just get() and has()
