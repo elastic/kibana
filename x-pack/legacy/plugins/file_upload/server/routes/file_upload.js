@@ -51,13 +51,7 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
 }
 
 export const importRouteConfig = {
-  // payload: {
-  //   maxBytes: MAX_BYTES,
-  // },
   validate: {
-    query: Joi.object().keys({
-      id: Joi.string(),
-    }),
     body: Joi.object({
       app: Joi.string(),
       index: Joi.string()
@@ -91,9 +85,24 @@ export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
   router.post({
     path: `${IMPORT_ROUTE}{id?}`,
     validate: {
-      params: schema.maybe(schema.any()),
-      query: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
+      params: schema.maybe(schema.object({id: schema.string()})),
+      body: schema.object({
+          app: schema.maybe(schema.string()),
+          index: schema.string(),
+          data: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+          fileType: schema.string(),
+          ingestPipeline: schema.maybe(schema.object(
+            {},
+            {
+              defaultValue: {},
+              allowUnknowns: true
+            }
+          )),
+          settings: schema.maybe(schema.object({}, { allowUnknowns: true })),
+          mappings: schema.maybe(schema.object({}, { allowUnknowns: true })),
+        },
+        { allowUnknowns: true }
+      ),
     },
     options: {
       body: {
