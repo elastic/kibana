@@ -50,35 +50,6 @@ export interface Props {
   onUpdate: OnUpdateHandler;
 }
 
-const getRandomField = (): NormalizedField => ({
-  canHaveChildFields: false,
-  canHaveMultiFields: true,
-  childFieldsName: 'fields',
-  hasChildFields: false,
-  hasMultiFields: false,
-  id: getUniqueId(),
-  isExpanded: false,
-  isMultiField: false,
-  nestedDepth: 1,
-  path: 'some.field.path',
-  source: {
-    type: 'text',
-    analyzer: 'standard',
-  } as any,
-});
-
-const generateDummyResult = (total = 500): SearchResult[] => {
-  return new Array(total).fill('').map(() => ({
-    display: (
-      <span>
-        <EuiLink onClick={() => undefined}>Hello</EuiLink> &gt;{' '}
-        <EuiLink onClick={() => undefined}>world</EuiLink> &gt; <strong>highlighted</strong>
-      </span>
-    ),
-    field: getRandomField(),
-  }));
-};
-
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
   const didMountRef = useRef(false);
 
@@ -110,8 +81,8 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       isValid: true,
     },
     search: {
-      term: 'temp',
-      result: generateDummyResult(25),
+      term: '',
+      result: [],
     },
   };
 

@@ -259,10 +259,6 @@ export interface SearchMetadata {
    */
   score: number;
   /**
-   * For multi word search, return the word that matches the path
-   */
-  wordMatchIndex: number;
-  /**
    * The JSX with <strong> tag wrapping the matched string
    */
   display: JSX.Element;
