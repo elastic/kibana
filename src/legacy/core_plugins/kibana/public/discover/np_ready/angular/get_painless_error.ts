@@ -33,9 +33,9 @@ export function getPainlessError(error: Error) {
 
   const [{ lang, script }] = rootCause;
 
-  if (lang !== 'painless') {	
-    return;	
-  }	
+  if (lang !== 'painless') {
+    return;
+  }
 
   return {
     lang,
