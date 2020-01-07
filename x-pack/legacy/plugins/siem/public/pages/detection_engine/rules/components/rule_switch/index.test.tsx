@@ -9,7 +9,6 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { RuleSwitchComponent } from './index';
-jest.mock('../../../../../lib/kibana');
 
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {

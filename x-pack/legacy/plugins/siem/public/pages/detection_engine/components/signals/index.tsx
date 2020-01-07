@@ -25,8 +25,7 @@ import {
   SignalFilterOption,
   SignalsTableFilterGroup,
 } from './signals_filter_group';
-import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
-import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
+import { useKibana } from '../../../../lib/kibana';
 import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
 import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -121,7 +120,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
     const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
-    const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
     const kibana = useKibana();
 
     const getGlobalQuery = useCallback(() => {
@@ -208,7 +206,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
           status,
           setEventsDeleted: setEventsDeletedCallback,
           setEventsLoading: setEventsLoadingCallback,
-          kbnVersion,
         });
       },
       [
@@ -261,9 +258,8 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
           setEventsLoading: setEventsLoadingCallback,
           setEventsDeleted: setEventsDeletedCallback,
           status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
-          kbnVersion,
         }),
-      [createTimelineCallback, filterGroup, kbnVersion]
+      [createTimelineCallback, filterGroup]
     );
 
     const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);

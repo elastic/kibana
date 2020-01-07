@@ -25,7 +25,7 @@ import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../lib/lib';
-import { StartCore, StartPlugins } from './plugin';
+import { CoreStart, StartPlugins } from '../plugin';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -89,10 +89,8 @@ const StartAppComponent: FC<AppFrontendLibs> = libs => {
 
 const StartApp = memo(StartAppComponent);
 
-export const ROOT_ELEMENT_ID = 'react-siem-root';
-
 interface SiemAppComponentProps {
-  core: StartCore;
+  core: CoreStart;
   plugins: StartPlugins;
 }
 

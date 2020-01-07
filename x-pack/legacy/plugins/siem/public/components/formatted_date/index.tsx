@@ -8,29 +8,16 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
 
-import { useUiSetting$ } from '../../lib/kibana';
-
-import {
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_DATE_FORMAT_TZ,
-  DEFAULT_TIMEZONE_BROWSER,
-} from '../../../common/constants';
+import { useDateFormat, useTimeZone } from '../../hooks';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
-  const [dateFormat] = useUiSetting$<string>(DEFAULT_DATE_FORMAT);
-  const [dateFormatTz] = useUiSetting$<string>(DEFAULT_DATE_FORMAT_TZ);
-  const [timezone] = useUiSetting$<string>(DEFAULT_TIMEZONE_BROWSER);
+  const dateFormat = useDateFormat();
+  const timeZone = useTimeZone();
 
-  return (
-    <>
-      {dateFormat && dateFormatTz && timezone
-        ? moment.tz(value, dateFormatTz === 'Browser' ? timezone : dateFormatTz).format(dateFormat)
-        : moment.utc(value).toISOString()}
-    </>
-  );
+  return <>{moment.tz(value, timeZone).format(dateFormat)}</>;
 });
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';

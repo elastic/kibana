@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -43,7 +43,7 @@ export const siem = (kibana: any) => {
         description: i18n.translate('xpack.siem.securityDescription', {
           defaultMessage: 'Explore your SIEM App',
         }),
-        main: 'plugins/siem/app',
+        main: 'plugins/siem/legacy',
         euiIconType: 'securityAnalyticsApp',
         title: APP_NAME,
         listed: false,

@@ -14,8 +14,7 @@ import { deleteRulesAction, enableRulesAction, exportRulesAction } from './actio
 export const getBatchItems = (
   selectedState: TableData[],
   dispatch: React.Dispatch<Action>,
-  closePopover: () => void,
-  kbnVersion: string
+  closePopover: () => void
 ) => {
   const containsEnabled = selectedState.some(v => v.activate);
   const containsDisabled = selectedState.some(v => !v.activate);
@@ -29,7 +28,7 @@ export const getBatchItems = (
       onClick={async () => {
         closePopover();
         const deactivatedIds = selectedState.filter(s => !s.activate).map(s => s.id);
-        await enableRulesAction(deactivatedIds, true, dispatch, kbnVersion);
+        await enableRulesAction(deactivatedIds, true, dispatch);
       }}
     >
       {i18n.BATCH_ACTION_ACTIVATE_SELECTED}
@@ -41,7 +40,7 @@ export const getBatchItems = (
       onClick={async () => {
         closePopover();
         const activatedIds = selectedState.filter(s => s.activate).map(s => s.id);
-        await enableRulesAction(activatedIds, false, dispatch, kbnVersion);
+        await enableRulesAction(activatedIds, false, dispatch);
       }}
     >
       {i18n.BATCH_ACTION_DEACTIVATE_SELECTED}
@@ -78,8 +77,7 @@ export const getBatchItems = (
         closePopover();
         await deleteRulesAction(
           selectedState.map(({ sourceRule: { id } }) => id),
-          dispatch,
-          kbnVersion
+          dispatch
         );
       }}
     >

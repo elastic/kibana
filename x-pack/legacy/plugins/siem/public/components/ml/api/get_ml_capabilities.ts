@@ -22,18 +22,14 @@ export interface Body {
   maxExamples: number;
 }
 
-export const getMlCapabilities = async (
-  kbnVersion: string,
-  signal: AbortSignal
-): Promise<MlCapabilities> => {
+export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
-      'kbn-system-api': 'true',
       'content-Type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      'kbn-version': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
     signal,
   });

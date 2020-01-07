@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`formatted_bytes PreferenceFormattedBytes rendering renders correctly against snapshot 1`] = `
+exports[`PreferenceFormattedBytes renders correctly against snapshot 1`] = `
 <Fragment>
   2.7MB
 </Fragment>

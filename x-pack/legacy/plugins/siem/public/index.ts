@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './apps/index';
+import { Plugin, PluginInitializerContext } from './plugin';
+
+export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);

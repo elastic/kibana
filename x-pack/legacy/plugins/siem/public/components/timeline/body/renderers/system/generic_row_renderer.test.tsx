@@ -49,8 +49,6 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
-jest.mock('../../../../../lib/kibana');
-
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();
 
