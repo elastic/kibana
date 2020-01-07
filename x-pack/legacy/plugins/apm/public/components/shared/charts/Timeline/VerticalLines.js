@@ -11,7 +11,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 class VerticalLines extends PureComponent {
   render() {
-    const { topTraceDuration } = this.props;
+    const { topTraceDuration, marks } = this.props;
     const {
       width,
       height,
@@ -20,7 +20,9 @@ class VerticalLines extends PureComponent {
       tickValues
     } = this.props.plotValues;
 
-    const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
+    const markTimes = marks
+      .filter(mark => mark.verticalLine)
+      .map(({ offset }) => offset);
 
     return (
       <div
@@ -43,7 +45,7 @@ class VerticalLines extends PureComponent {
           />
 
           <VerticalGridLines
-            tickValues={agentMarkTimes}
+            tickValues={markTimes}
             style={{ stroke: theme.euiColorMediumShade }}
           />
 
@@ -61,11 +63,11 @@ class VerticalLines extends PureComponent {
 
 VerticalLines.propTypes = {
   plotValues: PropTypes.object.isRequired,
-  agentMarks: PropTypes.array
+  marks: PropTypes.array
 };
 
 VerticalLines.defaultProps = {
-  agentMarks: []
+  marks: []
 };
 
 export default VerticalLines;
