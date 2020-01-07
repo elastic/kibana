@@ -7,7 +7,6 @@
 import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
-import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
 import {
   ElasticsearchPlugin,
   CallCluster,
@@ -16,6 +15,7 @@ import { CancellationToken } from './common/cancellation_token';
 import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
+import { ServerFacade } from './index';
 
 export type ReportingPlugin = object; // For Plugin contract
 
@@ -70,25 +70,6 @@ interface GenerateExportTypePayload {
  */
 
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
-
-type LegacyPlugins = Legacy.Server['plugins'];
-
-export interface ServerFacade {
-  config: Legacy.Server['config'];
-  info: Legacy.Server['info'];
-  log: Legacy.Server['log'];
-  newPlatform: Legacy.Server['newPlatform'];
-  plugins: {
-    elasticsearch: LegacyPlugins['elasticsearch'];
-    security: LegacyPlugins['security'];
-    xpack_main: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-  route: Legacy.Server['route'];
-  savedObjects: Legacy.Server['savedObjects'];
-  uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
-}
 
 export type EnqueueJobFn = <JobParamsType>(
   parentLogger: LevelLogger,
@@ -352,3 +333,5 @@ export interface AbsoluteURLFactoryOptions {
   hostname: string;
   port: string | number;
 }
+
+export { ServerFacade };

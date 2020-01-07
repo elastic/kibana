@@ -6,6 +6,8 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
+import { Legacy } from 'kibana';
+import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -18,14 +20,32 @@ import {
 } from './server/lib';
 import { createBrowserDriverFactory } from './server/browsers';
 import { registerReportingUsageCollector } from './server/usage';
-import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
+import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
-import { makeServerFacade } from './make_server_facade';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
+
+type LegacyPlugins = Legacy.Server['plugins'];
+
+export interface ServerFacade {
+  config: Legacy.Server['config'];
+  info: Legacy.Server['info'];
+  log: Legacy.Server['log'];
+  newPlatform: Legacy.Server['newPlatform'];
+  plugins: {
+    elasticsearch: LegacyPlugins['elasticsearch'];
+    security: LegacyPlugins['security'];
+    xpack_main: XPackMainPlugin & {
+      status?: any;
+    };
+  };
+  route: Legacy.Server['route'];
+  savedObjects: Legacy.Server['savedObjects'];
+  uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
+}
 
 export const reporting = (kibana: any) => {
   return new kibana.Plugin({
@@ -71,8 +91,21 @@ export const reporting = (kibana: any) => {
       },
     },
 
-    async init(originalServer: ServerFacade) {
-      const server = makeServerFacade(originalServer);
+    async init(server: Legacy.Server) {
+      const serverFacade: ServerFacade = {
+        config: server.config,
+        info: server.info,
+        route: server.route.bind(server),
+        newPlatform: server.newPlatform,
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch,
+          xpack_main: server.plugins.xpack_main,
+          security: server.plugins.security,
+        },
+        savedObjects: server.savedObjects,
+        uiSettingsServiceFactory: server.uiSettingsServiceFactory,
+        log: server.log.bind(server),
+      };
       const exportTypesRegistry = getExportTypesRegistry();
 
       let isCollectorReady = false;
@@ -80,18 +113,18 @@ export const reporting = (kibana: any) => {
       const { usageCollection } = server.newPlatform.setup.plugins;
       registerReportingUsageCollector(
         usageCollection,
-        server,
+        serverFacade,
         () => isCollectorReady,
         exportTypesRegistry
       );
 
-      const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(server);
+      const logger = LevelLogger.createForServer(serverFacade, [PLUGIN_ID]);
+      const browserDriverFactory = await createBrowserDriverFactory(serverFacade);
 
-      logConfiguration(server, logger);
-      runValidations(server, logger, browserDriverFactory);
+      logConfiguration(serverFacade, logger);
+      runValidations(serverFacade, logger, browserDriverFactory);
 
-      const { xpack_main: xpackMainPlugin } = server.plugins;
+      const { xpack_main: xpackMainPlugin } = serverFacade.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       (xpackMainPlugin as any).status.once('green', () => {
@@ -104,7 +137,7 @@ export const reporting = (kibana: any) => {
       isCollectorReady = true;
 
       // Reporting routes
-      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
+      registerRoutes(serverFacade, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {
