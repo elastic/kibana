@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
@@ -22,6 +22,10 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
     text: i18n.ALERTS_STACK_BY_MODULE,
     value: 'event.module',
   },
+  {
+    text: i18n.ALERTS_DOCUMENT_TYPE,
+    value: 'event.type',
+  },
 ];
 const dataKey = 'Alerts';
 const AlertsOverTimeGqlQuery = gql`
@@ -37,29 +41,38 @@ export const AlertsView = ({
   startDate,
   type,
   updateDateRange = noop,
-}: AlertsComponentsQueryProps) => (
-  <>
-    <MatrixHistogramContainer
-      dataKey={dataKey}
-      deleteQuery={deleteQuery}
-      defaultStackByOption={alertsStackByOptions[0]}
-      endDate={endDate}
-      filterQuery={filterQuery}
-      id={ID}
-      query={AlertsOverTimeGqlQuery}
-      setQuery={setQuery}
-      skip={skip}
-      sourceId="default"
-      stackByOptions={alertsStackByOptions}
-      startDate={startDate}
-      subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
-      title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
-      type={type}
-      updateDateRange={updateDateRange}
-    />
-    <EuiSpacer size="l" />
-    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
-  </>
-);
+}: AlertsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+  return (
+    <>
+      <MatrixHistogramContainer
+        dataKey={dataKey}
+        deleteQuery={deleteQuery}
+        defaultStackByOption={alertsStackByOptions[0]}
+        endDate={endDate}
+        filterQuery={filterQuery}
+        id={ID}
+        query={AlertsOverTimeGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
+        sourceId="default"
+        stackByOptions={alertsStackByOptions}
+        startDate={startDate}
+        subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
+        title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
+        type={type}
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer size="l" />
+      <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+    </>
+  );
+};
 
 AlertsView.displayName = 'AlertsView';

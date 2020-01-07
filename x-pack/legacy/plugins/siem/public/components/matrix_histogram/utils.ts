@@ -96,9 +96,8 @@ export const getCustomChartData = (
 
   if (mapping)
     return map((item: ChartSeriesData) => {
-      const customColor = get(`${item.key}.color`, mapping);
-      item.color = customColor;
-      return item;
+      const mapItem = get(item.key, mapping);
+      return { ...item, color: mapItem.color };
     }, formattedChartData);
   else return formattedChartData;
 };
@@ -123,6 +122,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
 }: MatrixHistogramQueryProps) => {
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [, dispatchToaster] = useStateToaster();
+  const [refetch, setRefetch] = useState<inputsModel.Refetch>();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
@@ -132,12 +132,11 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    setLoading(true);
+    const abortSignal = abortCtrl.signal;
 
-    async function fetchData(abortSignal: AbortSignal) {
+    async function fetchData() {
       if (!apolloClient) return null;
-
+      setLoading(true);
       return apolloClient
         .query<MatrixHistogramQuery, MatrixHistogramQueryVariables>({
           query,
@@ -197,13 +196,27 @@ export const useQuery = <Hit, Aggs, TCache = object>({
           }
         );
     }
-
-    fetchData(signal);
+    setRefetch(() => {
+      fetchData();
+    });
+    fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, isInspected, startDate, endDate]);
+  }, [
+    defaultIndex,
+    query,
+    filterQuery,
+    isInspected,
+    isHistogram,
+    stackByField,
+    sort,
+    isPtrIncluded,
+    pagination,
+    startDate,
+    endDate,
+  ]);
 
-  return { data, loading, inspect, totalCount };
+  return { data, loading, inspect, totalCount, refetch };
 };

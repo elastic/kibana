@@ -11,6 +11,7 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { noop } from 'lodash/fp';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
@@ -65,8 +66,16 @@ export const MatrixHistogram = React.memo(
     const [showInspect, setShowInspect] = useState(false);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
-    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
-    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+    const handleOnMouseEnter = useCallback(() => {
+      if (!showInspect) {
+        setShowInspect(true);
+      }
+    }, [showInspect]);
+    const handleOnMouseLeave = useCallback(() => {
+      if (showInspect) {
+        setShowInspect(false);
+      }
+    }, [showInspect]);
 
     const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
       defaultStackByOption
@@ -83,7 +92,10 @@ export const MatrixHistogram = React.memo(
       []
     );
 
-    const { data, loading, inspect, totalCount } = useQuery<{}, HistogramAggregation>({
+    const { data, loading, inspect, totalCount, refetch = noop } = useQuery<
+      {},
+      HistogramAggregation
+    >({
       dataKey,
       endDate,
       filterQuery,
@@ -101,6 +113,7 @@ export const MatrixHistogram = React.memo(
           : undefined,
       stackByField: selectedStackByOption.value,
     });
+
     useEffect(() => {
       const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
       setSubtitle(formattedSubTitle);
@@ -114,12 +127,7 @@ export const MatrixHistogram = React.memo(
 
       setBarChartData(getCustomChartData(data, mapping));
 
-      setQuery({ id, inspect, loading, refetch: undefined });
-      return () => {
-        if (deleteQuery) {
-          deleteQuery({ id });
-        }
-      };
+      setQuery({ id, inspect, loading, refetch });
     }, [totalCount, isInspected, loading, data]);
 
     return !hideHistogram ? (
@@ -134,7 +142,7 @@ export const MatrixHistogram = React.memo(
           title={
             title && selectedStackByOption ? `${title} by ${selectedStackByOption.text}` : null
           }
-          showInspect={!loading && showInspect}
+          showInspect={showInspect}
           subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
         >
           {stackByOptions && (
@@ -151,7 +159,6 @@ export const MatrixHistogram = React.memo(
             />
           )}
         </HeaderSection>
-
         {loading ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
         ) : (
