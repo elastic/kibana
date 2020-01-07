@@ -43,6 +43,7 @@ export interface CliArgs {
   optimize: boolean;
   open: boolean;
   oss: boolean;
+  runExamples: boolean;
 }
 
 export class Env {
@@ -60,8 +61,6 @@ export class Env {
   public readonly binDir: string;
   /** @internal */
   public readonly logDir: string;
-  /** @internal */
-  public readonly staticFilesDir: string;
   /** @internal */
   public readonly pluginSearchPaths: readonly string[];
 
@@ -100,14 +99,14 @@ export class Env {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
-    this.staticFilesDir = resolve(this.homeDir, 'ui');
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
-      options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
+      ...(options.cliArgs.oss ? [] : [resolve(this.homeDir, 'x-pack', 'plugins')]),
       resolve(this.homeDir, 'plugins'),
+      ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
       resolve(this.homeDir, '..', 'kibana-extra'),
-    ].filter(Boolean);
+    ];
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

@@ -33,103 +33,100 @@ interface SignalsUtilityBarProps {
   updateSignalsStatus: UpdateSignalsStatus;
 }
 
-export const SignalsUtilityBar = React.memo<SignalsUtilityBarProps>(
-  ({
-    areEventsLoading,
-    clearSelection,
-    totalCount,
-    selectedEventIds,
-    isFilteredToOpen,
-    selectAll,
-    showClearSelection,
-    updateSignalsStatus,
-    sendSignalsToTimeline,
-  }) => {
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
+  areEventsLoading,
+  clearSelection,
+  totalCount,
+  selectedEventIds,
+  isFilteredToOpen,
+  selectAll,
+  showClearSelection,
+  updateSignalsStatus,
+  sendSignalsToTimeline,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-    const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={getBatchItems(
-            areEventsLoading,
-            showClearSelection,
-            selectedEventIds,
-            updateSignalsStatus,
-            sendSignalsToTimeline,
-            closePopover,
-            isFilteredToOpen
-          )}
-        />
-      ),
-      [
-        areEventsLoading,
-        selectedEventIds,
-        updateSignalsStatus,
-        sendSignalsToTimeline,
-        isFilteredToOpen,
-      ]
-    );
+  const getBatchItemsPopoverContent = useCallback(
+    (closePopover: () => void) => (
+      <EuiContextMenuPanel
+        items={getBatchItems(
+          areEventsLoading,
+          showClearSelection,
+          selectedEventIds,
+          updateSignalsStatus,
+          sendSignalsToTimeline,
+          closePopover,
+          isFilteredToOpen
+        )}
+      />
+    ),
+    [
+      areEventsLoading,
+      selectedEventIds,
+      updateSignalsStatus,
+      sendSignalsToTimeline,
+      isFilteredToOpen,
+    ]
+  );
 
-    const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
-    const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
-      defaultNumberFormat
-    );
+  const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
+  const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
+    defaultNumberFormat
+  );
 
-    return (
-      <>
-        <UtilityBar>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText>
-                {i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}
-              </UtilityBarText>
-            </UtilityBarGroup>
+  return (
+    <>
+      <UtilityBar>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText>{i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}</UtilityBarText>
+          </UtilityBarGroup>
 
-            <UtilityBarGroup>
-              {totalCount > 0 && (
-                <>
-                  <UtilityBarText>
-                    {i18n.SELECTED_SIGNALS(
-                      showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
-                      showClearSelection ? totalCount : Object.keys(selectedEventIds).length
-                    )}
-                  </UtilityBarText>
+          <UtilityBarGroup>
+            {totalCount > 0 && (
+              <>
+                <UtilityBarText>
+                  {i18n.SELECTED_SIGNALS(
+                    showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
+                    showClearSelection ? totalCount : Object.keys(selectedEventIds).length
+                  )}
+                </UtilityBarText>
 
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                <UtilityBarAction
+                  iconSide="right"
+                  iconType="arrowDown"
+                  popoverContent={getBatchItemsPopoverContent}
+                >
+                  {i18n.BATCH_ACTIONS}
+                </UtilityBarAction>
 
-                  <UtilityBarAction
-                    iconType="listAdd"
-                    onClick={() => {
-                      if (!showClearSelection) {
-                        selectAll();
-                      } else {
-                        clearSelection();
-                      }
-                    }}
-                  >
-                    {showClearSelection
-                      ? i18n.CLEAR_SELECTION
-                      : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
-                  </UtilityBarAction>
-                </>
-              )}
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
-      </>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.selectedEventIds === nextProps.selectedEventIds &&
-      prevProps.totalCount === nextProps.totalCount &&
-      prevProps.showClearSelection === nextProps.showClearSelection
-    );
-  }
+                <UtilityBarAction
+                  iconType="listAdd"
+                  onClick={() => {
+                    if (!showClearSelection) {
+                      selectAll();
+                    } else {
+                      clearSelection();
+                    }
+                  }}
+                >
+                  {showClearSelection
+                    ? i18n.CLEAR_SELECTION
+                    : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
+                </UtilityBarAction>
+              </>
+            )}
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+    </>
+  );
+};
+
+export const SignalsUtilityBar = React.memo(
+  SignalsUtilityBarComponent,
+  (prevProps, nextProps) =>
+    prevProps.selectedEventIds === nextProps.selectedEventIds &&
+    prevProps.totalCount === nextProps.totalCount &&
+    prevProps.showClearSelection === nextProps.showClearSelection
 );

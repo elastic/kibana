@@ -445,8 +445,6 @@ const TimeseriesChartIntl = injectI18n(
         };
         this.selectedBounds = newSelectedBounds;
       } else {
-        // Don't set the brush if the selection is the full context chart domain.
-        this.setBrushVisibility(false);
         const contextXScaleDomain = this.contextXScale.domain();
         const newSelectedBounds = {
           min: moment(new Date(contextXScaleDomain[0])),
