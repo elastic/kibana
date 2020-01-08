@@ -108,7 +108,7 @@ type eventSubtypeFull =
   | 'already_running'
   | 'termination_event';
 
-type eventTypeFull = 'process_event' | 'alert_event';
+type eventTypeFull = 'process_event';
 
 export interface ProcessEvent {
   readonly event_timestamp: number;

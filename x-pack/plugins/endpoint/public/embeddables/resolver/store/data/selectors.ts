@@ -35,9 +35,13 @@ function childrenOfProcessFromGraphableProcessesPidMaps(
 function parentOfProcessFromGraphableProcessesPidMaps(
   graphableProcessesPidMaps: GraphableProcessesPidMaps,
   childProcess: ProcessEvent
-) {
+): ProcessEvent | undefined {
   const uniqueParentPid = uniqueParentPidForProcess(childProcess);
-  return graphableProcessesPidMaps.processesByUniquePid.get(uniqueParentPid);
+  if (uniqueParentPid === undefined) {
+    return undefined;
+  } else {
+    return graphableProcessesPidMaps.processesByUniquePid.get(uniqueParentPid);
+  }
 }
 
 function isProcessOnlyChildFromGraphableProcessPidMaps(
@@ -48,10 +52,15 @@ function isProcessOnlyChildFromGraphableProcessPidMaps(
     graphableProcessesPidMaps,
     childProcess
   );
-  return (
-    childrenOfProcessFromGraphableProcessesPidMaps(graphableProcessesPidMaps, parentProcess)
-      .length === 1
-  );
+  if (parentProcess === undefined) {
+    // if parent process is undefined, then the child is the root. We choose not to support multiple roots
+    return true;
+  } else {
+    return (
+      childrenOfProcessFromGraphableProcessesPidMaps(graphableProcessesPidMaps, parentProcess)
+        .length === 1
+    );
+  }
 }
 
 export function graphableProcesses(state: DataState) {
@@ -71,8 +80,9 @@ const graphableProcessesPidMaps = createSelector(
     for (const process of graphableProcesses) {
       processesByUniquePid.set(uniquePidForProcess(process), process);
       const uniqueParentPid = uniqueParentPidForProcess(process);
-      if (processesByUniqueParentPid.has(uniqueParentPid)) {
-        processesByUniqueParentPid.get(uniqueParentPid).push(process);
+      const processes = processesByUniqueParentPid.get(uniqueParentPid);
+      if (processes) {
+        processes.push(process);
       } else {
         processesByUniqueParentPid.set(uniqueParentPid, [process]);
       }
@@ -137,11 +147,11 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
   ) {
     const positions = new Map();
     const edgeLineSegments = [];
-    let parentProcess: ProcessEvent = null;
+    let parentProcess: ProcessEvent | undefined;
     let numberOfPrecedingSiblings = 0;
     let runningWidthOfPrecedingSiblings = 0;
     for (const process of levelOrder(graphableProcesses[0], childrenOfProcess)) {
-      if (parentProcess === null) {
+      if (parentProcess === undefined) {
         parentProcess = process;
         numberOfPrecedingSiblings = 0;
         runningWidthOfPrecedingSiblings = 0;
@@ -178,7 +188,11 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
               // One from the parent to the midway line,
               // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
               // A line from the child to the midway line
-              return [lineFromParentToMidwayLine(), midwayLine(), lineFromProcessToMidwayLine()];
+              return [
+                lineFromParentToMidwayLine(),
+                midwayLine(parentProcess),
+                lineFromProcessToMidwayLine(),
+              ];
             }
           } else {
             // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
@@ -205,14 +219,14 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
             ];
           }
 
-          function midwayLine() {
+          function midwayLine(parentProcessNode: ProcessEvent) {
             /* eslint-disable no-shadow */
-            const parentProcessPosition = positions.get(parentProcess);
+            const parentProcessPosition = positions.get(parentProcessNode);
             /* eslint-enable no-shadow */
-            const childrenOfParent = childrenOfProcess(parentProcess);
+            const childrenOfParent = childrenOfProcess(parentProcessNode);
             const lastChild = childrenOfParent[childrenOfParent.length - 1];
 
-            const widthOfParent = widthOfProcessSubtrees.get(parentProcess);
+            const widthOfParent = widthOfProcessSubtrees.get(parentProcessNode);
             const widthOfFirstChild = widthOfProcessSubtrees.get(process);
             const widthOfLastChild = widthOfProcessSubtrees.get(lastChild);
             const widthOfMidline = widthOfParent - widthOfFirstChild / 2 - widthOfLastChild / 2;
