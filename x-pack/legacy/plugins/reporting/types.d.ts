@@ -53,7 +53,7 @@ export interface NetworkPolicy {
   rules: NetworkPolicyRule[];
 }
 
-interface ListQuery {
+export interface ListQuery {
   page: string;
   size: string;
   ids?: string; // optional field forbids us from extending RequestQuery
@@ -81,7 +81,7 @@ export type EnqueueJobFn = <JobParamsType>(
 ) => Promise<Job>;
 
 export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
-export type ReportingRequestQuery = ListQuery | GenerateQuery; // FIXME weird
+export type ReportingRequestQuery = ListQuery | GenerateQuery;
 
 export interface ReportingRequestPre {
   management: {

@@ -5,12 +5,12 @@
  */
 
 import boom from 'boom';
+import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
   ExportTypesRegistry,
   HeadlessChromiumDriverFactory,
-  RequestFacade,
   ReportingResponseToolkit,
   Logger,
 } from '../../types';
@@ -40,7 +40,7 @@ export function registerJobGenerationRoutes(
   async function handler(
     exportTypeId: string,
     jobParams: object,
-    originalRequest: RequestFacade,
+    originalRequest: Legacy.Request,
     h: ReportingResponseToolkit
   ) {
     const request = makeRequestFacade(originalRequest);

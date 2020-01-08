@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
   ExportTypesRegistry,
   Logger,
-  RequestFacade,
   ReportingResponseToolkit,
   JobDocOutput,
   JobSource,
+  ListQuery,
 } from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
@@ -41,9 +42,9 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: RequestFacade) => {
+    handler: (originalRequest: Legacy.Request) => {
       const request = makeRequestFacade(originalRequest);
-      const { page: queryPage, size: querySize, ids: queryIds } = request.query;
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
@@ -64,7 +65,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: RequestFacade) => {
+    handler: (originalRequest: Legacy.Request) => {
       const request = makeRequestFacade(originalRequest);
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
@@ -76,7 +77,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: RequestFacade) => {
+    handler: (originalRequest: Legacy.Request) => {
       const request = makeRequestFacade(originalRequest);
       const { docId } = request.params;
 
@@ -102,7 +103,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: RequestFacade) => {
+    handler: (originalRequest: Legacy.Request) => {
       const request = makeRequestFacade(originalRequest);
       const { docId } = request.params;
 
@@ -135,7 +136,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     options: getRouteConfigDownload(),
-    handler: async (originalRequest: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(originalRequest);
       const { docId } = request.params;
 

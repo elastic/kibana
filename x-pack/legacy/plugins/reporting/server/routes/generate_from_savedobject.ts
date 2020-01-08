@@ -34,17 +34,17 @@ export function registerGenerateCsvFromSavedObject(
     method: 'POST',
     options: routeOptions,
     handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(originalRequest);
+      const requestFacade = makeRequestFacade(originalRequest);
+
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
        * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
        * 3. Ensure that details for a queued job were returned
        */
-
       let result: QueuedJobPayload<any>;
       try {
-        const jobParams = getJobParamsFromRequest(request, { isImmediate: false });
-        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
+        const jobParams = getJobParamsFromRequest(requestFacade, { isImmediate: false });
+        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, originalRequest, h); // pass the original request because the handler will make the request facade on its own
       } catch (err) {
         throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
       }

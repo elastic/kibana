@@ -83,7 +83,7 @@ export function registerGenerateFromJobParams(
         if (!jobParams) {
           throw new Error('missing jobParams!');
         }
-        response = await handler(exportType, jobParams, request, h);
+        response = await handler(exportType, jobParams, originalRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }
