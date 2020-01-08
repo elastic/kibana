@@ -6,7 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -18,7 +18,8 @@ const Overlay = styled.div`
   top: 0;
   z-index: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   padding: ${theme.gutterTypes.gutterMedium};
 `;
@@ -26,13 +27,24 @@ const Overlay = styled.div`
 interface Props {
   children: React.ReactNode;
   isLoading: boolean;
+  percentageLoaded: number;
 }
 
-export const LoadingOverlay = ({ children, isLoading }: Props) => (
+export const LoadingOverlay = ({
+  children,
+  isLoading,
+  percentageLoaded
+}: Props) => (
   <Container>
     {isLoading && (
       <Overlay>
-        <EuiLoadingChart size="xl" mono />
+        <EuiProgress
+          value={percentageLoaded}
+          max={100}
+          color="subdued"
+          size="m"
+        />
+        {/*<EuiLoadingChart size="xl" mono />*/}
       </Overlay>
     )}
     {children}
