@@ -5,7 +5,6 @@
  */
 
 import moment from 'moment';
-import { flatten } from 'lodash';
 import { ESResponse } from './fetcher';
 
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
@@ -29,10 +28,8 @@ const getBuckets = (response: ESResponse) => {
   if (response.aggregations) {
     const buckets =
       'services' in response.aggregations
-        ? flatten(
-            response.aggregations.services.buckets.map(
-              bucket => bucket.transactions.buckets
-            )
+        ? response.aggregations.services.buckets.flatMap(
+            bucket => bucket.transactions.buckets
           )
         : response.aggregations.transactions.buckets;
     return buckets;

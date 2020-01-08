@@ -70,8 +70,7 @@ export function transactionGroupsFetcher(
   const servicesAggregation = {
     services: {
       terms: {
-        field: SERVICE_NAME,
-        size: config['xpack.apm.ui.transactionGroupBucketSize']
+        field: SERVICE_NAME
       },
       aggs: transactionsAggregation
     }
