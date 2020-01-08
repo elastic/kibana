@@ -5,11 +5,13 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { CategorizationDetectorSelect } from './categorization_detector_select';
+import { ML_JOB_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { Description } from './description';
+import { CountCard, RareCard } from './detector_cards';
 
 export const CategorizationDetector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
@@ -29,12 +31,34 @@ export const CategorizationDetector: FC = () => {
     setCategorizationDetectorType(jobCreator.selectedDetectorType);
   }, [jobCreatorUpdated]);
 
+  function onCountSelection() {
+    setCategorizationDetectorType(ML_JOB_AGGREGATION.COUNT);
+  }
+  function onRareSelection() {
+    setCategorizationDetectorType(ML_JOB_AGGREGATION.RARE);
+  }
+
   return (
-    <Description>
-      <CategorizationDetectorSelect
-        changeHandler={setCategorizationDetectorType}
-        selectedDetectorType={categorizationDetectorType}
-      />
-    </Description>
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.title"
+            defaultMessage="Categorization detector"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="l" style={{ maxWidth: '824px' }}>
+        <CountCard
+          onClick={onCountSelection}
+          isSelected={categorizationDetectorType === ML_JOB_AGGREGATION.COUNT}
+        />
+        <RareCard
+          onClick={onRareSelection}
+          isSelected={categorizationDetectorType === ML_JOB_AGGREGATION.RARE}
+        />
+      </EuiFlexGroup>
+    </>
   );
 };

@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -88,6 +89,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   return (
     <>
       <CategorizationDetector />
+      <EuiHorizontalRule />
       <CategorizationField />
       {loadingData === true && (
         <LoadingWrapper height={LOADING_PLACEHOLDER_HEIGHT} hasData={false} loading={true}>
