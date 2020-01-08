@@ -312,15 +312,17 @@ export class EditRoleMappingPage extends Component<Props, State> {
         roleMapping,
       });
     } catch (e) {
-      toastNotifications.addDanger(
-        i18n.translate(
+      toastNotifications.addDanger({
+        title: i18n.translate(
           'xpack.security.management.editRoleMapping.table.fetchingRoleMappingsErrorMessage',
           {
             defaultMessage: 'Error loading role mapping editor: {message}',
             values: { message: e?.body?.message ?? '' },
           }
-        )
-      );
+        ),
+        'data-test-subj': 'errorLoadingRoleMappingEditorToast',
+      });
+      this.backToRoleMappingsList();
     }
   }
 

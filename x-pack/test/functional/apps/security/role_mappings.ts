@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -79,6 +80,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click(`deleteRoleMappingButton-new_role_mapping`);
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('deletedRoleMappingSuccessToast');
+    });
+
+    it('displays an error and returns to the listing page when navigating to a role mapping which does not exist', async () => {
+      await pageObjects.common.navigateToActualUrl(
+        'kibana',
+        '#/management/security/role_mappings/edit/i-do-not-exist',
+        { ensureCurrentUrl: false }
+      );
+
+      await testSubjects.existOrFail('errorLoadingRoleMappingEditorToast');
+
+      const url = parse(await browser.getCurrentUrl());
+
+      expect(url.hash).to.eql('#/management/security/role_mappings?_g=()');
     });
 
     describe('with role mappings', () => {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { defineRoleMappingGetRoutes } from './get';
@@ -198,6 +199,38 @@ describe('GET role mappings', () => {
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
+    });
+
+    it('returns a 404 when the role mapping is not found', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        Boom.notFound('role mapping not found!')
+      );
+
+      defineRoleMappingGetRoutes(mockRouteDefinitionParams);
+
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+
+      const name = 'mapping1';
+
+      const headers = { authorization: 'foo' };
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: `/internal/security/role_mapping/${name}`,
+        params: { name },
+        headers,
+      });
+      const mockContext = ({
+        licensing: {
+          license: { check: jest.fn().mockReturnValue({ state: LICENSE_CHECK_STATE.Valid }) },
+        },
+      } as unknown) as RequestHandlerContext;
+
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(404);
     });
   });
 });

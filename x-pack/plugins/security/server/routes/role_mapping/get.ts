@@ -6,6 +6,7 @@
 import { schema } from '@kbn/config-schema';
 import { RoleMapping } from '../../../../../legacy/plugins/security/common/model';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
 
 interface RoleMappingsResponse {
@@ -25,34 +26,39 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const roleMappingsResponse: RoleMappingsResponse = await clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.getRoleMappings', {
-          name: request.params.name,
-        });
-
       const expectSingleEntity = typeof request.params.name === 'string';
 
-      const mappings = Object.entries(roleMappingsResponse).map(([name, mapping]) => {
-        return {
-          name,
-          ...mapping,
-          role_templates: (mapping.role_templates || []).map(entry => {
-            return {
-              ...entry,
-              template: tryParseRoleTemplate(entry.template as string),
-            };
-          }),
-        } as RoleMapping;
-      });
+      try {
+        const roleMappingsResponse: RoleMappingsResponse = await clusterClient
+          .asScoped(request)
+          .callAsCurrentUser('shield.getRoleMappings', {
+            name: request.params.name,
+          });
 
-      if (expectSingleEntity) {
-        if (mappings.length === 0) {
-          return response.notFound();
+        const mappings = Object.entries(roleMappingsResponse).map(([name, mapping]) => {
+          return {
+            name,
+            ...mapping,
+            role_templates: (mapping.role_templates || []).map(entry => {
+              return {
+                ...entry,
+                template: tryParseRoleTemplate(entry.template as string),
+              };
+            }),
+          } as RoleMapping;
+        });
+
+        if (expectSingleEntity) {
+          return response.ok({ body: mappings[0] });
         }
-        return response.ok({ body: mappings[0] });
+        return response.ok({ body: mappings });
+      } catch (error) {
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          statusCode: wrappedError.output.statusCode,
+        });
       }
-      return response.ok({ body: mappings });
     })
   );
 
