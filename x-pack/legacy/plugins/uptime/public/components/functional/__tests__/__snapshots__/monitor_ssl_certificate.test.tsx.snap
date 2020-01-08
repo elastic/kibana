@@ -6,7 +6,7 @@ Array [
     class="euiSpacer euiSpacer--s"
   />,
   .c0 {
-  margin-left: 20px;
+  bottom: 0;
 }
 
 <div
