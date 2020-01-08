@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  parseTileKey,
-  getTileBoundingBoxFromTileKey,
-  expandToTileBoundaries,
-} from './geo_tile_utils';
+import { parseTileKey, getTileBoundingBox, expandToTileBoundaries } from './geo_tile_utils';
 
 it('Should parse tile key', () => {
   expect(parseTileKey('15/23423/1867')).toEqual({
@@ -20,7 +16,7 @@ it('Should parse tile key', () => {
 });
 
 it('Should convert tile key to geojson Polygon', () => {
-  const geometry = getTileBoundingBoxFromTileKey('15/23423/1867');
+  const geometry = getTileBoundingBox('15/23423/1867');
   expect(geometry).toEqual({
     top: 82.92546,
     bottom: 82.92411,
@@ -30,7 +26,7 @@ it('Should convert tile key to geojson Polygon', () => {
 });
 
 it('Should convert tile key to geojson Polygon with extra precision', () => {
-  const geometry = getTileBoundingBoxFromTileKey('26/19762828/25222702');
+  const geometry = getTileBoundingBox('26/19762828/25222702');
   expect(geometry).toEqual({
     top: 40.7491508,
     bottom: 40.7491467,

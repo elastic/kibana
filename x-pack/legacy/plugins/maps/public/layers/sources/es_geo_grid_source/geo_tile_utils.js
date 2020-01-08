@@ -71,17 +71,15 @@ function tileToLongitude(x, tileCount) {
   return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, 360 / tileCount);
 }
 
-function getTileBoundingBox({ x, y, tileCount }) {
+export function getTileBoundingBox(tileKey) {
+  const { x, y, tileCount } = parseTileKey(tileKey);
+
   return {
     top: tileToLatitude(y, tileCount),
     bottom: tileToLatitude(y + 1, tileCount),
     left: tileToLongitude(x, tileCount),
     right: tileToLongitude(x + 1, tileCount),
   };
-}
-
-export function getTileBoundingBoxFromTileKey(tileKey) {
-  return getTileBoundingBox(parseTileKey(tileKey));
 }
 
 function sec(value) {
@@ -104,24 +102,13 @@ export function expandToTileBoundaries(extent, zoom) {
 
   const upperLeftX = longitudeToTile(extent.minLon, tileCount);
   const upperLeftY = latitudeToTile(Math.min(extent.maxLat, 90), tileCount);
-  const { top, left } = getTileBoundingBox({
-    x: upperLeftX,
-    y: upperLeftY,
-    tileCount,
-  });
-
   const lowerRightX = longitudeToTile(extent.maxLon, tileCount);
   const lowerRightY = latitudeToTile(Math.max(extent.minLat, -90), tileCount);
-  const { bottom, right } = getTileBoundingBox({
-    x: lowerRightX,
-    y: lowerRightY,
-    tileCount,
-  });
 
   return {
-    minLon: left,
-    minLat: bottom,
-    maxLon: right,
-    maxLat: top,
+    minLon: tileToLongitude(upperLeftX, tileCount),
+    minLat: tileToLatitude(lowerRightY + 1, tileCount),
+    maxLon: tileToLongitude(lowerRightX + 1, tileCount),
+    maxLat: tileToLatitude(upperLeftY, tileCount),
   };
 }
