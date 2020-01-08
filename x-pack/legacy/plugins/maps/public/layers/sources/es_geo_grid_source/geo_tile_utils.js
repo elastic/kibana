@@ -103,7 +103,7 @@ export function expandToTileBoundaries(extent, zoom) {
   const tileCount = getTileCount(zoom);
 
   const upperLeftX = longitudeToTile(extent.minLon, tileCount);
-  const upperLeftY = latitudeToTile(extent.maxLat, tileCount);
+  const upperLeftY = latitudeToTile(Math.min(extent.maxLat, 90), tileCount);
   const { top, left } = getTileBoundingBox({
     x: upperLeftX,
     y: upperLeftY,
@@ -111,7 +111,7 @@ export function expandToTileBoundaries(extent, zoom) {
   });
 
   const lowerRightX = longitudeToTile(extent.maxLon, tileCount);
-  const lowerRightY = latitudeToTile(extent.minLat, tileCount);
+  const lowerRightY = latitudeToTile(Math.max(extent.minLat, -90), tileCount);
   const { bottom, right } = getTileBoundingBox({
     x: lowerRightX,
     y: lowerRightY,
