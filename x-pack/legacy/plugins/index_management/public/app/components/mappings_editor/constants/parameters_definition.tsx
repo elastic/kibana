@@ -439,7 +439,7 @@ export const PARAMETERS_DEFINITION = {
       helpText: () => (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.localeHelpText"
-          defaultMessage="You can separate the language, country, and variant using {hyphen} or {underscore} separators. Locales can have a maximum of 2 separators. Example locale: {locale}."
+          defaultMessage="To separate the language, country, and variant, use {hyphen} or {underscore} separators. Locales can have a maximum of 2 separators. Example: {locale}."
           values={{
             locale: <EuiCode>en-US</EuiCode>,
             hyphen: <EuiCode>-</EuiCode>,

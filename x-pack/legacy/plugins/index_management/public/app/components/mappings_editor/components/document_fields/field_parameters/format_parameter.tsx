@@ -42,7 +42,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       description={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription"
-          defaultMessage="The date format(s) that can be parsed. Most of the built-in formats have a {strict} companion format, which means year must use 4 digits, month must use 2 digits, and day must use 2 digits."
+          defaultMessage="The date formats to parse. Most builit-ins use {strict} date formats, where YYYY is the year, MM is the month, and DD is the day. Example: 2020/11/01."
           values={{
             strict: <EuiCode>strict</EuiCode>,
           }}
