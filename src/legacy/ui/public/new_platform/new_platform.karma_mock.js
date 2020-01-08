@@ -132,6 +132,9 @@ export const npSetup = {
         register: sinon.fake(),
       },
     },
+    spaces: {
+      registerLegacyAPI: sinon.fake(),
+    },
   },
 };
 
