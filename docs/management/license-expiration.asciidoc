@@ -13,14 +13,10 @@ essentially flying blind when running with an expired license. Access to the
 cluster health and stats APIs is critical for monitoring and managing an {es}
 cluster.
 
-[[expiration-kibana]]
-==== {kib}
+[[expiration-beats]]
+==== Beats
 
-* Users can still log into {kib}.
-* It is still usable for data exploration and visualization, but some features
-are disabled.
-* The license management UI is available to easily upgrade your license. See
-<<update-license>> and <<managing-licenses>>.
+*  Beats will continue to poll centrally-managed configuration.
 
 [[expiration-elasticsearch]]
 ==== {es}
@@ -36,15 +32,16 @@ are disabled.
 * Cannot create new pipelines or edit or delete existing pipelines from the UI.
 * Cannot list or view existing pipelines from the UI.
 * Cannot run Logstash instances which are registered to listen to existing pipelines.
-////
-TBD
-ES message: Logstash will continue to poll centrally-managed pipelines
-////
+//TBD: * Logstash will continue to poll centrally-managed pipelines
 
-[[expiration-beats]]
-==== Beats
+[[expiration-kibana]]
+==== {kib}
 
-*  Beats will continue to poll centrally-managed configuration.
+* Users can still log into {kib}.
+* It is still usable for data exploration and visualization, but some features
+are disabled.
+* The license management UI is available to easily upgrade your license. See
+<<update-license>> and <<managing-licenses>>.
 
 [[expiration-watcher]]
 ==== {stack} {alert-features}
@@ -53,17 +50,27 @@ ES message: Logstash will continue to poll centrally-managed pipelines
 * Watches execute and write to the history.
 * The actions of the watches do not execute.
 
+[[expiration-graph]]
+==== {stack} {graph-features}
+
+* Graph explore APIs are disabled.
+
+[[expiration-ml]]
+==== {stack} {ml-features}
+
+* APIs to create {anomaly-jobs}, open jobs, send data to jobs, create {dfeeds},
+and start {dfeeds} are disabled.
+* All started {dfeeds} are stopped. All open {anomaly-jobs} are closed.
+* APIs to create and start {dfanalytics-jobs} are disabled. 
+* Existing {anomaly-job} and {dfanalytics-job} results continue to be available
+by using {kib} or APIs.
+
 [[expiration-monitoring]]
 ==== {stack} {monitor-features}
 
 * The agent stops collecting cluster and indices metrics.
 * The agent stops automatically cleaning indices older than
 `xpack.monitoring.history.duration`.
-
-[[expiration-graph]]
-==== {stack} {graph-features}
-
-* Graph explore APIs are disabled.
 
 [[expiration-security]]
 ==== {stack} {security-features}
@@ -96,17 +103,6 @@ stats APIs fail with a `security_exception` and return a 403 HTTP status code.
 This message enables automatic monitoring systems to easily detect the license
 failure without immediately impacting other users.
 
-[[expiration-ml]]
-==== {stack} {ml-features}
-
-* APIs to create jobs, open jobs, send data to jobs, create {dfeeds}, and start
-{dfeeds} are disabled.
-* All started {dfeeds} are stopped. All open jobs are closed.
-* Existing job results continue to be available by using {kib} or APIs.
-////
-TBD
-ES message: Machine learning APIs are disabled
-////
 
 [[expiration-reporting]]
 ==== {kib} {report-features}
@@ -115,15 +111,16 @@ ES message: Machine learning APIs are disabled
 * Report generation URLs stop working.
 * Existing reports are no longer accessible.
 
-[[expiration-transforms]]
-==== {transforms-cap}
-
-*  {transforms-cap} cannot be created, started, or updated.
-*  Existing {transforms} can be stopped and deleted.
-
 [[expiration-rollups]]
 ==== {rollups-cap}
 
 * {rollup-jobs-cap} cannot be created or started.
 * Existing {rollup-jobs} can be stopped and deleted.
 * The get rollup caps and rollup search APIs continue to function.
+
+[[expiration-transforms]]
+==== {transforms-cap}
+
+* {transforms-cap} cannot be created, previewed, started, or updated.
+* Existing {transforms} can be stopped and deleted.
+* Existing {transform} results continue to be available.
