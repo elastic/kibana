@@ -139,7 +139,7 @@ export function KbnAggTable(config, RecursionHelper) {
                 _.get(dimension, 'format.params.id') === type;
 
               const shouldShowTotal = dimension => {
-                const allowedFormatTypes = ['number', 'duration', 'bytes'];
+                const allowedFormatTypes = ['number', 'duration', 'bytes', 'percent'];
                 return allowedFormatTypes.some(type => checkDimensionType(dimension, type));
               };
 
