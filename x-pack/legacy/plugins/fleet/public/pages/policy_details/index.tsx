@@ -20,8 +20,8 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
-import { Loading, ConnectedLink } from '../../components';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Loading, ConnectedLink, PolicyDeleteProvider } from '../../components';
 import { useLibs, sendRequest } from '../../hooks';
 import {
   useGetPolicy,
@@ -53,6 +53,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
 }) => {
   const { framework, httpClient } = useLibs();
   const { policy, isLoading, error, refreshPolicy } = useGetPolicy(policyId);
+  const [redirectToPoliciesList, setRedirectToPoliciesList] = useState<boolean>(false);
   const {
     result: agentStatus,
     isLoading: agentStatusIsLoading,
@@ -107,6 +108,10 @@ export const PolicyDetailsPage: React.FC<Props> = ({
       refreshData();
     }
   };
+
+  if (redirectToPoliciesList) {
+    return <Redirect to="/policies" />;
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -190,12 +195,35 @@ export const PolicyDetailsPage: React.FC<Props> = ({
               ) : null}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setIsEditPolicyFlyoutOpen(true)}>
-                <FormattedMessage
-                  id="xpack.fleet.policyDetails.editPolicyButtonLabel"
-                  defaultMessage="Edit"
-                />
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => setIsEditPolicyFlyoutOpen(true)} iconType="pencil">
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.editPolicyButtonLabel"
+                      defaultMessage="Edit policy"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <PolicyDeleteProvider>
+                    {deletePoliciesPrompt => (
+                      <EuiButtonEmpty
+                        color="danger"
+                        onClick={() => {
+                          deletePoliciesPrompt([policyId], () => {
+                            setRedirectToPoliciesList(true);
+                          });
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.policyDetails.deletePolicyButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    )}
+                  </PolicyDeleteProvider>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
