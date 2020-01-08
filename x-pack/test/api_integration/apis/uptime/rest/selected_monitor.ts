@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   describe('get selected monitor by ID', () => {
-    const monitorId = 'wapo';
+    const monitorId = '0002-up';
 
     const supertest = getService('supertest');
 

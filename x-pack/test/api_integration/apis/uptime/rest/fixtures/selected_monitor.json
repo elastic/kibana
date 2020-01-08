@@ -1,23 +1,28 @@
 {
-  "observer": {
-    "geo": { "name": "Islamabad", "location": "52.487448, 13.394798" },
-    "hostname": "ElasticacLoaner"
-  },
   "monitor": {
-    "duration": { "us": 8448171 },
-    "ip": "104.86.46.103",
+    "check_group": "d76f0762-d445-11e9-88e3-3e80641b9c71",
+    "duration": {
+      "us": 24627
+    },
+    "id": "0002-up",
+    "ip": "127.0.0.1",
     "name": "",
-    "timespan": { "lt": "2020-01-08T12:08:22.092Z", "gte": "2020-01-08T12:07:22.092Z" },
-    "id": "wapo",
-    "check_group": "4ec0b2e8-320f-11ea-b590-3af9d398f084",
-    "type": "http",
-    "status": "up"
+    "status": "up",
+    "type": "http"
+  },
+  "observer": {
+    "geo": {
+      "location": "37.926868, -78.024902",
+      "name": "mpls"
+    },
+    "hostname": "avc-x1x"
   },
   "url": {
-    "path": "//",
-    "scheme": "https",
-    "port": 443,
-    "domain": "www.washingtonpost.com",
-    "full": "https://www.washingtonpost.com//"
+    "domain": "localhost",
+    "full": "http://localhost:5678/pattern?r=200x1",
+    "path": "/pattern",
+    "port": 5678,
+    "query": "r=200x1",
+    "scheme": "http"
   }
 }
