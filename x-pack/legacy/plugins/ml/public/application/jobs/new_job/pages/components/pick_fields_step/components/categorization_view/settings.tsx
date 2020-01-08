@@ -8,7 +8,6 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
-import { SparseDataSwitch } from '../sparse_data';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;
@@ -20,9 +19,6 @@ export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <BucketSpan setIsValid={setIsValid} hideEstimateButton={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SparseDataSwitch />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
