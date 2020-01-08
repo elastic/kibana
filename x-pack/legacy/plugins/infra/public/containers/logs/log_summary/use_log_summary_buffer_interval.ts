@@ -13,6 +13,7 @@ const UNKNOWN_BUFFER_INTERVAL = {
   bucketSize: 0,
 };
 
+/* TODO: cleanup */
 export const useLogSummaryBufferInterval = (midpointTime: number | null, intervalSize: number) => {
   return useMemo(() => {
     if (midpointTime === null || intervalSize <= 0) {
