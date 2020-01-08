@@ -23,7 +23,15 @@ import { ByteSizeValue } from '../byte_size_value';
 const { byteSize } = schema;
 
 test('returns value by default', () => {
-  expect(byteSize().validate('123b')).toMatchSnapshot();
+  expect(byteSize().validate('123b')).toEqual(new ByteSizeValue(123));
+});
+
+test('handles numeric strings', () => {
+  expect(byteSize().validate('123')).toEqual(new ByteSizeValue(123));
+});
+
+test('handles numbers', () => {
+  expect(byteSize().validate(123)).toEqual(new ByteSizeValue(123));
 });
 
 test('is required by default', () => {
@@ -96,7 +104,7 @@ describe('#max', () => {
   });
 });
 
-test('returns error when not string or positive safe integer', () => {
+test('returns error when not valid string or positive safe integer', () => {
   expect(() => byteSize().validate(-123)).toThrowErrorMatchingSnapshot();
 
   expect(() => byteSize().validate(NaN)).toThrowErrorMatchingSnapshot();
@@ -108,4 +116,8 @@ test('returns error when not string or positive safe integer', () => {
   expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => byteSize().validate(/abc/)).toThrowErrorMatchingSnapshot();
+
+  expect(() => byteSize().validate('123foo')).toThrowErrorMatchingSnapshot();
+
+  expect(() => byteSize().validate('123 456')).toThrowErrorMatchingSnapshot();
 });

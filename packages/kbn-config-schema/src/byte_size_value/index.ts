@@ -38,7 +38,8 @@ export class ByteSizeValue {
       const number = Number(text);
       if (typeof number !== 'number' || isNaN(number)) {
         throw new Error(
-          `could not parse byte size value [${text}]. Value must be a safe positive integer.`
+          `Failed to parse [${text}] as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] ` +
+            `(e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer.`
         );
       }
       return new ByteSizeValue(number);
@@ -53,8 +54,7 @@ export class ByteSizeValue {
   constructor(private readonly valueInBytes: number) {
     if (!Number.isSafeInteger(valueInBytes) || valueInBytes < 0) {
       throw new Error(
-        `Value in bytes is expected to be a safe positive integer, ` +
-          `but provided [${valueInBytes}]`
+        `Value in bytes is expected to be a safe positive integer, but provided [${valueInBytes}].`
       );
     }
   }

@@ -128,10 +128,10 @@ Validates input data as a number.
 __Output type:__ `number`
 
 __Options:__
-  * `defaultValue: number | Reference<number> | (() => number)` - defines a default value, see [Default values](#default-values) section for more details.
-  * `validate: (value: number) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
-  * `min: number` - defines a minimum value the number should have.
-  * `max: number` - defines a maximum value the number should have.
+  * `defaultValue: number | string | Reference<number | string> | (() => number | string)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: number | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `min: number | string` - defines a minimum value the number should have.
+  * `max: number | string` - defines a maximum value the number should have.
 
 __Usage:__
 ```typescript
@@ -148,13 +148,16 @@ Validates input data as a boolean.
 __Output type:__ `boolean`
 
 __Options:__
-  * `defaultValue: boolean | Reference<boolean> | (() => boolean)` - defines a default value, see [Default values](#default-values) section for more details.
-  * `validate: (value: boolean) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `defaultValue: boolean | string | Reference<boolean | string> | (() => boolean | string)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: boolean | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
 __Usage:__
 ```typescript
 const valueSchema = schema.boolean({ defaultValue: false });
 ```
+
+__Notes:__
+* The `schema.boolean()` also supports a string as input if it equals `'true'` or `'false'` (case-insensitive).
 
 #### `schema.literal()`
 
@@ -397,7 +400,7 @@ const valueSchema = schema.byteSize({ min: '3kb' });
 ```
 
 __Notes:__
-* The string value for `schema.byteSize()` and its options supports the following prefixes: `b`, `kb`, `mb`, `gb` and `tb`.
+* The string value for `schema.byteSize()` and its options supports the following optional suffixes: `b`, `kb`, `mb`, `gb` and `tb`. The default suffix is `b`.
 * The number value is treated as a number of bytes and hence should be a positive integer, e.g. `100` is equal to `'100b'`.
 * Currently you cannot specify zero bytes with a string format and should use number `0` instead.
 
@@ -417,7 +420,7 @@ const valueSchema = schema.duration({ defaultValue: '70ms' });
 ```
 
 __Notes:__
-* The string value for `schema.duration()` supports the following prefixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`.
+* The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
 * The number value is treated as a number of milliseconds and hence should be a positive integer, e.g. `100` is equal to `'100ms'`.
 
 #### `schema.conditional()`

@@ -42,7 +42,7 @@ describe('parsing units', () => {
   });
 
   test('throws an error when unsupported unit specified', () => {
-    expect(() => ByteSizeValue.parse('1tb')).toThrowError('could not parse byte size value');
+    expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingSnapshot();
   });
 });
 
