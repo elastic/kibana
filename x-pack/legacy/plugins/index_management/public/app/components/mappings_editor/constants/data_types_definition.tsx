@@ -126,7 +126,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.dateLongDescription"
-          defaultMessage='Date fields accept strings with formatted dates ("2015-01-01" or "2015/01/01 12:10:30"), long numbers representing milliseconds since the epoch, and integers representing seconds since the epoch. Multiple date formats are allowed. Dates with timezones are converted to UTC.'
+          defaultMessage='Date fields accept strings with formatted dates ("2015/01/01 12:10:30"), long numbers representing milliseconds since the epoch, and integers representing seconds since the epoch. Multiple date formats are allowed. Dates with timezones are converted to UTC.'
         />
       </p>
     ),
