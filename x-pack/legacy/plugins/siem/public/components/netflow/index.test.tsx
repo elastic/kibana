@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../lib/helpers';

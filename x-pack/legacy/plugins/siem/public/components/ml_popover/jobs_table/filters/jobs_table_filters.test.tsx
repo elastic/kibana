@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
 import { SiemJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
