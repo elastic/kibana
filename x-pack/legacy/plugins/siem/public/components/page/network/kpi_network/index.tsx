@@ -146,6 +146,8 @@ export const KpiNetworkBaseComponent = React.memo<{
   );
 });
 
+KpiNetworkBaseComponent.displayName = 'KpiNetworkBaseComponent';
+
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
   ({ data, from, id, loading, to, narrowDateRange }) => {
     return loading ? (

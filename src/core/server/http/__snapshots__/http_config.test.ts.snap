@@ -31,11 +31,13 @@ Object {
     "enabled": true,
   },
   "cors": false,
+  "customResponseHeaders": Object {},
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
     "valueInBytes": 1048576,
   },
+  "name": "kibana-hostname",
   "port": 5601,
   "rewriteBasePath": false,
   "socketTimeout": 120000,
@@ -69,6 +71,10 @@ Object {
       "TLSv1.1",
       "TLSv1.2",
     ],
+  },
+  "xsrf": Object {
+    "disableProtection": false,
+    "whitelist": Array [],
   },
 }
 `;
