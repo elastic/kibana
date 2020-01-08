@@ -43,7 +43,7 @@ This action is send when a new policy is available, the policy is available unde
             "id": "default",
             "name": "Default",
             "type": "elasticsearch",
-            "url": "https://localhost:9200",
+            "hosts": ["https://localhost:9200"],
           }
         },
         "streams": [

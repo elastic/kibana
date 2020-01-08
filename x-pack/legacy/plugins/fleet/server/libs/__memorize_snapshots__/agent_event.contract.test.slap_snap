@@ -191,3 +191,139 @@ exports['AgentEvent Lib processEventsForCheckin Should set error for a policy if
     ]
   }
 }
+
+exports['AgentEvent Lib processEventsForCheckin Should do nothing if there is no events - find:"agent_events" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should clear error for a stream if there is a stream error event - find:"agent_events" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should clear error for a stream if there is a stream error event - bulkCreate (2)'] = {
+  "results": {
+    "saved_objects": [
+      {
+        "id": "agent_events:8b34ad50-324c-11ea-96a5-01b9c6e09978",
+        "type": "agent_events",
+        "updated_at": "2020-01-08T19:24:52.260Z",
+        "version": "WzIsMV0=",
+        "attributes": {
+          "message": "Restarting",
+          "type": "STATE",
+          "subtype": "IN_PROGRESS",
+          "stream_id": "stream-1",
+          "timestamp": "2019-11-07T18:43:46.773Z"
+        },
+        "references": []
+      }
+    ]
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a stream if there is a stream error event - find:"agent_events" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agent_events",
+        "id": "8b34ad50-324c-11ea-96a5-01b9c6e09978",
+        "attributes": {
+          "message": "Restarting",
+          "type": "STATE",
+          "subtype": "IN_PROGRESS",
+          "stream_id": "stream-1",
+          "timestamp": "2019-11-07T18:43:46.773Z"
+        },
+        "references": [],
+        "updated_at": "2020-01-08T19:24:52.260Z",
+        "version": "WzIsMV0="
+      }
+    ]
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a stream if there is a stream error event - delete (2)'] = {
+  "results": {}
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a stream if there is a stream error event - bulkCreate (3)'] = {
+  "results": {
+    "saved_objects": [
+      {
+        "id": "agent_events:8c0fcb10-324c-11ea-96a5-01b9c6e09978",
+        "type": "agent_events",
+        "updated_at": "2020-01-08T19:24:53.697Z",
+        "version": "WzQsMV0=",
+        "attributes": {
+          "message": "Invalid path /foo",
+          "type": "ERROR",
+          "subtype": "CONFIG",
+          "stream_id": "stream-1",
+          "timestamp": "2019-11-07T18:43:46.773Z"
+        },
+        "references": []
+      }
+    ]
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a policy if there is a global error event - find:"agent_events" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agent_events",
+        "id": "8c0fcb10-324c-11ea-96a5-01b9c6e09978",
+        "attributes": {
+          "message": "Invalid path /foo",
+          "type": "ERROR",
+          "subtype": "CONFIG",
+          "stream_id": "stream-1",
+          "timestamp": "2019-11-07T18:43:46.773Z"
+        },
+        "references": [],
+        "updated_at": "2020-01-08T19:24:53.697Z",
+        "version": "WzQsMV0="
+      }
+    ]
+  }
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a policy if there is a global error event - delete (2)'] = {
+  "results": {}
+}
+
+exports['AgentEvent Lib processEventsForCheckin Should set error for a policy if there is a global error event - bulkCreate (3)'] = {
+  "results": {
+    "saved_objects": [
+      {
+        "id": "agent_events:8d462830-324c-11ea-96a5-01b9c6e09978",
+        "type": "agent_events",
+        "updated_at": "2020-01-08T19:24:55.731Z",
+        "version": "WzYsMV0=",
+        "attributes": {
+          "message": "Invalid path /foo",
+          "type": "ERROR",
+          "subtype": "CONFIG",
+          "timestamp": "2019-11-07T18:43:46.773Z"
+        },
+        "references": []
+      }
+    ]
+  }
+}

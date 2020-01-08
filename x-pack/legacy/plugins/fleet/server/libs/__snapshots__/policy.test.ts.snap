@@ -6,11 +6,13 @@ Object {
   "outputs": Object {
     "default": Object {
       "api_token": "slfhsdlfhjjkshfkjh:sdfsdfsdfsdf",
+      "hosts": Array [
+        "https://localhost:9200",
+      ],
       "id": "default",
       "name": "Default",
       "tlsCert": "ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh",
       "type": "elasticsearch",
-      "url": "https://localhost:9200",
     },
   },
   "streams": Array [

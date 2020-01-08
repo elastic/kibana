@@ -30,7 +30,7 @@ jest.mock('./policy', () => ({
             id: 'default',
             name: 'Default',
             type: 'elasticsearch',
-            url: 'https://localhost:9200',
+            hosts: ['https://localhost:9200'],
             tlsCert: 'ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh',
           },
         },

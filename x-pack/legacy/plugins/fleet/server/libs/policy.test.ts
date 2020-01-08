@@ -37,7 +37,7 @@ describe('Policies Lib', () => {
               id,
               name: 'Default',
               type: 'elasticsearch',
-              url: 'https://localhost:9200',
+              hosts: ['https://localhost:9200'],
             };
           });
         },
