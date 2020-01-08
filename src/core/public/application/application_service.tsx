@@ -46,7 +46,7 @@ interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
-  showConfirmation?: (msg: string | undefined) => boolean;
+  history?: History<any>;
   /**
    * Only necessary for redirecting to legacy apps
    * @deprecated
@@ -97,12 +97,12 @@ export class ApplicationService {
     http: { basePath },
     injectedMetadata,
     redirectTo = (path: string) => (window.location.href = path),
-    showConfirmation = (msg: string | undefined) => window.confirm(msg),
+    history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
     // Only setup history if we're not in legacy mode
     if (!injectedMetadata.getLegacyMode()) {
-      this.history = createBrowserHistory({ basename });
+      this.history = history || createBrowserHistory({ basename });
     }
 
     // If we do not have history available, use redirectTo to do a full page refresh.
