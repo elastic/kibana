@@ -88,13 +88,19 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
 
       if (indexPattern !== undefined) {
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        // Check dependent_variable field type to see if .keyword suffix is required for evaluate endpoint
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        // If dependent_variable is of type keyword and text .keyword suffix is required for evaluate endpoint
         const { fields } = newJobCapsService;
         const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
 
-        if (depVarFieldType !== undefined) {
-          requiresKeyword = depVarFieldType === ES_FIELD_TYPES.KEYWORD;
+        // If it's a keyword type - check if it has a corresponding text type
+        if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.KEYWORD) {
+          const field = newJobCapsService.getFieldById(dependentVariable.replace(/\.keyword$/, ''));
+          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+        } else if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.TEXT) {
+          // If text, check if has corresponding keyword type
+          const field = newJobCapsService.getFieldById(`${dependentVariable}.keyword`);
+          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
         }
       }
     } catch (e) {
