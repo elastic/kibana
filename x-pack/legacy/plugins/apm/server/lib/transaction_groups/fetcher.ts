@@ -79,6 +79,7 @@ export function transactionGroupsFetcher(
 
   const isTopTraces = options.type === 'top_traces';
   if (isTopTraces) {
+    // Delete the projection aggregation when searching for traces, as it should use the combined aggregation instead
     delete projection.body.aggs;
   }
 
