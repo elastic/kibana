@@ -9,15 +9,19 @@ Array [
       Up in 2/2 Locations
     </h2>
   </div>,
-  <a
-    aria-label="Monitor URL link"
-    class="euiLink euiLink--primary"
-    href="https://www.example.com/"
-    rel="noopener noreferrer"
-    target="_blank"
+  <div
+    class="euiText euiText--medium"
   >
-    https://www.example.com/
-  </a>,
+    <a
+      aria-label="Monitor URL link"
+      class="euiLink euiLink--primary"
+      href="https://www.example.com/"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      https://www.example.com/
+    </a>
+  </div>,
   <span
     class="euiTextColor euiTextColor--subdued euiTitle euiTitle--xsmall"
   >

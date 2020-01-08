@@ -14,7 +14,7 @@ import { MonitorLocations } from '../../../../common/runtime_types';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
-  margin-right: 10px;
+  margin-right: 20px;
 `;
 
 interface LocationMapProps {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTitle, EuiTextColor, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiTitle, EuiTextColor, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
@@ -42,9 +42,11 @@ export const MonitorStatusBarComponent = ({
   return (
     <>
       <StatusByLocations locations={monitorLocations?.locations ?? []} />
-      <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-        {full}
-      </EuiLink>
+      <EuiText>
+        <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
+          {full}
+        </EuiLink>
+      </EuiText>
       <EuiTitle size="xs">
         <EuiTextColor color="subdued">
           <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
