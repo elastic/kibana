@@ -30,7 +30,7 @@
       {
         "url_name": "APM",
         "time_range": "2h",
-        "url_value": "apm#/services/$service.name$/transactions?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=&transactionType=request"
+        "url_value": "apm#/services?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=&transactionType=request"
       }
     ]
   }

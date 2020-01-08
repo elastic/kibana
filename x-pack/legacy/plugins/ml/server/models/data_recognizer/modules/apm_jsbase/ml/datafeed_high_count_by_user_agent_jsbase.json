@@ -8,7 +8,8 @@
     "bool": {
       "must": [
         { "bool": { "filter": { "term": { "agent.name": "js-base" } } } },
-        { "bool": { "filter": [{ "exists": { "field": "user_agent.name" } }] } }
+        { "bool": { "filter": [{ "exists": { "field": "user_agent.name" } }] } },
+        { "bool": { "filter": { "term": { "processor.event": "transaction" } } } }
       ]
     }
   }
