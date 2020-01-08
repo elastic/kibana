@@ -18,8 +18,6 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../lib/kibana');
-
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../containers/detection_engine/rules/fetch_index_patterns');
 mockUseFetchIndexPatterns.mockImplementation(() => [
