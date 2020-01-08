@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniquePidForProcess, uniqueParentPidForProcess } from '../models/process_event';
+import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
 import { IndexedProcessTree, ProcessEvent } from '../types';
 
 /**

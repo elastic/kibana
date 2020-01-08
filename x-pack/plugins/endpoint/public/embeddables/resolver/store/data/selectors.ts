@@ -5,15 +5,17 @@
  */
 
 import { createSelector } from 'reselect';
-import { DataState, ProcessEvent, GraphableProcessesPidMaps } from '../../types';
+import { DataState, ProcessEvent } from '../../types';
 import { levelOrder } from '../../lib/tree_sequencers';
 import { Vector2 } from '../../types';
 import { add as vector2Add } from '../../lib/vector2';
+import { isGraphableProcess } from '../../models/process_event';
 import {
-  isGraphableProcess,
-  uniquePidForProcess,
-  uniqueParentPidForProcess,
-} from '../../models/process_event';
+  factory as indexedProcessTreeFactory,
+  children as indexedProcessTreeChildren,
+  parent as indexedProcessTreeParent,
+  isOnlyChild as indexedProcessTreeIsOnlyChild,
+} from '../../models/indexed_process_tree';
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
@@ -27,85 +29,19 @@ function yHalfWayBetweenSourceAndTarget(sourcePosition: Vector2, targetPosition:
   return sourcePosition[1] + (targetPosition[1] - sourcePosition[1]) / 2;
 }
 
-function childrenOfProcessFromGraphableProcessesPidMaps(
-  graphableProcessesPidMaps: GraphableProcessesPidMaps,
-  parentProcess: ProcessEvent
-) {
-  const uniqueParentPid = uniquePidForProcess(parentProcess);
-  const children = graphableProcessesPidMaps.processesByUniqueParentPid.get(uniqueParentPid);
-  return children === undefined ? [] : children;
-}
-
-function parentOfProcessFromGraphableProcessesPidMaps(
-  graphableProcessesPidMaps: GraphableProcessesPidMaps,
-  childProcess: ProcessEvent
-): ProcessEvent | undefined {
-  const uniqueParentPid = uniqueParentPidForProcess(childProcess);
-  if (uniqueParentPid === undefined) {
-    return undefined;
-  } else {
-    return graphableProcessesPidMaps.processesByUniquePid.get(uniqueParentPid);
-  }
-}
-
-function isProcessOnlyChildFromGraphableProcessPidMaps(
-  graphableProcessesPidMaps: GraphableProcessesPidMaps,
-  childProcess: ProcessEvent
-) {
-  const parentProcess = parentOfProcessFromGraphableProcessesPidMaps(
-    graphableProcessesPidMaps,
-    childProcess
-  );
-  if (parentProcess === undefined) {
-    // if parent process is undefined, then the child is the root. We choose not to support multiple roots
-    return true;
-  } else {
-    return (
-      childrenOfProcessFromGraphableProcessesPidMaps(graphableProcessesPidMaps, parentProcess)
-        .length === 1
-    );
-  }
-}
-
 export function graphableProcesses(state: DataState) {
   return state.results.filter(isGraphableProcess);
 }
 
-const graphableProcessesPidMaps = createSelector(
-  graphableProcesses,
-  function graphableProcessesPidMaps(
-    /* eslint-disable no-shadow */
-    graphableProcesses
-    /* eslint-disable no-shadow */
-  ): GraphableProcessesPidMaps {
-    const processesByUniqueParentPid = new Map<number | undefined, ProcessEvent[]>();
-    const processesByUniquePid = new Map<number, ProcessEvent>();
-
-    for (const process of graphableProcesses) {
-      processesByUniquePid.set(uniquePidForProcess(process), process);
-      const uniqueParentPid = uniqueParentPidForProcess(process);
-      const processes = processesByUniqueParentPid.get(uniqueParentPid);
-      if (processes) {
-        processes.push(process);
-      } else {
-        processesByUniqueParentPid.set(uniqueParentPid, [process]);
-      }
-    }
-
-    return {
-      processesByUniqueParentPid,
-      processesByUniquePid,
-    };
-  }
-);
+const indexedProcessTree = createSelector(graphableProcesses, indexedProcessTreeFactory);
 
 const widthOfProcessSubtrees = createSelector(
   graphableProcesses,
-  graphableProcessesPidMaps,
+  indexedProcessTree,
   function widthOfProcessSubtrees(
     /* eslint-disable no-shadow */
     graphableProcesses,
-    graphableProcessesPidMaps
+    indexedProcessTree
     /* eslint-enable no-shadow */
   ) {
     const widths = new Map<ProcessEvent, number>();
@@ -115,11 +51,13 @@ const widthOfProcessSubtrees = createSelector(
     }
 
     const processesInReverseLevelOrder = [
-      ...levelOrder(graphableProcesses[0], childrenOfProcess),
+      ...levelOrder(graphableProcesses[0], (child: ProcessEvent) =>
+        indexedProcessTreeChildren(indexedProcessTree, child)
+      ),
     ].reverse();
 
     for (const process of processesInReverseLevelOrder) {
-      const children = childrenOfProcess(process);
+      const children = indexedProcessTreeChildren(indexedProcessTree, process);
 
       const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
         return children.reduce(function sum(currentValue, child) {
@@ -136,24 +74,17 @@ const widthOfProcessSubtrees = createSelector(
     }
 
     return widths;
-
-    function childrenOfProcess(parentProcess: ProcessEvent) {
-      return childrenOfProcessFromGraphableProcessesPidMaps(
-        graphableProcessesPidMaps,
-        parentProcess
-      );
-    }
   }
 );
 
 export const processNodePositionsAndEdgeLineSegments = createSelector(
   graphableProcesses,
-  graphableProcessesPidMaps,
+  indexedProcessTree,
   widthOfProcessSubtrees,
   function processNodePositionsAndEdgeLineSegments(
     /* eslint-disable no-shadow */
     graphableProcesses,
-    graphableProcessesPidMaps,
+    indexedProcessTree,
     widthOfProcessSubtrees
     /* eslint-enable no-shadow */
   ) {
@@ -164,15 +95,18 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     let runningWidthOfPrecedingSiblings = 0;
 
     if (graphableProcesses.length !== 0) {
-      for (const process of levelOrder(graphableProcesses[0], childrenOfProcess)) {
+      for (const process of levelOrder(graphableProcesses[0], (child: ProcessEvent) =>
+        indexedProcessTreeChildren(indexedProcessTree, child)
+      )) {
         if (parentProcess === undefined) {
           parentProcess = process;
           numberOfPrecedingSiblings = 0;
           runningWidthOfPrecedingSiblings = 0;
           positions.set(process, [0, 0]);
         } else {
-          if (parentProcess !== parentOfProcess(process)) {
-            parentProcess = parentOfProcess(process);
+          const currentParent = indexedProcessTreeParent(indexedProcessTree, process);
+          if (parentProcess !== currentParent) {
+            parentProcess = currentParent;
             numberOfPrecedingSiblings = 0;
             runningWidthOfPrecedingSiblings = 0;
           }
@@ -196,7 +130,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
             // If this is the first child
             if (numberOfPrecedingSiblings === 0) {
-              if (isProcessOnlyChild(process)) {
+              if (indexedProcessTreeIsOnlyChild(indexedProcessTree, process)) {
                 // add a single line segment directly from parent to child
                 return [[parentProcessPosition, position]];
               } else {
@@ -239,7 +173,10 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
               /* eslint-disable no-shadow */
               const parentProcessPosition = positions.get(parentProcessNode);
               /* eslint-enable no-shadow */
-              const childrenOfParent = childrenOfProcess(parentProcessNode);
+              const childrenOfParent = indexedProcessTreeChildren(
+                indexedProcessTree,
+                parentProcessNode
+              );
               const lastChild = childrenOfParent[childrenOfParent.length - 1];
 
               const widthOfParent = widthOfProcessSubtrees.get(parentProcessNode);
@@ -270,25 +207,6 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
           runningWidthOfPrecedingSiblings += widthOfProcessSubtrees.get(process);
         }
       }
-    }
-
-    function childrenOfProcess(
-      /* eslint-disable no-shadow */
-      parentProcess: ProcessEvent
-      /* eslint-enable no-shadow */
-    ) {
-      return childrenOfProcessFromGraphableProcessesPidMaps(
-        graphableProcessesPidMaps,
-        parentProcess
-      );
-    }
-
-    function parentOfProcess(childProcess: ProcessEvent) {
-      return parentOfProcessFromGraphableProcessesPidMaps(graphableProcessesPidMaps, childProcess);
-    }
-
-    function isProcessOnlyChild(childProcess: ProcessEvent) {
-      return isProcessOnlyChildFromGraphableProcessPidMaps(graphableProcessesPidMaps, childProcess);
     }
 
     return {
