@@ -53,7 +53,12 @@ export function registerSearchRoute({
             },
           });
         } catch (error) {
-          throw Boom.boomify(error, { statusCode: error.statusCode || 500 });
+          return response.customError({
+            statusCode: error.statusCode || 500,
+            body: {
+              message: error.message,
+            },
+          });
         }
       }
     )
