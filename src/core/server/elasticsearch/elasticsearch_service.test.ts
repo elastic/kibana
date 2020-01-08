@@ -30,6 +30,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
+import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
@@ -67,6 +68,27 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
+  });
+
+  it('returns data and admin client as a part of the contract', async () => {
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    MockClusterClient.mockImplementationOnce(
+      () => mockAdminClusterClientInstance
+    ).mockImplementationOnce(() => mockDataClusterClientInstance);
+
+    const setupContract = await elasticsearchService.setup(deps);
+
+    const adminClient = setupContract.adminClient;
+    const dataClient = setupContract.dataClient;
+
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    await adminClient.callAsInternalUser('any');
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+
+    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    await dataClient.callAsInternalUser('any');
+    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
   });
 
   it('returns data and admin client observables as a part of the contract', async () => {

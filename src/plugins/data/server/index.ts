@@ -47,6 +47,8 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // utils
+  parseInterval,
 } from '../common';
 
 /**

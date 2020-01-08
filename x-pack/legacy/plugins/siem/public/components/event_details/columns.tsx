@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -13,7 +15,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
