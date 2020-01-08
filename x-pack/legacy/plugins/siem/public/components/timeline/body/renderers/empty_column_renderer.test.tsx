@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
@@ -36,7 +35,7 @@ describe('empty_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should return isInstance true if source is empty', () => {

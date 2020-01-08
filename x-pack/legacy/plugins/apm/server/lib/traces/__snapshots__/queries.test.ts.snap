@@ -16,6 +16,7 @@ Object {
               "processor.event": Array [
                 "span",
                 "transaction",
+                "error",
               ],
             },
           },

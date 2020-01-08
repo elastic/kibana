@@ -283,9 +283,7 @@ export const getResult = (): RuleAlertType => ({
     ],
     riskScore: 50,
     maxSignals: 100,
-    size: 1,
     severity: 'high',
-    tags: [],
     to: 'now',
     type: 'query',
     threats: [

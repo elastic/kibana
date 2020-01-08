@@ -9,7 +9,7 @@ import React, { useContext } from 'react';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position';
+import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
 import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogEntriesState } from '../../../containers/logs/log_entries';
 
@@ -28,17 +28,23 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
-  const { timeKey, pagesBeforeStart, pagesAfterEnd, isAutoReloading } = useContext(
-    LogPositionState.Context
-  );
+  const {
+    targetPosition,
+    pagesBeforeStart,
+    pagesAfterEnd,
+    isAutoReloading,
+    jumpToTargetPosition,
+  } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
+
   const entriesProps = {
-    timeKey,
+    timeKey: targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
     filterQuery,
     sourceId,
     isAutoReloading,
+    jumpToTargetPosition,
   };
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
 };
@@ -62,6 +68,7 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
     <LogViewConfiguration.Provider>
       <LogFlyout.Provider>
         <LogPositionState.Provider>
+          <WithLogPositionUrlState />
           <LogFilterStateProvider>
             <LogEntriesStateProvider>
               <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>

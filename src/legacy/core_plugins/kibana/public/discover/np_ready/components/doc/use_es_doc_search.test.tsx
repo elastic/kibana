@@ -43,7 +43,7 @@ describe('Test of <Doc /> helper / hook', () => {
     `);
   });
 
-  test('useEsDocSearch', () => {
+  test('useEsDocSearch', async () => {
     const indexPattern = {
       getComputedFields: () => [],
     };
@@ -53,16 +53,16 @@ describe('Test of <Doc /> helper / hook', () => {
     const props = {
       id: '1',
       index: 'index1',
-      esClient: { search: jest.fn() },
+      esClient: { search: jest.fn(() => new Promise(() => {})) },
       indexPatternId: 'xyz',
       indexPatternService,
     } as DocProps;
     let hook;
-    act(() => {
+    await act(async () => {
       hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
     });
     // @ts-ignore
-    expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, null]);
+    expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, indexPattern]);
     expect(indexPatternService.get).toHaveBeenCalled();
   });
 });
