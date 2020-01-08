@@ -41,7 +41,7 @@ export const getMockKbnServer = (
   newPlatform: {
     start: {
       plugins: {
-        kibanaTaskManager: {
+        taskManager: {
           registerTaskDefinitions: () => undefined,
           schedule: () => Promise.resolve(),
           fetch: mockTaskFetch,

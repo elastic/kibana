@@ -11,7 +11,7 @@ import {
   TaskStatus,
   TaskManagerStartContract,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 
 export const getMockTaskInstance = (
   overrides: Partial<ConcreteTaskInstance> = {}

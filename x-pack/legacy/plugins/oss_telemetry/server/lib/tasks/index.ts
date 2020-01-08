@@ -13,7 +13,7 @@ import {
   TaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
-} from '../../../../../../plugins/kibana_task_manager/server';
+} from '../../../../../../plugins/task_manager/server';
 
 export function registerTasks({
   taskManager,

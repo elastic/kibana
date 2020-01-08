@@ -8,7 +8,7 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { Server } from 'src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TaskManagerStartContract } from '../../../../../plugins/kibana_task_manager/server';
+import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
 
 import { LensUsage, LensTelemetryState } from './types';
 
@@ -79,8 +79,7 @@ async function isTaskManagerReady(server: Server) {
 }
 
 async function getLatestTaskState(server: Server) {
-  const taskManager = server.newPlatform.start.plugins
-    .kibanaTaskManager as TaskManagerStartContract;
+  const taskManager = server.newPlatform.start.plugins.taskManager as TaskManagerStartContract;
 
   if (!taskManager) {
     return null;

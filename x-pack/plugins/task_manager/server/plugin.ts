@@ -36,7 +36,7 @@ export class TaskManagerPlugin
   }
 
   public setup(core: CoreSetup, plugins: any): TaskManagerSetupContract {
-    const logger = this.initContext.logger.get('kibanaTaskManager');
+    const logger = this.initContext.logger.get('taskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
     const savedObjectsRepository = core.savedObjects.createInternalRepository(['task']);
     const elasticsearch = core.elasticsearch.adminClient;

@@ -15,7 +15,7 @@ import { lensServerPlugin } from './server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../plugins/kibana_task_manager/server/index.js';
+} from '../../../plugins/task_manager/server/index.js';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -69,12 +69,12 @@ export const lens: LegacyPluginInitializer = kibana => {
         savedObjects: server.savedObjects,
         config: server.config(),
         server,
-        taskManager: server.newPlatform.setup.plugins.kibanaTaskManager as TaskManagerSetupContract,
+        taskManager: server.newPlatform.setup.plugins.taskManager as TaskManagerSetupContract,
       });
 
       plugin.start((kbnServer.newPlatform.start.core as unknown) as CoreStart, {
         server,
-        taskManager: server.newPlatform.start.plugins.kibanaTaskManager as TaskManagerStartContract,
+        taskManager: server.newPlatform.start.plugins.taskManager as TaskManagerStartContract,
       });
 
       server.events.on('stop', () => {

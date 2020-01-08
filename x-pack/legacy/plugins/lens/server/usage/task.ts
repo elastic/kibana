@@ -19,7 +19,7 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../plugins/kibana_task_manager/server';
+} from '../../../../../plugins/task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
 

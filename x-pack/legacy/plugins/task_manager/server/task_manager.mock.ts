@@ -7,7 +7,7 @@
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 import { Subject } from 'rxjs';
 
 export const taskManagerMock = {

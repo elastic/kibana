@@ -8,12 +8,12 @@ import { Server } from 'src/legacy/server/kbn_server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 
 export function getTaskManagerSetup(server: Server): TaskManagerSetupContract | undefined {
-  return server?.newPlatform?.setup?.plugins?.kibanaTaskManager as TaskManagerSetupContract;
+  return server?.newPlatform?.setup?.plugins?.taskManager as TaskManagerSetupContract;
 }
 
 export function getTaskManagerStart(server: Server): TaskManagerStartContract | undefined {
-  return server?.newPlatform?.start?.plugins?.kibanaTaskManager as TaskManagerStartContract;
+  return server?.newPlatform?.start?.plugins?.taskManager as TaskManagerStartContract;
 }

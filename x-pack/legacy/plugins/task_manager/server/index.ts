@@ -8,13 +8,13 @@ import { Root } from 'joi';
 import { Legacy } from 'kibana';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManagerSetupContract } from '../../../../plugins/kibana_task_manager/server';
+import { TaskManagerSetupContract } from '../../../../plugins/task_manager/server';
 
 export { getTaskManagerSetup, getTaskManagerStart } from './legacy';
 
 // Once all plugins are migrated to NP, this can be removed
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TaskManager } from '../../../../plugins/kibana_task_manager/server/task_manager';
+import { TaskManager } from '../../../../plugins/task_manager/server/task_manager';
 
 const savedObjectSchemas = {
   task: {
@@ -45,12 +45,12 @@ export function taskManager(kibana: any) {
       const {
         newPlatform: {
           setup: {
-            plugins: { kibanaTaskManager },
+            plugins: { taskManager: taskManagerPluginApi },
           },
         },
       } = server;
 
-      await (kibanaTaskManager as TaskManagerSetupContract)
+      await (taskManagerPluginApi as TaskManagerSetupContract)
         .registerLegacyAPI({
           savedObjectSchemas,
         })

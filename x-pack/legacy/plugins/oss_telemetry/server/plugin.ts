@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';

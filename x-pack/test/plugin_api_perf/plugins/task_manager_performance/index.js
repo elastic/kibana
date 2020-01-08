@@ -24,8 +24,8 @@ export default function TaskManagerPerformanceAPI(kibana) {
 
     init(server) {
       const taskManager = {
-        ...server.newPlatform.setup.plugins.kibanaTaskManager,
-        ...server.newPlatform.start.plugins.kibanaTaskManager,
+        ...server.newPlatform.setup.plugins.taskManager,
+        ...server.newPlatform.start.plugins.taskManager,
       };
       const performanceState = resetPerfState({});
 

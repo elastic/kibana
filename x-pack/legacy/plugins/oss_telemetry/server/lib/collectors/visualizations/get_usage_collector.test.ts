@@ -9,12 +9,12 @@ import {
   getMockThrowingTaskFetch,
   getMockTaskInstance,
 } from '../../../../test_utils';
-import { taskManagerMock } from '../../../../../../../plugins/kibana_task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../../../../plugins/task_manager/server/task_manager.mock';
 import { getUsageCollector } from './get_usage_collector';
 
 describe('getVisualizationsCollector#fetch', () => {
   test('can return empty stats', async () => {
-    const { type, fetch } = getUsageCollector(taskManagerMock.start());
+    const { type, fetch } = getUsageCollector(taskManagerMock.start(getMockTaskFetch()));
     expect(type).toBe('visualization_types');
     const fetchResult = await fetch();
     expect(fetchResult).toEqual({});

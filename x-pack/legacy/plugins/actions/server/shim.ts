@@ -11,7 +11,7 @@ import { ActionsConfigType } from './types';
 import {
   TaskManagerStartContract,
   TaskManagerSetupContract,
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
@@ -130,7 +130,7 @@ export function shim(
 
   const pluginsSetup: ActionsPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
-    task_manager: newPlatform.setup.plugins.kibanaTaskManager as TaskManagerSetupContract,
+    task_manager: newPlatform.setup.plugins.taskManager as TaskManagerSetupContract,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
@@ -144,7 +144,7 @@ export function shim(
     spaces: () => server.plugins.spaces,
     encryptedSavedObjects: newPlatform.start.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
-    task_manager: newPlatform.start.plugins.kibanaTaskManager as TaskManagerStartContract,
+    task_manager: newPlatform.start.plugins.taskManager as TaskManagerStartContract,
   };
 
   return {

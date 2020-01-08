@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
-import { TaskManagerStartContract } from '../../../../../../../plugins/kibana_task_manager/server';
+import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
 
 async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
   const result = await fetch(taskManager);

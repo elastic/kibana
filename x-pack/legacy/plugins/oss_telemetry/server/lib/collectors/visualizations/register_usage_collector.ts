@@ -5,7 +5,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TaskManagerStartContract } from '../../../../../../../plugins/kibana_task_manager/server';
+import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(

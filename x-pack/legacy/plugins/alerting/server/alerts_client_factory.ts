@@ -12,7 +12,7 @@ import { SecurityPluginStartContract } from './shim';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { InvalidateAPIKeyParams } from '../../../../plugins/security/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../../plugins/kibana_task_manager/server';
+import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 export interface ConstructorOpts {
   logger: Logger;

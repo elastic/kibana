@@ -10,7 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../plugins/kibana_task_manager/server';
+} from '../../../../plugins/task_manager/server';
 import { setupRoutes } from './routes';
 import {
   registerLensUsageCollector,
