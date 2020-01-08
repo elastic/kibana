@@ -81,6 +81,7 @@ export class CategorizationJobCreator extends JobCreator {
     } else {
       this._createRareDetector();
       this.bucketSpan = DEFAULT_RARE_BUCKET_SPAN;
+      this.modelPlot = false;
     }
   }
 
