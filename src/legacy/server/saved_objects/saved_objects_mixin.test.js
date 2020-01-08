@@ -106,12 +106,7 @@ describe('Saved Objects Mixin', () => {
       newPlatform: {
         __internals: {
           elasticsearch: {
-            adminClient$: {
-              pipe: jest.fn().mockImplementation(() => ({
-                toPromise: () =>
-                  Promise.resolve({ adminClient: { callAsInternalUser: mockCallCluster } }),
-              })),
-            },
+            adminClient: { callAsInternalUser: mockCallCluster },
           },
         },
       },

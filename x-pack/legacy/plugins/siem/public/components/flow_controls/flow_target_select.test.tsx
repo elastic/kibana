@@ -5,9 +5,8 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { clone } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowDirection, FlowTarget } from '../../graphql/types';
@@ -31,7 +30,7 @@ describe('FlowTargetSelect Component', () => {
     test('it renders the FlowTargetSelect', () => {
       const wrapper = shallow(<FlowTargetSelect {...mockProps} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
