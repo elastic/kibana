@@ -154,6 +154,7 @@ Object {
     },
   },
   "enabled": true,
+  "encryptionKey": null,
   "index": ".reporting",
   "kibanaServer": Object {},
   "poll": Object {
@@ -335,6 +336,7 @@ Object {
     },
   },
   "enabled": true,
+  "encryptionKey": null,
   "index": ".reporting",
   "kibanaServer": Object {},
   "poll": Object {
