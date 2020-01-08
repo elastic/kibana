@@ -114,12 +114,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/vis_type_vega/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -247,6 +241,7 @@ module.exports = {
                   '!x-pack/test/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'src/core/(public|server)/**/*',
+                  'examples/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
@@ -283,11 +278,15 @@ module.exports = {
                   'x-pack/legacy/plugins/**/*',
                   '!x-pack/legacy/plugins/*/server/**/*',
                   '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+
+                  'examples/**/*',
+                  '!examples/**/server/**/*',
                 ],
                 from: [
                   'src/core/server',
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
+                  'examples/**/server/**/*',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
@@ -737,10 +736,10 @@ module.exports = {
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
-        // This style will be turned on after most bugs are fixed
-        // 'prefer-template': 'warn',
+        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
+        'react/display-name': 'error',
         'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
         'react/no-children-prop': 'error',
