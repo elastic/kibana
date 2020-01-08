@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { set } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';

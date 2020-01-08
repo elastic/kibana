@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../mock';
 import { flyoutHeaderHeight } from '..';
@@ -15,8 +15,6 @@ import { Pane } from '.';
 const testFlyoutHeight = 980;
 const testWidth = 640;
 const usersViewing = ['elastic'];
-
-jest.mock('../../../lib/kibana');
 
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
