@@ -21,12 +21,12 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { SavedObjectsManagementRecord } from '../../../../../../../src/legacy/core_plugins/management/public';
+import { ToastsStart } from 'src/core/public';
 import {
+  SavedObjectsManagementRecord,
   ProcessedImportResponse,
   processImportResponse,
-} from '../../../../../../../src/legacy/core_plugins/management/public';
+} from '../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
@@ -38,7 +38,7 @@ interface Props {
   onClose: () => void;
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
-  toastNotifications: ToastNotifications;
+  toastNotifications: ToastsStart;
 }
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {

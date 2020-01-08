@@ -13,7 +13,7 @@ import {
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
-import { SecurityLicenseService } from '../common/licensing';
+import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { SecurityNavControlService } from './nav_control';
 import { AuthenticationService } from './authentication';
 
@@ -27,6 +27,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
   private navControlService!: SecurityNavControlService;
 
   private securityLicenseService!: SecurityLicenseService;
+  private securityLicense?: SecurityLicense;
 
   public setup(core: CoreSetup, { licensing }: PluginSetupDependencies) {
     const { http, notifications, injectedMetadata } = core;
@@ -44,6 +45,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     this.navControlService = new SecurityNavControlService();
     this.securityLicenseService = new SecurityLicenseService();
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
+    this.securityLicense = license;
 
     const authc = new AuthenticationService().setup({ http: core.http });
 
@@ -55,18 +57,23 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     return {
       authc,
       sessionTimeout: this.sessionTimeout,
+      license,
     };
   }
 
   public start(core: CoreStart) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
+    return {
+      securityLicense: this.securityLicense!,
+    };
   }
 
   public stop() {
     this.sessionTimeout.stop();
     this.navControlService.stop();
     this.securityLicenseService.stop();
+    this.securityLicense = undefined;
   }
 }
 

@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { Capabilities } from 'src/core/public';
+import { Capabilities, ApplicationStart } from 'src/core/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { ManageSpacesButton } from './manage_spaces_button';
@@ -26,6 +26,7 @@ interface Props {
   onManageSpacesClick: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -164,6 +165,7 @@ class SpacesMenuUI extends Component<Props, State> {
         size="s"
         onClick={this.props.onManageSpacesClick}
         capabilities={this.props.capabilities}
+        navigateToApp={this.props.navigateToApp}
       />
     );
   };

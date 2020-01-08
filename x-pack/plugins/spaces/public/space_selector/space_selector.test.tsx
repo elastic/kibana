@@ -7,8 +7,8 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../common/model/space';
-import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SpaceSelector } from './space_selector';
+import { spacesManagerMock } from '../spaces_manager/mocks';
 
 function getSpacesManager(spaces: Space[] = []) {
   const manager = spacesManagerMock.create();

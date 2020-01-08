@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { PAGE_TITLE_COMPONENT, PAGE_SUBTITLE_COMPONENT } from 'ui/management';
 import { Space } from '../../common/model/space';
 import { AdvancedSettingsTitle, AdvancedSettingsSubtitle } from './components';
+
+// TODO: LP imported from ui/management, but that's not available here. Need NP replacement for these string constants
+import {
+  PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
+} from '../../../../../src/legacy/core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;

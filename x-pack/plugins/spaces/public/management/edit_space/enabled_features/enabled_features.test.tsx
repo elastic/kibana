@@ -7,10 +7,10 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
+import { Feature } from '../../../../../features/public';
 
 const features: Feature[] = [
   {

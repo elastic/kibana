@@ -5,6 +5,8 @@
  */
 
 import { ManagementService } from '.';
+import { coreMock } from 'src/core/public/mocks';
+import { spacesManagerMock } from '../spaces_manager/mocks';
 
 describe('ManagementService', () => {
   describe('#start', () => {
@@ -22,6 +24,8 @@ describe('ManagementService', () => {
 
       const deps = {
         managementStart,
+        coreStart: coreMock.createStart(),
+        spacesManager: spacesManagerMock.create(),
       };
 
       const service = new ManagementService();
@@ -53,6 +57,8 @@ describe('ManagementService', () => {
 
       const deps = {
         managementStart,
+        coreStart: coreMock.createStart(),
+        spacesManager: spacesManagerMock.create(),
       };
 
       const service = new ManagementService();
@@ -70,6 +76,8 @@ describe('ManagementService', () => {
 
       const deps = {
         managementStart,
+        coreStart: coreMock.createStart(),
+        spacesManager: spacesManagerMock.create(),
       };
 
       const service = new ManagementService();
@@ -98,6 +106,8 @@ describe('ManagementService', () => {
 
       const deps = {
         managementStart,
+        coreStart: coreMock.createStart(),
+        spacesManager: spacesManagerMock.create(),
       };
 
       const service = new ManagementService();

@@ -8,7 +8,6 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UICapabilities } from 'ui/capabilities';
-import { Space } from '../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../../plugins/features/public';
 // These modules should be moved into a common directory
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -20,6 +19,7 @@ import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
+import { Space } from '../../../../../../../../plugins/spaces/public';
 
 const buildFeatures = () => {
   return [

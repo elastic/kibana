@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export function getUrlPrefix(spaceId: string) {
   return spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : ``;

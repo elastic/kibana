@@ -5,12 +5,6 @@
  */
 
 import { AdvancedSettingsService } from './advanced_settings_service';
-jest.mock('ui/management', () => {
-  return {
-    PAGE_TITLE_COMPONENT: 'page_title_component',
-    PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-  };
-});
 
 describe('Advanced Settings Service', () => {
   describe('#setup', () => {
@@ -25,13 +19,13 @@ describe('Advanced Settings Service', () => {
 
       expect(deps.registerSettingsComponent).toHaveBeenCalledTimes(2);
       expect(deps.registerSettingsComponent).toHaveBeenCalledWith(
-        'page_title_component',
+        'advanced_settings_page_title',
         expect.any(Function),
         true
       );
 
       expect(deps.registerSettingsComponent).toHaveBeenCalledWith(
-        'page_subtitle_component',
+        'advanced_settings_page_subtitle',
         expect.any(Function),
         true
       );

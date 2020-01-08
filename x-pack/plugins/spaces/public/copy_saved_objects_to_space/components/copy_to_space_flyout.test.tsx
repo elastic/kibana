@@ -6,7 +6,7 @@
 import React from 'react';
 import Boom from 'boom';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
+import { mockManagementPlugin } from '../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
@@ -17,9 +17,9 @@ import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { ToastsApi } from 'src/core/public';
 
-jest.mock('../../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
+jest.mock('../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
   setup: mockManagementPlugin.createSetupContract(),
   start: mockManagementPlugin.createStartContract(),
 }));
@@ -86,7 +86,7 @@ const setup = async (opts: SetupOpts = {}) => {
     <CopySavedObjectsToSpaceFlyout
       savedObject={savedObjectToCopy}
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      toastNotifications={(mockToastNotifications as unknown) as ToastNotifications}
+      toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
       onClose={onClose}
     />
   );

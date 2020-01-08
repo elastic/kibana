@@ -3,16 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => Promise.resolve([]),
-}));
-import '../../__mocks__/xpack_info';
+
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { SpacesGridPage } from './spaces_grid_page';
+import { httpServiceMock } from 'src/core/public/mocks';
+import { notificationServiceMock } from 'src/core/public/mocks';
 
 const spaces = [
   {
@@ -41,11 +40,17 @@ spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
 describe('SpacesGridPage', () => {
   it('renders as expected', () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
     expect(
       shallowWithIntl(
         <SpacesGridPage.WrappedComponent
           spacesManager={(spacesManager as unknown) as SpacesManager}
           intl={null as any}
+          http={httpStart}
+          notifications={notificationServiceMock.createStartContract()}
+          securityEnabled={true}
           capabilities={{
             navLinks: {},
             management: {},
@@ -58,10 +63,16 @@ describe('SpacesGridPage', () => {
   });
 
   it('renders the list of spaces', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
     const wrapper = mountWithIntl(
       <SpacesGridPage.WrappedComponent
         spacesManager={(spacesManager as unknown) as SpacesManager}
         intl={null as any}
+        http={httpStart}
+        notifications={notificationServiceMock.createStartContract()}
+        securityEnabled={true}
         capabilities={{
           navLinks: {},
           management: {},
@@ -72,9 +83,7 @@ describe('SpacesGridPage', () => {
     );
 
     // allow spacesManager to load spaces
-    await Promise.resolve();
-    wrapper.update();
-    await Promise.resolve();
+    await nextTick();
     wrapper.update();
 
     expect(wrapper.find(SpaceAvatar)).toHaveLength(spaces.length);

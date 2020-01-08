@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]),
-}));
-import '../../__mocks__/xpack_info';
+
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -16,6 +13,7 @@ import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
+import { httpServiceMock, notificationServiceMock } from 'src/core/public/mocks';
 
 const space = {
   id: 'my-space',
@@ -29,10 +27,16 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
+
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spacesManager={(spacesManager as unknown) as SpacesManager}
         intl={null as any}
+        http={httpStart}
+        notifications={notificationServiceMock.createStartContract()}
+        securityEnabled={true}
         capabilities={{
           navLinks: {},
           management: {},
@@ -80,6 +84,9 @@ describe('ManageSpacePage', () => {
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
+
     const onLoadSpace = jest.fn();
 
     const wrapper = mountWithIntl(
@@ -88,6 +95,9 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         onLoadSpace={onLoadSpace}
         intl={null as any}
+        http={httpStart}
+        notifications={notificationServiceMock.createStartContract()}
+        securityEnabled={true}
         capabilities={{
           navLinks: {},
           management: {},
@@ -134,11 +144,17 @@ describe('ManageSpacePage', () => {
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
+
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         intl={null as any}
+        http={httpStart}
+        notifications={notificationServiceMock.createStartContract()}
+        securityEnabled={true}
         capabilities={{
           navLinks: {},
           management: {},
@@ -191,11 +207,17 @@ describe('ManageSpacePage', () => {
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
+
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         intl={null as any}
+        http={httpStart}
+        notifications={notificationServiceMock.createStartContract()}
+        securityEnabled={true}
         capabilities={{
           navLinks: {},
           management: {},

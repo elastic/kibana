@@ -11,7 +11,7 @@ import {
   EuiHeaderSectionItemButton,
 } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Capabilities } from 'src/core/public';
+import { Capabilities, ApplicationStart } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { Space } from '../../common/model/space';
 import { SpaceAvatar } from '../space_avatar';
@@ -23,6 +23,7 @@ interface Props {
   spacesManager: SpacesManager;
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -73,6 +74,7 @@ export class NavControlPopover extends Component<Props, State> {
         <SpacesDescription
           onManageSpacesClick={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
+          navigateToApp={this.props.navigateToApp}
         />
       );
     } else {
@@ -83,6 +85,7 @@ export class NavControlPopover extends Component<Props, State> {
           onSelectSpace={this.onSelectSpace}
           onManageSpacesClick={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
+          navigateToApp={this.props.navigateToApp}
         />
       );
     }

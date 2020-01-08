@@ -5,7 +5,11 @@
  */
 import { SpacesPlugin } from './plugin';
 
+export { Space } from '../common/model/space';
+
 export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
+
+export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
 export const plugin = () => {
   return new SpacesPlugin();

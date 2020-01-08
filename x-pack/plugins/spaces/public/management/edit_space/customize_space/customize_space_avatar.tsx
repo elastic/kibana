@@ -17,11 +17,10 @@ import {
   isValidHex,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { Space } from '../../../../common/model/space';
 import { imageTypes, encode } from '../../../../common/lib/dataurl';
 import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
-import { Space } from '../../../../../../../plugins/spaces/common/model/space';
-import { MAX_SPACE_INITIALS } from '../../../../../../../plugins/spaces/common';
-
+import { MAX_SPACE_INITIALS } from '../../../../common';
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;

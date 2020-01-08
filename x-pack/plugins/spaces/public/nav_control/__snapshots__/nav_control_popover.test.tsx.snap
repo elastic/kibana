@@ -39,6 +39,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
         },
       }
     }
+    navigateToApp={[MockFunction]}
     onManageSpacesClick={[Function]}
   />
 </EuiPopover>

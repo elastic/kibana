@@ -17,10 +17,8 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
-import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../plugins/features/public';
+import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
+import { Feature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
@@ -34,11 +32,14 @@ import { EnabledFeatures } from './enabled_features';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 
 interface Props {
+  http: HttpStart;
+  notifications: NotificationsStart;
   spacesManager: SpacesManager;
   spaceId?: string;
   intl: InjectedIntl;
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
+  securityEnabled: boolean;
 }
 
 interface State {
@@ -74,9 +75,9 @@ class ManageSpacePageUI extends Component<Props, State> {
       return;
     }
 
-    const { spaceId, spacesManager, intl, onLoadSpace } = this.props;
+    const { spaceId, spacesManager, intl, onLoadSpace, http } = this.props;
 
-    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
+    const getFeatures = http.get('/api/features');
 
     if (spaceId) {
       try {
@@ -96,7 +97,7 @@ class ManageSpacePageUI extends Component<Props, State> {
       } catch (error) {
         const { message = '' } = error.data || {};
 
-        toastNotifications.addDanger(
+        this.props.notifications.toasts.addDanger(
           intl.formatMessage(
             {
               id: 'xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle',
@@ -212,7 +213,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public maybeGetSecureSpacesMessage = () => {
-    if (this.editingExistingSpace()) {
+    if (this.editingExistingSpace() && this.props.securityEnabled) {
       return <SecureSpaceMessage />;
     }
     return null;
@@ -267,6 +268,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             space={this.state.space as Space}
             spacesManager={this.props.spacesManager}
             onDelete={this.backToSpacesList}
+            notifications={this.props.notifications}
           />
         </EuiFlexItem>
       );
@@ -357,7 +359,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     action
       .then(() => {
-        toastNotifications.addSuccess(
+        this.props.notifications.toasts.addSuccess(
           intl.formatMessage(
             {
               id:
@@ -381,7 +383,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         this.setState({ saveInProgress: false });
 
-        toastNotifications.addDanger(
+        this.props.notifications.toasts.addDanger(
           intl.formatMessage(
             {
               id: 'xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle',

@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../../../../plugins/spaces/common/constants';
 import { wrapError } from '../../lib/errors';
 
 export function initEnterSpaceView(server: Legacy.Server) {

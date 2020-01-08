@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
-import { Space } from '../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../plugins/spaces/public';
 import { Feature } from '../../../../../../../../plugins/features/public';
 import {
   KibanaPrivileges,

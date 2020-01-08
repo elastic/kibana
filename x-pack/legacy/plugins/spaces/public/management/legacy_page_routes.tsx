@@ -7,16 +7,14 @@
 import template from 'plugins/spaces/management/template.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management/breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { ManageSpacePage } from './edit_space';
-import { SpacesGridPage } from './spaces_grid';
+import { Space } from '../../../../../plugins/spaces/public';
+import { SpacesPluginStart } from '../../../../../plugins/spaces/public';
 
-import { start as spacesNPStart } from '../legacy';
-import { Space } from '../../common/model/space';
+const spacesNPStart = (npStart.plugins as any).spaces as SpacesPluginStart;
 
 const reactRootNodeId = 'manageSpacesReactRoot';
 
@@ -56,17 +54,9 @@ routes.when('/management/spaces/list', {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const { spacesManager } = spacesNPStart;
+      const { management } = spacesNPStart.__legacyCompat;
 
-      render(
-        <I18nContext>
-          <SpacesGridPage
-            spacesManager={spacesManager!}
-            capabilities={npStart.core.application.capabilities}
-          />
-        </I18nContext>,
-        domNode
-      );
+      render(<management.SpacesGridPage />, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {
@@ -86,17 +76,9 @@ routes.when('/management/spaces/create', {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const { spacesManager } = spacesNPStart;
+      const { management } = spacesNPStart.__legacyCompat;
 
-      render(
-        <I18nContext>
-          <ManageSpacePage
-            spacesManager={spacesManager!}
-            capabilities={npStart.core.application.capabilities}
-          />
-        </I18nContext>,
-        domNode
-      );
+      render(<management.ManageSpacePage />, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {
@@ -122,19 +104,15 @@ routes.when('/management/spaces/edit/:spaceId', {
 
       const { spaceId } = $route.current.params;
 
-      const { spacesManager } = await spacesNPStart;
+      const { management } = spacesNPStart.__legacyCompat;
 
       render(
-        <I18nContext>
-          <ManageSpacePage
-            spaceId={spaceId}
-            spacesManager={spacesManager!}
-            onLoadSpace={space => {
-              npStart.core.chrome.setBreadcrumbs(getEditBreadcrumbs(space));
-            }}
-            capabilities={npStart.core.application.capabilities}
-          />
-        </I18nContext>,
+        <management.ManageSpacePage
+          spaceId={spaceId}
+          onLoadSpace={space => {
+            npStart.core.chrome.setBreadcrumbs(getEditBreadcrumbs(space));
+          }}
+        />,
         domNode
       );
 

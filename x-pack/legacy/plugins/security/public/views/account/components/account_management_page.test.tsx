@@ -9,6 +9,7 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { securityMock } from '../../../../../../../plugins/security/public/mocks';
 import { AccountManagementPage } from './account_management_page';
 import { AuthenticatedUser } from '../../../../common/model';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 
 jest.mock('ui/kfetch');
 
@@ -38,7 +39,7 @@ const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }:
 function getSecuritySetupMock({ currentUser }: { currentUser: AuthenticatedUser }) {
   const securitySetupMock = securityMock.createSetup();
   securitySetupMock.authc.getCurrentUser.mockResolvedValue(currentUser);
-  return securitySetupMock;
+  return (securitySetupMock as unknown) as SecurityPluginSetup;
 }
 
 describe('<AccountManagementPage>', () => {

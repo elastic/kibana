@@ -7,7 +7,7 @@
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { toastNotifications } from 'ui/notify';
+import { NotificationsStart } from 'src/core/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
@@ -18,6 +18,7 @@ interface Props {
   spacesManager: SpacesManager;
   onDelete: () => void;
   intl: InjectedIntl;
+  notifications: NotificationsStart;
 }
 
 interface State {
@@ -102,7 +103,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
     } catch (error) {
       const { message: errorMessage = '' } = error.data || {};
 
-      toastNotifications.addDanger(
+      this.props.notifications.toasts.addDanger(
         intl.formatMessage(
           {
             id: 'xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle',
@@ -130,7 +131,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       }
     );
 
-    toastNotifications.addSuccess(message);
+    this.props.notifications.toasts.addSuccess(message);
 
     if (this.props.onDelete) {
       this.props.onDelete();

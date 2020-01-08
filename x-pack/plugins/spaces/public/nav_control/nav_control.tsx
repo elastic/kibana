@@ -25,6 +25,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
             spacesManager={spacesManager}
             anchorPosition="downLeft"
             capabilities={core.application.capabilities}
+            navigateToApp={core.application.navigateToApp}
           />
         </I18nContext>,
         targetDomElement

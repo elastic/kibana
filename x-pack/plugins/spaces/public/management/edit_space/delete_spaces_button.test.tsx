@@ -9,6 +9,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
+import { notificationServiceMock } from 'src/core/public/mocks';
+import { NotificationsStart } from 'src/core/public';
 
 const space = {
   id: 'my-space',
@@ -20,12 +22,15 @@ describe('DeleteSpacesButton', () => {
   it('renders as expected', () => {
     const spacesManager = spacesManagerMock.create();
 
+    const notificatons = (notificationServiceMock.create().start as unknown) as NotificationsStart;
+
     const wrapper = shallowWithIntl(
       <DeleteSpacesButton.WrappedComponent
         space={space}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         onDelete={jest.fn()}
         intl={null as any}
+        notifications={notificatons}
       />
     );
     expect(wrapper).toMatchSnapshot();

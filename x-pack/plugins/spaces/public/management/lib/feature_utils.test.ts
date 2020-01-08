@@ -5,7 +5,7 @@
  */
 
 import { getEnabledFeatures } from './feature_utils';
-import { Feature } from '../../../../../../plugins/features/public';
+import { Feature } from '../../../../features/public';
 
 const buildFeatures = () =>
   [

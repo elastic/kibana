@@ -13,6 +13,7 @@ import { UserAPIClient } from '../../../../lib/api';
 import { User, Role } from '../../../../../common/model';
 import { ReactWrapper } from 'enzyme';
 import { mockAuthenticatedUser } from '../../../../../../../../plugins/security/common/model/authenticated_user.mock';
+import { SecurityPluginSetup } from '../../../../../../../../plugins/security/public';
 
 jest.mock('ui/kfetch');
 
@@ -72,7 +73,7 @@ function buildSecuritySetup() {
   securitySetupMock.authc.getCurrentUser.mockResolvedValue(
     mockAuthenticatedUser(createUser('current_user'))
   );
-  return securitySetupMock;
+  return (securitySetupMock as unknown) as SecurityPluginSetup;
 }
 
 function expectSaveButton(wrapper: ReactWrapper<any, any>) {

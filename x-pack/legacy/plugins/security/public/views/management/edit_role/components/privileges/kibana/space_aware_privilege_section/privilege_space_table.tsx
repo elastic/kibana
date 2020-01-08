@@ -15,7 +15,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getSpaceColor } from '../../../../../../../../../../../plugins/spaces/public';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../../../../plugins/spaces/public';
 import {
   FeaturesPrivileges,
   Role,

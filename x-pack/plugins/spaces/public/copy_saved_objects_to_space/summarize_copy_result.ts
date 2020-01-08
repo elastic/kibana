@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
-import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/management/public';
+import {
+  ProcessedImportResponse,
+  SavedObjectsManagementRecord,
+} from 'src/legacy/core_plugins/management/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;

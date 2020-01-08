@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { NotificationsStart } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
-} from '../../../../../../src/legacy/core_plugins/management/public';
+} from '../../../../../src/legacy/core_plugins/management/public';
 import { CopySavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
 
@@ -30,7 +30,10 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     },
   };
 
-  constructor(private readonly spacesManager: SpacesManager) {
+  constructor(
+    private readonly spacesManager: SpacesManager,
+    private readonly notifications: NotificationsStart
+  ) {
     super();
   }
 
@@ -43,7 +46,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
         onClose={this.onClose}
         savedObject={this.record}
         spacesManager={this.spacesManager}
-        toastNotifications={toastNotifications}
+        toastNotifications={this.notifications.toasts}
       />
     );
   };

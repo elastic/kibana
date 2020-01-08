@@ -23,6 +23,7 @@ describe('NavControlPopover', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
+        navigateToApp={jest.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -54,6 +55,7 @@ describe('NavControlPopover', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
+        navigateToApp={jest.fn()}
       />
     );
 

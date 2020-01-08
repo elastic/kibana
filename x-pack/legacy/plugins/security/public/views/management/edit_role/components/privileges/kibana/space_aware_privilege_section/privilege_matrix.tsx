@@ -23,7 +23,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { SpaceAvatar } from '../../../../../../../../../../../plugins/spaces/public';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../../../../plugins/spaces/public';
 import { Feature } from '../../../../../../../../../../../plugins/features/public';
 import { FeaturesPrivileges, Role } from '../../../../../../../../common/model';
 import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';

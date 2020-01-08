@@ -19,10 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
-import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../plugins/features/public';
+import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
+import { Feature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
@@ -36,8 +34,11 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
+  notifications: NotificationsStart;
+  http: HttpStart;
   intl: InjectedIntl;
   capabilities: Capabilities;
+  securityEnabled: boolean;
 }
 
 interface State {
@@ -72,7 +73,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-        <SecureSpaceMessage />
+        {this.props.securityEnabled && <SecureSpaceMessage />}
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -188,7 +189,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     } catch (error) {
       const { message: errorMessage = '' } = error.data || {};
 
-      toastNotifications.addDanger(
+      this.props.notifications.toasts.addDanger(
         intl.formatMessage(
           {
             id: 'xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage',
@@ -217,11 +218,11 @@ class SpacesGridPageUI extends Component<Props, State> {
       }
     );
 
-    toastNotifications.addSuccess(message);
+    this.props.notifications.toasts.addSuccess(message);
   };
 
   public loadGrid = async () => {
-    const { spacesManager } = this.props;
+    const { spacesManager, http } = this.props;
 
     this.setState({
       loading: true,
@@ -230,7 +231,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
+    const getFeatures = http.get('/api/features');
 
     try {
       const [spaces, features] = await Promise.all([getSpaces, getFeatures]);

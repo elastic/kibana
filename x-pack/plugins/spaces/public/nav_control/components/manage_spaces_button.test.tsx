@@ -12,6 +12,7 @@ describe('ManageSpacesButton', () => {
   it('renders as expected', () => {
     const component = (
       <ManageSpacesButton
+        navigateToApp={jest.fn()}
         capabilities={{
           navLinks: {},
           management: {},
@@ -28,6 +29,7 @@ describe('ManageSpacesButton', () => {
   it(`doesn't render if user profile forbids managing spaces`, () => {
     const component = (
       <ManageSpacesButton
+        navigateToApp={jest.fn()}
         capabilities={{
           navLinks: {},
           management: {},

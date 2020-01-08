@@ -7,8 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
-import { Capabilities } from 'src/core/public';
-import { getManageSpacesUrl } from '../../constants';
+import { Capabilities, ApplicationStart } from 'src/core/public';
 
 interface Props {
   isDisabled?: boolean;
@@ -17,6 +16,7 @@ interface Props {
   style?: CSSProperties;
   onClick?: () => void;
   capabilities: Capabilities;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
@@ -45,6 +45,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
     if (this.props.onClick) {
       this.props.onClick();
     }
-    window.location.replace(getManageSpacesUrl());
+
+    this.props.navigateToApp('kibana', { path: '#/management/spaces/list' });
   };
 }

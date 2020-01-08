@@ -5,3 +5,18 @@
  */
 
 import './management/legacy_page_routes';
+
+import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
+import { registerSettingsComponent } from 'ui/management';
+import { npSetup } from 'ui/new_platform';
+import { SpacesPluginSetup } from '../../../../plugins/spaces/public';
+import { setup as managementSetup } from '../../../../../src/legacy/core_plugins/management/public/legacy';
+
+const legacyAPI = {
+  registerSavedObjectsManagementAction: (action: SavedObjectsManagementAction) => {
+    managementSetup.savedObjects.registry.register(action);
+  },
+  registerSettingsComponent,
+};
+
+((npSetup.plugins as any).spaces as SpacesPluginSetup).registerLegacyAPI(legacyAPI);

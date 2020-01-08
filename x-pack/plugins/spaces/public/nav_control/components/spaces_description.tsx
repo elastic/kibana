@@ -6,13 +6,14 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
-import { Capabilities } from 'src/core/public';
+import { Capabilities, ApplicationStart } from 'src/core/public';
 import { ManageSpacesButton } from './manage_spaces_button';
 import { getSpacesFeatureDescription } from '../../constants';
 
 interface Props {
   onManageSpacesClick: () => void;
   capabilities: Capabilities;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 export const SpacesDescription: FC<Props> = (props: Props) => {
@@ -32,6 +33,7 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
           style={{ width: `100%` }}
           onClick={props.onManageSpacesClick}
           capabilities={props.capabilities}
+          navigateToApp={props.navigateToApp}
         />
       </div>
     </EuiContextMenuPanel>

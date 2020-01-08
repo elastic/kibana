@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { SpacesManager } from '../spaces_manager';
 import { Space } from '../../common/model/space';
 import { SpaceCards } from './components';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
+import { SpacesManager } from '../spaces_manager';
 
 interface Props {
   spacesManager: SpacesManager;
