@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { PopoverDescriptionComponent } from './popover_description';
 
 describe('JobsTableFilters', () => {

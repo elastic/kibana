@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { SecurityPluginSetup } from '../../../../../../../../plugins/security/public';
 import { UserValidator, UserValidationResult } from '../../../../lib/validate_user';
 import { User, EditUser, Role } from '../../../../../common/model';
 import { USERS_PATH } from '../../../../views/management/management_urls';
@@ -40,6 +41,7 @@ interface Props {
   intl: InjectedIntl;
   changeUrl: (path: string) => void;
   apiClient: UserAPIClient;
+  securitySetup: SecurityPluginSetup;
 }
 
 interface State {
@@ -82,7 +84,7 @@ class EditUserPageUI extends Component<Props, State> {
   }
 
   public async componentDidMount() {
-    const { username, apiClient } = this.props;
+    const { username, apiClient, securitySetup } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
@@ -91,7 +93,7 @@ class EditUserPageUI extends Component<Props, State> {
           password: '',
           confirmPassword: '',
         };
-        currentUser = await apiClient.getCurrentUser();
+        currentUser = await securitySetup.authc.getCurrentUser();
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({

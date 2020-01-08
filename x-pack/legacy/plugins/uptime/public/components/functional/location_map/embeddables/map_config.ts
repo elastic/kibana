@@ -12,8 +12,12 @@ import { LocationPoint } from './embedded_map';
  * destination, and line layer for each of the provided indexPatterns
  *
  */
-export const getLayerList = (upPoints: LocationPoint[], downPoints: LocationPoint[]) => {
-  return [getLowPolyLayer(), getDownPointsLayer(downPoints), getUpPointsLayer(upPoints)];
+export const getLayerList = (
+  upPoints: LocationPoint[],
+  downPoints: LocationPoint[],
+  { gray, danger }: { gray: string; danger: string }
+) => {
+  return [getLowPolyLayer(), getDownPointsLayer(downPoints, danger), getUpPointsLayer(upPoints)];
 };
 
 export const getLowPolyLayer = () => {
@@ -62,7 +66,7 @@ export const getLowPolyLayer = () => {
   };
 };
 
-export const getDownPointsLayer = (downPoints: LocationPoint[]) => {
+export const getDownPointsLayer = (downPoints: LocationPoint[], dangerColor: string) => {
   const features = downPoints?.map(point => ({
     type: 'feature',
     geometry: {
@@ -87,7 +91,7 @@ export const getDownPointsLayer = (downPoints: LocationPoint[]) => {
         fillColor: {
           type: 'STATIC',
           options: {
-            color: '#BC261E',
+            color: dangerColor,
           },
         },
         lineColor: {
