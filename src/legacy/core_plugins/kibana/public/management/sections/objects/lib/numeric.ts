@@ -17,20 +17,8 @@
  * under the License.
  */
 
-// TODO: This file is copied from src/legacy/utils/case_conversion.ts
-// because TS-imports from utils in ui are currently not possible.
-// When the build process is updated, this file can be removed
+import { isNaN } from 'lodash';
 
-import _ from 'lodash';
-
-export function keysToSnakeCaseShallow(object: Record<string, any>) {
-  return _.mapKeys(object, (value, key) => {
-    return _.snakeCase(key);
-  });
-}
-
-export function keysToCamelCaseShallow(object: Record<string, any>) {
-  return _.mapKeys(object, (value, key) => {
-    return _.camelCase(key);
-  });
+export function isNumeric(v: any): boolean {
+  return !isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !isNaN(parseFloat(v))));
 }
