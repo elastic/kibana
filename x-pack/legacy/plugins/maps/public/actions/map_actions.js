@@ -378,9 +378,9 @@ export function mapExtentChanged(newMapConstants) {
         const height = extent.maxLat - extent.minLat;
         dataFilters.buffer = {
           minLon: extent.minLon - width * scaleFactor,
-          minLat: extent.minLat - height * scaleFactor,
+          minLat: Math.max(extent.minLat - height * scaleFactor, -90),
           maxLon: extent.maxLon + width * scaleFactor,
-          maxLat: extent.maxLat + height * scaleFactor,
+          maxLat: Math.min(extent.maxLat + height * scaleFactor, 90),
         };
       }
     }
