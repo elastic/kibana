@@ -24,7 +24,10 @@ export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screensho
   const actualpngFileName = path.basename(actualpngPath, '.png');
   const baselinepngFileName = path.basename(baselinepngPath, '.png');
 
-  const baselineCopyPath = path.resolve(sessionDirectoryPath, `${baselinepngFileName}_baseline.png`);
+  const baselineCopyPath = path.resolve(
+    sessionDirectoryPath,
+    `${baselinepngFileName}_baseline.png`
+  );
   const actualCopyPath = path.resolve(sessionDirectoryPath, `${actualpngFileName}_actual.png`);
 
   // Don't cause a test failure if the baseline snapshot doesn't exist - we don't have all OS's covered and we
@@ -43,8 +46,13 @@ export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screensho
   let diffTotal = 0;
 
   const diffPngPath = path.resolve(failureDirectoryPath, `${baselinepngFileName}-${1}.png`);
-  diffTotal += await comparePngs(actualCopyPath, baselineCopyPath, diffPngPath, sessionDirectoryPath, log);
-
+  diffTotal += await comparePngs(
+    actualCopyPath,
+    baselineCopyPath,
+    diffPngPath,
+    sessionDirectoryPath,
+    log
+  );
 
   return diffTotal;
 }

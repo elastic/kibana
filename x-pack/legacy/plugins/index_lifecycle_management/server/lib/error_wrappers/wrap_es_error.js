@@ -14,7 +14,6 @@ import Boom from 'boom';
  * @return Object Boom error response
  */
 export function wrapEsError(err, statusCodeToMessageMap = {}) {
-
   const statusCode = err.statusCode;
 
   // If no custom message if specified for the error's status code, just

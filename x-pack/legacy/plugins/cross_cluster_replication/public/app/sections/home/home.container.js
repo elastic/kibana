@@ -7,10 +7,14 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../constants';
-import { getListAutoFollowPatterns, getListFollowerIndices, isApiAuthorized } from '../../store/selectors';
+import {
+  getListAutoFollowPatterns,
+  getListFollowerIndices,
+  isApiAuthorized,
+} from '../../store/selectors';
 import { CrossClusterReplicationHome as CrossClusterReplicationHomeView } from './home';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   autoFollowPatterns: getListAutoFollowPatterns(state),
   isAutoFollowApiAuthorized: isApiAuthorized(SECTIONS.AUTO_FOLLOW_PATTERN)(state),
   followerIndices: getListFollowerIndices(state),

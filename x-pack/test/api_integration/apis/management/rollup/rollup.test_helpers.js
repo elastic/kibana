@@ -29,27 +29,30 @@ export const registerHelpers = ({ supertest, es }) => {
           interval: '24h',
           delay: '1d',
           time_zone: 'UTC',
-          field: 'testCreatedField'
+          field: 'testCreatedField',
         },
         terms: {
-          fields: ['testTotalField', 'testTagField']
+          fields: ['testTotalField', 'testTagField'],
         },
         histogram: {
           interval: '7',
-          fields: ['testTotalField']
-        }
+          fields: ['testTotalField'],
+        },
       },
-      metrics: [{
-        field: 'testTotalField',
-        metrics: ['avg', 'value_count']
-      }, {
-        field: 'testCreatedField',
-        metrics: ['max', 'min']
-      }]
-    }
+      metrics: [
+        {
+          field: 'testTotalField',
+          metrics: ['avg', 'value_count'],
+        },
+        {
+          field: 'testCreatedField',
+          metrics: ['max', 'min'],
+        },
+      ],
+    },
   });
 
-  const createJob = (payload) => {
+  const createJob = payload => {
     jobsCreated.push(payload.job.id);
 
     return supertest
@@ -58,7 +61,7 @@ export const registerHelpers = ({ supertest, es }) => {
       .send(payload);
   };
 
-  const deleteJob = (id) => {
+  const deleteJob = id => {
     const jobIds = Array.isArray(id) ? id : [id];
 
     return supertest
@@ -67,7 +70,7 @@ export const registerHelpers = ({ supertest, es }) => {
       .send({ jobIds });
   };
 
-  const startJob = (ids) => {
+  const startJob = ids => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
     jobsStarted.concat(jobIds);
 
@@ -77,7 +80,7 @@ export const registerHelpers = ({ supertest, es }) => {
       .send({ jobIds });
   };
 
-  const stopJob = (ids) => {
+  const stopJob = ids => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
@@ -88,44 +91,38 @@ export const registerHelpers = ({ supertest, es }) => {
 
   const loadJobs = () => supertest.get(`${API_BASE_PATH}/jobs`);
 
-  const stopAllJobs = () => (
-    loadJobs()
-      .then(async ({ body: { jobs } }) => {
-        const jobIds = jobs.map(job => job.config.id);
+  const stopAllJobs = () =>
+    loadJobs().then(async ({ body: { jobs } }) => {
+      const jobIds = jobs.map(job => job.config.id);
 
-        await stopJob(jobIds);
+      await stopJob(jobIds);
 
-        return jobIds;
-      })
-  );
+      return jobIds;
+    });
 
-  const deleteIndicesGeneratedByJobs = () => (
-    supertest.get(`${API_BASE_PATH}/indices`)
-      .then(({ status, body }) => {
+  const deleteIndicesGeneratedByJobs = () =>
+    supertest.get(`${API_BASE_PATH}/indices`).then(({ status, body }) => {
+      if (status !== 200) {
+        throw new Error(`Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
+      }
 
-        if (status !== 200) {
-          throw new Error(`Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
-        }
+      const index = Object.keys(body);
 
-        const index = Object.keys(body);
+      if (!index.length) {
+        return;
+      }
 
-        if (!index.length) {
-          return;
-        }
+      return deleteIndex(index);
+    });
 
-        return deleteIndex(index);
-      })
-  );
-
-  const cleanUp = () => (
+  const cleanUp = () =>
     Promise.all([
       stopAllJobs().then(deleteJob),
       deleteIndicesGeneratedByJobs().then(deleteAllIndicesCreated),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
       throw err;
-    })
-  );
+    });
 
   return {
     createIndexWithMappings,

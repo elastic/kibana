@@ -51,7 +51,7 @@ describe('src/dev/build/tasks/notice_file/generate_notice', () => {
           packages: PACKAGES,
           nodeDir: NODE_DIR,
           nodeVersion: NODE_VERSION,
-          noticeFromSource: 'NOTICE_FROM_SOURCE\n'
+          noticeFromSource: 'NOTICE_FROM_SOURCE\n',
         }))
     );
 
@@ -60,36 +60,29 @@ describe('src/dev/build/tasks/notice_file/generate_notice', () => {
     });
 
     it('includes *NOTICE* files from packages', () => {
-      expect(notice).toEqual(expect.stringContaining(
-        readFileSync(resolve(NODE_MODULES, 'foo/NOTICE.txt'), 'utf8')
-      ));
+      expect(notice).toEqual(
+        expect.stringContaining(readFileSync(resolve(NODE_MODULES, 'foo/NOTICE.txt'), 'utf8'))
+      );
     });
 
     it('includes *LICENSE* files from packages', () => {
-      expect(notice).toEqual(expect.stringContaining(
-        readFileSync(
-          resolve(NODE_MODULES, 'bar/LICENSE.md'),
-          'utf8'
-        )
-      ));
+      expect(notice).toEqual(
+        expect.stringContaining(readFileSync(resolve(NODE_MODULES, 'bar/LICENSE.md'), 'utf8'))
+      );
     });
 
     it('includes the LICENSE file from node', () => {
-      expect(notice).toEqual(expect.stringContaining(
-        readFileSync(resolve(NODE_DIR, 'LICENSE'), 'utf8')
-      ));
+      expect(notice).toEqual(
+        expect.stringContaining(readFileSync(resolve(NODE_DIR, 'LICENSE'), 'utf8'))
+      );
     });
 
     it('includes node version', () => {
-      expect(notice).toEqual(expect.stringContaining(
-        'This product bundles Node.js v8.11.3'
-      ));
+      expect(notice).toEqual(expect.stringContaining('This product bundles Node.js v8.11.3'));
     });
 
     it('includes the noticeFromSource', () => {
-      expect(notice).toEqual(expect.stringContaining(
-        'NOTICE_FROM_SOURCE'
-      ));
+      expect(notice).toEqual(expect.stringContaining('NOTICE_FROM_SOURCE'));
     });
   });
 });

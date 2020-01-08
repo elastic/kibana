@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../../../../plugins/features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../..//lib/kibana_privilege_calculator';
 import { PrivilegeMatrix } from './privilege_matrix';

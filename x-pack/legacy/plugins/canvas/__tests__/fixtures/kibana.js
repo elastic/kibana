@@ -29,12 +29,6 @@ export class Plugin {
         has: key => has(config, key),
       }),
       route: def => this.routes.push(def),
-      usage: {
-        collectorSet: {
-          makeUsageCollector: () => {},
-          register: () => {},
-        },
-      },
     };
 
     const { init } = this.props;

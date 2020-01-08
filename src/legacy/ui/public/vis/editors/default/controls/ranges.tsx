@@ -29,6 +29,8 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiFormRow,
+  EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -154,14 +156,23 @@ function RangesParamEditor({
             [isFromValid, isToValid] = validateRange({ from, to }, index);
           }
 
-          const fromPrepend = i18n.translate(
+          const gtePrependLabel = i18n.translate(
             'common.ui.aggTypes.ranges.greaterThanOrEqualPrepend',
             {
               defaultMessage: '\u2265',
             }
           );
-          const toPrepend = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
+          const gteTooltipContent = i18n.translate(
+            'common.ui.aggTypes.ranges.greaterThanOrEqualTooltip',
+            {
+              defaultMessage: 'Greater than or equal to',
+            }
+          );
+          const ltPrependLabel = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
             defaultMessage: '\u003c',
+          });
+          const ltTooltipContent = i18n.translate('common.ui.aggTypes.ranges.lessThanTooltip', {
+            defaultMessage: 'Less than',
           });
 
           return (
@@ -179,7 +190,11 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
-                    prepend={fromPrepend}
+                    prepend={
+                      <EuiToolTip content={gteTooltipContent}>
+                        <EuiText size="s">{gtePrependLabel}</EuiText>
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -197,7 +212,11 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}
-                    prepend={toPrepend}
+                    prepend={
+                      <EuiToolTip content={ltTooltipContent}>
+                        <EuiText size="s">{ltPrependLabel}</EuiText>
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

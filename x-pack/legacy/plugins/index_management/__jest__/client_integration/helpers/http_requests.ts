@@ -5,15 +5,14 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-
-const API_PATH = '/api/index_management';
+import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   const setLoadTemplatesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_PATH}/templates`, [
+    server.respondWith('GET', `${API_BASE_PATH}/templates`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -21,7 +20,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setLoadIndicesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_PATH}/indices`, [
+    server.respondWith('GET', `${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -29,7 +28,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setDeleteTemplateResponse = (response: HttpResponse = []) => {
-    server.respondWith('DELETE', `${API_PATH}/templates`, [
+    server.respondWith('DELETE', `${API_BASE_PATH}/templates`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -40,7 +39,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? error.body : response;
 
-    server.respondWith('GET', `${API_PATH}/templates/:id`, [
+    server.respondWith('GET', `${API_BASE_PATH}/templates/:id`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -48,10 +47,10 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setCreateTemplateResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
+    const status = error ? error.body.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('PUT', `${API_PATH}/templates`, [
+    server.respondWith('PUT', `${API_BASE_PATH}/templates`, [
       status,
       { 'Content-Type': 'application/json' },
       body,
@@ -62,7 +61,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('PUT', `${API_PATH}/templates/:name`, [
+    server.respondWith('PUT', `${API_BASE_PATH}/templates/:name`, [
       status,
       { 'Content-Type': 'application/json' },
       body,

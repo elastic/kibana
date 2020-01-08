@@ -69,9 +69,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           >
             <EuiTextArea
               data-test-subj="viewDescription"
-              fullWidth={false}
               onChange={[Function]}
-              resize="vertical"
               value=""
             />
           </EuiFormRow>

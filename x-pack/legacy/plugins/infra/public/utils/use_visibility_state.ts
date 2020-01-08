@@ -20,6 +20,6 @@ export const useVisibilityState = (initialState: boolean) => {
       show,
       toggle,
     }),
-    [isVisible, show, hide]
+    [hide, isVisible, show, toggle]
   );
 };

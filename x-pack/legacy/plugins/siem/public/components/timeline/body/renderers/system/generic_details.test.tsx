@@ -5,16 +5,17 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { SystemGenericDetails, SystemGenericLine } from './generic_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SystemGenericDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
@@ -28,11 +29,11 @@ describe('SystemGenericDetails', () => {
           timelineId="test"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns system rendering if the data does contain system data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <SystemGenericDetails
             contextId="[contextid-123]"
@@ -51,7 +52,7 @@ describe('SystemGenericDetails', () => {
 
   describe('#SystemGenericLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -82,7 +83,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it returns nothing if data is all null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -111,7 +112,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return only the host name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -140,7 +141,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -169,7 +170,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -198,7 +199,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -229,7 +230,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -260,7 +261,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -291,7 +292,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -322,7 +323,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -353,7 +354,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -384,7 +385,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -415,7 +416,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -446,7 +447,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -477,7 +478,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine
@@ -508,7 +509,7 @@ describe('SystemGenericDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericLine

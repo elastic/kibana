@@ -18,7 +18,7 @@ describe('flattenPipelineSection', () => {
   it('creates list for only-plugin pipeline section', () => {
     pipelineSection = [
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
-      PluginStatement.fromPipelineGraphVertex({ id: 'second' })
+      PluginStatement.fromPipelineGraphVertex({ id: 'second' }),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -37,9 +37,9 @@ describe('flattenPipelineSection', () => {
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
         []
-      )
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -58,9 +58,9 @@ describe('flattenPipelineSection', () => {
     pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
-      )
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -85,15 +85,16 @@ describe('flattenPipelineSection', () => {
     pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
         [
           new IfStatement(
             { id: 'if_parent2' },
-            [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child2' })],
+            [PluginStatement.fromPipelineGraphVertex({ id: 'if_child2' })],
             []
           ),
-          PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
-      )
+          PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' }),
+        ]
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);

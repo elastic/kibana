@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { get } from 'lodash';
+import { get, uniq } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
-export async function getLogstashPipelineIds(req, logstashIndexPattern, { clusterUuid, logstashUuid }, size) {
+export async function getLogstashPipelineIds(
+  req,
+  logstashIndexPattern,
+  { clusterUuid, logstashUuid },
+  size
+) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
@@ -21,9 +26,7 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, { cluste
     index: logstashIndexPattern,
     size: 0,
     ignoreUnavailable: true,
-    filterPath: [
-      'aggregations.nested_context.composite_data.buckets'
-    ],
+    filterPath: ['aggregations.nested_context.composite_data.buckets'],
     body: {
       query: createQuery({
         start,
@@ -35,7 +38,7 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, { cluste
       aggs: {
         nested_context: {
           nested: {
-            path: 'logstash_stats.pipelines'
+            path: 'logstash_stats.pipelines',
           },
           aggs: {
             composite_data: {
@@ -46,33 +49,36 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, { cluste
                     id: {
                       terms: {
                         field: 'logstash_stats.pipelines.id',
-                      }
-                    }
+                      },
+                    },
                   },
                   {
                     hash: {
                       terms: {
                         field: 'logstash_stats.pipelines.hash',
-                      }
-                    }
+                      },
+                    },
                   },
                   {
                     ephemeral_id: {
                       terms: {
                         field: 'logstash_stats.pipelines.ephemeral_id',
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    }
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'aggregations.nested_context.composite_data.buckets', []).map(bucket => bucket.key);
+  const data = get(response, 'aggregations.nested_context.composite_data.buckets', []).map(
+    bucket => bucket.key
+  );
+  return uniq(data, item => item.id);
 }

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns';
 import { AggParam } from 'ui/agg_types';
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../..';
 import { SubAggParamsProp } from './agg_params';
+import { Field } from '../../../../../../../plugins/data/public';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { collectReferencesDeep } from './collect_references_deep';
 
-
 export async function exportDashboards(req) {
   const ids = _.flatten([req.query.dashboard]);
   const config = req.server.config();
@@ -31,7 +30,6 @@ export async function exportDashboards(req) {
   const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
   return {
     version: config.get('pkg.version'),
-    objects
+    objects,
   };
-
 }

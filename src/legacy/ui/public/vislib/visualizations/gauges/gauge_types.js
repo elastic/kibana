@@ -20,5 +20,5 @@
 import { MeterGauge } from './meter';
 
 export const gaugeTypes = {
-  meter: MeterGauge
+  meter: MeterGauge,
 };

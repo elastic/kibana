@@ -18,7 +18,7 @@
  */
 
 export function initChromeXsrfApi(chrome, internals) {
-  chrome.getXsrfToken = function () {
+  chrome.getXsrfToken = function() {
     return internals.version;
   };
 }

@@ -10,21 +10,21 @@ export const standaloneClusterFilter = {
       {
         term: {
           cluster_uuid: {
-            value: ''
-          }
-        }
+            value: '',
+          },
+        },
       },
       {
         bool: {
           must_not: [
             {
               exists: {
-                field: 'cluster_uuid'
-              }
-            }
-          ]
-        }
-      }
-    ]
-  }
+                field: 'cluster_uuid',
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
 };

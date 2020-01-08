@@ -81,9 +81,7 @@ export class EditPolicy extends Component {
     const {
       isPolicyListLoaded,
       fetchPolicies,
-      match: {
-        params: { policyName },
-      } = { params: {} },
+      match: { params: { policyName } } = { params: {} },
     } = this.props;
 
     if (policyName) {
@@ -111,7 +109,7 @@ export class EditPolicy extends Component {
     if (firstError) {
       toastNotifications.addDanger(
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
-          defaultMessage: 'Please fix the errors on this page.'
+          defaultMessage: 'Please fix the errors on this page.',
         })
       );
       const errorRowId = `${firstError.replace('.', '-')}-row`;
@@ -132,7 +130,9 @@ export class EditPolicy extends Component {
   };
 
   togglePolicyJsonFlyout = () => {
-    this.setState(({ isShowingPolicyJsonFlyout }) => ({ isShowingPolicyJsonFlyout: !isShowingPolicyJsonFlyout }));
+    this.setState(({ isShowingPolicyJsonFlyout }) => ({
+      isShowingPolicyJsonFlyout: !isShowingPolicyJsonFlyout,
+    }));
   };
 
   render() {
@@ -161,12 +161,12 @@ export class EditPolicy extends Component {
               <h1>
                 {isNewPolicy
                   ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                    defaultMessage: 'Create an index lifecycle policy'
-                  })
+                      defaultMessage: 'Create an index lifecycle policy',
+                    })
                   : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                    defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
-                    values: { originalPolicyName }
-                  })}
+                      defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
+                      values: { originalPolicyName },
+                    })}
               </h1>
             </EuiTitle>
 
@@ -178,8 +178,7 @@ export class EditPolicy extends Component {
                     id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
                     defaultMessage="Use an index policy to automate the four phases of the index lifecycle,
                       from actively writing to the index to deleting it."
-                  />
-                  {' '}
+                  />{' '}
                   <LearnMoreLink
                     docPath="index-lifecycle-management.html"
                     text={
@@ -257,7 +256,7 @@ export class EditPolicy extends Component {
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
                       label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
-                        defaultMessage: 'Policy name'
+                        defaultMessage: 'Policy name',
                       })}
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
@@ -341,7 +340,10 @@ export class EditPolicy extends Component {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={this.backToPolicyList}>
+                      <EuiButtonEmpty
+                        data-test-subj="cancelTestPolicy"
+                        onClick={this.backToPolicyList}
+                      >
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                           defaultMessage="Cancel"

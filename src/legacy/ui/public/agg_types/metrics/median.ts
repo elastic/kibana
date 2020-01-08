@@ -17,12 +17,12 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 
 // @ts-ignore
 import { percentilesMetricAgg } from './percentiles';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 const medianTitle = i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
   defaultMessage: 'Median',
@@ -49,7 +49,7 @@ export const medianMetricAgg = new MetricAggType({
       default: [50],
     },
     {
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         output.params.keyed = false;
       },
     },

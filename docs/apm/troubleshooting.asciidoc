@@ -42,3 +42,22 @@ Finally, this problem can also occur if you've changed the index name that you w
 The default index pattern can be found {apm-server-ref}/elasticsearch-output.html#index-option-es[here].
 If you change this setting, you must also configure the `setup.template.name` and `setup.template.pattern` options.
 See {apm-server-ref}/configuration-template.html[Load the Elasticsearch index template].
+
+==== Unknown route
+
+The {apm-app-ref}/transactions.html[transaction overview] will only display helpful information
+when the transactions in your services are named correctly.
+If you're seeing "GET unknown route" or "unknown route" in the APM app,
+it could be a sign that something isn't working like it should.
+
+Elastic APM Agents come with built-in support for popular frameworks out-of-the-box.
+This means, among other things, that the Agent will try to automatically name HTTP requests.
+As an example, the Node.js Agent uses the route that handled the request, while the Java Agent uses the Servlet name.
+
+"Unknown route" indicates that the Agent can't determine what to name the request,
+perhaps because the technology you're using isn't supported, the Agent has been installed incorrectly,
+or because something is happening to the request that the Agent doesn't understand.
+
+To resolve this, you'll need to head over to the relevant {apm-agents-ref}[Agent documentation].
+Specifically, view the Agent's supported technologies page.
+You can also use the Agent's public API to manually set a name for the transaction.

@@ -220,10 +220,11 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           type="button"
         >
           <svg
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
             height={16}
+            role="img"
             style={null}
             viewBox="0 0 16 16"
             width={16}
@@ -238,10 +239,11 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           type="button"
         >
           <svg
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
             height={16}
+            role="img"
             style={null}
             viewBox="0 0 16 16"
             width={16}
@@ -307,9 +309,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",
@@ -511,10 +515,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -529,10 +534,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -767,10 +773,11 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -785,10 +792,11 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -833,9 +841,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",
@@ -959,10 +969,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -977,10 +988,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}

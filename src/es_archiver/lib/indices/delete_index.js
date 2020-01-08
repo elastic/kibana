@@ -20,20 +20,10 @@
 import { get } from 'lodash';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
-const PENDING_SNAPSHOT_STATUSES = [
-  'INIT',
-  'STARTED',
-  'WAITING',
-];
+const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];
 
 export async function deleteIndex(options) {
-  const {
-    client,
-    stats,
-    index,
-    log,
-    retryIfSnapshottingCount = 3
-  } = options;
+  const { client, stats, index, log, retryIfSnapshottingCount = 10 } = options;
 
   const getIndicesToDelete = async () => {
     const aliasInfo = await client.indices.getAlias({ name: index, ignore: [404] });
@@ -45,13 +35,12 @@ export async function deleteIndex(options) {
     await client.indices.delete({ index: indicesToDelete });
     stats.deletedIndex(indicesToDelete);
   } catch (error) {
-
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
       stats.waitingForInProgressSnapshot(index);
       await waitForSnapshotCompletion(client, index, log);
       return await deleteIndex({
         ...options,
-        retryIfSnapshottingCount: retryIfSnapshottingCount - 1
+        retryIfSnapshottingCount: retryIfSnapshottingCount - 1,
       });
     }
 
@@ -68,8 +57,9 @@ export async function deleteIndex(options) {
  * @return {Boolean}
  */
 export function isDeleteWhileSnapshotInProgressError(error) {
-  return get(error, 'body.error.reason', '')
-    .startsWith('Cannot delete indices that are being snapshotted');
+  return get(error, 'body.error.reason', '').startsWith(
+    'Cannot delete indices that are being snapshotted'
+  );
 }
 
 /**
@@ -82,7 +72,9 @@ export function isDeleteWhileSnapshotInProgressError(error) {
  */
 export async function waitForSnapshotCompletion(client, index, log) {
   const isSnapshotPending = async (repository, snapshot) => {
-    const { snapshots: [status] } = await client.snapshot.status({
+    const {
+      snapshots: [status],
+    } = await client.snapshot.status({
       repository,
       snapshot,
     });
@@ -91,10 +83,10 @@ export async function waitForSnapshotCompletion(client, index, log) {
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 
-  const getInProgressSnapshots = async (repository) => {
+  const getInProgressSnapshots = async repository => {
     const { snapshots: inProgressSnapshots } = await client.snapshot.get({
       repository,
-      snapshot: '_current'
+      snapshot: '_current',
     });
     return inProgressSnapshots;
   };

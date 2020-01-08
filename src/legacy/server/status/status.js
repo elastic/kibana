@@ -33,22 +33,21 @@ export default class Status extends EventEmitter {
     this.state = 'uninitialized';
     this.message = 'uninitialized';
 
-    this.on('change', function (previous, previousMsg) {
+    this.on('change', function(previous, previousMsg) {
       this.since = new Date();
 
-      const tags = [
-        'status',
-        this.id,
-        this.state === 'red' ? 'error' : 'info'
-      ];
+      const tags = ['status', this.id, this.state === 'red' ? 'error' : 'info'];
 
-      server.logWithMetadata(tags,
-        `Status changed from ${ previous } to ${this.state}${ this.message ? ' - ' + this.message : '' }`,
+      server.logWithMetadata(
+        tags,
+        `Status changed from ${previous} to ${this.state}${
+          this.message ? ' - ' + this.message : ''
+        }`,
         {
           state: this.state,
           message: this.message,
           prevState: previous,
-          prevMsg: previousMsg
+          prevMsg: previousMsg,
         }
       );
     });
@@ -61,7 +60,7 @@ export default class Status extends EventEmitter {
       icon: states.get(this.state).icon,
       message: this.message,
       uiColor: states.get(this.state).uiColor,
-      since: this.since
+      since: this.since,
     };
   }
 
@@ -82,8 +81,8 @@ export default class Status extends EventEmitter {
   }
 }
 
-states.getAll().forEach(function (state) {
-  Status.prototype[state.id] = function (message) {
+states.getAll().forEach(function(state) {
+  Status.prototype[state.id] = function(message) {
     if (this.state === 'disabled') return;
 
     const previous = this.state;

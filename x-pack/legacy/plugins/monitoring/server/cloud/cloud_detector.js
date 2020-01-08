@@ -10,11 +10,8 @@ import { CLOUD_SERVICES } from './cloud_services';
  * {@code CloudDetector} can be used to asynchronously detect the cloud service that Kibana is running within.
  */
 export class CloudDetector {
-
-  constructor(options = { }) {
-    const {
-      cloudServices = CLOUD_SERVICES
-    } = options;
+  constructor(options = {}) {
+    const { cloudServices = CLOUD_SERVICES } = options;
 
     this._cloudServices = cloudServices;
     // Explicitly undefined. If the value is never updated, then the property will be dropped when the data is serialized.
@@ -63,5 +60,4 @@ export class CloudDetector {
     // explicitly undefined rather than null so that it can be ignored in JSON
     return undefined;
   }
-
 }

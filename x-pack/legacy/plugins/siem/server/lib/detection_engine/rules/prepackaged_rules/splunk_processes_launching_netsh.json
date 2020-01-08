@@ -1,0 +1,17 @@
+{
+  "rule_id": "600dba95-f1c6-4a4d-aae1-c79cbd8a5ddd",
+  "risk_score": 50,
+  "description": "Splunk - Processes launching netsh",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Processes launching netsh",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:netsh.exe and event.action:\"Process Create (rule: ProcessCreate)\" ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

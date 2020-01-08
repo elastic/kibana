@@ -20,11 +20,12 @@
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { MountPoint } from '../../types';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
-  mount(targetDomElement: HTMLElement): () => void;
+  mount: MountPoint;
 }
 
 /**

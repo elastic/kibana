@@ -42,6 +42,7 @@ export interface AggregationOptionsByType {
     size?: number;
     missing?: string;
     order?: SortOptions;
+    execution_hint?: 'map' | 'global_ordinals';
   };
   date_histogram: {
     field: string;
@@ -202,22 +203,19 @@ interface AggregationResponsePart<
           TDocument
         >
       >
-    : (TAggregationOptionsMap extends {
+    : TAggregationOptionsMap extends {
         filters: {
           filters: Record<string, any>;
         };
       }
-        ? {
-            buckets: {
-              [key in keyof TAggregationOptionsMap['filters']['filters']]: {
-                doc_count: number;
-              } & AggregationResponseMap<
-                TAggregationOptionsMap['aggs'],
-                TDocument
-              >;
-            };
-          }
-        : never);
+    ? {
+        buckets: {
+          [key in keyof TAggregationOptionsMap['filters']['filters']]: {
+            doc_count: number;
+          } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+        };
+      }
+    : never;
   sampler: {
     doc_count: number;
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;

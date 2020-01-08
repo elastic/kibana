@@ -5,17 +5,15 @@
  */
 
 import React from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { SourceConfigurationSettings } from '../../components/source_configuration/source_configuration_settings';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-interface SettingsPageProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const MetricsSettingsPage = injectUICapabilities(({ uiCapabilities }: SettingsPageProps) => (
-  <SourceConfigurationSettings
-    shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}
-    displaySettings="metrics"
-  />
-));
+export const MetricsSettingsPage = () => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  return (
+    <SourceConfigurationSettings
+      shouldAllowEdit={uiCapabilities?.infrastructure?.configureSource as boolean}
+      displaySettings="metrics"
+    />
+  );
+};

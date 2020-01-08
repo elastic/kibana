@@ -11,7 +11,7 @@ export default {
       destroy() {},
       acequire() {
         return {
-          setCompleters() {}
+          setCompleters() {},
         };
       },
       setValue() {},
@@ -29,17 +29,17 @@ export default {
       },
       renderer: {
         setShowGutter() {},
-        setScrollMargin() {}
+        setScrollMargin() {},
       },
-      setBehavioursEnabled() {}
+      setBehavioursEnabled() {},
     };
   },
   acequire() {
     return {
-      setCompleters() {}
+      setCompleters() {},
     };
   },
   setCompleters() {
     return [{}];
-  }
+  },
 };

@@ -22,7 +22,8 @@ import { mockInjectedMetadata } from '../../services/telemetry_opt_in.test.mocks
 import sinon from 'sinon';
 import { uiModules } from 'ui/modules';
 
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   // disable stat reporting while running tests,
   // MockInjector used in these tests is not impacted
   .constant('telemetryOptedIn', null);
@@ -34,7 +35,7 @@ const getMockInjector = ({ simulateFailure }) => {
   const get = sinon.stub();
 
   const mockHttp = {
-    post: sinon.stub()
+    post: sinon.stub(),
   };
 
   if (simulateFailure) {
@@ -51,10 +52,10 @@ const getMockInjector = ({ simulateFailure }) => {
 const getTelemetryOptInProvider = ({ simulateFailure = false, simulateError = false } = {}) => {
   const injector = getMockInjector({ simulateFailure });
   const chrome = {
-    addBasePath: (url) => url
+    addBasePath: url => url,
   };
 
-  const provider = new TelemetryOptInProvider(injector, chrome);
+  const provider = new TelemetryOptInProvider(injector, chrome, false);
 
   if (simulateError) {
     provider.setOptIn = () => Promise.reject('unhandled error');
@@ -64,15 +65,14 @@ const getTelemetryOptInProvider = ({ simulateFailure = false, simulateError = fa
 };
 
 describe('click_banner', () => {
-
   it('sets setting successfully and removes banner', async () => {
     const banners = {
-      remove: sinon.spy()
+      remove: sinon.spy(),
     };
 
     const optIn = true;
     const bannerId = 'bruce-banner';
-    mockInjectedMetadata({ telemetryOptedIn: optIn });
+    mockInjectedMetadata({ telemetryOptedIn: optIn, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider();
 
     telemetryOptInProvider.setBannerId(bannerId);
@@ -86,16 +86,19 @@ describe('click_banner', () => {
 
   it('sets setting unsuccessfully, adds toast, and does not touch banner', async () => {
     const toastNotifications = {
-      addDanger: sinon.spy()
+      addDanger: sinon.spy(),
     };
     const banners = {
-      remove: sinon.spy()
+      remove: sinon.spy(),
     };
     const optIn = true;
-    mockInjectedMetadata({ telemetryOptedIn: null });
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider({ simulateFailure: true });
 
-    await clickBanner(telemetryOptInProvider, optIn, { _banners: banners, _toastNotifications: toastNotifications });
+    await clickBanner(telemetryOptInProvider, optIn, {
+      _banners: banners,
+      _toastNotifications: toastNotifications,
+    });
 
     expect(telemetryOptInProvider.getOptIn()).toBe(null);
     expect(toastNotifications.addDanger.calledOnce).toBe(true);
@@ -104,20 +107,22 @@ describe('click_banner', () => {
 
   it('sets setting unsuccessfully with error, adds toast, and does not touch banner', async () => {
     const toastNotifications = {
-      addDanger: sinon.spy()
+      addDanger: sinon.spy(),
     };
     const banners = {
-      remove: sinon.spy()
+      remove: sinon.spy(),
     };
     const optIn = false;
-    mockInjectedMetadata({ telemetryOptedIn: null });
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider({ simulateError: true });
 
-    await clickBanner(telemetryOptInProvider, optIn, { _banners: banners, _toastNotifications: toastNotifications });
+    await clickBanner(telemetryOptInProvider, optIn, {
+      _banners: banners,
+      _toastNotifications: toastNotifications,
+    });
 
     expect(telemetryOptInProvider.getOptIn()).toBe(null);
     expect(toastNotifications.addDanger.calledOnce).toBe(true);
     expect(banners.remove.notCalled).toBe(true);
   });
-
 });

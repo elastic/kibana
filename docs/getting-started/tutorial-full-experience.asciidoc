@@ -91,7 +91,7 @@ and whether it's _tokenized_, or broken up into separate words.
 
 NOTE: If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
 You must also have the `create`, `manage` `read`, `write,` and `delete` 
-index privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+index privileges. See {ref}/security-privileges.html[Security privileges] 
 for more information.
 
 In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:

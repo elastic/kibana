@@ -55,14 +55,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 const expressionLifecycle = lifecycle({
-  componentWillReceiveProps({ formState, setFormState, expression }) {
-    if (this.props.expression !== expression && expression !== formState.expression) {
-      setFormState({
-        expression,
-        dirty: false,
-      });
-    }
-  },
   componentDidMount() {
     const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
     functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
@@ -70,11 +62,7 @@ const expressionLifecycle = lifecycle({
 });
 
 export const Expression = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('functionDefinitions', 'setFunctionDefinitions', []),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,

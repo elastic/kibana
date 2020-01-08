@@ -19,13 +19,13 @@
 
 const { resolve } = require('path');
 
-module.exports = function (grunt) {
-  grunt.registerTask('test:jest', function () {
+module.exports = function(grunt) {
+  grunt.registerTask('test:jest', function() {
     const done = this.async();
     runJest(resolve(__dirname, '../scripts/jest.js')).then(done, done);
   });
 
-  grunt.registerTask('test:jest_integration', function () {
+  grunt.registerTask('test:jest_integration', function() {
     const done = this.async();
     runJest(resolve(__dirname, '../scripts/jest_integration.js')).then(done, done);
   });
@@ -34,7 +34,7 @@ module.exports = function (grunt) {
     const serverCmd = {
       cmd: 'node',
       args: [jestScript, '--ci'],
-      opts: { stdio: 'inherit' }
+      opts: { stdio: 'inherit' },
     };
 
     return new Promise((resolve, reject) => {
@@ -49,7 +49,6 @@ module.exports = function (grunt) {
         grunt.log.writeln(result);
         resolve();
       });
-
     });
   }
 };

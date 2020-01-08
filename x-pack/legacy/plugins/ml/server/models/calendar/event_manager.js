@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import Boom from 'boom';
 
 export class EventManager {
-
   constructor(callWithRequest) {
     this.callWithRequest = callWithRequest;
   }
@@ -49,9 +46,11 @@ export class EventManager {
   }
 
   isEqual(ev1, ev2) {
-    return (ev1.event_id === ev2.event_id &&
+    return (
+      ev1.event_id === ev2.event_id &&
       ev1.description === ev2.description &&
       ev1.start_time === ev2.start_time &&
-      ev1.end_time === ev2.end_time);
+      ev1.end_time === ev2.end_time
+    );
   }
 }

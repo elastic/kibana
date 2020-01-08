@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiSpacer
 } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
@@ -34,7 +33,7 @@ import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import { ALL_OPTION_VALUE } from '../../../../../../common/agent_configuration_constants';
 import { saveConfig } from './saveConfig';
-import { useKibanaCore } from '../../../../../../../observability/public';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 const defaultSettings = {
   TRANSACTION_SAMPLE_RATE: '1.0',
@@ -55,9 +54,7 @@ export function AddEditFlyout({
   onDeleted,
   selectedConfig
 }: Props) {
-  const {
-    notifications: { toasts }
-  } = useKibanaCore();
+  const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
   const callApmApiFromHook = useCallApmApi();
@@ -90,17 +87,16 @@ export function AddEditFlyout({
   // config settings
   const [sampleRate, setSampleRate] = useState<string>(
     (
-      idx(selectedConfig, _ => _.settings.transaction_sample_rate) ||
+      selectedConfig?.settings.transaction_sample_rate ||
       defaultSettings.TRANSACTION_SAMPLE_RATE
     ).toString()
   );
   const [captureBody, setCaptureBody] = useState<string>(
-    idx(selectedConfig, _ => _.settings.capture_body) ||
-      defaultSettings.CAPTURE_BODY
+    selectedConfig?.settings.capture_body || defaultSettings.CAPTURE_BODY
   );
   const [transactionMaxSpans, setTransactionMaxSpans] = useState<string>(
     (
-      idx(selectedConfig, _ => _.settings.transaction_max_spans) ||
+      selectedConfig?.settings.transaction_max_spans ||
       defaultSettings.TRANSACTION_MAX_SPANS
     ).toString()
   );

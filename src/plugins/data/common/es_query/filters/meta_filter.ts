@@ -33,15 +33,17 @@ export interface FilterValueFormatter {
 }
 
 export interface FilterMeta {
+  alias: string | null;
+  disabled: boolean;
+  negate: boolean;
+  // controlledBy is there to identify who owns the filter
+  controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   type?: string;
-  disabled: boolean;
-  negate: boolean;
-  alias: string | null;
   key?: string;
-  value?: string | ((formatter?: FilterValueFormatter) => string);
   params?: any;
+  value?: string | ((formatter?: FilterValueFormatter) => string);
 }
 
 export interface Filter {

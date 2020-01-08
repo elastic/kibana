@@ -19,18 +19,19 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
 
   describe('embed mode', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -38,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides the chrome', async () => {
-      const isChromeVisible = await PageObjects.common.isChromeVisible();
-      expect(isChromeVisible).to.be(true);
+      const globalNavShown = await globalNav.exists();
+      expect(globalNavShown).to.be(true);
 
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl + '&embed=true';
@@ -48,12 +49,12 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(newUrl.toString(), useTimeStamp);
 
       await retry.try(async () => {
-        const isChromeHidden = await PageObjects.common.isChromeHidden();
-        expect(isChromeHidden).to.be(true);
+        const globalNavHidden = !(await globalNav.exists());
+        expect(globalNavHidden).to.be(true);
       });
     });
 
-    after(async function () {
+    after(async function() {
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace('&embed=true', '');
       // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
@@ -65,4 +66,3 @@ export default function ({ getService, getPageObjects }) {
     });
   });
 }
-

@@ -18,7 +18,7 @@
  */
 import { each, union } from 'lodash';
 import { dedupFilters } from './dedup_filters';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 /**
  * Remove duplicate filters from an array of filters

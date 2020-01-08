@@ -30,18 +30,15 @@ function getExpressionForLayer(
       return getEsAggsConfig(col, colId);
     });
 
-    const idMap = columnEntries.reduce(
-      (currentIdMap, [colId], index) => {
-        return {
-          ...currentIdMap,
-          [`col-${index}-${colId}`]: {
-            ...columns[colId],
-            id: colId,
-          },
-        };
-      },
-      {} as Record<string, OriginalColumn>
-    );
+    const idMap = columnEntries.reduce((currentIdMap, [colId], index) => {
+      return {
+        ...currentIdMap,
+        [`col-${index}-${colId}`]: {
+          ...columns[colId],
+          id: colId,
+        },
+      };
+    }, {} as Record<string, OriginalColumn>);
 
     return `esaggs
       index="${indexPattern.id}"

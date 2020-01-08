@@ -22,6 +22,8 @@ export * from './numeric_field';
 export * from './checkbox_field';
 export * from './combobox_field';
 export * from './multi_select_field';
+export * from './radio_group_field';
+export * from './range_field';
 export * from './select_field';
 export * from './toggle_field';
 export * from './text_area_field';

@@ -51,17 +51,13 @@ exports[`CcrShard that is renders an exception properly 1`] = `
 
 exports[`CcrShard that it renders normally 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "backgroundColor": "white",
     }
   }
 >
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <Status
       formattedLeader="leader on remote"
       oldestStat={

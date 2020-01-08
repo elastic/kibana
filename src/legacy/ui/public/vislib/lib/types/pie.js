@@ -25,8 +25,8 @@ export function vislibPieConfig(config) {
       type: 'pie',
       labels: {
         show: false,
-        truncate: 100
-      }
+        truncate: 100,
+      },
     });
   }
   return config;

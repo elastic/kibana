@@ -20,14 +20,12 @@ export interface JobParamsPanelCsv {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
-  panel: SearchPanel;
+  panel?: SearchPanel;
   post?: JobParamsPostPayloadPanelCsv;
   visType?: string;
 }
 
-export interface JobDocPayloadPanelCsv extends JobDocPayload {
-  type: string | null;
-  objects: null;
+export interface JobDocPayloadPanelCsv extends JobDocPayload<JobParamsPanelCsv> {
   jobParams: JobParamsPanelCsv;
 }
 
@@ -232,12 +230,6 @@ export interface QueryFilter extends Filter {
 }
 export interface SearchSourceFilter extends Filter {
   isSearchSourceFilter: boolean;
-}
-
-export interface ESQueryConfig {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: boolean;
-  ignoreFilterIfFieldNotInIndex: boolean;
 }
 
 export interface IndexPatternField {

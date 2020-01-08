@@ -5,8 +5,7 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, DatatableColumn } from '../../../types';
+import { Datatable, DatatableColumn, ExpressionFunction } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {

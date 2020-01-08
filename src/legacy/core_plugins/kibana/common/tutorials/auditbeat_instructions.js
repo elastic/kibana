@@ -87,7 +87,8 @@ export const createAuditbeatInstructions = context => ({
         defaultMessage: 'Download and install Auditbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.auditbeatInstructions.install.windowsTextPre', {
-        defaultMessage: 'First time using Auditbeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
+        defaultMessage:
+          'First time using Auditbeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
  1. Download the Auditbeat Windows zip file from the [Download]({auditbeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Auditbeat`.\n\
@@ -99,20 +100,21 @@ export const createAuditbeatInstructions = context => ({
           guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-getting-started.html',
           auditbeatLinkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
           directoryName: 'auditbeat-{config.kibana.version}-windows',
-        }
+        },
       }),
-      commands: [
-        'cd "C:\\Program Files\\Auditbeat"',
-        '.\\install-service-auditbeat.ps1',
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatInstructions.install.windowsTextPost', {
-        defaultMessage: 'Modify the settings under {propertyName} in the {auditbeatPath} file to point to your Elasticsearch installation.',
-        values: {
-          propertyName: '`output.elasticsearch`',
-          auditbeatPath: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
+      commands: ['cd "C:\\Program Files\\Auditbeat"', '.\\install-service-auditbeat.ps1'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatInstructions.install.windowsTextPost',
+        {
+          defaultMessage:
+            'Modify the settings under {propertyName} in the {auditbeatPath} file to point to your Elasticsearch installation.',
+          values: {
+            propertyName: '`output.elasticsearch`',
+            auditbeatPath: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
+          },
         }
-      }),
-    }
+      ),
+    },
   },
   START: {
     OSX: {
@@ -120,48 +122,40 @@ export const createAuditbeatInstructions = context => ({
         defaultMessage: 'Start Auditbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.osxTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage:
+          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
-      commands: [
-        './auditbeat setup',
-        './auditbeat -e',
-      ]
+      commands: ['./auditbeat setup', './auditbeat -e'],
     },
     DEB: {
       title: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.debTitle', {
         defaultMessage: 'Start Auditbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.debTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage:
+          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
-      commands: [
-        'sudo auditbeat setup',
-        'sudo service auditbeat start',
-      ]
+      commands: ['sudo auditbeat setup', 'sudo service auditbeat start'],
     },
     RPM: {
       title: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.rpmTitle', {
         defaultMessage: 'Start Auditbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.rpmTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage:
+          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
-      commands: [
-        'sudo auditbeat setup',
-        'sudo service auditbeat start',
-      ],
+      commands: ['sudo auditbeat setup', 'sudo service auditbeat start'],
     },
     WINDOWS: {
       title: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.windowsTitle', {
         defaultMessage: 'Start Auditbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.auditbeatInstructions.start.windowsTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage:
+          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
-      commands: [
-        '.\\auditbeat.exe setup',
-        'Start-Service auditbeat',
-      ],
+      commands: ['.\\auditbeat.exe setup', 'Start-Service auditbeat'],
     },
   },
   CONFIG: {
@@ -182,10 +176,11 @@ export const createAuditbeatInstructions = context => ({
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.auditbeatInstructions.config.osxTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -211,10 +206,11 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.auditbeatInstructions.config.debTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -240,10 +236,11 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.auditbeatInstructions.config.rpmTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -269,18 +266,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatInstructions.config.windowsTextPost',
+        {
+          defaultMessage:
+            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    }
+          values: {
+            passwordTemplate: '`<password>`',
+            esUrlTemplate: '`<es_url>`',
+            kibanaUrlTemplate: '`<kibana_url>`',
+          },
+        }
+      ),
+    },
   },
 });
 
@@ -296,14 +297,14 @@ export const createAuditbeatCloudInstructions = () => ({
           path: '`auditbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.osxTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatCloudInstructions.config.osxTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     DEB: {
       title: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.debTitle', {
@@ -315,14 +316,14 @@ export const createAuditbeatCloudInstructions = () => ({
           path: '`/etc/auditbeat/auditbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.debTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatCloudInstructions.config.debTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     RPM: {
       title: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.rpmTitle', {
@@ -334,35 +335,38 @@ export const createAuditbeatCloudInstructions = () => ({
           path: '`/etc/auditbeat/auditbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.rpmTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatCloudInstructions.config.rpmTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     WINDOWS: {
       title: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
-        },
-      }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.auditbeatCloudInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
-    }
-  }
+      textPre: i18n.translate(
+        'kbn.common.tutorials.auditbeatCloudInstructions.config.windowsTextPre',
+        {
+          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
+          values: {
+            path: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
+          },
+        }
+      ),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.auditbeatCloudInstructions.config.windowsTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
+    },
+  },
 });
 
 export function auditbeatStatusCheck() {
@@ -415,9 +419,12 @@ export function onPremInstructions(platforms, context) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.auditbeat.premInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.auditbeat.premInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: variants,
         statusCheck: auditbeatStatusCheck(),
       },
@@ -448,9 +455,12 @@ export function onPremCloudInstructions(platforms) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.auditbeat.premCloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.auditbeat.premCloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: variants,
         statusCheck: auditbeatStatusCheck(),
       },
@@ -478,9 +488,12 @@ export function cloudInstructions(platforms) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.auditbeat.cloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.auditbeat.cloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: variants,
         statusCheck: auditbeatStatusCheck(),
       },

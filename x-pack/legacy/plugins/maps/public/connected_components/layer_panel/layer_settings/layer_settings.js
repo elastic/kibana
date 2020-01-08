@@ -6,23 +6,13 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-  EuiSwitch,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from 'ui/validated_range';
-
-const MIN_ZOOM = 0;
-const MAX_ZOOM = 24;
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export function LayerSettings(props) {
   const onLabelChange = event => {
@@ -37,12 +27,7 @@ export function LayerSettings(props) {
 
   const onAlphaChange = alpha => {
     const alphaDecimal = alpha / 100;
-
     props.updateAlpha(props.layerId, alphaDecimal);
-  };
-
-  const onApplyGlobalQueryChange = event => {
-    props.setLayerApplyGlobalQuery(props.layerId, event.target.checked);
   };
 
   const renderZoomSliders = () => {
@@ -109,45 +94,6 @@ export function LayerSettings(props) {
     );
   };
 
-  const renderApplyGlobalQueryCheckbox = () => {
-    const layerSupportsGlobalQuery = props.layer.getIndexPatternIds().length;
-
-    const applyGlobalQueryCheckbox = (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGlobalFilterLabel', {
-          defaultMessage: 'Global filter',
-        })}
-        display="columnCompressedSwitch"
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply to layer`,
-          })}
-          checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
-          onChange={onApplyGlobalQueryChange}
-          disabled={!layerSupportsGlobalQuery}
-          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-          compressed
-        />
-      </EuiFormRow>
-    );
-
-    if (layerSupportsGlobalQuery) {
-      return applyGlobalQueryCheckbox;
-    }
-
-    return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckbox.disableTooltip', {
-          defaultMessage: `Layer does not support filtering.`,
-        })}
-      >
-        {applyGlobalQueryCheckbox}
-      </EuiToolTip>
-    );
-  };
-
   return (
     <Fragment>
       <EuiPanel>
@@ -164,7 +110,6 @@ export function LayerSettings(props) {
         {renderLabel()}
         {renderZoomSliders()}
         {renderAlphaSlider()}
-        {renderApplyGlobalQueryCheckbox()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

@@ -49,6 +49,20 @@ const sortTimeline = `
   sortDirection: String
 `;
 
+const filtersMetaTimeline = `
+  alias: String
+  controlledBy: String
+  disabled: Boolean
+  field: String
+  formattedValue: String
+  index: String
+  key: String
+  negate: Boolean
+  params: String
+  type: String
+  value: String
+`;
+
 export const timelineSchema = gql`
   ###############
   #### INPUT ####
@@ -97,14 +111,30 @@ export const timelineSchema = gql`
     ${sortTimeline}
   }
 
+  input FilterMetaTimelineInput {
+    ${filtersMetaTimeline}
+  }
+
+  input FilterTimelineInput {
+    exists: String
+    meta: FilterMetaTimelineInput
+    match_all: String
+    missing: String
+    query: String
+    range: String
+    script: String
+  }
+
   input TimelineInput {
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
     description: String
+    filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
     title: String
     dateRange: DateRangePickerInput
+    savedQueryId: String
     sort: SortTimelineInput
   }
 
@@ -171,24 +201,40 @@ export const timelineSchema = gql`
      ${sortTimeline}
   }
 
+  type FilterMetaTimelineResult {
+    ${filtersMetaTimeline}
+  }
+
+  type FilterTimelineResult {
+    exists: String
+    meta: FilterMetaTimelineResult
+    match_all: String
+    missing: String
+    query: String
+    range: String
+    script: String
+  }
+
   type TimelineResult {
-    savedObjectId: String!
     columns: [ColumnHeaderResult!]
+    created: Float
+    createdBy: String
     dataProviders: [DataProviderResult!]
     dateRange: DateRangePickerResult
     description: String
     eventIdToNoteIds: [NoteResult!]
     favorite: [FavoriteTimelineResult!]
+    filters: [FilterTimelineResult!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryResult
     notes: [NoteResult!]
     noteIds: [String!]
     pinnedEventIds: [String!]
     pinnedEventsSaveObject: [PinnedEvent!]
-    title: String
+    savedQueryId: String
+    savedObjectId: String!
     sort: SortTimelineResult
-    created: Float
-    createdBy: String
+    title: String
     updated: Float
     updatedBy: String
     version: String!

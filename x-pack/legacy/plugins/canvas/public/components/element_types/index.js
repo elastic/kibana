@@ -95,11 +95,7 @@ export const ElementTypes = compose(
   withState('customElements', 'setCustomElements', []),
   withState('filterTags', 'setFilterTags', []),
   withProps(() => ({ elements: elementsRegistry.toJS() })),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  )
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(Component);
 
 ElementTypes.propTypes = {

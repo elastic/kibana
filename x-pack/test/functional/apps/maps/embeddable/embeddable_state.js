@@ -6,17 +6,16 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const DASHBOARD_NAME = 'verify_map_embeddable_state';
 
   describe('embeddable state', () => {
-
     before(async () => {
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a'
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -33,6 +32,5 @@ export default function ({ getPageObjects, getService }) {
       expect(Math.round(lon)).to.equal(0);
       expect(Math.round(zoom)).to.equal(10);
     });
-
   });
 }

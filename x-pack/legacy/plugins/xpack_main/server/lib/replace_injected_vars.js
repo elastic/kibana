@@ -25,7 +25,11 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // request is not authenticated
-  if (!await server.newPlatform.setup.plugins.security.authc.isAuthenticated(KibanaRequest.from(request))) {
+  if (
+    !(await server.newPlatform.setup.plugins.security.authc.isAuthenticated(
+      KibanaRequest.from(request)
+    ))
+  ) {
     return originalInjectedVars;
   }
 

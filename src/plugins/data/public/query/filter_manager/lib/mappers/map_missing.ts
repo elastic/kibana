@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 export const mapMissing = (filter: esFilters.Filter) => {
   if (esFilters.isMissingFilter(filter)) {

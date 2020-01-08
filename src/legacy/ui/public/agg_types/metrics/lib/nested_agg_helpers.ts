@@ -44,7 +44,7 @@ export const forwardModifyAggConfigOnSearchRequestStart = (paramName: string) =>
     const nestedAggConfig = aggConfig.getParam(paramName);
 
     if (nestedAggConfig && nestedAggConfig.type && nestedAggConfig.type.params) {
-      nestedAggConfig.type.params.forEach((param: MetricAggParam) => {
+      nestedAggConfig.type.params.forEach((param: MetricAggParam<IMetricAggConfig>) => {
         // Check if this parameter of the nested aggConfig has a modifyAggConfigOnSearchRequestStart
         // function, that needs to be called.
         if (param.modifyAggConfigOnSearchRequestStart) {

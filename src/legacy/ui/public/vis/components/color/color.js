@@ -33,7 +33,7 @@ export function vislibColor(arrayOfStringsOrNumbers, colorMapping) {
     throw new Error('ColorUtil expects an array');
   }
 
-  arrayOfStringsOrNumbers.forEach(function (val) {
+  arrayOfStringsOrNumbers.forEach(function(val) {
     if (!_.isString(val) && !_.isNumber(val) && !_.isUndefined(val)) {
       throw new TypeError('ColorUtil expects an array of strings, numbers, or undefined values');
     }
@@ -41,7 +41,7 @@ export function vislibColor(arrayOfStringsOrNumbers, colorMapping) {
 
   mappedColors.mapKeys(arrayOfStringsOrNumbers);
 
-  return function (value) {
+  return function(value) {
     return colorMapping[value] || mappedColors.get(value);
   };
 }

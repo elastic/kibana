@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { App, AppUnmount } from 'kibana/public';
+import { App, AppUnmount, AppMountDeprecated } from 'kibana/public';
 import { UIRoutes } from 'ui/routes';
 import { ILocationService, IScope } from 'angular';
 import { npStart } from 'ui/new_platform';
 import { htmlIdGenerator } from '@elastic/eui';
-
-interface ForwardDefinition {
-  legacyAppId: string;
-  newAppId: string;
-  keepPrefix: boolean;
-}
 
 const matchAllWithPrefix = (prefixOrApp: string | App) =>
   `/${typeof prefixOrApp === 'string' ? prefixOrApp : prefixOrApp.id}/:tail*?`;
@@ -45,54 +39,7 @@ const matchAllWithPrefix = (prefixOrApp: string | App) =>
  * router that handles switching between applications without page reload.
  */
 export class LocalApplicationService {
-  private apps: App[] = [];
-  private forwards: ForwardDefinition[] = [];
   private idGenerator = htmlIdGenerator('kibanaAppLocalApp');
-
-  /**
-   * Register an app to be managed by the application service.
-   * This method works exactly as `core.application.register`.
-   *
-   * When an app is mounted, it is responsible for routing. The app
-   * won't be mounted again if the route changes within the prefix
-   * of the app (its id). It is fine to use whatever means for handling
-   * routing within the app.
-   *
-   * When switching to a URL outside of the current prefix, the app router
-   * shouldn't do anything because it doesn't own the routing anymore -
-   * the local application service takes over routing again,
-   * unmounts the current app and mounts the next app.
-   *
-   * @param app The app descriptor
-   */
-  register(app: App) {
-    this.apps.push(app);
-  }
-
-  /**
-   * Forwards every URL starting with `legacyAppId` to the same URL starting
-   * with `newAppId` - e.g. `/legacy/my/legacy/path?q=123` gets forwarded to
-   * `/newApp/my/legacy/path?q=123`.
-   *
-   * When setting the `keepPrefix` option, the new app id is simply prepended.
-   * The example above would become `/newApp/legacy/my/legacy/path?q=123`.
-   *
-   * This method can be used to provide backwards compatibility for URLs when
-   * renaming or nesting plugins. For route changes after the prefix, please
-   * use the routing mechanism of your app.
-   *
-   * @param legacyAppId The name of the old app to forward URLs from
-   * @param newAppId The name of the new app that handles the URLs now
-   * @param options Whether the prefix of the old app is kept to nest the legacy
-   * path into the new path
-   */
-  forwardApp(
-    legacyAppId: string,
-    newAppId: string,
-    options: { keepPrefix: boolean } = { keepPrefix: false }
-  ) {
-    this.forwards.push({ legacyAppId, newAppId, ...options });
-  }
 
   /**
    * Wires up listeners to handle mounting and unmounting of apps to
@@ -103,7 +50,7 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    this.apps.forEach(app => {
+    npStart.plugins.kibana_legacy.getApps().forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
@@ -121,7 +68,10 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            unmountHandler = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+            const params = { element, appBasePath: '' };
+            unmountHandler = isAppMountDeprecated(app.mount)
+              ? await app.mount({ core: npStart.core }, params)
+              : await app.mount(params);
             // immediately unmount app if scope got destroyed in the meantime
             if (isUnmounted) {
               unmountHandler();
@@ -131,7 +81,7 @@ export class LocalApplicationService {
       });
     });
 
-    this.forwards.forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+    npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
         resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();
@@ -143,3 +93,8 @@ export class LocalApplicationService {
 }
 
 export const localApplicationService = new LocalApplicationService();
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
+}

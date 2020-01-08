@@ -5,17 +5,15 @@
  */
 
 import React from 'react';
-
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
-import { TimeRange, esFilters } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { TimeRange, esFilters, Query } from 'src/plugins/data/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;
-  expression: string;
+  expression: string | null;
   context: {
     timeRange?: TimeRange;
     query?: Query;
@@ -31,7 +29,7 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
-      {expression === '' ? (
+      {expression === null || expression === '' ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
             <EuiIcon type="alert" color="danger" />
@@ -48,8 +46,11 @@ export function ExpressionWrapper({
       ) : (
         <div className="lnsExpressionRenderer">
           <ExpressionRendererComponent
+            className="lnsExpressionRenderer__component"
+            padding="m"
             expression={expression}
             searchContext={{ ...context, type: 'kibana_context' }}
+            renderError={error => <div data-test-subj="expression-renderer-error">{error}</div>}
           />
         </div>
       )}

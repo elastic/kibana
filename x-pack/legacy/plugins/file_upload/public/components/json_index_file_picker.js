@@ -12,13 +12,9 @@ import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
 import _ from 'lodash';
 
-const ACCEPTABLE_FILETYPES = [
-  'json',
-  'geojson',
-];
+const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
 
 export class JsonIndexFilePicker extends Component {
-
   state = {
     fileUploadError: '',
     percentageProcessed: 0,
@@ -45,18 +41,22 @@ export class JsonIndexFilePicker extends Component {
       percentageProcessed: 0,
       featuresProcessed: 0,
     });
-    if (fileArr.length === 0) { // Remove
+    if (fileArr.length === 0) {
+      // Remove
       this.setState({
-        fileParseActive: false
+        fileParseActive: false,
       });
       return;
     }
     const file = fileArr[0];
 
-    this.setState({
-      fileParseActive: true,
-      currentFileTracker: Symbol()
-    }, () => this._parseFile(file));
+    this.setState(
+      {
+        fileParseActive: true,
+        currentFileTracker: Symbol(),
+      },
+      () => this._parseFile(file)
+    );
   };
 
   _checkFileSize = ({ size }) => {
@@ -65,57 +65,66 @@ export class JsonIndexFilePicker extends Component {
       if (size > MAX_FILE_SIZE) {
         const humanReadableSize = bytesToSize(size);
         const humanReadableMaxSize = bytesToSize(MAX_FILE_SIZE);
-        throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
-          defaultMessage: 'File size {fileSize} exceeds max file size of {maxFileSize}',
-          values: {
-            fileSize: humanReadableSize,
-            maxFileSize: humanReadableMaxSize
-          }
-        }));
+        throw new Error(
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
+            defaultMessage: 'File size {fileSize} exceeds max file size of {maxFileSize}',
+            values: {
+              fileSize: humanReadableSize,
+              maxFileSize: humanReadableMaxSize,
+            },
+          })
+        );
       }
     } catch (error) {
       this.setState({
         fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.fileSizeError', {
           defaultMessage: 'File size error: {errorMessage}',
           values: {
-            errorMessage: error.message
-          }
-        })
+            errorMessage: error.message,
+          },
+        }),
       });
       return;
     }
     return fileSizeValid;
-  }
+  };
 
   _getFileNameAndCheckType({ name }) {
     let fileNameOnly;
     try {
       if (!name) {
-        throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.noFileNameError', {
-          defaultMessage: 'No file name provided'
-        }));
+        throw new Error(
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.noFileNameError', {
+            defaultMessage: 'No file name provided',
+          })
+        );
       }
 
       const splitNameArr = name.split('.');
       const fileType = splitNameArr.pop();
       if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
-        throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError', {
-          defaultMessage: 'File is not one of acceptable types: {types}',
-          values: {
-            types: ACCEPTABLE_FILETYPES.join(', ')
-          }
-        }));
+        throw new Error(
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError', {
+            defaultMessage: 'File is not one of acceptable types: {types}',
+            values: {
+              types: ACCEPTABLE_FILETYPES.join(', '),
+            },
+          })
+        );
       }
 
       fileNameOnly = splitNameArr[0];
     } catch (error) {
       this.setState({
-        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.fileProcessingError', {
-          defaultMessage: 'File processing error: {errorMessage}',
-          values: {
-            errorMessage: error.message
+        fileUploadError: i18n.translate(
+          'xpack.fileUpload.jsonIndexFilePicker.fileProcessingError',
+          {
+            defaultMessage: 'File processing error: {errorMessage}',
+            values: {
+              errorMessage: error.message,
+            },
           }
-        })
+        ),
       });
       return;
     }
@@ -134,8 +143,12 @@ export class JsonIndexFilePicker extends Component {
   async _parseFile(file) {
     const { currentFileTracker } = this.state;
     const {
-      setFileRef, setParsedFile, resetFileAndIndexSettings, onFileUpload,
-      transformDetails, setIndexName
+      setFileRef,
+      setParsedFile,
+      resetFileAndIndexSettings,
+      onFileUpload,
+      transformDetails,
+      setIndexName,
     } = this.props;
 
     const fileSizeValid = this._checkFileSize(file);
@@ -151,7 +164,7 @@ export class JsonIndexFilePicker extends Component {
       transformDetails,
       onFileUpload,
       setFileProgress: this.setFileProgress,
-      getFileParseActive: this.getFileParseActive
+      getFileParseActive: this.getFileParseActive,
     }).catch(err => {
       if (this._isMounted) {
         this.setState({
@@ -163,10 +176,10 @@ export class JsonIndexFilePicker extends Component {
               id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
               defaultMessage="Unable to parse file: {error}"
               values={{
-                error: err.message
+                error: err.message,
               }}
             />
-          )
+          ),
         });
       }
     });
@@ -178,7 +191,7 @@ export class JsonIndexFilePicker extends Component {
     this.setState({
       percentageProcessed: 0,
       featuresProcessed: 0,
-      fileParseActive: currentFileTracker !== this.state.currentFileTracker
+      fileParseActive: currentFileTracker !== this.state.currentFileTracker,
     });
     if (!fileResult) {
       resetFileAndIndexSettings();
@@ -197,7 +210,7 @@ export class JsonIndexFilePicker extends Component {
             defaultMessage="File parse error(s) detected: {error}"
             values={{ error }}
           />
-        )
+        ),
       });
     }
     setIndexName(defaultIndexName);
@@ -205,27 +218,20 @@ export class JsonIndexFilePicker extends Component {
     setParsedFile(parsedGeojson);
   }
 
-
-
   render() {
-    const {
-      fileUploadError,
-      percentageProcessed,
-      featuresProcessed,
-    } = this.state;
+    const { fileUploadError, percentageProcessed, featuresProcessed } = this.state;
 
     return (
       <Fragment>
-        {percentageProcessed
-          ? <EuiProgress
+        {percentageProcessed ? (
+          <EuiProgress
             value={percentageProcessed}
             max={100}
             size="xs"
             color="accent"
             position="absolute"
           />
-          : null
-        }
+        ) : null}
         <EuiFormRow
           label={
             <FormattedMessage
@@ -237,13 +243,12 @@ export class JsonIndexFilePicker extends Component {
           error={[fileUploadError]}
           helpText={
             percentageProcessed ? (
-              i18n.translate(
-                'xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
-                  defaultMessage: '{featuresProcessed} features parsed...',
-                  values: {
-                    featuresProcessed
-                  }
-                })
+              i18n.translate('xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
+                defaultMessage: '{featuresProcessed} features parsed...',
+                values: {
+                  featuresProcessed,
+                },
+              })
             ) : (
               <span>
                 {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {
@@ -281,5 +286,5 @@ function bytesToSize(bytes) {
   if (bytes === 0) return 'n/a';
   const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
   if (i === 0) return `${bytes} ${sizes[i]})`;
-  return `${(bytes / (1024 ** i)).toFixed(1)} ${sizes[i]}`;
+  return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
 }

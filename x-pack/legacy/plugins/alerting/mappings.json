@@ -7,10 +7,20 @@
       "name": {
         "type": "text"
       },
+      "tags": {
+        "type": "keyword"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
-      "interval": {
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "consumer": {
         "type": "keyword"
       },
       "actions": {
@@ -22,13 +32,16 @@
           "actionRef": {
             "type": "keyword"
           },
+          "actionTypeId": {
+            "type": "keyword"
+          },
           "params": {
             "enabled": false,
             "type": "object"
           }
         }
       },
-      "alertTypeParams": {
+      "params": {
         "enabled": false,
         "type": "object"
       },
@@ -40,6 +53,9 @@
       },
       "updatedBy": {
         "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
       },
       "apiKey": {
         "type": "binary"

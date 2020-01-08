@@ -1,11 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Package rendering it renders against shallow snapshot 1`] = `
-<Component
-  contextId="[context-123]"
-  eventId="[event-123]"
-  packageName="package-name-123"
-  packageSummary="package-summary-123"
-  packageVersion="package-version-123"
-/>
+<Fragment>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="[context-123]"
+      eventId="[event-123]"
+      field="system.audit.package.name"
+      iconType="document"
+      value="package-name-123"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="[context-123]"
+      eventId="[event-123]"
+      field="system.audit.package.version"
+      iconType="document"
+      value="package-version-123"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="[context-123]"
+      eventId="[event-123]"
+      field="system.audit.package.summary"
+      value="package-summary-123"
+    />
+  </TokensFlexItem>
+</Fragment>
 `;

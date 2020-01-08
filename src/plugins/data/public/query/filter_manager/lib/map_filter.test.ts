@@ -18,7 +18,7 @@
  */
 
 import { mapFilter } from './map_filter';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   function getDisplayName(filter: esFilters.Filter) {

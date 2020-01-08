@@ -59,22 +59,19 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
         return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
       });
 
-  const privilegesMissing = privilegesToArray.reduce(
-    (acc, [section, privilege]) => {
-      if (privilege === '*') {
-        acc[section] = privileges.missingPrivileges[section] || [];
-      } else if (
-        privileges.missingPrivileges[section] &&
-        privileges.missingPrivileges[section]!.includes(privilege)
-      ) {
-        const missing: string[] = acc[section] || [];
-        acc[section] = [...missing, privilege];
-      }
+  const privilegesMissing = privilegesToArray.reduce((acc, [section, privilege]) => {
+    if (privilege === '*') {
+      acc[section] = privileges.missingPrivileges[section] || [];
+    } else if (
+      privileges.missingPrivileges[section] &&
+      privileges.missingPrivileges[section]!.includes(privilege)
+    ) {
+      const missing: string[] = acc[section] || [];
+      acc[section] = [...missing, privilege];
+    }
 
-      return acc;
-    },
-    {} as MissingPrivileges
-  );
+    return acc;
+  }, {} as MissingPrivileges);
 
   return children({ isLoading, hasPrivileges, privilegesMissing });
 };

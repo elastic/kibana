@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesService } from './spaces_service';
+export { SpacesService, SpacesServiceSetup } from './spaces_service';

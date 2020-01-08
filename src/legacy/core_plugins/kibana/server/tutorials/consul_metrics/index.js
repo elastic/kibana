@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function consulMetricsSpecProvider(server, context) {
+export function consulMetricsSpecProvider(context) {
   const moduleName = 'consul';
   return {
     id: 'consulMetrics',
@@ -33,7 +37,8 @@ export function consulMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from the Consul server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.consulMetrics.longDescription', {
-      defaultMessage: 'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
+      defaultMessage:
+        'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-consul.html',
@@ -44,20 +49,23 @@ export function consulMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: '496910f0-b952-11e9-a579-f5c0a5d81340',
-          linkLabel: i18n.translate('kbn.server.tutorials.consulMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Consul metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.consulMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Consul metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-consul.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-consul.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/consul_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

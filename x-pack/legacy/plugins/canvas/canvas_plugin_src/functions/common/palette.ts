@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
 import { getFunctionHelp } from '../../../i18n';

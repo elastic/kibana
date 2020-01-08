@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   Datatable,
   Filter,
@@ -13,7 +14,7 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions/public';
+} from 'src/plugins/expressions/common';
 import { CanvasFunction } from './functions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';

@@ -5,7 +5,7 @@
  */
 
 import Papa from 'papaparse';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
 import { Datatable } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 

@@ -6,9 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiBasicTable,
-} from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 export function LatestTypes({ latestTypes }) {
   return (
@@ -23,15 +21,17 @@ export function LatestTypes({ latestTypes }) {
           field: 'count',
           dataType: 'number',
           name: '',
-        }
+        },
       ]}
     />
   );
 }
 
 LatestTypes.propTypes = {
-  latestTypes: PropTypes.arrayOf(PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    count: PropTypes.number.isRequired,
-  })).isRequired,
+  latestTypes: PropTypes.arrayOf(
+    PropTypes.shape({
+      type: PropTypes.string.isRequired,
+      count: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };

@@ -28,7 +28,7 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const GroupByLabelForm: React.SFC<Props> = ({
+export const GroupByLabelForm: React.FC<Props> = ({
   deleteHandler,
   item,
   otherAggNames,
@@ -53,14 +53,20 @@ export const GroupByLabelForm: React.SFC<Props> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="transform__GroupByLabel--text">
-        <span className="eui-textTruncate">{item.aggName}</span>
+        <span className="eui-textTruncate" data-test-subj="transformGroupByEntryLabel">
+          {item.aggName}
+        </span>
       </EuiFlexItem>
       {interval !== undefined && (
         <EuiFlexItem
           grow={false}
           className="transform__GroupByLabel--text transform__GroupByLabel--interval"
         >
-          <EuiTextColor color="subdued" className="eui-textTruncate">
+          <EuiTextColor
+            color="subdued"
+            className="eui-textTruncate"
+            data-test-subj="transformGroupByEntryIntervalLabel"
+          >
             {interval}
           </EuiTextColor>
         </EuiFlexItem>
@@ -77,6 +83,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
               size="s"
               iconType="pencil"
               onClick={() => setPopoverVisibility(!isPopoverVisible)}
+              data-test-subj="transformGroupByEntryEditButton"
             />
           }
           isOpen={isPopoverVisible}
@@ -98,6 +105,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           size="s"
           iconType="cross"
           onClick={() => deleteHandler(item.aggName)}
+          data-test-subj="transformGroupByEntryDeleteButton"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

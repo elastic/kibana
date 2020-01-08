@@ -57,22 +57,22 @@ Object {
     });
   });
 
-  describe('7.6.0', function () {
+  describe('7.6.0', function() {
     const migrate = doc => migrations['index-pattern']['7.6.0'](doc);
 
     it('should remove the parent property and update the subType prop on every field that has them', () => {
       const input = {
         attributes: {
           title: 'test',
-          // eslint-disable-next-line max-len
-          fields: '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
+          fields:
+            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
         },
       };
       const expected = {
         attributes: {
           title: 'test',
-          // eslint-disable-next-line max-len
-          fields: '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
+          fields:
+            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
         },
       };
 
@@ -464,7 +464,7 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -490,7 +490,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('extracts index patterns from controls', () => {
@@ -516,7 +515,7 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -534,7 +533,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -1177,15 +1175,17 @@ Array [
           {
             type: 'filters',
             params: {
-              filters: [{
-                input: {
-                  query: {
-                    query_string: { query: 'machine.os.keyword:\"win 8\"' }
-                  }
-                }
-              }]
-            }
-          }
+              filters: [
+                {
+                  input: {
+                    query: {
+                      query_string: { query: 'machine.os.keyword:"win 8"' },
+                    },
+                  },
+                },
+              ],
+            },
+          },
         ],
       };
       const expected = {
@@ -1194,9 +1194,9 @@ Array [
           {
             type: 'filters',
             params: {
-              filters: [{ input: { query: 'machine.os.keyword:\"win 8\"' } }]
-            }
-          }
+              filters: [{ input: { query: 'machine.os.keyword:"win 8"' } }],
+            },
+          },
         ],
       };
       const migratedDoc = migrate({ attributes: { visState: JSON.stringify(state) } });
@@ -1222,13 +1222,13 @@ Array [
         type: 'timeseries',
         filter: {
           query: 'bytes:>1000',
-          language: 'lucene'
+          language: 'lucene',
         },
         series: [
           {
             split_filters: [{ filter: 'bytes:>1000' }],
           },
-        ]
+        ],
       };
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
@@ -1236,16 +1236,17 @@ Array [
       expect(Object.keys(timeSeriesParams.filter)).toEqual(
         expect.arrayContaining(['query', 'language'])
       );
-      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual(
-        { query: 'bytes:>1000', language: 'lucene' }
-      );
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual({
+        query: 'bytes:>1000',
+        language: 'lucene',
+      });
     });
     it('should change series item split filters when there is no filter item', () => {
       const params = {
         type: 'timeseries',
         filter: {
           query: 'bytes:>1000',
-          language: 'lucene'
+          language: 'lucene',
         },
         series: [
           {
@@ -1256,30 +1257,31 @@ Array [
           {
             query_string: {
               query: 'bytes:>1000',
-              language: 'lucene'
-            }
-          }
+              language: 'lucene',
+            },
+          },
         ],
       };
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
-      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual(
-        { query: 'bytes:>1000', language: 'lucene' }
-      );
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual({
+        query: 'bytes:>1000',
+        language: 'lucene',
+      });
     });
     it('should not convert split_filters to objects if there are no split filter filters', () => {
       const params = {
         type: 'timeseries',
         filter: {
           query: 'bytes:>1000',
-          language: 'lucene'
+          language: 'lucene',
         },
         series: [
           {
             split_filters: [],
           },
-        ]
+        ],
       };
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
@@ -1291,25 +1293,27 @@ Array [
         type: 'timeseries',
         filter: {
           query: 'bytes:>1000',
-          language: 'lucene'
+          language: 'lucene',
         },
         series: [
           {
-            split_filters: [{
-              filter: {
-                query: 'bytes:>1000',
-                language: 'lucene',
-              }
-            }],
+            split_filters: [
+              {
+                filter: {
+                  query: 'bytes:>1000',
+                  language: 'lucene',
+                },
+              },
+            ],
           },
         ],
         annotations: [
           {
             query_string: {
               query: 'bytes:>1000',
-              language: 'lucene'
-            }
-          }
+              language: 'lucene',
+            },
+          },
         ],
       };
       const timeSeriesDoc = generateDoc({ params: params });
@@ -1317,7 +1321,6 @@ Array [
       const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
       expect(timeSeriesParams.series[0].split_filters[0].filter.query).toEqual('bytes:>1000');
       expect(timeSeriesParams.series[0].split_filters[0].filter.language).toEqual('lucene');
-
     });
   });
 });
@@ -1594,7 +1597,7 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1624,7 +1627,6 @@ Object {
   "type": "dashboard",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -1942,7 +1944,7 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1962,11 +1964,10 @@ Object {
   "type": "search",
 }
 `);
-      /* eslint-enable max-len */
     });
   });
 
-  describe('7.4.0', function () {
+  describe('7.4.0', function() {
     const migration = migrations.search['7.4.0'];
 
     test('transforms one dimensional sort arrays into two dimensional arrays', () => {
@@ -1991,7 +1992,7 @@ Object {
       expect(migratedDoc).toEqual(expected);
     });
 
-    test('doesn\'t modify search docs that already have two dimensional sort arrays', () => {
+    test("doesn't modify search docs that already have two dimensional sort arrays", () => {
       const doc = {
         id: '123',
         type: 'search',
@@ -2005,7 +2006,7 @@ Object {
       expect(migratedDoc).toEqual(doc);
     });
 
-    test('doesn\'t modify search docs that have no sort array', () => {
+    test("doesn't modify search docs that have no sort array", () => {
       const doc = {
         id: '123',
         type: 'search',

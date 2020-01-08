@@ -124,11 +124,10 @@ export function deleteColumn({
   layerId: string;
   columnId: string;
 }): IndexPatternPrivateState {
-  const newColumns = adjustColumnReferencesForChangedColumn(
-    state.layers[layerId].columns,
-    columnId
-  );
-  delete newColumns[columnId];
+  const hypotheticalColumns = { ...state.layers[layerId].columns };
+  delete hypotheticalColumns[columnId];
+
+  const newColumns = adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId);
 
   return {
     ...state,

@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { RequestHandlerContext, CallAPIOptions } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
 
-export interface UMContext {
-  req: Request;
-}
+export type UMContext = RequestHandlerContext & {
+  APICaller: (
+    endpoint: string,
+    clientParams?: Record<string, any>,
+    options?: CallAPIOptions | undefined
+  ) => Promise<any>;
+};
 
 export interface UMGraphQLResolver {
   Query?: any;

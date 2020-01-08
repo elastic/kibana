@@ -16,6 +16,7 @@ import { awsNetworkBytes } from './tsvb/aws_network_bytes';
 import { awsNetworkPackets } from './tsvb/aws_network_packets';
 import { awsOverview } from './tsvb/aws_overview';
 import { InventoryMetrics } from '../../types';
+import { count } from './snapshot/count';
 
 export const metrics: InventoryMetrics = {
   tsvb: {
@@ -30,4 +31,9 @@ export const metrics: InventoryMetrics = {
     awsNetworkPackets,
     awsOverview,
   },
+  snapshot: {
+    count,
+  },
+  defaultSnapshot: 'count',
+  defaultTimeRangeInSeconds: 3600,
 };

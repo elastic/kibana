@@ -25,10 +25,7 @@ import sinon from 'sinon';
 describe('EmptyState', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState
-        loadingDataDocUrl="http://www.elastic.co"
-        onRefresh={() => {}}
-      />
+      <EmptyState loadingDataDocUrl="http://www.elastic.co" onRefresh={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -40,10 +37,7 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = shallow(
-          <EmptyState
-            loadingDataDocUrl="http://www.elastic.co"
-            onRefresh={onRefreshHandler}
-          />
+          <EmptyState loadingDataDocUrl="http://www.elastic.co" onRefresh={onRefreshHandler} />
         );
 
         component.find('[data-test-subj="refreshIndicesButton"]').simulate('click');

@@ -6,21 +6,19 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
-export class App extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+class AppComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);
@@ -29,8 +27,11 @@ export class App extends Component {
 
   registerRouter() {
     // Share the router with the app without requiring React or context.
-    const { router } = this.context;
-    registerRouter(router);
+    const { history, location } = this.props;
+    registerRouter({
+      history,
+      route: { location },
+    });
   }
 
   componentDidMount() {
@@ -56,3 +57,5 @@ export class App extends Component {
     );
   }
 }
+
+export const App = withRouter(AppComponent);

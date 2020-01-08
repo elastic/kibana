@@ -17,23 +17,28 @@
  * under the License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { getVisData } from '../lib/get_vis_data';
-import Boom from 'boom';
 
-export const visDataRoutes = server => {
-  server.route({
-    path: '/api/metrics/vis/data',
-    method: 'POST',
-    handler: async req => {
-      try {
-        return await getVisData(req);
-      } catch (err) {
-        if (err.isBoom && err.status === 401) {
-          return err;
-        }
+const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-        throw Boom.boomify(err, { statusCode: 500 });
-      }
+export const visDataRoutes = (router, framework) => {
+  router.post(
+    {
+      path: '/api/metrics/vis/data',
+      validate: {
+        body: escapeHatch,
+      },
     },
-  });
+    async (requestContext, request, response) => {
+      try {
+        const results = await getVisData(requestContext, request.body, framework);
+        return response.ok({ body: results });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
 };

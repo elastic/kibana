@@ -30,13 +30,7 @@ import { Browsers } from './remote/browsers';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const { driver, browserType, consoleLog$ } = await getService('__webdriver__').init();
-
-  consoleLog$.subscribe(({ message, level }) => {
-    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
-      `browser[${level}] ${message}`
-    );
-  });
+  const { driver, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
@@ -430,6 +424,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Clears session storage for the focused window/frame.
+     *
+     * @return {Promise<void>}
+     */
+    public async clearSessionStorage(): Promise<void> {
+      await driver.executeScript('return window.sessionStorage.clear();');
+    }
+
+    /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close
@@ -461,7 +464,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<R>(fn: string | ((...args: any[]) => R), ...args: any[]): Promise<R> {
+    public async executeAsync<R>(
+      fn: string | ((...args: any[]) => Promise<R>),
+      ...args: any[]
+    ): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
         ...cloneDeep<any>(args, arg => {

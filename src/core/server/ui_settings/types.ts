@@ -33,25 +33,23 @@ export interface IUiSettingsClient {
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+  get: <T = any>(key: string) => Promise<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>() => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */
-  getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
-    Record<string, UserProvidedValues<T>>
-  >;
+  getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
   /**
    * Writes multiple uiSettings values and marks them as set by the user.
    */
-  setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+  setMany: (changes: Record<string, any>) => Promise<void>;
   /**
    * Writes uiSettings value and marks it as set by the user.
    */
-  set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+  set: (key: string, value: any) => Promise<void>;
   /**
    * Removes uiSettings value by key.
    */
@@ -70,7 +68,7 @@ export interface IUiSettingsClient {
  * Describes the values explicitly set by user.
  * @public
  * */
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
 }
@@ -127,6 +125,7 @@ export interface UiSettingsServiceSetup {
    * @param settings
    *
    * @example
+   * ```ts
    * setup(core: CoreSetup){
    *  core.uiSettings.register([{
    *   foo: {
@@ -136,6 +135,29 @@ export interface UiSettingsServiceSetup {
    *   },
    *  }]);
    * }
+   * ```
    */
   register(settings: Record<string, UiSettingsParams>): void;
 }
+
+/** @public */
+export interface UiSettingsServiceStart {
+  /**
+   * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
+   *
+   * This should only be used in the specific case where the client needs to be accessed
+   * from outside of the scope of a {@link RequestHandler}.
+   *
+   * @example
+   * ```ts
+   * start(core: CoreStart) {
+   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
+   *  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+   * }
+   * ```
+   */
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
+/** @internal */
+export type InternalUiSettingsServiceStart = UiSettingsServiceStart;

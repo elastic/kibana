@@ -83,9 +83,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   // stores previous aggs' custom labels
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   // stores previous aggs' field and type
-  const [lastSeriesAgg, setLastSeriesAgg] = useState({} as {
-    [key: string]: { type: string; field: string };
-  });
+  const [lastSeriesAgg, setLastSeriesAgg] = useState(
+    {} as {
+      [key: string]: { type: string; field: string };
+    }
+  );
 
   const updateAxisTitle = () => {
     const axes = cloneDeep(stateParams.valueAxes);

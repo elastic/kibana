@@ -50,7 +50,6 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       maxZoom: 24,
       alpha: 1,
       visible: true,
-      applyGlobalQuery: true,
       style: null,
       type: 'VECTOR_TILE',
     },
@@ -76,6 +75,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
+    applyGlobalQuery: true,
     geoField: 'source.geo.location',
     filterByMapBounds: false,
     tooltipProperties: Object.keys(sourceFieldMappings),
@@ -112,7 +112,6 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
   joins: [],
@@ -129,6 +128,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
+    applyGlobalQuery: true,
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
     tooltipProperties: Object.keys(destinationFieldMappings),
@@ -165,7 +165,6 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 });
@@ -180,6 +179,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
 export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) => ({
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
+    applyGlobalQuery: true,
     id: uuid.v4(),
     indexPatternId,
     sourceGeoField: 'source.geo.location',
@@ -210,6 +210,10 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
           },
           minSize: 1,
           maxSize: 8,
+          fieldMetaOptions: {
+            isEnabled: true,
+            sigma: 3,
+          },
         },
       },
       iconSize: { type: 'STATIC', options: { size: 10 } },
@@ -228,7 +232,6 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 });

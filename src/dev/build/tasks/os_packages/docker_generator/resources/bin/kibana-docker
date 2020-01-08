@@ -42,6 +42,11 @@ kibana_vars=(
     kibana.index
     logging.dest
     logging.quiet
+    logging.rotate.enabled
+    logging.rotate.everyBytes
+    logging.rotate.keepFiles
+    logging.rotate.pollingInterval
+    logging.rotate.usePolling
     logging.silent
     logging.useUTC
     logging.verbose
@@ -180,7 +185,11 @@ kibana_vars=(
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
+    xpack.security.session.idleTimeout
+    xpack.security.session.lifespan
+    xpack.security.loginAssistanceMessage
     telemetry.enabled
+    telemetry.sendUsageFrom
 )
 
 longopts=''

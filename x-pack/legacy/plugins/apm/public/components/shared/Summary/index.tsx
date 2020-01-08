@@ -8,9 +8,10 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { px, units } from '../../../../public/style/variables';
+import { Maybe } from '../../../../typings/common';
 
 interface Props {
-  items: Array<React.ReactElement | null | undefined>;
+  items: Array<Maybe<React.ReactElement>>;
 }
 
 // TODO: Light/Dark theme (@see https://github.com/elastic/kibana/issues/44840)

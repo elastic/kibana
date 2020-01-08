@@ -14,7 +14,7 @@ You can create a layer that requests data from {es} from the following:
 
 ** Grid aggregation source
 
-** <<terms-join>>. The search context is applied to both the terms join and the vector source when the vector source is provided by Elasticsearch documents.
+** <<terms-join>>
 
 * <<heatmap-layer>> with Grid aggregation source
 
@@ -87,8 +87,11 @@ The most common cause for empty layers are searches for a field that exists in o
 [[maps-disable-search-for-layer]]
 ==== Disable search for layer
 
-To prevent the global search bar from applying search context to a layer, clear the *Apply global filter to layer* checkbox in Layer settings.
-Disabling the search context applies to the layer source and all <<terms-join, term joins>> configured for the layer.
+You can prevent the search bar from applying search context to a layer by configuring the following:
+
+* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off the global search context for the layer source.
+
+* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off the global search context for the <<terms-join, term join>>.
 
 [float]
 [[maps-add-index-search]]

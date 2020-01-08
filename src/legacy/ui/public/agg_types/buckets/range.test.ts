@@ -19,7 +19,7 @@
 
 import { AggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { NumberFormat } from '../../../../../plugins/data/common/';
+import { NumberFormat } from '../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -72,7 +72,10 @@ describe('Range Agg', () => {
           schema: 'segment',
           params: {
             field: 'bytes',
-            ranges: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+            ranges: [
+              { from: 0, to: 1000 },
+              { from: 1000, to: 2000 },
+            ],
           },
         },
       ],

@@ -22,7 +22,7 @@ describe('Error handling for 503 errors', () => {
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
       'Connection Failure: ' +
-      'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
+        'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
     );
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
@@ -32,12 +32,11 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: (
+        message:
           'Connection Failure: ' +
-          'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
-        )
+          'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
       },
-      headers: {}
+      headers: {},
     });
   });
 
@@ -48,7 +47,7 @@ describe('Error handling for 503 errors', () => {
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
       'No Living connections: ' +
-      'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
+        'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
     );
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
@@ -58,12 +57,11 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: (
+        message:
           'No Living connections: ' +
-          'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.'
-        )
+          'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
       },
-      headers: {}
+      headers: {},
     });
   });
 
@@ -74,7 +72,8 @@ describe('Error handling for 503 errors', () => {
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
       'Request Timeout: ' +
-      'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.');
+        'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+    );
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
     expect(wrappedErr.data).to.be(null);
@@ -83,9 +82,10 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: 'Request Timeout: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+        message:
+          'Request Timeout: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.',
       },
-      headers: {}
+      headers: {},
     });
   });
 
@@ -97,8 +97,9 @@ describe('Error handling for 503 errors', () => {
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
       'Monitoring License Error: ' +
-      `Could not find license information for cluster = '${clusterName}'. ` +
-      `Please check the cluster's master node server logs for errors or warnings.`);
+        `Could not find license information for cluster = '${clusterName}'. ` +
+        `Please check the cluster's master node server logs for errors or warnings.`
+    );
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
     expect(wrappedErr.data).to.be(null);
@@ -107,10 +108,11 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: `Monitoring License Error: Could not find license information for cluster = '${clusterName}'. `
-        + `Please check the cluster's master node server logs for errors or warnings.`
+        message:
+          `Monitoring License Error: Could not find license information for cluster = '${clusterName}'. ` +
+          `Please check the cluster's master node server logs for errors or warnings.`,
       },
-      headers: {}
+      headers: {},
     });
   });
 });

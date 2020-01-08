@@ -26,9 +26,11 @@ if (isLicenseOK && isCcrUiEnabled) {
 
   esSection.register('ccr', {
     visible: true,
-    display: i18n.translate('xpack.crossClusterReplication.appTitle', { defaultMessage: 'Cross-Cluster Replication' }),
+    display: i18n.translate('xpack.crossClusterReplication.appTitle', {
+      defaultMessage: 'Cross-Cluster Replication',
+    }),
     order: 4,
-    url: `#${BASE_PATH}`
+    url: `#${BASE_PATH}`,
   });
 
   let elem;
@@ -76,6 +78,6 @@ if (isLicenseOK && isCcrUiEnabled) {
           });
         });
       }
-    }
+    },
   });
 }

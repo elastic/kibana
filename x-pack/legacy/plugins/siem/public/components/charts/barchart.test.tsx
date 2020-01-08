@@ -5,11 +5,13 @@
  */
 
 import { shallow, ShallowWrapper } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
-import { BarChartBaseComponent, BarChart } from './barchart';
+import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
+
+jest.mock('../../lib/kibana');
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -272,7 +274,7 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
+    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
   it(`should render chart`, () => {
@@ -285,7 +287,7 @@ describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
-    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
+    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
   it(`should render chart holder`, () => {

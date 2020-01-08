@@ -2,335 +2,386 @@
 
 exports[`should enable sort order select when sort field provided 1`] = `
 <Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.esSearch.tooltipsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Sort"
-    labelType="label"
-  >
-    <EuiFlexGroup
-      gutterSize="none"
-      justifyContent="flexEnd"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiFlexItem>
-        <SingleFieldSelect
-          compressed={true}
-          fields={null}
-          filterField={[Function]}
-          onChange={[Function]}
-          placeholder="Select sort field"
-          value="@timestamp"
+      <h5>
+        <FormattedMessage
+          defaultMessage="Sorting"
+          id="xpack.maps.esSearch.sortTitle"
+          values={Object {}}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiSelect
-          compressed={true}
-          disabled={false}
-          fullWidth={false}
-          hasNoInitialSelection={false}
-          isLoading={false}
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "ASC",
-                "value": "asc",
-              },
-              Object {
-                "text": "DESC",
-                "value": "desc",
-              },
-            ]
-          }
-          value="DESC"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={false}
-      compressed={true}
-      label="Show top documents based on sort order"
-      onChange={[Function]}
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      label="Dynamically filter for data in the visible map area"
-      onChange={[Function]}
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Field"
+      labelType="label"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        fields={null}
+        filterField={[Function]}
+        onChange={[Function]}
+        placeholder="Select sort field"
+        value="@timestamp"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Order"
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        disabled={false}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "ascending",
+              "value": "asc",
+            },
+            Object {
+              "text": "descending",
+              "value": "desc",
+            },
+          ]
+        }
+        value="DESC"
+      />
+    </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
     />
-  </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Top hits"
+      labelType="label"
+    >
+      <EuiSwitch
+        checked={false}
+        compressed={true}
+        label="Show top hits per entity"
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
 </Fragment>
 `;
 
 exports[`should render top hits form when useTopHits is true 1`] = `
 <Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.esSearch.tooltipsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Sort"
-    labelType="label"
-  >
-    <EuiFlexGroup
-      gutterSize="none"
-      justifyContent="flexEnd"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiFlexItem>
-        <SingleFieldSelect
-          compressed={true}
-          fields={null}
-          filterField={[Function]}
-          onChange={[Function]}
-          placeholder="Select sort field"
+      <h5>
+        <FormattedMessage
+          defaultMessage="Sorting"
+          id="xpack.maps.esSearch.sortTitle"
+          values={Object {}}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiSelect
-          compressed={true}
-          disabled={true}
-          fullWidth={false}
-          hasNoInitialSelection={false}
-          isLoading={false}
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "ASC",
-                "value": "asc",
-              },
-              Object {
-                "text": "DESC",
-                "value": "desc",
-              },
-            ]
-          }
-          value="DESC"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      label="Show top documents based on sort order"
-      onChange={[Function]}
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Entity"
-    labelType="label"
-  >
-    <SingleFieldSelect
-      compressed={true}
-      fields={null}
-      filterField={[Function]}
-      onChange={[Function]}
-      placeholder="Select entity field"
-      value="trackId"
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Field"
+      labelType="label"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        fields={null}
+        filterField={[Function]}
+        onChange={[Function]}
+        placeholder="Select sort field"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Order"
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        disabled={true}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "ascending",
+              "value": "asc",
+            },
+            Object {
+              "text": "descending",
+              "value": "desc",
+            },
+          ]
+        }
+        value="DESC"
+      />
+    </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Documents per entity"
-    labelType="label"
-  >
-    <ValidatedRange
-      compressed={true}
-      data-test-subj="layerPanelTopHitsSize"
-      max={100}
-      min={1}
-      onChange={[Function]}
-      showInput={true}
-      showLabels={true}
-      showRange={true}
-      step={1}
-      value={1}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      label="Dynamically filter for data in the visible map area"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Top hits"
+      labelType="label"
+    >
+      <EuiSwitch
+        checked={true}
+        compressed={true}
+        label="Show top hits per entity"
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Entity"
+      labelType="label"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        fields={null}
+        filterField={[Function]}
+        onChange={[Function]}
+        placeholder="Select entity field"
+        value="trackId"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Documents per entity"
+      labelType="label"
+    >
+      <ValidatedRange
+        compressed={true}
+        data-test-subj="layerPanelTopHitsSize"
+        max={100}
+        min={1}
+        onChange={[Function]}
+        showInput={true}
+        showLabels={true}
+        showRange={true}
+        step={1}
+        value={1}
+      />
+    </EuiFormRow>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
 </Fragment>
 `;
 
 exports[`should render update source editor 1`] = `
 <Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.esSearch.tooltipsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Sort"
-    labelType="label"
-  >
-    <EuiFlexGroup
-      gutterSize="none"
-      justifyContent="flexEnd"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiFlexItem>
-        <SingleFieldSelect
-          compressed={true}
-          fields={null}
-          filterField={[Function]}
-          onChange={[Function]}
-          placeholder="Select sort field"
+      <h5>
+        <FormattedMessage
+          defaultMessage="Sorting"
+          id="xpack.maps.esSearch.sortTitle"
+          values={Object {}}
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiSelect
-          compressed={true}
-          disabled={true}
-          fullWidth={false}
-          hasNoInitialSelection={false}
-          isLoading={false}
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "ASC",
-                "value": "asc",
-              },
-              Object {
-                "text": "DESC",
-                "value": "desc",
-              },
-            ]
-          }
-          value="DESC"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={false}
-      compressed={true}
-      label="Show top documents based on sort order"
-      onChange={[Function]}
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      label="Dynamically filter for data in the visible map area"
-      onChange={[Function]}
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Field"
+      labelType="label"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        fields={null}
+        filterField={[Function]}
+        onChange={[Function]}
+        placeholder="Select sort field"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Order"
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        disabled={true}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "ascending",
+              "value": "asc",
+            },
+            Object {
+              "text": "descending",
+              "value": "desc",
+            },
+          ]
+        }
+        value="DESC"
+      />
+    </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
     />
-  </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="columnCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Top hits"
+      labelType="label"
+    >
+      <EuiSwitch
+        checked={false}
+        compressed={true}
+        label="Show top hits per entity"
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
 </Fragment>
 `;

@@ -35,18 +35,18 @@ import { injectUICapabilities } from './inject_ui_capabilities';
 import { UICapabilitiesProvider } from './ui_capabilities_provider';
 
 describe('injectUICapabilities', () => {
-  it('provides UICapabilities to SFCs', () => {
-    interface SFCProps {
+  it('provides UICapabilities to FCs', () => {
+    interface FCProps {
       uiCapabilities: UICapabilities;
     }
 
-    const MySFC = injectUICapabilities(({ uiCapabilities }: SFCProps) => {
+    const MyFC = injectUICapabilities(({ uiCapabilities }: FCProps) => {
       return <span>{uiCapabilities.uiCapability2.nestedProp}</span>;
     });
 
     const wrapper = mount(
       <UICapabilitiesProvider>
-        <MySFC />
+        <MyFC />
       </UICapabilitiesProvider>
     );
 

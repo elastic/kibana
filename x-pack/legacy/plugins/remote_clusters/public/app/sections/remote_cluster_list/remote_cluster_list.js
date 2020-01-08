@@ -32,13 +32,9 @@ import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps, extractQueryParams } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
-import {
-  RemoteClusterTable,
-} from './remote_cluster_table';
+import { RemoteClusterTable } from './remote_cluster_table';
 
-import {
-  DetailPanel,
-} from './detail_panel';
+import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -53,7 +49,7 @@ export class RemoteClusterList extends Component {
     isLoading: PropTypes.bool,
     isCopyingCluster: PropTypes.bool,
     isRemovingCluster: PropTypes.bool,
-  }
+  };
 
   componentDidUpdate() {
     const {
@@ -61,9 +57,7 @@ export class RemoteClusterList extends Component {
       closeDetailPanel,
       isDetailPanelOpen,
       history: {
-        location: {
-          search,
-        },
+        location: { search },
       },
     } = this.props;
 
@@ -102,7 +96,7 @@ export class RemoteClusterList extends Component {
             </EuiTitle>
           </EuiPageContentHeaderSection>
 
-          { isAuthorized && (
+          {isAuthorized && (
             <EuiPageContentHeaderSection>
               <EuiButton
                 {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
@@ -128,7 +122,7 @@ export class RemoteClusterList extends Component {
     if (isCopyingCluster || isRemovingCluster) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -141,11 +135,7 @@ export class RemoteClusterList extends Component {
       defaultMessage: 'Permission error',
     });
     return (
-      <EuiCallOut
-        title={title}
-        color="warning"
-        iconType="help"
-      >
+      <EuiCallOut title={title} color="warning" iconType="help">
         <FormattedMessage
           id="xpack.remoteClusters.remoteClusterList.noPermissionText"
           defaultMessage="You do not have permission to view or add remote clusters."
@@ -157,20 +147,13 @@ export class RemoteClusterList extends Component {
   renderError(error) {
     // We can safely depend upon the shape of this error coming from Angular $http, because we
     // handle unexpected error shapes in the API action.
-    const {
-      statusCode,
-      error: errorString,
-    } = error.data;
+    const { statusCode, error: errorString } = error.data;
 
     const title = i18n.translate('xpack.remoteClusters.remoteClusterList.loadingErrorTitle', {
       defaultMessage: 'Error loading remote clusters',
     });
     return (
-      <EuiCallOut
-        title={title}
-        color="danger"
-        iconType="alert"
-      >
+      <EuiCallOut title={title} color="danger" iconType="alert">
         {statusCode} {errorString}
       </EuiCallOut>
     );
@@ -181,14 +164,14 @@ export class RemoteClusterList extends Component {
       <EuiEmptyPrompt
         data-test-subj="remoteClusterListEmptyPrompt"
         iconType="managementApp"
-        title={(
+        title={
           <h1>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
               defaultMessage="Add your first remote cluster"
             />
           </h1>
-        )}
+        }
         body={
           <Fragment>
             <p>
@@ -279,7 +262,7 @@ export class RemoteClusterList extends Component {
     return (
       <EuiPageBody>
         <EuiPageContent>
-          {(isHeaderVisible) && this.getHeaderSection(isAuthorized)}
+          {isHeaderVisible && this.getHeaderSection(isAuthorized)}
           {content}
           {this.renderBlockingAction()}
         </EuiPageContent>

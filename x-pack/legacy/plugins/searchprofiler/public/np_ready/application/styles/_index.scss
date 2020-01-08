@@ -1,5 +1,4 @@
 @import '@elastic/eui/src/components/header/variables';
-@import '@elastic/eui/src/components/panel/mixins';
 
 @import 'mixins';
 
@@ -10,18 +9,11 @@
 @import 'containers/main';
 @import 'containers/profile_query_editor';
 
-#searchProfilerAppRoot {
-  height: 100%;
-  display: flex;
-  flex: 1 1 auto;
-}
-
 .prfDevTool__licenseWarning {
   &__container {
     max-width: 1000px;
   }
 }
-
 
 .prfDevTool__page {
   height: 100%;
@@ -55,19 +47,10 @@
   }
 }
 
-.prfDevTool {
-  height: calc(100vh - #{$euiHeaderChildSize});
+.appRoot {
+  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
   overflow: hidden;
-
-  .devApp__container {
-    height: 100%;
-    overflow: hidden;
-    flex-shrink: 1;
-  }
-
-  &__container {
-    overflow: hidden;
-  }
+  flex-shrink: 1;
 }
 
 .prfDevTool__detail {

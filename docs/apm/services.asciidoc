@@ -6,4 +6,4 @@ The *Services* overview gives you quick insights into the health and general per
 You can add services by setting the `service.name` configuration in each of the {apm-agents-ref}[APM agents] you’re instrumenting.
 
 [role="screenshot"]
-image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
+image::apm/images/apm-services-overview.png[Example view of services table the APM app in Kibana]

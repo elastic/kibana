@@ -9,5 +9,5 @@ Retrieves uiSettings values set by the user with fallbacks to default values if 
 <b>Signature:</b>
 
 ```typescript
-get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+get: <T = any>(key: string) => Promise<T>;
 ```

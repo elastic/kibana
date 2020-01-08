@@ -1,0 +1,17 @@
+{
+  "rule_id": "335b2ddc-f806-46e8-8ffa-114d613aac92",
+  "risk_score": 50,
+  "description": "This notice is generated if a packet filter cannot be compiled.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice PacketFilter::Compile_Failure",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"PacketFilter::Compile_Failure\" or rule.name: \"PacketFilter::Compile_Failure\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

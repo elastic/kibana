@@ -25,7 +25,8 @@ import {
   TGetActionsCompatibleWithTrigger,
   IAction,
 } from '../ui_actions';
-import { CoreStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
@@ -49,6 +50,7 @@ interface Props {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  hideHeader?: boolean;
 }
 
 interface State {
@@ -89,18 +91,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    const badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
+    let badges: IAction[] = await this.props.getActions(PANEL_BADGE_TRIGGER, {
       embeddable: this.props.embeddable,
     });
+    if (!this.mounted) return;
 
-    if (this.mounted) {
-      this.setState({
-        badges,
-      });
+    const { disabledActions } = this.props.embeddable.getInput();
+    if (disabledActions) {
+      badges = badges.filter(badge => disabledActions.indexOf(badge.id) === -1);
     }
+
+    this.setState({
+      badges,
+    });
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
     const { parent } = embeddable;
@@ -164,16 +170,18 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         role="figure"
         aria-labelledby={headerId}
       >
-        <PanelHeader
-          getActionContextMenuPanel={this.getActionContextMenuPanel}
-          hidePanelTitles={this.state.hidePanelTitles}
-          isViewMode={viewOnlyMode}
-          closeContextMenu={this.state.closeContextMenu}
-          title={title}
-          badges={this.state.badges}
-          embeddable={this.props.embeddable}
-          headerId={headerId}
-        />
+        {!this.props.hideHeader && (
+          <PanelHeader
+            getActionContextMenuPanel={this.getActionContextMenuPanel}
+            hidePanelTitles={this.state.hidePanelTitles}
+            isViewMode={viewOnlyMode}
+            closeContextMenu={this.state.closeContextMenu}
+            title={title}
+            badges={this.state.badges}
+            embeddable={this.props.embeddable}
+            headerId={headerId}
+          />
+        )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>
     );
@@ -196,21 +204,28 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    const actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
+    let actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
 
-    const createGetUserData = (overlays: CoreStart['overlays']) =>
+    const { disabledActions } = this.props.embeddable.getInput();
+    if (disabledActions) {
+      actions = actions.filter(action => disabledActions.indexOf(action.id) === -1);
+    }
+
+    const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined }>(resolve => {
           const session = overlays.openModal(
-            <CustomizePanelModal
-              embeddable={context.embeddable}
-              updateTitle={title => {
-                session.close();
-                resolve({ title });
-              }}
-            />,
+            toMountPoint(
+              <CustomizePanelModal
+                embeddable={context.embeddable}
+                updateTitle={title => {
+                  session.close();
+                  resolve({ title });
+                }}
+              />
+            ),
             {
               'data-test-subj': 'customizePanel',
             }

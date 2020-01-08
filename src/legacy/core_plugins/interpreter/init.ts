@@ -25,9 +25,7 @@ import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common
 // @ts-ignore
 import { routes } from './server/routes';
 
-import { typeSpecs as types } from '../../../plugins/expressions/public';
-
-import { Type } from './common';
+import { typeSpecs as types, Type } from '../../../plugins/expressions/common';
 import { Legacy } from '../../../../kibana';
 
 export class TypesRegistry extends Registry<any, any> {

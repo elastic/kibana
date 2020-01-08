@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -37,7 +37,7 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -115,12 +115,32 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableActivePage,
     updateTableLimit,
   }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        }),
+      [type, updateTableActivePage]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
           const sort: HostsSortField = {
             field: getSortField(criteria.sort.field),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (sort.direction !== direction || sort.field !== sortField) {
             updateHostsSort({
@@ -130,7 +150,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           }
         }
       },
-      [direction, sortField, type]
+      [direction, sortField, type, updateHostsSort]
     );
 
     const hostsColumns = useMemo(() => getHostsColumns(), []);
@@ -153,26 +173,14 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
-        updateLimitPagination={newLimit =>
-          updateTableLimit({
-            hostsType: type,
-            limit: newLimit,
-            tableType,
-          })
-        }
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            hostsType: type,
-            tableType,
-          })
-        }
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
       />
     );
   }
@@ -209,11 +217,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(
-  makeMapStateToProps,
-  {
-    updateHostsSort: hostsActions.updateHostsSort,
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(HostsTableComponent);
+export const HostsTable = connect(makeMapStateToProps, {
+  updateHostsSort: hostsActions.updateHostsSort,
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

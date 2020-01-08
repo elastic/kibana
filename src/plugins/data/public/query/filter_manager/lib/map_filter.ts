@@ -19,6 +19,7 @@
 
 import { reduceRight } from 'lodash';
 
+import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
 import { mapPhrases } from './mappers/map_phrases';
@@ -30,7 +31,7 @@ import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
 import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 export function mapFilter(filter: esFilters.Filter) {
   /** Mappers **/
@@ -50,6 +51,7 @@ export function mapFilter(filter: esFilters.Filter) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
+    mapSpatialFilter,
     mapMatchAll,
     mapRange,
     mapPhrase,

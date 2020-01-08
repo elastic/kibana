@@ -22,7 +22,7 @@ function getFont(text) {
   // (you can see the full list of supported scripts here: http://www.unicode.org/standard/supported.html).
   // This will match Chinese, Japanese, Korean and some other Asian languages.
   const isCKJ = xRegExp('\\p{Han}').test(text, 'g');
-  if(isCKJ) {
+  if (isCKJ) {
     return 'noto-cjk';
   } else {
     return 'Roboto';
@@ -31,7 +31,7 @@ function getFont(text) {
 
 class PdfMaker {
   constructor(layout, logo) {
-    const fontPath = (filename) => path.resolve(assetPath, 'fonts', filename);
+    const fontPath = filename => path.resolve(assetPath, 'fonts', filename);
     const fonts = {
       Roboto: {
         normal: fontPath('roboto/Roboto-Regular.ttf'),
@@ -39,12 +39,13 @@ class PdfMaker {
         italics: fontPath('roboto/Roboto-Italic.ttf'),
         bolditalics: fontPath('roboto/Roboto-Italic.ttf'),
       },
-      'noto-cjk': { // Roboto does not support CJK characters, so we'll fall back on this font if we detect them.
+      'noto-cjk': {
+        // Roboto does not support CJK characters, so we'll fall back on this font if we detect them.
         normal: fontPath('noto/NotoSansCJKtc-Regular.ttf'),
         bold: fontPath('noto/NotoSansCJKtc-Medium.ttf'),
         italics: fontPath('noto/NotoSansCJKtc-Regular.ttf'),
         bolditalics: fontPath('noto/NotoSansCJKtc-Medium.ttf'),
-      }
+      },
     };
 
     this._layout = layout;
@@ -59,10 +60,12 @@ class PdfMaker {
 
     // inject a page break for every 2 groups on the page
     if (groupCount > 0 && groupCount % this._layout.groupCount === 0) {
-      contents = [{
-        text: '',
-        pageBreak: 'after',
-      }].concat(contents);
+      contents = [
+        {
+          text: '',
+          pageBreak: 'after',
+        },
+      ].concat(contents);
     }
     this._content.push(contents);
   }
@@ -99,11 +102,9 @@ class PdfMaker {
 
     const wrappedImg = {
       table: {
-        body: [
-          [ img ],
-        ],
+        body: [[img]],
       },
-      layout: 'simpleBorder'
+      layout: 'simpleBorder',
     };
 
     contents.push(wrappedImg);
@@ -116,7 +117,7 @@ class PdfMaker {
     contents.push({
       text: headingText,
       style: ['heading'].concat(opts.styles || []),
-      font: getFont(headingText)
+      font: getFont(headingText),
     });
     this._addContents(contents);
   }
@@ -126,7 +127,9 @@ class PdfMaker {
   }
 
   generate() {
-    const docTemplate = _.assign(getTemplate(this._layout, this._logo, this._title), { content: this._content });
+    const docTemplate = _.assign(getTemplate(this._layout, this._logo, this._title), {
+      content: this._content,
+    });
     this._pdfDoc = this._printer.createPdfKitDocument(docTemplate, getDocOptions());
     return this;
   }
@@ -134,13 +137,16 @@ class PdfMaker {
   getBuffer() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
-          defaultMessage: 'Document stream has not been generated'
-        })
+        i18n.translate(
+          'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
+          {
+            defaultMessage: 'Document stream has not been generated',
+          }
+        )
       );
     }
     return new Promise((resolve, reject) => {
-      const concatStream = concat(function (pdfBuffer) {
+      const concatStream = concat(function(pdfBuffer) {
         resolve(pdfBuffer);
       });
 
@@ -153,9 +159,12 @@ class PdfMaker {
   getStream() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
-          defaultMessage: 'Document stream has not been generated'
-        })
+        i18n.translate(
+          'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
+          {
+            defaultMessage: 'Document stream has not been generated',
+          }
+        )
       );
     }
     this._pdfDoc.end();
@@ -170,12 +179,11 @@ function getTemplate(layout, logo, title) {
   const headingFontSize = 14;
   const headingMarginTop = 10;
   const headingMarginBottom = 5;
-  const headingHeight = (headingFontSize * 1.5) + headingMarginTop + headingMarginBottom;
+  const headingHeight = headingFontSize * 1.5 + headingMarginTop + headingMarginBottom;
   const subheadingFontSize = 12;
   const subheadingMarginTop = 0;
   const subheadingMarginBottom = 5;
-  const subheadingHeight = (subheadingFontSize * 1.5) + subheadingMarginTop + subheadingMarginBottom;
-
+  const subheadingHeight = subheadingFontSize * 1.5 + subheadingMarginTop + subheadingMarginBottom;
 
   return {
     // define page size
@@ -188,58 +196,67 @@ function getTemplate(layout, logo, title) {
       headingHeight,
       subheadingHeight,
     }),
-    pageMargins: [ pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom ],
+    pageMargins: [pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom],
 
-    header: function () {
+    header: function() {
       return {
-        margin: [ pageMarginWidth, pageMarginTop / 4, pageMarginWidth, 0 ],
+        margin: [pageMarginWidth, pageMarginTop / 4, pageMarginWidth, 0],
         text: title,
         font: getFont(title),
         style: {
           color: '#aaa',
         },
         fontSize: 10,
-        alignment: 'center'
+        alignment: 'center',
       };
     },
 
-    footer: function (currentPage, pageCount) {
+    footer: function(currentPage, pageCount) {
       const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png');
       return {
-        margin: [ pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0 ],
+        margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],
         layout: 'noBorder',
         table: {
-          widths: [ 100, '*', 100],
+          widths: [100, '*', 100],
           body: [
-            [{
-              fit: [100, 35],
-              image: logo || logoPath,
-            }, {
-              alignment: 'center',
-              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
-                defaultMessage: 'Page {currentPage} of {pageCount}',
-                values: { currentPage: currentPage.toString(), pageCount }
-              }),
-              style: {
-                color: '#aaa'
-              },
-            }, ''],
             [
-              logo ? {
-                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.logoDescription', {
-                  defaultMessage: 'Powered by Elastic'
+              {
+                fit: [100, 35],
+                image: logo || logoPath,
+              },
+              {
+                alignment: 'center',
+                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
+                  defaultMessage: 'Page {currentPage} of {pageCount}',
+                  values: { currentPage: currentPage.toString(), pageCount },
                 }),
-                fontSize: 10,
                 style: {
-                  color: '#aaa'
+                  color: '#aaa',
                 },
-                margin: [0, 2, 0, 0]
-              } : '',
+              },
               '',
-              ''
-            ]
-          ]
-        }
+            ],
+            [
+              logo
+                ? {
+                    text: i18n.translate(
+                      'xpack.reporting.exportTypes.printablePdf.logoDescription',
+                      {
+                        defaultMessage: 'Powered by Elastic',
+                      }
+                    ),
+                    fontSize: 10,
+                    style: {
+                      color: '#aaa',
+                    },
+                    margin: [0, 2, 0, 0],
+                  }
+                : '',
+              '',
+              '',
+            ],
+          ],
+        },
       };
     },
 
@@ -259,8 +276,8 @@ function getTemplate(layout, logo, title) {
         marginBottom: subheadingMarginBottom,
       },
       warning: {
-        color: '#f39c12' // same as @brand-warning in Kibana colors.less
-      }
+        color: '#f39c12', // same as @brand-warning in Kibana colors.less
+      },
     },
 
     defaultStyle: {
@@ -292,11 +309,11 @@ function getDocOptions() {
         paddingRight: () => 0,
         paddingTop: () => 0,
         paddingBottom: () => 0,
-      }
-    }
+      },
+    },
   };
 }
 
 export const pdf = {
-  create: (layout, logo) => new PdfMaker(layout, logo)
+  create: (layout, logo) => new PdfMaker(layout, logo),
 };

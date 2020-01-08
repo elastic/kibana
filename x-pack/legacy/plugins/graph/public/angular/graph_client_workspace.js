@@ -7,11 +7,10 @@
 // Kibana wrapper
 const d3 = require('d3');
 
-module.exports = (function () {
-
+module.exports = (function() {
   // Pluggable function to handle the comms with a server. Default impl here is
   // for use outside of Kibana server with direct access to elasticsearch
-  let graphExplorer = function (indexName, typeName, request, responseHandler) {
+  let graphExplorer = function(indexName, typeName, request, responseHandler) {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
@@ -20,12 +19,12 @@ module.exports = (function () {
       contentType: 'application/json;charset=utf-8',
       async: true,
       data: dataForServer,
-      success: function (data) {
+      success: function(data) {
         responseHandler(data);
-      }
+      },
     });
   };
-  let searcher = function (indexName, request, responseHandler) {
+  let searcher = function(indexName, request, responseHandler) {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
@@ -34,11 +33,10 @@ module.exports = (function () {
       contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
       async: true,
       data: dataForServer,
-      success: function (data) {
+      success: function(data) {
         responseHandler(data);
-      }
+      },
     });
-
   };
 
   // ====== Undo operations =============
@@ -47,14 +45,14 @@ module.exports = (function () {
     const self = this;
     const vm = owner;
     self.node = node;
-    self.undo = function () {
+    self.undo = function() {
       vm.arrRemove(vm.nodes, self.node);
       vm.arrRemove(vm.selectedNodes, self.node);
       self.node.isSelected = false;
 
       delete vm.nodesMap[self.node.id];
     };
-    self.redo = function () {
+    self.redo = function() {
       vm.nodes.push(self.node);
       vm.nodesMap[self.node.id] = self.node;
     };
@@ -64,11 +62,11 @@ module.exports = (function () {
     const self = this;
     const vm = owner;
     self.edge = edge;
-    self.undo = function () {
+    self.undo = function() {
       vm.arrRemove(vm.edges, self.edge);
       delete vm.edgesMap[self.edge.id];
     };
-    self.redo = function () {
+    self.redo = function() {
       vm.edges.push(self.edge);
       vm.edgesMap[self.edge.id] = self.edge;
     };
@@ -85,10 +83,10 @@ module.exports = (function () {
     const self = this;
     self.receiver = receiver;
     self.orphan = orphan;
-    self.undo = function () {
+    self.undo = function() {
       self.orphan.parent = undefined;
     };
-    self.redo = function () {
+    self.redo = function() {
       self.orphan.parent = self.receiver;
     };
   }
@@ -97,14 +95,13 @@ module.exports = (function () {
     const self = this;
     self.parent = parent;
     self.child = child;
-    self.undo = function () {
+    self.undo = function() {
       self.child.parent = self.parent;
     };
-    self.redo = function () {
+    self.redo = function() {
       self.child.parent = undefined;
     };
   }
-
 
   function createWorkspace(options) {
     return new GraphWorkspace(options);
@@ -119,14 +116,12 @@ module.exports = (function () {
     this.redoLog = [];
     this.selectedNodes = [];
 
-
     if (!options) {
       this.options = {};
     }
     this.nodesMap = {};
     this.edgesMap = {};
     this.searchTerm = '';
-
 
     //A sequence number used to know when a node was added
     this.seqNumber = 0;
@@ -143,7 +138,7 @@ module.exports = (function () {
       searcher = options.searchProxy;
     }
 
-    this.addUndoLogEntry = function (undoOperations) {
+    this.addUndoLogEntry = function(undoOperations) {
       self.undoLog.push(undoOperations);
       if (self.undoLog.length > 50) {
         //Remove the oldest
@@ -152,8 +147,7 @@ module.exports = (function () {
       self.redoLog = [];
     };
 
-
-    this.undo = function () {
+    this.undo = function() {
       const lastOps = this.undoLog.pop();
       if (lastOps) {
         this.stopLayout();
@@ -164,7 +158,7 @@ module.exports = (function () {
         this.runLayout();
       }
     };
-    this.redo = function () {
+    this.redo = function() {
       const lastOps = this.redoLog.pop();
       if (lastOps) {
         this.stopLayout();
@@ -176,9 +170,8 @@ module.exports = (function () {
       }
     };
 
-
     //Determines if 2 nodes are connected via an edge
-    this.areLinked = function (a, b) {
+    this.areLinked = function(a, b) {
       if (a == b) return true;
       const allEdges = this.edges;
       for (const e in allEdges) {
@@ -198,7 +191,7 @@ module.exports = (function () {
 
     //======== Selection functions ========
 
-    this.selectAll = function () {
+    this.selectAll = function() {
       self.selectedNodes = [];
       for (const n in self.nodes) {
         const node = self.nodes[n];
@@ -211,7 +204,7 @@ module.exports = (function () {
       }
     };
 
-    this.selectNone = function () {
+    this.selectNone = function() {
       self.selectedNodes = [];
       for (const n in self.nodes) {
         const node = self.nodes[n];
@@ -219,7 +212,7 @@ module.exports = (function () {
       }
     };
 
-    this.selectInvert = function () {
+    this.selectInvert = function() {
       self.selectedNodes = [];
       for (const n in self.nodes) {
         const node = self.nodes[n];
@@ -233,7 +226,7 @@ module.exports = (function () {
       }
     };
 
-    this.selectNodes = function (nodes) {
+    this.selectNodes = function(nodes) {
       for (const n in nodes) {
         const node = nodes[n];
         node.isSelected = true;
@@ -243,14 +236,14 @@ module.exports = (function () {
       }
     };
 
-    this.selectNode = function (node) {
+    this.selectNode = function(node) {
       node.isSelected = true;
       if (self.selectedNodes.indexOf(node) < 0) {
         self.selectedNodes.push(node);
       }
     };
 
-    this.deleteSelection = function () {
+    this.deleteSelection = function() {
       let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
 
       // Nothing selected so process all nodes
@@ -269,7 +262,7 @@ module.exports = (function () {
       self.arrRemoveAll(self.nodes, allAndGrouped);
       self.arrRemoveAll(self.selectedNodes, allAndGrouped);
 
-      const danglingEdges = self.edges.filter(function (edge) {
+      const danglingEdges = self.edges.filter(function(edge) {
         return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
       });
       for (const i in danglingEdges) {
@@ -282,8 +275,7 @@ module.exports = (function () {
       self.runLayout();
     };
 
-
-    this.selectNeighbours = function () {
+    this.selectNeighbours = function() {
       const newSelections = [];
       for (const n in self.edges) {
         const edge = self.edges[n];
@@ -309,30 +301,30 @@ module.exports = (function () {
       }
     };
 
-    this.selectNone = function () {
+    this.selectNone = function() {
       for (const n in self.selectedNodes) {
         self.selectedNodes[n].isSelected = false;
       }
       self.selectedNodes = [];
     };
 
-    this.deselectNode = function (node) {
+    this.deselectNode = function(node) {
       node.isSelected = false;
       self.arrRemove(self.selectedNodes, node);
     };
 
-    this.getAllSelectedNodes = function () {
+    this.getAllSelectedNodes = function() {
       return this.returnUnpackedGroupeds(self.selectedNodes);
     };
 
-    this.colorSelected = function (colorNum) {
+    this.colorSelected = function(colorNum) {
       const selections = self.getAllSelectedNodes();
       for (const i in selections) {
         selections[i].color = colorNum;
       }
     };
 
-    this.getSelectionsThatAreGrouped = function () {
+    this.getSelectionsThatAreGrouped = function() {
       const result = [];
       const selections = self.selectedNodes;
       for (const i in selections) {
@@ -344,7 +336,7 @@ module.exports = (function () {
       return result;
     };
 
-    this.ungroupSelection = function () {
+    this.ungroupSelection = function() {
       const selections = self.getSelectionsThatAreGrouped();
       for (const i in selections) {
         const node = selections[i];
@@ -352,7 +344,7 @@ module.exports = (function () {
       }
     };
 
-    this.toggleNodeSelection = function (node) {
+    this.toggleNodeSelection = function(node) {
       if (node.isSelected) {
         self.deselectNode(node);
       } else {
@@ -362,10 +354,9 @@ module.exports = (function () {
       return node.isSelected;
     };
 
-    this.returnUnpackedGroupeds = function (topLevelNodeArray) {
+    this.returnUnpackedGroupeds = function(topLevelNodeArray) {
       //Gather any grouped nodes that are part of this top-level selection
       const result = topLevelNodeArray.slice();
-
 
       // We iterate over edges not nodes because edges conveniently hold the top-most
       // node information.
@@ -405,7 +396,7 @@ module.exports = (function () {
 
     // ======= Miscellaneous functions
 
-    this.clearGraph = function () {
+    this.clearGraph = function() {
       this.stopLayout();
       this.nodes = [];
       this.edges = [];
@@ -416,25 +407,23 @@ module.exports = (function () {
       this.blacklistedNodes = [];
       this.selectedNodes = [];
       this.lastResponse = null;
-
     };
 
-
     this.arrRemoveAll = function remove(arr, items) {
-      for (let i = items.length; i--;) {
+      for (let i = items.length; i--; ) {
         self.arrRemove(arr, items[i]);
       }
     };
 
     this.arrRemove = function remove(arr, item) {
-      for (let i = arr.length; i--;) {
+      for (let i = arr.length; i--; ) {
         if (arr[i] === item) {
           arr.splice(i, 1);
         }
       }
     };
 
-    this.getNeighbours = function (node) {
+    this.getNeighbours = function(node) {
       const neighbourNodes = [];
       for (const e in self.edges) {
         const edge = self.edges[e];
@@ -456,7 +445,7 @@ module.exports = (function () {
     };
 
     //Creates a query that represents a node - either simple term query or boolean if grouped
-    this.buildNodeQuery = function (topLevelNode) {
+    this.buildNodeQuery = function(topLevelNode) {
       let containedNodes = [topLevelNode];
       containedNodes = self.returnUnpackedGroupeds(containedNodes);
       if (containedNodes.length == 1) {
@@ -464,7 +453,7 @@ module.exports = (function () {
         const tq = {};
         tq[topLevelNode.data.field] = topLevelNode.data.term;
         return {
-          'term': tq
+          term: tq,
         };
       }
       const termsByField = {};
@@ -480,20 +469,20 @@ module.exports = (function () {
       //Single field case
       if (Object.keys(termsByField).length == 1) {
         return {
-          'terms': termsByField
+          terms: termsByField,
         };
       }
       //Multi-field case - build a bool query with per-field terms clauses.
       const q = {
-        'bool': {
-          'should': []
-        }
+        bool: {
+          should: [],
+        },
       };
       for (const field in termsByField) {
         const tq = {};
         tq[field] = termsByField[field];
         q.bool.should.push({
-          'terms': tq
+          terms: tq,
         });
       }
       return q;
@@ -501,15 +490,14 @@ module.exports = (function () {
 
     //====== Layout functions ========
 
-    this.stopLayout = function () {
+    this.stopLayout = function() {
       if (this.force) {
         this.force.stop();
       }
       this.force = null;
     };
 
-
-    this.runLayout = function () {
+    this.runLayout = function() {
       this.stopLayout();
       // The set of nodes and edges we present to the d3 layout algorithms
       // is potentially a reduced set of nodes if the client has used any
@@ -531,12 +519,12 @@ module.exports = (function () {
 
         if (topSrc != topTarget) {
           effectiveEdges.push({
-            'source': topSrc,
-            'target': topTarget
+            source: topSrc,
+            target: topTarget,
           });
         }
       }
-      const visibleNodes = self.nodes.filter(function (n) {
+      const visibleNodes = self.nodes.filter(function(n) {
         return n.parent == undefined;
       });
       //reset then roll-up all the counts
@@ -552,7 +540,8 @@ module.exports = (function () {
           node.numChildren = node.numChildren + 1;
         }
       }
-      this.force = d3.layout.force()
+      this.force = d3.layout
+        .force()
         .nodes(visibleNodes)
         .links(effectiveEdges)
         .friction(0.8)
@@ -562,7 +551,7 @@ module.exports = (function () {
         .theta(0.99)
         .alpha(0.5)
         .size([800, 600])
-        .on('tick', function (e) {
+        .on('tick', function(e) {
           const nodeArray = self.nodes;
           let hasRollups = false;
           //Update the position of all "top level nodes"
@@ -592,7 +581,6 @@ module.exports = (function () {
                 n.ky = topLevelNode.y;
               }
             }
-
           }
           if (self.changeHandler) {
             // Hook to allow any client to respond to position changes
@@ -603,14 +591,13 @@ module.exports = (function () {
       this.force.start();
     };
 
-
     //========Grouping functions==========
 
     //Merges all selected nodes into node
-    this.groupSelections = function (node) {
+    this.groupSelections = function(node) {
       const ops = [];
-      self.nodes.forEach(function (otherNode) {
-        if ((otherNode != node) && (otherNode.isSelected) && (otherNode.parent == undefined)) {
+      self.nodes.forEach(function(otherNode) {
+        if (otherNode != node && otherNode.isSelected && otherNode.parent == undefined) {
           otherNode.parent = node;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
@@ -623,11 +610,11 @@ module.exports = (function () {
       self.runLayout();
     };
 
-    this.mergeNeighbours = function (node) {
+    this.mergeNeighbours = function(node) {
       const neighbours = self.getNeighbours(node);
       const ops = [];
-      neighbours.forEach(function (otherNode) {
-        if ((otherNode != node) && (otherNode.parent == undefined)) {
+      neighbours.forEach(function(otherNode) {
+        if (otherNode != node && otherNode.parent == undefined) {
           otherNode.parent = node;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
@@ -638,15 +625,15 @@ module.exports = (function () {
       self.runLayout();
     };
 
-    this.mergeSelections = function (targetNode) {
+    this.mergeSelections = function(targetNode) {
       if (!targetNode) {
         console.log('Error - merge called on undefined target');
         return;
       }
       const selClone = self.selectedNodes.slice();
       const ops = [];
-      selClone.forEach(function (otherNode) {
-        if ((otherNode != targetNode) && (otherNode.parent == undefined)) {
+      selClone.forEach(function(otherNode) {
+        if (otherNode != targetNode && otherNode.parent == undefined) {
           otherNode.parent = targetNode;
           otherNode.isSelected = false;
           self.arrRemove(self.selectedNodes, otherNode);
@@ -657,9 +644,9 @@ module.exports = (function () {
       self.runLayout();
     };
 
-    this.ungroup = function (node) {
+    this.ungroup = function(node) {
       const ops = [];
-      self.nodes.forEach(function (other) {
+      self.nodes.forEach(function(other) {
         if (other.parent == node) {
           other.parent = undefined;
           ops.push(new UnGroupOperation(node, other, self));
@@ -669,16 +656,15 @@ module.exports = (function () {
       self.runLayout();
     };
 
-    this.unblacklist = function (node) {
+    this.unblacklist = function(node) {
       self.arrRemove(self.blacklistedNodes, node);
     };
 
-    this.blacklistSelection = function () {
+    this.blacklistSelection = function() {
       const selection = self.getAllSelectedNodes();
       const danglingEdges = [];
-      self.edges.forEach(function (edge) {
-        if ((selection.indexOf(edge.source) >= 0) ||
-              (selection.indexOf(edge.target) >= 0)) {
+      self.edges.forEach(function(edge) {
+        if (selection.indexOf(edge.source) >= 0 || selection.indexOf(edge.target) >= 0) {
           delete self.edgesMap[edge.id];
           danglingEdges.push(edge);
         }
@@ -693,23 +679,20 @@ module.exports = (function () {
       self.arrRemoveAll(self.edges, danglingEdges);
       self.selectedNodes = [];
       self.runLayout();
-
     };
-
-
 
     // A "simple search" operation that requires no parameters from the client.
     // Performs numHops hops pulling in field-specific number of terms each time
-    this.simpleSearch = function (searchTerm, fieldsChoice, numHops) {
+    this.simpleSearch = function(searchTerm, fieldsChoice, numHops) {
       const qs = {
-        'query_string': {
-          'query': searchTerm
-        }
+        query_string: {
+          query: searchTerm,
+        },
       };
       return this.search(qs, fieldsChoice, numHops);
     };
 
-    this.search = function (query, fieldsChoice, numHops) {
+    this.search = function(query, fieldsChoice, numHops) {
       if (!fieldsChoice) {
         fieldsChoice = self.options.vertex_fields;
       }
@@ -731,7 +714,7 @@ module.exports = (function () {
         const tq = {};
         tq[n.data.field] = n.data.term;
         nots.push({
-          'term': tq
+          term: tq,
         });
       }
 
@@ -744,9 +727,9 @@ module.exports = (function () {
           const hopSize = fieldsChoice[f].hopSize;
           const excludes = excludeNodesByField[field];
           const stepField = {
-            'field': field,
-            'size': hopSize,
-            'min_doc_count': parseInt(self.options.exploreControls.minDocCount)
+            field: field,
+            size: hopSize,
+            min_doc_count: parseInt(self.options.exploreControls.minDocCount),
           };
           if (excludes) {
             stepField.exclude = excludes;
@@ -754,7 +737,7 @@ module.exports = (function () {
           arr.push(stepField);
         }
         step.vertices = arr;
-        if (hopNum < (numHops - 1)) {
+        if (hopNum < numHops - 1) {
           // if (s < (stepSizes.length - 1)) {
           const nextStep = {};
           step.connections = nextStep;
@@ -764,48 +747,46 @@ module.exports = (function () {
 
       if (nots.length > 0) {
         query = {
-          'bool': {
-            'must': [query],
-            'must_not': nots
-          }
+          bool: {
+            must: [query],
+            must_not: nots,
+          },
         };
       }
 
-
       const request = {
-        'query': query,
-        'controls': self.buildControls(),
-        'connections': rootStep.connections,
-        'vertices': rootStep.vertices
+        query: query,
+        controls: self.buildControls(),
+        connections: rootStep.connections,
+        vertices: rootStep.vertices,
       };
       self.callElasticsearch(request);
-
     };
 
-    this.buildControls = function () {
+    this.buildControls = function() {
       //This is an object managed by the client that may be subject to change
       const guiSettingsObj = self.options.exploreControls;
 
       const controls = {
         use_significance: guiSettingsObj.useSignificance,
         sample_size: guiSettingsObj.sampleSize,
-        timeout: parseInt(guiSettingsObj.timeoutMillis)
+        timeout: parseInt(guiSettingsObj.timeoutMillis),
       };
-        // console.log("guiSettingsObj",guiSettingsObj);
+      // console.log("guiSettingsObj",guiSettingsObj);
       if (guiSettingsObj.sampleDiversityField != null) {
         controls.sample_diversity = {
           field: guiSettingsObj.sampleDiversityField.name,
-          max_docs_per_value: guiSettingsObj.maxValuesPerDoc
+          max_docs_per_value: guiSettingsObj.maxValuesPerDoc,
         };
       }
       return controls;
     };
 
-    this.makeNodeId = function (field, term) {
+    this.makeNodeId = function(field, term) {
       return field + '..' + term;
     };
 
-    this.makeEdgeId = function (srcId, targetId) {
+    this.makeEdgeId = function(srcId, targetId) {
       let id = srcId + '->' + targetId;
       if (srcId > targetId) {
         id = targetId + '->' + srcId;
@@ -814,7 +795,7 @@ module.exports = (function () {
     };
 
     //=======  Adds new nodes retrieved from an elasticsearch search ========
-    this.mergeGraph = function (newData) {
+    this.mergeGraph = function(newData) {
       this.stopLayout();
 
       if (!newData.nodes) {
@@ -845,7 +826,7 @@ module.exports = (function () {
           dedupedNodes.push(node);
         }
       }
-      if ((dedupedNodes.length > 0) && (this.options.nodeLabeller)) {
+      if (dedupedNodes.length > 0 && this.options.nodeLabeller) {
         // A hook for client code to attach labels etc to newly introduced nodes.
         this.options.nodeLabeller(dedupedNodes);
       }
@@ -867,9 +848,9 @@ module.exports = (function () {
           label: label,
           color: dedupedNode.color,
           icon: dedupedNode.icon,
-          data: dedupedNode
+          data: dedupedNode,
         };
-          //        node.scaledSize = sizeScale(node.data.weight);
+        //        node.scaledSize = sizeScale(node.data.weight);
         node.scaledSize = 15;
         node.seqNumber = this.seqNumber++;
         this.nodes.push(node);
@@ -895,12 +876,12 @@ module.exports = (function () {
           continue;
         }
         const newEdge = {
-          'source': srcWrapperObj,
-          'target': targetWrapperObj,
-          'weight': edge.weight,
-          'width': edge.width,
-          'id': edge.id,
-          'doc_count': edge.doc_count,
+          source: srcWrapperObj,
+          target: targetWrapperObj,
+          weight: edge.weight,
+          width: edge.width,
+          id: edge.id,
+          doc_count: edge.doc_count,
         };
         if (edge.label) {
           newEdge.label = edge.label;
@@ -916,10 +897,9 @@ module.exports = (function () {
       }
 
       this.runLayout();
-
     };
 
-    this.mergeIds = function (parentId, childId) {
+    this.mergeIds = function(parentId, childId) {
       const parent = self.getNode(parentId);
       const child = self.getNode(childId);
       if (child.isSelected) {
@@ -931,18 +911,16 @@ module.exports = (function () {
       self.runLayout();
     };
 
-    this.getNode = function (nodeId) {
+    this.getNode = function(nodeId) {
       return this.nodesMap[nodeId];
     };
-    this.getEdge = function (edgeId) {
+    this.getEdge = function(edgeId) {
       return this.edgesMap[edgeId];
     };
 
-
-
     //======= Expand functions to request new additions to the graph
 
-    this.expandSelecteds = function (targetOptions = {}) {
+    this.expandSelecteds = function(targetOptions = {}) {
       let startNodes = self.getAllSelectedNodes();
       if (startNodes.length == 0) {
         startNodes = self.nodes;
@@ -951,19 +929,19 @@ module.exports = (function () {
       self.expand(clone, targetOptions);
     };
 
-    this.expandGraph = function () {
+    this.expandGraph = function() {
       self.expandSelecteds();
     };
 
     //Find new nodes to link to existing selected nodes
-    this.expandNode = function (node) {
+    this.expandNode = function(node) {
       self.expand(self.returnUnpackedGroupeds([node]), {});
     };
 
     // A manual expand function where the client provides the list
     // of existing nodes that are the start points and some options
     // about what targets are of interest.
-    this.expand = function (startNodes, targetOptions) {
+    this.expand = function(startNodes, targetOptions) {
       //=============================
       const nodesByField = {};
       const excludeNodesByField = {};
@@ -1003,8 +981,8 @@ module.exports = (function () {
         }
         // pushing boosts server-side to influence sampling/direction
         arr.push({
-          'term': n.data.term,
-          'boost': n.data.weight
+          term: n.data.term,
+          boost: n.data.weight,
         });
 
         arr = excludeNodesByField[n.data.field];
@@ -1019,14 +997,13 @@ module.exports = (function () {
         }
       }
 
-
       const primaryVertices = [];
       const secondaryVertices = [];
       for (const fieldName in nodesByField) {
         primaryVertices.push({
-          'field': fieldName,
-          'include': nodesByField[fieldName],
-          'min_doc_count': parseInt(self.options.exploreControls.minDocCount)
+          field: fieldName,
+          include: nodesByField[fieldName],
+          min_doc_count: parseInt(self.options.exploreControls.minDocCount),
         });
       }
 
@@ -1039,27 +1016,27 @@ module.exports = (function () {
       for (const f in targetFields) {
         const fieldName = targetFields[f].name;
         // Sometimes the target field is disabled from loading new hops so we need to use the last valid figure
-        const hopSize = targetFields[f].hopSize > 0 ? targetFields[f].hopSize : targetFields[f].lastValidHopSize;
+        const hopSize =
+          targetFields[f].hopSize > 0 ? targetFields[f].hopSize : targetFields[f].lastValidHopSize;
 
         const fieldHop = {
-          'field': fieldName,
-          'size': hopSize,
-          'min_doc_count': parseInt(self.options.exploreControls.minDocCount)
+          field: fieldName,
+          size: hopSize,
+          min_doc_count: parseInt(self.options.exploreControls.minDocCount),
         };
         fieldHop.exclude = excludeNodesByField[fieldName];
         secondaryVertices.push(fieldHop);
-
       }
 
       const request = {
-        'controls': self.buildControls(),
-        'vertices': primaryVertices,
-        'connections': {
-          'vertices': secondaryVertices
-        }
+        controls: self.buildControls(),
+        vertices: primaryVertices,
+        connections: {
+          vertices: secondaryVertices,
+        },
       };
       self.lastRequest = JSON.stringify(request, null, '\t');
-      graphExplorer(self.options.indexName, request, function (data) {
+      graphExplorer(self.options.indexName, request, function(data) {
         self.lastResponse = JSON.stringify(data, null, '\t');
         const nodes = [];
         const edges = [];
@@ -1093,22 +1070,20 @@ module.exports = (function () {
             target: edge.target,
             doc_count: edge.doc_count,
             weight: edge.weight,
-            width: Math.max(minLineSize, ((edge.weight / maxEdgeWeight) * maxLineSize))
+            width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
           });
         }
 
         // Add the new nodes and edges into the existing workspace's graph
         self.mergeGraph({
-          'nodes': data.vertices,
-          'edges': edges
+          nodes: data.vertices,
+          edges: edges,
         });
-
       });
       //===== End expand graph ========================
-
     };
 
-    this.trimExcessNewEdges = function (newNodes, newEdges) {
+    this.trimExcessNewEdges = function(newNodes, newEdges) {
       let trimmedEdges = [];
       const maxNumEdgesToReturn = 5;
       //Trim here to just the new edges that are most interesting.
@@ -1143,7 +1118,7 @@ module.exports = (function () {
       }
       if (trimmedEdges.length > maxNumEdgesToReturn) {
         //trim to only the most interesting ones
-        trimmedEdges.sort(function (a, b) {
+        trimmedEdges.sort(function(a, b) {
           return b.weight - a.weight;
         });
         trimmedEdges = trimmedEdges.splice(0, maxNumEdgesToReturn);
@@ -1151,7 +1126,7 @@ module.exports = (function () {
       return trimmedEdges;
     };
 
-    this.getQuery = function (startNodes, loose) {
+    this.getQuery = function(startNodes, loose) {
       const shoulds = [];
       let nodes = startNodes;
       if (!startNodes) {
@@ -1164,14 +1139,14 @@ module.exports = (function () {
         }
       }
       return {
-        'bool': {
-          'should': shoulds,
-          'minimum_should_match': Math.min(shoulds.length, loose ? 1 : 2)
-        }
+        bool: {
+          should: shoulds,
+          minimum_should_match: Math.min(shoulds.length, loose ? 1 : 2),
+        },
       };
     };
 
-    this.getSelectedOrAllNodes = function () {
+    this.getSelectedOrAllNodes = function() {
       let startNodes = self.getAllSelectedNodes();
       if (startNodes.length === 0) {
         startNodes = self.nodes;
@@ -1179,8 +1154,8 @@ module.exports = (function () {
       return startNodes;
     };
 
-    this.getSelectedOrAllTopNodes = function () {
-      return self.getSelectedOrAllNodes().filter(function (node) {
+    this.getSelectedOrAllTopNodes = function() {
+      return self.getSelectedOrAllNodes().filter(function(node) {
         return node.parent === undefined;
       });
     };
@@ -1194,23 +1169,21 @@ module.exports = (function () {
       arr.push(term);
     }
 
-
     /**
      * Add missing links between existing nodes
      * @param maxNewEdges Max number of new edges added. Avoid adding too many new edges
      * at once into the graph otherwise disorientating
      */
-    this.fillInGraph = function (maxNewEdges = 10) {
+    this.fillInGraph = function(maxNewEdges = 10) {
       let nodesForLinking = self.getSelectedOrAllTopNodes();
 
       const maxNumVerticesSearchable = 100;
 
-
       // Server limitation - we can only search for connections between max 100 vertices at a time.
-      if(nodesForLinking.length > maxNumVerticesSearchable) {
+      if (nodesForLinking.length > maxNumVerticesSearchable) {
         //Make a selection of random nodes from the array. Shift the random choices
         // to the front of the array.
-        for(let i = 0; i < maxNumVerticesSearchable; i++) {
+        for (let i = 0; i < maxNumVerticesSearchable; i++) {
           const oldNode = nodesForLinking[i];
           const randomIndex = Math.floor(Math.random() * (nodesForLinking.length - i)) + i;
           //Swap the node positions of the randomly selected node and i
@@ -1221,48 +1194,46 @@ module.exports = (function () {
         nodesForLinking = nodesForLinking.slice(0, maxNumVerticesSearchable - 1);
       }
 
-
       // Create our query/aggregation request using the selected nodes.
       // Filters are named after the index of the node in the nodesForLinking
       // array. The result bucket describing the relationship between
       // the first 2 nodes in the array will therefore be labelled "0|1"
       const shoulds = [];
       const filterMap = {};
-      nodesForLinking.forEach(function (node, nodeNum) {
+      nodesForLinking.forEach(function(node, nodeNum) {
         const nodeQuery = self.buildNodeQuery(node);
         shoulds.push(nodeQuery);
         filterMap[nodeNum] = nodeQuery;
       });
       const searchReq = {
-        'size': 0,
-        'query': {
-          'bool': {
+        size: 0,
+        query: {
+          bool: {
             // Only match docs that share 2 nodes so can help describe their relationship
-            'minimum_should_match': 2,
-            'should': shoulds
-          }
+            minimum_should_match: 2,
+            should: shoulds,
+          },
         },
-        'aggs': {
-          'matrix': {
-            'adjacency_matrix': {
-              'separator': '|',
-              'filters': filterMap
-            }
-          }
-        }
+        aggs: {
+          matrix: {
+            adjacency_matrix: {
+              separator: '|',
+              filters: filterMap,
+            },
+          },
+        },
       };
 
       // Search for connections between the selected nodes.
-      searcher(self.options.indexName, searchReq, function (data) {
-
+      searcher(self.options.indexName, searchReq, function(data) {
         const numDocsMatched = data.hits.total;
         const buckets = data.aggregations.matrix.buckets;
-        const vertices = nodesForLinking.map(function (existingNode) {
+        const vertices = nodesForLinking.map(function(existingNode) {
           return {
-            'field': existingNode.data.field,
-            'term': existingNode.data.term,
-            'weight': 1,
-            'depth': 0
+            field: existingNode.data.field,
+            term: existingNode.data.term,
+            weight: 1,
+            depth: 0,
           };
         });
 
@@ -1270,22 +1241,27 @@ module.exports = (function () {
         let maxEdgeWeight = 0;
         // Turn matrix array of results into a map
         const keyedBuckets = {};
-        buckets.forEach(function (bucket) {
+        buckets.forEach(function(bucket) {
           keyedBuckets[bucket.key] = bucket;
         });
 
-        buckets.forEach(function (bucket) {
+        buckets.forEach(function(bucket) {
           // We calibrate line thickness based on % of max weight of
           // all edges (including the edges we may already have in the workspace)
           const ids = bucket.key.split('|');
-          if(ids.length === 2) {
+          if (ids.length === 2) {
             // bucket represents an edge
             if (self.options.exploreControls.useSignificance) {
               const t1 = keyedBuckets[ids[0]].doc_count;
               const t2 = keyedBuckets[ids[1]].doc_count;
               const t1AndT2 = bucket.doc_count;
               // Calc the significant_terms score to prioritize selection of interesting links
-              bucket.weight = self.JLHScore(t1AndT2, Math.max(t1, t2), Math.min(t1, t2), numDocsMatched);
+              bucket.weight = self.JLHScore(
+                t1AndT2,
+                Math.max(t1, t2),
+                Math.min(t1, t2),
+                numDocsMatched
+              );
             } else {
               // prioritize links purely on volume of intersecting docs
               bucket.weight = bucket.doc_count;
@@ -1295,12 +1271,12 @@ module.exports = (function () {
         });
         const backFilledMinLineSize = 2;
         const backFilledMaxLineSize = 5;
-        buckets.forEach(function (bucket) {
-          if(bucket.doc_count < parseInt(self.options.exploreControls.minDocCount)) {
+        buckets.forEach(function(bucket) {
+          if (bucket.doc_count < parseInt(self.options.exploreControls.minDocCount)) {
             return;
           }
           const ids = bucket.key.split('|');
-          if(ids.length == 2) {
+          if (ids.length == 2) {
             // Bucket represents an edge
             const srcNode = nodesForLinking[ids[0]];
             const targetNode = nodesForLinking[ids[1]];
@@ -1309,21 +1285,24 @@ module.exports = (function () {
             if (existingEdge) {
               // Tweak the doc_count score having just looked it up.
               existingEdge.doc_count = Math.max(existingEdge.doc_count, bucket.doc_count);
-            } else  {
+            } else {
               connections.push({
                 // source and target values are indexes into the vertices array
-                'source': parseInt(ids[0]),
-                'target': parseInt(ids[1]),
-                'weight': bucket.weight,
-                'width': Math.max(backFilledMinLineSize, ((bucket.weight / maxEdgeWeight) * backFilledMaxLineSize)),
-                'doc_count': bucket.doc_count
+                source: parseInt(ids[0]),
+                target: parseInt(ids[1]),
+                weight: bucket.weight,
+                width: Math.max(
+                  backFilledMinLineSize,
+                  (bucket.weight / maxEdgeWeight) * backFilledMaxLineSize
+                ),
+                doc_count: bucket.doc_count,
               });
             }
           }
         });
         // Trim the array of connections so that we don't add too many at once - disorientating for users otherwise
-        if(connections.length > maxNewEdges) {
-          connections = connections.sort(function (a, b) {
+        if (connections.length > maxNewEdges) {
+          connections = connections.sort(function(a, b) {
             return b.weight - a.weight;
           });
           connections = connections.slice(0, maxNewEdges);
@@ -1336,10 +1315,9 @@ module.exports = (function () {
         // even though we know all the vertices we provide will
         // be duplicates and ignored.
         self.mergeGraph({
-          'nodes': vertices,
-          'edges': connections
+          nodes: vertices,
+          edges: connections,
         });
-
       });
     };
 
@@ -1348,7 +1326,7 @@ module.exports = (function () {
     // We use a free-text search on the index's configured default field (typically '_all')
     // to drill-down into docs that should be linked but aren't via the exact terms
     // we have in the workspace
-    this.getLikeThisButNotThisQuery = function (startNodes) {
+    this.getLikeThisButNotThisQuery = function(startNodes) {
       const likeQueries = [];
 
       const txtsByFieldType = {};
@@ -1356,21 +1334,21 @@ module.exports = (function () {
         let txt = txtsByFieldType[node.data.field];
         if (txt) {
           txt = txt + ' ' + node.label;
-        }else {
+        } else {
           txt = node.label;
         }
         txtsByFieldType[node.data.field] = txt;
       });
       for (const field in txtsByFieldType) {
         likeQueries.push({
-          'more_like_this': {
-            'like': txtsByFieldType[field],
-            'min_term_freq': 1,
-            'minimum_should_match': '20%',
-            'min_doc_freq': 1,
-            'boost_terms': 2,
-            'max_query_terms': 25
-          }
+          more_like_this: {
+            like: txtsByFieldType[field],
+            min_term_freq: 1,
+            minimum_should_match: '20%',
+            min_doc_freq: 1,
+            boost_terms: 2,
+            max_query_terms: 25,
+          },
         });
       }
 
@@ -1381,7 +1359,11 @@ module.exports = (function () {
       });
       const blacklistedNodes = self.blacklistedNodes;
       blacklistedNodes.forEach(blacklistedNode => {
-        addTermToFieldList(excludeNodesByField, blacklistedNode.data.field, blacklistedNode.data.term);
+        addTermToFieldList(
+          excludeNodesByField,
+          blacklistedNode.data.field,
+          blacklistedNode.data.term
+        );
       });
 
       //Create negative boosting queries to avoid matching what you already have in the workspace.
@@ -1390,31 +1372,31 @@ module.exports = (function () {
         const termsQuery = {};
         termsQuery[fieldName] = excludeNodesByField[fieldName];
         notExistingNodes.push({
-          'terms': termsQuery
+          terms: termsQuery,
         });
       });
 
       const result = {
         // Use a boosting query to effectively to request "similar to these IDS/labels but
         // preferably not containing these exact IDs".
-        'boosting': {
-          'negative_boost': 0.0001,
-          'negative': {
-            'bool': {
-              'should': notExistingNodes
-            }
+        boosting: {
+          negative_boost: 0.0001,
+          negative: {
+            bool: {
+              should: notExistingNodes,
+            },
           },
-          'positive': {
-            'bool': {
-              'should': likeQueries
-            }
-          }
-        }
+          positive: {
+            bool: {
+              should: likeQueries,
+            },
+          },
+        },
       };
       return result;
     };
 
-    this.getSelectedIntersections = function (callback) {
+    this.getSelectedIntersections = function(callback) {
       if (self.selectedNodes.length == 0) {
         return self.getAllIntersections(callback, self.nodes);
       }
@@ -1427,7 +1409,7 @@ module.exports = (function () {
       return self.getAllIntersections(callback, self.getAllSelectedNodes());
     };
 
-    this.JLHScore = function (subsetFreq, subsetSize, supersetFreq, supersetSize) {
+    this.JLHScore = function(subsetFreq, subsetSize, supersetFreq, supersetSize) {
       const subsetProbability = subsetFreq / subsetSize;
       const supersetProbability = supersetFreq / supersetSize;
 
@@ -1435,11 +1417,9 @@ module.exports = (function () {
       if (absoluteProbabilityChange <= 0) {
         return 0;
       }
-      const relativeProbabilityChange = (subsetProbability / supersetProbability);
+      const relativeProbabilityChange = subsetProbability / supersetProbability;
       return absoluteProbabilityChange * relativeProbabilityChange;
     };
-
-
 
     // Currently unused in the Kibana UI. It was a utility that provided a sorted list
     // of recommended node merges for a selection of nodes. Top results would be
@@ -1449,46 +1429,44 @@ module.exports = (function () {
 
     // Determines union/intersection stats for neighbours of a node.
     // TODO - could move server-side as a graph API function?
-    this.getAllIntersections = function (callback, nodes) {
+    this.getAllIntersections = function(callback, nodes) {
       //Ensure these are all top-level nodes only
-      nodes = nodes.filter(function (n) {
+      nodes = nodes.filter(function(n) {
         return n.parent == undefined;
       });
 
-      const allQueries = nodes.map(function (node) {
+      const allQueries = nodes.map(function(node) {
         return self.buildNodeQuery(node);
       });
 
       const allQuery = {
-        'bool': {
-          'should': allQueries
-        }
+        bool: {
+          should: allQueries,
+        },
       };
-        //====================
+      //====================
       const request = {
-        'query': allQuery,
-        'size': 0,
-        'aggs': {
-          'all': {
-            'global': {}
+        query: allQuery,
+        size: 0,
+        aggs: {
+          all: {
+            global: {},
           },
-          'sources': {
+          sources: {
             // Could use significant_terms not filters to get stats but
             // for the fact some of the nodes are groups of terms.
-            'filters': {
-              'filters': {}
+            filters: {
+              filters: {},
             },
-            'aggs': {
-              'targets': {
-                'filters': {
-                  'filters': {
-
-                  }
-                }
-              }
-            }
-          }
-        }
+            aggs: {
+              targets: {
+                filters: {
+                  filters: {},
+                },
+              },
+            },
+          },
+        },
       };
       for (const n in allQueries) {
         // Add aggs to get intersection stats with root node.
@@ -1496,7 +1474,7 @@ module.exports = (function () {
         request.aggs.sources.aggs.targets.filters.filters['fg' + n] = allQueries[n];
       }
       const dataForServer = JSON.stringify(request);
-      searcher(self.options.indexName, request, function (data) {
+      searcher(self.options.indexName, request, function(data) {
         const termIntersects = [];
         const fullDocCounts = [];
         const allDocCount = data.aggregations.all.doc_count;
@@ -1552,15 +1530,15 @@ module.exports = (function () {
               term2: t2Label,
               v1: t1,
               v2: t2,
-              mergeLeftConfidence: (t1AndT2 / t1),
-              mergeRightConfidence: (t1AndT2 / t2),
-              'mergeConfidence': mergeConfidence,
-              overlap: t1AndT2
+              mergeLeftConfidence: t1AndT2 / t1,
+              mergeRightConfidence: t1AndT2 / t2,
+              mergeConfidence: mergeConfidence,
+              overlap: t1AndT2,
             };
             termIntersects.push(termIntersect);
           }
         }
-        termIntersects.sort(function (a, b) {
+        termIntersects.sort(function(a, b) {
           if (b.mergeConfidence != a.mergeConfidence) {
             return b.mergeConfidence - a.mergeConfidence;
           }
@@ -1576,15 +1554,14 @@ module.exports = (function () {
         if (callback) {
           callback(termIntersects);
         }
-
       });
     };
 
     // Internal utility function for calling the Graph API and handling the response
     // by merging results into existing nodes in this workspace.
-    this.callElasticsearch = function (request) {
+    this.callElasticsearch = function(request) {
       self.lastRequest = JSON.stringify(request, null, '\t');
-      graphExplorer(self.options.indexName, request, function (data) {
+      graphExplorer(self.options.indexName, request, function(data) {
         self.lastResponse = JSON.stringify(data, null, '\t');
         const nodes = [];
         const edges = [];
@@ -1609,7 +1586,6 @@ module.exports = (function () {
         for (const e in data.connections) {
           const edge = data.connections[e];
           maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
-
         }
         for (const e in data.connections) {
           const edge = data.connections[e];
@@ -1618,27 +1594,26 @@ module.exports = (function () {
             target: edge.target,
             doc_count: edge.doc_count,
             weight: edge.weight,
-            width: Math.max(minLineSize, ((edge.weight / maxEdgeWeight) * maxLineSize))
+            width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
           });
         }
 
-        self.mergeGraph({
-          'nodes': data.vertices,
-          'edges': edges
-        }, {
-          'labeller': self.options.labeller
-        });
-
+        self.mergeGraph(
+          {
+            nodes: data.vertices,
+            edges: edges,
+          },
+          {
+            labeller: self.options.labeller,
+          }
+        );
       });
     };
-
-
   }
   //=====================
 
   // Begin Kibana wrapper
   return {
-    'createWorkspace': createWorkspace
+    createWorkspace: createWorkspace,
   };
-
-}());
+})();

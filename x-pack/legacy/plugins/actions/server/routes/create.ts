@@ -16,7 +16,7 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
     id?: string;
   };
   payload: {
-    description: string;
+    name: string;
     actionTypeId: string;
     config: Record<string, any>;
     secrets: Record<string, any>;
@@ -34,7 +34,7 @@ export const createActionRoute = {
       },
       payload: Joi.object()
         .keys({
-          description: Joi.string().required(),
+          name: Joi.string().required(),
           actionTypeId: Joi.string().required(),
           config: Joi.object().default({}),
           secrets: Joi.object().default({}),

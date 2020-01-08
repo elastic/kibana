@@ -5,10 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export function SectionError(props) {
   const { title, error, ...rest } = props;
@@ -20,18 +17,15 @@ export function SectionError(props) {
   } = data;
 
   return (
-    <EuiCallOut
-      title={title}
-      color="danger"
-      iconType="alert"
-      {...rest}
-    >
+    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
       <div>{message || errorString}</div>
-      { cause && (
+      {cause && (
         <Fragment>
           <EuiSpacer size="m" />
           <ul>
-            { cause.map((message, i) => <li key={i}>{message}</li>) }
+            {cause.map((message, i) => (
+              <li key={i}>{message}</li>
+            ))}
           </ul>
         </Fragment>
       )}

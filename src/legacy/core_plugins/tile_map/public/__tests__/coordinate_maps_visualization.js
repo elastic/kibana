@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -62,10 +62,9 @@ const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
 let visRegComplete = false;
 
-describe('CoordinateMapsVisualizationTest', function () {
+describe('CoordinateMapsVisualizationTest', function() {
   let domNode;
   let CoordinateMapsVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let dependencies;
@@ -85,13 +84,13 @@ describe('CoordinateMapsVisualizationTest', function () {
         $injector,
       };
 
-      if(!visRegComplete) {
+      if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+        visualizationsSetup.types.createBaseVisualization(
+          createTileMapTypeDefinition(dependencies)
+        );
       }
 
-
-      Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
 
@@ -120,8 +119,8 @@ describe('CoordinateMapsVisualizationTest', function () {
     getManifestStub.removeStub();
   });
 
-  describe('CoordinateMapsVisualization - basics', function () {
-    beforeEach(async function () {
+  describe('CoordinateMapsVisualization - basics', function() {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
@@ -140,12 +139,12 @@ describe('CoordinateMapsVisualizationTest', function () {
           metric: {
             accessor: 1,
             label: 'test',
-            format: { id: 'string' }
+            format: { id: 'string' },
           },
           bucket: {
-            accessor: 0
-          }
-        }
+            accessor: 0,
+          },
+        },
       };
       const mockAggs = {
         byType: type => {
@@ -171,18 +170,18 @@ describe('CoordinateMapsVisualizationTest', function () {
           },
         ],
       };
-      vis.getAggConfig = function () {
+      vis.getAggConfig = function() {
         return mockAggs;
       };
       vis.aggs = mockAggs;
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should initialize OK (may fail in dev env)', async function () {
+    it('should initialize OK (may fail in dev env)', async function() {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -197,7 +196,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle to Heatmap OK', async function () {
+    it('should toggle to Heatmap OK', async function() {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -221,7 +220,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle back&forth OK between mapTypes (may fail in dev env)', async function () {
+    it('should toggle back&forth OK between mapTypes (may fail in dev env)', async function() {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -254,7 +253,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle to different color schema ok (may fail in dev env)', async function () {
+    it('should toggle to different color schema ok (may fail in dev env)', async function() {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -278,7 +277,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle to different color schema and maptypes ok', async function () {
+    it('should toggle to different color schema and maptypes ok', async function() {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,

@@ -7,13 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import {
-  InternalCoreSetup,
-  PluginInitializerContext
-} from '../../../../src/core/server';
+import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
-import { plugin } from './server/new-platform/index';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -34,7 +31,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         order: 8100
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      home: ['plugins/apm/register_feature'],
+      home: ['plugins/apm/legacy_register_feature'],
 
       // TODO: get proper types
       injectDefaultVars(server: Server) {
@@ -46,9 +43,11 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
-        'apm-telemetry': {
+        'apm-services-telemetry': {
+          isNamespaceAgnostic: true
+        },
+        'apm-indices': {
           isNamespaceAgnostic: true
         }
       },
@@ -68,9 +67,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         // enable plugin
         enabled: Joi.boolean().default(true),
 
-        // buckets
-        minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(15),
+        // index patterns
+        autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
         serviceMapEnabled: Joi.boolean().default(false)
@@ -90,7 +88,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm'],
+            api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -109,14 +107,12 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      makeApmUsageCollector(usageCollection, server);
+      const apmPlugin = server.newPlatform.setup.plugins
+        .apm as APMPluginContract;
 
-      const initializerContext = {} as PluginInitializerContext;
-      const core = {
-        http: {
-          server
-        }
-      } as InternalCoreSetup;
-      plugin(initializerContext).setup(core);
+      apmPlugin.registerLegacyAPI({ server });
     }
   });
 };

@@ -70,7 +70,7 @@ export class WorkpadLoader extends React.PureComponent {
     this._isMounted = true;
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     // the workpadId prop will change when a is created or loaded, close the toolbar when it does
     const { workpadId, onClose } = this.props;
     if (workpadId !== newProps.workpadId) {

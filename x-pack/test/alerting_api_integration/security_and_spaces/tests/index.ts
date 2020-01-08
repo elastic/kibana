@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService, SecurityService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
@@ -14,15 +13,11 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  const securityService: SecurityService = getService('security');
-  const spacesService: SpacesService = getService('spaces');
+  const securityService = getService('security');
+  const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/50079
-  // FLAKY: https://github.com/elastic/kibana/issues/50074
-  // FLAKY: https://github.com/elastic/kibana/issues/48709
-  // FLAKY: https://github.com/elastic/kibana/issues/50078
-  describe.skip('alerting api integration security and spaces enabled', function() {
+  describe('alerting api integration security and spaces enabled', function() {
     this.tags('ciGroup1');
 
     before(async () => {

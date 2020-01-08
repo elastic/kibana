@@ -8,7 +8,7 @@ import { once } from 'lodash';
 import { elasticsearchJsPlugin } from '../../client/elasticsearch_ccr';
 
 const callWithRequest = once(server => {
-  const config = { plugins: [ elasticsearchJsPlugin ], };
+  const config = { plugins: [elasticsearchJsPlugin] };
   const cluster = server.plugins.elasticsearch.createCluster('ccr', config);
   return cluster.callWithRequest;
 });

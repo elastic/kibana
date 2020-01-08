@@ -105,10 +105,4 @@ export const normalize = (target: Targets) => (data: IndexMap) =>
   });
 
 export const initDataFor = (target: Targets) =>
-  flow(
-    initShards,
-    calculateShardValues(target),
-    initIndices,
-    normalize(target),
-    sortIndices
-  );
+  flow(initShards, calculateShardValues(target), initIndices, normalize(target), sortIndices);

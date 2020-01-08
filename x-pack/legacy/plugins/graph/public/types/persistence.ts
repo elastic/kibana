@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
+import { SavedObject } from '../legacy_imports';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 

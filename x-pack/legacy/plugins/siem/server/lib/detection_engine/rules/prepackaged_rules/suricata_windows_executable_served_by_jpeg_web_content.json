@@ -1,0 +1,17 @@
+{
+  "rule_id": "f7f038f4-b97a-4d0c-b3b6-d5fa1ad15951",
+  "risk_score": 50,
+  "description": "Suricata Windows Executable Served by JPEG Web Content",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Windows Executable Served by JPEG Web Content",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610084 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

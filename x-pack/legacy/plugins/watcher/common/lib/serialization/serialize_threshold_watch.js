@@ -33,10 +33,19 @@ export function serializeThresholdWatch({
   actions,
   includeMetadata = true,
 }) {
-
   const serializedWatch = {
     trigger: buildTrigger(triggerIntervalSize, triggerIntervalUnit),
-    input: buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder }),
+    input: buildInput({
+      index,
+      timeWindowSize,
+      timeWindowUnit,
+      timeField,
+      aggType,
+      aggField,
+      termField,
+      termSize,
+      termOrder,
+    }),
     condition: buildCondition({ aggType, thresholdComparator, hasTermsAgg, threshold }),
     transform: buildTransform({ aggType, thresholdComparator, hasTermsAgg, threshold }),
     actions: buildActions(actions),

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('Collection', () => {
     loadTestFile(require.resolve('./kibana_mb'));
     loadTestFile(require.resolve('./kibana_exclusive_mb'));
@@ -15,5 +15,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./detect_logstash'));
     loadTestFile(require.resolve('./detect_logstash_management'));
     loadTestFile(require.resolve('./detect_apm'));
+    loadTestFile(require.resolve('./security'));
   });
 }

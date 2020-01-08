@@ -52,7 +52,8 @@ exports[`PercentFormatEditor should render normally 1`] = `
       placeholder="0,0.[000]%"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

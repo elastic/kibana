@@ -18,7 +18,7 @@
  */
 
 import { uniqFilters } from './uniq_filters';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('niqFilter', () => {

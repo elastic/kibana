@@ -6,7 +6,6 @@
 
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import { populateTimeline } from '../../lib/fields_browser/helpers';
-import { logout } from '../../lib/logout';
 import { toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
@@ -14,10 +13,6 @@ import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 describe('toggle column in timeline', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   const timestampField = '@timestamp';
@@ -50,7 +45,7 @@ describe('toggle column in timeline', () => {
 
     cy.get(
       `[data-test-subj="timeline"] [data-test-subj="toggle-field-${timestampField}"]`
-    ).uncheck();
+    ).uncheck({ force: true });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${timestampField}"]`).should(
       'not.exist'
@@ -66,7 +61,9 @@ describe('toggle column in timeline', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).check({
+      force: true,
+    });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });

@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
+import { set } from 'lodash';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
-    if (series.split_mode !== 'filter') return next(doc);
-    _.set(
+    if (series.split_mode !== 'filter') {
+      return next(doc);
+    }
+
+    set(
       doc,
       `aggs.${series.id}.filter`,
-      buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)
+      esQuery.buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)
     );
+
     return next(doc);
   };
 }

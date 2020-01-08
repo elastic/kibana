@@ -62,8 +62,10 @@ describe('Create app mount search context', () => {
         });
       },
     });
-    context
-      .search({ greeting: 'hi' } as any, {}, 'mysearch')
-      .subscribe(response => {}, () => {}, done);
+    context.search({ greeting: 'hi' } as any, {}, 'mysearch').subscribe(
+      response => {},
+      () => {},
+      done
+    );
   });
 });

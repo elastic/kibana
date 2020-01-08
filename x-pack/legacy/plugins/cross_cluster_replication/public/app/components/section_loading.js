@@ -6,13 +6,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 
 export function SectionLoading({ children, dataTestSubj = '' }) {
   return (
@@ -28,9 +22,7 @@ export function SectionLoading({ children, dataTestSubj = '' }) {
 
       <EuiFlexItem grow={false}>
         <EuiText>
-          <EuiTextColor color="subdued">
-            {children}
-          </EuiTextColor>
+          <EuiTextColor color="subdued">{children}</EuiTextColor>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

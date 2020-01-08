@@ -17,13 +17,15 @@
  * under the License.
  */
 
-export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
+export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+
 export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   ISavedObjectsClientProvider,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
+  SavedObjectsClientFactory,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';

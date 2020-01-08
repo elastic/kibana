@@ -20,18 +20,18 @@ export function logstashClusterPipelineIdsRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       const config = server.config();
       const { ccs } = req.payload;
       const clusterUuid = req.params.clusterUuid;
@@ -44,6 +44,6 @@ export function logstashClusterPipelineIdsRoute(server) {
       } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

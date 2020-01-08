@@ -9,11 +9,12 @@ for displayed decimal values.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
 
+
 [float]
 [[settings-read-only-access]]
 === [xpack]#Read only access#
-When you have insufficient privileges to edit advanced settings, the following 
-indicator in Kibana will be displayed. The buttons to edit settings won't be visible. 
+When you have insufficient privileges to edit advanced settings, the following
+indicator in Kibana will be displayed. The buttons to edit settings won't be visible.
 For more information on granting access to Kibana see <<xpack-security-authorization>>.
 
 [role="screenshot"]
@@ -25,9 +26,9 @@ image::images/settings-read-only-badge.png[Example of Advanced Settings Manageme
 
 WARNING: Modifying a setting can affect {kib}
 performance and cause problems that are
-difficult to diagnose. Setting a property value to a blank field reverts 
+difficult to diagnose. Setting a property value to a blank field reverts
 to the default behavior, which might not be
-compatible with other configuration settings. Deleting a custom setting 
+compatible with other configuration settings. Deleting a custom setting
 removes it from {kib} permanently.
 
 
@@ -44,7 +45,8 @@ removes it from {kib} permanently.
 adapt to the interval between measurements. Keys are http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
 `dateNanosFormat`:: The format to use for displaying https://momentjs.com/docs/#/displaying/format/[pretty formatted dates] of {ref}/date_nanos.html[Elasticsearch date_nanos type].
-`defaultIndex`:: The index to access if no index is set. The default is `null`. 
+`defaultIndex`:: The index to access if no index is set. The default is `null`.
+`defaultRoute`:: The default route when opening Kibana. Use this setting to route users to a specific dashboard, application, or saved object as they enter each space.
 `fields:popularLimit`:: The top N most popular fields to show.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state (be pinned) by default.
@@ -59,46 +61,46 @@ mentioned use "\_default_".
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `history:limit`:: In fields that have history, such as query inputs, show this many recent values.
-`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names, 
+`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names,
 look for this many recent matching patterns from which to query the field mapping.
 `indexPattern:placeholder`:: The default placeholder value to use in Management > Index Patterns > Create Index Pattern.
-`metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields 
+`metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields
 into the document when displaying it.
 `metrics:max_buckets`:: The maximum numbers of buckets that a single
-data source can return. This might arise when the user selects a 
+data source can return. This might arise when the user selects a
 short interval (for example, 1s) for a long time period (1 year).
-`query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character 
-in a query clause. Only applies when experimental query features are 
-enabled in the query bar. To disallow leading wildcards in Lucene queries, 
+`query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character
+in a query clause. Only applies when experimental query features are
+enabled in the query bar. To disallow leading wildcards in Lucene queries,
 use `query:queryString:options`.
 `query:queryString:options`:: Options for the Lucene query string parser. Only
 used when "Query language" is set to Lucene.
-`savedObjects:listingLimit`:: The number of objects to fetch for lists of saved objects. 
+`savedObjects:listingLimit`:: The number of objects to fetch for lists of saved objects.
 The default value is 1000. Do not set above 10000.
-`savedObjects:perPage`:: The number of objects to show on each page of the 
+`savedObjects:perPage`:: The number of objects to show on each page of the
 list of saved objects. The default is 5.
 `search:queryLanguage`:: The query language to use in the query bar.
-Choices are <<kuery-query, KQL>>, a language built specifically for {kib}, and the <<lucene-query, Lucene 
+Choices are <<kuery-query, KQL>>, a language built specifically for {kib}, and the <<lucene-query, Lucene
 query syntax>>.
-`shortDots:enable`:: Set this property to `true` to shorten long 
+`shortDots:enable`:: Set this property to `true` to shorten long
 field names in visualizations. For example, show `f.b.baz` instead of `foo.bar.baz`.
 `sort:options`:: Options for the Elasticsearch {ref}/search-request-body.html#request-body-search-sort[sort] parameter.
-`state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the 
-URL, which can lead to problems when there is a lot of state information, 
-and the URL gets very long. 
-Enabling this setting stores part of the URL in your browser session to keep the 
+`state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the
+URL, which can lead to problems when there is a lot of state information,
+and the URL gets very long.
+Enabling this setting stores part of the URL in your browser session to keep the
 URL short.
 `theme:darkMode`:: Set to `true` to enable a dark mode for the {kib} UI. You must
 refresh the page to apply the setting.
-`timepicker:quickRanges`:: The list of ranges to show in the Quick section of 
-the time filter. This should be an array of objects, with each object containing 
-`from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), 
+`timepicker:quickRanges`:: The list of ranges to show in the Quick section of
+the time filter. This should be an array of objects, with each object containing
+`from`, `to` (see {ref}/common-options.html#date-math[accepted formats]),
 and `display` (the title to be displayed).
 `timepicker:refreshIntervalDefaults`:: The default refresh interval for the time filter. Example: `{ "display": "15 seconds", "pause": true, "value": 15000 }`.
 `timepicker:timeDefaults`:: The default selection in the time filter.
 `truncate:maxHeight`:: The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
-`xPack:defaultAdminEmail`:: Email address for X-Pack admin operations, such as 
+`xPack:defaultAdminEmail`:: Email address for X-Pack admin operations, such as
 cluster alert notifications from Monitoring.
 
 
@@ -107,7 +109,7 @@ cluster alert notifications from Monitoring.
 === Accessibility settings
 
 [horizontal]
-`accessibility:disableAnimations`:: Turns off all unnecessary animations in the 
+`accessibility:disableAnimations`:: Turns off all unnecessary animations in the
 {kib} UI. Refresh the page to apply the changes.
 
 [float]
@@ -124,21 +126,21 @@ cluster alert notifications from Monitoring.
 [horizontal]
 `context:defaultSize`:: The number of surrounding entries to display in the context view. The default value is 5.
 `context:step`:: The number by which to increment or decrement the context size. The default value is 5.
-`context:tieBreakerFields`:: A comma-separated list of fields to use 
-for breaking a tie between documents that have the same timestamp value. The first 
+`context:tieBreakerFields`:: A comma-separated list of fields to use
+for breaking a tie between documents that have the same timestamp value. The first
 field that is present and sortable in the current index pattern is used.
 `defaultColumns`:: The columns that appear by default on the Discover page.
-The default is `_source`. 
-`discover:aggs:terms:size`:: The number terms that are visualized when clicking 
+The default is `_source`.
+`discover:aggs:terms:size`:: The number terms that are visualized when clicking
 the Visualize button in the field drop down. The default is `20`.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `discover:sort:defaultOrder`:: The default sort direction for time-based index patterns.
-`discover:searchOnPageLoad`:: Controls whether a search is executed when Discover first loads. 
+`discover:searchOnPageLoad`:: Controls whether a search is executed when Discover first loads.
 This setting does not have an effect when loading a saved search.
 `doc_table:hideTimeColumn`:: Hides the "Time" column in Discover and in all saved searches on dashboards.
-`doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards. 
+`doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards.
 Highlighting slows requests when
-working on big documents. 
+working on big documents.
 
 
 
@@ -150,14 +152,14 @@ working on big documents.
 [horizontal]
 `notifications:banner`:: A custom banner intended for temporary notices to all users.
 Supports https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown].
-`notifications:lifetime:banner`:: The duration, in milliseconds, for banner 
-notification displays. The default value is 3000000. Set this field to `Infinity` 
+`notifications:lifetime:banner`:: The duration, in milliseconds, for banner
+notification displays. The default value is 3000000. Set this field to `Infinity`
 to disable banner notifications.
-`notifications:lifetime:error`:: The duration, in milliseconds, for error 
+`notifications:lifetime:error`:: The duration, in milliseconds, for error
 notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
-`notifications:lifetime:info`:: The duration, in milliseconds, for information notification displays. 
+`notifications:lifetime:info`:: The duration, in milliseconds, for information notification displays.
 The default value is 5000. Set this field to `Infinity` to disable information notifications.
-`notifications:lifetime:warning`:: The duration, in milliseconds, for warning notification 
+`notifications:lifetime:warning`:: The duration, in milliseconds, for warning notification
 displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
 
 
@@ -175,8 +177,8 @@ displays. The default value is 10000. Set this field to `Infinity` to disable wa
 === Rollup settings
 
 [horizontal]
-`rollups:enableIndexPatterns`:: Enables the creation of index patterns that 
-capture rollup indices, which in turn enables visualizations based on rollup data. 
+`rollups:enableIndexPatterns`:: Enables the creation of index patterns that
+capture rollup indices, which in turn enables visualizations based on rollup data.
 Refresh the page to apply the changes.
 
 
@@ -188,22 +190,22 @@ Refresh the page to apply the changes.
 `courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will terminate when
 users navigate away or update the query. When enabled, dashboard panels will load together when all of the data is loaded,
 and searches will not terminate.
-`courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference] 
+`courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference]
 to use when `courier:setRequestPreference` is set to "custom".
-`courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
+`courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization.
 Useful when dashboards consist of visualizations from multiple index patterns.
-`courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests] 
-setting used for `_msearch` requests sent by {kib}. Set to 0 to disable this 
+`courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests]
+setting used for `_msearch` requests sent by {kib}. Set to 0 to disable this
 config and use the {es} default.
 `courier:setRequestPreference`:: Enables you to set which shards handle your search requests.
-* *Session ID:* Restricts operations to execute all search requests on the same shards. 
+* *Session ID:* Restricts operations to execute all search requests on the same shards.
 This has the benefit of reusing shard caches across requests.
-* *Custom:* Allows you to define your own preference. Use `courier:customRequestPreference` 
+* *Custom:* Allows you to define your own preference. Use `courier:customRequestPreference`
 to customize your preference value.
-* *None:* Do not set a preference. This might provide better performance 
-because requests can be spread across all shard copies. However, results might 
+* *None:* Do not set a preference. This might provide better performance
+because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
-`search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results. 
+`search:includeFrozen`:: Includes {ref}/frozen-indices.html[frozen indices] in results.
 Searching through frozen indices
 might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
 
@@ -212,8 +214,8 @@ might increase the search time. This setting is off by default. Users must opt-i
 === SIEM settings
 
 [horizontal]
-`siem:defaultAnomalyScore`:: The threshold above which anomalies are displayed in the SIEM app.
-`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events. 
+`siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
+`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
 `siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
 `siem:timeDefaults`:: The default period of time in the SIEM time filter.
 
@@ -226,16 +228,16 @@ might increase the search time. This setting is off by default. Users must opt-i
 `timelion:default_rows`:: The default number of rows to use on a Timelion sheet.
 `timelion:es.default_index`:: The default index when using the `.es()` query.
 `timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
-`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host 
-in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be 
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host
+in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be
 selected from a whitelist configured in the `kibana.yml` under `timelion.graphiteUrls`.
 `timelion:max_buckets`:: The maximum number of buckets a single data source can return.
 This value is used for calculating automatic intervals in visualizations.
 `timelion:min_interval`:: The smallest interval to calculate when using "auto".
 `timelion:quandl.key`:: [experimental] Used with quandl queries, this is your API key from https://www.quandl.com/[www.quandl.com].
-`timelion:showTutorial`:: Shows the Timelion tutorial 
+`timelion:showTutorial`:: Shows the Timelion tutorial
 to users when they first open the Timelion app.
-`timelion:target_buckets`:: Used for calculating automatic intervals in visualizations, 
+`timelion:target_buckets`:: Used for calculating automatic intervals in visualizations,
 this is the number of buckets to try to represent.
 
 
@@ -246,18 +248,18 @@ this is the number of buckets to try to represent.
 
 [horizontal]
 `visualization:colorMapping`:: Maps values to specified colors in visualizations.
-`visualization:dimmingOpacity`:: The opacity of the chart items that are dimmed 
-when highlighting another element of the chart. The lower this number, the more 
+`visualization:dimmingOpacity`:: The opacity of the chart items that are dimmed
+when highlighting another element of the chart. The lower this number, the more
 the highlighted element stands out. This must be a number between 0 and 1.
-`visualization:loadingDelay`:: The time to wait before dimming visualizations 
+`visualization:loadingDelay`:: The time to wait before dimming visualizations
 during a query.
-`visualization:regionmap:showWarnings`:: Shows 
+`visualization:regionmap:showWarnings`:: Shows
 a warning in a region map when terms cannot be joined to a shape.
 `visualization:tileMap:WMSdefaults`:: The default properties for the WMS map server support in the coordinate map.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
-and 12 is the maximum. See this 
+and 12 is the maximum. See this
 {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[explanation of cell dimensions].
-`visualize:enableLabs`:: Enables users to create, view, and edit experimental visualizations. 
+`visualize:enableLabs`:: Enables users to create, view, and edit experimental visualizations.
 If disabled, only visualizations that are considered production-ready are available to the user.
 
 
@@ -265,6 +267,5 @@ If disabled, only visualizations that are considered production-ready are availa
 [[kibana-telemetry-settings]]
 === Usage data settings
 
-Helps improve the Elastic Stack by providing usage statistics for 
+Helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.
-

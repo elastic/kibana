@@ -13,4 +13,4 @@ set -e
 ./delete_all_alerts.sh
 ./delete_all_alert_tasks.sh
 ./delete_signal_index.sh
-./put_signal_index.sh
+./post_signal_index.sh

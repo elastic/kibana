@@ -38,7 +38,7 @@ describe('Console Proxy Route', () => {
       const server = new Server();
       server.route(
         createProxyRoute({
-          baseUrl: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
         })
       );
 
@@ -85,19 +85,19 @@ describe('Console Proxy Route', () => {
       });
       describe('starts with a slash', () => {
         it('combines well with the base url', async () => {
-          await request('GET', '/index/type/id');
+          await request('GET', '/index/id');
           sinon.assert.calledOnce(requestModule.sendRequest);
           expect(requestModule.sendRequest.getCall(0).args[0].uri.href).to.be(
-            'http://localhost:9200/index/type/id?pretty=true'
+            'http://localhost:9200/index/id?pretty=true'
           );
         });
       });
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
-          await request('GET', 'index/type/id');
+          await request('GET', 'index/id');
           sinon.assert.calledOnce(requestModule.sendRequest);
           expect(requestModule.sendRequest.getCall(0).args[0].uri.href).to.be(
-            'http://localhost:9200/index/type/id?pretty=true'
+            'http://localhost:9200/index/id?pretty=true'
           );
         });
       });

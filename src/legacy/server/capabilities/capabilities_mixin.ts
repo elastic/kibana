@@ -17,51 +17,26 @@
  * under the License.
  */
 
-import { Server, Request } from 'hapi';
-
-import { Capabilities } from '../../../core/public';
+import { Server } from 'hapi';
 import KbnServer from '../kbn_server';
-import { registerCapabilitiesRoute } from './capabilities_route';
-import { mergeCapabilities } from './merge_capabilities';
-import { resolveCapabilities } from './resolve_capabilities';
-
-export type CapabilitiesModifier = (
-  request: Request,
-  uiCapabilities: Capabilities
-) => Capabilities | Promise<Capabilities>;
 
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
-  const modifiers: CapabilitiesModifier[] = [];
+  const registerLegacyCapabilities = async () => {
+    const capabilitiesList = await Promise.all(
+      kbnServer.pluginSpecs
+        .map(spec => spec.getUiCapabilitiesProvider())
+        .filter(provider => !!provider)
+        .map(provider => provider(server))
+    );
 
-  server.decorate('server', 'registerCapabilitiesModifier', (provider: CapabilitiesModifier) => {
-    modifiers.push(provider);
-  });
+    capabilitiesList.forEach(capabilities => {
+      kbnServer.newPlatform.setup.core.capabilities.registerProvider(() => capabilities);
+    });
+  };
 
   // Some plugin capabilities are derived from data provided by other plugins,
   // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
   kbnServer.afterPluginsInit(async () => {
-    const defaultCapabilities = mergeCapabilities(
-      ...(await Promise.all(
-        kbnServer.pluginSpecs
-          .map(spec => spec.getUiCapabilitiesProvider())
-          .filter(provider => !!provider)
-          .map(provider => provider(server))
-      ))
-    );
-
-    server.decorate('request', 'getCapabilities', function() {
-      // Get legacy nav links
-      const navLinks = server.getUiNavLinks().reduce(
-        (acc, spec) => ({
-          ...acc,
-          [spec._id]: true,
-        }),
-        {} as Record<string, boolean>
-      );
-
-      return resolveCapabilities(this, modifiers, defaultCapabilities, { navLinks });
-    });
-
-    registerCapabilitiesRoute(server, defaultCapabilities, modifiers);
+    await registerLegacyCapabilities();
   });
 }

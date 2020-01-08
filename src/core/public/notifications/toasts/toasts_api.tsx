@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { MountPoint } from '../../types';
+import { mountReactNode } from '../../utils';
+import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
+import { I18nStart } from '../../i18n';
 
 /**
  * Allowed fields for {@link ToastInput}.
@@ -33,13 +36,20 @@ import { OverlayStart } from '../../overlays';
  *
  * @public
  */
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  title?: string | MountPoint;
+  text?: string | MountPoint;
+};
+
+export type Toast = ToastInputFields & {
+  id: string;
+};
 
 /**
  * Inputs for {@link IToasts} APIs.
  * @public
  */
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 /**
  * Options available for {@link IToasts} APIs.
@@ -59,13 +69,12 @@ export interface ErrorToastOptions {
   toastMessage?: string;
 }
 
-const normalizeToast = (toastOrTitle: ToastInput) => {
+const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   if (typeof toastOrTitle === 'string') {
     return {
       title: toastOrTitle,
     };
   }
-
   return toastOrTitle;
 };
 
@@ -85,17 +94,19 @@ export type IToasts = Pick<
 export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
   private overlays?: OverlayStart;
+  private i18n?: I18nStart;
 
-  constructor(deps: { uiSettings: UiSettingsClientContract }) {
+  constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
   /** @internal */
-  public registerOverlays(overlays: OverlayStart) {
+  public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
     this.overlays = overlays;
+    this.i18n = i18n;
   }
 
   /** Observable of the toast messages to show to the user. */
@@ -123,11 +134,12 @@ export class ToastsApi implements IToasts {
 
   /**
    * Removes a toast from the current array of toasts if present.
-   * @param toast - a {@link Toast} returned by {@link ToastApi.add}
+   * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or its id
    */
-  public remove(toast: Toast) {
+  public remove(toastOrId: Toast | string) {
+    const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter(t => t !== toast);
+    const listWithoutToast = list.filter(t => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }
@@ -191,12 +203,13 @@ export class ToastsApi implements IToasts {
       iconType: 'alert',
       title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: (
+      text: mountReactNode(
         <ErrorToast
           openModal={this.openModal.bind(this)}
           error={error}
           title={options.title}
           toastMessage={message}
+          i18nContext={() => this.i18n!.Context}
         />
       ),
     });

@@ -41,14 +41,14 @@ function convertTableGroup(tableGroup, convertTable) {
   const out = {};
   let outList;
 
-  tables.forEach(function (table) {
+  tables.forEach(function(table) {
     if (!outList) {
       const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
       outList = out[direction] = [];
     }
 
     let output;
-    if (output = convertTableGroup(table, convertTable)) {
+    if ((output = convertTableGroup(table, convertTable))) {
       outList.push(output);
     }
   });
@@ -56,9 +56,9 @@ function convertTableGroup(tableGroup, convertTable) {
   return out;
 }
 
-const handlerFunction =  function (convertTable) {
-  return function (response, dimensions) {
-    return new Promise((resolve) => {
+const handlerFunction = function(convertTable) {
+  return function(response, dimensions) {
+    return new Promise(resolve => {
       return tableResponseHandler(response, dimensions).then(tableGroup => {
         let converted = convertTableGroup(tableGroup, table => {
           return convertTable(table, dimensions);
@@ -77,17 +77,16 @@ const handlerFunction =  function (convertTable) {
   };
 };
 
-export const vislibSeriesResponseHandlerProvider = function () {
+export const vislibSeriesResponseHandlerProvider = function() {
   return {
     name: 'vislib_series',
-    handler: handlerFunction(buildPointSeriesData)
+    handler: handlerFunction(buildPointSeriesData),
   };
 };
 
-export const vislibSlicesResponseHandlerProvider = function () {
+export const vislibSlicesResponseHandlerProvider = function() {
   return {
     name: 'vislib_slices',
-    handler: handlerFunction(buildHierarchicalData)
+    handler: handlerFunction(buildHierarchicalData),
   };
 };
-

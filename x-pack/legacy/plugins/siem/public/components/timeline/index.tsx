@@ -9,10 +9,12 @@ import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
+
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
@@ -40,6 +42,7 @@ interface StateReduxProps {
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -137,6 +140,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     createTimeline,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -252,6 +256,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             id={id}
@@ -295,6 +300,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.start === nextProps.start &&
       isEqual(prevProps.columns, nextProps.columns) &&
       isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       isEqual(prevProps.sort, nextProps.sort)
     );
@@ -309,11 +315,12 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
       dataProviders,
+      filters,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -322,10 +329,13 @@ const makeMapStateToProps = () => {
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
 
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+
     return {
       columns,
       dataProviders,
       end: input.timerange.to,
+      filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
@@ -341,22 +351,19 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(
-  makeMapStateToProps,
-  {
-    addProvider: timelineActions.addProvider,
-    createTimeline: timelineActions.createTimeline,
-    onDataProviderEdited: timelineActions.dataProviderEdited,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    updateColumns: timelineActions.updateColumns,
-    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updateSort: timelineActions.updateSort,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulTimelineComponent);
+export const StatefulTimeline = connect(makeMapStateToProps, {
+  addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
+  onDataProviderEdited: timelineActions.dataProviderEdited,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  updateColumns: timelineActions.updateColumns,
+  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+  updateSort: timelineActions.updateSort,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulTimelineComponent);

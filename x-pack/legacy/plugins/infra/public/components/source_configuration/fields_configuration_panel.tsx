@@ -52,10 +52,12 @@ export const FieldsConfigurationPanel = ({
     <EuiDescribedFormGroup
       idAria="timestampField"
       title={
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.timestampFieldLabel"
-          defaultMessage="Timestamp"
-        />
+        <h4>
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.timestampFieldLabel"
+            defaultMessage="Timestamp"
+          />
+        </h4>
       }
       description={
         <FormattedMessage
@@ -99,10 +101,12 @@ export const FieldsConfigurationPanel = ({
         <EuiDescribedFormGroup
           idAria="tiebreakerField"
           title={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
-              defaultMessage="Tiebreaker"
-            />
+            <h4>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
+                defaultMessage="Tiebreaker"
+              />
+            </h4>
           }
           description={
             <FormattedMessage
@@ -148,10 +152,12 @@ export const FieldsConfigurationPanel = ({
         <EuiDescribedFormGroup
           idAria="containerField"
           title={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.containerFieldLabel"
-              defaultMessage="Container ID"
-            />
+            <h4>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.containerFieldLabel"
+                defaultMessage="Container ID"
+              />
+            </h4>
           }
           description={
             <FormattedMessage
@@ -193,10 +199,12 @@ export const FieldsConfigurationPanel = ({
         <EuiDescribedFormGroup
           idAria="hostNameField"
           title={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.hostNameFieldLabel"
-              defaultMessage="Host name"
-            />
+            <h4>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.hostNameFieldLabel"
+                defaultMessage="Host name"
+              />
+            </h4>
           }
           description={
             <FormattedMessage
@@ -238,10 +246,12 @@ export const FieldsConfigurationPanel = ({
         <EuiDescribedFormGroup
           idAria="podField"
           title={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.podFieldLabel"
-              defaultMessage="Pod ID"
-            />
+            <h4>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.podFieldLabel"
+                defaultMessage="Pod ID"
+              />
+            </h4>
           }
           description={
             <FormattedMessage

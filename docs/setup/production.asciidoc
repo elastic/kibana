@@ -6,6 +6,7 @@
 * <<enabling-ssl>>
 * <<load-balancing>>
 * <<high-availability>>
+* <<memory>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -27,7 +28,7 @@ You can use {stack} {security-features} to control what {es} data users can
 access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
-have a role granting <<kibana-privileges, Kibana privileges>> as well as access 
+have a role granting <<kibana-privileges, Kibana privileges>> as well as access
 to the indices they will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
@@ -126,3 +127,16 @@ elasticsearch.hosts:
 
 Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.
 These can be used to automatically update the list of hosts as a cluster is resized.  Parameters can be found on the {kibana-ref}/settings.html[settings page].
+
+[float]
+[[memory]]
+=== Memory
+Kibana has a default maximum memory limit of 1.4 GB, and in most cases, we recommend leaving this unconfigured.  In some scenarios, such as large reporting jobs,
+it may make sense to tweak limits to meet more specific requirements.
+
+You can modify this limit by setting `--max-old-space-size` in the `NODE_OPTIONS` environment variable. For deb and rpm, packages this is passed in via `/etc/default/kibana` and can be appended to the bottom of the file.
+
+The option accepts a limit in MB:
+--------
+NODE_OPTIONS="--max-old-space-size=2048" bin/kibana
+--------

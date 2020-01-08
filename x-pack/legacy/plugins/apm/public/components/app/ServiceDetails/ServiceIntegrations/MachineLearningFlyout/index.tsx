@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
-import { KibanaCoreContext } from '../../../../../../../observability/public';
+import { ApmPluginContext } from '../../../../../context/ApmPluginContext';
 
 interface Props {
   isOpen: boolean;
@@ -23,7 +24,7 @@ interface State {
 }
 
 export class MachineLearningFlyout extends Component<Props, State> {
-  static contextType = KibanaCoreContext;
+  static contextType = ApmPluginContext;
 
   public state: State = {
     isCreatingJob: false
@@ -36,7 +37,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }) => {
     this.setState({ isCreatingJob: true });
     try {
-      const { http } = this.context;
+      const { http } = this.context.core;
       const { serviceName } = this.props.urlParams;
       if (!serviceName) {
         throw new Error('Service name is required to create this ML job');
@@ -71,7 +72,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
           defaultMessage: 'Job creation failed'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
@@ -90,7 +91,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }: {
     transactionType: string;
   }) => {
-    const core = this.context;
+    const { core } = this.context;
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
@@ -105,7 +106,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
           defaultMessage: 'Job successfully created'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText',
@@ -118,7 +119,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
               }
             }
           )}{' '}
-          <KibanaCoreContext.Provider value={core}>
+          <ApmPluginContext.Provider value={this.context}>
             <MLJobLink
               serviceName={serviceName}
               transactionType={transactionType}
@@ -130,7 +131,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
                 }
               )}
             </MLJobLink>
-          </KibanaCoreContext.Provider>
+          </ApmPluginContext.Provider>
         </p>
       )
     });

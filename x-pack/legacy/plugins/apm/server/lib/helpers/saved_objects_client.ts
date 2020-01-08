@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { APMLegacyServer } from '../../routes/typings';
 
-export function getSavedObjectsClient(server: Server, clusterName = 'admin') {
+export function getInternalSavedObjectsClient(server: APMLegacyServer) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-    clusterName
+    'admin'
   );
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
   return new SavedObjectsClient(internalRepository);

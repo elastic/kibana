@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
 import { TestProviders } from '../../mock';
@@ -25,19 +23,20 @@ import {
   MoreContainer,
 } from './field_renderers';
 import { mockData } from '../page/network/ip_overview/mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
 
 describe('Field Renderers', () => {
+  const mount = useMountAppended();
+
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)}
-        </TestProviders>
+        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when no fields provided', () => {
@@ -59,11 +58,9 @@ describe('Field Renderers', () => {
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{dateRenderer(mockData.complete.source!.firstSeen)}</TestProviders>
-      );
+      const wrapper = shallow(dateRenderer(mockData.complete.source!.firstSeen));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
@@ -78,12 +75,10 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)}
-        </TestProviders>
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-string field provided', () => {
@@ -113,11 +108,9 @@ describe('Field Renderers', () => {
       ip: null,
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -158,11 +151,9 @@ describe('Field Renderers', () => {
       ip: ['10.10.10.10'],
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -194,27 +185,23 @@ describe('Field Renderers', () => {
 
   describe('#whoisRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(whoisRenderer('10.10.10.10'));
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
   describe('#reputationRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>
-      );
+      const wrapper = shallow(<TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
     });
   });
 
   describe('DefaultFieldRenderer', () => {
     test('it should render a single item', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
         </TestProviders>
@@ -223,7 +210,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should render two items', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -237,7 +224,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should render all items when the item count exactly equals displayCount', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -252,7 +239,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should render all items up to displayCount and the expected "+ n More" popover anchor text for items greater than displayCount', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -272,7 +259,7 @@ describe('Field Renderers', () => {
     const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
 
     test('it should only render the items after overflowIndexStart', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
           rowItems={rowItems}
@@ -285,7 +272,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should render all the items when overflowIndexStart is zero', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
           rowItems={rowItems}
@@ -298,7 +285,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should have the overflow `auto` style to enable scrolling when necessary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
           rowItems={rowItems}
@@ -316,7 +303,7 @@ describe('Field Renderers', () => {
     });
 
     test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <MoreContainer
           idPrefix={idPrefix}
           rowItems={rowItems}
@@ -336,7 +323,7 @@ describe('Field Renderers', () => {
     test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
       const render = jest.fn();
 
-      mountWithIntl(
+      mount(
         <MoreContainer
           idPrefix={idPrefix}
           render={render}

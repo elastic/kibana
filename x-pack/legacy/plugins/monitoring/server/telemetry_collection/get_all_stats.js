@@ -6,33 +6,11 @@
 
 import { get, set, merge } from 'lodash';
 
-import {
-  LOGSTASH_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-} from '../../common/constants';
-import { getClusterUuids } from './get_cluster_uuids';
+import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
 import { getElasticsearchStats } from './get_es_stats';
 import { getKibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
 import { getHighLevelStats } from './get_high_level_stats';
-
-
-/**
- * Get statistics for all products joined by Elasticsearch cluster.
- *
- * @param {Object} req The incoming request
- * @param {Date} start The starting range to request data
- * @param {Date} end The ending range to request data
- * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
- */
-export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
-  const server = req.server;
-  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('monitoring');
-  const callCluster = useInternalUser ? callWithInternalUser : (...args) => callWithRequest(req, ...args);
-
-  return getAllStatsWithCaller(server, callCluster, start, end);
-}
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
@@ -43,22 +21,17 @@ export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
  * @param {Date} end The ending range to request data
  * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-function getAllStatsWithCaller(server, callCluster, start, end) {
-  return getClusterUuids(server, callCluster, start, end)
-    .then(clusterUuids => {
-    // don't bother doing a further lookup
-      if (clusterUuids.length === 0) {
-        return [];
-      }
+export async function getAllStats(clustersDetails, { server, callCluster, start, end }) {
+  const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
 
-      return Promise.all([
-        getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-        getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana
-        getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
-        getBeatsStats(server, callCluster, clusterUuids, start, end),      // stack_stats.beats
-      ])
-        .then(([esClusters, kibana, logstash, beats]) => handleAllStats(esClusters, { kibana, logstash, beats }));
-    });
+  const [esClusters, kibana, logstash, beats] = await Promise.all([
+    getElasticsearchStats(server, callCluster, clusterUuids), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getKibanaStats(server, callCluster, clusterUuids, start, end), // stack_stats.kibana
+    getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
+    getBeatsStats(server, callCluster, clusterUuids, start, end), // stack_stats.beats
+  ]);
+
+  return handleAllStats(esClusters, { kibana, logstash, beats });
 }
 
 /**
@@ -70,7 +43,7 @@ function getAllStatsWithCaller(server, callCluster, start, end) {
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
  * @return {Array} The clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
-export function handleAllStats(clusters, { kibana, logstash,  beats }) {
+export function handleAllStats(clusters, { kibana, logstash, beats }) {
   return clusters.map(cluster => {
     // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
     addStackStats(cluster, kibana, KIBANA_SYSTEM_ID);
@@ -95,7 +68,7 @@ export function addStackStats(cluster, allProductStats, product) {
   // Don't add it if they're not using (or configured to report stats) this product for this cluster
   if (productStats) {
     if (!cluster.stack_stats) {
-      cluster.stack_stats = { };
+      cluster.stack_stats = {};
     }
 
     cluster.stack_stats[product] = productStats;

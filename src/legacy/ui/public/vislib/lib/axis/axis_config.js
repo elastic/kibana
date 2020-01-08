@@ -35,7 +35,7 @@ const defaults = {
     setYExtents: null,
     min: null,
     max: null,
-    mode: SCALE_MODES.NORMAL
+    mode: SCALE_MODES.NORMAL,
   },
   style: {
     color: '#ddd',
@@ -45,7 +45,7 @@ const defaults = {
     tickWidth: '1px',
     tickLength: '6px',
     rangePadding: 0.1,
-    rangeOuterPadding: 0
+    rangeOuterPadding: 0,
   },
   labels: {
     axisFormatter: null,
@@ -56,7 +56,7 @@ const defaults = {
     color: '#ddd',
     font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif',
     fontSize: '8pt',
-    truncate: 100
+    truncate: 100,
   },
   title: {
     text: '',
@@ -75,8 +75,8 @@ const categoryDefaults = {
 
 const valueDefaults = {
   labels: {
-    axisFormatter: d3.format('n')
-  }
+    axisFormatter: d3.format('n'),
+  },
 };
 
 const horizontalDefaults = {
@@ -85,23 +85,26 @@ const horizontalDefaults = {
     rotateAnchor: 'end',
     filter: true,
     truncate: 0,
-  }
+  },
 };
 
 const verticalDefaults = {
   labels: {
-    rotateAnchor: 'middle'
-  }
+    rotateAnchor: 'middle',
+  },
 };
 
 export class AxisConfig {
   constructor(chartConfig, axisConfigArgs) {
     const isCategoryType = axisConfigArgs.type === 'category';
-    const typeDefaults = isCategoryType ? _.cloneDeep(categoryDefaults) : _.cloneDeep(valueDefaults);
+    const typeDefaults = isCategoryType
+      ? _.cloneDeep(categoryDefaults)
+      : _.cloneDeep(valueDefaults);
     // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
     const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
     const isCategoryAxis = axisConfigArgsClone.type === 'category';
-    const isHorizontal = axisConfigArgsClone.position && ['top', 'bottom'].includes(axisConfigArgsClone.position);
+    const isHorizontal =
+      axisConfigArgsClone.position && ['top', 'bottom'].includes(axisConfigArgsClone.position);
 
     _.merge(typeDefaults, isHorizontal || isCategoryAxis ? horizontalDefaults : verticalDefaults);
     this._values = _.defaultsDeep({}, axisConfigArgsClone, typeDefaults, defaults);
@@ -118,7 +121,8 @@ export class AxisConfig {
         this.values = this._values.values;
       }
       if (!this._values.labels.axisFormatter) {
-        this._values.labels.axisFormatter = this.data.data.xAxisFormatter || this.data.get('xAxisFormatter');
+        this._values.labels.axisFormatter =
+          this.data.data.xAxisFormatter || this.data.get('xAxisFormatter');
       }
     }
 
@@ -220,11 +224,11 @@ export class AxisConfig {
   }
 
   isHorizontal() {
-    return (this._values.position === 'top' || this._values.position === 'bottom');
+    return this._values.position === 'top' || this._values.position === 'bottom';
   }
 
   isOrdinal() {
-    return !!this.values && (!this.isTimeDomain());
+    return !!this.values && !this.isTimeDomain();
   }
 
   isTimeDomain() {

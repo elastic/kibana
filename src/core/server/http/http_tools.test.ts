@@ -31,8 +31,6 @@ import { HttpConfig, config } from './http_config';
 import { Router } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const emptyOutput = {
   statusCode: 400,
@@ -90,6 +88,7 @@ describe('timeouts', () => {
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
+      compression: { enabled: true },
     } as HttpConfig);
     registerRouter(router);
 
@@ -121,22 +120,22 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
-            Object {
-              "ca": undefined,
-              "cert": "content-some-certificate-path",
-              "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-              "honorCipherOrder": true,
-              "key": "content-some-key-path",
-              "passphrase": undefined,
-              "rejectUnauthorized": false,
-              "requestCert": false,
-              "secureOptions": 67108864,
-            }
-        `);
+      Object {
+        "ca": undefined,
+        "cert": "content-some-certificate-path",
+        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "honorCipherOrder": true,
+        "key": "content-some-key-path",
+        "passphrase": undefined,
+        "rejectUnauthorized": false,
+        "requestCert": false,
+        "secureOptions": 67108864,
+      }
+    `);
   });
 
   it('properly configures TLS with client authentication', () => {
@@ -150,7 +149,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`

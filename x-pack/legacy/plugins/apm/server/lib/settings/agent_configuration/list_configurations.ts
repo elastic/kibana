@@ -12,13 +12,14 @@ export type AgentConfigurationListAPIResponse = PromiseReturnType<
   typeof listConfigurations
 >;
 export async function listConfigurations({ setup }: { setup: Setup }) {
-  const { client, indices } = setup;
+  const { internalClient, indices } = setup;
 
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex']
+    index: indices.apmAgentConfigurationIndex,
+    size: 200
   };
 
-  const resp = await client.search<AgentConfiguration>(params);
+  const resp = await internalClient.search<AgentConfiguration>(params);
   return resp.hits.hits.map(item => ({
     id: item._id,
     ...item._source

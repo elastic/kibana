@@ -71,6 +71,7 @@
   },
   "_meta": {
     "secondsAgo": 30,
-    "liveClusterUuid": null
+    "liveClusterUuid": null,
+    "hasPermissions": true
   }
 }

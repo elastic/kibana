@@ -5,7 +5,6 @@
  */
 
 import rison from 'rison-node';
-import chrome from 'ui/chrome';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
@@ -17,7 +16,9 @@ interface PageCount {
   pageCount: number;
 }
 
-type Arguments = [CanvasWorkpad, PageCount];
+type AddBasePath = (url: string) => string;
+
+type Arguments = [CanvasWorkpad, PageCount, AddBasePath];
 
 interface PdfUrlData {
   createPdfUri: string;
@@ -26,9 +27,10 @@ interface PdfUrlData {
 
 export function getPdfUrl(
   { id, name: title, width, height }: CanvasWorkpad,
-  { pageCount }: PageCount
+  { pageCount }: PageCount,
+  addBasePath: (path: string) => string
 ): PdfUrlData {
-  const reportingEntry = chrome.addBasePath('/api/reporting/generate');
+  const reportingEntry = addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
 
   // The viewport in Reporting by specifying the dimensions. In order for things to work,

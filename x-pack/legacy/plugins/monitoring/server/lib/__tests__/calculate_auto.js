@@ -24,10 +24,10 @@ describe('Calculating Time Intervals Based on Size of Buckets', () => {
       [40, 282],
       [200, 56],
       [800, 14],
-      [10000, 1]
+      [10000, 1],
     ];
 
-    _.each(tuples, (t) => {
+    _.each(tuples, t => {
       it(`Bucket Size: ${t[0]} - Time Interval: ${t[1]}`, () => {
         const result = calculateAuto(t[0], duration);
         expect(result.milliseconds()).to.be.eql(t[1]);

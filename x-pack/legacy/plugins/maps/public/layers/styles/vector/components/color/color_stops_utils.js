@@ -33,11 +33,7 @@ export function addRow(colorStops, index) {
     stop: currentStop + delta,
     color: '#FF0000',
   };
-  return [
-    ...colorStops.slice(0, index + 1),
-    newRow,
-    ...colorStops.slice(index + 1),
-  ];
+  return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
 }
 
 export function isColorInvalid(color) {
@@ -57,10 +53,6 @@ export function isInvalid(colorStops) {
       isDescending = prevStop >= colorStop.stop;
     }
 
-    return (
-      isColorInvalid(colorStop.color) ||
-      isStopInvalid(colorStop.stop) ||
-      isDescending
-    );
+    return isColorInvalid(colorStop.color) || isStopInvalid(colorStop.stop) || isDescending;
   });
 }

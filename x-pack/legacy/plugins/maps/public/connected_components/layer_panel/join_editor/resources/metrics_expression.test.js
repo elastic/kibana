@@ -8,20 +8,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricsExpression } from './metrics_expression';
 
-
 const defaultProps = {
-  onChange: () => {}
+  onChange: () => {},
 };
 
 test('Should render default props', () => {
-  const component = shallow(
-    <MetricsExpression
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<MetricsExpression {...defaultProps} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('Should render metrics expression for metrics', () => {
@@ -29,15 +23,12 @@ test('Should render metrics expression for metrics', () => {
     <MetricsExpression
       {...defaultProps}
       metrics={[
-        { type: 'count', label: 'my count' },  // should ignore label
+        { type: 'count', label: 'my count' }, // should ignore label
         { type: 'max' }, // incomplete - no field, should not be included in expression
         { type: 'max', field: 'prop1', label: 'mostest' }, // should ignore label
       ]}
     />
   );
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
-
-

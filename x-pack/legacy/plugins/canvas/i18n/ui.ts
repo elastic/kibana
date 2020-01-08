@@ -12,9 +12,9 @@ import {
   CANVAS,
   CSS,
   ELASTICSEARCH,
+  ELASTICSEARCH_SHORT,
   HEX,
   HTML,
-  KIBANA,
   LUCENE,
   MARKDOWN,
   MOMENTJS,
@@ -34,6 +34,10 @@ export const ArgumentStrings = {
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.axisConfigLabel', {
         defaultMessage: 'Visualization axis configuration',
+      }),
+    getDisabledText: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfigDisabledText', {
+        defaultMessage: 'Switch on to view axis settings',
       }),
     getPositionBottom: () =>
       i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.bottomDropDown', {
@@ -123,6 +127,14 @@ export const ArgumentStrings = {
     getCreateNewGroup: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroup.createNewGroupLinkText', {
         defaultMessage: 'Create new group',
+      }),
+    getButtonSet: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.setValue', {
+        defaultMessage: 'Set',
+      }),
+    getButtonCancel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.cancelValue', {
+        defaultMessage: 'Cancel',
       }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroupTitle', {
@@ -260,7 +272,7 @@ export const ArgumentStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.shapeLabel', {
-        defaultMessage: 'Shape picker',
+        defaultMessage: 'Change the shape of the current element',
       }),
   },
   String: {
@@ -303,11 +315,19 @@ export const DataSourceStrings = {
       }),
     getHeading: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoData.headingTitle', {
-        defaultMessage: 'You are using demo data',
+        defaultMessage: 'This element is using demo data',
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
         defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
+      }),
+    getDescription: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoDataDescription', {
+        defaultMessage:
+          'By default, every {canvas} element is connected to the demo data source. Change the data source, above, to connect your own data.',
+        values: {
+          canvas: CANVAS,
+        },
       }),
   },
   Essql: {
@@ -329,9 +349,13 @@ export const DataSourceStrings = {
       }),
     getLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitle', {
-        defaultMessage: '{elasticsearch} {sql} query',
+        defaultMessage: 'Query',
+      }),
+    getLabelAppend: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitleAppend', {
+        defaultMessage: 'Learn {elasticsearchShort} {sql} syntax',
         values: {
-          elasticsearch: ELASTICSEARCH,
+          elasticsearchShort: ELASTICSEARCH_SHORT,
           sql: SQL,
         },
       }),
@@ -340,10 +364,9 @@ export const DataSourceStrings = {
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
         defaultMessage:
-          '{canvas} integrates with {kibanaTimelion} application to allow you to use {timelion} queries to pull back timeseries data in a tabular format that can be used with {canvas} elements.',
+          'Use {timelion} queries to pull back timeseries data that can be used with {canvas} elements.',
         values: {
           timelion: TIMELION,
-          kibanaTimelion: `${KIBANA}'s ${TIMELION}`,
           canvas: CANVAS,
         },
       }),
@@ -357,9 +380,8 @@ export const DataSourceStrings = {
     getIntervalHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalLabel', {
         defaultMessage:
-          'Accepts {elasticsearch} date math: {weeksExample}, {daysExample}, {secondsExample}, or {auto}',
+          'Use date math like {weeksExample}, {daysExample}, {secondsExample}, or {auto}',
         values: {
-          elasticsearch: ELASTICSEARCH,
           secondsExample: '10s',
           daysExample: '5d',
           weeksExample: '1w',
@@ -383,7 +405,11 @@ export const DataSourceStrings = {
       }),
     getTipsHeading: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.tipsTitle', {
-        defaultMessage: 'Some tips',
+        defaultMessage: 'Tips for using {timelion} in {canvas}',
+        values: {
+          timelion: TIMELION,
+          canvas: CANVAS,
+        },
       }),
   },
 };
@@ -530,7 +556,7 @@ export const ViewStrings = {
       }),
     getValueDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnTitle', {
-        defaultMessage: 'Values column',
+        defaultMessage: 'Value column',
       }),
     getValueHelp: () =>
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnLabel', {
@@ -610,7 +636,7 @@ export const ViewStrings = {
       }),
     getNumberDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.numberArgTitle', {
-        defaultMessage: 'Number',
+        defaultMessage: 'Value',
       }),
     getLabelDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelArgTitle', {
@@ -618,7 +644,7 @@ export const ViewStrings = {
       }),
     getLabelFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelFontTitle', {
-        defaultMessage: 'Label text settings',
+        defaultMessage: 'Label text',
       }),
     getLabelFontHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelFontLabel', {
@@ -626,11 +652,11 @@ export const ViewStrings = {
       }),
     getLabelHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelArgLabel', {
-        defaultMessage: 'Describes the metric',
+        defaultMessage: 'Enter a text label for the metric value',
       }),
     getMetricFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFontTitle', {
-        defaultMessage: 'Metric text settings',
+        defaultMessage: 'Metric text',
       }),
     getMetricFontHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFontLabel', {
@@ -638,11 +664,11 @@ export const ViewStrings = {
       }),
     getMetricFormatDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFormatTitle', {
-        defaultMessage: 'Metric Format',
+        defaultMessage: 'Format',
       }),
     getMetricFormatHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFormatLabel', {
-        defaultMessage: 'Fonts, alignment and color',
+        defaultMessage: 'Select a format for the metric value',
       }),
   },
   Pie: {
@@ -676,7 +702,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.legendTitle', {
-        defaultMessage: 'Legend position',
+        defaultMessage: 'Legend',
       }),
     getLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.legendLabel', {
@@ -714,7 +740,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.plot.args.legendTitle', {
-        defaultMessage: 'Legend position',
+        defaultMessage: 'Legend',
       }),
     getLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.plot.args.legendLabel', {
@@ -744,7 +770,7 @@ export const ViewStrings = {
       }),
     getBarColorHelp: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.barColorLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
       }),
     getBarWeightDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.barWeightTitle', {
@@ -930,7 +956,7 @@ export const ViewStrings = {
       }),
     getBorderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.borderLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
       }),
     getBorderWidthDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.borderWidthTitle', {
@@ -950,22 +976,19 @@ export const ViewStrings = {
       }),
     getFillHelp: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.fillLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
       }),
     getMaintainAspectDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectTitle', {
-        defaultMessage: 'Maintain aspect ratio',
+        defaultMessage: 'Fixed ratio',
       }),
     getMaintainAspectHelp: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
-        defaultMessage: `Select '{true}' to maintain aspect ratio`,
-        values: {
-          true: BOOLEAN_TRUE,
-        },
+        defaultMessage: `Enable to maintain aspect ratio`,
       }),
     getShapeDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.shapeTitle', {
-        defaultMessage: 'Select a shape',
+        defaultMessage: 'Select shape',
       }),
   },
   Table: {
@@ -988,7 +1011,7 @@ export const ViewStrings = {
       }),
     getPerPageDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.perPageTitle', {
-        defaultMessage: 'Rows per page',
+        defaultMessage: 'Rows',
       }),
     getPerPageHelp: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.perPageLabel', {
@@ -1022,7 +1045,7 @@ export const ViewStrings = {
       }),
     getFilterGroupDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.timefilter.args.filterGroupTitle', {
-        defaultMessage: 'Filter group name',
+        defaultMessage: 'Filter group',
       }),
     getFilterGroupHelp: () =>
       i18n.translate('xpack.canvas.uis.views.timefilter.args.filterGroupLabel', {

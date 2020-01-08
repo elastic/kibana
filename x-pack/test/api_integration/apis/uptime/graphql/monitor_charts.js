@@ -7,7 +7,7 @@
 import { monitorChartsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   describe('monitorCharts query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
@@ -50,7 +50,6 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
-
 
       expectFixtureEql(data, 'monitor_charts_empty_sets');
     });

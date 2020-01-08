@@ -26,7 +26,7 @@ export function getBreadcrumbs() {
     {
       text: i18n.translate('kbn.management.settings.breadcrumb', {
         defaultMessage: 'Advanced settings',
-      })
-    }
+      }),
+    },
   ];
 }

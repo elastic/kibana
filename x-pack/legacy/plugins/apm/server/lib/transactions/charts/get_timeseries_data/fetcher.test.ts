@@ -6,6 +6,7 @@
 
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
+import { APMConfig } from '../../../../../../../../plugins/apm/server';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;
@@ -21,10 +22,13 @@ describe('timeseriesFetcher', () => {
         start: 1528113600000,
         end: 1528977600000,
         client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
+        internalClient: { search: clientSpy } as any,
+        config: new Proxy(
+          {},
+          {
+            get: () => 'myIndex'
+          }
+        ) as APMConfig,
         uiFiltersES: [
           {
             term: { 'service.environment': 'test' }
@@ -37,8 +41,9 @@ describe('timeseriesFetcher', () => {
           'apm_oss.spanIndices': 'myIndex',
           'apm_oss.transactionIndices': 'myIndex',
           'apm_oss.metricsIndices': 'myIndex',
-          'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-        }
+          apmAgentConfigurationIndex: 'myIndex'
+        },
+        dynamicIndexPattern: null as any
       }
     });
   });

@@ -1,0 +1,17 @@
+{
+  "rule_id": "e8207172-3478-4b2c-85b7-6f13d97fff43",
+  "risk_score": 50,
+  "description": "Indicates that a certificate is going to expire within SSL::notify_when_cert_expiring_in.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Certificate_Expires_Soon",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Certificate_Expires_Soon\" or rule.name: \"SSL::Certificate_Expires_Soon\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

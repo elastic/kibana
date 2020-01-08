@@ -105,7 +105,7 @@ export class EsArchiver {
     return await rebuildAllAction({
       client: this.client,
       dataDir: this.dataDir,
-      log: this.log
+      log: this.log,
     });
   }
 
@@ -122,7 +122,7 @@ export class EsArchiver {
       prefix,
       log: this.log,
       dataDir: this.dataDir,
-      handler
+      handler,
     });
   }
 

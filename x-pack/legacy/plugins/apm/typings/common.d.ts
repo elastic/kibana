@@ -27,3 +27,5 @@ export type PromiseReturnType<Func> = Func extends (
 ) => Promise<infer Value>
   ? Value
   : Func;
+
+export type Maybe<T> = T | null | undefined;

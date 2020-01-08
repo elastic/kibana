@@ -7,7 +7,7 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { replaceMetricTimeInQueryString } from '../../containers/metrics/with_metrics_time';
+import { replaceMetricTimeInQueryString } from '../metrics/containers/with_metrics_time';
 import { InfraNodeType } from '../../graphql/types';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 

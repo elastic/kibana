@@ -19,22 +19,16 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 'ui/scripting_languages';
+import {
+  getSupportedScriptingLanguages,
+  getDeprecatedScriptingLanguages,
+} from 'ui/scripting_languages';
 import { documentationLinks } from 'ui/documentation_links';
 
-import {
-  EuiSpacer,
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EUI_MODAL_CONFIRM_BUTTON,
-} from '@elastic/eui';
+import { EuiSpacer, EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  Table,
-  Header,
-  CallOuts,
-} from './components';
+import { Table, Header, CallOuts } from './components';
 
 export class ScriptedFieldsTable extends Component {
   static propTypes = {
@@ -46,7 +40,7 @@ export class ScriptedFieldsTable extends Component {
       getRouteHref: PropTypes.func.isRequired,
     }),
     onRemoveField: PropTypes.func,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -59,7 +53,7 @@ export class ScriptedFieldsTable extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.fetchFields();
   }
 
@@ -80,7 +74,7 @@ export class ScriptedFieldsTable extends Component {
       fields,
       deprecatedLangsInUse,
     });
-  }
+  };
 
   getFilteredItems = () => {
     const { fields } = this.state;
@@ -98,13 +92,13 @@ export class ScriptedFieldsTable extends Component {
 
     if (fieldFilter) {
       const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
-      filteredFields = languageFilteredFields.filter(
-        field => field.name.toLowerCase().includes(normalizedFieldFilter)
+      filteredFields = languageFilteredFields.filter(field =>
+        field.name.toLowerCase().includes(normalizedFieldFilter)
       );
     }
 
     return filteredFields;
-  }
+  };
 
   renderCallOuts() {
     const { deprecatedLangsInUse } = this.state;
@@ -119,13 +113,13 @@ export class ScriptedFieldsTable extends Component {
 
   startDeleteField = field => {
     this.setState({ fieldToDelete: field, isDeleteConfirmationModalVisible: true });
-  }
+  };
 
   hideDeleteConfirmationModal = () => {
     this.setState({ fieldToDelete: undefined, isDeleteConfirmationModalVisible: false });
-  }
+  };
 
-  deleteField = () =>  {
+  deleteField = () => {
     const { indexPattern, onRemoveField } = this.props;
     const { fieldToDelete } = this.state;
 
@@ -133,7 +127,7 @@ export class ScriptedFieldsTable extends Component {
     onRemoveField && onRemoveField();
     this.fetchFields();
     this.hideDeleteConfirmationModal();
-  }
+  };
 
   renderDeleteConfirmationModal() {
     const { fieldToDelete } = this.state;
@@ -142,12 +136,18 @@ export class ScriptedFieldsTable extends Component {
       return null;
     }
 
-    const title = i18n.translate('kbn.management.editIndexPattern.scripted.deleteFieldLabel',
-      { defaultMessage: 'Delete scripted field \'{fieldName}\'?', values: { fieldName: fieldToDelete.name } });
-    const cancelButtonText = i18n.translate('kbn.management.editIndexPattern.scripted.deleteField.cancelButton',
-      { defaultMessage: 'Cancel' });
-    const confirmButtonText = i18n.translate('kbn.management.editIndexPattern.scripted.deleteField.deleteButton',
-      { defaultMessage: 'Delete' });
+    const title = i18n.translate('kbn.management.editIndexPattern.scripted.deleteFieldLabel', {
+      defaultMessage: "Delete scripted field '{fieldName}'?",
+      values: { fieldName: fieldToDelete.name },
+    });
+    const cancelButtonText = i18n.translate(
+      'kbn.management.editIndexPattern.scripted.deleteField.cancelButton',
+      { defaultMessage: 'Cancel' }
+    );
+    const confirmButtonText = i18n.translate(
+      'kbn.management.editIndexPattern.scripted.deleteField.deleteButton',
+      { defaultMessage: 'Delete' }
+    );
 
     return (
       <EuiOverlayMask>
@@ -164,10 +164,7 @@ export class ScriptedFieldsTable extends Component {
   }
 
   render() {
-    const {
-      helpers,
-      indexPattern,
-    } = this.props;
+    const { helpers, indexPattern } = this.props;
 
     const items = this.getFilteredItems();
 

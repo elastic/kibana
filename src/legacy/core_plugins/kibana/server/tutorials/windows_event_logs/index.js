@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/winlogbeat_instructions';
 
-export function windowsEventLogsSpecProvider(server, context) {
+export function windowsEventLogsSpecProvider(context) {
   return {
     id: 'windowsEventLogs',
     name: i18n.translate('kbn.server.tutorials.windowsEventLogs.nameTitle', {

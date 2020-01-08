@@ -19,18 +19,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
-  const fromTime = '2019-01-01 00:00:00.000';
-  const toTime = '2019-01-01 23:59:59.999';
+  const fromTime = 'Jan 1, 2019 @ 00:00:00.000';
+  const toTime = 'Jan 1, 2019 @ 23:59:59.999';
 
-  describe('date_nanos_mixed', function () {
-
-    before(async function () {
+  describe('date_nanos_mixed', function() {
+    before(async function() {
       await esArchiver.loadIfNeeded('date_nanos_mixed');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'timestamp-*' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
@@ -39,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       return esArchiver.unload('date_nanos_mixed');
     });
 
-    it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
+    it('shows a list of records of indices with date & date_nanos fields in the right order', async function() {
       const rowData1 = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData1.startsWith('Jan 1, 2019 @ 12:10:30.124000000')).to.be.ok();
       const rowData2 = await PageObjects.discover.getDocTableIndex(3);
@@ -50,5 +49,4 @@ export default function ({ getService, getPageObjects }) {
       expect(rowData4.startsWith('Jan 1, 2019 @ 12:10:30.123000000')).to.be.ok();
     });
   });
-
 }

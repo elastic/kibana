@@ -18,16 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './_bucket_agg_type';
 import { BucketAggType } from './_bucket_agg_type';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { RangeKey } from './range_key';
 import { RangesEditor } from './range_editor';
 
 // @ts-ignore
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();
@@ -98,9 +96,12 @@ export const rangeBucketAgg = new BucketAggType({
     },
     {
       name: 'ranges',
-      default: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+      default: [
+        { from: 0, to: 1000 },
+        { from: 1000, to: 2000 },
+      ],
       editorComponent: RangesEditor,
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         output.params.ranges = aggConfig.params.ranges;
         output.params.keyed = true;
       },

@@ -11,26 +11,17 @@ import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getPolicyPayload } from './fixtures';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
-  const {
-    getIndex,
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { getIndex, createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
-  const {
-    addPolicyToIndex,
-    removePolicyFromIndex,
-    retryPolicyOnIndex,
-  } = registerIndexHelpers({ supertest });
+  const { addPolicyToIndex, removePolicyFromIndex, retryPolicyOnIndex } = registerIndexHelpers({
+    supertest,
+  });
 
-  const {
-    createPolicy,
-    cleanUp: cleanUpPolicies,
-  } = registerPoliciesHelpers({ supertest });
+  const { createPolicy, cleanUp: cleanUpPolicies } = registerPoliciesHelpers({ supertest });
 
   describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
@@ -50,7 +41,11 @@ export default function ({ getService }) {
 
         // Fetch the index and verify that the policy has been attached
         const indexFetched = await getIndex(indexName);
-        const { settings: { index: { lifecycle } } } = indexFetched[indexName];
+        const {
+          settings: {
+            index: { lifecycle },
+          },
+        } = indexFetched[indexName];
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });
@@ -94,7 +89,7 @@ export default function ({ getService }) {
         // As there is no easy way to set the index in the ERROR state to be able to retry
         // we validate that the error returned *is* coming from the ES "_ilm/retry" endpoint
         const { body } = await retryPolicyOnIndex(indexName);
-        const expected = `[illegal_argument_exception] cannot retry an action for an index [${indexName}] that has not encountered an error when running a Lifecycle Policy`; // eslint-disable-line max-len
+        const expected = `[illegal_argument_exception] cannot retry an action for an index [${indexName}] that has not encountered an error when running a Lifecycle Policy`;
         expect(body.message).to.be(expected);
       });
     });

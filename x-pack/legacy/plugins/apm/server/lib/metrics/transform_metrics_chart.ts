@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { idx } from '@kbn/elastic-idx';
 import { Unionize, Overwrite } from 'utility-types';
 import { ChartBase } from './types';
 import {
@@ -12,16 +11,7 @@ import {
   ESSearchRequest
 } from '../../../typings/elasticsearch';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
-
-const colors = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6
-];
+import { getVizColorForIndex } from '../../../common/viz_colors';
 
 export type GenericMetricsChart = ReturnType<
   typeof transformDataToMetricsChart
@@ -48,11 +38,12 @@ type GenericMetricsRequest = Overwrite<
   }
 >;
 
-export function transformDataToMetricsChart<
-  TRequest extends GenericMetricsRequest
->(result: ESSearchResponse<unknown, TRequest>, chartBase: ChartBase) {
+export function transformDataToMetricsChart(
+  result: ESSearchResponse<unknown, GenericMetricsRequest>,
+  chartBase: ChartBase
+) {
   const { aggregations, hits } = result;
-  const timeseriesData = idx(aggregations, _ => _.timeseriesData);
+  const timeseriesData = aggregations?.timeseriesData;
 
   return {
     title: chartBase.title,
@@ -60,22 +51,24 @@ export function transformDataToMetricsChart<
     yUnit: chartBase.yUnit,
     noHits: hits.total.value === 0,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const overallValue = idx(aggregations, _ => _[seriesKey].value);
+      const overallValue = aggregations?.[seriesKey].value;
 
       return {
         title: chartBase.series[seriesKey].title,
         key: seriesKey,
         type: chartBase.type,
-        color: chartBase.series[seriesKey].color || colors[i],
+        color:
+          chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
         overallValue,
-        data: (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
-          const { value } = bucket[seriesKey] as { value: number | null };
-          const y = value === null || isNaN(value) ? null : value;
-          return {
-            x: bucket.key,
-            y
-          };
-        })
+        data:
+          timeseriesData?.buckets.map(bucket => {
+            const { value } = bucket[seriesKey] as { value: number | null };
+            const y = value === null || isNaN(value) ? null : value;
+            return {
+              x: bucket.key,
+              y
+            };
+          }) || []
       };
     })
   };

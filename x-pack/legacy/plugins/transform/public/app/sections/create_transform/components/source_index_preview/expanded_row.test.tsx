@@ -24,16 +24,13 @@ describe('Transform: <ExpandedRow />', () => {
       arrayObject: [{ object1: 'the-object-1' }, { object2: 'the-objects-2' }],
     } as Record<string, any>;
 
-    const flattenedSource = getFlattenedFields(source).reduce(
-      (p, c) => {
-        p[c] = getNestedProperty(source, c);
-        if (p[c] === undefined) {
-          p[c] = source[`"${c}"`];
-        }
-        return p;
-      },
-      {} as Record<string, any>
-    );
+    const flattenedSource = getFlattenedFields(source).reduce((p, c) => {
+      p[c] = getNestedProperty(source, c);
+      if (p[c] === undefined) {
+        p[c] = source[`"${c}"`];
+      }
+      return p;
+    }, {} as Record<string, any>);
 
     const props = {
       item: {

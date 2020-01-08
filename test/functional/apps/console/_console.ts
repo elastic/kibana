@@ -35,6 +35,8 @@ GET _search
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
+  const find = getService('find');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
@@ -80,6 +82,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         // the settings are not applied synchronously, so we retry for a time
         expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
       });
+    });
+
+    it('should resize the editor', async () => {
+      const editor = await find.byCssSelector('.conApp');
+      await browser.setWindowSize(1300, 1100);
+      const initialSize = await editor.getSize();
+      await browser.setWindowSize(1000, 1100);
+      const afterSize = await editor.getSize();
+      expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
   });
 }

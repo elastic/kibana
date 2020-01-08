@@ -22,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { npStart } from 'ui/new_platform';
-import { BucketAggType, IBucketAggConfig, BucketAggParam } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
 import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
 import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
 import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 export interface AutoBounds {
@@ -123,14 +123,13 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
             if (e.name === 'AbortError') return;
             toastNotifications.addWarning(
               i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
-                // eslint-disable-next-line max-len
                 defaultMessage:
                   'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',
               })
             );
           });
       },
-      write(aggConfig: IBucketHistogramAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         let interval = parseFloat(aggConfig.params.interval);
         if (interval <= 0) {
           interval = 1;
@@ -171,12 +170,12 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
 
         output.params.interval = interval;
       },
-    } as BucketAggParam,
+    },
     {
       name: 'min_doc_count',
       default: false,
       editorComponent: MinDocCountParamEditor,
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         if (aggConfig.params.min_doc_count) {
           output.params.min_doc_count = 0;
         } else {
@@ -197,7 +196,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
         max: '',
       },
       editorComponent: ExtendedBoundsParamEditor,
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         const { min, max } = aggConfig.params.extended_bounds;
 
         if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {

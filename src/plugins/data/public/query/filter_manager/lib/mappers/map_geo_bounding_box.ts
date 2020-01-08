@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 const getFormattedValueFn = (params: any) => {
   return (formatter?: esFilters.FilterValueFormatter) => {

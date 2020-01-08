@@ -35,9 +35,18 @@ describe('chartSelectors', () => {
   describe('getResponseTimeSeries', () => {
     const apmTimeseries = {
       responseTimes: {
-        avg: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
-        p95: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
-        p99: [{ x: 0, y: 300 }, { x: 1000, y: 400 }]
+        avg: [
+          { x: 0, y: 100 },
+          { x: 1000, y: 200 }
+        ],
+        p95: [
+          { x: 0, y: 200 },
+          { x: 1000, y: 300 }
+        ],
+        p99: [
+          { x: 0, y: 300 },
+          { x: 1000, y: 400 }
+        ]
       },
       tpmBuckets: [],
       overallAvgDuration: 200
@@ -49,21 +58,30 @@ describe('chartSelectors', () => {
       ).toEqual([
         {
           color: '#3185fc',
-          data: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
+          data: [
+            { x: 0, y: 100 },
+            { x: 1000, y: 200 }
+          ],
           legendValue: '0 ms',
           title: 'Avg.',
           type: 'linemark'
         },
         {
           color: '#e6c220',
-          data: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
+          data: [
+            { x: 0, y: 200 },
+            { x: 1000, y: 300 }
+          ],
           title: '95th percentile',
           titleShort: '95th',
           type: 'linemark'
         },
         {
           color: '#f98510',
-          data: [{ x: 0, y: 300 }, { x: 1000, y: 400 }],
+          data: [
+            { x: 0, y: 300 },
+            { x: 1000, y: 400 }
+          ],
           title: '99th percentile',
           titleShort: '99th',
           type: 'linemark'
@@ -87,7 +105,13 @@ describe('chartSelectors', () => {
         p99: []
       },
       tpmBuckets: [
-        { key: 'HTTP 2xx', dataPoints: [{ x: 0, y: 5 }, { x: 0, y: 2 }] },
+        {
+          key: 'HTTP 2xx',
+          dataPoints: [
+            { x: 0, y: 5 },
+            { x: 0, y: 2 }
+          ]
+        },
         { key: 'HTTP 4xx', dataPoints: [{ x: 0, y: 1 }] },
         { key: 'HTTP 5xx', dataPoints: [{ x: 0, y: 0 }] }
       ],
@@ -99,7 +123,10 @@ describe('chartSelectors', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
           color: successColor,
-          data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
+          data: [
+            { x: 0, y: 5 },
+            { x: 0, y: 2 }
+          ],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
           type: 'linemark'
@@ -220,9 +247,18 @@ describe('chartSelectors', () => {
     describe('when empty', () => {
       it('produces an empty series', () => {
         const responseTimes = {
-          avg: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
-          p95: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
-          p99: [{ x: 0, y: 1 }, { x: 100, y: 1 }]
+          avg: [
+            { x: 0, y: 1 },
+            { x: 100, y: 1 }
+          ],
+          p95: [
+            { x: 0, y: 1 },
+            { x: 100, y: 1 }
+          ],
+          p99: [
+            { x: 0, y: 1 },
+            { x: 100, y: 1 }
+          ]
         };
         const series = getTpmSeries(
           { ...apmTimeseries, responseTimes, tpmBuckets: [] },

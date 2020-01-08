@@ -14,7 +14,10 @@ describe('csv', () => {
   const fn = functionWrapper(csv);
   const expected = {
     type: 'datatable',
-    columns: [{ name: 'name', type: 'string' }, { name: 'number', type: 'string' }],
+    columns: [
+      { name: 'name', type: 'string' },
+      { name: 'number', type: 'string' },
+    ],
     rows: [
       { name: 'one', number: '1' },
       { name: 'two', number: '2' },

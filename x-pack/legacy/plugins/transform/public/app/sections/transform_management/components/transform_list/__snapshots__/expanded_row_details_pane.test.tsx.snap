@@ -1,40 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transform: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal initialization 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem
-    style={
-      Object {
-        "width": "50%",
-      }
-    }
-  >
-    <EuiSpacer
-      size="s"
-    />
-    <Section
-      section={
+<div
+  data-test-subj="transformDetailsTabContent"
+>
+  <EuiFlexGroup>
+    <EuiFlexItem
+      style={
         Object {
-          "items": Array [
-            Object {
-              "description": "the-item-description",
-              "title": "the-item-title",
-            },
-          ],
-          "position": "left",
-          "title": "the-section-title",
+          "width": "50%",
+        }
+      }
+    >
+      <EuiSpacer
+        size="s"
+      />
+      <Section
+        section={
+          Object {
+            "items": Array [
+              Object {
+                "description": "the-item-description",
+                "title": "the-item-title",
+              },
+            ],
+            "position": "left",
+            "title": "the-section-title",
+          }
+        }
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      style={
+        Object {
+          "width": "50%",
         }
       }
     />
-  </EuiFlexItem>
-  <EuiFlexItem
-    style={
-      Object {
-        "width": "50%",
-      }
-    }
-  />
-</EuiFlexGroup>
+  </EuiFlexGroup>
+</div>
 `;
 
 exports[`Transform: Job List Expanded Row <Section /> Minimal initialization 1`] = `

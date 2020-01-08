@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 // @ts-ignore Untyped local
@@ -31,7 +30,9 @@ import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
 import { ComponentStrings } from '../../../../../i18n';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public/';
 import { OnCloseFn } from '../workpad_export';
+import { WithKibanaProps } from '../../../../index';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 const getUnsupportedRenderers = (state: State) => {
@@ -61,8 +62,15 @@ interface Props {
 
 export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>>(
   connect(mapStateToProps),
+  withKibana,
   withProps(
-    ({ unsupportedRenderers, renderedWorkpad, onClose, workpad }: Props): ComponentProps => ({
+    ({
+      unsupportedRenderers,
+      renderedWorkpad,
+      onClose,
+      workpad,
+      kibana,
+    }: Props & WithKibanaProps): ComponentProps => ({
       unsupportedRenderers,
       onClose,
       onCopy: () => {
@@ -74,10 +82,10 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
             downloadRenderedWorkpad(renderedWorkpad);
             return;
           case 'shareRuntime':
-            downloadRuntime();
+            downloadRuntime(kibana.services.http.basePath.get());
             return;
           case 'shareZip':
-            const basePath = chrome.getBasePath();
+            const basePath = kibana.services.http.basePath.get();
             arrayBufferFetch
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
               .then(blob => downloadZippedRuntime(blob.data))

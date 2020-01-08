@@ -14,9 +14,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../../spaces/common/constants';
-import { Space } from '../../../../../../../spaces/common/model/space';
-import { SpaceAvatar } from '../../../../../../../spaces/public/components';
+import { SpaceAvatar } from '../../../../../../../spaces/public/space_avatar';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../../../../plugins/spaces/common/constants';
+import { Space } from '../../../../../../../../../plugins/spaces/common/model/space';
 
 interface Props {
   spaces: Space[];

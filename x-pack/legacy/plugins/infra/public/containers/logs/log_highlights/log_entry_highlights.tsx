@@ -78,7 +78,7 @@ export const useLogEntryHighlights = (
     } else {
       setLogEntryHighlights([]);
     }
-  }, [highlightTerms, startKey, endKey, filterQuery, sourceVersion]);
+  }, [endKey, filterQuery, highlightTerms, loadLogEntryHighlights, sourceVersion, startKey]);
 
   const logEntryHighlightsById = useMemo(
     () =>

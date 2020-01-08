@@ -45,12 +45,14 @@ export const IndicesConfigurationPanel = ({
     <EuiSpacer size="m" />
     {displaySettings === 'metrics' && (
       <EuiDescribedFormGroup
-        idAria="matricIndices"
+        idAria="metricIndices"
         title={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.metricIndicesTitle"
-            defaultMessage="Metric indices"
-          />
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.metricIndicesTitle"
+              defaultMessage="Metric indices"
+            />
+          </h4>
         }
         description={
           <FormattedMessage
@@ -95,10 +97,12 @@ export const IndicesConfigurationPanel = ({
       <EuiDescribedFormGroup
         idAria="logIndices"
         title={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesTitle"
-            defaultMessage="Log indices"
-          />
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesTitle"
+              defaultMessage="Log indices"
+            />
+          </h4>
         }
         description={
           <FormattedMessage

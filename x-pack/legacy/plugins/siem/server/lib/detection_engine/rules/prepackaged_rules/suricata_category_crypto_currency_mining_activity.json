@@ -1,0 +1,17 @@
+{
+  "rule_id": "74cd4920-a441-41d2-8a23-5bee70626e60",
+  "risk_score": 50,
+  "description": "Suricata Category - Crypto Currency Mining Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Crypto Currency Mining Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Crypto Currency Mining Activity Detected\" or rule.category: \"Crypto Currency Mining Activity Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -19,9 +19,6 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const FROM_TIME = '2015-09-19 06:31:44.000';
-const TO_TIME = '2015-09-23 18:31:44.000';
-
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const a11y = getService('a11y');
@@ -36,7 +33,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(FROM_TIME, TO_TIME);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('main view', async () => {

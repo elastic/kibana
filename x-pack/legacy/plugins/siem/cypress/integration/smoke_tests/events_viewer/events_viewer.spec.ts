@@ -10,7 +10,6 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 import {
@@ -26,6 +25,7 @@ import {
   LOAD_MORE,
   LOCAL_EVENTS_COUNT,
 } from '../../lib/events_viewer/selectors';
+import { SERVER_SIDE_EVENT_COUNT } from '../../lib/timeline/selectors';
 import { clickEventsTab } from '../../lib/hosts/helpers';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -43,10 +43,6 @@ describe('Events Viewer', () => {
     loginAndWaitForPage(HOSTS_PAGE);
 
     clickEventsTab();
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
@@ -106,7 +102,7 @@ describe('Events Viewer', () => {
       .invoke('text')
       .then(text1 => {
         cy.get(HEADER_SUBTITLE)
-          .invoke('text')
+          .invoke('text', { timeout: DEFAULT_TIMEOUT })
           .should('not.equal', 'Showing: 0 events');
 
         filterSearchBar(filterInput);
@@ -141,7 +137,7 @@ describe('Events Viewer', () => {
   });
 
   it('loads more events when the load more button is clicked', () => {
-    cy.get(LOCAL_EVENTS_COUNT)
+    cy.get(LOCAL_EVENTS_COUNT, { timeout: DEFAULT_TIMEOUT })
       .invoke('text')
       .then(text1 => {
         cy.get(LOCAL_EVENTS_COUNT)
@@ -160,11 +156,13 @@ describe('Events Viewer', () => {
 
   it('launches the inspect query modal when the inspect button is clicked', () => {
     // wait for data to load
-    cy.get(HEADER_SUBTITLE)
-      .invoke('text')
-      .should('not.equal', 'Showing: 0 events');
+    cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
+      .should('exist')
+      .invoke('text', { timeout: DEFAULT_TIMEOUT })
+      .should('not.equal', '0');
 
-    cy.get(INSPECT_QUERY)
+    cy.get(INSPECT_QUERY, { timeout: DEFAULT_TIMEOUT })
+      .should('exist')
       .trigger('mousemove', { force: true })
       .click({ force: true });
 

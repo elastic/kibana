@@ -1,0 +1,9 @@
+{
+  "id": "cloud",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "cloud"],
+  "optionalPlugins": ["usageCollection"],
+  "server": true,
+  "ui": true
+}

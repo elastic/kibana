@@ -18,9 +18,9 @@
  */
 
 import moment from 'moment';
-import { TimeRange } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../persisted_log';
+import { TimeRange } from '../../../common';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;
@@ -37,7 +37,7 @@ export class TimeHistory {
   }
 
   add(time: TimeRange) {
-    if (!time) {
+    if (!time || !time.from || !time.to) {
       return;
     }
 

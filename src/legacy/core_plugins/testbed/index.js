@@ -19,12 +19,12 @@
 
 import { resolve } from 'path';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     id: 'testbed',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      hacks: [ 'plugins/testbed' ]
-    }
+      hacks: ['plugins/testbed'],
+    },
   });
 }

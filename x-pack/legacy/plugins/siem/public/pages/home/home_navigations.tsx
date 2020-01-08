@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as i18n from './translations';
-import { SiemPageName, SiemNavTab } from './types';
+
 import {
+  getDetectionEngineUrl,
   getOverviewUrl,
   getNetworkUrl,
   getTimelinesUrl,
   getHostsUrl,
 } from '../../components/link_to';
+import * as i18n from './translations';
+import { SiemPageName, SiemNavTab } from './types';
 
 export const navTabs: SiemNavTab = {
   [SiemPageName.overview]: {
@@ -33,6 +35,13 @@ export const navTabs: SiemNavTab = {
     href: getNetworkUrl(),
     disabled: false,
     urlKey: 'network',
+  },
+  [SiemPageName.detectionEngine]: {
+    id: SiemPageName.detectionEngine,
+    name: i18n.DETECTION_ENGINE,
+    href: getDetectionEngineUrl(),
+    disabled: false,
+    urlKey: 'detection-engine',
   },
   [SiemPageName.timelines]: {
     id: SiemPageName.timelines,

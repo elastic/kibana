@@ -18,7 +18,7 @@
  */
 
 import { defaults, isEqual, omit } from 'lodash';
-import { esFilters } from '../../../../common/es_query';
+import { esFilters } from '../../../../common';
 
 /**
  * Compare two filters to see if they match

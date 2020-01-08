@@ -18,7 +18,7 @@
  */
 
 import { filter, isEqual } from 'lodash';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../common';
 
 const isEnabled = (f: esFilters.Filter) => f && f.meta && !f.meta.disabled;
 
