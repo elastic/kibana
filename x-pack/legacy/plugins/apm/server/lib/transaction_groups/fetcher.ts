@@ -5,19 +5,20 @@
  */
 
 import {
+  SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
+import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
+import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters
 } from '../helpers/setup_request';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { SortOptions } from '../../../typings/elasticsearch/aggregations';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -50,6 +51,37 @@ export function transactionGroupsFetcher(
     { '@timestamp': { order: 'desc' as const } }
   ];
 
+  const transactionsAggregation = {
+    transactions: {
+      terms: {
+        ...projection.body.aggs.transactions.terms,
+        order: { sum: 'desc' as const },
+        size: config['xpack.apm.ui.transactionGroupBucketSize']
+      },
+      aggs: {
+        sample: { top_hits: { size: 1, sort } },
+        avg: { avg: { field: TRANSACTION_DURATION } },
+        p95: { percentiles: { field: TRANSACTION_DURATION, percents: [95] } },
+        sum: { sum: { field: TRANSACTION_DURATION } }
+      }
+    }
+  };
+
+  const servicesAggregation = {
+    services: {
+      terms: {
+        field: SERVICE_NAME,
+        size: config['xpack.apm.ui.transactionGroupBucketSize']
+      },
+      aggs: transactionsAggregation
+    }
+  };
+
+  const isTopTraces = options.type === 'top_traces';
+  if (isTopTraces) {
+    delete projection.body.aggs;
+  }
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -59,28 +91,7 @@ export function transactionGroupsFetcher(
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }
       },
-      aggs: {
-        transactions: {
-          terms: {
-            ...projection.body.aggs.transactions.terms,
-            order: { sum: 'desc' as const },
-            size: config['xpack.apm.ui.transactionGroupBucketSize']
-          },
-          aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                sort
-              }
-            },
-            avg: { avg: { field: TRANSACTION_DURATION } },
-            p95: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95] }
-            },
-            sum: { sum: { field: TRANSACTION_DURATION } }
-          }
-        }
-      }
+      aggs: isTopTraces ? servicesAggregation : transactionsAggregation
     }
   });
 

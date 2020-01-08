@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { flatten } from 'lodash';
 import { ESResponse } from './fetcher';
 
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
@@ -24,9 +25,24 @@ function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
   }));
 }
 
+const getBuckets = (response: ESResponse) => {
+  if (response.aggregations) {
+    const buckets =
+      'services' in response.aggregations
+        ? flatten(
+            response.aggregations.services.buckets.map(
+              bucket => bucket.transactions.buckets
+            )
+          )
+        : response.aggregations.transactions.buckets;
+    return buckets;
+  }
+  return [];
+};
+
 export type ITransactionGroup = ReturnType<typeof getTransactionGroup>;
 function getTransactionGroup(
-  bucket: Required<ESResponse>['aggregations']['transactions']['buckets'][0],
+  bucket: ReturnType<typeof getBuckets>[0],
   minutes: number
 ) {
   const averageResponseTime = bucket.avg.value;
@@ -53,7 +69,7 @@ export function transactionGroupsTransformer({
   start: number;
   end: number;
 }): ITransactionGroup[] {
-  const buckets = response.aggregations?.transactions.buckets || [];
+  const buckets = getBuckets(response);
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
   const transactionGroups = buckets.map(bucket =>
