@@ -9,7 +9,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 

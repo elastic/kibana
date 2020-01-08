@@ -66,7 +66,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Check that script that forwards URL fragment worked correctly.
         expect(dom.window.location.href).to.be(
-          '/api/security/oidc?authenticationResponseURI=https%3A%2F%2Fkibana.com%2Fapi%2Fsecurity%2Foidc%2Fimplicit%23token%3Dsome_token%26access_token%3Dsome_access_token'
+          '/api/security/oidc/callback?authenticationResponseURI=https%3A%2F%2Fkibana.com%2Fapi%2Fsecurity%2Foidc%2Fimplicit%23token%3Dsome_token%26access_token%3Dsome_access_token'
         );
       });
 
@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
 
         await supertest
           .get(
-            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
@@ -90,7 +90,7 @@ export default function({ getService }: FtrProviderContext) {
 
         await supertest
           .get(
-            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
@@ -106,7 +106,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(
-            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )

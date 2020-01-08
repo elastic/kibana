@@ -41,7 +41,7 @@ export interface ISessionTimeout {
   extend(url: string): void;
 }
 
-export class SessionTimeout {
+export class SessionTimeout implements ISessionTimeout {
   private channel?: BroadcastChannel<SessionInfo>;
   private sessionInfo?: SessionInfo;
   private fetchTimer?: number;

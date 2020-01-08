@@ -8,7 +8,6 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { FieldType } from 'ui/index_patterns';
 import { timefilter } from 'ui/timefilter';
 
 import {
@@ -22,7 +21,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES, esQuery, esKuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  IFieldType,
+  KBN_FIELD_TYPES,
+  esQuery,
+  esKuery,
+} from '../../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -107,7 +111,7 @@ export const Page: FC = () => {
 
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  const indexPatternFields: FieldType[] = currentIndexPattern.fields;
+  const indexPatternFields: IFieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach(field => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
