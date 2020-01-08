@@ -229,7 +229,9 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
+                const savedQueryFilters = savedQuery.attributes.filters || [];
+                const globalFilters = data.query.filterManager.getGlobalFilters();
+                data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -242,7 +244,7 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                data.query.filterManager.removeAll();
+                data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
