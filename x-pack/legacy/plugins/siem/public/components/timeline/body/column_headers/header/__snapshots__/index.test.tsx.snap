@@ -2,7 +2,7 @@
 
 exports[`Header renders correctly against snapshot 1`] = `
 <Fragment>
-  <HeaderContent
+  <Memo(HeaderContentComponent)
     header={
       Object {
         "columnHeaderType": "not-filtered",
@@ -35,7 +35,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         }
       }
     />
-  </HeaderContent>
+  </Memo(HeaderContentComponent)>
   <Filter
     header={
       Object {
