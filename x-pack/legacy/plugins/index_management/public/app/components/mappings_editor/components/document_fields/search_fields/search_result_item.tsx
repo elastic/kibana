@@ -43,15 +43,6 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
 
     return (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-        {/* {canHaveChildFields && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={addField} data-test-subj="addChildButton">
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
-                defaultMessage: 'Add child',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )} */}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.searchResult.editFieldButtonLabel', {

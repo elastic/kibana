@@ -5,40 +5,80 @@
  */
 import React from 'react';
 import VirtualList from 'react-tiny-virtual-list';
+import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SearchResult as SearchResultType } from '../../../types';
+import { useDispatch } from '../../../mappings_state';
+import { State } from '../../../reducer';
 import { SearchResultItem } from './search_result_item';
 
 interface Props {
   result: SearchResultType[];
+  documentFieldsState: State['documentFields'];
 }
 
 const ITEM_HEIGHT = 64;
 
-export const SearchResult = React.memo(({ result }: Props) => {
-  const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
+export const SearchResult = React.memo(
+  ({ result, documentFieldsState: { status, fieldToEdit } }: Props) => {
+    const dispatch = useDispatch();
+    const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
-  return (
-    <VirtualList
-      width="100%"
-      height={listHeight}
-      itemCount={result.length}
-      itemSize={ITEM_HEIGHT}
-      overscanCount={4}
-      renderItem={({ index, style }) => {
-        const item = result[index];
+    const clearSearch = () => {
+      dispatch({ type: 'search:update', value: '' });
+    };
 
-        return (
-          <div key={item.field.id} style={style}>
-            <SearchResultItem
-              item={item}
-              areActionButtonsVisible={true}
-              isDimmed={false}
-              isHighlighted={false}
+    return result.length === 0 ? (
+      <EuiEmptyPrompt
+        iconType="search"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPromptTitle"
+              defaultMessage="No fields found"
             />
-          </div>
-        );
-      }}
-    />
-  );
-});
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPromptDescription"
+              defaultMessage="No fields match the terms introduced."
+            />
+          </p>
+        }
+        actions={
+          <EuiButtonEmpty onClick={clearSearch}>
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPrompt.clearSearchButtonLabel"
+              defaultMessage="Clear search"
+            />
+          </EuiButtonEmpty>
+        }
+      />
+    ) : (
+      <VirtualList
+        width="100%"
+        height={listHeight}
+        itemCount={result.length}
+        itemSize={ITEM_HEIGHT}
+        overscanCount={4}
+        renderItem={({ index, style }) => {
+          const item = result[index];
+
+          return (
+            <div key={item.field.id} style={style}>
+              <SearchResultItem
+                item={item}
+                areActionButtonsVisible={status === 'idle'}
+                isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
+                isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
+              />
+            </div>
+          );
+        }}
+      />
+    );
+  }
+);

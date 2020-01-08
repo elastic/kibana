@@ -15,12 +15,10 @@ import { DocumentFieldsTreeEditor } from './fields_tree_editor';
 import { SearchResult } from './search_fields';
 
 export const DocumentFields = React.memo(() => {
-  const {
-    fields,
-    search,
-    documentFields: { status, fieldToEdit, editor: editorType },
-  } = useMappingsState();
+  const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
+
+  const { status, fieldToEdit, editor: editorType } = documentFields;
 
   const jsonEditorDefaultValue = useMemo(() => {
     if (editorType === 'json') {
@@ -51,7 +49,11 @@ export const DocumentFields = React.memo(() => {
     <>
       <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiSpacer size="m" />
-      {search.term.trim() !== '' ? <SearchResult result={search.result} /> : editor}
+      {search.term.trim() !== '' ? (
+        <SearchResult result={search.result} documentFieldsState={documentFields} />
+      ) : (
+        editor
+      )}
       {renderEditField()}
     </>
   );
