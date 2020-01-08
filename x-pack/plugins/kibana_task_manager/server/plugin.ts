@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { Observable, combineLatest, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { once } from 'lodash';
 import { TaskDictionary, TaskDefinition } from './task';
@@ -39,23 +39,22 @@ export class TaskManagerPlugin
     const logger = this.initContext.logger.get('kibanaTaskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
     const savedObjectsRepository = core.savedObjects.createInternalRepository(['task']);
+    const elasticsearch = core.elasticsearch.adminClient;
     return {
       config$,
       registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
-        combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
-          async ([config, elasticsearch]) => {
-            this.legacyTaskManager$.next(
-              createTaskManager(core, {
-                logger,
-                config,
-                elasticsearch,
-                savedObjectsRepository,
-                ...__LEGACY,
-              })
-            );
-            this.legacyTaskManager$.complete();
-          }
-        );
+        config$.subscribe(async config => {
+          this.legacyTaskManager$.next(
+            createTaskManager(core, {
+              logger,
+              config,
+              elasticsearch,
+              savedObjectsRepository,
+              ...__LEGACY,
+            })
+          );
+          this.legacyTaskManager$.complete();
+        });
         return this.taskManager;
       }),
       addMiddleware: (middleware: Middleware) => {
