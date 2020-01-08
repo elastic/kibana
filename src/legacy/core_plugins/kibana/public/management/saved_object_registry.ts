@@ -18,8 +18,17 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'ui/saved_objects';
+import { createSavedVisLoader } from '../visualize';
+import { createSavedDashboardLoader } from '../dashboard';
+import { createSavedSearchesService } from '../discover';
 
+/**
+ * This registry is used for the editing mode of Saved Searches, Visualizations,
+ * Dashboard and Time Lion saved objects.
+ */
 interface SavedObjectRegistryEntry {
   id: string;
   service: SavedObjectLoader;
@@ -39,3 +48,30 @@ export const savedObjectManagementRegistry = {
     return _.find(registry, { id });
   },
 };
+
+const services = {
+  savedObjectsClient: npStart.core.savedObjects.client,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+
+savedObjectManagementRegistry.register({
+  id: 'savedVisualizations',
+  service: createSavedVisLoader(services),
+  title: 'visualizations',
+});
+
+savedObjectManagementRegistry.register({
+  id: 'savedDashboards',
+  service: createSavedDashboardLoader(services),
+  title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
+    defaultMessage: 'dashboards',
+  }),
+});
+
+savedObjectManagementRegistry.register({
+  id: 'savedSearches',
+  service: createSavedSearchesService(services),
+  title: 'searches',
+});

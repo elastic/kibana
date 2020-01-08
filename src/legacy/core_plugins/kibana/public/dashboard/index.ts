@@ -21,7 +21,6 @@ import { npSetup, npStart, legacyChrome } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './saved_dashboard/saved_dashboard_register';
 import './dashboard_config';
 
 export * from './np_ready/dashboard_constants';
@@ -54,3 +53,5 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     navigation: npStart.plugins.navigation,
   });
 })();
+
+export { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
