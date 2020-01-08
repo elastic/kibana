@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './apps/index';
+export { useDateFormat, useTimeZone } from './use_ui_settings';

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as logPositionActions from './actions';
-import * as logPositionSelectors from './selectors';
+import { Plugin, PluginInitializerContext } from './plugin';
 
-export { logPositionActions, logPositionSelectors };
-export * from './reducer';
+export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
