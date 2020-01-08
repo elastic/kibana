@@ -17,17 +17,34 @@
  * under the License.
  */
 import React from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from 'ui/registry/doc_views';
 
-export function JsonCodeBlock({ hit }: DocViewRenderProps) {
-  const label = i18n.translate('kbnDocViews.json.codeEditorAriaLabel', {
-    defaultMessage: 'Read only JSON view of an elasticsearch document',
-  });
+export function DocViewTableRowIconNoMapping() {
+  const ariaLabel = i18n.translate(
+    'kbn.discover.docViews.table.noCachedMappingForThisFieldAriaLabel',
+    {
+      defaultMessage: 'Warning',
+    }
+  );
+  const tooltipContent = i18n.translate(
+    'kbn.discover.docViews.table.noCachedMappingForThisFieldTooltip',
+    {
+      defaultMessage:
+        'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
+    }
+  );
   return (
-    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
-      {JSON.stringify(hit, null, 2)}
-    </EuiCodeBlock>
+    <EuiIconTip
+      aria-label={ariaLabel}
+      color="warning"
+      content={tooltipContent}
+      iconProps={{
+        className: 'kbnDocViewer__warning',
+        'data-test-subj': 'noMappingWarning',
+      }}
+      size="s"
+      type="alert"
+    />
   );
 }

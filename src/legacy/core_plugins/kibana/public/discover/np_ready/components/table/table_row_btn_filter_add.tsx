@@ -17,26 +17,39 @@
  * under the License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface Props {
   onClick: () => void;
-  isCollapsed: boolean;
+  disabled: boolean;
 }
 
-export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
-  const label = i18n.translate('kbnDocViews.table.toggleFieldDetails', {
-    defaultMessage: 'Toggle field details',
-  });
+export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props) {
+  const tooltipContent = disabled ? (
+    <FormattedMessage
+      id="kbn.discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
+      defaultMessage="Unindexed fields can not be searched"
+    />
+  ) : (
+    <FormattedMessage
+      id="kbn.discover.docViews.table.filterForValueButtonTooltip"
+      defaultMessage="Filter for value"
+    />
+  );
+
   return (
-    <EuiToolTip content={label}>
+    <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-expanded={!isCollapsed}
-        aria-label={label}
-        data-test-subj="collapseBtn"
-        onClick={() => onClick()}
-        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        aria-label={i18n.translate('kbn.discover.docViews.table.filterForValueButtonAriaLabel', {
+          defaultMessage: 'Filter for value',
+        })}
+        className="kbnDocViewer__actionButton"
+        data-test-subj="addInclusiveFilterButton"
+        disabled={disabled}
+        onClick={onClick}
+        iconType={'magnifyWithPlus'}
         iconSize={'s'}
       />
     </EuiToolTip>

@@ -16,6 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
-import './views/table';
-import './views/json';
+export function JsonCodeBlock({ hit }: DocViewRenderProps) {
+  const label = i18n.translate('kbn.discover.docViews.json.codeEditorAriaLabel', {
+    defaultMessage: 'Read only JSON view of an elasticsearch document',
+  });
+  return (
+    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
+      {JSON.stringify(hit, null, 2)}
+    </EuiCodeBlock>
+  );
+}
