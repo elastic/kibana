@@ -11,7 +11,14 @@ import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, FieldOption } from './field
 import { INDEX_DEFAULT, STANDARD } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
 
-export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = ['object', 'nested', 'alias'];
+export const TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL: DataType[] = ['join'];
+
+export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = [
+  ...TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
+  'object',
+  'nested',
+  'alias',
+];
 
 export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(
   ([dataType, { label }]) => ({

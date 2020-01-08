@@ -42,7 +42,7 @@ export const DocumentFields = () => {
       return null;
     }
 
-    return <CreateField isCancelable={fields.length > 0} allFields={byId} />;
+    return <CreateField isCancelable={fields.length > 0} allFields={byId} isRootLevelField />;
   };
 
   const renderAddFieldButton = () => {

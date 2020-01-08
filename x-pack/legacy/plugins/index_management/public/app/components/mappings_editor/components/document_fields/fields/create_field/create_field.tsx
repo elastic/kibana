@@ -24,7 +24,12 @@ import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_im
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
 import { useDispatch } from '../../../../mappings_state';
-import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
+import {
+  fieldSerializer,
+  getFieldConfig,
+  filterTypesForMultiField,
+  filterTypesForNonRootFields,
+} from '../../../../lib';
 import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
 import { NameParameter, TypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
@@ -33,6 +38,7 @@ const formWrapper = (props: any) => <form {...props} />;
 
 interface Props {
   allFields: NormalizedFields['byId'];
+  isRootLevelField: boolean;
   isMultiField?: boolean;
   paddingLeft?: number;
   isCancelable?: boolean;
@@ -41,6 +47,7 @@ interface Props {
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
+  isRootLevelField,
   isMultiField,
   paddingLeft,
   isCancelable,
@@ -115,9 +122,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
           )
       : undefined;
 
-    if (isMultiField && hasSubTypes) {
-      // If it is a multi-field, we need to filter out non-allowed types
-      subTypeOptions = filterTypesForMultiField<SubType>(subTypeOptions!);
+    if (hasSubTypes) {
+      if (isMultiField) {
+        // If it is a multi-field, we need to filter out non-allowed types
+        subTypeOptions = filterTypesForMultiField<SubType>(subTypeOptions!);
+      } else if (isRootLevelField === false) {
+        subTypeOptions = filterTypesForNonRootFields(subTypeOptions!);
+      }
     }
 
     return {
@@ -151,6 +162,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
             {/* Field type */}
             <EuiFlexItem>
               <TypeParameter
+                isRootLevelField={isRootLevelField}
                 isMultiField={isMultiField}
                 onTypeChange={onTypeChange}
                 docLink={docLink}

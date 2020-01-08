@@ -8,18 +8,23 @@ import React from 'react';
 import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getFieldConfig, filterTypesForMultiField } from '../../../lib';
+import {
+  getFieldConfig,
+  filterTypesForMultiField,
+  filterTypesForNonRootFields,
+} from '../../../lib';
 import { UseField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {
   onTypeChange: (nextType: ComboBoxOption[]) => void;
+  isRootLevelField: boolean;
   isMultiField?: boolean | null;
   docLink?: string | undefined;
 }
 
-export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) => (
+export const TypeParameter = ({ onTypeChange, isMultiField, docLink, isRootLevelField }: Props) => (
   <UseField path="type" config={getFieldConfig('type')}>
     {typeField => {
       const error = typeField.getErrorsMessages();
@@ -54,7 +59,11 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) =>
             })}
             singleSelection={{ asPlainText: true }}
             options={
-              isMultiField ? filterTypesForMultiField(FIELD_TYPES_OPTIONS) : FIELD_TYPES_OPTIONS
+              isMultiField
+                ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                : isRootLevelField
+                ? FIELD_TYPES_OPTIONS
+                : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
             }
             selectedOptions={typeField.value as ComboBoxOption[]}
             onChange={onTypeChange}
