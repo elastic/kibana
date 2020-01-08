@@ -48,20 +48,14 @@ openssl pkcs12 -in elasticsearch.p12 -nodes -passin pass:"storepass" -passout pa
 # Extract the PEM-formatted X.509 certificate for the CA
 openssl pkcs12 -in elasticsearch.p12 -out ca.crt -cacerts -passin pass:"storepass" -passout pass:
 
-# Extract the PEM-formatted PKCS #8 encrypted private key for Elasticsearch
-openssl pkcs12 -in elasticsearch.p12 -out elasticsearch-encrypted.key -nocerts -passin pass:"storepass" -passout pass:"keypass"
-
-# Decrypt the private key for Elasticsearch and convert it to a PEM-formatted PKCS #1 private key
-openssl rsa -in elasticsearch-encrypted.key -out elasticsearch.key -passin pass:keypass
+# Extract the PEM-formatted PKCS #1 private key for Elasticsearch
+openssl pkcs12 -in elasticsearch.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out elasticsearch.key
 
 # Extract the PEM-formatted X.509 certificate for Elasticsearch
 openssl pkcs12 -in elasticsearch.p12 -out elasticsearch.crt -clcerts -passin pass:"storepass" -passout pass:
 
-# Extract the PEM-formatted PKCS #8 encrypted private key for Kibana
-openssl pkcs12 -in kibana.p12 -out kibana-encrypted.key -nocerts -passin pass:"storepass" -passout pass:"keypass"
-
-# Decrypt the private key for Kibana and convert it to a PEM-formatted PKCS #1 private key
-openssl rsa -in kibana-encrypted.key -out kibana.key -passin pass:keypass
+# Extract the PEM-formatted PKCS #1 private key for Kibana
+openssl pkcs12 -in kibana.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out kibana.key
 
 # Extract the PEM-formatted X.509 certificate for Kibana
 openssl pkcs12 -in kibana.p12 -out kibana.crt -clcerts -passin pass:"storepass" -passout pass:
