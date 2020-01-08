@@ -14,6 +14,7 @@
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
+/src/legacy/core_plugins/metrics/ @elastic/kibana-app
 /src/plugins/home/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
@@ -30,6 +31,7 @@
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/data/ @elastic/kibana-app-arch
+/src/legacy/core_plugins/elasticsearch/lib/create_proxy.js @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
@@ -146,6 +148,3 @@
 /x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/legacy/plugins/watcher/  @elastic/es-ui
-
-# Kibana TSVB external contractors
-/src/legacy/core_plugins/metrics/  @elastic/kibana-tsvb-external
