@@ -142,7 +142,7 @@ describe('params validation', () => {
     );
 
     expect(() => {
-      validateParams(actionType, { refresh: 'true' });
+      validateParams(actionType, { refresh: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [refresh]: expected value of type [boolean] but got [string]"`
     );
