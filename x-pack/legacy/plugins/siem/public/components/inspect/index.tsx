@@ -38,6 +38,8 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
     `}
 `;
 
+InspectButtonContainer.displayName = 'InspectButtonContainer';
+
 InspectButtonContainer.defaultProps = {
   show: true,
 };

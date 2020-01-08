@@ -75,12 +75,9 @@ describe('StatefulEventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`.${BUTTON_CLASS}`)
-        .first()
-        .exists()
-    ).toHaveStyleRule('opacity', 0);
+    expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '0', {
+      modifier: `.${BUTTON_CLASS}`,
+    });
   });
 
   test('it renders an opaque inspect button when it has mouse focus', async () => {
@@ -100,14 +97,8 @@ describe('StatefulEventsViewer', () => {
     await wait();
     wrapper.update();
 
-    wrapper.simulate('mouseenter');
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find(`.${BUTTON_CLASS}`)
-        .first()
-        .exists()
-    ).toHaveStyleRule('opacity', 1);
+    expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '1', {
+      modifier: `:hover .${BUTTON_CLASS}`,
+    });
   });
 });
