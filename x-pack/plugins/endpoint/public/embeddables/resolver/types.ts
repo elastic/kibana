@@ -124,6 +124,14 @@ export interface ProcessEvent {
   };
 }
 
+export interface IndexedProcessTree {
+  /**
+   * `id` can be undefined because `source_id` can be undefined. Root nodes have no known parent
+   */
+  idToChildren: Map<number | undefined, ProcessEvent[]>;
+  idToProcess: Map<number, ProcessEvent>;
+}
+
 export interface GraphableProcessesPidMaps {
   processesByUniqueParentPid: Map<number | undefined, ProcessEvent[]>;
   processesByUniquePid: Map<number, ProcessEvent>;
