@@ -41,19 +41,25 @@ export interface DiscoverIndexPatternProps {
  * Component allows you to select an index pattern in discovers side bar
  */
 export function DiscoverIndexPattern({
-  indexPatternList = [],
-  selectedIndexPattern = { id: '', attributes: { title: '' } } as SavedObject,
+  indexPatternList,
+  selectedIndexPattern,
   setIndexPattern,
 }: DiscoverIndexPatternProps) {
-  const options: IndexPatternRef[] = indexPatternList.map(entity => ({
+  const options: IndexPatternRef[] = (indexPatternList || []).map(entity => ({
     id: entity.id,
     title: entity.attributes!.title,
   }));
+  const { id: selectedId, attributes } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
-    id: selectedIndexPattern.id,
-    title: selectedIndexPattern.attributes!.title,
+    id: selectedId || '',
+    title: attributes ? attributes.title : '',
   });
+
+  if (!indexPatternList || indexPatternList.length === 0 || !selectedIndexPattern) {
+    // just in case, shouldn't happen
+    return null;
+  }
 
   return (
     <div className="indexPattern__container">
