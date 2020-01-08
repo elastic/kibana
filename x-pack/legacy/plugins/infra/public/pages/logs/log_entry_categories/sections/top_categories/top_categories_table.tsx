@@ -72,7 +72,7 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
         />
       );
     },
-    width: '200px',
+    width: '220px',
   },
   {
     field: 'regularExpression',
@@ -101,6 +101,6 @@ const createColumns = (timeRange: TimeRange): Array<EuiBasicTableColumn<LogEntry
     render: (maximumAnomalyScore: number) => (
       <AnomalySeverityIndicator anomalyScore={maximumAnomalyScore} />
     ),
-    width: '200px',
+    width: '160px',
   },
 ];
