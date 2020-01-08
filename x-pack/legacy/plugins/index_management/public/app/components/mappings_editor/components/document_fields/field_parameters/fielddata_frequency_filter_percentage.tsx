@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiDualRange } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiDualRange, EuiFormRow } from '@elastic/eui';
 
 import { FieldHook } from '../../../shared_imports';
 
@@ -20,13 +21,24 @@ export const FielddataFrequencyFilterPercentage = ({ min, max }: Props) => {
   };
 
   return (
-    <EuiDualRange
-      min={0}
-      max={100}
-      value={[min.value as number, max.value as number]}
-      onChange={onFrequencyFilterChange}
-      showInput
+    <EuiFormRow
       fullWidth
-    />
+      label={
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterPercentageFieldLabel"
+          defaultMessage="Percentage-based frequency range"
+        />
+      }
+    >
+      <EuiDualRange
+        min={0}
+        max={100}
+        value={[min.value as number, max.value as number]}
+        onChange={onFrequencyFilterChange}
+        showInput="inputWithPopover"
+        // @ts-ignore
+        append={'%'}
+      />
+    </EuiFormRow>
   );
 };
