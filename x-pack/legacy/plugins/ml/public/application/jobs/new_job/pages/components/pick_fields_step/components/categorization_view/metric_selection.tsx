@@ -16,8 +16,6 @@ import { ExamplesValidCallout } from './examples_valid_callout';
 import { CategoryExample } from '../../../../../common/results_loader';
 import { LoadingWrapper } from '../../../charts/loading_wrapper';
 
-const LOADING_PLACEHOLDER_HEIGHT = '200x';
-
 interface Props {
   setIsValid: (na: boolean) => void;
 }
@@ -92,8 +90,8 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       <EuiHorizontalRule />
       <CategorizationField />
       {loadingData === true && (
-        <LoadingWrapper height={LOADING_PLACEHOLDER_HEIGHT} hasData={false} loading={true}>
-          <div style={{ height: LOADING_PLACEHOLDER_HEIGHT }} />
+        <LoadingWrapper hasData={false} loading={true}>
+          <div />
         </LoadingWrapper>
       )}
       {fieldExamples !== null && loadingData === false && (

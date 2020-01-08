@@ -209,7 +209,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       id: c.key,
       count: c.doc_count,
     }));
-    return catCounts;
+    return catCounts || [];
   }
 
   async function getCategories(

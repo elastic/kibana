@@ -19,7 +19,12 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../index';
+import {
+  JobCreatorType,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isCategorizationJobCreator,
+} from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
@@ -251,6 +256,8 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType) {
     jobType = JOB_TYPE.MULTI_METRIC;
   } else if (isPopulationJobCreator(jobCreator)) {
     jobType = JOB_TYPE.POPULATION;
+  } else if (isCategorizationJobCreator(jobCreator)) {
+    jobType = JOB_TYPE.CATEGORIZATION;
   }
 
   window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
