@@ -24,6 +24,7 @@ import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
+import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
 import { CapabilitiesService, Capabilities } from './capabilities';
@@ -55,6 +56,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  overlays: OverlayStart;
 }
 
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
@@ -175,7 +177,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -198,7 +200,7 @@ export class ApplicationService {
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        if (await this.shouldNavigateTo(appId)) {
+        if (await this.shouldNavigateTo(appId, overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
           this.currentAppId$.next(appId);
@@ -224,14 +226,15 @@ export class ApplicationService {
     };
   }
 
-  private async shouldNavigateTo(_appId: string): Promise<boolean> {
+  private async shouldNavigateTo(_appId: string, overlays: OverlayStart): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
       return true;
     }
     const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
     if (isConfirmAction(action)) {
-      const confirmed = window.confirm(action.text);
+      const confirmed = await overlays.openConfirm(action.text, { title: action.title });
+      // const confirmed = window.confirm(action.text);
       if (!confirmed) {
         return false;
       }

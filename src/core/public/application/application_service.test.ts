@@ -25,6 +25,7 @@ import { shallow } from 'enzyme';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
@@ -44,7 +45,7 @@ describe('#setup()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -156,7 +157,7 @@ describe('#start()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -454,7 +455,7 @@ describe('#stop()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 

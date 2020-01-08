@@ -763,6 +763,8 @@ export interface OverlayRef {
 export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
+    // (undocumented)
+    openConfirm: OverlayModalStart['openConfirm'];
     // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
