@@ -4,13 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
-
-export const useIsContainerResizing = () => {
-  const [isResizing, setIsResizing] = useState(false);
-
-  return {
-    isResizing,
-    setIsResizing,
-  };
-};
+export const CASE_SAVED_OBJECT = 'case-workflow';
+export const CASE_COMMENT_SAVED_OBJECT = 'case-workflow-comment';
