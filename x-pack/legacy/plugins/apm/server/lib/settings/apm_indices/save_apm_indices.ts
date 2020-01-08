@@ -13,14 +13,23 @@ import { APMRequestHandlerContext } from '../../../routes/typings';
 
 export async function saveApmIndices(
   context: APMRequestHandlerContext,
-  apmIndicesSavedObject: Partial<ApmIndicesConfig>
+  apmIndices: Partial<ApmIndicesConfig>
 ) {
   return await context.core.savedObjects.client.create(
     APM_INDICES_SAVED_OBJECT_TYPE,
-    apmIndicesSavedObject,
+    removeEmpty(apmIndices),
     {
       id: APM_INDICES_SAVED_OBJECT_ID,
       overwrite: true
     }
+  );
+}
+
+// remove empty/undefined values
+function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
+  return Object.fromEntries(
+    Object.entries(apmIndices)
+      .map(([key, value]) => [key, value?.trim()])
+      .filter(([key, value]) => !!value)
   );
 }

@@ -125,14 +125,14 @@ export default function({ getService }) {
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
         await supertest
-          .get(`/api/security/oidc?code=thisisthecode&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .expect(401);
       });
 
       it('should fail if state is not matching', async () => {
         await supertest
-          .get(`/api/security/oidc?code=thisisthecode&state=someothervalue`)
+          .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
@@ -140,7 +140,7 @@ export default function({ getService }) {
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code1&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -195,7 +195,7 @@ export default function({ getService }) {
           .expect(200);
 
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code2&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code2&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -245,7 +245,7 @@ export default function({ getService }) {
           .expect(200);
 
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code1&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
@@ -320,7 +320,7 @@ export default function({ getService }) {
           .expect(200);
 
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code1&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -409,7 +409,7 @@ export default function({ getService }) {
           .expect(200);
 
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code1&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -499,7 +499,7 @@ export default function({ getService }) {
           .expect(200);
 
         const oidcAuthenticationResponse = await supertest
-          .get(`/api/security/oidc?code=code1&state=${stateAndNonce.state}`)
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);

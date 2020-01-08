@@ -6,13 +6,11 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
+
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 
-jest.mock('ui/documentation_links', () => ({
-  ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
-  DOC_LINK_VERSION: 'current',
-}));
+jest.mock('../../lib/kibana');
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {

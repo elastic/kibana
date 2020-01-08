@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import {
@@ -17,18 +17,10 @@ import {
   TestProviders,
 } from '../../../../mock';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
-import { mockUiSettings } from '../../../../mock/ui_settings';
-import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

@@ -7,13 +7,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { VectorStyle } from '../../vector_style';
-import { getColorRampCenterColor } from '../../../color_utils';
+import { VECTOR_STYLES } from '../../vector_style_defaults';
 
 export class VectorIcon extends Component {
   state = {
@@ -48,16 +46,16 @@ export class VectorIcon extends Component {
 
     if (this.state.isLinesOnly) {
       const style = {
-        stroke: extractColorFromStyleProperty(this.props.lineColor, 'grey'),
+        stroke: this.props.getColorForProperty(VECTOR_STYLES.LINE_COLOR, true),
         strokeWidth: '4px',
       };
       return <LineIcon style={style} />;
     }
 
     const style = {
-      stroke: extractColorFromStyleProperty(this.props.lineColor, 'none'),
+      stroke: this.props.getColorForProperty(VECTOR_STYLES.LINE_COLOR, false),
       strokeWidth: '1px',
-      fill: extractColorFromStyleProperty(this.props.fillColor, 'grey'),
+      fill: this.props.getColorForProperty(VECTOR_STYLES.FILL_COLOR, false),
     };
 
     if (!this.state.isPointsOnly) {
@@ -79,45 +77,8 @@ export class VectorIcon extends Component {
   }
 }
 
-function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
-  if (!colorStyleProperty) {
-    return defaultColor;
-  }
-
-  if (colorStyleProperty.type === VectorStyle.STYLE_TYPE.STATIC) {
-    return colorStyleProperty.options.color;
-  }
-
-  // Do not use dynamic color unless configuration is complete
-  if (!colorStyleProperty.options.field || !colorStyleProperty.options.field.name) {
-    return defaultColor;
-  }
-
-  // return middle of gradient for dynamic style property
-
-  if (colorStyleProperty.options.useCustomColorRamp) {
-    if (
-      !colorStyleProperty.options.customColorRamp ||
-      !colorStyleProperty.options.customColorRamp.length
-    ) {
-      return defaultColor;
-    }
-    // favor the lowest color in even arrays
-    const middleIndex = Math.floor((colorStyleProperty.options.customColorRamp.length - 1) / 2);
-    return colorStyleProperty.options.customColorRamp[middleIndex].color;
-  }
-
-  return getColorRampCenterColor(colorStyleProperty.options.color);
-}
-
-const colorStylePropertyShape = PropTypes.shape({
-  type: PropTypes.string.isRequired,
-  options: PropTypes.oneOfType([dynamicColorShape, staticColorShape]).isRequired,
-});
-
 VectorIcon.propTypes = {
-  fillColor: colorStylePropertyShape,
-  lineColor: colorStylePropertyShape,
+  getColorForProperty: PropTypes.func.isRequired,
   symbolId: PropTypes.string,
   loadIsPointsOnly: PropTypes.func.isRequired,
   loadIsLinesOnly: PropTypes.func.isRequired,

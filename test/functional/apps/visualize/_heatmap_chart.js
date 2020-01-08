@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');
@@ -36,20 +36,20 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-axis');
+      await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
-      await PageObjects.visualize.selectField('@timestamp');
+      await PageObjects.visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.clickGo();
     });
 
     it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function() {
@@ -87,16 +87,16 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should show 4 color ranges as default colorNumbers param', async function() {
-      const legends = await PageObjects.visualize.getLegendEntries();
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
       expect(legends).to.eql(expectedLegends);
     });
 
     it('should show 6 color ranges if changed on options', async function() {
-      await PageObjects.visualize.clickOptionsTab();
-      await PageObjects.visualize.changeHeatmapColorNumbers(6);
-      await PageObjects.visualize.clickGo();
-      const legends = await PageObjects.visualize.getLegendEntries();
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.changeHeatmapColorNumbers(6);
+      await PageObjects.visEditor.clickGo();
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 267',
         '267 - 534',
@@ -108,23 +108,23 @@ export default function({ getService, getPageObjects }) {
       expect(legends).to.eql(expectedLegends);
     });
     it('should show 6 custom color ranges', async function() {
-      await PageObjects.visualize.clickOptionsTab();
-      await PageObjects.visualize.clickEnableCustomRanges();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.clickEnableCustomRanges();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
 
       log.debug('customize 2 last ranges');
-      await PageObjects.visualize.setCustomRangeByIndex(6, '650', '720');
-      await PageObjects.visualize.setCustomRangeByIndex(7, '800', '905');
+      await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
+      await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
 
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      await PageObjects.visualize.clickGo();
-      const legends = await PageObjects.visualize.getLegendEntries();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.visEditor.clickGo();
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 100',
         '100 - 200',

@@ -1,0 +1,17 @@
+{
+  "rule_id": "ac394dec-67e8-417f-bb06-ae0bd75556b0",
+  "risk_score": 50,
+  "description": "Generic notice type for notice-worthy signature matches.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Signatures::Sensitive_Signature",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Signatures::Sensitive_Signature\" or rule.name: \"Signatures::Sensitive_Signature\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

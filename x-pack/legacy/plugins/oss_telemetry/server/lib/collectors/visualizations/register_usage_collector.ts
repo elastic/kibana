@@ -5,7 +5,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/plugin';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(

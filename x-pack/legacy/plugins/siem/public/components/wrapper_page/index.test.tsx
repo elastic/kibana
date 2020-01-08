@@ -9,10 +9,7 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { WrapperPage } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('WrapperPage', () => {
   test('it renders', () => {

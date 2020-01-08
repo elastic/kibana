@@ -8,16 +8,12 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { Embeddable } from './embeddable';
@@ -28,6 +24,7 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { useKibana, useUiSetting$ } from '../../lib/kibana';
 import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
@@ -96,7 +93,7 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
   const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
-  const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
+  const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -104,8 +101,7 @@ export const EmbeddedMapComponent = ({
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createPortalNode(), []);
 
-  const plugins = useKibanaPlugins();
-  const core = useKibanaCore();
+  const { services } = useKibana();
 
   // Initial Load useEffect
   useEffect(() => {
@@ -131,7 +127,7 @@ export const EmbeddedMapComponent = ({
           endDate,
           setQuery,
           portalNode,
-          plugins.embeddable
+          services.embeddable
         );
         if (isSubscribed) {
           setEmbeddable(embeddableObject);
@@ -180,7 +176,11 @@ export const EmbeddedMapComponent = ({
   }, [startDate, endDate]);
 
   const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi {...props} savedObjects={core.savedObjects} uiSettings={core.uiSettings} />
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={services.savedObjects}
+      uiSettings={services.uiSettings}
+    />
   );
 
   return isError ? null : (
@@ -188,7 +188,7 @@ export const EmbeddedMapComponent = ({
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
+            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
             target="_blank"
           >
             {i18n.EMBEDDABLE_HEADER_HELP}
@@ -205,12 +205,12 @@ export const EmbeddedMapComponent = ({
           <EmbeddablePanel
             data-test-subj="embeddable-panel"
             embeddable={embeddable}
-            getActions={plugins.uiActions.getTriggerCompatibleActions}
+            getActions={services.uiActions.getTriggerCompatibleActions}
             getEmbeddableFactory={start.getEmbeddableFactory}
             getAllEmbeddableFactories={start.getEmbeddableFactories}
-            notifications={core.notifications}
-            overlays={core.overlays}
-            inspector={plugins.inspector}
+            notifications={services.notifications}
+            overlays={services.overlays}
+            inspector={services.inspector}
             SavedObjectFinder={SavedObjectFinder}
           />
         ) : !isLoading && isIndexError ? (

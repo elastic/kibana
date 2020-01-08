@@ -27,8 +27,6 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
     <EuiFieldNumber
       aria-label="Enter numeric value for condition"
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Enter value"
       value={210}
@@ -78,8 +76,6 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
     <EuiFieldNumber
       aria-label="Enter numeric value for condition"
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Enter value"
       value={208.8}
@@ -129,8 +125,6 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
     <EuiFieldNumber
       aria-label="Enter numeric value for condition"
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Enter value"
       value={1.23}

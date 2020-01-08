@@ -1,0 +1,17 @@
+{
+  "rule_id": "4b63cf13-9043-41e3-84ec-6e39eb0d407e",
+  "risk_score": 50,
+  "description": "Splunk - Detect PsExec With accepteula Flag",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Detect PsExec With accepteula Flag",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:PsExec.exe and process.args:\"-accepteula\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

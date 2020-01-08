@@ -20,7 +20,7 @@
 import { createIndexMap } from './build_index_map';
 import { ObjectToConfigAdapter } from '../../../config';
 import { SavedObjectsSchema } from '../../schema';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 const config = (new ObjectToConfigAdapter({}) as unknown) as LegacyConfig;
 

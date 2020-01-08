@@ -9,10 +9,9 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
 import { HeaderGlobal } from './index';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('ui/new_platform');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar

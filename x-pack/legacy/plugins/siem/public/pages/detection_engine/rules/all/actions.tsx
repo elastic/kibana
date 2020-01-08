@@ -22,13 +22,9 @@ export const editRuleAction = (rule: Rule, history: H.History) => {
 
 export const runRuleAction = () => {};
 
-export const duplicateRuleAction = async (
-  rule: Rule,
-  dispatch: React.Dispatch<Action>,
-  kbnVersion: string
-) => {
+export const duplicateRuleAction = async (rule: Rule, dispatch: React.Dispatch<Action>) => {
   dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
-  const duplicatedRule = await duplicateRules({ rules: [rule], kbnVersion });
+  const duplicatedRule = await duplicateRules({ rules: [rule] });
   dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
   dispatch({ type: 'updateRules', rules: duplicatedRule, appendRuleId: rule.id });
 };
@@ -37,25 +33,20 @@ export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<
   dispatch({ type: 'setExportPayload', exportPayload: rules });
 };
 
-export const deleteRulesAction = async (
-  ids: string[],
-  dispatch: React.Dispatch<Action>,
-  kbnVersion: string
-) => {
+export const deleteRulesAction = async (ids: string[], dispatch: React.Dispatch<Action>) => {
   dispatch({ type: 'updateLoading', ids, isLoading: true });
-  const deletedRules = await deleteRules({ ids, kbnVersion });
+  const deletedRules = await deleteRules({ ids });
   dispatch({ type: 'deleteRules', rules: deletedRules });
 };
 
 export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
-  dispatch: React.Dispatch<Action>,
-  kbnVersion: string
+  dispatch: React.Dispatch<Action>
 ) => {
   try {
     dispatch({ type: 'updateLoading', ids, isLoading: true });
-    const updatedRules = await enableRules({ ids, enabled, kbnVersion });
+    const updatedRules = await enableRules({ ids, enabled });
     dispatch({ type: 'updateRules', rules: updatedRules });
   } catch {
     // TODO Add error toast support to actions (and @throw jsdoc to api calls)
