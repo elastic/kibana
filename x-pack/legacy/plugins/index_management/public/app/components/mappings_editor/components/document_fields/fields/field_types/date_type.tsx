@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field } from '../../../../shared_imports';
 
 import {
   StoreParameter,
@@ -21,7 +20,7 @@ import {
   FormatParameter,
   LocaleParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
