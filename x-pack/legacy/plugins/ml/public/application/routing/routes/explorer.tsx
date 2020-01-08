@@ -149,7 +149,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       selectedJobs: explorerState.selectedJobs,
       swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
       swimlaneLimit: explorerState.swimlaneLimit,
-      tableInterval,
+      tableInterval: tableInterval.val,
       tableSeverity: tableSeverity.val,
       viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
     }) ||

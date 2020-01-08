@@ -72,7 +72,7 @@ export interface LoadExplorerDataConfig {
   selectedJobs: ExplorerJob[];
   swimlaneBucketInterval: any;
   swimlaneLimit: number;
-  tableInterval: any;
+  tableInterval: string;
   tableSeverity: number;
   viewBySwimlaneFieldName: string;
 }
