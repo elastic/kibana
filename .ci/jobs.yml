@@ -1,0 +1,38 @@
+# This file is needed by functionalTests:ensureAllTestsInCiGroup for the list of ciGroups. That must be changed before this file can be removed
+
+JOB:
+  - kibana-intake
+  - x-pack-intake
+  - kibana-firefoxSmoke
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  - kibana-accessibility
+  - kibana-visualRegression
+
+  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+  - x-pack-firefoxSmoke
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
+  - x-pack-accessibility
+  - x-pack-visualRegression
+
+# `~` is yaml for `null`
+exclude: ~
