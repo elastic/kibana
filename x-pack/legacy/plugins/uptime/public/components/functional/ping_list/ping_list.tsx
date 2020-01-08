@@ -38,7 +38,7 @@ interface PingListQueryResult {
 }
 
 interface PingListProps {
-  onSelectedStatusChange: (status: string | null) => void;
+  onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
   onPageCountChange: (itemCount: number) => void;
   pageSize: number;
@@ -260,7 +260,7 @@ export const PingListComponent = ({
                           if (typeof selectedOptions[0].value === 'string') {
                             onSelectedStatusChange(
                               // @ts-ignore it's definitely a string
-                              selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                              selectedOptions[0].value !== '' ? selectedOptions[0].value : undefined
                             );
                           }
                         }}
