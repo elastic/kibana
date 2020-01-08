@@ -126,7 +126,6 @@ exports[`ApiKeysGridPage renders permission denied if user does not have require
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
       >
         <EuiPanel
           className="euiPageContent euiPageContent--horizontalCenter"

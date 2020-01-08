@@ -277,7 +277,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
-      const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega'];
+      const visTypesWithoutInspector = [
+        'markdown',
+        'input_control_vis',
+        'metrics',
+        'vega',
+        'timelion',
+      ];
       if (visTypesWithoutInspector.includes(this.vis.type.name)) {
         return false;
       }

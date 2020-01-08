@@ -20,7 +20,7 @@
 import { TimeIntervalParam } from 'ui/vis/editors/config/types';
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 import { leastCommonMultiple } from '../../../utils/math';
 import { parseEsInterval } from '../../../../../core_plugins/data/public';
 import { leastCommonInterval } from '../../lib/least_common_interval';

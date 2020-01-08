@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './types';
+import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 
 describe('getUnusedConfigKeys', () => {
@@ -26,7 +25,7 @@ describe('getUnusedConfigKeys', () => {
     jest.resetAllMocks();
   });
 
-  const getConfig = (values: Record<string, any> = {}): LegacyConfig =>
+  const getConfig = (values: LegacyVars = {}): LegacyConfig =>
     ({
       get: () => values as any,
     } as LegacyConfig);

@@ -13,7 +13,7 @@ export interface Document {
   type?: string;
   visualizationType: string | null;
   title: string;
-  expression: string;
+  expression: string | null;
   state: {
     datasourceMetaData: {
       filterableIndexPatterns: Array<{ id: string; title: string }>;

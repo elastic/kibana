@@ -95,14 +95,14 @@ export class Shard extends React.Component {
     const classification = classes + ' ' + shard.shard;
 
     let shardUi = <EuiBadge color={color}>{shard.shard}</EuiBadge>;
-
+    const tooltipContent =
+      shard.tooltip_message ||
+      i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
+        defaultMessage: 'Shard',
+      });
     if (this.state.tooltipVisible) {
       shardUi = (
-        <EuiToolTip
-          content={this.props.shard.tooltip_message}
-          position="bottom"
-          data-test-subj="shardTooltip"
-        >
+        <EuiToolTip content={tooltipContent} position="bottom" data-test-subj="shardTooltip">
           <p>{shardUi}</p>
         </EuiToolTip>
       );
@@ -114,7 +114,7 @@ export class Shard extends React.Component {
         onMouseEnter={this.toggle}
         onMouseLeave={this.toggle}
         className={classes}
-        data-shard-tooltip={this.props.shard.tooltip_message}
+        data-shard-tooltip={tooltipContent}
         data-shard-classification={classification}
         data-test-subj="shardIcon"
       >
