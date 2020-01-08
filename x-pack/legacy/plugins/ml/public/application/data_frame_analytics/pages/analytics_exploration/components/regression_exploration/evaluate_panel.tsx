@@ -258,7 +258,12 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             color="primary"
             href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
           >
-            Regression evaluation docs
+            {i18n.translate(
+              'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
+              {
+                defaultMessage: 'Regression evaluation docs ',
+              }
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
