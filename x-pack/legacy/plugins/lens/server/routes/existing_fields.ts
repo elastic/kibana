@@ -11,10 +11,7 @@ import _ from 'lodash';
 import { IScopedClusterClient } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
-import {
-  FieldDescriptor,
-  IndexPatternsService,
-} from '../../../../../../src/legacy/server/index_patterns/service';
+import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 
 /**
  * The number of docs to sample to determine field empty status.
@@ -42,11 +39,11 @@ export async function existingFieldsRoute(setup: CoreSetup) {
     async (context, req, res) => {
       const { indexPatternTitle } = req.params;
       const requestClient = context.core.elasticsearch.dataClient;
-      const indexPatternsService = new IndexPatternsService(requestClient.callAsCurrentUser);
+      const indexPatternsFetcher = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
       const { fromDate, toDate, timeFieldName } = req.query;
 
       try {
-        const fields = await indexPatternsService.getFieldsForWildcard({
+        const fields = await indexPatternsFetcher.getFieldsForWildcard({
           pattern: indexPatternTitle,
           // TODO: Pull this from kibana advanced settings
           metaFields: ['_source', '_id', '_type', '_index', '_score'],

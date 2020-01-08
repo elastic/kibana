@@ -7,6 +7,7 @@
 import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 import moment from 'moment-timezone';
 
+// FAILING: https://github.com/elastic/kibana/issues/50005
 describe('getTimezoneOffsetInMs', () => {
   describe('when no default timezone is set', () => {
     it('guesses the timezone', () => {
@@ -33,7 +34,11 @@ describe('getTimezoneOffsetInMs', () => {
     });
 
     it('returns the time in milliseconds', () => {
-      expect(getTimezoneOffsetInMs(Date.now())).toEqual(21600000);
+      const now = Date.now();
+      // get the expected offset from moment to prevent any issues with DST
+      const expectedOffset =
+        moment.tz.zone('America/Denver')!.parse(now) * 60000;
+      expect(getTimezoneOffsetInMs(Date.now())).toEqual(expectedOffset);
     });
   });
 });

@@ -26,7 +26,7 @@ export default new Chainable('trim', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'start',
@@ -41,7 +41,7 @@ export default new Chainable('trim', {
       help: i18n.translate('timelion.help.functions.trim.args.endHelpText', {
         defaultMessage: 'Buckets to trim from the end of the series. Default: 1',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.trimHelpText', {
     defaultMessage:
@@ -52,17 +52,16 @@ export default new Chainable('trim', {
     if (config.start == null) config.start = 1;
     if (config.end == null) config.end = 1;
 
-    return alter(args, function (eachSeries) {
-
-      _.times(config.start, function (i) {
+    return alter(args, function(eachSeries) {
+      _.times(config.start, function(i) {
         eachSeries.data[i][1] = null;
       });
 
-      _.times(config.end, function (i) {
-        eachSeries.data[(eachSeries.data.length - 1) - i][1] = null;
+      _.times(config.end, function(i) {
+        eachSeries.data[eachSeries.data.length - 1 - i][1] = null;
       });
 
       return eachSeries;
     });
-  }
+  },
 });

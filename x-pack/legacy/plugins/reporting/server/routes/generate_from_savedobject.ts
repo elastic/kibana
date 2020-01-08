@@ -38,7 +38,7 @@ export function registerGenerateCsvFromSavedObject(
        * 3. Ensure that details for a queued job were returned
        */
 
-      let result: QueuedJobPayload;
+      let result: QueuedJobPayload<any>;
       try {
         const jobParams = getJobParamsFromRequest(request, { isImmediate: false });
         result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);

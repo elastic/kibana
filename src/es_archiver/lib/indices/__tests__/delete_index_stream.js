@@ -19,20 +19,11 @@
 
 import sinon from 'sinon';
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-} from '../../../../legacy/utils';
+import { createListStream, createPromiseFromStreams } from '../../../../legacy/utils';
 
-import {
-  createDeleteIndexStream,
-} from '../delete_index_stream';
+import { createDeleteIndexStream } from '../delete_index_stream';
 
-import {
-  createStubStats,
-  createStubClient,
-  createStubIndexRecord
-} from './stubs';
+import { createStubStats, createStubClient, createStubIndexRecord } from './stubs';
 
 describe('esArchiver: createDeleteIndexStream()', () => {
   it('deletes the index without checking if it exists', async () => {
@@ -40,9 +31,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
     const client = createStubClient([]);
 
     await createPromiseFromStreams([
-      createListStream([
-        createStubIndexRecord('index1')
-      ]),
+      createListStream([createStubIndexRecord('index1')]),
       createDeleteIndexStream(client, stats),
     ]);
 
@@ -57,9 +46,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
     const client = createStubClient(['index1']);
 
     await createPromiseFromStreams([
-      createListStream([
-        createStubIndexRecord('index1')
-      ]),
+      createListStream([createStubIndexRecord('index1')]),
       createDeleteIndexStream(client, stats),
     ]);
 

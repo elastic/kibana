@@ -35,7 +35,7 @@ const registerHandlers = () => {
     1: 'create',
     2: 'update',
     3: 'get',
-    4: 'delete'
+    4: 'delete',
   };
 
   const server = {
@@ -64,10 +64,10 @@ let requestResponseQueue = [];
  * @param {*} response The response to return
  */
 const setHttpRequestResponse = (error, response) => {
-  requestResponseQueue.push ({ error, response });
+  requestResponseQueue.push({ error, response });
 };
 
-const resetHttpRequestResponses = () => requestResponseQueue = [];
+const resetHttpRequestResponses = () => (requestResponseQueue = []);
 
 const getNextResponseFromQueue = () => {
   if (!requestResponseQueue.length) {
@@ -120,7 +120,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       const response = await routeHandler({
         payload: {
           id: 'some-id',
-          foo: 'bar'
+          foo: 'bar',
         },
       }).catch(err => err); // return the error
 
@@ -136,7 +136,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       const response = await routeHandler({
         payload: {
           id: 'some-id',
-          foo: 'bar'
+          foo: 'bar',
         },
       });
 
@@ -156,7 +156,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
         params: { id: 'foo' },
         payload: {
           remoteCluster: 'bar1',
-          leaderIndexPatterns: [ 'bar2' ],
+          leaderIndexPatterns: ['bar2'],
           followIndexPattern: 'bar3',
         },
       };
@@ -167,7 +167,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
         id: 'foo',
         body: {
           remote_cluster: 'bar1',
-          leader_index_patterns: [ 'bar2' ],
+          leader_index_patterns: ['bar2'],
           follow_index_pattern: 'bar3',
         },
       });

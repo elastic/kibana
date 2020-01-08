@@ -20,26 +20,34 @@ export async function searchConfigurations({
   environment?: string;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
-
-  // sorting order
-  // 1. exact match: service.name AND service.environment (eg. opbeans-node / production)
-  // 2. Partial match: service.name and no service.environment (eg. opbeans-node / All)
-  // 3. Partial match: service.environment and no service.name (eg. All / production)
-  // 4. Catch all: no service.name and no service.environment (eg. All / All)
-
+  const { internalClient, indices } = setup;
   const environmentFilter = environment
-    ? [{ term: { [SERVICE_ENVIRONMENT]: { value: environment } } }]
+    ? [
+        {
+          constant_score: {
+            filter: { term: { [SERVICE_ENVIRONMENT]: { value: environment } } },
+            boost: 1
+          }
+        }
+      ]
     : [];
 
+  // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring)
+  // Additionally a boost has been added to service.name to ensure it scores higher
+  // if there is tie between a config with a matching service.name and a config with a matching environment
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex'],
+    index: indices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: {
           minimum_should_match: 2,
           should: [
-            { term: { [SERVICE_NAME]: { value: serviceName } } },
+            {
+              constant_score: {
+                filter: { term: { [SERVICE_NAME]: { value: serviceName } } },
+                boost: 2
+              }
+            },
             ...environmentFilter,
             { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
             { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }
@@ -49,34 +57,9 @@ export async function searchConfigurations({
     }
   };
 
-  const resp = await client.search<AgentConfiguration, typeof params>(params);
-  const { hits } = resp.hits;
-
-  const exactMatch = hits.find(
-    hit =>
-      hit._source.service.name === serviceName &&
-      hit._source.service.environment === environment
+  const resp = await internalClient.search<AgentConfiguration, typeof params>(
+    params
   );
-
-  if (exactMatch) {
-    return exactMatch;
-  }
-
-  const matchWithServiceName = hits.find(
-    hit => hit._source.service.name === serviceName
-  );
-
-  if (matchWithServiceName) {
-    return matchWithServiceName;
-  }
-
-  const matchWithEnvironment = hits.find(
-    hit => hit._source.service.environment === environment
-  );
-
-  if (matchWithEnvironment) {
-    return matchWithEnvironment;
-  }
 
   return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
 }

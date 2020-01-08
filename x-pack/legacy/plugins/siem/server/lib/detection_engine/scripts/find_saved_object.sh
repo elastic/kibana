@@ -18,5 +18,5 @@ TYPE=${1:-alert}
 # https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html#saved-objects-api-find-request
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}/api/saved_objects/_find?type=$TYPE \
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/saved_objects/_find?type=$TYPE \
   | jq .

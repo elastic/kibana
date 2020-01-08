@@ -21,21 +21,21 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { buildPointSeriesData } from '../point_series';
 
-describe('pointSeriesChartDataFromTable', function () {
+describe('pointSeriesChartDataFromTable', function() {
   this.slow(1000);
 
-  it('handles a table with just a count', function () {
+  it('handles a table with just a count', function() {
     const table = {
       columns: [{ id: '0' }],
-      rows: [
-        { '0': 100 }
-      ],
+      rows: [{ '0': 100 }],
     };
     const chartData = buildPointSeriesData(table, {
-      y: [{
-        accessor: 0,
-        params: {},
-      }]
+      y: [
+        {
+          accessor: 0,
+          params: {},
+        },
+      ],
     });
 
     expect(chartData).to.be.an('object');
@@ -48,9 +48,12 @@ describe('pointSeriesChartDataFromTable', function () {
       .and.have.property('y', 100);
   });
 
-  it('handles a table with x and y column', function () {
+  it('handles a table with x and y column', function() {
     const table = {
-      columns: [{ id: '0', name: 'x' }, { id: '1', name: 'Count' }],
+      columns: [
+        { id: '0', name: 'x' },
+        { id: '1', name: 'Count' },
+      ],
       rows: [
         { '0': 1, '1': 200 },
         { '0': 2, '1': 200 },
@@ -73,7 +76,7 @@ describe('pointSeriesChartDataFromTable', function () {
     expect(series.values).to.have.length(3);
   });
 
-  it('handles a table with an x and two y aspects', function () {
+  it('handles a table with an x and two y aspects', function() {
     const table = {
       columns: [{ id: '0' }, { id: '1', name: 'Count-0' }, { id: '2', name: 'Count-1' }],
       rows: [
@@ -85,26 +88,30 @@ describe('pointSeriesChartDataFromTable', function () {
 
     const dimensions = {
       x: [{ accessor: 0, params: {} }],
-      y: [{ accessor: 1, params: {} }, { accessor: 2, params: {} }],
+      y: [
+        { accessor: 1, params: {} },
+        { accessor: 2, params: {} },
+      ],
     };
 
     const chartData = buildPointSeriesData(table, dimensions);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(2);
-    chartData.series.forEach(function (siri, i) {
+    chartData.series.forEach(function(siri, i) {
       expect(siri).to.have.property('label', `Count-${i}`);
       expect(siri.values).to.have.length(3);
     });
   });
 
-  it('handles a table with an x, a series, and two y aspects', function () {
+  it('handles a table with an x, a series, and two y aspects', function() {
     const table = {
       columns: [
         { id: '0', name: 'x' },
         { id: '1', name: 'series', fieldFormatter: _.identity },
         { id: '2', name: 'y1' },
-        { id: '3', name: 'y2' }],
+        { id: '3', name: 'y2' },
+      ],
       rows: [
         { '0': 1, '1': 0, '2': 300, '3': 400 },
         { '0': 1, '1': 1, '2': 300, '3': 400 },
@@ -116,7 +123,10 @@ describe('pointSeriesChartDataFromTable', function () {
     const dimensions = {
       x: [{ accessor: 0, params: {} }],
       series: [{ accessor: 1, params: {} }],
-      y: [{ accessor: 2, params: {} }, { accessor: 3, params: {} }],
+      y: [
+        { accessor: 2, params: {} },
+        { accessor: 3, params: {} },
+      ],
     };
 
     const chartData = buildPointSeriesData(table, dimensions);
@@ -124,7 +134,7 @@ describe('pointSeriesChartDataFromTable', function () {
     expect(chartData.series).to.be.an('array');
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).to.have.length(4);
-    chartData.series.forEach(function (siri) {
+    chartData.series.forEach(function(siri) {
       expect(siri.values).to.have.length(2);
     });
   });

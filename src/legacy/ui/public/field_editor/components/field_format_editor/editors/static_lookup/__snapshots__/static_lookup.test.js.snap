@@ -1,18 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StaticLookupFormatEditorComponent should render multiple lookup entries and unknown key value 1`] = `
+exports[`StaticLookupFormatEditor should render multiple lookup entries and unknown key value 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "key",
-          "name": "Key",
+          "name": <FormattedMessage
+            defaultMessage="Key"
+            id="common.ui.fieldEditor.staticLookup.keyLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": "Value",
+          "name": <FormattedMessage
+            defaultMessage="Value"
+            id="common.ui.fieldEditor.staticLookup.valueLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
@@ -99,19 +107,27 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
 </Fragment>
 `;
 
-exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
+exports[`StaticLookupFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "key",
-          "name": "Key",
+          "name": <FormattedMessage
+            defaultMessage="Key"
+            id="common.ui.fieldEditor.staticLookup.keyLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": "Value",
+          "name": <FormattedMessage
+            defaultMessage="Value"
+            id="common.ui.fieldEditor.staticLookup.valueLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {

@@ -1,0 +1,17 @@
+{
+  "rule_id": "a84cd36c-dd5a-4e86-a2ce-44556c21cef0",
+  "risk_score": 50,
+  "description": "Suricata Category - Attempted Login with Suspicious Username",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Attempted Login with Suspicious Username",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"An attempted login using a suspicious username was detected\" or rule.category: \"An attempted login using a suspicious username was detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

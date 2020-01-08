@@ -24,7 +24,7 @@ import _ from 'lodash';
  * and returns an array of flattened series values.
  */
 export function flattenSeries(obj) {
-  if (!_.isObject(obj) || !obj.rows && !obj.columns) {
+  if (!_.isObject(obj) || (!obj.rows && !obj.columns)) {
     throw new TypeError('GetSeriesUtilService expects an object with either a rows or columns key');
   }
 

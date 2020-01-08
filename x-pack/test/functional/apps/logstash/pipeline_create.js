@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
@@ -59,9 +59,15 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.setQueueCheckpointWrites(queueCheckpointWrites);
 
         await pipelineEditor.assertInputs({
-          id, description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id,
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
 
         await pipelineEditor.clickSave();
@@ -72,8 +78,7 @@ export default function ({ getService, getPageObjects }) {
           const rows = await pipelineList.readRows();
           const newRow = rows.find(row => row.id === id);
 
-          expect(newRow)
-            .to.have.property('description', description);
+          expect(newRow).to.have.property('description', description);
         });
       });
     });

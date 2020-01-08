@@ -1,20 +1,143 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview Network Stat Data rendering it renders the default OverviewNetworkStats 1`] = `
-<Component
-  data={
-    Object {
-      "auditbeatSocket": 12,
-      "filebeatCisco": 999,
-      "filebeatNetflow": 7777,
-      "filebeatPanw": 66,
-      "filebeatSuricata": 60015,
-      "filebeatZeek": 2003,
-      "packetbeatDNS": 10277307,
-      "packetbeatFlow": 16,
-      "packetbeatTLS": 3400000,
-    }
-  }
-  loading={false}
-/>
+<EuiDescriptionList
+  type="column"
+>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat Socket"
+      id="xpack.siem.overview.auditBeatSocketTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-auditbeatSocket"
+  >
+    <StatValue
+      isLoading={false}
+      value="12"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat Cisco"
+      id="xpack.siem.overview.filebeatCiscoTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-filebeatCisco"
+  >
+    <StatValue
+      isLoading={false}
+      value="999"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat Netflow"
+      id="xpack.siem.overview.filebeatNetflowTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-filebeatNetflow"
+  >
+    <StatValue
+      isLoading={false}
+      value="7,777"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat Palo Alto Networks"
+      id="xpack.siem.overview.filebeatPanwTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-filebeatPanw"
+  >
+    <StatValue
+      isLoading={false}
+      value="66"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat Suricata"
+      id="xpack.siem.overview.fileBeatSuricataTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-filebeatSuricata"
+  >
+    <StatValue
+      isLoading={false}
+      value="60,015"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat Zeek"
+      id="xpack.siem.overview.fileBeatZeekTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-filebeatZeek"
+  >
+    <StatValue
+      isLoading={false}
+      value="2,003"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Packetbeat DNS"
+      id="xpack.siem.overview.packetBeatDnsTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-packetbeatDNS"
+  >
+    <StatValue
+      isLoading={false}
+      value="10,277,307"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Packetbeat Flow"
+      id="xpack.siem.overview.packetBeatFlowTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-packetbeatFlow"
+  >
+    <StatValue
+      isLoading={false}
+      value="16"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Packetbeat TLS"
+      id="xpack.siem.overview.packetbeatTLSTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="network-stat-packetbeatTLS"
+  >
+    <StatValue
+      isLoading={false}
+      value="3,400,000"
+    />
+  </DescriptionListDescription>
+</EuiDescriptionList>
 `;

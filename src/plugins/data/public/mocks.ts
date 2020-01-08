@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
+import {
+  FieldFormatRegisty,
+  Plugin,
+  FieldFormatsStart,
+  FieldFormatsSetup,
+  IndexPatternsContract,
+} from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -29,11 +35,29 @@ const autocompleteMock: any = {
   clearProviders: jest.fn(),
 };
 
+const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
+  getByFieldType: jest.fn(),
+  getConfig: jest.fn(),
+  getDefaultConfig: jest.fn(),
+  getDefaultInstance: jest.fn() as any,
+  getDefaultInstanceCacheResolver: jest.fn(),
+  getDefaultInstancePlain: jest.fn(),
+  getDefaultType: jest.fn(),
+  getDefaultTypeName: jest.fn(),
+  getInstance: jest.fn() as any,
+  getType: jest.fn(),
+  getTypeNameByEsTypes: jest.fn(),
+  init: jest.fn(),
+  register: jest.fn(),
+  parseDefaultTypeMap: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
-  const setupContract: Setup = {
-    autocomplete: autocompleteMock as Setup['autocomplete'],
+  const setupContract = {
+    autocomplete: autocompleteMock,
     search: searchSetupMock,
+    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
     query: querySetupMock,
   };
 
@@ -42,11 +66,17 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const startContract: Start = {
-    autocomplete: autocompleteMock as Start['autocomplete'],
+  const startContract = {
+    autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: { search: jest.fn() },
+    fieldFormats: fieldFormatsMock as FieldFormatsStart,
     query: queryStartMock,
+    ui: {
+      IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
+    },
+    indexPatterns: {} as IndexPatternsContract,
   };
   return startContract;
 };

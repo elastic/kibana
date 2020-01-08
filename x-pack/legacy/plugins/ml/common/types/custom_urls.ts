@@ -6,14 +6,19 @@
 
 import { AnomalyRecordDoc } from './anomalies';
 
-export interface UrlConfig {
+/**
+ * Base Interface for basic custom URL.
+ */
+export interface BaseUrlConfig {
   url_name: string;
   url_value: string;
 }
 
-export interface KibanaUrlConfig extends UrlConfig {
+export interface KibanaUrlConfig extends BaseUrlConfig {
   time_range: string;
 }
+
+export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
 
 export interface CustomUrlAnomalyRecordDoc extends AnomalyRecordDoc {
   earliest: string;

@@ -14,6 +14,6 @@ export function sendBulkPayload(cluster, interval, payload) {
     system_id: KIBANA_SYSTEM_ID,
     system_api_version: MONITORING_SYSTEM_API_VERSION,
     interval: interval + 'ms',
-    body: payload
+    body: payload,
   });
 }

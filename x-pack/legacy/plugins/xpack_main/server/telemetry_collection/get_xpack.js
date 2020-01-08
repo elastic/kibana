@@ -22,10 +22,9 @@ export function getXPackLicense(callCluster) {
     path: '/_license',
     query: {
       // Fetching the local license is cheaper than getting it from the master and good enough
-      local: 'true'
-    }
-  })
-    .then(({ license }) => license);
+      local: 'true',
+    },
+  }).then(({ license }) => license);
 }
 
 /**
@@ -43,8 +42,8 @@ export function getXPackUsage(callCluster) {
     method: 'GET',
     path: '/_xpack/usage',
     query: {
-      master_timeout: TIMEOUT
-    }
+      master_timeout: TIMEOUT,
+    },
   });
 }
 
@@ -59,8 +58,8 @@ export function handleXPack(license, usage) {
   return {
     license,
     stack_stats: {
-      xpack: usage
-    }
+      xpack: usage,
+    },
   };
 }
 
@@ -71,15 +70,14 @@ export function handleXPack(license, usage) {
  * @return {Promise}
  */
 export function getXPack(callCluster) {
-  return Promise.all([
-    getXPackLicense(callCluster),
-    getXPackUsage(callCluster),
-  ])
+  return Promise.all([getXPackLicense(callCluster), getXPackUsage(callCluster)])
     .then(([license, xpack]) => {
       return {
         license,
         xpack,
       };
     })
-    .catch(() => { return {}; });
+    .catch(() => {
+      return {};
+    });
 }

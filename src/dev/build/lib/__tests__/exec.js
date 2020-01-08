@@ -33,8 +33,8 @@ describe('dev/build/lib/exec', () => {
     writeTo: {
       write: chunk => {
         onLogLine(stripAnsi(chunk));
-      }
-    }
+      },
+    },
   });
 
   it('executes a command, logs the command, and logs the output', async () => {
@@ -49,7 +49,7 @@ describe('dev/build/lib/exec', () => {
 
   it('logs using level: option', async () => {
     await exec(log, process.execPath, ['-e', 'console.log("hi")'], {
-      level: 'info'
+      level: 'info',
     });
 
     // log output of the process

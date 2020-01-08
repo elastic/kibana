@@ -30,10 +30,8 @@ export function replacePlaceholder(read, replacement) {
   // handle errors on the read stream by proxying them
   // to the replace stream so that the consumer can
   // choose what to do with them.
-  Rx.fromEvent(read, 'error').pipe(
-    take(1),
-    takeUntil(Rx.fromEvent(read, 'end'))
-  )
+  Rx.fromEvent(read, 'error')
+    .pipe(take(1), takeUntil(Rx.fromEvent(read, 'end')))
     .forEach(error => {
       replace.emit('error', error);
       replace.end();

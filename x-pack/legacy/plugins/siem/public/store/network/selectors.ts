@@ -23,11 +23,7 @@ const selectNetworkPage = (state: State): NetworkPageModel => state.network.page
 const selectNetworkDetails = (state: State): NetworkDetailsModel => state.network.details;
 
 // Network Page Selectors
-export const dnsSelector = () =>
-  createSelector(
-    selectNetworkPage,
-    network => network.queries.dns
-  );
+export const dnsSelector = () => createSelector(selectNetworkPage, network => network.queries.dns);
 
 const selectTopNFlowByType = (
   state: State,
@@ -44,10 +40,7 @@ const selectTopNFlowByType = (
 };
 
 export const topNFlowSelector = () =>
-  createSelector(
-    selectTopNFlowByType,
-    topNFlowQueries => topNFlowQueries
-  );
+  createSelector(selectTopNFlowByType, topNFlowQueries => topNFlowQueries);
 const selectTlsByType = (state: State, networkType: NetworkType) => {
   const tlsType = networkType === NetworkType.page ? NetworkTableType.tls : IpDetailsTableType.tls;
   return (
@@ -56,11 +49,7 @@ const selectTlsByType = (state: State, networkType: NetworkType) => {
   );
 };
 
-export const tlsSelector = () =>
-  createSelector(
-    selectTlsByType,
-    tlsQueries => tlsQueries
-  );
+export const tlsSelector = () => createSelector(selectTlsByType, tlsQueries => tlsQueries);
 
 const selectTopCountriesByType = (
   state: State,
@@ -79,20 +68,22 @@ const selectTopCountriesByType = (
 };
 
 export const topCountriesSelector = () =>
-  createSelector(
-    selectTopCountriesByType,
-    topCountriesQueries => topCountriesQueries
+  createSelector(selectTopCountriesByType, topCountriesQueries => topCountriesQueries);
+
+const selectHttpByType = (state: State, networkType: NetworkType) => {
+  const httpType =
+    networkType === NetworkType.page ? NetworkTableType.http : IpDetailsTableType.http;
+  return (
+    get([networkType, 'queries', httpType], state.network) ||
+    get([networkType, 'queries', httpType], initialNetworkState)
   );
+};
+
+export const httpSelector = () => createSelector(selectHttpByType, httpQueries => httpQueries);
 
 // IP Details Selectors
 export const ipDetailsFlowTargetSelector = () =>
-  createSelector(
-    selectNetworkDetails,
-    network => network.flowTarget
-  );
+  createSelector(selectNetworkDetails, network => network.flowTarget);
 
 export const usersSelector = () =>
-  createSelector(
-    selectNetworkDetails,
-    network => network.queries.users
-  );
+  createSelector(selectNetworkDetails, network => network.queries.users);

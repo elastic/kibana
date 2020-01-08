@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './filters_service';
+// @ts-ignore
+export * from './vis_filters';

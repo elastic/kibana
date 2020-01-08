@@ -18,6 +18,7 @@
  */
 
 export { encryptTelemetry } from './encryption';
-export { createTelemetryUsageCollector } from './usage';
-export { createUiMetricUsageCollector } from './ui_metric';
-export { createLocalizationUsageCollector } from './localization';
+export { registerTelemetryUsageCollector } from './usage';
+export { registerUiMetricUsageCollector } from './ui_metric';
+export { registerLocalizationUsageCollector } from './localization';
+export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';

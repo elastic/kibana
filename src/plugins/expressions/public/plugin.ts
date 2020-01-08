@@ -18,15 +18,16 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import {
-  AnyExpressionFunction,
-  AnyExpressionType,
-  ExpressionInterpretWithHandlers,
-  ExpressionExecutor,
-} from './types';
+import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart } from './services';
+import {
+  setCoreStart,
+  setInspector,
+  setInterpreter,
+  setRenderersRegistry,
+  setNotifications,
+} from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
@@ -47,9 +48,14 @@ import {
   style as styleType,
   kibanaContext as kibanaContextType,
   kibanaDatatable as kibanaDatatableType,
-} from './expression_types';
+} from '../common/expression_types';
 import { interpreterProvider } from './interpreter_provider';
 import { createHandlers } from './create_handlers';
+import { ExpressionRendererImplementation } from './expression_renderer';
+import { ExpressionLoader, loader } from './loader';
+import { ExpressionDataHandler, execute } from './execute';
+import { render, ExpressionRenderHandler } from './render';
+import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -71,7 +77,15 @@ export interface ExpressionsSetup {
   };
 }
 
-export type ExpressionsStart = void;
+export interface ExpressionsStart {
+  execute: typeof execute;
+  ExpressionDataHandler: typeof ExpressionDataHandler;
+  ExpressionLoader: typeof ExpressionLoader;
+  ExpressionRenderer: typeof ExpressionRendererImplementation;
+  ExpressionRenderHandler: typeof ExpressionRenderHandler;
+  loader: typeof loader;
+  render: typeof render;
+}
 
 export class ExpressionsPublicPlugin
   implements
@@ -84,6 +98,8 @@ export class ExpressionsPublicPlugin
 
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
+
+    setRenderersRegistry(renderers);
 
     const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
       functions.register(fn);
@@ -116,13 +132,15 @@ export class ExpressionsPublicPlugin
         const interpret = interpreterProvider({
           types: types.toJS(),
           handlers: { ...handlers, ...createHandlers() },
-          functions: functions.toJS(),
+          functions,
         });
         return interpret(ast, context);
       };
       const executor: ExpressionExecutor = { interpreter: { interpretAst } };
       return executor;
     };
+
+    setInterpreter(getExecutor().interpreter);
 
     const setup: ExpressionsSetup = {
       registerFunction,
@@ -145,6 +163,18 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
+    setInspector(inspector);
+    setNotifications(core.notifications);
+
+    return {
+      execute,
+      ExpressionDataHandler,
+      ExpressionLoader,
+      ExpressionRenderer: ExpressionRendererImplementation,
+      ExpressionRenderHandler,
+      loader,
+      render,
+    };
   }
 
   public stop() {}

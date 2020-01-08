@@ -5,11 +5,13 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
-import { AreaChartBaseComponent, AreaChart } from './areachart';
+import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
+
+jest.mock('../../lib/kibana');
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -325,7 +327,7 @@ describe('AreaChart', () => {
   };
   describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', data => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
+      shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
     });
 
     it(`should render area chart`, () => {
@@ -338,7 +340,7 @@ describe('AreaChart', () => {
     'with invalid data [%o]',
     data => {
       beforeAll(() => {
-        shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
+        shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
       });
 
       it(`should render a chart place holder`, () => {

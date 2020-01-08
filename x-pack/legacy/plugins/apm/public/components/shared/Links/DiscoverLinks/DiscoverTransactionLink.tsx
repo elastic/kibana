@@ -32,7 +32,7 @@ export function getDiscoverQuery(transaction: Transaction) {
   };
 }
 
-export const DiscoverTransactionLink: React.SFC<{
+export const DiscoverTransactionLink: React.FC<{
   readonly transaction: Transaction;
 }> = ({ transaction, children }) => {
   return (

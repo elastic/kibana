@@ -52,6 +52,7 @@ exports[`DetailView should render TabContent 1`] = `
   error={
     Object {
       "context": Object {},
+      "error": Object {},
       "timestamp": Object {
         "us": 0,
       },

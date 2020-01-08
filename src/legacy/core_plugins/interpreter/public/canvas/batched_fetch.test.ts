@@ -18,23 +18,35 @@
  */
 
 import { batchedFetch, Request } from './batched_fetch';
+import { defer } from '../../../../../plugins/kibana_utils/public';
+import { Subject } from 'rxjs';
 
 const serialize = (o: any) => JSON.stringify(o);
 
-const ajaxStream = jest.fn(async ({ body, onResponse }) => {
+const fetchStreaming = jest.fn(({ body }) => {
   const { functions } = JSON.parse(body);
-  functions.map(({ id, functionName, context, args }: Request) =>
-    onResponse({
-      id,
-      statusCode: context,
-      result: Number(context) >= 400 ? { err: {} } : `${functionName}${context}${args}`,
-    })
-  );
-});
+  const { promise, resolve } = defer<void>();
+  const stream = new Subject<any>();
+
+  setTimeout(() => {
+    functions.map(({ id, functionName, context, args }: Request) =>
+      stream.next(
+        JSON.stringify({
+          id,
+          statusCode: context,
+          result: Number(context) >= 400 ? { err: {} } : `${functionName}${context}${args}`,
+        }) + '\n'
+      )
+    );
+    resolve();
+  }, 1);
+
+  return { promise, stream };
+}) as any;
 
 describe('batchedFetch', () => {
   it('resolves the correct promise', async () => {
-    const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
+    const ajax = batchedFetch({ fetchStreaming, serialize, ms: 1 });
 
     const result = await Promise.all([
       ajax({ functionName: 'a', context: 1, args: 'aaa' }),
@@ -45,7 +57,7 @@ describe('batchedFetch', () => {
   });
 
   it('dedupes duplicate calls', async () => {
-    const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
+    const ajax = batchedFetch({ fetchStreaming, serialize, ms: 1 });
 
     const result = await Promise.all([
       ajax({ functionName: 'a', context: 1, args: 'aaa' }),
@@ -55,11 +67,11 @@ describe('batchedFetch', () => {
     ]);
 
     expect(result).toEqual(['a1aaa', 'b2bbb', 'a1aaa', 'a1aaa']);
-    expect(ajaxStream).toHaveBeenCalledTimes(2);
+    expect(fetchStreaming).toHaveBeenCalledTimes(2);
   });
 
   it('rejects responses whose statusCode is >= 300', async () => {
-    const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
+    const ajax = batchedFetch({ fetchStreaming, serialize, ms: 1 });
 
     const result = await Promise.all([
       ajax({ functionName: 'a', context: 500, args: 'aaa' }).catch(() => 'fail'),

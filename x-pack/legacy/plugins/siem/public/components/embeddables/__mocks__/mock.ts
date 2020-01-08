@@ -14,6 +14,7 @@ export const mockSourceLayer = {
   sourceDescriptor: {
     id: 'uuid.v4()',
     type: 'ES_SEARCH',
+    applyGlobalQuery: true,
     geoField: 'source.geo.location',
     filterByMapBounds: false,
     tooltipProperties: [
@@ -56,7 +57,6 @@ export const mockSourceLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
   joins: [],
@@ -66,6 +66,7 @@ export const mockDestinationLayer = {
   sourceDescriptor: {
     id: 'uuid.v4()',
     type: 'ES_SEARCH',
+    applyGlobalQuery: true,
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
     tooltipProperties: [
@@ -108,7 +109,6 @@ export const mockDestinationLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 };
@@ -116,6 +116,7 @@ export const mockDestinationLayer = {
 export const mockLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
+    applyGlobalQuery: true,
     id: 'uuid.v4()',
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
     sourceGeoField: 'source.geo.location',
@@ -146,6 +147,10 @@ export const mockLineLayer = {
           },
           minSize: 1,
           maxSize: 8,
+          fieldMetaOptions: {
+            isEnabled: true,
+            sigma: 3,
+          },
         },
       },
       iconSize: { type: 'STATIC', options: { size: 10 } },
@@ -164,7 +169,6 @@ export const mockLineLayer = {
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 };
@@ -178,7 +182,6 @@ export const mockLayerList = [
     maxZoom: 24,
     alpha: 1,
     visible: true,
-    applyGlobalQuery: true,
     style: null,
     type: 'VECTOR_TILE',
   },
@@ -196,7 +199,6 @@ export const mockLayerListDouble = [
     maxZoom: 24,
     alpha: 1,
     visible: true,
-    applyGlobalQuery: true,
     style: null,
     type: 'VECTOR_TILE',
   },

@@ -106,7 +106,10 @@ describe('percentile(resp, panel, series)', () => {
     });
     expect(results[0]).to.have.property('points');
     expect(results[0].points).to.eql({ show: false });
-    expect(results[0].data).to.eql([[1, 1], [2, 1.2]]);
+    expect(results[0].data).to.eql([
+      [1, 1],
+      [2, 1.2],
+    ]);
 
     expect(results[1]).to.have.property('id', 'test:10-90:90');
     expect(results[1]).to.have.property('color', 'rgb(255, 0, 0)');
@@ -120,7 +123,10 @@ describe('percentile(resp, panel, series)', () => {
     });
     expect(results[1]).to.have.property('points');
     expect(results[1].points).to.eql({ show: false });
-    expect(results[1].data).to.eql([[1, 5], [2, 5.3]]);
+    expect(results[1].data).to.eql([
+      [1, 5],
+      [2, 5.3],
+    ]);
 
     expect(results[2]).to.have.property('id', 'test:50');
     expect(results[2]).to.have.property('color', 'rgb(255, 0, 0)');
@@ -141,6 +147,9 @@ describe('percentile(resp, panel, series)', () => {
     });
     expect(results[2]).to.have.property('points');
     expect(results[2].points).to.eql({ show: true, lineWidth: 1, radius: 1 });
-    expect(results[2].data).to.eql([[1, 2.5], [2, 2.7]]);
+    expect(results[2].data).to.eql([
+      [1, 2.5],
+      [2, 2.7],
+    ]);
   });
 });

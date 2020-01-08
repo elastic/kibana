@@ -30,6 +30,9 @@ import {
   RouteMethod,
   KibanaResponseFactory,
 } from './router';
+import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -39,6 +42,7 @@ interface RequestFixtureOptions {
   path?: string;
   method?: RouteMethod;
   socket?: Socket;
+  routeTags?: string[];
 }
 
 function createKibanaRequestMock({
@@ -49,10 +53,11 @@ function createKibanaRequestMock({
   query = {},
   method = 'get',
   socket = new Socket(),
+  routeTags,
 }: RequestFixtureOptions = {}) {
   const queryString = querystring.stringify(query);
   return KibanaRequest.from(
-    {
+    createRawRequestMock({
       headers,
       params,
       query,
@@ -61,14 +66,15 @@ function createKibanaRequestMock({
       method,
       url: {
         path,
+        pathname: path,
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: {} },
+      route: { settings: { tags: routeTags } },
       raw: {
         req: { socket },
       },
-    } as any,
+    }),
     {
       params: schema.object({}, { allowUnknowns: true }),
       body: schema.object({}, { allowUnknowns: true }),
@@ -134,9 +140,19 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   customError: jest.fn(),
 });
 
+type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreAuthToolkit>;
+
+const createToolkitMock = (): ToolkitMock => {
+  return {
+    next: jest.fn(),
+    rewriteUrl: jest.fn(),
+  };
+};
+
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
   createResponseFactory: createResponseFactoryMock,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
+  createToolkit: createToolkitMock,
 };

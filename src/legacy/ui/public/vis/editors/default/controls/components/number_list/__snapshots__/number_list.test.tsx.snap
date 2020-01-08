@@ -18,7 +18,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
     onChange={[Function]}
     onDelete={[Function]}
     range={
-      Range {
+      NumberListRange {
         "max": 10,
         "maxInclusive": true,
         "min": 1,
@@ -45,7 +45,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
     onChange={[Function]}
     onDelete={[Function]}
     range={
-      Range {
+      NumberListRange {
         "max": 10,
         "maxInclusive": true,
         "min": 1,

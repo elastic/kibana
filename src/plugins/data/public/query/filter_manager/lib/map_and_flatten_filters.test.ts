@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
     let filters: unknown;
 
-    function getDisplayName(filter: Filter) {
+    function getDisplayName(filter: esFilters.Filter) {
       return typeof filter.meta.value === 'function' ? filter.meta.value() : filter.meta.value;
     }
 
@@ -45,7 +45,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should map and flatten the filters', () => {
-      const results = mapAndFlattenFilters(filters as Filter[]);
+      const results = mapAndFlattenFilters(filters as esFilters.Filter[]);
 
       expect(results).toHaveLength(5);
       expect(results[0]).toHaveProperty('meta');

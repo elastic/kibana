@@ -63,7 +63,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const { rows } = table.getMetaData(REPOSITORY_TABLE);
     const repositoryLink = findTestSubject(rows[index].reactWrapper, 'repositoryLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
@@ -78,7 +77,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(lastColumn, `${action}RepositoryButton`);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -89,7 +87,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const { rows } = table.getMetaData(SNAPSHOT_TABLE);
     const snapshotLink = findTestSubject(rows[index].reactWrapper, 'snapshotLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = snapshotLink.props();
       router.navigateTo(href!);

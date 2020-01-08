@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import {
-  resolve,
-  dirname,
-  relative
-} from 'path';
+import { resolve, dirname, relative } from 'path';
 
-import {
-  stat,
-  rename,
-  createReadStream,
-  createWriteStream
-} from 'fs';
+import { stat, rename, createReadStream, createWriteStream } from 'fs';
 
 import { fromNode } from 'bluebird';
 
-import {
-  createPromiseFromStreams
-} from '../../legacy/utils';
+import { createPromiseFromStreams } from '../../legacy/utils';
 
 import {
   prioritizeMappings,

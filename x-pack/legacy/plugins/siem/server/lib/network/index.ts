@@ -7,7 +7,10 @@
 import {
   FlowTargetSourceDest,
   Maybe,
+  NetworkDnsData,
   NetworkDnsSortField,
+  NetworkHttpData,
+  NetworkHttpSortField,
   NetworkTopCountriesData,
   NetworkTopNFlowData,
   NetworkTopTablesSortField,
@@ -27,6 +30,11 @@ export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
 export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
   networkTopCountriesSort: NetworkTopTablesSortField;
   flowTarget: FlowTargetSourceDest;
+  ip?: Maybe<string>;
+}
+
+export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
+  networkHttpSort: NetworkHttpSortField;
   ip?: Maybe<string>;
 }
 
@@ -55,7 +63,14 @@ export class Network {
   public async getNetworkDns(
     req: FrameworkRequest,
     options: NetworkDnsRequestOptions
-  ): Promise<NetworkTopNFlowData> {
+  ): Promise<NetworkDnsData> {
     return this.adapter.getNetworkDns(req, options);
+  }
+
+  public async getNetworkHttp(
+    req: FrameworkRequest,
+    options: NetworkHttpRequestOptions
+  ): Promise<NetworkHttpData> {
+    return this.adapter.getNetworkHttp(req, options);
   }
 }

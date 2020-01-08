@@ -32,19 +32,19 @@ export function handleResponse(response, start, end) {
       hitTimestamp: get(stats, 'timestamp'),
       earliestHitTimestamp: get(earliestStats, 'timestamp'),
       timeWindowMin: start,
-      timeWindowMax: end
+      timeWindowMax: end,
     };
 
     const { rate: bytesSentRate } = calculateRate({
       latestTotal: get(stats, 'metrics.libbeat.output.write.bytes'),
       earliestTotal: get(earliestStats, 'metrics.libbeat.output.write.bytes'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
       latestTotal: get(stats, 'metrics.libbeat.pipeline.events.total'),
       earliestTotal: get(earliestStats, 'metrics.libbeat.pipeline.events.total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const errorsWrittenLatest = get(stats, 'metrics.libbeat.output.write.errors');
@@ -66,7 +66,7 @@ export function handleResponse(response, start, end) {
       errors,
       memory: get(stats, 'metrics.beat.memstats.memory_alloc'),
       version: get(stats, 'beat.version'),
-      time_of_last_event: get(hit, '_source.timestamp')
+      time_of_last_event: get(hit, '_source.timestamp'),
     });
 
     return accum;
@@ -86,7 +86,8 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
     index: apmIndexPattern,
     size: config.get('xpack.monitoring.max_bucket_size'), // FIXME
     ignoreUnavailable: true,
-    filterPath: [ // only filter path can filter for inner_hits
+    filterPath: [
+      // only filter path can filter for inner_hits
       'hits.hits._source.timestamp',
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beats_stats.beat.name',
@@ -110,27 +111,27 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
 
       // earliest hits for calculating diffs
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
-      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors'
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
     ],
     body: {
       query: createApmQuery({
         start,
         end,
-        clusterUuid
+        clusterUuid,
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }]
-        }
+          sort: [{ 'beats_stats.timestamp': 'asc' }],
+        },
       },
       sort: [
         { 'beats_stats.beat.uuid': { order: 'asc' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc' } } // need oldest timestamp to come first for rate calcs to work
-      ]
-    }
+        { timestamp: { order: 'desc' } }, // need oldest timestamp to come first for rate calcs to work
+      ],
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

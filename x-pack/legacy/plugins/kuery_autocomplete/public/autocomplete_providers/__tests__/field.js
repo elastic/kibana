@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { getSuggestionsProvider } from '../field';
 import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
-import { isFilterable } from 'ui/index_patterns';
+import { isFilterable } from '../../../../../../../src/plugins/data/public';
 
-describe('Kuery field suggestions', function () {
+describe('Kuery field suggestions', function() {
   let indexPattern;
   let indexPatterns;
   let getSuggestions;
@@ -20,11 +20,11 @@ describe('Kuery field suggestions', function () {
     getSuggestions = getSuggestionsProvider({ indexPatterns });
   });
 
-  it('should return a function', function () {
+  it('should return a function', function() {
     expect(typeof getSuggestions).to.be('function');
   });
 
-  it('should return filterable fields', function () {
+  it('should return filterable fields', function() {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
@@ -71,7 +71,7 @@ describe('Kuery field suggestions', function () {
     expect(keywordIndex).to.be.lessThan(analyzedIndex);
   });
 
-  it('should have descriptions', function () {
+  it('should have descriptions', function() {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
@@ -81,9 +81,8 @@ describe('Kuery field suggestions', function () {
     });
   });
 
-  describe('nested fields', function () {
-
-    it('should automatically wrap nested fields in KQL\'s nested syntax', () => {
+  describe('nested fields', function() {
+    it("should automatically wrap nested fields in KQL's nested syntax", () => {
       const prefix = 'ch';
       const suffix = '';
       const suggestions = getSuggestions({ prefix, suffix });
@@ -107,7 +106,7 @@ describe('Kuery field suggestions', function () {
       expect(nestedSuggestions).to.have.length(2);
     });
 
-    it('should not wrap the suggestion in KQL\'s nested syntax if the correct nested path is already provided', () => {
+    it("should not wrap the suggestion in KQL's nested syntax if the correct nested path is already provided", () => {
       const prefix = 'ch';
       const suffix = '';
 
@@ -122,17 +121,25 @@ describe('Kuery field suggestions', function () {
 
       const suggestionsWithNoPath = getSuggestions({ prefix, suffix });
       expect(suggestionsWithNoPath).to.have.length(1);
-      const [ noPathSuggestion ] = suggestionsWithNoPath;
+      const [noPathSuggestion] = suggestionsWithNoPath;
       expect(noPathSuggestion.text).to.be('nestedField.nestedChild:{ doublyNestedChild  }');
 
-      const suggestionsWithPartialPath = getSuggestions({ prefix, suffix, nestedPath: 'nestedField' });
+      const suggestionsWithPartialPath = getSuggestions({
+        prefix,
+        suffix,
+        nestedPath: 'nestedField',
+      });
       expect(suggestionsWithPartialPath).to.have.length(1);
-      const [ partialPathSuggestion ] = suggestionsWithPartialPath;
+      const [partialPathSuggestion] = suggestionsWithPartialPath;
       expect(partialPathSuggestion.text).to.be('nestedChild:{ doublyNestedChild  }');
 
-      const suggestionsWithFullPath = getSuggestions({ prefix, suffix, nestedPath: 'nestedField.nestedChild' });
+      const suggestionsWithFullPath = getSuggestions({
+        prefix,
+        suffix,
+        nestedPath: 'nestedField.nestedChild',
+      });
       expect(suggestionsWithFullPath).to.have.length(1);
-      const [ fullPathSuggestion ] = suggestionsWithFullPath;
+      const [fullPathSuggestion] = suggestionsWithFullPath;
       expect(fullPathSuggestion.text).to.be('doublyNestedChild ');
     });
   });

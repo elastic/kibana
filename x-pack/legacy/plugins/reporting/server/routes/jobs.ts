@@ -6,7 +6,15 @@
 
 import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  Logger,
+  RequestFacade,
+  ReportingResponseToolkit,
+  JobDocOutput,
+  JobSource,
+} from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -18,7 +26,11 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: ServerFacade) {
+export function registerJobInfoRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  logger: Logger
+) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -65,8 +77,7 @@ export function registerJobs(server: ServerFacade) {
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        (doc: any): JobDoc => {
-          const job = doc._source;
+        ({ _source: job }: JobSource<any>): JobDocOutput => {
           if (!job) {
             throw boom.notFound();
           }
@@ -90,9 +101,9 @@ export function registerJobs(server: ServerFacade) {
     handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then(
-        (doc: any): JobDoc => {
-          const job: JobDoc = doc._source;
+      return jobsQuery
+        .get(request.pre.user, docId)
+        .then(({ _source: job }: JobSource<any>): JobSource<any>['_source'] => {
           if (!job) {
             throw boom.notFound();
           }
@@ -103,19 +114,18 @@ export function registerJobs(server: ServerFacade) {
           }
 
           return {
-            ...doc._source,
+            ...job,
             payload: {
               ...payload,
               headers: undefined,
             },
           };
-        }
-      );
+        });
     },
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server);
+  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -132,13 +142,15 @@ export function registerJobs(server: ServerFacade) {
       const { statusCode } = response;
 
       if (statusCode !== 200) {
-        const logLevel = statusCode === 500 ? 'error' : 'debug';
-        server.log(
-          [logLevel, 'reporting', 'download'],
-          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-            response.source
-          )}]`
-        );
+        if (statusCode === 500) {
+          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+        } else {
+          logger.debug(
+            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+              response.source
+            )}]`
+          );
+        }
       }
 
       if (!response.isBoom) {

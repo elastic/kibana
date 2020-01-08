@@ -16,9 +16,7 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
     index: indexPattern,
     size: 0,
     ignoreUnavailable: true,
-    filterPath: [
-      'aggregations.composite_data.buckets'
-    ],
+    filterPath: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
         start,
@@ -35,21 +33,21 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
                 name: {
                   terms: {
                     field: 'source_node.name',
-                  }
-                }
+                  },
+                },
               },
               {
                 uuid: {
                   terms: {
                     field: 'source_node.uuid',
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
-    }
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

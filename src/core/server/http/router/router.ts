@@ -17,23 +17,35 @@
  * under the License.
  */
 
-import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
+import { Type } from '@kbn/config-schema';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
-import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
+import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
+import { wrapErrors } from './error_wrapper';
+import { RouteValidator } from './validator';
 
 interface RouterRoute {
   method: RouteMethod;
   path: string;
-  options: RouteConfigOptions;
+  options: RouteConfigOptions<RouteMethod>;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
+
+/**
+ * Route handler common definition
+ *
+ * @public
+ */
+export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(
+  route: RouteConfig<P, Q, B, Method>,
+  handler: RequestHandler<P, Q, B, Method>
+) => void;
 
 /**
  * Registers route handlers for specified resource path and method.
@@ -52,52 +64,53 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  get: RouteRegistrar<'get'>;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  post: RouteRegistrar<'post'>;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  put: RouteRegistrar<'put'>;
+
+  /**
+   * Register a route handler for `PATCH` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  patch: RouteRegistrar<'patch'>;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  delete: RouteRegistrar<'delete'>;
 
   /**
-   * Returns all routes registered with the this router.
+   * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
+   * @param handler {@link RequestHandler} - a route handler to wrap
+   */
+  handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+
+  /**
+   * Returns all routes registered with this router.
    * @returns List of registered routes.
    * @internal
    */
   getRoutes: () => RouterRoute[];
 }
 
-export type ContextEnhancer<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
-  handler: RequestHandler<P, Q, B>
-) => RequestHandlerEnhanced<P, Q, B>;
+export type ContextEnhancer<P, Q, B, Method extends RouteMethod> = (
+  handler: RequestHandler<P, Q, B, Method>
+) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
@@ -112,11 +125,10 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * @returns Route schemas if `validate` is specified on the route, otherwise
  * undefined.
  */
-function routeSchemasFromRouteConfig<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
->(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+function routeSchemasFromRouteConfig<P, Q, B>(
+  route: RouteConfig<P, Q, B, typeof routeMethod>,
+  routeMethod: RouteMethod
+) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
   if (route.validate === undefined) {
@@ -127,15 +139,55 @@ function routeSchemasFromRouteConfig<
 
   if (route.validate !== false) {
     Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type)) {
+      if (!(schema instanceof Type || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
   }
 
-  return route.validate ? route.validate : undefined;
+  if (route.validate) {
+    return RouteValidator.from(route.validate);
+  }
+}
+
+/**
+ * Create a valid options object with "sensible" defaults + adding some validation to the options fields
+ *
+ * @param method HTTP verb for these options
+ * @param routeConfig The route config definition
+ */
+function validOptions(
+  method: RouteMethod,
+  routeConfig: RouteConfig<unknown, unknown, unknown, typeof method>
+) {
+  const shouldNotHavePayload = ['head', 'get'].includes(method);
+  const { options = {}, validate } = routeConfig;
+  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+
+  const { output } = options.body || {};
+  if (typeof output === 'string' && !validBodyOutput.includes(output)) {
+    throw new Error(
+      `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${
+        routeConfig.path
+      } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
+    );
+  }
+
+  const body = shouldNotHavePayload
+    ? undefined
+    : {
+        // If it's not a GET (requires payload) but no body validation is required (or no body options are specified),
+        // We assume the route does not care about the body => use the memory-cheapest approach (stream and no parsing)
+        output: !shouldValidateBody ? ('stream' as const) : undefined,
+        parse: !shouldValidateBody ? false : undefined,
+
+        // User's settings should overwrite any of the "desired" values
+        ...options.body,
+      };
+
+  return { ...options, body };
 }
 
 /**
@@ -147,21 +199,17 @@ export class Router implements IRouter {
   public post: IRouter['post'];
   public delete: IRouter['delete'];
   public put: IRouter['put'];
+  public patch: IRouter['patch'];
 
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
-    const buildMethod = (method: RouteMethod) => <
-      P extends ObjectType,
-      Q extends ObjectType,
-      B extends ObjectType
-    >(
-      route: RouteConfig<P, Q, B>,
-      handler: RequestHandler<P, Q, B>
+    const buildMethod = <Method extends RouteMethod>(method: Method) => <P, Q, B>(
+      route: RouteConfig<P, Q, B, Method>,
+      handler: RequestHandler<P, Q, B, Method>
     ) => {
-      const { path, options = {} } = route;
       const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
       this.routes.push({
@@ -173,8 +221,8 @@ export class Router implements IRouter {
             handler: this.enhanceWithContext(handler),
           }),
         method,
-        path: getRouteFullPath(this.routerPath, path),
-        options,
+        path: getRouteFullPath(this.routerPath, route.path),
+        options: validOptions(method, route),
       });
     };
 
@@ -182,13 +230,18 @@ export class Router implements IRouter {
     this.post = buildMethod('post');
     this.delete = buildMethod('delete');
     this.put = buildMethod('put');
+    this.patch = buildMethod('patch');
   }
 
   public getRoutes() {
     return [...this.routes];
   }
 
-  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
+  public handleLegacyErrors<P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
+    return wrapErrors(handler);
+  }
+
+  private async handle<P, Q, B>({
     routeSchemas,
     request,
     responseToolkit,
@@ -196,10 +249,10 @@ export class Router implements IRouter {
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B>;
-    routeSchemas?: RouteSchemas<P, Q, B>;
+    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
+    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
@@ -221,15 +274,14 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   ? (...rest: Params) => Return
   : never;
 
-type RequestHandlerEnhanced<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = WithoutHeadArgument<RequestHandler<P, Q, B>>;
+type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
+  RequestHandler<P, Q, B, Method>
+>;
 
 /**
  * A function executed when route path matched requested resource path.
  * Request handler is expected to return a result of one of {@link KibanaResponseFactory} functions.
+ * @param context {@link RequestHandlerContext} - the core context exposed for this request.
  * @param request {@link KibanaRequest} - object containing information about requested resource,
  * such as path, method, headers, parameters, query, body, etc.
  * @param response {@link KibanaResponseFactory} - a set of helper functions used to respond to a request.
@@ -260,8 +312,13 @@ type RequestHandlerEnhanced<
  * ```
  * @public
  */
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+export type RequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Method extends RouteMethod = any
+> = (
   context: RequestHandlerContext,
-  request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
+  request: KibanaRequest<P, Q, B, Method>,
   response: KibanaResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

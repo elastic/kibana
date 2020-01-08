@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-options: Required<RouteConfigOptions>;
+options: KibanaRequestRouteOptions<Method>;
 ```

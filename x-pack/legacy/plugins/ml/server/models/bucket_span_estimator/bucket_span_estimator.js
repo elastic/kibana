@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 
 import { mlLog } from '../../client/log';
@@ -23,7 +21,11 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
   const SingleSeriesChecker = singleSeriesCheckerFactory(callWithRequest);
 
   class BucketSpanEstimator {
-    constructor({ index, timeField, aggTypes, fields, duration, query, splitField }, splitFieldValues, maxBuckets) {
+    constructor(
+      { index, timeField, aggTypes, fields, duration, query, splitField },
+      splitFieldValues,
+      maxBuckets
+    ) {
       this.index = index;
       this.timeField = timeField;
       this.aggTypes = aggTypes;
@@ -35,7 +37,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       this.checkers = [];
 
       this.thresholds = {
-        minimumBucketSpanMS: 0
+        minimumBucketSpanMS: 0,
       };
 
       // determine durations for bucket span estimation
@@ -47,8 +49,8 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       const ONE_HOUR_MS = 3600000;
       // only run the tests over the last 250 hours of data at max
       const HOUR_MULTIPLIER = Math.min(250, Math.floor((maxBuckets * ONE_MINUTE_MS) / ONE_HOUR_MS));
-      const timePickerDurationLength = (this.duration.end - this.duration.start);
-      const multiplierDurationLength = (ONE_HOUR_MS * HOUR_MULTIPLIER);
+      const timePickerDurationLength = this.duration.end - this.duration.start;
+      const multiplierDurationLength = ONE_HOUR_MS * HOUR_MULTIPLIER;
 
       if (timePickerDurationLength > multiplierDurationLength) {
         // move time range to the end of the data
@@ -60,20 +62,21 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
           [this.timeField]: {
             gte: this.duration.start,
             lte: this.duration.end,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       });
 
       this.polledDataChecker = new PolledDataChecker(
         this.index,
         this.timeField,
         this.duration,
-        this.query);
+        this.query
+      );
 
-      if(this.aggTypes.length === this.fields.length) {
+      if (this.aggTypes.length === this.fields.length) {
         // loop over detectors
-        for(let i = 0; i < this.aggTypes.length; i++) {
+        for (let i = 0; i < this.aggTypes.length; i++) {
           if (this.splitField === undefined) {
             // either a single metric job or no data split
             this.checkers.push({
@@ -84,18 +87,19 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                 this.fields[i],
                 this.duration,
                 this.query,
-                this.thresholds),
-              result: null
+                this.thresholds
+              ),
+              result: null,
             });
           } else {
             // loop over partition values
-            for(let j = 0; j < this.splitFieldValues.length; j++) {
+            for (let j = 0; j < this.splitFieldValues.length; j++) {
               const queryCopy = _.cloneDeep(this.query);
               // add a term to the query to filter on the partition value
               queryCopy.bool.must.push({
                 term: {
-                  [this.splitField]: this.splitFieldValues[j]
-                }
+                  [this.splitField]: this.splitFieldValues[j],
+                },
               });
               this.checkers.push({
                 check: new SingleSeriesChecker(
@@ -105,8 +109,9 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                   this.fields[i],
                   this.duration,
                   queryCopy,
-                  this.thresholds),
-                result: null
+                  this.thresholds
+                ),
+                result: null,
               });
             }
           }
@@ -121,10 +126,11 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
           reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
-        this.polledDataChecker.run()
-          .then((result) => {
-          // if the data is polled, set a minimum threshold
-          // of bucket span
+        this.polledDataChecker
+          .run()
+          .then(result => {
+            // if the data is polled, set a minimum threshold
+            // of bucket span
             if (result.isPolled) {
               this.thresholds.minimumBucketSpanMS = result.minimumBucketSpan;
             }
@@ -137,16 +143,21 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                 if (median !== null) {
                   resolve(median);
                 } else {
-                // no results found
-                  mlLog.warn('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
-                  reject('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
+                  // no results found
+                  mlLog.warn(
+                    'BucketSpanEstimator: run has stopped because no checks returned a valid interval'
+                  );
+                  reject(
+                    'BucketSpanEstimator: run has stopped because no checks returned a valid interval'
+                  );
                 }
               }
             };
 
-            _.each(this.checkers, (check) => {
-              check.check.run()
-                .then((interval) => {
+            _.each(this.checkers, check => {
+              check.check
+                .run()
+                .then(interval => {
                   check.result = interval;
                   runComplete();
                 })
@@ -159,7 +170,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                 });
             });
           })
-          .catch((resp) => {
+          .catch(resp => {
             reject(resp);
           });
       });
@@ -173,8 +184,8 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       // find the median results per detector
       // if the data has been split, the may be ten results per detector,
       // so we need to find the median of those first.
-      for(let i = 0; i < this.aggTypes.length; i++) {
-        const pos = (i * numberOfSplitFields);
+      for (let i = 0; i < this.aggTypes.length; i++) {
+        const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
         resultsSubset = _.remove(resultsSubset, res => res !== null);
@@ -197,7 +208,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
       if (results.length) {
         if (results.length % 2 === 0) {
           // even number of results
-          const medIndex = (((results.length) / 2) - 1);
+          const medIndex = results.length / 2 - 1;
           // find the two middle values
           const med1 = results[medIndex];
           const med2 = results[medIndex + 1];
@@ -208,16 +219,16 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
           } else {
             let interval = null;
             // find the average ms value between the two middle intervals
-            const avgMs = ((med2.ms - med1.ms) / 2) + med1.ms;
+            const avgMs = (med2.ms - med1.ms) / 2 + med1.ms;
             // loop over the allowed bucket spans to find closest one
-            for(let i = 1; i < INTERVALS.length; i++) {
-              if(avgMs < INTERVALS[i].ms) {
+            for (let i = 1; i < INTERVALS.length; i++) {
+              if (avgMs < INTERVALS[i].ms) {
                 // see if it's closer to this interval or the one before
                 const int1 = INTERVALS[i - 1];
                 const int2 = INTERVALS[i];
                 const diff = int2.ms - int1.ms;
                 const d = avgMs - int1.ms;
-                interval = ((d / diff) < 0.5) ? int1 : int2;
+                interval = d / diff < 0.5 ? int1 : int2;
                 break;
               }
             }
@@ -232,7 +243,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
     }
   }
 
-  const getFieldCardinality = function (index, field) {
+  const getFieldCardinality = function(index, field) {
     return new Promise((resolve, reject) => {
       callWithRequest('search', {
         index,
@@ -242,30 +253,30 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
             field_count: {
               cardinality: {
                 field,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       })
-        .then((resp) => {
+        .then(resp => {
           const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
-        .catch((resp) => {
+        .catch(resp => {
           reject(resp);
         });
     });
   };
 
-  const getRandomFieldValues = function (index, field, query) {
+  const getRandomFieldValues = function(index, field, query) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
       getFieldCardinality(index, field)
-        .then((value) => {
-          const numPartitions = (Math.floor(value / NUM_PARTITIONS)) || 1;
+        .then(value => {
+          const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           callWithRequest('search', {
             index,
             size: 0,
@@ -277,31 +288,31 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                     field,
                     include: {
                       partition: 0,
-                      num_partitions: numPartitions
-                    }
-                  }
-                }
-              }
-            }
+                      num_partitions: numPartitions,
+                    },
+                  },
+                },
+              },
+            },
           })
-            .then((partitionResp) => {
+            .then(partitionResp => {
               if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
                 const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
                 fieldValues = _.map(buckets, b => b.key);
               }
               resolve(fieldValues);
             })
-            .catch((resp) => {
+            .catch(resp => {
               reject(resp);
             });
         })
-        .catch((resp) => {
+        .catch(resp => {
           reject(resp);
         });
     });
   };
 
-  return function (formConfig) {
+  return function(formConfig) {
     if (typeof formConfig !== 'object' || formConfig === null) {
       throw new Error('Invalid formConfig: formConfig needs to be an object.');
     }
@@ -329,9 +340,9 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
         callWithInternalUser('cluster.getSettings', {
           flatSettings: true,
           includeDefaults: true,
-          filterPath: '*.*max_buckets'
+          filterPath: '*.*max_buckets',
         })
-          .then((settings) => {
+          .then(settings => {
             if (typeof settings !== 'object' || typeof settings.defaults !== 'object') {
               reject('Unable to retrieve cluster setting search.max_buckets');
             }
@@ -345,11 +356,12 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                 maxBuckets
               );
 
-              bucketSpanEstimator.run()
-                .then((resp) => {
+              bucketSpanEstimator
+                .run()
+                .then(resp => {
                   resolve(resp);
                 })
-                .catch((resp) => {
+                .catch(resp => {
                   reject(resp);
                 });
             };
@@ -358,10 +370,10 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
             // bucket span tests.
             if (formConfig.splitField !== undefined) {
               getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-                .then((splitFieldValues) => {
+                .then(splitFieldValues => {
                   runEstimator(splitFieldValues);
                 })
-                .catch((resp) => {
+                .catch(resp => {
                   reject(resp);
                 });
             } else {
@@ -369,7 +381,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
               runEstimator();
             }
           })
-          .catch((resp) => {
+          .catch(resp => {
             reject(resp);
           });
       }
@@ -387,15 +399,17 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
             'cluster:monitor/xpack/ml/job/get',
             'cluster:monitor/xpack/ml/job/stats/get',
             'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get'
-          ]
+            'cluster:monitor/xpack/ml/datafeeds/stats/get',
+          ],
         };
         callWithRequest('ml.privilegeCheck', { body })
-          .then((resp) => {
-            if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
+          .then(resp => {
+            if (
+              resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
               resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
               resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
+              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']
+            ) {
               getBucketSpanEstimation();
             } else {
               reject('Insufficient permissions to call bucket span estimation.');
@@ -403,8 +417,6 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
           })
           .catch(reject);
       }
-
-
     });
   };
 }

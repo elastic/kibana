@@ -5,8 +5,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { Feature, FeatureWithAllOrReadPrivileges } from './feature';
+import { Feature, FeatureWithAllOrReadPrivileges, FeatureKibanaPrivileges } from '../common';
 import { validateFeature } from './feature_schema';
 
 export class FeatureRegistry {

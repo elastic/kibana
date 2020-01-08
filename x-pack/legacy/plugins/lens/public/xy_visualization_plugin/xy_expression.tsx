@@ -12,21 +12,22 @@ import {
   Settings,
   Axis,
   LineSeries,
-  getAxisId,
-  getSpecId,
   AreaSeries,
   BarSeries,
   Position,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
-import { IInterpreterRenderHandlers } from 'src/legacy/core_plugins/expressions/public';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  IInterpreterRenderHandlers,
+  IInterpreterRenderFunction,
+} from 'src/plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
@@ -202,7 +203,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       />
 
       <Axis
-        id={getAxisId('x')}
+        id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
@@ -211,7 +212,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       />
 
       <Axis
-        id={getAxisId('y')}
+        id="y"
         position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
@@ -257,7 +258,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
             key: index,
             splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: getSpecId(idForLegend),
+            id: idForLegend,
             xAccessor,
             yAccessors,
             data: sanitized.rows,

@@ -5,28 +5,30 @@
  */
 
 import moment from 'moment';
-import { HapiServer, TaskInstance } from '../../../../';
 import {
   getMockCallWithInternal,
-  getMockKbnServer,
+  getMockConfig,
+  getMockEs,
   getMockTaskInstance,
 } from '../../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
+import { TaskInstance } from '../../../../../task_manager/server';
 
 describe('visualizationsTaskRunner', () => {
   let mockTaskInstance: TaskInstance;
-  let mockKbnServer: HapiServer;
   beforeEach(() => {
     mockTaskInstance = getMockTaskInstance();
-    mockKbnServer = getMockKbnServer();
   });
 
   describe('Error handling', () => {
     test('catches its own errors', async () => {
       const mockCallWithInternal = () => Promise.reject(new Error('Things did not go well!'));
-      mockKbnServer = getMockKbnServer(mockCallWithInternal);
 
-      const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
+      const runner = visualizationsTaskRunner(
+        mockTaskInstance,
+        getMockConfig(),
+        getMockEs(mockCallWithInternal)
+      );
       const result = await runner();
       expect(result).toMatchObject({
         error: 'Things did not go well!',
@@ -45,7 +47,7 @@ describe('visualizationsTaskRunner', () => {
         .startOf('day')
         .toDate();
 
-    const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
+    const runner = visualizationsTaskRunner(mockTaskInstance, getMockConfig(), getMockEs());
     const result = await runner();
 
     expect(result).toMatchObject({
@@ -123,9 +125,12 @@ describe('visualizationsTaskRunner', () => {
         },
       },
     ]);
-    mockKbnServer = getMockKbnServer(mockCallWithInternal);
 
-    const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
+    const runner = visualizationsTaskRunner(
+      mockTaskInstance,
+      getMockConfig(),
+      getMockEs(mockCallWithInternal)
+    );
     const result = await runner();
 
     expect(result).toMatchObject({

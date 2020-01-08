@@ -1,0 +1,61 @@
+.mlFieldDataCard {
+  height: 420px;
+  width: 360px;
+
+  // Note the names of these styles need to match the type of the field they are displaying.
+  .boolean {
+    background-color: $euiColorVis5;
+  }
+
+  .date {
+    background-color: $euiColorVis7;
+  }
+
+  .document_count {
+    background-color: $euiColorVis2;
+  }
+
+  .geo_point {
+    background-color: $euiColorVis8;
+  }
+
+  .ip {
+    background-color: $euiColorVis3;
+  }
+
+  .keyword {
+    background-color: $euiColorVis0;
+  }
+
+  .number {
+    background-color: $euiColorVis1;
+  }
+
+  .text {
+    background-color: $euiColorVis9;
+  }
+
+  .type-other,
+  .unknown {
+    background-color: $euiColorVis6;
+  }
+
+  // Use euiPanel styling
+  @include euiPanel($selector: '.mlFieldDataCard__content');
+
+  .mlFieldDataCard__content {
+    @include euiFontSizeS;
+    height: 385px;
+    border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
+    overflow: hidden;
+  }
+
+  .mlFieldDataCard__codeContent {
+    font-family: $euiCodeFontFamily;
+  }
+
+  .mlFieldDataCard__stats {
+    padding: $euiSizeS $euiSizeS 0px $euiSizeS;
+    text-align: center;
+  }
+}

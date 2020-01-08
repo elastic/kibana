@@ -7,7 +7,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { State, waffleFilterActions, waffleFilterSelectors } from '../../store';
 import { FilterQuery } from '../../store/local/waffle_filter';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
@@ -16,7 +16,7 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
 
 interface WithWaffleFilterProps {
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 export const withWaffleFilter = connect(
@@ -63,7 +63,7 @@ type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffle
 
 type WithWaffleFilterUrlStateProps = WithWaffleFilterProps;
 
-export const WithWaffleFilterUrlState: React.SFC<WithWaffleFilterUrlStateProps> = ({
+export const WithWaffleFilterUrlState: React.FC<WithWaffleFilterUrlStateProps> = ({
   indexPattern,
 }) => (
   <WithWaffleFilter indexPattern={indexPattern}>

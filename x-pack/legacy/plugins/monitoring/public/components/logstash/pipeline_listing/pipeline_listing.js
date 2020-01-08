@@ -7,7 +7,16 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import { partialRight } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
@@ -30,11 +39,11 @@ export class PipelineListing extends Component {
     return [
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.idTitle', {
-          defaultMessage: 'ID'
+          defaultMessage: 'ID',
         }),
         field: 'id',
         sortable: true,
-        render: (id) => (
+        render: id => (
           <EuiLink
             data-test-subj="id"
             onClick={() => {
@@ -45,75 +54,71 @@ export class PipelineListing extends Component {
           >
             {id}
           </EuiLink>
-        )
+        ),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.eventsEmittedRateTitle', {
-          defaultMessage: 'Events Emitted Rate'
+          defaultMessage: 'Events Emitted Rate',
         }),
         field: 'latestThroughput',
         sortable: true,
         render: (value, pipeline) => {
           const throughput = pipeline.metrics.throughput;
           return (
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-            >
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem>
                 <Sparkline
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
                     xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
-                    yValueFormatter: partialRight(this.tooltipYValueFormatter, throughput.metric.format, throughput.metric.units)
+                    yValueFormatter: partialRight(
+                      this.tooltipYValueFormatter,
+                      throughput.metric.format,
+                      throughput.metric.units
+                    ),
                   }}
                   options={{ xaxis: throughput.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem
-                className="monTableCell__number"
-                data-test-subj="eventsEmittedRate"
-              >
-                { formatMetric(value, '0.[0]a', throughput.metric.units) }
+              <EuiFlexItem className="monTableCell__number" data-test-subj="eventsEmittedRate">
+                {formatMetric(value, '0.[0]a', throughput.metric.units)}
               </EuiFlexItem>
             </EuiFlexGroup>
           );
-        }
+        },
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.numberOfNodesTitle', {
-          defaultMessage: 'Number of Nodes'
+          defaultMessage: 'Number of Nodes',
         }),
         field: 'latestNodesCount',
         sortable: true,
         render: (value, pipeline) => {
           const nodesCount = pipeline.metrics.nodesCount;
           return (
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-            >
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem>
                 <Sparkline
                   series={nodesCount.data}
                   onBrush={onBrush}
                   tooltip={{
                     xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
-                    yValueFormatter: partialRight(this.tooltipYValueFormatter, nodesCount.metric.format, nodesCount.metric.units)
+                    yValueFormatter: partialRight(
+                      this.tooltipYValueFormatter,
+                      nodesCount.metric.format,
+                      nodesCount.metric.units
+                    ),
                   }}
                   options={{ xaxis: nodesCount.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem
-                className="monTableCell__number"
-                data-test-subj="nodeCount"
-              >
-                { formatMetric(value, '0a') }
+              <EuiFlexItem className="monTableCell__number" data-test-subj="nodeCount">
+                {formatMetric(value, '0a')}
               </EuiFlexItem>
             </EuiFlexGroup>
           );
-        }
+        },
       },
     ];
   }
@@ -121,14 +126,10 @@ export class PipelineListing extends Component {
   renderStats() {
     if (this.props.statusComponent) {
       const Component = this.props.statusComponent;
-      return (
-        <Component stats={this.props.stats}/>
-      );
+      return <Component stats={this.props.stats} />;
     }
 
-    return (
-      <ClusterStatus stats={this.props.stats}/>
-    );
+    return <ClusterStatus stats={this.props.stats} />;
   }
 
   render() {
@@ -139,7 +140,7 @@ export class PipelineListing extends Component {
       onTableChange,
       fetchMoreData,
       upgradeMessage,
-      className
+      className,
     } = this.props;
 
     const columns = this.getColumns();
@@ -147,9 +148,7 @@ export class PipelineListing extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPanel>
-            {this.renderStats()}
-          </EuiPanel>
+          <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>
             <EuiMonitoringSSPTable
@@ -162,9 +161,12 @@ export class PipelineListing extends Component {
               fetchMoreData={fetchMoreData}
               search={{
                 box: {
-                  placeholder: i18n.translate('xpack.monitoring.logstash.filterPipelinesPlaceholder', {
-                    defaultMessage: 'Filter Pipelines…'
-                  })
+                  placeholder: i18n.translate(
+                    'xpack.monitoring.logstash.filterPipelinesPlaceholder',
+                    {
+                      defaultMessage: 'Filter Pipelines…',
+                    }
+                  ),
                 },
               }}
               onTableChange={onTableChange}

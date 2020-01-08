@@ -6,9 +6,9 @@
 
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -91,8 +91,8 @@ describe('deserialize', () => {
           },
         ],
         links: [
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 0 },
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 4 },
+          { label: '', weight: 5, width: 5, source: 2, target: 0 },
+          { label: '', weight: 5, width: 5, source: 2, target: 4 },
         ],
         urlTemplates: [
           {

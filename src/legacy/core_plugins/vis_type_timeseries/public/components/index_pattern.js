@@ -123,9 +123,12 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             >
               <EuiComboBox
                 isClearable={false}
-                placeholder={i18n.translate('visTypeTimeseries.indexPattern.timeRange.selectTimeRange', {
-                  defaultMessage: 'Select',
-                })}
+                placeholder={i18n.translate(
+                  'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
+                  {
+                    defaultMessage: 'Select',
+                  }
+                )}
                 options={timeRangeOptions}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
@@ -147,7 +150,9 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={i18n.translate('visTypeTimeseries.indexPatternLabel', { defaultMessage: 'Index pattern' })}
+            label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
+              defaultMessage: 'Index pattern',
+            })}
             helpText={
               isDefaultIndexPatternUsed &&
               i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {

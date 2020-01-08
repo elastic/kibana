@@ -10,13 +10,13 @@ import { AbstractStyle } from '../abstract_style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap_constants';
+import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { getColorRampStops } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
 export class HeatmapStyle extends AbstractStyle {
-
-  static type = 'HEATMAP';
+  static type = LAYER_STYLE_TYPE.HEATMAP;
 
   constructor(descriptor = {}) {
     super();
@@ -32,7 +32,7 @@ export class HeatmapStyle extends AbstractStyle {
 
   static getDisplayName() {
     return i18n.translate('xpack.maps.style.heatmap.displayNameLabel', {
-      defaultMessage: 'Heatmap style'
+      defaultMessage: 'Heatmap style',
     });
   }
 
@@ -50,22 +50,12 @@ export class HeatmapStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails(label) {
-    return (
-      <HeatmapLegend
-        colorRampName={this._descriptor.colorRampName}
-        label={label}
-      />
-    );
+  renderLegendDetails(field) {
+    return <HeatmapLegend colorRampName={this._descriptor.colorRampName} field={field} />;
   }
 
   getIcon() {
-    return (
-      <EuiIcon
-        size="m"
-        type="heatmap"
-      />
-    );
+    return <EuiIcon size="m" type="heatmap" />;
   }
 
   setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
@@ -79,14 +69,14 @@ export class HeatmapStyle extends AbstractStyle {
     } else {
       const errorMessage = i18n.translate('xpack.maps.style.heatmap.resolutionStyleErrorMessage', {
         defaultMessage: `Resolution param not recognized: {resolution}`,
-        values: { resolution }
+        values: { resolution },
       });
       throw new Error(errorMessage);
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
     mbMap.setPaintProperty(layerId, 'heatmap-weight', {
       type: 'identity',
-      property: propertyName
+      property: propertyName,
     });
 
     const { colorRampName } = this._descriptor;
@@ -96,20 +86,27 @@ export class HeatmapStyle extends AbstractStyle {
         'interpolate',
         ['linear'],
         ['heatmap-density'],
-        0, 'rgba(0, 0, 255, 0)',
-        ...colorStops.slice(2) // remove first stop from colorStops to avoid conflict with transparent stop at zero
+        0,
+        'rgba(0, 0, 255, 0)',
+        ...colorStops.slice(2), // remove first stop from colorStops to avoid conflict with transparent stop at zero
       ]);
     } else {
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
         ['linear'],
         ['heatmap-density'],
-        0, 'rgba(0, 0, 255, 0)',
-        0.1, 'royalblue',
-        0.3, 'cyan',
-        0.5, 'lime',
-        0.7, 'yellow',
-        1, 'red'
+        0,
+        'rgba(0, 0, 255, 0)',
+        0.1,
+        'royalblue',
+        0.3,
+        'cyan',
+        0.5,
+        'lime',
+        0.7,
+        'yellow',
+        1,
+        'red',
       ]);
     }
   }

@@ -41,13 +41,7 @@ export class HotPhase extends PureComponent {
   };
 
   render() {
-    const {
-      setPhaseData,
-      phaseData,
-      isShowingErrors,
-      errors,
-      setWarmPhaseOnRollover
-    } = this.props;
+    const { setPhaseData, phaseData, isShowingErrors, errors, setWarmPhaseOnRollover } = this.props;
 
     return (
       <Fragment>
@@ -99,7 +93,7 @@ export class HotPhase extends PureComponent {
                   }
                   docPath="indices-rollover-index.html"
                 />
-                <EuiSpacer size="m"/>
+                <EuiSpacer size="m" />
               </Fragment>
             }
           >
@@ -112,7 +106,7 @@ export class HotPhase extends PureComponent {
                 setWarmPhaseOnRollover(checked);
               }}
               label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-                defaultMessage: 'Enable rollover'
+                defaultMessage: 'Enable rollover',
               })}
             />
           </EuiFormRow>
@@ -123,9 +117,12 @@ export class HotPhase extends PureComponent {
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
                     id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
-                    label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
-                      defaultMessage: 'Maximum index size'
-                    })}
+                    label={i18n.translate(
+                      'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
+                      {
+                        defaultMessage: 'Maximum index size',
+                      }
+                    )}
                     errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
@@ -134,10 +131,7 @@ export class HotPhase extends PureComponent {
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
                       onChange={e => {
-                        setPhaseData(
-                          PHASE_ROLLOVER_MAX_SIZE_STORED,
-                          e.target.value
-                        );
+                        setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED, e.target.value);
                       }}
                       min={1}
                     />
@@ -152,23 +146,29 @@ export class HotPhase extends PureComponent {
                     errors={errors}
                   >
                     <EuiSelect
-                      aria-label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel', {
-                        defaultMessage: 'Maximum index size units'
-                      })}
+                      aria-label={i18n.translate(
+                        'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                        {
+                          defaultMessage: 'Maximum index size units',
+                        }
+                      )}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
                       onChange={e => {
-                        setPhaseData(
-                          PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
-                          e.target.value
-                        );
+                        setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS, e.target.value);
                       }}
                       options={[
-                        { value: 'gb', text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel', {
-                          defaultMessage: 'gigabytes'
-                        }) },
-                        { value: 'mb', text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
-                          defaultMessage: 'megabytes'
-                        }) }
+                        {
+                          value: 'gb',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel', {
+                            defaultMessage: 'gigabytes',
+                          }),
+                        },
+                        {
+                          value: 'mb',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+                            defaultMessage: 'megabytes',
+                          }),
+                        },
                       ]}
                     />
                   </ErrableFormRow>
@@ -179,9 +179,12 @@ export class HotPhase extends PureComponent {
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
                     id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
-                    label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
-                      defaultMessage: 'Maximum documents'
-                    })}
+                    label={i18n.translate(
+                      'xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel',
+                      {
+                        defaultMessage: 'Maximum documents',
+                      }
+                    )}
                     errorKey={PHASE_ROLLOVER_MAX_DOCUMENTS}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
@@ -190,10 +193,7 @@ export class HotPhase extends PureComponent {
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
                       onChange={e => {
-                        setPhaseData(
-                          PHASE_ROLLOVER_MAX_DOCUMENTS,
-                          e.target.value
-                        );
+                        setPhaseData(PHASE_ROLLOVER_MAX_DOCUMENTS, e.target.value);
                       }}
                       min={1}
                     />
@@ -206,7 +206,7 @@ export class HotPhase extends PureComponent {
                   <ErrableFormRow
                     id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                     label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
-                      defaultMessage: 'Maximum age'
+                      defaultMessage: 'Maximum age',
                     })}
                     errorKey={`${PHASE_ROLLOVER_MAX_AGE}`}
                     isShowingErrors={isShowingErrors}
@@ -231,23 +231,29 @@ export class HotPhase extends PureComponent {
                     errors={errors}
                   >
                     <EuiSelect
-                      aria-label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel', {
-                        defaultMessage: 'Maximum age units'
-                      })}
+                      aria-label={i18n.translate(
+                        'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
+                        {
+                          defaultMessage: 'Maximum age units',
+                        }
+                      )}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
                       onChange={e => {
-                        setPhaseData(
-                          PHASE_ROLLOVER_MAX_AGE_UNITS,
-                          e.target.value
-                        );
+                        setPhaseData(PHASE_ROLLOVER_MAX_AGE_UNITS, e.target.value);
                       }}
                       options={[
-                        { value: 'd', text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.daysLabel', {
-                          defaultMessage: 'days'
-                        }) },
-                        { value: 'h', text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
-                          defaultMessage: 'hours'
-                        }) },
+                        {
+                          value: 'd',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.daysLabel', {
+                            defaultMessage: 'days',
+                          }),
+                        },
+                        {
+                          value: 'h',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
+                            defaultMessage: 'hours',
+                          }),
+                        },
                       ]}
                     />
                   </ErrableFormRow>

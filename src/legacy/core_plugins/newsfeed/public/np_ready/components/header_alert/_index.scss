@@ -1,0 +1,27 @@
+@import '@elastic/eui/src/components/header/variables';
+
+.kbnNews__flyout {
+  top: $euiHeaderChildSize + 1px;
+  height: calc(100% - #{$euiHeaderChildSize});
+}
+
+.kbnNewsFeed__headerAlert.euiHeaderAlert {
+  margin-bottom: $euiSizeL;
+  padding: 0 $euiSizeS $euiSizeL;
+  border-bottom: $euiBorderThin;
+  border-top: none;
+
+  .euiHeaderAlert__title {
+    @include euiTitle('xs');
+    margin-bottom: $euiSizeS;
+  }
+
+  .euiHeaderAlert__text {
+    @include euiFontSizeS;
+    margin-bottom: $euiSize;
+  }
+
+  .euiHeaderAlert__action {
+    @include euiFontSizeS;
+  }
+}

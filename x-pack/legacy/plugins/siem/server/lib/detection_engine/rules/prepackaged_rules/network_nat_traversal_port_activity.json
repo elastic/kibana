@@ -1,0 +1,17 @@
+{
+  "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
+  "risk_score": 50,
+  "description": "Network - NAT Traversal Port Activity\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - NAT Traversal Port Activity\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:4500",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

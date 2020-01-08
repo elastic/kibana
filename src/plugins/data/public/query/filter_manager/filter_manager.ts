@@ -17,30 +17,29 @@
  * under the License.
  */
 
-import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
-
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
+import { esFilters } from '../../../common';
 
 export class FilterManager {
-  private filters: Filter[] = [];
+  private filters: esFilters.Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
-  constructor(uiSettings: UiSettingsClientContract) {
+  constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
 
-  private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
+  private mergeIncomingFilters(partitionedFilters: PartitionedFilters): esFilters.Filter[] {
     const globalFilters = partitionedFilters.globalFilters;
     const appFilters = partitionedFilters.appFilters;
 
@@ -61,25 +60,33 @@ export class FilterManager {
     return FilterManager.mergeFilters(appFilters, globalFilters);
   }
 
-  private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
+  private static mergeFilters(
+    appFilters: esFilters.Filter[],
+    globalFilters: esFilters.Filter[]
+  ): esFilters.Filter[] {
     return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
-  private static partitionFilters(filters: Filter[]): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
+  private static partitionFilters(filters: esFilters.Filter[]): PartitionedFilters {
+    const [globalFilters, appFilters] = _.partition(filters, esFilters.isFilterPinned);
     return {
       globalFilters,
       appFilters,
     };
   }
 
-  private handleStateUpdate(newFilters: Filter[]) {
+  private handleStateUpdate(newFilters: esFilters.Filter[]) {
     // global filters should always be first
-    newFilters.sort(({ $state: a }: Filter, { $state: b }: Filter): number => {
-      return a!.store === FilterStateStore.GLOBAL_STATE &&
-        b!.store !== FilterStateStore.GLOBAL_STATE
-        ? -1
-        : 1;
+
+    newFilters.sort(({ $state: a }: esFilters.Filter, { $state: b }: esFilters.Filter): number => {
+      if (a!.store === b!.store) {
+        return 0;
+      } else {
+        return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
+          b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
+          ? -1
+          : 1;
+      }
     });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);
@@ -124,7 +131,7 @@ export class FilterManager {
 
   /* Setters */
 
-  public addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
+  public addFilters(filters: esFilters.Filter[] | esFilters.Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -139,7 +146,10 @@ export class FilterManager {
 
     // Set the store of all filters. For now.
     // In the future, all filters should come in with filter state store already set.
-    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+    const store = pinFilterStatus
+      ? esFilters.FilterStateStore.GLOBAL_STATE
+      : esFilters.FilterStateStore.APP_STATE;
+
     FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = mapAndFlattenFilters(filters);
@@ -154,14 +164,14 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public setFilters(newFilters: Filter[]) {
+  public setFilters(newFilters: esFilters.Filter[]) {
     const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
     this.handleStateUpdate(mergedFilters);
   }
 
-  public removeFilter(filter: Filter) {
+  public removeFilter(filter: esFilters.Filter) {
     const filterIndex = _.findIndex(this.filters, item => {
       return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
     });
@@ -177,8 +187,8 @@ export class FilterManager {
     this.setFilters([]);
   }
 
-  public static setFiltersStore(filters: Filter[], store: FilterStateStore) {
-    _.map(filters, (filter: Filter) => {
+  public static setFiltersStore(filters: esFilters.Filter[], store: esFilters.FilterStateStore) {
+    _.map(filters, (filter: esFilters.Filter) => {
       // Override status only for filters that didn't have state in the first place.
       if (filter.$state === undefined) {
         filter.$state = { store };

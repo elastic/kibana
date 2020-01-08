@@ -24,7 +24,7 @@ export class Listing extends PureComponent {
     return [
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.nameTitle', {
-          defaultMessage: 'Name'
+          defaultMessage: 'Name',
         }),
         field: 'name',
         sortable: true,
@@ -36,7 +36,7 @@ export class Listing extends PureComponent {
             const status = list[uuid] || {};
             const instance = {
               uuid,
-              name: node.name
+              name: node.name,
             };
 
             setupModeStatus = (
@@ -64,50 +64,48 @@ export class Listing extends PureComponent {
                   {name}
                 </EuiLink>
               </div>
-              <div>
-                {node.logstash.http_address}
-              </div>
+              <div>{node.logstash.http_address}</div>
               {setupModeStatus}
             </div>
           );
-        }
+        },
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {
-          defaultMessage: 'CPU Usage'
+          defaultMessage: 'CPU Usage',
         }),
         field: 'cpu_usage',
         sortable: true,
-        render: value => formatPercentageUsage(value, 100)
+        render: value => formatPercentageUsage(value, 100),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.loadAverageTitle', {
-          defaultMessage: 'Load Average'
+          defaultMessage: 'Load Average',
         }),
         field: 'load_average',
         sortable: true,
-        render: value => formatNumber(value, '0.00')
+        render: value => formatNumber(value, '0.00'),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.jvmHeapUsedTitle', {
           defaultMessage: '{javaVirtualMachine} Heap Used',
-          values: { javaVirtualMachine: 'JVM' }
+          values: { javaVirtualMachine: 'JVM' },
         }),
         field: 'jvm_heap_used',
         sortable: true,
-        render: value => formatPercentageUsage(value, 100)
+        render: value => formatPercentageUsage(value, 100),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
-          defaultMessage: 'Events Ingested'
+          defaultMessage: 'Events Ingested',
         }),
         field: 'events_out',
         sortable: true,
-        render: value => formatNumber(value, '0.[0]a')
+        render: value => formatNumber(value, '0.[0]a'),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.configReloadsTitle', {
-          defaultMessage: 'Config Reloads'
+          defaultMessage: 'Config Reloads',
         }),
         sortable: true,
         render: node => (
@@ -127,16 +125,16 @@ export class Listing extends PureComponent {
               />
             </div>
           </div>
-        )
+        ),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.versionTitle', {
-          defaultMessage: 'Version'
+          defaultMessage: 'Version',
         }),
         field: 'version',
         sortable: true,
-        render: value => formatNumber(value)
-      }
+        render: value => formatNumber(value),
+      },
     ];
   }
 
@@ -183,21 +181,21 @@ export class Listing extends PureComponent {
                 ...sorting,
                 sort: {
                   ...sorting.sort,
-                  field: 'name'
-                }
+                  field: 'name',
+                },
               }}
               pagination={pagination}
               search={{
                 box: {
                   incremental: true,
                   placeholder: i18n.translate('xpack.monitoring.logstash.filterNodesPlaceholder', {
-                    defaultMessage: 'Filter Nodes…'
-                  })
+                    defaultMessage: 'Filter Nodes…',
+                  }),
                 },
               }}
               onTableChange={onTableChange}
               executeQueryOptions={{
-                defaultFields: ['name']
+                defaultFields: ['name'],
               }}
             />
           </EuiPageContent>

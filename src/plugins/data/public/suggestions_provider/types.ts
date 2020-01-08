@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IFieldType } from '../../common';
 
-// Should be import { Field } from './index_patterns';
-export type Field = any;
-
-export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;
+export type IGetSuggestions = (
+  index: string,
+  field: IFieldType,
+  query: string,
+  boolFilter?: any
+) => any;

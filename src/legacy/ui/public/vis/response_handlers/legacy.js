@@ -28,15 +28,14 @@ import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
  * function.
  */
 
-export const legacyResponseHandlerProvider = function () {
-
+export const legacyResponseHandlerProvider = function() {
   return {
     name: 'legacy',
-    handler: function (table, dimensions) {
-      return new Promise((resolve) => {
+    handler: function(table, dimensions) {
+      return new Promise(resolve => {
         const converted = { tables: [] };
 
-        const split = (dimensions.splitColumn || dimensions.splitRow);
+        const split = dimensions.splitColumn || dimensions.splitRow;
 
         if (split) {
           converted.direction = dimensions.splitRow ? 'row' : 'column';
@@ -59,12 +58,12 @@ export const legacyResponseHandlerProvider = function () {
                 column: splitColumnIndex,
                 row: rowIndex,
                 table: table,
-                tables: []
+                tables: [],
               };
               tableGroup.tables.push({
                 $parent: tableGroup,
                 columns: table.columns,
-                rows: []
+                rows: [],
               });
 
               converted.tables.push(tableGroup);
@@ -74,16 +73,14 @@ export const legacyResponseHandlerProvider = function () {
             converted.tables[tableIndex].tables[0].rows.push(row);
           });
         } else {
-
           converted.tables.push({
             columns: table.columns,
-            rows: table.rows
+            rows: table.rows,
           });
         }
 
         resolve(converted);
       });
-    }
+    },
   };
 };
-

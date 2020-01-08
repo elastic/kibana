@@ -17,56 +17,39 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { FlyoutService } from './flyout';
-import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
+import { IUiSettingsClient } from '../ui_settings';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
-import { UiSettingsClientContract } from '../ui_settings';
-
-/**
- * Returned by {@link OverlayStart} methods for closing a mounted overlay.
- * @public
- */
-export interface OverlayRef {
-  /**
-   * A Promise that will resolve once this overlay is closed.
-   *
-   * Overlays can close from user interaction, calling `close()` on the overlay
-   * reference or another overlay replacing yours via `openModal` or `openFlyout`.
-   */
-  onClose: Promise<void>;
-
-  /**
-   * Closes the referenced overlay if it's still open which in turn will
-   * resolve the `onClose` Promise. If the overlay had already been
-   * closed this method does nothing.
-   */
-  close(): Promise<void>;
-}
+import { FlyoutService, OverlayFlyoutStart } from './flyout';
+import { ModalService, OverlayModalStart } from './modal';
 
 interface StartDeps {
   i18n: I18nStart;
   targetDomElement: HTMLElement;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
 export class OverlayService {
+  private bannersService = new OverlayBannersService();
+  private modalService = new ModalService();
+  private flyoutService = new FlyoutService();
+
   public start({ i18n, targetDomElement, uiSettings }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
-    const modalElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
+    const flyouts = this.flyoutService.start({ i18n, targetDomElement: flyoutElement });
+
+    const banners = this.bannersService.start({ i18n, uiSettings });
+
+    const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
-    const flyoutService = new FlyoutService(flyoutElement);
-    const modalService = new ModalService(modalElement);
-    const bannersService = new OverlayBannersService();
+    const modals = this.modalService.start({ i18n, targetDomElement: modalElement });
 
     return {
-      banners: bannersService.start({ i18n, uiSettings }),
-      openFlyout: flyoutService.openFlyout.bind(flyoutService, i18n),
-      openModal: modalService.openModal.bind(modalService, i18n),
+      banners,
+      openFlyout: flyouts.open.bind(flyouts),
+      openModal: modals.open.bind(modals),
     };
   }
 }
@@ -75,19 +58,8 @@ export class OverlayService {
 export interface OverlayStart {
   /** {@link OverlayBannersStart} */
   banners: OverlayBannersStart;
-  openFlyout: (
-    flyoutChildren: React.ReactNode,
-    flyoutProps?: {
-      closeButtonAriaLabel?: string;
-      'data-test-subj'?: string;
-    }
-  ) => OverlayRef;
-  openModal: (
-    modalChildren: React.ReactNode,
-    modalProps?: {
-      className?: string;
-      closeButtonAriaLabel?: string;
-      'data-test-subj'?: string;
-    }
-  ) => OverlayRef;
+  /** {@link OverlayFlyoutStart#open} */
+  openFlyout: OverlayFlyoutStart['open'];
+  /** {@link OverlayModalStart#open} */
+  openModal: OverlayModalStart['open'];
 }

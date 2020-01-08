@@ -5,8 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, Render } from '../../../types';
+import { Datatable, Render, ExpressionFunction } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

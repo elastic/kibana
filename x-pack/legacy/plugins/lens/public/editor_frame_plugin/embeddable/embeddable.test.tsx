@@ -5,10 +5,8 @@
  */
 
 import { Embeddable } from './embeddable';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
-import { Filter } from '@kbn/es-query';
+import { ExpressionRendererProps } from 'src/plugins/expressions/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
@@ -63,7 +61,9 @@ describe('embeddable', () => {
   it('should re-render if new input is pushed', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: false } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -88,7 +88,9 @@ describe('embeddable', () => {
   it('should pass context to embeddable', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: false } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -112,7 +114,9 @@ describe('embeddable', () => {
   it('should not re-render if only change is in disabled filter', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: true } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,

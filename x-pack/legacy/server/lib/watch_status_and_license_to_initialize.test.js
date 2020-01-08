@@ -5,9 +5,13 @@
  */
 
 import { EventEmitter } from 'events';
-import { watchStatusAndLicenseToInitialize, RETRY_SCALE_DURATION, RETRY_DURATION_MAX } from './watch_status_and_license_to_initialize';
+import {
+  watchStatusAndLicenseToInitialize,
+  RETRY_SCALE_DURATION,
+  RETRY_DURATION_MAX,
+} from './watch_status_and_license_to_initialize';
 
-const createMockXpackMainPluginAndFeature = (featureId) => {
+const createMockXpackMainPluginAndFeature = featureId => {
   const licenseChangeCallbacks = [];
 
   const mockFeature = {
@@ -18,23 +22,23 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
           callback();
         }
       },
-      setLicenseCheckResults: (value) => {
+      setLicenseCheckResults: value => {
         mockFeature.getLicenseCheckResults.mockReturnValue(value);
-      }
-    }
+      },
+    },
   };
 
   const mockXpackMainPlugin = {
     info: {
-      onLicenseInfoChange: (callback) => {
+      onLicenseInfoChange: callback => {
         licenseChangeCallbacks.push(callback);
       },
-      feature: (id) => {
+      feature: id => {
         if (id === featureId) {
           return mockFeature;
         }
         throw new Error('Unexpected feature');
-      }
+      },
     },
     status: new EventEmitter(),
     mock: {
@@ -42,15 +46,17 @@ const createMockXpackMainPluginAndFeature = (featureId) => {
         mockXpackMainPlugin.status.state = state;
         mockXpackMainPlugin.status.message = message;
         mockXpackMainPlugin.status.emit('change', null, null, state, message);
-      }
-    }
+      },
+    },
   };
 
   return { mockXpackMainPlugin, mockFeature };
 };
 
-const createMockDownstreamPlugin = (id) => {
-  const defaultImplementation = () => { throw new Error('Not implemented'); };
+const createMockDownstreamPlugin = id => {
+  const defaultImplementation = () => {
+    throw new Error('Not implemented');
+  };
   return {
     id,
     status: {
@@ -62,7 +68,7 @@ const createMockDownstreamPlugin = (id) => {
   };
 };
 
-const advanceRetry = async (initializeCount) => {
+const advanceRetry = async initializeCount => {
   await Promise.resolve();
   let duration = initializeCount * RETRY_SCALE_DURATION;
   if (duration > RETRY_DURATION_MAX) {
@@ -79,7 +85,7 @@ const advanceRetry = async (initializeCount) => {
     mockXpackMainPlugin.mock.setStatus(state, message);
     const downstreamPlugin = createMockDownstreamPlugin(pluginId);
     const initializeMock = jest.fn();
-    downstreamPlugin.status[state].mockImplementation(() => { });
+    downstreamPlugin.status[state].mockImplementation(() => {});
 
     watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
@@ -96,7 +102,7 @@ test(`calls initialize and doesn't immediately set downstream status when the in
   const licenseCheckResults = Symbol();
   mockFeature.mock.setLicenseCheckResults(licenseCheckResults);
   const downstreamPlugin = createMockDownstreamPlugin(pluginId);
-  const initializeMock = jest.fn().mockImplementation(() => new Promise(() => { }));
+  const initializeMock = jest.fn().mockImplementation(() => new Promise(() => {}));
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 
@@ -105,7 +111,7 @@ test(`calls initialize and doesn't immediately set downstream status when the in
   expect(downstreamPlugin.status.green).toHaveBeenCalledTimes(0);
 });
 
-test(`sets downstream plugin's status to green when initialize resolves`, (done) => {
+test(`sets downstream plugin's status to green when initialize resolves`, done => {
   const pluginId = 'foo-plugin';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
   mockXpackMainPlugin.mock.setStatus('green', 'green is now the state');
@@ -124,7 +130,7 @@ test(`sets downstream plugin's status to green when initialize resolves`, (done)
   });
 });
 
-test(`sets downstream plugin's status to red when initialize initially rejects, and continually polls initialize`, (done) => {
+test(`sets downstream plugin's status to red when initialize initially rejects, and continually polls initialize`, done => {
   jest.useFakeTimers();
 
   const pluginId = 'foo-plugin';
@@ -168,7 +174,7 @@ test(`sets downstream plugin's status to red when initialize initially rejects, 
   });
 });
 
-test(`sets downstream plugin's status to green when initialize resolves after rejecting 10 times`, (done) => {
+test(`sets downstream plugin's status to green when initialize resolves after rejecting 10 times`, done => {
   jest.useFakeTimers();
 
   const pluginId = 'foo-plugin';
@@ -211,7 +217,7 @@ test(`sets downstream plugin's status to green when initialize resolves after re
   });
 });
 
-test(`calls initialize twice when it gets a new license and the status is green`, (done) => {
+test(`calls initialize twice when it gets a new license and the status is green`, done => {
   const pluginId = 'foo-plugin';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
   mockXpackMainPlugin.mock.setStatus('green');
@@ -240,7 +246,7 @@ test(`calls initialize twice when it gets a new license and the status is green`
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 });
 
-test(`doesn't call initialize twice when it gets a new license when the status isn't green`, (done) => {
+test(`doesn't call initialize twice when it gets a new license when the status isn't green`, done => {
   const pluginId = 'foo-plugin';
   const redMessage = 'the red message';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
@@ -268,7 +274,7 @@ test(`doesn't call initialize twice when it gets a new license when the status i
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 });
 
-test(`calls initialize twice when the status changes to green twice`, (done) => {
+test(`calls initialize twice when the status changes to green twice`, done => {
   const pluginId = 'foo-plugin';
   const { mockXpackMainPlugin, mockFeature } = createMockXpackMainPluginAndFeature(pluginId);
   mockXpackMainPlugin.mock.setStatus('green');
@@ -293,4 +299,3 @@ test(`calls initialize twice when the status changes to green twice`, (done) => 
 
   watchStatusAndLicenseToInitialize(mockXpackMainPlugin, downstreamPlugin, initializeMock);
 });
-

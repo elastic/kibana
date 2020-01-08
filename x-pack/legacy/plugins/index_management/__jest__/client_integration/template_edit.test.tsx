@@ -5,8 +5,6 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
@@ -17,27 +15,7 @@ const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 
 const { setup } = pageHelpers.templateEdit;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
-  CONTAINS_SPACES: 'CONTAINS_SPACES',
-  validateIndexPattern: () => {
-    return {
-      errors: {},
-    };
-  },
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-jest.mock('../../public/services/api', () => ({
-  ...jest.requireActual('../../public/services/api'),
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -62,9 +40,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateEdit />', () => {
+describe('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -83,7 +59,6 @@ describe.skip('<TemplateEdit />', () => {
 
     testBed = await setup();
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       await nextTick();
       testBed.component.update();
@@ -109,7 +84,6 @@ describe.skip('<TemplateEdit />', () => {
     beforeEach(async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         // Complete step 1 (logistics)
         await actions.completeStepOne({
@@ -130,7 +104,6 @@ describe.skip('<TemplateEdit />', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickSubmitButton();
         await nextTick();
@@ -140,17 +113,18 @@ describe.skip('<TemplateEdit />', () => {
 
       const { version, order } = templateToEdit;
 
-      const expected = {
+      const expected = JSON.stringify({
         name: TEMPLATE_NAME,
         version,
         order,
         indexPatterns: UPDATED_INDEX_PATTERN,
+        isManaged: false,
         settings: SETTINGS,
         mappings: MAPPINGS,
         aliases: ALIASES,
-        isManaged: false,
-      };
-      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+      });
+
+      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });

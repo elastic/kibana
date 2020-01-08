@@ -45,6 +45,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
+        alerts: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -59,6 +60,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
+        alerts: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -96,6 +98,15 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { field: TlsFields._id, direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
+        },
       },
     },
     details: {
@@ -130,6 +141,11 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [networkModel.IpDetailsTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
         },
       },
     },
@@ -167,6 +183,7 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
@@ -178,16 +195,21 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
+        isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        loadingEventIds: [],
         title: '',
         noteIds: [],
         dateRange: {
           start: 0,
           end: 0,
         },
+        selectedEventIds: {},
         show: false,
+        showRowRenderers: true,
+        showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],

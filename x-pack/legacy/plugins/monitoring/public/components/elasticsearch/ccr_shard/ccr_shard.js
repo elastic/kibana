@@ -28,26 +28,17 @@ import { i18n } from '@kbn/i18n';
 export class CcrShard extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
-    const seriesToShow = [
-      metrics.ccr_sync_lag_ops,
-      metrics.ccr_sync_lag_time
-    ];
+    const seriesToShow = [metrics.ccr_sync_lag_ops, metrics.ccr_sync_lag_time];
 
     const charts = seriesToShow.map((data, index) => (
       <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
         <EuiPanel>
-          <MonitoringTimeseriesContainer
-            series={data}
-          />
+          <MonitoringTimeseriesContainer series={data} />
         </EuiPanel>
       </EuiFlexItem>
     ));
 
-    return (
-      <Fragment>
-        {charts}
-      </Fragment>
-    );
+    return <Fragment>{charts}</Fragment>;
   }
 
   renderErrors() {
@@ -66,27 +57,33 @@ export class CcrShard extends PureComponent {
                 </EuiTextColor>
               </h3>
             </EuiTitle>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <EuiBasicTable
               items={stat.read_exceptions}
               columns={[
                 {
-                  name: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle', {
-                    defaultMessage: 'Type'
-                  }),
-                  field: 'exception.type'
+                  name: i18n.translate(
+                    'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
+                    {
+                      defaultMessage: 'Type',
+                    }
+                  ),
+                  field: 'exception.type',
                 },
                 {
-                  name: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle', {
-                    defaultMessage: 'Reason'
-                  }),
+                  name: i18n.translate(
+                    'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
+                    {
+                      defaultMessage: 'Reason',
+                    }
+                  ),
                   field: 'exception.reason',
-                  width: '75%'
-                }
+                  width: '75%',
+                },
               ]}
             />
           </EuiPanel>
-          <EuiHorizontalRule/>
+          <EuiHorizontalRule />
         </Fragment>
       );
     }
@@ -99,7 +96,7 @@ export class CcrShard extends PureComponent {
     return (
       <EuiAccordion
         id="ccrLatestStat"
-        buttonContent={(
+        buttonContent={
           <EuiTitle>
             <h2>
               <FormattedMessage
@@ -108,17 +105,15 @@ export class CcrShard extends PureComponent {
               />
             </h2>
           </EuiTitle>
-        )}
+        }
         paddingSize="l"
       >
         <Fragment>
           <EuiTitle size="s">
             <h4>{formatDateTimeLocal(timestamp)}</h4>
           </EuiTitle>
-          <EuiHorizontalRule/>
-          <EuiCodeBlock language="json">
-            {JSON.stringify(stat, null, 2)}
-          </EuiCodeBlock>
+          <EuiHorizontalRule />
+          <EuiCodeBlock language="json">{JSON.stringify(stat, null, 2)}</EuiCodeBlock>
         </Fragment>
       </EuiAccordion>
     );
@@ -130,13 +125,11 @@ export class CcrShard extends PureComponent {
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat}/>
-          <EuiSpacer size="s"/>
+          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat} />
+          <EuiSpacer size="s" />
           {this.renderErrors()}
-          <EuiFlexGroup wrap>
-            {this.renderCharts()}
-          </EuiFlexGroup>
-          <EuiHorizontalRule/>
+          <EuiFlexGroup wrap>{this.renderCharts()}</EuiFlexGroup>
+          <EuiHorizontalRule />
           {this.renderLatestStat()}
         </EuiPageBody>
       </EuiPage>

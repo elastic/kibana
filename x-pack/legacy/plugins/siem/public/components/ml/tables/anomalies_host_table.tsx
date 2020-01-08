@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
@@ -27,7 +27,7 @@ const sorting = {
     field: 'anomaly.severity',
     direction: 'desc',
   },
-};
+} as const;
 
 export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
   ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
@@ -62,7 +62,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     } else {
       return (
         <Panel loading={loading}>
-          <HeaderPanel
+          <HeaderSection
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
             )}`}
@@ -71,8 +71,10 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
           />
 
           <BasicTable
+            // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             compressed
+            // @ts-ignore ...which leads to `networks` not "matching" the columns
             items={hosts}
             pagination={pagination}
             sorting={sorting}

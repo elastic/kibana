@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, FILTERS, isMatchAllFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
-export const mapMatchAll = (filter: Filter) => {
-  if (isMatchAllFilter(filter)) {
+export const mapMatchAll = (filter: esFilters.Filter) => {
+  if (esFilters.isMatchAllFilter(filter)) {
     return {
-      type: FILTERS.MATCH_ALL,
+      type: esFilters.FILTERS.MATCH_ALL,
       key: filter.meta.field,
       value: filter.meta.formattedValue || 'all',
     };

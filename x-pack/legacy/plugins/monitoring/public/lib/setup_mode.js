@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
+import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
+import { npSetup } from 'ui/new_platform';
 
 function isOnPage(hash) {
   return contains(window.location.hash, hash);
@@ -19,15 +25,15 @@ const angularState = {
 
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
-    throw 'Unable to interact with setup mode because the angular injector was not previously set.'
-      + ' This needs to be set by calling `initSetupModeState`.';
+    throw 'Unable to interact with setup mode because the angular injector was not previously set.' +
+      ' This needs to be set by calling `initSetupModeState`.';
   }
 };
 
 const setupModeState = {
   enabled: false,
   data: null,
-  callbacks: []
+  callbacks: [],
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -53,26 +59,23 @@ export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false)
   let url = '../api/monitoring/v1/setup/collection';
   if (uuid) {
     url += `/node/${uuid}`;
-  }
-  else if (!fetchWithoutClusterUuid && clusterUuid) {
+  } else if (!fetchWithoutClusterUuid && clusterUuid) {
     url += `/cluster/${clusterUuid}`;
-  }
-  else {
+  } else {
     url += '/cluster';
   }
 
   try {
     const response = await http.post(url, { ccs });
     return response.data;
-  }
-  catch (err) {
+  } catch (err) {
     const Private = angularState.injector.get('Private');
     const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
     return ajaxErrorHandlers(err);
   }
 };
 
-const notifySetupModeDataChange = (oldData) => {
+const notifySetupModeDataChange = oldData => {
   setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
@@ -80,7 +83,29 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  if (get(data, '_meta.isOnCloud', false)) {
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
+  const hasPermissions = get(data, '_meta.hasPermissions', false);
+  if (isCloudEnabled || !hasPermissions) {
+    let text = null;
+    if (!hasPermissions) {
+      text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
+        defaultMessage: 'You do not have the necessary permissions to do this.',
+      });
+    } else {
+      text = i18n.translate('xpack.monitoring.setupMode.notAvailableCloud', {
+        defaultMessage: 'This feature is not available on cloud.',
+      });
+    }
+
+    angularState.scope.$evalAsync(() => {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
+          defaultMessage: 'Setup mode is not available',
+        }),
+        text,
+      });
+    });
     return toggleSetupMode(false); // eslint-disable-line no-use-before-define
   }
   notifySetupModeDataChange(oldData);
@@ -89,8 +114,9 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const clusterUuid = globalState.cluster_uuid;
   if (!clusterUuid) {
     const liveClusterUuid = get(data, '_meta.liveClusterUuid');
-    const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {}))
-      .filter(node => node.isPartiallyMigrated || node.isFullyMigrated);
+    const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {})).filter(
+      node => node.isPartiallyMigrated || node.isFullyMigrated
+    );
     if (liveClusterUuid && migratedEsNodes.length > 0) {
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
     }
@@ -107,8 +133,7 @@ export const disableElasticsearchInternalCollection = async () => {
   try {
     const response = await http.post(url);
     return response.data;
-  }
-  catch (err) {
+  } catch (err) {
     const Private = angularState.injector.get('Private');
     const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
     return ajaxErrorHandlers(err);
@@ -139,21 +164,14 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const navItems = globalState.inSetupMode
-    ? []
-    : [{
-      id: 'enter',
-      label: 'Enter Setup Mode',
-      description: 'Enter setup',
-      run: () => toggleSetupMode(true),
-      testId: 'enterSetupMode'
-    }];
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
+  const enabled = !globalState.inSetupMode && !isCloudEnabled;
 
-  angularState.scope.topNavMenu = [...navItems];
-  // LOL angular
-  if (!angularState.scope.$$phase) {
-    angularState.scope.$apply();
-  }
+  render(
+    <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
+    document.getElementById('setupModeNav')
+  );
 };
 
 export const initSetupModeState = async ($scope, $injector, callback) => {
@@ -172,7 +190,7 @@ export const isInSetupMode = async () => {
     return true;
   }
 
-  const $injector = angularState.injector || await chrome.dangerouslyGetActiveInjector();
+  const $injector = angularState.injector || (await chrome.dangerouslyGetActiveInjector());
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
 };

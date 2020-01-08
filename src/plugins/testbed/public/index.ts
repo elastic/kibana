@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { TestbedPlugin, TestbedPluginSetup, TestbedPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<TestbedPluginSetup, TestbedPluginStart> = () =>
-  new TestbedPlugin();
+export const plugin: PluginInitializer<TestbedPluginSetup, TestbedPluginStart> = (
+  initializerContext: PluginInitializerContext
+) => new TestbedPlugin(initializerContext);

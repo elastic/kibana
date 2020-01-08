@@ -7,7 +7,6 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -37,7 +36,7 @@ export interface FlowTargetSelectDispatchProps {
 
 type FlowTargetSelectProps = FlowTargetSelectReduxProps & FlowTargetSelectDispatchProps;
 
-const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
+const FlowTargetSelectComponent = React.memo<FlowTargetSelectProps>(
   ({ flowTarget, updateIpDetailsFlowTarget }) => (
     <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
       <FlowTargetSelect
@@ -63,9 +62,6 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const FlowTargetSelectConnected = connect(
-  makeMapStateToProps,
-  {
-    updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-  }
-)(FlowTargetSelectComponent);
+export const FlowTargetSelectConnected = connect(makeMapStateToProps, {
+  updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
+})(FlowTargetSelectComponent);

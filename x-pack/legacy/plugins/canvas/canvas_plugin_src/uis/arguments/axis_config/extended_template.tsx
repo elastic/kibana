@@ -71,21 +71,31 @@ export class ExtendedTemplate extends PureComponent<Props> {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
     if (isDisabled) {
-      return <EuiText color="subdued">The axis is disabled</EuiText>;
+      return (
+        <EuiText color="subdued" size="xs">
+          <p>{strings.getDisabledText()}</p>
+        </EuiText>
+      );
     }
 
     const positions = {
-      xaxis: [strings.getPositionBottom(), strings.getPositionTop()],
-      yaxis: [strings.getPositionLeft(), strings.getPositionRight()],
+      xaxis: [
+        { value: 'bottom', text: strings.getPositionBottom() },
+        { value: 'top', text: strings.getPositionTop() },
+      ],
+      yaxis: [
+        { value: 'left', text: strings.getPositionLeft() },
+        { value: 'right', text: strings.getPositionRight() },
+      ],
     };
     const argName = this.props.typeInstance.name;
-    const position = this.getArgValue('position', positions[argName][0]);
+    const position = this.getArgValue('position', positions[argName][0].value);
 
-    const options = positions[argName].map(val => ({ value: val, text: val }));
+    const options = positions[argName];
 
     return (
       <Fragment>
-        <EuiFormRow label={strings.getPositionLabel()} display="rowCompressed">
+        <EuiFormRow label={strings.getPositionLabel()} display="columnCompressed">
           <EuiSelect
             compressed
             value={position}

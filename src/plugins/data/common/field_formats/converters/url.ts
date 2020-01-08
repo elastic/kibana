@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import { FieldFormat, IFieldFormatMetaParams } from '../field_format';
+import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -50,7 +50,7 @@ const URL_TYPES = [
 const DEFAULT_URL_TYPE = 'a';
 
 export class UrlFormat extends FieldFormat {
-  static id = 'url';
+  static id = FIELD_FORMAT_IDS.URL;
   static title = 'Url';
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
@@ -64,7 +64,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: Record<string, any>) {
+  constructor(params: IFieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }
@@ -134,7 +134,11 @@ export class UrlFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+  htmlConvert: HtmlContextTypeConvert = (rawValue, options = {}) => {
+    const { field, hit } = options;
+    const { parsedUrl } = this._params;
+    const { basePath, pathname, origin } = parsedUrl || {};
+
     const url = escape(this.formatUrl(rawValue));
     const label = escape(this.formatLabel(rawValue, url));
 
@@ -170,17 +174,17 @@ export class UrlFormat extends FieldFormat {
         if (!inWhitelist) {
           // Handles urls like: `#/discover`
           if (url[0] === '#') {
-            prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
+            prefix = `${origin}${pathname}`;
           }
           // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-          else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
-            prefix = `${parsedUrl.origin}`;
+          else if (url.indexOf(basePath || '/') === 0) {
+            prefix = `${origin}`;
           }
           // Handle urls like: `../app/kibana`
           else {
             const prefixEnd = url[0] === '/' ? '' : '/';
 
-            prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
+            prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
           }
         }
 

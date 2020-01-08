@@ -37,4 +37,4 @@ cause Kibana's authorization to behave unexpectedly.
 include::authorization/index.asciidoc[]
 include::authorization/kibana-privileges.asciidoc[]
 include::api-keys/index.asciidoc[]
-
+include::rbac_tutorial.asciidoc[]

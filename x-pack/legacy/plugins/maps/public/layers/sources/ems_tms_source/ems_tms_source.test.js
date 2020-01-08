@@ -24,42 +24,37 @@ jest.mock('../../../meta', () => {
           return [
             new MockTMSService({
               id: 'road_map',
-              attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
+              attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)',
             }),
             new MockTMSService({
               id: 'satellite',
-              attributionMarkdown: '[satellite](http://satellite.org)'
-            })
+              attributionMarkdown: '[satellite](http://satellite.org)',
+            }),
           ];
-        }
+        },
       };
-    }
+    },
   };
 });
 
-import {
-  EMSTMSSource,
-} from './ems_tms_source';
+import { EMSTMSSource } from './ems_tms_source';
 
 describe('EMSTMSSource', () => {
-
   it('should get attribution from markdown (tiles v2 legacy format)', async () => {
-
     const emsTmsSource = new EMSTMSSource({
-      id: 'road_map'
+      id: 'road_map',
     });
-
 
     const attributions = await emsTmsSource.getAttributions();
     expect(attributions).toEqual([
       {
         label: 'foobar',
-        url: 'http://foobar.org'
-      }, {
+        url: 'http://foobar.org',
+      },
+      {
         label: 'foobaz',
-        url: 'http://foobaz.org'
-      }
+        url: 'http://foobaz.org',
+      },
     ]);
   });
-
 });

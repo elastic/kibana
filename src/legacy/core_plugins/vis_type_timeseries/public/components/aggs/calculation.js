@@ -42,7 +42,7 @@ import {
 } from '@elastic/eui';
 
 export class CalculationAgg extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!this.props.model.variables) {
       this.props.onChange(
         _.assign({}, this.props.model, {

@@ -12,13 +12,13 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiCode,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, TIMELION, CANVAS } from '../../../i18n';
+import { TooltipIcon } from '../../../public/components/tooltip_icon';
 
 const { Timelion: strings } = DataSourceStrings;
 
@@ -57,43 +57,12 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiText size="xs">
-        <h3>{TIMELION}</h3>
-        <p>{strings.getAbout()}</p>
-      </EuiText>
-
-      <EuiSpacer />
-
-      <EuiFormRow label={strings.getQueryLabel()} helpText={strings.getQueryHelp()}>
-        <EuiTextArea
-          className="canvasTextArea__code"
-          value={getQuery()}
-          onChange={e => setArg(argName, e.target.value)}
-        />
-      </EuiFormRow>
-      {
-        // TODO: Time timelion interval picker should be a drop down
-      }
-      <EuiFormRow
-        label={strings.getIntervalLabel()}
-        helpText={strings.getIntervalHelp()}
-        display="rowCompressed"
-      >
-        <EuiFieldText
-          compressed
-          value={getInterval()}
-          onChange={e => setArg('interval', e.target.value)}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="m" />
-
-      <EuiCallOut color="warning" title={strings.getTipsHeading()} size="s">
+      <EuiCallOut title={strings.getTipsHeading()} size="s" iconType="iInCircle">
         <ul>
           <li>
             <FormattedMessage
               id="xpack.canvas.uis.dataSources.timelion.tips.time"
-              defaultMessage="{timelion} requires a time range, you should add a time filter element to your page somewhere, or use the code editor to pass in a time filter."
+              defaultMessage="{timelion} requires a time range. Add a time filter element to your page or use the expression editor to pass one in."
               values={{
                 timelion: TIMELION,
               }}
@@ -102,7 +71,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
           <li>
             <FormattedMessage
               id="xpack.canvas.uis.dataSources.timelion.tips.functions"
-              defaultMessage="Some {timelion} functions, such as {functionExample}, don't translate to a {canvas} data table. Anything todo with data manipulation should work grand."
+              defaultMessage="Some {timelion} functions, such as {functionExample}, do not translate to a {canvas} data table. However, anything todo with data manipulation should work as expected."
               values={{
                 timelion: TIMELION,
                 canvas: CANVAS,
@@ -112,6 +81,35 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
           </li>
         </ul>
       </EuiCallOut>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow
+        label={strings.getQueryLabel()}
+        helpText={strings.getQueryHelp()}
+        labelAppend={<TooltipIcon content={strings.getAbout()} />}
+      >
+        <EuiTextArea
+          className="canvasTextArea__code"
+          value={getQuery()}
+          onChange={e => setArg(argName, e.target.value)}
+          rows={15}
+        />
+      </EuiFormRow>
+      {
+        // TODO: Time timelion interval picker should be a drop down
+      }
+      <EuiFormRow
+        label={strings.getIntervalLabel()}
+        helpText={strings.getIntervalHelp()}
+        display="columnCompressed"
+      >
+        <EuiFieldText
+          compressed
+          value={getInterval()}
+          onChange={e => setArg('interval', e.target.value)}
+        />
+      </EuiFormRow>
     </div>
   );
 };

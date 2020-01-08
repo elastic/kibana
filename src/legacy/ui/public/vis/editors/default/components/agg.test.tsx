@@ -24,8 +24,8 @@ import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
-import { IndexPattern } from 'ui/index_patterns';
 import { AggType } from 'ui/agg_types';
+import { IndexPattern } from '../../../../../../../plugins/data/public';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -248,10 +248,9 @@ describe('DefaultEditorAgg component', () => {
       expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
         'min_doc_count',
       ]);
-      expect(compDateHistogram.find(DefaultEditorAggParams).props()).toHaveProperty(
-        'disabledParams',
-        ['min_doc_count']
-      );
+      expect(
+        compDateHistogram.find(DefaultEditorAggParams).props()
+      ).toHaveProperty('disabledParams', ['min_doc_count']);
     });
 
     it('should set error when agg is not histogram or date_histogram', () => {

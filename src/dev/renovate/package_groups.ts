@@ -78,7 +78,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'babel',
     packageWords: ['babel'],
-    packageNames: ['core-js'],
+    packageNames: ['core-js', '@babel/preset-react', '@babel/preset-typescript'],
   },
 
   {

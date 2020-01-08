@@ -71,6 +71,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
       maxCount: '',
       minCount: '',
     },
+    isManagedPolicy: false,
   };
 
   const renderSaveError = () => {

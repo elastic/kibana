@@ -76,7 +76,7 @@ export class Field extends PureComponent {
     this.changeImageForm = null;
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { unsavedValue } = this.state;
     const { type, value, defVal } = nextProps.setting;
     const editableValue = this.getEditableValue(type, value, defVal);
@@ -195,7 +195,7 @@ export class Field extends PureComponent {
     this.setState({
       unsavedValue: newUnsavedValue,
       isInvalid,
-      error
+      error,
     });
   };
 
@@ -232,11 +232,11 @@ export class Field extends PureComponent {
         isInvalid,
         error: isInvalid
           ? i18n.translate('kbn.management.settings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          })
+              defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
+              values: {
+                maxSizeDescription: maxSize.description,
+              },
+            })
           : null,
         changeImage: true,
         unsavedValue: base64Image,
@@ -764,6 +764,7 @@ export class Field extends PureComponent {
               helpText={this.renderHelpText(setting)}
               describedByIds={[`${setting.name}-aria`]}
               className="mgtAdvancedSettings__fieldRow"
+              hasChildLabel={setting.type !== 'boolean'}
             >
               {this.renderField(setting)}
             </EuiFormRow>

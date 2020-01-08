@@ -6,6 +6,7 @@
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as commonServices } from '../../common/services';
 
 import {
   MonitoringNoDataProvider,
@@ -47,14 +48,15 @@ import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { InfraLogStreamProvider } from './infra_log_stream';
 import { MachineLearningProvider } from './ml';
-
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
+import { TransformProvider } from './transform';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
 export const services = {
   ...kibanaFunctionalServices,
+  ...commonServices,
+
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -82,11 +84,10 @@ export const services = {
   random: RandomProvider,
   aceEditor: AceEditorProvider,
   grokDebugger: GrokDebuggerProvider,
-  security: SecurityServiceProvider,
-  spaces: SpacesServiceProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   infraLogStream: InfraLogStreamProvider,
   ml: MachineLearningProvider,
+  transform: TransformProvider,
 };

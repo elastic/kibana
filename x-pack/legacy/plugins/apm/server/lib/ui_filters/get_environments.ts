@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ESFilter } from '../../../typings/elasticsearch';
 
-export async function getEnvironments(setup: Setup, serviceName?: string) {
+export async function getEnvironments(
+  setup: Setup & SetupTimeRange,
+  serviceName?: string
+) {
   const { start, end, client, indices } = setup;
 
   const filter: ESFilter[] = [
@@ -55,7 +57,7 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
 
   const resp = await client.search(params);
   const aggs = resp.aggregations;
-  const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
+  const environmentsBuckets = aggs?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
     environmentBucket => environmentBucket.key as string

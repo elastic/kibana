@@ -50,7 +50,7 @@ const HeaderComp = React.memo<HeaderCompProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
 
@@ -66,7 +66,7 @@ const HeaderComp = React.memo<HeaderCompProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
           </EventsHeadingTitleSpan>
@@ -91,56 +91,58 @@ interface Props {
 }
 
 /** Renders a header */
-export const Header = React.memo<Props>(
-  ({
-    header,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
-    onFilterChange = noop,
-    setIsResizing,
-    sort,
-  }) => {
-    const onClick = () => {
-      onColumnSorted!({
-        columnId: header.id,
-        sortDirection: getNewSortDirectionOnClick({
-          clickedHeader: header,
-          currentSort: sort,
-        }),
-      });
-    };
+export const HeaderComponent = ({
+  header,
+  onColumnRemoved,
+  onColumnResized,
+  onColumnSorted,
+  onFilterChange = noop,
+  setIsResizing,
+  sort,
+}: Props) => {
+  const onClick = () => {
+    onColumnSorted!({
+      columnId: header.id,
+      sortDirection: getNewSortDirectionOnClick({
+        clickedHeader: header,
+        currentSort: sort,
+      }),
+    });
+  };
 
-    const onResize: OnResize = ({ delta, id }) => {
-      onColumnResized({ columnId: id, delta });
-    };
+  const onResize: OnResize = ({ delta, id }) => {
+    onColumnResized({ columnId: id, delta });
+  };
 
-    const renderActions = (isResizing: boolean) => {
-      setIsResizing(isResizing);
-      return (
-        <>
-          <HeaderComp header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
-            <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-          </HeaderComp>
-
-          <Filter header={header} onFilterChange={onFilterChange} />
-        </>
-      );
-    };
-
+  const renderActions = (isResizing: boolean) => {
+    setIsResizing(isResizing);
     return (
-      <Resizeable
-        bottom={0}
-        handle={<EventsHeadingHandle />}
-        id={header.id}
-        onResize={onResize}
-        positionAbsolute
-        render={renderActions}
-        right="-1px"
-        top={0}
-      />
+      <>
+        <HeaderComp header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
+          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+        </HeaderComp>
+
+        <Filter header={header} onFilterChange={onFilterChange} />
+      </>
     );
-  }
-);
+  };
+
+  return (
+    <Resizeable
+      bottom={0}
+      handle={<EventsHeadingHandle />}
+      id={header.id}
+      onResize={onResize}
+      positionAbsolute
+      render={renderActions}
+      right="-1px"
+      top={0}
+    />
+  );
+};
+
+HeaderComponent.displayName = 'HeaderComponent';
+
+export const Header = React.memo(HeaderComponent);
 
 Header.displayName = 'Header';

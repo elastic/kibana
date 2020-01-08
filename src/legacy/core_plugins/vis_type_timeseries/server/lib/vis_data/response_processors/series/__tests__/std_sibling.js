@@ -102,7 +102,10 @@ describe('stdSibling(resp, panel, series)', () => {
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },
-      data: [[1, 0.23], [2, 0.23]],
+      data: [
+        [1, 0.23],
+        [2, 0.23],
+      ],
     });
   });
 });

@@ -4,9 +4,8 @@
   height: 100%;
   display: flex;
   overflow-x: hidden;
-  padding: $euiSize;
 
-  > .expExpressionRenderer {
+  .lnsExpressionRenderer__component {
     position: static; // Let the progress indicator position itself against the outer parent
   }
 }

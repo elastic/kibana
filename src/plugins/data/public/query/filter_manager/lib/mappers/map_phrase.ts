@@ -18,45 +18,36 @@
  */
 
 import { get } from 'lodash';
-import {
-  PhraseFilter,
-  Filter,
-  FILTERS,
-  isPhraseFilter,
-  isScriptedPhraseFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  FilterValueFormatter,
-} from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
-const getScriptedPhraseValue = (filter: PhraseFilter) =>
+const getScriptedPhraseValue = (filter: esFilters.PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);
 
 const getFormattedValueFn = (value: any) => {
-  return (formatter?: FilterValueFormatter) => {
+  return (formatter?: esFilters.FilterValueFormatter) => {
     return formatter ? formatter.convert(value) : value;
   };
 };
 
-const getParams = (filter: PhraseFilter) => {
+const getParams = (filter: esFilters.PhraseFilter) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
   const isScriptedFilter = Boolean(scriptedPhraseValue);
-  const key = isScriptedFilter ? filter.meta.field || '' : getPhraseFilterField(filter);
-  const query = scriptedPhraseValue || getPhraseFilterValue(filter);
+  const key = isScriptedFilter ? filter.meta.field || '' : esFilters.getPhraseFilterField(filter);
+  const query = scriptedPhraseValue || esFilters.getPhraseFilterValue(filter);
   const params = { query };
 
   return {
     key,
     params,
-    type: FILTERS.PHRASE,
+    type: esFilters.FILTERS.PHRASE,
     value: getFormattedValueFn(query),
   };
 };
 
-export const isMapPhraseFilter = (filter: any): filter is PhraseFilter =>
-  isPhraseFilter(filter) || isScriptedPhraseFilter(filter);
+export const isMapPhraseFilter = (filter: any): filter is esFilters.PhraseFilter =>
+  esFilters.isPhraseFilter(filter) || esFilters.isScriptedPhraseFilter(filter);
 
-export const mapPhrase = (filter: Filter) => {
+export const mapPhrase = (filter: esFilters.Filter) => {
   if (!isMapPhraseFilter(filter)) {
     throw filter;
   }

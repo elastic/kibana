@@ -22,17 +22,11 @@ const unmountComponentAtNode = jest.fn();
 
 jest.doMock('react-dom', () => ({ render, unmountComponentAtNode }));
 
-// If we don't mock this, Jest fails with the error `TypeError: Cannot redefine property: prototype
-// at Function.defineProperties`.
-jest.mock('ui/index_patterns', () => ({
-  INDEX_PATTERN_ILLEGAL_CHARACTERS: ['\\', '/', '?', '"', '<', '>', '|', ' '],
-}));
-
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
-  addBasePath: () => { },
+  addBasePath: () => {},
 }));
 
 jest.mock('ui/i18n', () => ({
@@ -49,17 +43,14 @@ describe('CreateIndexPatternWizardRender', () => {
   });
 
   it('should call render', () => {
-    renderCreateIndexPatternWizard(
-      '',
-      {
-        es: {},
-        indexPatterns: {},
-        savedObjectsClient: {},
-        config: {},
-        changeUrl: () => {},
-        indexPatternCreationType: {},
-      }
-    );
+    renderCreateIndexPatternWizard('', {
+      es: {},
+      indexPatterns: {},
+      savedObjectsClient: {},
+      config: {},
+      changeUrl: () => {},
+      indexPatternCreationType: {},
+    });
 
     expect(render.mock.calls.length).toBe(1);
   });

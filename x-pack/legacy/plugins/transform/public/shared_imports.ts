@@ -25,12 +25,12 @@ export {
   ExpanderColumnType,
   FieldDataColumnType,
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   OnTableChangeArg,
   SortingPropType,
   SortDirection,
   SORT_DIRECTION,
-} from '../../ml/public/components/ml_in_memory_table';
+} from '../../ml/public/application/components/ml_in_memory_table';
 
 // @ts-ignore: could not find declaration file for module
-export { KqlFilterBar } from '../../ml/public/components/kql_filter_bar';
+export { KqlFilterBar } from '../../ml/public/application/components/kql_filter_bar';

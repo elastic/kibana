@@ -23,17 +23,21 @@ import _ from 'lodash';
 // Good: count, sum
 // Bad: avg, min, max
 
-
 // For upsampling cumulative metrics (eg sum from 1M to 1d), could rename this scale.
 // Really only the 0s that screws this up, need to distribute contents of spikes to empty buckets
 // Empty is currently 0, which is not right
 
 function sum(set) {
-  return _.reduce(set, function (sum, num) { return sum + num; }, 0);
+  return _.reduce(
+    set,
+    function(sum, num) {
+      return sum + num;
+    },
+    0
+  );
 }
 
 export default function scale(dataTuples, targetTuples) {
-
   let i = 0;
   let j = 0;
   let spreadCount = 0;
@@ -59,7 +63,6 @@ export default function scale(dataTuples, targetTuples) {
 
     // We hit a real number, or the end
     if (scaleSet.length > 0 || i === targetTuples.length - 1) {
-
       nextRealNumber = sum(scaleSet);
 
       step = nextRealNumber;
@@ -72,20 +75,17 @@ export default function scale(dataTuples, targetTuples) {
         // Thus [5, null, null, 30] becomes [5, 10, 10, 10]
         step = nextRealNumber / (spreadCount + 1);
         while (spreadCount > 0) {
-
           result[i - spreadCount][1] = step;
           spreadCount--;
         }
       }
       result.push([time, step]);
-
     } else {
       result.push([time, null]);
       spreadCount++;
     }
 
     i++;
-
   }
 
   return result;

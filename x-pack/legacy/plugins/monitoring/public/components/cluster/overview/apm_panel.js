@@ -8,7 +8,11 @@ import React from 'react';
 import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import {
+  ClusterItemContainer,
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink,
+} from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,22 +43,21 @@ export function ApmPanel(props) {
   const goToInstances = () => props.changeUrl('apm/instances');
 
   const setupModeData = get(setupMode.data, 'apm');
-  const setupModeTooltip = setupMode && setupMode.enabled
-    ? (
+  const setupModeTooltip =
+    setupMode && setupMode.enabled ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         badgeClickAction={goToInstances}
         productName={APM_SYSTEM_ID}
       />
-    )
-    : null;
+    ) : null;
 
   return (
     <ClusterItemContainer
       {...props}
       url="apm"
       title={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
-        defaultMessage: 'APM'
+        defaultMessage: 'APM',
       })}
     >
       <EuiFlexGrid columns={4}>
@@ -66,9 +69,12 @@ export function ApmPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   onClick={goToApm}
-                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
-                    defaultMessage: 'APM Overview'
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel',
+                    {
+                      defaultMessage: 'APM Overview',
+                    }
+                  )}
                   data-test-subj="apmOverview"
                 >
                   <FormattedMessage
@@ -99,7 +105,12 @@ export function ApmPanel(props) {
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.lastEventDescription"
                   defaultMessage="{timeOfLastEvent} ago"
-                  values={{ timeOfLastEvent: formatTimestampToDuration(+moment(props.timeOfLastEvent), CALCULATE_DURATION_SINCE) }}
+                  values={{
+                    timeOfLastEvent: formatTimestampToDuration(
+                      +moment(props.timeOfLastEvent),
+                      CALCULATE_DURATION_SINCE
+                    ),
+                  }}
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -117,7 +128,7 @@ export function ApmPanel(props) {
                         'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                         {
                           defaultMessage: 'APM Instances: {apmsTotal}',
-                          values: { apmsTotal }
+                          values: { apmsTotal },
                         }
                       )}
                       data-test-subj="apmListing"
@@ -125,7 +136,7 @@ export function ApmPanel(props) {
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
                         defaultMessage="APM Servers: {apmsTotal}"
-                        values={{ apmsTotal: (<span data-test-subj="apmsTotal">{apmsTotal}</span>) }}
+                        values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
                       />
                     </EuiLink>
                   </h3>

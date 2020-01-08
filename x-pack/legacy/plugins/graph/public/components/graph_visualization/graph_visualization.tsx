@@ -94,7 +94,6 @@ export function GraphVisualization({
                 }}
                 className={classNames('gphEdge', {
                   'gphEdge--selected': edge.isSelected,
-                  'gphEdge--inferred': edge.inferred,
                 })}
                 style={{ strokeWidth: edge.width }}
                 strokeLinecap="round"

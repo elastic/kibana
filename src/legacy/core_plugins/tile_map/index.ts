@@ -25,12 +25,19 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const tileMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'tile_map',
-    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({}),
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+        };
+      },
     },
     config(Joi: any) {
       return Joi.object({

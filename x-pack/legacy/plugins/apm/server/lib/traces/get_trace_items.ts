@@ -13,12 +13,16 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export async function getTraceItems(traceId: string, setup: Setup) {
+export async function getTraceItems(
+  traceId: string,
+  setup: Setup & SetupTimeRange
+) {
   const { start, end, client, config, indices } = setup;
-  const maxTraceItems = config.get<number>('xpack.apm.ui.maxTraceItems');
+  const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
 
   const params = {
     index: [
@@ -31,7 +35,7 @@ export async function getTraceItems(traceId: string, setup: Setup) {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
+            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction', 'error'] } },
             { range: rangeFilter(start, end) }
           ],
           should: {
@@ -48,7 +52,7 @@ export async function getTraceItems(traceId: string, setup: Setup) {
     }
   };
 
-  const resp = await client.search<Transaction | Span>(params);
+  const resp = await client.search<Transaction | Span | APMError>(params);
 
   return {
     items: resp.hits.hits.map(hit => hit._source),

@@ -5,9 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
-import * as React from 'react';
+import React from 'react';
 
 import { AddNote } from '.';
 
@@ -25,7 +23,7 @@ describe('AddNote', () => {
         updateNote={jest.fn()}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {

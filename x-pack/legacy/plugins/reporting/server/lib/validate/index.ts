@@ -5,16 +5,20 @@
  */
 
 import { ServerFacade, Logger } from '../../../types';
+import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
 import { validateConfig } from './validate_config';
 import { validateMaxContentLength } from './validate_max_content_length';
 
-export async function runValidations(server: ServerFacade, logger: Logger, browserFactory: any) {
+export async function runValidations(
+  server: ServerFacade,
+  logger: Logger,
+  browserFactory: HeadlessChromiumDriverFactory
+) {
   try {
-    const config = server.config();
     await Promise.all([
       validateBrowser(server, browserFactory, logger),
-      validateConfig(config, logger),
+      validateConfig(server, logger),
       validateMaxContentLength(server, logger),
     ]);
     logger.debug(`Reporting plugin self-check ok!`);

@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { MatchAllFilter } from '@kbn/es-query';
+
 import { mapMatchAll } from './map_match_all';
+import { esFilters } from '../../../../../common';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {
-    let filter: MatchAllFilter;
+    let filter: esFilters.MatchAllFilter;
 
     beforeEach(() => {
       filter = {

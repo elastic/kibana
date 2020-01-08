@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../../../index_management/public/app/services/navigation';
 
 import {
   EuiButton,
@@ -42,9 +42,14 @@ export class DetailPanel extends Component {
     autoFollowPatternId: PropTypes.string,
     autoFollowPattern: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
-  }
+  };
 
-  renderAutoFollowPattern({ followIndexPatternPrefix, followIndexPatternSuffix, remoteCluster, leaderIndexPatterns }) {
+  renderAutoFollowPattern({
+    followIndexPatternPrefix,
+    followIndexPatternSuffix,
+    remoteCluster,
+    leaderIndexPatterns,
+  }) {
     return (
       <section
         aria-labelledby="ccrAutoFollowPatternDetailSettingsTitle"
@@ -161,11 +166,7 @@ export class DetailPanel extends Component {
   renderAutoFollowPatternNotFound() {
     return (
       <EuiFlyoutBody>
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiIcon size="m" type="alert" color="danger" />
           </EuiFlexItem>
@@ -192,11 +193,7 @@ export class DetailPanel extends Component {
 
     return (
       <section data-test-subj="errors">
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiIcon type="alert" color="danger" />
           </EuiFlexItem>
@@ -216,10 +213,7 @@ export class DetailPanel extends Component {
         <EuiText>
           <ul>
             {autoFollowPattern.errors.map((error, i) => (
-              <li
-                key={i}
-                data-test-subj="recentError"
-              >
+              <li key={i} data-test-subj="recentError">
                 {error.autoFollowException.reason}
               </li>
             ))}
@@ -244,9 +238,9 @@ export class DetailPanel extends Component {
 
     let indexManagementFilter;
 
-    if(followIndexPatternPrefix) {
+    if (followIndexPatternPrefix) {
       indexManagementFilter = `name:${followIndexPatternPrefix}`;
-    } else if(followIndexPatternSuffix) {
+    } else if (followIndexPatternSuffix) {
       indexManagementFilter = `name:${followIndexPatternSuffix}`;
     }
 
@@ -258,14 +252,15 @@ export class DetailPanel extends Component {
 
         <EuiSpacer size="m" />
 
-        {this.renderIndicesPreview(followIndexPatternPrefix, followIndexPatternSuffix, leaderIndexPatterns)}
+        {this.renderIndicesPreview(
+          followIndexPatternPrefix,
+          followIndexPatternSuffix,
+          leaderIndexPatterns
+        )}
 
         <EuiSpacer size="l" />
 
-        <EuiLink
-          href={indexManagementUri}
-          data-test-subj="viewIndexManagementLink"
-        >
+        <EuiLink href={indexManagementUri} data-test-subj="viewIndexManagementLink">
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
             defaultMessage="View your follower indices in Index Management"
@@ -275,16 +270,12 @@ export class DetailPanel extends Component {
         <EuiSpacer size="l" />
 
         {this.renderAutoFollowPatternErrors(autoFollowPattern)}
-
       </EuiFlyoutBody>
     );
   }
 
   renderFlyoutFooter() {
-    const {
-      autoFollowPattern,
-      closeDetailPanel,
-    } = this.props;
+    const { autoFollowPattern, closeDetailPanel } = this.props;
 
     return (
       <EuiFlyoutFooter>
@@ -308,7 +299,7 @@ export class DetailPanel extends Component {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <AutoFollowPatternDeleteProvider>
-                    {(deleteAutoFollowPattern) => (
+                    {deleteAutoFollowPattern => (
                       <EuiButtonEmpty
                         color="danger"
                         onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
@@ -356,11 +347,7 @@ export class DetailPanel extends Component {
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle
-            size="m"
-            id="autoFollowPatternDetailsFlyoutTitle"
-            data-test-subj="title"
-          >
+          <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle" data-test-subj="title">
             <h2>{autoFollowPatternId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>

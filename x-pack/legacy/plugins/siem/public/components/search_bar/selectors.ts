@@ -5,9 +5,9 @@
  */
 
 import { createSelector } from 'reselect';
-import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { InputsRange } from '../../store/inputs/model';
+import { Query } from '../../../../../../../src/plugins/data/public';
 
 export {
   endSelector,
@@ -24,14 +24,6 @@ export const getFilterQuery = (inputState: InputsRange): Query => inputState.que
 export const getSavedQuery = (inputState: InputsRange): SavedQuery | undefined =>
   inputState.savedQuery;
 
-export const filterQuerySelector = () =>
-  createSelector(
-    getFilterQuery,
-    filterQuery => filterQuery
-  );
+export const filterQuerySelector = () => createSelector(getFilterQuery, filterQuery => filterQuery);
 
-export const savedQuerySelector = () =>
-  createSelector(
-    getSavedQuery,
-    savedQuery => savedQuery
-  );
+export const savedQuerySelector = () => createSelector(getSavedQuery, savedQuery => savedQuery);

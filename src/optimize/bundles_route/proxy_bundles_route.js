@@ -34,9 +34,9 @@ function buildProxyRouteForBundles(routePath, host, port) {
         host,
         port,
         passThrough: true,
-        xforward: true
-      }
+        xforward: true,
+      },
     },
-    config: { auth: false }
+    config: { auth: false },
   };
 }

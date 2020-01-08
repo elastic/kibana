@@ -72,6 +72,7 @@ const createStartContractMock = () => {
     setBreadcrumbs: jest.fn(),
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
+    setHelpSupportUrl: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));

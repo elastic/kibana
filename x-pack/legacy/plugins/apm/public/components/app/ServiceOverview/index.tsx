@@ -9,14 +9,15 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 const initalData = {
   items: [],
@@ -27,7 +28,7 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
   const {
     urlParams: { start, end },
     uiFilters
@@ -55,7 +56,7 @@ export function ServiceOverview() {
           defaultMessage:
             'Legacy data was detected within the selected time range'
         }),
-        text: (
+        text: toMountPoint(
           <p>
             {i18n.translate('xpack.apm.serviceOverview.toastText', {
               defaultMessage:
@@ -84,9 +85,7 @@ export function ServiceOverview() {
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
       projection: PROJECTION.SERVICES

@@ -41,6 +41,7 @@ module.exports = {
         KIBANA_ROOT,
         'src/legacy/core_plugins/interpreter/public/types'
       ),
+      tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.es5.js'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
   },

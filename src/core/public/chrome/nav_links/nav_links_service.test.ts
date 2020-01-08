@@ -19,27 +19,34 @@
 
 import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
-import { LegacyApp } from '../../application';
+import { App, LegacyApp } from '../../application';
 
 const mockAppService = {
-  availableApps: new Map(),
-  availableLegacyApps: new Map<string, LegacyApp>([
-    [
-      'legacyApp1',
-      { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
-    ],
-    [
-      'legacyApp2',
+  availableApps: new Map<string, App>(
+    ([
+      { id: 'app1', order: 0, title: 'App 1', icon: 'app1' },
+      {
+        id: 'app2',
+        order: -10,
+        title: 'App 2',
+        euiIconType: 'canvasApp',
+      },
+      { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true },
+    ] as App[]).map(app => [app.id, app])
+  ),
+  availableLegacyApps: new Map<string, LegacyApp>(
+    ([
+      { id: 'legacyApp1', order: 5, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
       {
         id: 'legacyApp2',
-        order: -10,
+        order: -5,
         title: 'Legacy App 2',
         euiIconType: 'canvasApp',
         appUrl: '/app2',
       },
-    ],
-    ['legacyApp3', { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' }],
-  ]),
+      { id: 'legacyApp3', order: 15, title: 'Legacy App 3', appUrl: '/app3' },
+    ] as LegacyApp[]).map(app => [app.id, app])
+  ),
 } as any;
 
 const mockHttp = {
@@ -58,6 +65,18 @@ describe('NavLinksService', () => {
   });
 
   describe('#getNavLinks$()', () => {
+    it('does not include `chromeless` applications', async () => {
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map(links => links.map(l => l.id))
+          )
+          .toPromise()
+      ).not.toContain('chromelessApp');
+    });
+
     it('sorts navlinks by `order` property', async () => {
       expect(
         await start
@@ -67,7 +86,7 @@ describe('NavLinksService', () => {
             map(links => links.map(l => l.id))
           )
           .toPromise()
-      ).toEqual(['legacyApp2', 'legacyApp1', 'legacyApp3']);
+      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
     });
 
     it('emits multiple values', async () => {
@@ -78,8 +97,8 @@ describe('NavLinksService', () => {
 
       service.stop();
       expect(emittedLinks).toEqual([
-        ['legacyApp2', 'legacyApp1', 'legacyApp3'],
-        ['legacyApp2', 'legacyApp1', 'legacyApp3'],
+        ['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3'],
+        ['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3'],
       ]);
     });
 
@@ -105,7 +124,13 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map(l => l.id)).toEqual(['legacyApp2', 'legacyApp1', 'legacyApp3']);
+      expect(start.getAll().map(l => l.id)).toEqual([
+        'app2',
+        'legacyApp2',
+        'app1',
+        'legacyApp1',
+        'legacyApp3',
+      ]);
     });
   });
 
@@ -130,7 +155,20 @@ describe('NavLinksService', () => {
             map(links => links.map(l => l.id))
           )
           .toPromise()
-      ).toEqual(['legacyApp2', 'legacyApp1', 'legacyApp3']);
+      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
+    });
+
+    it('does nothing on chromeless applications', async () => {
+      start.showOnly('chromelessApp');
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map(links => links.map(l => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
     });
 
     it('removes all other links', async () => {
@@ -157,7 +195,7 @@ describe('NavLinksService', () => {
           "icon": "legacyApp1",
           "id": "legacyApp1",
           "legacy": true,
-          "order": 0,
+          "order": 5,
           "title": "Legacy App 1",
         }
       `);

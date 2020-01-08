@@ -53,16 +53,13 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
     const { breadcrumbs } = this.state;
 
     const context = {
-      breadcrumbs: breadcrumbs.reduce(
-        (crumbs, crumbStorageItem) => {
-          if (crumbStorageItem.parents) {
-            crumbs = crumbs.concat(crumbStorageItem.parents);
-          }
-          crumbs.push(crumbStorageItem.breadcrumb);
-          return crumbs;
-        },
-        [] as Breadcrumb[]
-      ),
+      breadcrumbs: breadcrumbs.reduce((crumbs, crumbStorageItem) => {
+        if (crumbStorageItem.parents) {
+          crumbs = crumbs.concat(crumbStorageItem.parents);
+        }
+        crumbs.push(crumbStorageItem.breadcrumb);
+        return crumbs;
+      }, [] as Breadcrumb[]),
       addCrumb: this.addCrumb,
       removeCrumb: this.removeCrumb,
     };

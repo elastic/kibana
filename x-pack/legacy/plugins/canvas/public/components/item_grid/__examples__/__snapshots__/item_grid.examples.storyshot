@@ -71,9 +71,11 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#333",
@@ -100,9 +102,11 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#FFF",
@@ -129,9 +133,11 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#FFF",
@@ -151,27 +157,33 @@ exports[`Storyshots components/ItemGrid icon grid 1`] = `
   className="item-grid-row"
 >
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
     xmlns="http://www.w3.org/2000/svg"
   />
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}
     xmlns="http://www.w3.org/2000/svg"
   />
   <svg
+    aria-hidden={true}
     className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
     height={16}
+    role="img"
     style={null}
     viewBox="0 0 16 16"
     width={16}

@@ -36,13 +36,12 @@ function serializeNode(
 }
 
 function serializeEdge(
-  { source, target, weight, width, inferred, label }: WorkspaceEdge,
+  { source, target, weight, width, label }: WorkspaceEdge,
   allNodes: WorkspaceNode[] = []
 ): SerializedEdge {
   return {
     weight,
     width,
-    inferred,
     label,
     source: allNodes.indexOf(source),
     target: allNodes.indexOf(target),

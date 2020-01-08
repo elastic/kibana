@@ -154,7 +154,6 @@ To open an element for editing, put the dashboard in *Edit* mode,
 and then select *Edit* from the panel menu. The changes you make appear in
 every dashboard that uses the element. 
 
-include::{kib-repo-dir}/management/dashboard_only_mode/index.asciidoc[]
 
 
 

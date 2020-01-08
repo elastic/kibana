@@ -10,7 +10,7 @@ import { getSelectedLayer } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
-    layer: getSelectedLayer(state)
+    layer: getSelectedLayer(state),
   };
 }
 

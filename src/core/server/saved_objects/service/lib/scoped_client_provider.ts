@@ -55,8 +55,7 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * @public
- * See {@link SavedObjectsClientProvider}
+ * @internal
  */
 export type ISavedObjectsClientProvider<T = unknown> = Pick<
   SavedObjectsClientProvider<T>,
@@ -66,11 +65,7 @@ export type ISavedObjectsClientProvider<T = unknown> = Pick<
 /**
  * Provider for the Scoped Saved Objects Client.
  *
- * @internalRemarks Because `getClient` is synchronous the Client Provider does
- * not support creating factories that react to new ES clients emitted from
- * elasticsearch.adminClient$. The Client Provider therefore doesn't support
- * configuration changes to the Elasticsearch client. TODO: revisit once we've
- * closed https://github.com/elastic/kibana/pull/45796
+ * @internal
  */
 export class SavedObjectsClientProvider<Request = unknown> {
   private readonly _wrapperFactories = new PriorityCollection<{
@@ -100,7 +95,7 @@ export class SavedObjectsClientProvider<Request = unknown> {
     this._wrapperFactories.add(priority, { id, factory });
   }
 
-  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory<Request>) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }

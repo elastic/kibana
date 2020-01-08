@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function systemMetricsSpecProvider(server, context) {
+export function systemMetricsSpecProvider(context) {
   const moduleName = 'system';
   return {
     id: 'systemMetrics',
@@ -33,7 +37,8 @@ export function systemMetricsSpecProvider(server, context) {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.systemMetrics.longDescription', {
-      defaultMessage: 'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host. \
+      defaultMessage:
+        'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host. \
 It collects system wide statistics and statistics per process and filesystem. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -44,20 +49,23 @@ It collects system wide statistics and statistics per process and filesystem. \
       dashboards: [
         {
           id: 'Metricbeat-system-overview-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.systemMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'System metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.systemMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'System metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-system.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-system.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

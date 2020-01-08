@@ -6,10 +6,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -21,11 +19,11 @@ import {
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
+import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 
 interface OverviewPageProps {
   basePath: string;
@@ -35,7 +33,6 @@ interface OverviewPageProps {
     pathname: string;
     search: string;
   };
-  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -55,12 +52,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({
-  basePath,
-  autocomplete,
-  logOverviewPageLoad,
-  setBreadcrumbs,
-}: Props) => {
+export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -73,11 +65,11 @@ export const OverviewPage = ({
     filters: urlFilters,
   } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
+  useUptimeTelemetry(UptimePage.Overview);
+  useIndexPattern(setIndexPattern);
 
   useEffect(() => {
-    getIndexPattern(basePath, setIndexPattern);
     setBreadcrumbs(getOverviewPageBreadcrumbs());
-    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {
@@ -86,7 +78,7 @@ export const OverviewPage = ({
         })
       );
     }
-  }, []);
+  }, [basePath, setBreadcrumbs, setHeadingText]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
@@ -109,8 +101,8 @@ export const OverviewPage = ({
       if (indexPattern) {
         const staticIndexPattern = toStaticIndexPattern(indexPattern);
         const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
-        const ast = fromKueryExpression(combinedFilterString);
-        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        const ast = esKuery.fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
       }
     }
@@ -151,6 +143,10 @@ export const OverviewPage = ({
         <StatusPanel
           absoluteDateRangeStart={absoluteDateRangeStart}
           absoluteDateRangeEnd={absoluteDateRangeEnd}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={filters}
+          statusFilter={statusFilter}
           sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />

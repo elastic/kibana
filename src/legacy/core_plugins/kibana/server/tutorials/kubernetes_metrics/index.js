@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function kubernetesMetricsSpecProvider(server, context) {
+export function kubernetesMetricsSpecProvider(context) {
   const moduleName = 'kubernetes';
   return {
     id: 'kubernetesMetrics',
@@ -33,7 +37,8 @@ export function kubernetesMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch metrics from your Kubernetes installation.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.longDescription', {
-      defaultMessage: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
+      defaultMessage:
+        'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html',
@@ -44,20 +49,23 @@ export function kubernetesMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'AV4RGUqo5NkDleZmzKuZ-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Kubernetes metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Kubernetes metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-kubernetes.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-kubernetes.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/kubernetes_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

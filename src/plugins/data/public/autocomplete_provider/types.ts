@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { StaticIndexPattern, Field } from 'ui/index_patterns';
 import { AutocompleteProviderRegister } from '.';
+import { IIndexPattern, IFieldType } from '../../common';
 
 export type AutocompletePublicPluginSetup = Pick<
   AutocompleteProviderRegister,
@@ -31,7 +31,7 @@ export type AutocompleteProvider = (args: {
   config: {
     get(configKey: string): any;
   };
-  indexPatterns: StaticIndexPattern[];
+  indexPatterns: IIndexPattern[];
   boolFilter?: any;
 }) => GetSuggestions;
 
@@ -40,6 +40,7 @@ export type GetSuggestions = (args: {
   query: string;
   selectionStart: number;
   selectionEnd: number;
+  signal?: AbortSignal;
 }) => Promise<AutocompleteSuggestion[]>;
 
 /** @public **/
@@ -67,5 +68,5 @@ interface BasicAutocompleteSuggestion {
 
 export type FieldAutocompleteSuggestion = BasicAutocompleteSuggestion & {
   type: 'field';
-  field: Field;
+  field: IFieldType;
 };

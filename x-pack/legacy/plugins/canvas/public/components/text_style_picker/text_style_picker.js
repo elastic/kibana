@@ -105,22 +105,30 @@ export const TextStylePicker = ({
   return (
     <div className="canvasTextStylePicker">
       <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <FontPicker value={family} onSelect={value => doChange('family', value)} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
             value={size}
             onChange={e => doChange('size', Number(e.target.value))}
             options={fontSizes.map(size => ({ text: String(size), value: size }))}
+            prepend="Size"
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FontPicker value={family} onSelect={value => doChange('family', value)} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
+          <ColorPickerPopover
+            value={color}
+            onChange={value => doChange('color', value)}
+            colors={colors}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={styleButtons}
@@ -129,6 +137,7 @@ export const TextStylePicker = ({
             onChange={onStyleChange}
             type="multi"
             isIconOnly
+            className="canvasSidebar__buttonGroup"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -138,13 +147,7 @@ export const TextStylePicker = ({
             isIconOnly
             idSelected={align}
             onChange={onAlignmentChange}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
-          <ColorPickerPopover
-            value={color}
-            onChange={value => doChange('color', value)}
-            colors={colors}
+            className="canvasSidebar__buttonGroup"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

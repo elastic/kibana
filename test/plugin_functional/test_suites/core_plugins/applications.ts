@@ -91,13 +91,29 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await testSubjects.existOrFail('fooAppPageA');
     });
 
-    it('can navigate from NP apps to legacy apps', async () => {
+    it('chromeless applications are not visible in apps list', async () => {
+      expect(await appsMenu.linkExists('Chromeless')).to.be(false);
+    });
+
+    it('navigating to chromeless application hides chrome', async () => {
+      await PageObjects.common.navigateToApp('chromeless');
+      await loadingScreenNotShown();
+      expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
+    });
+
+    it('navigating away from chromeless application shows chrome', async () => {
+      await PageObjects.common.navigateToApp('foo');
+      await loadingScreenNotShown();
+      expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+    });
+
+    it.skip('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
-    it('can navigate from legacy apps to NP apps', async () => {
+    it.skip('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
       await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');

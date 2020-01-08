@@ -20,42 +20,44 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { State as StatePropType } from '../lib/prop_types';
-import {
-  EuiBasicTable,
-  EuiIcon,
-} from '@elastic/eui';
-import { i18n }  from '@kbn/i18n';
-
+import { EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 class StatusTable extends Component {
   static propTypes = {
-    statuses: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,  // plugin id
-      state: StatePropType.isRequired     // state of the plugin
-    }))  // can be null
+    statuses: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired, // plugin id
+        state: StatePropType.isRequired, // state of the plugin
+      })
+    ), // can be null
   };
 
-  static columns = [{
-    field: 'state',
-    name: '',
-    render: state => <EuiIcon type="dot" aria-hidden color={state.uiColor} />,
-    width: '32px'
-  }, {
-    field: 'id',
-    name: i18n.translate('statusPage.statusTable.columns.idHeader', {
-      defaultMessage: 'ID',
-    }),
-  }, {
-    field: 'state',
-    name: i18n.translate('statusPage.statusTable.columns.statusHeader', {
-      defaultMessage: 'Status',
-    }),
-    render: state => <span>{ state.message }</span>
-  }];
+  static columns = [
+    {
+      field: 'state',
+      name: '',
+      render: state => <EuiIcon type="dot" aria-hidden color={state.uiColor} />,
+      width: '32px',
+    },
+    {
+      field: 'id',
+      name: i18n.translate('statusPage.statusTable.columns.idHeader', {
+        defaultMessage: 'ID',
+      }),
+    },
+    {
+      field: 'state',
+      name: i18n.translate('statusPage.statusTable.columns.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      render: state => <span>{state.message}</span>,
+    },
+  ];
 
   static getRowProps = ({ state }) => {
     return {
-      className: `status-table-row-${state.uiColor}`
+      className: `status-table-row-${state.uiColor}`,
     };
   };
 

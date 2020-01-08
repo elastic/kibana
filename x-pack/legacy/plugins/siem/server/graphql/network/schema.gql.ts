@@ -145,8 +145,52 @@ export const networkSchema = gql`
     cursor: CursorType!
   }
 
+  type MatrixOverOrdinalHistogramData {
+    x: String!
+    y: Float!
+    g: String!
+  }
+
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+    histogram: [MatrixOverOrdinalHistogramData!]
+  }
+
+  enum NetworkHttpFields {
+    domains
+    lastHost
+    lastSourceIp
+    methods
+    path
+    requestCount
+    statuses
+  }
+
+  input NetworkHttpSortField {
+    direction: Direction!
+  }
+
+  type NetworkHttpItem {
+    _id: String
+    domains: [String!]!
+    lastHost: String
+    lastSourceIp: String
+    methods: [String!]!
+    path: String
+    requestCount: Float
+    statuses: [String!]!
+  }
+
+  type NetworkHttpEdges {
+    node: NetworkHttpItem!
+    cursor: CursorType!
+  }
+
+  type NetworkHttpData {
+    edges: [NetworkHttpEdges!]!
     totalCount: Float!
     pageInfo: PageInfoPaginated!
     inspect: Inspect
@@ -182,5 +226,14 @@ export const networkSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!
+    NetworkHttp(
+      id: String
+      filterQuery: String
+      ip: String
+      pagination: PaginationInputPaginated!
+      sort: NetworkHttpSortField!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): NetworkHttpData!
   }
 `;

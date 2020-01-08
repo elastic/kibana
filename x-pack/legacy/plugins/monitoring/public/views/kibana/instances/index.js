@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
@@ -26,7 +26,6 @@ uiRoutes.when('/kibana/instances', {
   },
   controllerAs: 'kibanas',
   controller: class KibanaInstancesList extends MonitoringViewBaseEuiTableController {
-
     constructor($injector, $scope) {
       super({
         title: 'Kibana Instances',
@@ -34,7 +33,7 @@ uiRoutes.when('/kibana/instances', {
         getPageData,
         reactNodeId: 'monitoringKibanaInstancesApp',
         $scope,
-        $injector
+        $injector,
       });
 
       const kbnUrl = $injector.get('kbnUrl');
@@ -69,13 +68,16 @@ uiRoutes.when('/kibana/instances', {
         );
       };
 
-      $scope.$watch(() => this.data, data => {
-        if (!data) {
-          return;
-        }
+      $scope.$watch(
+        () => this.data,
+        data => {
+          if (!data) {
+            return;
+          }
 
-        renderReact();
-      });
+          renderReact();
+        }
+      );
     }
-  }
+  },
 });

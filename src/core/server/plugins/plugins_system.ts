@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName, PluginOpaqueId } from './types';
+import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
@@ -77,18 +75,15 @@ export class PluginsSystem {
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
@@ -116,18 +111,15 @@ export class PluginsSystem {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
@@ -164,33 +156,22 @@ export class PluginsSystem {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
       pluginName => this.plugins.get(pluginName)!.includesUiPlugin
     );
-    const internal = new Map<PluginName, DiscoveredPluginInternal>(
+    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
       uiPluginNames.map(pluginName => {
         const plugin = this.plugins.get(pluginName)!;
         return [
           pluginName,
           {
             id: pluginName,
-            path: plugin.path,
             configPath: plugin.manifest.configPath,
             requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
             optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
           },
-        ] as [PluginName, DiscoveredPluginInternal];
+        ];
       })
     );
 
-    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      [...internal.entries()].map(
-        ([pluginName, plugin]) =>
-          [
-            pluginName,
-            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
-          ] as [PluginName, DiscoveredPlugin]
-      )
-    );
-
-    return { public: publicPlugins, internal };
+    return publicPlugins;
   }
 
   /**

@@ -24,5 +24,5 @@ import { tabifyAggResponse } from './tabify/tabify';
 export const aggResponseIndex = {
   hierarchical: buildHierarchicalData,
   pointSeries: buildPointSeriesData,
-  tabify: tabifyAggResponse
+  tabify: tabifyAggResponse,
 };

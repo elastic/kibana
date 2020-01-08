@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopCountriesData, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import {
+  NetworkDnsData,
+  NetworkHttpData,
+  NetworkTopCountriesData,
+  NetworkTopNFlowData,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TotalValue } from '../types';
 
@@ -18,6 +23,7 @@ export interface NetworkAdapter {
     options: RequestOptionsPaginated
   ): Promise<NetworkTopNFlowData>;
   getNetworkDns(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkDnsData>;
+  getNetworkHttp(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkHttpData>;
 }
 
 export interface GenericBuckets {
@@ -58,6 +64,21 @@ interface AutonomousSystemHit<T> {
         _score?: number | null;
       }>;
     };
+  };
+}
+
+interface HttpHit<T> {
+  hits: {
+    total: TotalValue | number;
+    max_score: number | null;
+    hits: Array<{
+      _source: T;
+      sort?: [number];
+      _index?: string;
+      _type?: string;
+      _id?: string;
+      _score?: number | null;
+    }>;
   };
 }
 
@@ -104,5 +125,20 @@ export interface NetworkDnsBuckets {
   };
   dns_bytes_out: {
     value: number;
+  };
+}
+
+export interface NetworkHttpBuckets {
+  key: string;
+  doc_count: number;
+  domains: {
+    buckets: GenericBuckets[];
+  };
+  methods: {
+    buckets: GenericBuckets[];
+  };
+  source: HttpHit<object>;
+  status: {
+    buckets: GenericBuckets[];
   };
 }

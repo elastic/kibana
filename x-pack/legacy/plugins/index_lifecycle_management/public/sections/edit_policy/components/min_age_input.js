@@ -7,13 +7,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import {
   PHASE_ROLLOVER_MINIMUM_AGE,
@@ -49,19 +43,28 @@ function getUnitsAriaLabelForPhase(phase) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
     case PHASE_WARM:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of warm phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of warm phase',
+        }
+      );
 
     case PHASE_COLD:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of cold phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of cold phase',
+        }
+      );
 
     case PHASE_DELETE:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of delete phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of delete phase',
+        }
+      );
   }
 }
 
@@ -72,21 +75,33 @@ export const MinAgeInput = props => {
   let hoursOptionLabel;
 
   if (rolloverEnabled) {
-    daysOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverDaysOptionLabel', {
-      defaultMessage: 'days from rollover',
-    });
+    daysOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverDaysOptionLabel',
+      {
+        defaultMessage: 'days from rollover',
+      }
+    );
 
-    hoursOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverHoursOptionLabel', {
-      defaultMessage: 'hours from rollover',
-    });
+    hoursOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverHoursOptionLabel',
+      {
+        defaultMessage: 'hours from rollover',
+      }
+    );
   } else {
-    daysOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.creationDaysOptionLabel', {
-      defaultMessage: 'days from index creation',
-    });
+    daysOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationDaysOptionLabel',
+      {
+        defaultMessage: 'days from index creation',
+      }
+    );
 
-    hoursOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.creationHoursOptionLabel', {
-      defaultMessage: 'hours from index creation',
-    });
+    hoursOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationHoursOptionLabel',
+      {
+        defaultMessage: 'hours from index creation',
+      }
+    );
   }
 
   return (
@@ -121,7 +136,7 @@ export const MinAgeInput = props => {
         </ErrableFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 220 }}>
-        <EuiFormRow hasEmptyLabelSpace >
+        <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}

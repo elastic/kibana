@@ -35,7 +35,7 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
   const write = new TabbedAggResponseWriter(aggs, respOpts);
 
   const topLevelBucket = _.assign({}, esResponse.aggregations, {
-    doc_count: esResponse.hits.total
+    doc_count: esResponse.hits.total,
   });
 
   collectBucket(write, topLevelBucket, '', 1);
@@ -62,7 +62,7 @@ function collectBucket(write, bucket, key, aggScale) {
     case 'buckets':
       const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
-        buckets.forEach(function (subBucket, key) {
+        buckets.forEach(function(subBucket, key) {
           // if the bucket doesn't have value don't add it to the row
           // we don't want rows like: { column1: undefined, column2: 10 }
           const bucketValue = agg.getKey(subBucket, key);
@@ -132,4 +132,3 @@ function passEmptyBuckets(write, bucket, key, aggScale) {
 
   write.aggStack.unshift(column);
 }
-

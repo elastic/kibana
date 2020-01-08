@@ -39,7 +39,7 @@ const config = {
     plugin_2: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2'],
     plugin_3: [
       'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
-      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3_additional_path'
+      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3_additional_path',
     ],
   },
   exclude: [],

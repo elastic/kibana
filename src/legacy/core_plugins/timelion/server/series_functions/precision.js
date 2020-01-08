@@ -26,7 +26,7 @@ export default new Chainable('precision', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'precision',
@@ -34,20 +34,20 @@ export default new Chainable('precision', {
       help: i18n.translate('timelion.help.functions.precision.args.precisionHelpText', {
         defaultMessage: 'Number of digits to round each value to',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.precisionHelpText', {
     defaultMessage: 'number of digits to round the decimal portion of the value to',
   }),
   fn: async function precisionFn(args) {
-    await alter(args, function (eachSeries, precision) {
+    await alter(args, function(eachSeries, precision) {
       eachSeries._meta = eachSeries._meta || {};
       eachSeries._meta.precision = precision;
       return eachSeries;
     });
 
-    return reduce(args, function (a, b) {
+    return reduce(args, function(a, b) {
       return parseInt(a * Math.pow(10, b), 10) / Math.pow(10, b);
     });
-  }
+  },
 });

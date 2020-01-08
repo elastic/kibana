@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
@@ -125,7 +124,7 @@ export const dispatchSetInitialStateFromUrl = (
     }
 
     if (urlKey === CONSTANTS.filters) {
-      const filters: Filter[] = decodeRisonUrlState(newUrlStateString);
+      const filters: esFilters.Filter[] = decodeRisonUrlState(newUrlStateString);
       siemFilterManager.setFilters(filters || []);
     }
 

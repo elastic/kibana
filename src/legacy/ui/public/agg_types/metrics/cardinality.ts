@@ -18,10 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { MetricAggType } from './metric_agg_type';
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 const uniqueCountTitle = i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
   defaultMessage: 'Unique Count',
@@ -37,7 +37,9 @@ export const cardinalityMetricAgg = new MetricAggType({
     });
   },
   getFormat() {
-    return fieldFormats.getDefaultInstance('number');
+    const fieldFormats = npStart.plugins.data.fieldFormats;
+
+    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
   },
   params: [
     {

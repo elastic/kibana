@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router } from '../../../../../server/lib/create_router';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import { registerAppRoutes } from './app';
 import { registerRepositoriesRoutes } from './repositories';
 import { registerSnapshotsRoutes } from './snapshots';

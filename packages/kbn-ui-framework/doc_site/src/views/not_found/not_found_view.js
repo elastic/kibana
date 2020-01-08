@@ -19,9 +19,7 @@
 
 import React from 'react';
 
-import {
-  Link,
-} from 'react-router';
+import { Link } from 'react-router'; // eslint-disable-line
 
 export const NotFoundView = () => (
   <div className="guideContentPage">
@@ -31,17 +29,15 @@ export const NotFoundView = () => (
       </h1>
 
       <p className="guideText">
-        You visited a page which doesn&rsquo;t exist, causing <em>this</em> page to exist. This page thanks
-        you for summoning it into existence from the raw fabric of reality, but it thinks you may
-        find another page more interesting. Might it suggest
-        the {(
-          <Link
-            className="guideLink"
-            to="/"
-          >
+        You visited a page which doesn&rsquo;t exist, causing <em>this</em> page to exist. This page
+        thanks you for summoning it into existence from the raw fabric of reality, but it thinks you
+        may find another page more interesting. Might it suggest the{' '}
+        {
+          <Link className="guideLink" to="/">
             home page
           </Link>
-        )}?
+        }
+        ?
       </p>
     </div>
   </div>

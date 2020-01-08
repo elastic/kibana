@@ -1,0 +1,10 @@
+// Do not link directly to this page.
+// Link to the anchor in `/docs/settings/apm-settings.asciidoc` instead.
+[[apm-settings-in-kibana]]
+=== APM settings in Kibana
+
+You do not need to configure any settings to use APM. It is enabled by default.
+If you'd like to change any of the default values,
+copy and paste the relevant settings below into your `kibana.yml` configuration file.
+
+include::./../settings/apm-settings.asciidoc[tag=general-apm-settings]

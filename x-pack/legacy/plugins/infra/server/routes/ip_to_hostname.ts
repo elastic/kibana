@@ -3,18 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
-import { boomify, notFound } from 'boom';
 import { first } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../lib/infra_types';
-import { InfraWrappableRequest } from '../lib/adapters/framework';
-
-interface IpToHostRequest {
-  ip: string;
-  index_pattern: string;
-}
-
-type IpToHostWrappedRequest = InfraWrappableRequest<IpToHostRequest>;
 
 export interface IpToHostResponse {
   host: string;
@@ -28,40 +19,47 @@ interface HostDoc {
   };
 }
 
-const ipToHostSchema = Joi.object({
-  ip: Joi.string().required(),
-  index_pattern: Joi.string().required(),
+const ipToHostSchema = schema.object({
+  ip: schema.string(),
+  index_pattern: schema.string(),
 });
 
 export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
   const { callWithRequest } = framework;
-  framework.registerRoute<IpToHostWrappedRequest, Promise<IpToHostResponse>>({
-    method: 'POST',
-    path: '/api/infra/ip_to_host',
-    options: {
-      validate: { payload: ipToHostSchema },
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/infra/ip_to_host',
+      validate: {
+        body: ipToHostSchema,
+      },
     },
-    handler: async req => {
+    async (requestContext, { body }, response) => {
       try {
         const params = {
-          index: req.payload.index_pattern,
+          index: body.index_pattern,
           body: {
             size: 1,
             query: {
-              match: { 'host.ip': req.payload.ip },
+              match: { 'host.ip': body.ip },
             },
             _source: ['host.name'],
           },
         };
-        const response = await callWithRequest<HostDoc>(req, 'search', params);
-        if (response.hits.total.value === 0) {
-          throw notFound('Host with matching IP address not found.');
+        const { hits } = await callWithRequest<HostDoc>(requestContext, 'search', params);
+        if (hits.total.value === 0) {
+          return response.notFound({
+            body: { message: 'Host with matching IP address not found.' },
+          });
         }
-        const hostDoc = first(response.hits.hits);
-        return { host: hostDoc._source.host.name };
-      } catch (e) {
-        throw boomify(e);
+        const hostDoc = first(hits.hits);
+        return response.ok({ body: { host: hostDoc._source.host.name } });
+      } catch ({ statusCode = 500, message = 'Unknown error occurred' }) {
+        return response.customError({
+          statusCode,
+          body: { message },
+        });
       }
-    },
-  });
+    }
+  );
 };

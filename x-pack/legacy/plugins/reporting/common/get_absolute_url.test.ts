@@ -4,88 +4,80 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../test_helpers/create_mock_server';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 
-test(`by default it builds url using information from server.info.protocol and the server.config`, () => {
-  const mockServer = createMockServer('');
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+const defaultOptions = {
+  defaultBasePath: 'sbp',
+  protocol: 'http:',
+  hostname: 'localhost',
+  port: 5601,
+};
+
+test(`by default it builds urls using information from server.info.protocol and the server.config`, () => {
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`http://localhost:5601/sbp/app/kibana`);
 });
 
 test(`uses kibanaServer.protocol if specified`, () => {
-  const settings = {
-    'xpack.reporting.kibanaServer.protocol': 'https',
-  };
-  const mockServer = createMockServer({ settings });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    ...defaultOptions,
+    protocol: 'https:',
+  });
 
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`https://localhost:5601/sbp/app/kibana`);
 });
 
 test(`uses kibanaServer.hostname if specified`, () => {
-  const settings = {
-    'xpack.reporting.kibanaServer.hostname': 'something-else',
-  };
-  const mockServer = createMockServer({ settings });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    ...defaultOptions,
+    hostname: 'something-else',
+  });
 
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`http://something-else:5601/sbp/app/kibana`);
 });
 
 test(`uses kibanaServer.port if specified`, () => {
-  const settings = {
-    'xpack.reporting.kibanaServer.port': 8008,
-  };
-  const mockServer = createMockServer({ settings });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    ...defaultOptions,
+    port: 8008,
+  });
 
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`http://localhost:8008/sbp/app/kibana`);
 });
 
 test(`uses the provided hash`, () => {
-  const mockServer = createMockServer('');
-
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const hash = '/hash';
   const absoluteUrl = getAbsoluteUrl({ hash });
   expect(absoluteUrl).toBe(`http://localhost:5601/sbp/app/kibana#${hash}`);
 });
 
 test(`uses the provided hash with queryString`, () => {
-  const mockServer = createMockServer('');
-
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const hash = '/hash?querystring';
   const absoluteUrl = getAbsoluteUrl({ hash });
   expect(absoluteUrl).toBe(`http://localhost:5601/sbp/app/kibana#${hash}`);
 });
 
 test(`uses the provided basePath`, () => {
-  const mockServer = createMockServer('');
-
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const absoluteUrl = getAbsoluteUrl({ basePath: '/s/marketing' });
   expect(absoluteUrl).toBe(`http://localhost:5601/s/marketing/app/kibana`);
 });
 
 test(`uses the path`, () => {
-  const mockServer = createMockServer('');
-
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const path = '/app/canvas';
   const absoluteUrl = getAbsoluteUrl({ path });
   expect(absoluteUrl).toBe(`http://localhost:5601/sbp${path}`);
 });
 
 test(`uses the search`, () => {
-  const mockServer = createMockServer('');
-
-  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
   const search = '_t=123456789';
   const absoluteUrl = getAbsoluteUrl({ search });
   expect(absoluteUrl).toBe(`http://localhost:5601/sbp/app/kibana?${search}`);

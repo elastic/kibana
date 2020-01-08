@@ -5,8 +5,8 @@
  */
 
 declare module 'formsy-react' {
-  import React, { SFC } from 'react';
-  let Formsy: SFC<any>;
+  import React, { FC } from 'react';
+  let Formsy: FC<any>;
   export interface FormsyInputProps {
     getErrorMessage(): any;
     getValue(): any;
@@ -43,6 +43,6 @@ declare module 'formsy-react' {
   // function withFormsy<ComponentProps = any>(
   //   component:
   //     | React.Component<IFormsyDecorator & ComponentProps>
-  //     | SFC<IFormsyDecorator & ComponentProps>
+  //     | FC<IFormsyDecorator & ComponentProps>
   // ): React.Component<IFormsyDecorator & ComponentProps>;
 }

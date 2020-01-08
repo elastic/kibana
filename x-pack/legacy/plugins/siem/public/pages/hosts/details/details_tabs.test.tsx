@@ -4,44 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { HostDetailsTabs } from './details_tabs';
 import { SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,
   WithSource: ({
     children,
   }: {
-    children: (args: {
-      indicesExist: boolean;
-      indexPattern: StaticIndexPattern;
-    }) => React.ReactNode;
+    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
   }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../components/search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 describe('body', () => {
@@ -52,6 +42,7 @@ describe('body', () => {
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
   };
+  const mount = useMountAppended();
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
@@ -62,7 +53,7 @@ describe('body', () => {
               from={0}
               isInitializing={false}
               detailName={'host-1'}
-              setQuery={() => {}}
+              setQuery={jest.fn()}
               to={0}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}

@@ -17,25 +17,28 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { kibanaPie } from './pie_fn';
 
 jest.mock('ui/new_platform');
 
-const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
-  hits: 1,
-  names: ['Count'],
-  raw: {
-    columns: [],
-    rows: [],
-  },
-  slices: {
-    children: [],
-  },
-  tooltipFormatter: {
-    id: 'number',
-  },
-}));
+const mockResponseHandler = jest.fn().mockReturnValue(
+  Promise.resolve({
+    hits: 1,
+    names: ['Count'],
+    raw: {
+      columns: [],
+      rows: [],
+    },
+    slices: {
+      children: [],
+    },
+    tooltipFormatter: {
+      id: 'number',
+    },
+  })
+);
 jest.mock('ui/vis/response_handlers/vislib', () => ({
   vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));

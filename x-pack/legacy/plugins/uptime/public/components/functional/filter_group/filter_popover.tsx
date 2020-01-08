@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
 import { toggleSelectedItems } from './toggle_selected_item';
-import { LocationLink } from '../monitor_list/location_link';
+import { LocationLink } from '../monitor_list';
 
 export interface FilterPopoverProps {
   fieldName: string;

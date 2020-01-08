@@ -19,14 +19,15 @@ export function checkLicense(xpackLicenseInfo) {
       message: i18n.translate(
         'xpack.crossClusterReplication.checkLicense.errorUnavailableMessage',
         {
-          defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
+          defaultMessage:
+            'You cannot use {pluginName} because license information is not available at this time.',
           values: { pluginName },
-        },
+        }
       ),
     };
   }
 
-  const VALID_LICENSE_MODES = [ 'trial', 'platinum' ];
+  const VALID_LICENSE_MODES = ['trial', 'platinum', 'enterprise'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
@@ -40,9 +41,10 @@ export function checkLicense(xpackLicenseInfo) {
       message: i18n.translate(
         'xpack.crossClusterReplication.checkLicense.errorUnsupportedMessage',
         {
-          defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+          defaultMessage:
+            'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
           values: { licenseType, pluginName },
-        },
+        }
       ),
     };
   }
@@ -52,13 +54,11 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: true,
       isActive: false,
-      message: i18n.translate(
-        'xpack.crossClusterReplication.checkLicense.errorExpiredMessage',
-        {
-          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired',
-          values: { licenseType, pluginName },
-        },
-      ),
+      message: i18n.translate('xpack.crossClusterReplication.checkLicense.errorExpiredMessage', {
+        defaultMessage:
+          'You cannot use {pluginName} because your {licenseType} license has expired',
+        values: { licenseType, pluginName },
+      }),
     };
   }
 

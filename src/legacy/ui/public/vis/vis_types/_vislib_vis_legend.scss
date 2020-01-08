@@ -11,9 +11,11 @@ $visLegendLineHeight: $euiSize;
   position: absolute;
   bottom: 0;
   left: 0;
+  display: flex;
+  padding: $euiSizeXS;
   background-color: $euiColorEmptyShade;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
-              background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
   &:focus {
     box-shadow: none;
@@ -22,13 +24,11 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__toggle--isOpen {
-  background-color: transparentize($euiColorDarkestShade, .9);
+  background-color: transparentize($euiColorDarkestShade, 0.9);
   opacity: 1;
 }
 
-
 .visLegend {
-  @include euiFontSizeXS;
   display: flex;
   min-height: 0;
   height: 100%;
@@ -46,27 +46,30 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-/**
- * 1. Position the .visLegend__valueDetails absolutely against the legend item
- * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
- * 3. Make sure the currently selected item is top most in z level
- */
 .visLegend__list {
   @include euiScrollBar;
   display: flex;
-  line-height: $visLegendLineHeight;
   width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
 
+  .visLegend__button {
+    font-size: $euiFontSizeXS;
+    text-align: left;
+    overflow: hidden; // Ensures scrollbars don't appear because EuiButton__text has a high line-height
+
+    .visLegend__valueTitle {
+      vertical-align: middle;
+    }
+  }
+
   .visLib--legend-top &,
   .visLib--legend-bottom & {
     width: auto;
     flex-direction: row;
     flex-wrap: wrap;
-    overflow: visible; /* 2 */
 
     .visLegend__value {
       flex-grow: 0;
@@ -79,74 +82,19 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-.visLegend__value {
-  cursor: pointer;
-  padding: $euiSizeXS;
-  display: flex;
-  flex-shrink: 0;
-  position: relative; /* 1 */
-
-  > * {
-    width: 100%;
-  }
-
-  &.disabled {
-    opacity: 0.5;
-  }
+.visLegend__valueColorPicker {
+  width: ($euiSizeL * 8); // 8 columns
 }
 
-.visLegend__valueTitle {
-  @include euiTextTruncate; // ALWAYS truncate
-  color: $visTextColor;
+.visLegend__valueColorPickerDot {
+  cursor: pointer;
 
   &:hover {
-    text-decoration: underline;
-  }
-}
-
-.visLegend__valueTitle--full ~ .visLegend__valueDetails {
-  z-index: 2; /* 3 */
-}
-
-.visLegend__valueDetails {
-  background-color: $euiColorEmptyShade;
-
-  .visLib--legend-left &,
-  .visLib--legend-right & {
-    margin-top: $euiSizeXS;
-    border-bottom: $euiBorderThin;
+    transform: scale(1.4);
   }
 
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
-    @include euiBottomShadowMedium;
-    position: absolute; /* 1 */
-    border-radius: $euiBorderRadius;
-  }
-
-  .visLib--legend-bottom & {
-    bottom: $visLegendLineHeight + 2 * $euiSizeXS;
-  }
-
-  .visLib--legend-top & {
-    margin-top: $euiSizeXS;
-  }
-}
-
-.visLegend__valueColorPicker {
-  width: $visColorPickerWidth;
-  margin: auto;
-
-  .visLegend__valueColorPickerDot {
-    $colorPickerDotsPerRow: 8;
-    $colorPickerDotMargin: $euiSizeXS / 2;
-    $colorPickerDotWidth: $visColorPickerWidth / $colorPickerDotsPerRow - 2 * $colorPickerDotMargin;
-
-    margin: $colorPickerDotMargin;
-    width: $colorPickerDotWidth;
-
-    &:hover {
-      transform: scale(1.4);
-    }
+  &-isSelected {
+    border: $euiSizeXS solid;
+    border-radius: 100%;
   }
 }

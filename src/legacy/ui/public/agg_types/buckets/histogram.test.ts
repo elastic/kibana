@@ -159,7 +159,7 @@ describe('Histogram Agg', () => {
           }
 
           // mock histogram:maxBars value;
-          npStart.core.uiSettings.get = jest.fn(() => maxBars);
+          npStart.core.uiSettings.get = jest.fn(() => maxBars as any);
 
           return aggConfig.write(aggConfigs).params;
         };

@@ -5,41 +5,41 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
-import React, { useContext, useEffect } from 'react';
-import { compose } from 'redux';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-
-import { inputsSelectors, State } from '../../../store';
+import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
-import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { LastEventTime } from '../../../components/last_event_time';
-import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
-import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
-import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
+import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
+import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
-import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { SiemNavigation } from '../../../components/navigation';
-import { manageQuery } from '../../../components/page/manage_query';
-import { HostOverview } from '../../../components/page/hosts/host_overview';
 import { KpiHostsComponent } from '../../../components/page/hosts';
+import { HostOverview } from '../../../components/page/hosts/host_overview';
+import { manageQuery } from '../../../components/page/manage_query';
 import { SiemSearchBar } from '../../../components/search_bar';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
+import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
+import { useKibana } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
+import { inputsSelectors, State } from '../../../store';
+import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
+import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps, HostDetailsProps } from './types';
-import { HostDetailsTabs } from './details_tabs';
 import { type } from './utils';
 
 const HostOverviewManage = manageQuery(HostOverview);
@@ -61,50 +61,59 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   }) => {
     useEffect(() => {
       setHostDetailsTablesActivePageToZero(null);
-    }, [detailName]);
+    }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
+    const hostDetailsPageFilters: esFilters.Filter[] = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'host.name',
+          value: detailName,
+          params: {
+            query: detailName,
+          },
+        },
+        query: {
+          match: {
+            'host.name': {
+              query: detailName,
+              type: 'phrase',
+            },
+          },
+        },
+      },
+    ];
+    const getFilters = () => [...hostDetailsPageFilters, ...filters];
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [
-                {
-                  meta: {
-                    alias: null,
-                    negate: false,
-                    disabled: false,
-                    type: 'phrase',
-                    key: 'host.name',
-                    value: detailName,
-                    params: {
-                      query: detailName,
-                    },
-                  },
-                  query: {
-                    match: {
-                      'host.name': {
-                        query: detailName,
-                        type: 'phrase',
-                      },
-                    },
-                  },
-                },
-                ...filters,
-              ],
+              filters: getFilters(),
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <>
-                <StickyContainer>
-                  <FiltersGlobal>
-                    <SiemSearchBar indexPattern={indexPattern} id="global" />
-                  </FiltersGlobal>
+              <StickyContainer>
+                <FiltersGlobal>
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                </FiltersGlobal>
 
+                <WrapperPage>
                   <HeaderPage
+                    border
                     subtitle={
                       <LastEventTime
                         indexKey={LastEventIndexKey.hostDetails}
@@ -113,6 +122,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                     }
                     title={detailName}
                   />
+
                   <HostOverviewByNameQuery
                     sourceId="default"
                     hostName={detailName}
@@ -172,9 +182,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostDetailsQuery>
@@ -183,40 +191,41 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
                   <SiemNavigation
                     navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
                   />
 
                   <EuiSpacer />
-                </StickyContainer>
-                <HostDetailsTabs
-                  isInitializing={isInitializing}
-                  deleteQuery={deleteQuery}
-                  to={to}
-                  from={from}
-                  detailName={detailName}
-                  type={type}
-                  setQuery={setQuery}
-                  filterQuery={filterQuery}
-                  hostDetailsPagePath={hostDetailsPagePath}
-                  indexPattern={indexPattern}
-                  setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                />
-              </>
+
+                  <HostDetailsTabs
+                    isInitializing={isInitializing}
+                    deleteQuery={deleteQuery}
+                    pageFilters={hostDetailsPageFilters}
+                    to={to}
+                    from={from}
+                    detailName={detailName}
+                    type={type}
+                    setQuery={setQuery}
+                    filterQuery={filterQuery}
+                    hostDetailsPagePath={hostDetailsPagePath}
+                    indexPattern={indexPattern}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                  />
+                </WrapperPage>
+              </StickyContainer>
             ) : (
-              <>
-                <HeaderPage title={detailName} />
+              <WrapperPage>
+                <HeaderPage border title={detailName} />
+
                 <HostsEmptyPage />
-              </>
+              </WrapperPage>
             );
           }}
         </WithSource>
+
         <SpyRoute />
       </>
     );
   }
 );
-
 HostDetailsComponent.displayName = 'HostDetailsComponent';
 
 export const makeMapStateToProps = () => {
@@ -229,11 +238,8 @@ export const makeMapStateToProps = () => {
 };
 
 export const HostDetails = compose<React.ComponentClass<HostDetailsProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-      setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-    }
-  )
+  connect(makeMapStateToProps, {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+    setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
+  })
 )(HostDetailsComponent);

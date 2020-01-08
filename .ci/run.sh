@@ -21,6 +21,9 @@ kibana-ciGroup*)
 kibana-visualRegression*)
   ./test/scripts/jenkins_visual_regression.sh
   ;;
+kibana-accessibility*)
+  ./test/scripts/jenkins_accessibility.sh
+  ;;
 kibana-firefoxSmoke*)
   ./test/scripts/jenkins_firefox_smoke.sh
   ;;
@@ -33,6 +36,9 @@ x-pack-ciGroup*)
   ;;
 x-pack-visualRegression*)
   ./test/scripts/jenkins_xpack_visual_regression.sh
+  ;;
+x-pack-accessibility*)
+  ./test/scripts/jenkins_xpack_accessibility.sh
   ;;
 x-pack-firefoxSmoke*)
   ./test/scripts/jenkins_xpack_firefox_smoke.sh

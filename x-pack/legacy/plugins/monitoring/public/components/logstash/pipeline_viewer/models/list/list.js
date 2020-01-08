@@ -15,18 +15,13 @@ export class List {
   }
 
   static fromPipeline(pipeline) {
-    const {
-      inputStatements,
-      filterStatements,
-      outputStatements,
-      queue
-    } = pipeline;
+    const { inputStatements, filterStatements, outputStatements, queue } = pipeline;
 
     return new List(
       flattenPipelineSection(inputStatements),
       flattenPipelineSection(filterStatements),
       flattenPipelineSection(outputStatements),
-      queue,
+      queue
     );
   }
 }

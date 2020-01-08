@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { METRIC_TYPES } from 'ui/agg_types/metrics/metric_agg_types';
-import { AggConfigOptions } from 'ui/agg_types/agg_config';
+import { AggConfigOptions } from '../agg_config';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { IBucketAggConfig } from './_bucket_agg_type';
+import { METRIC_TYPES } from '../metrics/metric_agg_types';
 
 const geotileGridTitle = i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',
@@ -67,6 +68,6 @@ export const geoTileBucketAgg = new BucketAggType({
       aggs.push(agg.aggConfigs.createAggConfig(aggConfig, { addToAggConfigs: false }));
     }
 
-    return aggs;
+    return aggs as IBucketAggConfig[];
   },
 });

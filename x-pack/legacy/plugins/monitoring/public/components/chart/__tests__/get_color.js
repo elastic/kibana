@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getColor } from '../get_color';
 
-describe('getColors', function () {
+describe('getColors', function() {
   it('elasticsearch colors', () => {
     expect(getColor('elasticsearch', 0)).to.be('#3ebeb0');
     expect(getColor('elasticsearch', 1)).to.be('#3b73ac');

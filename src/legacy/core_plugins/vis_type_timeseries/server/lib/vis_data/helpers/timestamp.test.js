@@ -28,21 +28,37 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
       [
         {
           id: 1,
-          data: [[100, 43], [1000, 56], [lastTimestamp, 59]],
+          data: [
+            [100, 43],
+            [1000, 56],
+            [lastTimestamp, 59],
+          ],
         },
         {
           id: 1,
-          data: [[100, 33], [1000, 16], [lastTimestamp, 29]],
+          data: [
+            [100, 33],
+            [1000, 16],
+            [lastTimestamp, 29],
+          ],
         },
       ],
       [
         {
           id: 2,
-          data: [[100, 3], [1000, 6], [lastTimestamp, 9]],
+          data: [
+            [100, 3],
+            [1000, 6],
+            [lastTimestamp, 9],
+          ],
         },
         {
           id: 2,
-          data: [[100, 5], [1000, 7], [lastTimestamp, 9]],
+          data: [
+            [100, 5],
+            [1000, 7],
+            [lastTimestamp, 9],
+          ],
         },
       ],
     ];
@@ -58,7 +74,11 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.
     test('should return the max last timestamp of series', () => {
       const maxLastTimestamp = 20000;
 
-      series[0][1].data = [[100, 5], [1000, 7], [maxLastTimestamp, 50]];
+      series[0][1].data = [
+        [100, 5],
+        [1000, 7],
+        [maxLastTimestamp, 50],
+      ];
 
       const timestamp = getLastSeriesTimestamp(series);
 

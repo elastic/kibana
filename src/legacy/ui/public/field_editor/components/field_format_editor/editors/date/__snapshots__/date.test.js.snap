@@ -53,7 +53,8 @@ exports[`DateFormatEditor should render normally 1`] = `
       placeholder="MMMM Do YYYY, HH:mm:ss.SSS"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

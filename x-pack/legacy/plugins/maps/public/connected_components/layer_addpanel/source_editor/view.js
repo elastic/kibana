@@ -6,15 +6,15 @@
 
 import React, { Fragment } from 'react';
 import { ALL_SOURCES } from '../../../layers/sources/all_sources';
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceEditor = ({
-  clearSource, sourceType, isIndexingTriggered, inspectorAdapters, previewLayer
+  clearSource,
+  sourceType,
+  isIndexingTriggered,
+  inspectorAdapters,
+  previewLayer,
 }) => {
   const editorProperties = {
     onPreviewSource: previewLayer,
@@ -29,30 +29,18 @@ export const SourceEditor = ({
   const editor = Source.renderEditor(editorProperties);
   return (
     <Fragment>
-      {
-        isIndexingTriggered
-          ? null
-          : (
-            <Fragment>
-              <EuiButtonEmpty
-                size="xs"
-                flush="left"
-                onClick={clearSource}
-                iconType="arrowLeft"
-              >
-                <FormattedMessage
-                  id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
-                  defaultMessage="Change data source"
-                />
-              </EuiButtonEmpty>
-              <EuiSpacer size="s" />
-            </Fragment>
-          )
-      }
-      <EuiPanel>
-        {editor}
-      </EuiPanel>
+      {isIndexingTriggered ? null : (
+        <Fragment>
+          <EuiButtonEmpty size="xs" flush="left" onClick={clearSource} iconType="arrowLeft">
+            <FormattedMessage
+              id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
+              defaultMessage="Change data source"
+            />
+          </EuiButtonEmpty>
+          <EuiSpacer size="s" />
+        </Fragment>
+      )}
+      <EuiPanel>{editor}</EuiPanel>
     </Fragment>
   );
 };
-

@@ -17,19 +17,45 @@
  * under the License.
  */
 
-import { Filter, buildRangeFilter, FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 import { dedupFilters } from './dedup_filters';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
 
 describe('filter manager utilities', () => {
+  let indexPattern: IIndexPattern;
+
+  beforeEach(() => {
+    indexPattern = {
+      id: 'index',
+    } as IIndexPattern;
+  });
+
   describe('dedupFilters(existing, filters)', () => {
     test('should return only filters which are not in the existing', () => {
-      const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index'),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
+      const existing: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
+        esFilters.buildQueryFilter(
+          { match: { _term: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       ];
-      const filters: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index'),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
+        esFilters.buildQueryFilter(
+          { match: { _term: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -38,16 +64,34 @@ describe('filter manager utilities', () => {
     });
 
     test('should ignore the disabled attribute when comparing ', () => {
-      const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index'),
+      const existing: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
-          ...buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
+          ...esFilters.buildQueryFilter(
+            { match: { _term: { query: 'apache', type: 'phrase' } } },
+            'index1',
+            ''
+          ),
           meta: { disabled: true, negate: false, alias: null },
         },
       ];
-      const filters: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index'),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
+        esFilters.buildQueryFilter(
+          { match: { _term: { query: 'apache', type: 'phrase' } } },
+          'index1',
+          ''
+        ),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -56,18 +100,36 @@ describe('filter manager utilities', () => {
     });
 
     test('should ignore $state attribute', () => {
-      const existing: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index'),
+      const existing: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
-          ...buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
-          $state: { store: FilterStateStore.APP_STATE },
+          ...esFilters.buildQueryFilter(
+            { match: { _term: { query: 'apache', type: 'phrase' } } },
+            'index',
+            ''
+          ),
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
         },
       ];
-      const filters: Filter[] = [
-        buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
         {
-          ...buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index'),
-          $state: { store: FilterStateStore.GLOBAL_STATE },
+          ...esFilters.buildQueryFilter(
+            { match: { _term: { query: 'apache', type: 'phrase' } } },
+            'index',
+            ''
+          ),
+          $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
         },
       ];
       const results = dedupFilters(existing, filters);

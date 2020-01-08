@@ -23,7 +23,7 @@ export function validateEsRoute(server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/validate/es',
-    handler: async function (request) {
+    handler: async function(request) {
       const uiSettings = await request.getUiSettingsService().getAll();
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -36,17 +36,17 @@ export function validateEsRoute(server) {
           aggs: {
             maxAgg: {
               max: {
-                field: timefield
-              }
+                field: timefield,
+              },
             },
             minAgg: {
               min: {
-                field: timefield
-              }
-            }
+                field: timefield,
+              },
+            },
           },
-          size: 0
-        }
+          size: 0,
+        },
       };
 
       let resp = {};
@@ -61,14 +61,14 @@ export function validateEsRoute(server) {
           ok: true,
           field: timefield,
           min: _.get(resp, 'aggregations.minAgg.value'),
-          max: _.get(resp, 'aggregations.maxAgg.value')
+          max: _.get(resp, 'aggregations.maxAgg.value'),
         };
       }
 
       return {
         ok: false,
-        resp: resp
+        resp: resp,
       };
-    }
+    },
   });
 }

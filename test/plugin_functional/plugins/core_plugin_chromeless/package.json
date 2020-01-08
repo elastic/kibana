@@ -1,0 +1,17 @@
+{
+  "name": "core_plugin_chromeless",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/core_plugin_chromeless",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.5.3"
+  }
+}

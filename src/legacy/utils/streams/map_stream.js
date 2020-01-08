@@ -31,6 +31,6 @@ export function createMapStream(fn) {
       } catch (err) {
         done(err);
       }
-    }
+    },
   });
 }

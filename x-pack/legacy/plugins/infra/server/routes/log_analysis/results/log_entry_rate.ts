@@ -9,6 +9,7 @@ import Boom from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -19,46 +20,55 @@ import {
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
 
-export const initLogAnalysisGetLogEntryRateRoute = ({
-  framework,
-  logAnalysis,
-}: InfraBackendLibs) => {
-  framework.registerRoute({
-    method: 'POST',
-    path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
-    handler: async (req, res) => {
-      const payload = pipe(
-        getLogEntryRateRequestPayloadRT.decode(req.payload),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+const anyObject = schema.object({}, { allowUnknowns: true });
 
-      const logEntryRateBuckets = await logAnalysis
-        .getLogEntryRateBuckets(
-          req,
+export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBackendLibs) => {
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
+      validate: {
+        // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
+        body: anyObject,
+      },
+    },
+    async (requestContext, request, response) => {
+      try {
+        const payload = pipe(
+          getLogEntryRateRequestPayloadRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
+        const logEntryRateBuckets = await logAnalysis.getLogEntryRateBuckets(
+          requestContext,
           payload.data.sourceId,
           payload.data.timeRange.startTime,
           payload.data.timeRange.endTime,
-          payload.data.bucketDuration
-        )
-        .catch(err => {
-          if (err instanceof NoLogRateResultsIndexError) {
-            throw Boom.boomify(err, { statusCode: 404 });
-          }
+          payload.data.bucketDuration,
+          request
+        );
 
-          throw Boom.boomify(err, { statusCode: ('statusCode' in err && err.statusCode) || 500 });
+        return response.ok({
+          body: getLogEntryRateSuccessReponsePayloadRT.encode({
+            data: {
+              bucketDuration: payload.data.bucketDuration,
+              histogramBuckets: logEntryRateBuckets,
+              totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
+            },
+          }),
         });
-
-      return res.response(
-        getLogEntryRateSuccessReponsePayloadRT.encode({
-          data: {
-            bucketDuration: payload.data.bucketDuration,
-            histogramBuckets: logEntryRateBuckets,
-            totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
-          },
-        })
-      );
-    },
-  });
+      } catch (e) {
+        const { statusCode = 500, message = 'Unknown error occurred' } = e;
+        if (e instanceof NoLogRateResultsIndexError) {
+          return response.notFound({ body: { message } });
+        }
+        return response.customError({
+          statusCode,
+          body: { message },
+        });
+      }
+    }
+  );
 };
 
 const getTotalNumberOfLogEntries = (

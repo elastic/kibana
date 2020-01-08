@@ -39,9 +39,17 @@ export const NAVIGATION_TLS_TITLE = i18n.translate('xpack.siem.network.navigatio
   defaultMessage: 'TLS',
 });
 
+export const NAVIGATION_HTTP_TITLE = i18n.translate('xpack.siem.network.navigation.httpTitle', {
+  defaultMessage: 'HTTP',
+});
+
 export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
   'xpack.siem.network.navigation.anomaliesTitle',
   {
     defaultMessage: 'Anomalies',
   }
 );
+
+export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.network.navigation.alertsTitle', {
+  defaultMessage: 'Alerts',
+});

@@ -16,6 +16,6 @@ export function getDefaultNodeFromId(nodeId) {
     transport_address: '',
     master: false,
     type: 'node',
-    attributes: {}
+    attributes: {},
   };
 }

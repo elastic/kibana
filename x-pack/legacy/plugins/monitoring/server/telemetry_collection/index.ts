@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getStatsWithMonitoring } from './get_stats_with_monitoring';
+export { registerMonitoringCollection } from './register_monitoring_collection';

@@ -32,7 +32,13 @@ describe('getRelationships', () => {
     const $http = jest.fn().mockImplementation(() => ({ data: [1, 2] }));
     const basePath = 'test';
 
-    const response = await getRelationships('dashboard', 1, ['search', 'index-pattern'], $http, basePath);
+    const response = await getRelationships(
+      'dashboard',
+      1,
+      ['search', 'index-pattern'],
+      $http,
+      basePath
+    );
     expect(response).toEqual([1, 2]);
   });
 

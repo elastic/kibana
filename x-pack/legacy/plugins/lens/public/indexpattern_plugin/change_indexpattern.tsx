@@ -79,6 +79,7 @@ export function ChangeIndexPattern({
             searchable
             singleSelection="always"
             options={indexPatternRefs.map(({ title, id }) => ({
+              key: id,
               label: title,
               value: id,
               checked: id === indexPatternId ? 'on' : undefined,

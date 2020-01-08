@@ -20,7 +20,7 @@ export function handleResponse(clusterUuid, response) {
     memTotal,
     apms: {
       total: apmTotal,
-    }
+    },
   };
 
   return {
@@ -37,44 +37,46 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
   const config = req.server.config();
   const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
 
-  return Promise.all(clusters.map(async cluster => {
-    const clusterUuid = cluster.cluster_uuid;
-    const params = {
-      index: apmIndexPattern,
-      size: 0,
-      ignoreUnavailable: true,
-      filterPath: apmAggFilterPath,
-      body: {
-        query: createApmQuery({
+  return Promise.all(
+    clusters.map(async cluster => {
+      const clusterUuid = cluster.cluster_uuid;
+      const params = {
+        index: apmIndexPattern,
+        size: 0,
+        ignoreUnavailable: true,
+        filterPath: apmAggFilterPath,
+        body: {
+          query: createApmQuery({
+            start,
+            end,
+            clusterUuid,
+            metric: ApmMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+          }),
+          aggs: apmUuidsAgg(maxBucketSize),
+        },
+      };
+
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+      const [response, timeOfLastEvent] = await Promise.all([
+        callWithRequest(req, 'search', params),
+        getTimeOfLastEvent({
+          req,
+          callWithRequest,
+          apmIndexPattern,
           start,
           end,
           clusterUuid,
-          metric: ApmMetric.getMetricFields() // override default of BeatMetric.getMetricFields
         }),
-        aggs: apmUuidsAgg(maxBucketSize)
-      },
-    };
+      ]);
 
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    const [response, timeOfLastEvent] = await Promise.all([
-      callWithRequest(req, 'search', params),
-      getTimeOfLastEvent({
-        req,
-        callWithRequest,
-        apmIndexPattern,
-        start,
-        end,
-        clusterUuid
-      })
-    ]);
-
-    const formattedResponse = handleResponse(clusterUuid, response);
-    return {
-      ...formattedResponse,
-      stats: {
-        ...formattedResponse.stats,
-        timeOfLastEvent,
-      }
-    };
-  }));
+      const formattedResponse = handleResponse(clusterUuid, response);
+      return {
+        ...formattedResponse,
+        stats: {
+          ...formattedResponse.stats,
+          timeOfLastEvent,
+        },
+      };
+    })
+  );
 }

@@ -27,38 +27,54 @@ const durationBaseOptions = [
     value: 'ms',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.secondsLabel', { defaultMessage: 'Seconds' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.secondsLabel', {
+      defaultMessage: 'Seconds',
+    }),
     value: 's',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.minutesLabel', { defaultMessage: 'Minutes' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.minutesLabel', {
+      defaultMessage: 'Minutes',
+    }),
     value: 'm',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.hoursLabel', { defaultMessage: 'Hours' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.hoursLabel', {
+      defaultMessage: 'Hours',
+    }),
     value: 'h',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.daysLabel', { defaultMessage: 'Days' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.daysLabel', {
+      defaultMessage: 'Days',
+    }),
     value: 'd',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.weeksLabel', { defaultMessage: 'Weeks' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.weeksLabel', {
+      defaultMessage: 'Weeks',
+    }),
     value: 'w',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.monthsLabel', { defaultMessage: 'Months' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.monthsLabel', {
+      defaultMessage: 'Months',
+    }),
     value: 'M',
   },
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.yearsLabel', { defaultMessage: 'Years' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.yearsLabel', {
+      defaultMessage: 'Years',
+    }),
     value: 'Y',
   },
 ];
 
 export const durationOutputOptions = [
   {
-    label: i18n.translate('visTypeTimeseries.durationOptions.humanize', { defaultMessage: 'Human readable' }),
+    label: i18n.translate('visTypeTimeseries.durationOptions.humanize', {
+      defaultMessage: 'Human readable',
+    }),
     value: 'humanize',
   },
   ...durationBaseOptions,

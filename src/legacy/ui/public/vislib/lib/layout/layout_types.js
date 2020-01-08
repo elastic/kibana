@@ -26,5 +26,5 @@ export const layoutTypes = {
   gauge: gaugeLayout,
   goal: gaugeLayout,
   metric: gaugeLayout,
-  point_series: columnLayout
+  point_series: columnLayout,
 };

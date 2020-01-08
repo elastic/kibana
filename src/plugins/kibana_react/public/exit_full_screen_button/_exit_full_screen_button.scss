@@ -1,17 +1,9 @@
-.dshExitFullScreenButton {
-  text-align: center;
-  width: 100%;
-  height: 0;
-  bottom: 0;
-  position: absolute;
-}
-
 /**
  * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
  *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
  */
 
-.dshExitFullScreenButton__mode {
+.dshExitFullScreenButton {
   height: $euiSizeXXL;
   left: 0;
   bottom: 0;
@@ -59,18 +51,19 @@
   color: $euiColorEmptyShade;
   line-height: $euiSizeXXL;
   display: inline-block;
+  font-size: $euiFontSizeS;
   height: $euiSizeXXL;
   position: absolute;
   left: calc(100% + #{$euiSize}); /* 1 */
   top: 0px;
   bottom: 0px;
   white-space: nowrap;
-  padding: 0px $euiSizeS 0px $euiSizeM;
+  padding: 0px $euiSizeXS 0px $euiSizeM;
   transition: all .2s ease;
   transform: translateX(-100%);
   z-index: -1;
-
-  .kuiIcon {
-    margin-left: $euiSizeS;
+  
+  .euiIcon {
+    margin-left: $euiSizeXS;
   }
 }

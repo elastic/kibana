@@ -17,69 +17,63 @@
  * under the License.
  */
 
-// @ts-ignore
-import { toastNotifications, banners } from 'ui/notify';
-import { kfetch } from 'ui/kfetch';
-import chrome from 'ui/chrome';
+import {
+  ChromeStart,
+  DocLinksStart,
+  HttpStart,
+  LegacyNavLink,
+  NotificationsSetup,
+  OverlayStart,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  UiSettingsState,
+} from 'kibana/public';
+import { UiStatsMetricType } from '@kbn/analytics';
+import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 
-import { wrapInI18nContext } from 'ui/i18n';
-
-// @ts-ignore
-import { uiModules as modules } from 'ui/modules';
-import routes from 'ui/routes';
-import { npSetup, npStart } from 'ui/new_platform';
-import { IPrivate } from 'ui/private';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { TelemetryOptInProvider } from '../../../telemetry/public/services';
-import { start as data } from '../../../data/public/legacy';
-
-let shouldShowTelemetryOptIn: boolean;
-let telemetryOptInProvider: any;
-
-export function getServices() {
-  return {
-    getInjected: npStart.core.injectedMetadata.getInjectedVar,
-    metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-    docLinks: npStart.core.docLinks,
-
-    uiRoutes: routes,
-    uiModules: modules,
-
-    savedObjectsClient: npStart.core.savedObjects.client,
-    chrome: npStart.core.chrome,
-    uiSettings: npStart.core.uiSettings,
-    addBasePath: npStart.core.http.basePath.prepend,
-    getBasePath: npStart.core.http.basePath.get,
-
-    indexPatternService: data.indexPatterns.indexPatterns,
-    shouldShowTelemetryOptIn,
-    telemetryOptInProvider,
-    getFeatureCatalogueEntries: async () => {
-      const injector = await chrome.dangerouslyGetActiveInjector();
-      const Private = injector.get<IPrivate>('Private');
-      // Merge legacy registry with new registry
-      (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
-        npSetup.plugins.feature_catalogue.register
-      );
-      return npStart.plugins.feature_catalogue.get();
-    },
-
-    trackUiMetric: createUiStatsReporter('Kibana_home'),
-    METRIC_TYPE,
-
-    toastNotifications,
-    banners,
-    kfetch,
-    wrapInI18nContext,
+export interface HomeKibanaServices {
+  indexPatternService: any;
+  getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
+  metadata: {
+    app: unknown;
+    bundleId: string;
+    nav: LegacyNavLink[];
+    version: string;
+    branch: string;
+    buildNum: number;
+    buildSha: string;
+    basePath: string;
+    serverName: string;
+    devMode: boolean;
+    uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
   };
+  getInjected: (name: string, defaultValue?: any) => unknown;
+  chrome: ChromeStart;
+  telemetryOptInProvider: any;
+  uiSettings: IUiSettingsClient;
+  http: HttpStart;
+  savedObjectsClient: SavedObjectsClientContract;
+  toastNotifications: NotificationsSetup['toasts'];
+  banners: OverlayStart['banners'];
+  METRIC_TYPE: any;
+  trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
+  getBasePath: () => string;
+  shouldShowTelemetryOptIn: boolean;
+  docLinks: DocLinksStart;
+  addBasePath: (url: string) => string;
 }
 
-modules.get('kibana').run((Private: IPrivate) => {
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+let services: HomeKibanaServices | null = null;
 
-  telemetryOptInProvider = Private(TelemetryOptInProvider);
-  shouldShowTelemetryOptIn =
-    telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
-});
+export function setServices(newServices: HomeKibanaServices) {
+  services = newServices;
+}
+
+export function getServices() {
+  if (!services) {
+    throw new Error(
+      'Kibana services not set - are you trying to import this module from outside of the home app?'
+    );
+  }
+  return services;
+}

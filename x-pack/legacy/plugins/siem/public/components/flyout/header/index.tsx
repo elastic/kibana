@@ -25,7 +25,7 @@ import { Properties } from '../../timeline/properties';
 import { appActions, appModel } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
 import { timelineActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
 import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
 import { InputsModelId } from '../../../store/inputs/constants';
 
@@ -129,7 +129,7 @@ const makeMapStateToProps = () => {
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId);
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       dataProviders,
@@ -215,7 +215,4 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
 });
 
-export const FlyoutHeader = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulFlyoutHeader);
+export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);

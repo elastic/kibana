@@ -31,12 +31,11 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('DefaultFormatEditor', () => {
-
   describe('convertSampleInput', () => {
-    const converter = (input) => {
-      if(isNaN(input)) {
+    const converter = input => {
+      if (isNaN(input)) {
         throw {
-          message: 'Input is not a number'
+          message: 'Input is not a number',
         };
       } else {
         return input * 2;
@@ -48,18 +47,22 @@ describe('DefaultFormatEditor', () => {
       const output = convertSampleInput(converter, inputs);
 
       expect(output.error).toEqual(null);
-      expect(JSON.stringify(output.samples)).toEqual(JSON.stringify([
-        { input: 1, output: 2 },
-        { input: 10, output: 20 },
-        { input: 15, output: 30 },
-      ]));
+      expect(JSON.stringify(output.samples)).toEqual(
+        JSON.stringify([
+          { input: 1, output: 2 },
+          { input: 10, output: 20 },
+          { input: 15, output: 30 },
+        ])
+      );
     });
 
     it('should return error if converter throws one', () => {
       const inputs = [1, 10, 15, 'invalid'];
       const output = convertSampleInput(converter, inputs);
 
-      expect(output.error).toEqual('An error occurred while trying to use this format configuration: Input is not a number');
+      expect(output.error).toEqual(
+        'An error occurred while trying to use this format configuration: Input is not a number'
+      );
       expect(JSON.stringify(output.samples)).toEqual(JSON.stringify([]));
     });
   });
@@ -98,7 +101,7 @@ describe('DefaultFormatEditor', () => {
   it('should call prop onError() if converter throws an error', async () => {
     const newFormat = {
       getConverterFor: jest.fn().mockImplementation(() => () => {
-        throw ({ message: 'Test error message' });
+        throw { message: 'Test error message' };
       }),
     };
 

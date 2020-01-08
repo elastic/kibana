@@ -29,42 +29,46 @@ const Icon = styled(EuiIcon)`
 
 Icon.displayName = 'Icon';
 
-export const AnomalyScore = React.memo<Args>(
-  ({ jobKey, startDate, endDate, index = 0, score, interval, narrowDateRange }): JSX.Element => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-      <>
-        <EuiFlexItem grow={false}>
-          <DraggableScore
-            id={escapeDataProviderId(`anomaly-scores-${jobKey}`)}
-            index={index}
-            score={score}
+export const AnomalyScoreComponent = ({
+  jobKey,
+  startDate,
+  endDate,
+  index = 0,
+  score,
+  interval,
+  narrowDateRange,
+}: Args): JSX.Element => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <EuiFlexItem grow={false}>
+        <DraggableScore
+          id={escapeDataProviderId(`anomaly-scores-${jobKey}`)}
+          index={index}
+          score={score}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          data-test-subj="anomaly-score-popover"
+          id="anomaly-score-popover"
+          isOpen={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+          closePopover={() => setIsOpen(!isOpen)}
+          button={<Icon type="iInCircle" />}
+        >
+          <EuiDescriptionList
+            data-test-subj="anomaly-description-list"
+            listItems={createDescriptionList(score, startDate, endDate, interval, narrowDateRange)}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            data-test-subj="anomaly-score-popover"
-            id="anomaly-score-popover"
-            isOpen={isOpen}
-            onClick={() => setIsOpen(!isOpen)}
-            closePopover={() => setIsOpen(!isOpen)}
-            button={<Icon type="iInCircle" />}
-          >
-            <EuiDescriptionList
-              data-test-subj="anomaly-description-list"
-              listItems={createDescriptionList(
-                score,
-                startDate,
-                endDate,
-                interval,
-                narrowDateRange
-              )}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
-      </>
-    );
-  }
-);
+        </EuiPopover>
+      </EuiFlexItem>
+    </>
+  );
+};
+
+AnomalyScoreComponent.displayName = 'AnomalyScoreComponent';
+
+export const AnomalyScore = React.memo(AnomalyScoreComponent);
 
 AnomalyScore.displayName = 'AnomalyScore';

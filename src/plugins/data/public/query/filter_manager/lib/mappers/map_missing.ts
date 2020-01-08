@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, FILTERS, isMissingFilter } from '@kbn/es-query';
 
-export const mapMissing = (filter: Filter) => {
-  if (isMissingFilter(filter)) {
+import { esFilters } from '../../../../../common';
+
+export const mapMissing = (filter: esFilters.Filter) => {
+  if (esFilters.isMissingFilter(filter)) {
     return {
-      type: FILTERS.MISSING,
-      value: FILTERS.MISSING,
+      type: esFilters.FILTERS.MISSING,
+      value: esFilters.FILTERS.MISSING,
       key: filter.missing.field,
     };
   }

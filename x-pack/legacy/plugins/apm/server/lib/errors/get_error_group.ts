@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -14,7 +13,11 @@ import {
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
@@ -27,7 +30,7 @@ export async function getErrorGroup({
 }: {
   serviceName: string;
   groupId: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
 
@@ -55,9 +58,9 @@ export async function getErrorGroup({
   };
 
   const resp = await client.search<APMError>(params);
-  const error = idx(resp, _ => _.hits.hits[0]._source);
-  const transactionId = idx(error, _ => _.transaction.id);
-  const traceId = idx(error, _ => _.trace.id);
+  const error = resp.hits.hits[0]?._source;
+  const transactionId = error?.transaction?.id;
+  const traceId = error?.trace?.id;
 
   let transaction;
   if (transactionId && traceId) {

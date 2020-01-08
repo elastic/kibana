@@ -6,28 +6,28 @@ Array [
     "color": "#3185fc",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       Avg.
-      <styled.span>
+      <ForwardRef(styled.span)>
         468 ms
-      </styled.span>
-    </styled.span>,
+      </ForwardRef(styled.span)>
+    </ForwardRef(styled.span)>,
   },
   Object {
     "color": "#e6c220",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       95th percentile
-    </styled.span>,
+    </ForwardRef(styled.span)>,
   },
   Object {
     "color": "#f98510",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       99th percentile
-    </styled.span>,
+    </ForwardRef(styled.span)>,
   },
 ]
 `;
@@ -46,6 +46,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2094,6 +2095,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2126,6 +2128,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -2703,66 +2706,121 @@ Array [
   display: inline-block;
 }
 
-<div
-    className="c0"
-  >
+<styled.div>
     <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
+      className="c0"
     >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        Avg.
-        <span
-          className="c4"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
         >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#e6c220"
-        radius={11}
-      />
-      <span
-        className="c3"
+          <styled.span
+            color="#3185fc"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c2"
+              color="#3185fc"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              Avg.
+              <styled.span>
+                <span
+                  className="c4"
+                >
+                  468 ms
+                </span>
+              </styled.span>
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#e6c220"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c5"
+              color="#e6c220"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              95th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        99th percentile
-      </span>
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#f98510"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c6"
+              color="#f98510"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              99th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
     </div>
-  </div>,
+  </styled.div>,
 ]
 `;
 
@@ -2772,6 +2830,7 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;
 
@@ -2923,6 +2982,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -4971,6 +5031,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -5077,85 +5138,168 @@ Array [
             }
           }
         >
-          <div
-            className="c0"
-          >
+          <styled.div>
             <div
-              className="c1"
+              className="c0"
             >
-              1502283720
+              <styled.div>
+                <div
+                  className="c1"
+                >
+                  1502283720
+                </div>
+              </styled.div>
+              <styled.div>
+                <div
+                  className="c2"
+                >
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#3185fc"
+                        radius={8}
+                        text="Avg."
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#3185fc"
+                              radius={8}
+                              shape="circle"
+                              withMargin={true}
+                            >
+                              <span
+                                className="c6"
+                                color="#3185fc"
+                                radius={8}
+                                shape="circle"
+                              />
+                            </styled.span>
+                            Avg.
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          438704.4
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#e6c220"
+                        radius={8}
+                        text="95th"
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#e6c220"
+                              radius={8}
+                              shape="circle"
+                              withMargin={true}
+                            >
+                              <span
+                                className="c8"
+                                color="#e6c220"
+                                radius={8}
+                                shape="circle"
+                              />
+                            </styled.span>
+                            95th
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          1557383.999999999
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#f98510"
+                        radius={8}
+                        text="99th"
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#f98510"
+                              radius={8}
+                              shape="circle"
+                              withMargin={true}
+                            >
+                              <span
+                                className="c9"
+                                color="#f98510"
+                                radius={8}
+                                shape="circle"
+                              />
+                            </styled.span>
+                            99th
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          1820377.1200000006
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                </div>
+              </styled.div>
+              <styled.div>
+                <div
+                  className="c10"
+                />
+              </styled.div>
             </div>
-            <div
-              className="c2"
-            >
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c6"
-                    color="#3185fc"
-                    radius={8}
-                  />
-                  Avg.
-                </div>
-                <div
-                  className="c7"
-                >
-                  438704.4
-                </div>
-              </div>
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c8"
-                    color="#e6c220"
-                    radius={8}
-                  />
-                  95th
-                </div>
-                <div
-                  className="c7"
-                >
-                  1557383.999999999
-                </div>
-              </div>
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c9"
-                    color="#f98510"
-                    radius={8}
-                  />
-                  99th
-                </div>
-                <div
-                  className="c7"
-                >
-                  1820377.1200000006
-                </div>
-              </div>
-            </div>
-            <div
-              className="c10"
-            />
-          </div>
+          </styled.div>
         </div>
       </div>
     </div>
@@ -5163,6 +5307,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -5740,66 +5885,121 @@ Array [
   display: inline-block;
 }
 
-<div
-    className="c0"
-  >
+<styled.div>
     <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
+      className="c0"
     >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        Avg.
-        <span
-          className="c4"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
         >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#e6c220"
-        radius={11}
-      />
-      <span
-        className="c3"
+          <styled.span
+            color="#3185fc"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c2"
+              color="#3185fc"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              Avg.
+              <styled.span>
+                <span
+                  className="c4"
+                >
+                  468 ms
+                </span>
+              </styled.span>
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#e6c220"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c5"
+              color="#e6c220"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              95th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        99th percentile
-      </span>
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#f98510"
+            radius={11}
+            shape="circle"
+            withMargin={true}
+          >
+            <span
+              className="c6"
+              color="#f98510"
+              radius={11}
+              shape="circle"
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              99th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
     </div>
-  </div>,
+  </styled.div>,
 ]
 `;
 
@@ -5809,6 +6009,7 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;
 
@@ -5826,6 +6027,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -6189,6 +6391,7 @@ Array [
       style={
         Object {
           "left": 0,
+          "pointerEvents": "none",
           "position": "absolute",
           "top": 0,
         }
@@ -6228,5 +6431,6 @@ Object {
   "selectionEnd": null,
   "selectionStart": null,
   "seriesEnabledState": Array [],
+  "showAnnotations": true,
 }
 `;

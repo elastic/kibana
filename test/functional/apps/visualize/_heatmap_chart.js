@@ -19,48 +19,46 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
-    before(async function () {
+    before(async function() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-axis');
+      await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
-      await PageObjects.visualize.selectField('@timestamp');
+      await PageObjects.visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.clickGo();
     });
 
-    it('should save and load', async function () {
+    it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', async function () {
+    it('should show correct data', async function() {
       // this is only the first page of the tabular data.
-      const expectedChartData =  [
+      const expectedChartData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
         ['2015-09-20 06:00', '740'],
@@ -83,23 +81,22 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-22 09:00', '1,408'],
       ];
 
-
       await inspector.open();
       await inspector.expectTableData(expectedChartData);
       await inspector.close();
     });
 
-    it('should show 4 color ranges as default colorNumbers param', async function () {
-      const legends = await PageObjects.visualize.getLegendEntries();
+    it('should show 4 color ranges as default colorNumbers param', async function() {
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
       expect(legends).to.eql(expectedLegends);
     });
 
-    it('should show 6 color ranges if changed on options', async function () {
-      await PageObjects.visualize.clickOptionsTab();
-      await PageObjects.visualize.changeHeatmapColorNumbers(6);
-      await PageObjects.visualize.clickGo();
-      const legends = await PageObjects.visualize.getLegendEntries();
+    it('should show 6 color ranges if changed on options', async function() {
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.changeHeatmapColorNumbers(6);
+      await PageObjects.visEditor.clickGo();
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 267',
         '267 - 534',
@@ -110,24 +107,24 @@ export default function ({ getService, getPageObjects }) {
       ];
       expect(legends).to.eql(expectedLegends);
     });
-    it('should show 6 custom color ranges', async function () {
-      await PageObjects.visualize.clickOptionsTab();
-      await PageObjects.visualize.clickEnableCustomRanges();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.clickAddRange();
+    it('should show 6 custom color ranges', async function() {
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.clickEnableCustomRanges();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
+      await PageObjects.visEditor.clickAddRange();
 
       log.debug('customize 2 last ranges');
-      await PageObjects.visualize.setCustomRangeByIndex(6, '650', '720');
-      await PageObjects.visualize.setCustomRangeByIndex(7, '800', '905');
+      await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
+      await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
 
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      await PageObjects.visualize.clickGo();
-      const legends = await PageObjects.visualize.getLegendEntries();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.visEditor.clickGo();
+      const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 100',
         '100 - 200',

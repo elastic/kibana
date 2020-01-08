@@ -63,8 +63,9 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
   });
 
   it('uses the custom label if it is set', () => {
-    const responseAggs: any = percentilesMetricAgg.getResponseAggs(aggConfigs
-      .aggs[0] as IPercentileAggConfig);
+    const responseAggs: any = percentilesMetricAgg.getResponseAggs(
+      aggConfigs.aggs[0] as IPercentileAggConfig
+    );
 
     const ninetyFifthPercentileLabel = responseAggs[0].makeLabel();
 
