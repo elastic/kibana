@@ -129,7 +129,7 @@ __Output type:__ `number`
 
 __Options:__
   * `defaultValue: number | Reference<number> | (() => number)` - defines a default value, see [Default values](#default-values) section for more details.
-  * `validate: (value: number | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `validate: (value: number) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `min: number` - defines a minimum value the number should have.
   * `max: number` - defines a maximum value the number should have.
 
@@ -149,7 +149,7 @@ __Output type:__ `boolean`
 
 __Options:__
   * `defaultValue: boolean | Reference<boolean> | (() => boolean)` - defines a default value, see [Default values](#default-values) section for more details.
-  * `validate: (value: boolean | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `validate: (value: boolean) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
 __Usage:__
 ```typescript
