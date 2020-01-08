@@ -134,7 +134,6 @@ export const LogEntryRow = ({
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           const column = logEntryColumnsById[columnConfiguration.messageColumn.id];
           const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
-
           return (
             <LogEntryColumn
               data-test-subj="logColumn messageLogColumn"

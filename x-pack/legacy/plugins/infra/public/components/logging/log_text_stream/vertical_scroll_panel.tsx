@@ -7,10 +7,16 @@
 import { bisector } from 'd3-array';
 import sortBy from 'lodash/fp/sortBy';
 import throttle from 'lodash/fp/throttle';
+import { VariableSizeList } from 'react-window';
+import { LogTextStreamLoadingItemView } from './loading_item_view';
 import * as React from 'react';
+import { useLogEntryMessageColumnWidthContext } from './log_entry_message_column';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { Rect } from './measurable_item_view';
+
+const DEFAULT_ITEM_HEIGHT = 25;
+const ITEM_PADDING = 4;
 
 interface VerticalScrollPanelProps<Child> {
   children?: (
@@ -31,6 +37,9 @@ interface VerticalScrollPanelProps<Child> {
   'data-test-subj'?: string;
   isLocked: boolean;
   entriesCount: number;
+  itemHeights: Map<string, number>;
+  recalculateColumnSize: () => void;
+  messageColumnSizeData: ReturnType<typeof useLogEntryMessageColumnWidthContext>;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -45,19 +54,19 @@ interface MeasurableChild {
 const SCROLL_THROTTLE_INTERVAL = 250;
 export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
-export class VerticalScrollPanel<Child> extends React.PureComponent<
+class VerticalScrollPanelComponent<Child> extends React.PureComponent<
   VerticalScrollPanelProps<Child>
 > {
   public static defaultProps: Partial<VerticalScrollPanelProps<any>> = {
     hideScrollbar: false,
   };
 
-  public scrollRef = React.createRef<HTMLDivElement>();
+  public scrollRef = React.createRef<HTMLDivElement & VariableSizeList>();
   public childRefs = new Map<Child, MeasurableChild>();
   public childDimensions = new Map<Child, Rect>();
   private nextScrollEventFromCenterTarget = false;
 
-  public handleScroll: React.UIEventHandler<HTMLDivElement> = throttle(
+  public handleScroll: React.UIEventHandler<HTMLDivElement & VariableSizeList> = throttle(
     SCROLL_THROTTLE_INTERVAL,
     () => {
       // If this event was fired by the centerTarget method modifying the scrollTop,
@@ -233,6 +242,18 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     if (prevProps.isLocked && !this.props.isLocked && this.scrollRef.current) {
       this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight;
     }
+    if (
+      prevProps.messageColumnSizeData.messageColumnWidth !==
+        this.props.messageColumnSizeData.messageColumnWidth &&
+      this.scrollRef.current
+    ) {
+      // This recomputes the column size after the first initial render. Even though
+      // recalculateColumnSize also calls requestAnimationFrame within itself, this
+      // doesn't actually work unless we also call requestAnimationFrame here a second time
+      // for some cosmic, unknowable reason
+      requestAnimationFrame(this.props.messageColumnSizeData.recalculateColumnSize);
+      this.scrollRef.current.resetAfterIndex(0, true);
+    }
   }
 
   public componentWillUnmount() {
@@ -240,33 +261,80 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 
   public render() {
-    const { children, height, width, hideScrollbar, 'data-test-subj': dataTestSubj } = this.props;
+    const {
+      children,
+      height,
+      width,
+      hideScrollbar,
+      'data-test-subj': dataTestSubj,
+      messageColumnSizeData,
+    } = this.props;
     const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
+
+    const renderedChildren = typeof children === 'function' ? children(this.registerChild) : null;
+    const childrenArray = renderedChildren
+      ? React.Children.toArray(React.Children.only(renderedChildren).props.children)
+      : [];
+
+    const getItemSize = ({
+      messageColumnWidth,
+      characterDimensions,
+      getLogEntryHeightFromMessageContent,
+    }) => (index: number) => {
+      const child = childrenArray[index];
+      if (child?.type === React.Fragment) {
+        const fragmentChildren = React.Children.toArray(child.props.children);
+        const logEntry = fragmentChildren[fragmentChildren.length - 1];
+        const logEntryValue = logEntry.props.logEntry;
+        const logEntryHeight = getLogEntryHeightFromMessageContent(
+          logEntryValue,
+          messageColumnWidth,
+          characterDimensions
+        );
+        return logEntryHeight
+          ? logEntryHeight +
+              ITEM_PADDING +
+              (fragmentChildren.length === 2 ? DEFAULT_ITEM_HEIGHT : 0)
+          : DEFAULT_ITEM_HEIGHT;
+      } else if (child?.type === LogTextStreamLoadingItemView) {
+        return 32;
+      }
+      return DEFAULT_ITEM_HEIGHT;
+    };
 
     return (
       <ScrollPanelWrapper
         data-test-subj={dataTestSubj}
-        style={{ height, width: width + scrollbarOffset }}
+        height={height}
+        width={width + scrollbarOffset}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
         ref={this.scrollRef}
+        itemCount={childrenArray.length}
+        itemSize={getItemSize(messageColumnSizeData)}
+        estimatedItemSize={DEFAULT_ITEM_HEIGHT}
       >
-        {typeof children === 'function' ? children(this.registerChild) : null}
+        {({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
       </ScrollPanelWrapper>
     );
   }
 }
 
+export const VerticalScrollPanel: React.FC<any> = props => {
+  const context = useLogEntryMessageColumnWidthContext();
+  return <VerticalScrollPanelComponent {...props} messageColumnSizeData={context} />;
+};
+
 interface ScrollPanelWrapperProps {
   scrollbarOffset?: number;
 }
 
-const ScrollPanelWrapper = euiStyled.div<ScrollPanelWrapperProps>`
+const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;
   padding-right: ${props => props.scrollbarOffset || 0}px;
-
+  visibility: ${props => (props.isHidden ? 'hidden' : 'visible')};
   & * {
     overflow-anchor: none;
   }

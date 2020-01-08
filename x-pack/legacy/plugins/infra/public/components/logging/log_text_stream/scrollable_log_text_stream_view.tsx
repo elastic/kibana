@@ -13,7 +13,11 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
+import {
+  LogColumnConfiguration,
+  MessageLogColumnConfiguration,
+  isMessageLogColumnConfiguration,
+} from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { useFormattedTime } from '../../formatted_time';
@@ -27,6 +31,10 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { useMeasuredCharacterDimensions } from './text_styles';
+import {
+  LogEntryMessageColumnWidthProvider,
+  getLogEntryHeightFromMessageContent,
+} from './log_entry_message_column';
 import { LogDateRow } from './log_date_row';
 
 interface ScrollableLogTextStreamViewProps {
@@ -136,6 +144,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     } = this.props;
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
+    const messageColumnId = (columnConfigurations.find(columnConfiguration =>
+      isMessageLogColumnConfiguration(columnConfiguration)
+    ) as MessageLogColumnConfiguration | undefined)?.messageColumn.id;
     return (
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && (!isStreaming || !hasItems) ? (
@@ -187,13 +198,15 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                       >
                         {registerChild => (
                           <>
-                            <LogTextStreamLoadingItemView
-                              alignment="bottom"
-                              isLoading={isLoadingMore}
-                              hasMore={hasMoreBeforeStart}
-                              isStreaming={false}
-                              lastStreamingUpdate={null}
-                            />
+                            {isLoadingMore && (
+                              <LogTextStreamLoadingItemView
+                                alignment="bottom"
+                                isLoading={isLoadingMore}
+                                hasMore={hasMoreBeforeStart}
+                                isStreaming={false}
+                                lastStreamingUpdate={null}
+                              />
+                            )}
                             {items.map((item, idx) => {
                               const currentTimestamp = item.logEntry.key.time;
                               let showDate = false;
@@ -202,47 +215,40 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 const prevTimestamp = items[idx - 1].logEntry.key.time;
                                 showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
                               }
-
                               return (
                                 <Fragment key={getStreamItemId(item)}>
                                   {showDate && <LogDateRow timestamp={currentTimestamp} />}
-                                  <MeasurableItemView
-                                    register={registerChild}
-                                    registrationKey={getStreamItemId(item)}
-                                  >
-                                    {itemMeasureRef => (
-                                      <LogEntryRow
-                                        columnConfigurations={columnConfigurations}
-                                        columnWidths={columnWidths}
-                                        openFlyoutWithItem={this.handleOpenFlyout}
-                                        boundingBoxRef={itemMeasureRef}
-                                        logEntry={item.logEntry}
-                                        highlights={item.highlights}
-                                        isActiveHighlight={
-                                          !!currentHighlightKey &&
-                                          currentHighlightKey.gid === item.logEntry.gid
-                                        }
-                                        scale={scale}
-                                        wrap={wrap}
-                                        isHighlighted={
-                                          highlightedItem
-                                            ? item.logEntry.gid === highlightedItem
-                                            : false
-                                        }
-                                      />
-                                    )}
-                                  </MeasurableItemView>
+                                  <LogEntryRow
+                                    columnConfigurations={columnConfigurations}
+                                    columnWidths={columnWidths}
+                                    openFlyoutWithItem={this.handleOpenFlyout}
+                                    logEntry={item.logEntry}
+                                    highlights={item.highlights}
+                                    isActiveHighlight={
+                                      !!currentHighlightKey &&
+                                      currentHighlightKey.gid === item.logEntry.gid
+                                    }
+                                    scale={scale}
+                                    wrap={wrap}
+                                    isHighlighted={
+                                      highlightedItem
+                                        ? item.logEntry.gid === highlightedItem
+                                        : false
+                                    }
+                                  />
                                 </Fragment>
                               );
                             })}
-                            <LogTextStreamLoadingItemView
-                              alignment="top"
-                              isLoading={isStreaming || isLoadingMore}
-                              hasMore={hasMoreAfterEnd}
-                              isStreaming={isStreaming}
-                              lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                              onLoadMore={this.handleLoadNewerItems}
-                            />
+                            {(isStreaming || isLoadingMore) && (
+                              <LogTextStreamLoadingItemView
+                                alignment="top"
+                                isLoading={isStreaming || isLoadingMore}
+                                hasMore={hasMoreAfterEnd}
+                                isStreaming={isStreaming}
+                                lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                                onLoadMore={this.handleLoadNewerItems}
+                              />
+                            )}
                             {isScrollLocked && (
                               <LogTextStreamJumpToTail
                                 width={width}
@@ -340,6 +346,10 @@ const WithColumnWidths: React.FunctionComponent<{
   children: (params: {
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
+    characterDimensions: {
+      height: number;
+      width: number;
+    };
   }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
@@ -355,11 +365,23 @@ const WithColumnWidths: React.FunctionComponent<{
     () => ({
       columnWidths,
       CharacterDimensionsProbe,
+      characterDimensions: dimensions,
     }),
-    [columnWidths, CharacterDimensionsProbe]
+    [columnWidths, CharacterDimensionsProbe, dimensions]
   );
 
-  return children(childParams);
+  const messageColumnId = (columnConfigurations.find(columnConfiguration =>
+    isMessageLogColumnConfiguration(columnConfiguration)
+  ) as MessageLogColumnConfiguration | undefined)?.messageColumn.id;
+
+  return (
+    <LogEntryMessageColumnWidthProvider
+      messageColumnId={messageColumnId}
+      characterDimensions={dimensions}
+    >
+      {children(childParams)}
+    </LogEntryMessageColumnWidthProvider>
+  );
 };
 
 const ScrollableLogTextStreamViewWrapper = euiStyled.div`
