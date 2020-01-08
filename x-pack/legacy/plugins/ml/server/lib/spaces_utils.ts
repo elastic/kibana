@@ -5,7 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { Space } from '../../../../../plugins/spaces/public';
+import { Space } from '../../../../../plugins/spaces/server';
 import { LegacySpacesPlugin } from '../../../spaces';
 
 interface GetActiveSpaceResponse {
