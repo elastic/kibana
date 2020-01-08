@@ -59,20 +59,16 @@ const managementSectionOrAppToNav = (appOrSection: ManagementApp | ManagementSec
 });
 
 const managementSectionToNavSection = (section: ManagementSection) => {
-  if (section.icon) {
-    return {
-      icon: <EuiIcon type={section.icon} size="m" />,
-      ...managementSectionOrAppToNav(section),
-    };
-  }
-  // euiIconType takes precedence
-  if (section.euiIconType) {
-    return {
-      icon: <EuiIcon type={section.euiIconType} size="m" />,
-      ...managementSectionOrAppToNav(section),
-    };
-  }
-  return { ...managementSectionOrAppToNav(section) };
+  const iconType = section.euiIconType
+    ? section.euiIconType
+    : section.icon
+    ? section.icon
+    : 'empty';
+
+  return {
+    icon: <EuiIcon type={iconType} size="m" />,
+    ...managementSectionOrAppToNav(section),
+  };
 };
 
 const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
