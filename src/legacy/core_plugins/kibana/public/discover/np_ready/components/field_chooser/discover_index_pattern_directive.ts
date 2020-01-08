@@ -17,10 +17,10 @@
  * under the License.
  */
 import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverIndexPattern } from './discover_index_pattern';
+import { DiscoverIndexPatternWrapper } from './discover_index_pattern';
 
 export function createIndexPatternSelectDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
+  return reactDirective(wrapInI18nContext(DiscoverIndexPatternWrapper), [
     ['indexPatternList', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
