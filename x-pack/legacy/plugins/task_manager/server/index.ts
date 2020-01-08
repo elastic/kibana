@@ -8,9 +8,8 @@ import { Root } from 'joi';
 import { Legacy } from 'kibana';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManagerSetupContract } from '../../../../plugins/task_manager/server';
 
-import { createLegacyApi } from './legacy';
+import { createLegacyApi, getTaskManagerSetup } from './legacy';
 export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from './legacy';
 
 // Once all plugins are migrated to NP, this can be removed
@@ -43,35 +42,29 @@ export function taskManager(kibana: any) {
       }).default();
     },
     init(server: Legacy.Server) {
-      const {
-        newPlatform: {
-          setup: {
-            plugins: { taskManager: taskManagerPluginApi },
-          },
-        },
-      } = server;
-
-      const legacyTaskManager = (taskManagerPluginApi as TaskManagerSetupContract)
-        .registerLegacyAPI({
-          savedObjectSchemas,
-        })
-        .then((taskManagerPlugin: TaskManager) => {
-          // we can't tell the Kibana Platform Task Manager plugin to
-          // to wait to `start` as that happens before legacy plugins
-          // instead we will start the internal Task Manager plugin when
-          // all legacy plugins have finished initializing
-          // Once all plugins are migrated to NP, this can be removed
-          this.kbnServer.afterPluginsInit(() => {
-            taskManagerPlugin.start();
-          });
-          return taskManagerPlugin;
-        });
-
       /*
        * We must expose the New Platform Task Manager Plugin via the legacy Api
        * as removing it now would be a breaking change - we'll remove this in v8.0.0
        */
-      server.expose(createLegacyApi(legacyTaskManager));
+      server.expose(
+        createLegacyApi(
+          getTaskManagerSetup(server)!
+            .registerLegacyAPI({
+              savedObjectSchemas,
+            })
+            .then((taskManagerPlugin: TaskManager) => {
+              // we can't tell the Kibana Platform Task Manager plugin to
+              // to wait to `start` as that happens before legacy plugins
+              // instead we will start the internal Task Manager plugin when
+              // all legacy plugins have finished initializing
+              // Once all plugins are migrated to NP, this can be removed
+              this.kbnServer.afterPluginsInit(() => {
+                taskManagerPlugin.start();
+              });
+              return taskManagerPlugin;
+            })
+        )
+      );
     },
     uiExports: {
       mappings,
