@@ -6,7 +6,6 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
 
 export function registerSearchRoute({
