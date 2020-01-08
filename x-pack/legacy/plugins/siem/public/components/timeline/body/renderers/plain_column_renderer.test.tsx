@@ -5,10 +5,9 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
@@ -41,7 +40,7 @@ describe('plain_column_renderer', () => {
         timelineId: 'test',
       });
       const wrapper = shallow(<span>{column}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return isInstance false if source is empty', () => {

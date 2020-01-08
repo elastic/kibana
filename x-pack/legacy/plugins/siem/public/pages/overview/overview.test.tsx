@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 

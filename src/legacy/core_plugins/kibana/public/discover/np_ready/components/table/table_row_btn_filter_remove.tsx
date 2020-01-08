@@ -22,44 +22,34 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
-  active: boolean;
-  disabled?: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
-  if (disabled) {
-    return (
-      <EuiButtonIcon
-        aria-label={i18n.translate('kbnDocViews.table.toggleColumnInTableButtonAriaLabel', {
-          defaultMessage: 'Toggle column in table',
-        })}
-        className="kbnDocViewer__actionButton"
-        data-test-subj="toggleColumnButton"
-        disabled
-        iconType={'tableOfContents'}
-        iconSize={'s'}
-      />
-    );
-  }
+export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Props) {
+  const tooltipContent = disabled ? (
+    <FormattedMessage
+      id="kbn.discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
+      defaultMessage="Unindexed fields can not be searched"
+    />
+  ) : (
+    <FormattedMessage
+      id="kbn.discover.docViews.table.filterOutValueButtonTooltip"
+      defaultMessage="Filter out value"
+    />
+  );
+
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.toggleColumnInTableButtonTooltip"
-          defaultMessage="Toggle column in table"
-        />
-      }
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('kbnDocViews.table.toggleColumnInTableButtonAriaLabel', {
-          defaultMessage: 'Toggle column in table',
+        aria-label={i18n.translate('kbn.discover.docViews.table.filterOutValueButtonAriaLabel', {
+          defaultMessage: 'Filter out value',
         })}
-        aria-pressed={active}
-        onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj="toggleColumnButton"
-        iconType={'tableOfContents'}
+        data-test-subj="removeInclusiveFilterButton"
+        disabled={disabled}
+        onClick={onClick}
+        iconType={'magnifyWithMinus'}
         iconSize={'s'}
       />
     </EuiToolTip>

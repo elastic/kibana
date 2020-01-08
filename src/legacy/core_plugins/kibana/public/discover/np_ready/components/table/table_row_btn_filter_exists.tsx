@@ -23,33 +23,48 @@ import { i18n } from '@kbn/i18n';
 
 export interface Props {
   onClick: () => void;
-  disabled: boolean;
+  disabled?: boolean;
+  scripted?: boolean;
 }
 
-export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props) {
+export function DocViewTableRowBtnFilterExists({
+  onClick,
+  disabled = false,
+  scripted = false,
+}: Props) {
   const tooltipContent = disabled ? (
-    <FormattedMessage
-      id="kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip"
-      defaultMessage="Unindexed fields can not be searched"
-    />
+    scripted ? (
+      <FormattedMessage
+        id="kbn.discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
+        defaultMessage="Unable to filter for presence of scripted fields"
+      />
+    ) : (
+      <FormattedMessage
+        id="kbn.discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
+        defaultMessage="Unable to filter for presence of meta fields"
+      />
+    )
   ) : (
     <FormattedMessage
-      id="kbnDocViews.table.filterForValueButtonTooltip"
-      defaultMessage="Filter for value"
+      id="kbn.discover.docViews.table.filterForFieldPresentButtonTooltip"
+      defaultMessage="Filter for field present"
     />
   );
 
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonAriaLabel', {
-          defaultMessage: 'Filter for value',
-        })}
-        className="kbnDocViewer__actionButton"
-        data-test-subj="addInclusiveFilterButton"
-        disabled={disabled}
+        aria-label={i18n.translate(
+          'kbn.discover.docViews.table.filterForFieldPresentButtonAriaLabel',
+          {
+            defaultMessage: 'Filter for field present',
+          }
+        )}
         onClick={onClick}
-        iconType={'magnifyWithPlus'}
+        className="kbnDocViewer__actionButton"
+        data-test-subj="addExistsFilterButton"
+        disabled={disabled}
+        iconType={'indexOpen'}
         iconSize={'s'}
       />
     </EuiToolTip>

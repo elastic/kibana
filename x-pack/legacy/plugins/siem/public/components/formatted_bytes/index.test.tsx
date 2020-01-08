@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { mockFrameworks, getMockKibanaUiSetting } from '../../mock';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -30,7 +29,7 @@ describe('formatted_bytes', () => {
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
         const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
-        expect(toJson(wrapper)).toMatchSnapshot();
+        expect(wrapper).toMatchSnapshot();
       });
 
       test('it renders bytes to hardcoded format when no configuration exists', () => {

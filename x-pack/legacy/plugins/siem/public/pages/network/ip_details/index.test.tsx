@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
@@ -131,7 +130,7 @@ describe('Ip Details', () => {
 
   test('it matches the snapshot', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
   test('it renders ipv6 headline', async () => {
     localSource[0].result.data.source.status.indicesExist = true;

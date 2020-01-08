@@ -90,9 +90,7 @@ declare interface Ml {
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<GetDataFrameAnalyticsStatsResponse>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
     evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
-    estimateDataFrameAnalyticsMemoryUsage(
-      jobConfig: DeepPartial<DataFrameAnalyticsConfig>
-    ): Promise<any>;
+    explainDataFrameAnalytics(jobConfig: DeepPartial<DataFrameAnalyticsConfig>): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(

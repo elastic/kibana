@@ -22,7 +22,7 @@ import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 
-import { IndexPattern, indexPatterns } from '../../../../../../plugins/data/public';
+import { IndexPattern, indexPatterns } from '../../../kibana_services';
 
 jest.mock('ui/new_platform');
 
