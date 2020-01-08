@@ -11,6 +11,7 @@ import {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '../../../../plugins/task_manager/server';
+import { getTaskManagerSetup, getTaskManagerStart } from '../../task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import {
@@ -34,7 +35,6 @@ import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 // due to being marked as dependencies
 interface Plugins extends Hapi.PluginProperties {
   actions: ActionsPlugin;
-  task_manager: TaskManagerStartContract & TaskManagerSetupContract;
 }
 
 export interface Server extends Legacy.Server {
@@ -68,7 +68,7 @@ export interface AlertingCoreStart {
 }
 export interface AlertingPluginsSetup {
   security?: SecurityPluginSetupContract;
-  task_manager: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
@@ -79,7 +79,7 @@ export interface AlertingPluginsStart {
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
-  task_manager: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -116,7 +116,7 @@ export function shim(
 
   const pluginsSetup: AlertingPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
-    task_manager: newPlatform.setup.plugins.taskManager as TaskManagerSetupContract,
+    taskManager: getTaskManagerSetup(server)!,
     actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
@@ -132,7 +132,7 @@ export function shim(
     spaces: () => server.plugins.spaces,
     encryptedSavedObjects: newPlatform.start.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
-    task_manager: newPlatform.start.plugins.taskManager as TaskManagerStartContract,
+    taskManager: getTaskManagerStart(server)!,
   };
 
   return {

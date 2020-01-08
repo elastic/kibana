@@ -7,6 +7,8 @@
 import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Plugin, CoreSetup, CoreStart, SavedObjectsLegacyService } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -31,17 +33,23 @@ export interface PluginStartContract {
   taskManager: TaskManagerStartContract;
 }
 
+const taskManagerStartContract$ = new Subject<TaskManagerStartContract>();
+
 export class LensServer implements Plugin<{}, {}, {}, {}> {
   setup(core: CoreSetup, plugins: PluginSetupContract) {
     setupRoutes(core, plugins);
-    registerLensUsageCollector(plugins.usageCollection, plugins.server);
+    registerLensUsageCollector(
+      plugins.usageCollection,
+      taskManagerStartContract$.pipe(first()).toPromise()
+    );
     initializeLensTelemetry(plugins.server, plugins.taskManager);
-
     return {};
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {
     scheduleLensTelemetry(plugins.server, plugins.taskManager);
+    taskManagerStartContract$.next(plugins.taskManager);
+    taskManagerStartContract$.complete();
     return {};
   }
 
