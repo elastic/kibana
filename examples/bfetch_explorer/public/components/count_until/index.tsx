@@ -66,7 +66,7 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
 
   if (showingResults) {
     return (
-      <EuiForm data-test-subj="DoubleIntegers">
+      <EuiForm data-test-subj="CountUntil">
         <pre>{JSON.stringify(error || results, null, 4)}</pre>
         <EuiSpacer size="l" />
         <EuiButton disabled={!completed} onClick={handleReset}>
@@ -77,7 +77,7 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
   }
 
   return (
-    <EuiForm data-test-subj="DoubleIntegers">
+    <EuiForm data-test-subj="CountUntil">
       <EuiFormRow label="Numbers in ms separated by new line" fullWidth>
         <EuiFieldNumber
           placeholder="Some integer"

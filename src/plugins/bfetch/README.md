@@ -10,7 +10,7 @@ and streams it back. We will also consider the number to be time in milliseconds
 and before streaming the number back the server will wait for the specified number of
 milliseconds.
 
-To do that, first create server-side batch processing route using [`addBatchProcessingRoute](./docs/server/reference.md#addBatchProcessingRoute).
+To do that, first create server-side batch processing route using [`addBatchProcessingRoute`](./docs/server/reference.md#addBatchProcessingRoute).
 
 ```ts
 plugins.bfetch.addBatchProcessingRoute<{ num: number }, { num: number }>(
@@ -28,7 +28,7 @@ plugins.bfetch.addBatchProcessingRoute<{ num: number }, { num: number }>(
 );
 ```
 
-Now on client-side create `double` function using [`batchedFunction](./docs/browser/reference.md#batchedFunction).
+Now on client-side create `double` function using [`batchedFunction`](./docs/browser/reference.md#batchedFunction).
 The newly created `double` function can be called many times and it
 will package individual calls into batches and send them to the server.
 

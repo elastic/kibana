@@ -27,7 +27,6 @@ import { routes } from '../../../routes';
 interface SidebarProps {}
 
 export const Sidebar: React.FC<SidebarProps> = () => {
-  const {} = useDeps();
   const history = useHistory();
 
   return (

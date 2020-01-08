@@ -113,8 +113,8 @@ export const createLegacyServerEndpoints = (
   });
 
   /**
-   * Register the endpoint that executes a batch of functions, and sends the
-   * result back as a single response.
+   * Register an endpoint that executes a batch of functions, and streams the
+   * results back using ND-JSON.
    */
   plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
     const scopedClient = client.asScoped(request);
