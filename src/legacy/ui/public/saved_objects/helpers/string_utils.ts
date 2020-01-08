@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-/**
- * Call all of the function in an array
- *
- * @param  {array[functions]} arr
- * @return {undefined}
- */
-export function callEach(arr) {
-  return _.map(arr, function(fn) {
-    return _.isFunction(fn) ? fn() : undefined;
-  });
+export class StringUtils {
+  /**
+   * Returns a version of the string with the first letter capitalized.
+   * @param str {string}
+   * @returns {string}
+   */
+  public static upperFirst(str: string = ''): string {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  }
 }

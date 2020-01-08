@@ -17,6 +17,20 @@
  * under the License.
  */
 
-import moment from 'moment';
+import { keysToCamelCaseShallow } from './case_conversion';
 
-export function parseInterval(interval: string): moment.Duration | null;
+describe('keysToCamelCaseShallow', () => {
+  test("should convert all of an object's keys to camel case", () => {
+    const data = {
+      camelCase: 'camelCase',
+      'kebab-case': 'kebabCase',
+      snake_case: 'snakeCase',
+    };
+
+    const result = keysToCamelCaseShallow(data);
+
+    expect(result.camelCase).toBe('camelCase');
+    expect(result.kebabCase).toBe('kebabCase');
+    expect(result.snakeCase).toBe('snakeCase');
+  });
+});
