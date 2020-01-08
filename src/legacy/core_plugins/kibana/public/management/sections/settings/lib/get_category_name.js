@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { StringUtils } from 'ui/utils/string_utils';
 import { i18n } from '@kbn/i18n';
+
+const upperFirst = (str = '') => str.replace(/^./, str => str.toUpperCase());
 
 const names = {
   general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
@@ -51,5 +52,5 @@ const names = {
 };
 
 export function getCategoryName(category) {
-  return category ? names[category] || StringUtils.upperFirst(category) : '';
+  return category ? names[category] || upperFirst(category) : '';
 }
