@@ -30,6 +30,7 @@
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/data/ @elastic/kibana-app-arch
+/src/legacy/core_plugins/elasticsearch/lib/create_proxy.js @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch

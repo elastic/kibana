@@ -55,7 +55,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   dropdown_filter: {
     displayName: i18n.translate('xpack.canvas.elements.dropdownFilterDisplayName', {
-      defaultMessage: 'Dropdown Filter',
+      defaultMessage: 'Dropdown filter',
     }),
     help: i18n.translate('xpack.canvas.elements.dropdownFilterHelpText', {
       defaultMessage: 'A dropdown from which you can select values for an "exactly" filter',
@@ -63,7 +63,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   horizontalBarChart: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalBarChartDisplayName', {
-      defaultMessage: 'Horizontal Bar chart',
+      defaultMessage: 'Horizontal bar chart',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalBarChartHelpText', {
       defaultMessage: 'A customizable horizontal bar chart',
@@ -71,7 +71,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   horizontalProgressBar: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalProgressBarDisplayName', {
-      defaultMessage: 'Horizontal Progress Bar',
+      defaultMessage: 'Horizontal progress bar',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalProgressBarHelpText', {
       defaultMessage: 'Displays progress as a portion of a horizontal bar',
@@ -79,7 +79,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   horizontalProgressPill: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalProgressPillDisplayName', {
-      defaultMessage: 'Horizontal Progress Pill',
+      defaultMessage: 'Horizontal progress pill',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalProgressPillHelpText', {
       defaultMessage: 'Displays progress as a portion of a horizontal pill',
@@ -103,10 +103,10 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   markdown: {
     displayName: i18n.translate('xpack.canvas.elements.markdownDisplayName', {
-      defaultMessage: 'Markdown',
+      defaultMessage: 'Text',
     }),
     help: i18n.translate('xpack.canvas.elements.markdownHelpText', {
-      defaultMessage: 'Markup from Markdown',
+      defaultMessage: 'Add text using Markdown',
     }),
   },
   metric: {
@@ -135,7 +135,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressGauge: {
     displayName: i18n.translate('xpack.canvas.elements.progressGaugeDisplayName', {
-      defaultMessage: 'Progress Gauge',
+      defaultMessage: 'Progress gauge',
     }),
     help: i18n.translate('xpack.canvas.elements.progressGaugeHelpText', {
       defaultMessage: 'Displays progress as a portion of a gauge',
@@ -143,7 +143,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressSemicircle: {
     displayName: i18n.translate('xpack.canvas.elements.progressSemicircleDisplayName', {
-      defaultMessage: 'Progress Semicircle',
+      defaultMessage: 'Progress semicircle',
     }),
     help: i18n.translate('xpack.canvas.elements.progressSemicircleHelpText', {
       defaultMessage: 'Displays progress as a portion of a semicircle',
@@ -151,7 +151,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressWheel: {
     displayName: i18n.translate('xpack.canvas.elements.progressWheelDisplayName', {
-      defaultMessage: 'Progress Wheel',
+      defaultMessage: 'Progress wheel',
     }),
     help: i18n.translate('xpack.canvas.elements.progressWheelHelpText', {
       defaultMessage: 'Displays progress as a portion of a wheel',
@@ -215,7 +215,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   verticalProgressBar: {
     displayName: i18n.translate('xpack.canvas.elements.verticalProgressBarDisplayName', {
-      defaultMessage: 'Vertical Progress Bar',
+      defaultMessage: 'Vertical progress bar',
     }),
     help: i18n.translate('xpack.canvas.elements.verticalProgressBarHelpText', {
       defaultMessage: 'Displays progress as a portion of a vertical bar',
@@ -223,7 +223,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   verticalProgressPill: {
     displayName: i18n.translate('xpack.canvas.elements.verticalProgressPillDisplayName', {
-      defaultMessage: 'Vertical Progress Pill',
+      defaultMessage: 'Vertical progress pill',
     }),
     help: i18n.translate('xpack.canvas.elements.verticalProgressPillHelpText', {
       defaultMessage: 'Displays progress as a portion of a vertical pill',

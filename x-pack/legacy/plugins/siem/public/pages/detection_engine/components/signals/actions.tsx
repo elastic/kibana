@@ -42,18 +42,13 @@ export const updateSignalStatusAction = async ({
   status,
   setEventsLoading,
   setEventsDeleted,
-  kbnVersion,
 }: UpdateSignalStatusActionProps) => {
   try {
     setEventsLoading({ eventIds: signalIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateSignalsQuery(signalIds);
 
-    await updateSignalStatus({
-      query: queryObject,
-      status,
-      kbnVersion,
-    });
+    await updateSignalStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: signalIds, isDeleted: true });
   } catch (e) {
