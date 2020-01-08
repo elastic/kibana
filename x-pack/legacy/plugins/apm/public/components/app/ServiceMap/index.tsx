@@ -192,16 +192,18 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
           }
         };
       }),
-      ...(Object.values(edgesById) as Connection[]).map(connection => {
-        return {
-          group: 'edges' as const,
-          data: {
-            id: getEdgeId(connection.source, connection.destination),
-            source: getConnectionNodeId(connection.source, destMap),
-            target: getConnectionNodeId(connection.destination, destMap)
-          }
-        };
-      })
+      ...(Object.values(edgesById) as Connection[])
+        .filter(connection => connection.source !== connection.destination)
+        .map(connection => {
+          return {
+            group: 'edges' as const,
+            data: {
+              id: getEdgeId(connection.source, connection.destination),
+              source: getConnectionNodeId(connection.source, destMap),
+              target: getConnectionNodeId(connection.destination, destMap)
+            }
+          };
+        })
     ];
   }, [responses, search]);
 
