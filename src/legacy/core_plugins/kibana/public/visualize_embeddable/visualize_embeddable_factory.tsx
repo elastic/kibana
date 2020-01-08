@@ -47,8 +47,7 @@ import {
   EmbeddableOutput,
 } from '../../../../../plugins/embeddable/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { showNewVisModal } from '../visualize';
-import { SavedVisualizations } from '../visualize/np_ready/types';
+import { createSavedVisLoader, showNewVisModal } from '../visualize';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import {
@@ -129,6 +128,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
+  public getSavedVisualizations() {
+    const services = {
+      savedObjectsClient: npStart.core.savedObjects.client,
+      indexPatterns: npStart.plugins.data.indexPatterns,
+      chrome: npStart.core.chrome,
+      overlays: npStart.core.overlays,
+    };
+
+    return createSavedVisLoader(services);
+  }
+
   public async createFromObject(
     savedObject: VisSavedObject,
     input: Partial<VisualizeInput> & { id: string },
@@ -136,7 +146,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const config = $injector.get<Legacy.KibanaConfig>('config');
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizations();
 
     try {
       const visId = savedObject.id as string;
@@ -175,13 +185,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizations();
 
     try {
-      const visId = savedObjectId;
-
-      const savedObject = await savedVisualizations.get(visId);
+      const savedObject = await savedVisualizations.get(savedObjectId);
       return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
