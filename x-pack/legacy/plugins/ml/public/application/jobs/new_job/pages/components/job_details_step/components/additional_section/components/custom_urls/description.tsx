@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { metadata } from 'ui/metadata';
 
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-configuring-url.html`;
+const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-configuring-url.html`;
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
