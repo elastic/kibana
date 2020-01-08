@@ -100,7 +100,7 @@ export interface FakeRequest {
 export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 /**
- * Represents an Elasticsearch cluster API client created by a plugin..
+ * Represents an Elasticsearch cluster API client created by a plugin.
  * It allows to call API on behalf of the internal Kibana user and
  * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
