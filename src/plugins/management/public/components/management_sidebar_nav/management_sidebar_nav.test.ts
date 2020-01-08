@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { IndexedArray } from '../../indexed_array';
-import { sideNavItems } from '../components/sidebar_nav';
+import { IndexedArray } from '../../../../../legacy/ui/public/indexed_array';
+import { mergeLegacyItems } from './management_sidebar_nav';
 
 const toIndexedArray = (initialSet: any[]) =>
   new IndexedArray({
@@ -30,30 +30,33 @@ const toIndexedArray = (initialSet: any[]) =>
 const activeProps = { visible: true, disabled: false };
 const disabledProps = { visible: true, disabled: true };
 const notVisibleProps = { visible: false, disabled: false };
-
 const visibleItem = { display: 'item', id: 'item', ...activeProps };
 
 const notVisibleSection = {
   display: 'Not visible',
   id: 'not-visible',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...notVisibleProps,
 };
 const disabledSection = {
   display: 'Disabled',
   id: 'disabled',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...disabledProps,
 };
 const noItemsSection = {
   display: 'No items',
   id: 'no-items',
+  order: 10,
   visibleItems: toIndexedArray([]),
   ...activeProps,
 };
 const noActiveItemsSection = {
   display: 'No active items',
   id: 'no-active-items',
+  order: 10,
   visibleItems: toIndexedArray([
     { display: 'disabled', id: 'disabled', ...disabledProps },
     { display: 'notVisible', id: 'notVisible', ...notVisibleProps },
@@ -63,6 +66,7 @@ const noActiveItemsSection = {
 const activeSection = {
   display: 'activeSection',
   id: 'activeSection',
+  order: 10,
   visibleItems: toIndexedArray([visibleItem]),
   ...activeProps,
 };
@@ -76,7 +80,19 @@ const managementSections = [
 ];
 
 describe('Management', () => {
-  it('filters and filters and maps section objects into SidebarNav items', () => {
-    expect(sideNavItems(managementSections, 'active-item-id')).toMatchSnapshot();
+  it('maps legacy sections and apps into SidebarNav items', () => {
+    expect(mergeLegacyItems([], managementSections, 'active-item-id')).toMatchSnapshot();
+  });
+
+  it('adds legacy apps to existing SidebarNav sections', () => {
+    const navSection = {
+      'data-test-subj': 'activeSection',
+      icon: null,
+      id: 'activeSection',
+      items: [],
+      name: 'activeSection',
+      order: 10,
+    };
+    expect(mergeLegacyItems([navSection], managementSections, 'active-item-id')).toMatchSnapshot();
   });
 });
