@@ -18,7 +18,10 @@ import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
 import * as i18n from './translations';
 
-export const RulesComponent = React.memo(() => {
+interface RulesComponentProps {
+  canUserCRUD: boolean;
+}
+export const RulesComponent = React.memo<RulesComponentProps>(({ canUserCRUD }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
 
@@ -48,27 +51,29 @@ export const RulesComponent = React.memo(() => {
           }
           title={i18n.PAGE_TITLE}
         >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="importAction"
-                onClick={() => {
-                  setShowImportModal(true);
-                }}
-              >
-                {i18n.IMPORT_RULE}
-              </EuiButton>
-            </EuiFlexItem>
+          {canUserCRUD && (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="importAction"
+                  onClick={() => {
+                    setShowImportModal(true);
+                  }}
+                >
+                  {i18n.IMPORT_RULE}
+                </EuiButton>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton fill href="#/detection-engine/rules/create" iconType="plusInCircle">
-                {i18n.ADD_NEW_RULE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill href="#/detection-engine/rules/create" iconType="plusInCircle">
+                  {i18n.ADD_NEW_RULE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </HeaderPage>
 
-        <AllRules importCompleteToggle={importCompleteToggle} />
+        <AllRules importCompleteToggle={importCompleteToggle} canUserCRUD={canUserCRUD} />
       </WrapperPage>
 
       <SpyRoute />

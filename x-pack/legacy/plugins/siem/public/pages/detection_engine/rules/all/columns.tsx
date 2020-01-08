@@ -68,111 +68,120 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
   },
 ];
 
+type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>;
+
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
-  history: H.History
-): Array<EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>> => [
-  {
-    field: 'rule',
-    name: i18n.COLUMN_RULE,
-    render: (value: TableData['rule']) => <EuiLink href={value.href}>{value.name}</EuiLink>,
-    truncateText: true,
-    width: '24%',
-  },
-  {
-    field: 'method',
-    name: i18n.COLUMN_METHOD,
-    truncateText: true,
-  },
-  {
-    field: 'severity',
-    name: i18n.COLUMN_SEVERITY,
-    render: (value: TableData['severity']) => (
-      <EuiHealth
-        color={
-          value === 'low'
-            ? euiLightVars.euiColorVis0
-            : value === 'medium'
-            ? euiLightVars.euiColorVis5
-            : value === 'high'
-            ? euiLightVars.euiColorVis7
-            : euiLightVars.euiColorVis9
-        }
-      >
-        {value}
-      </EuiHealth>
-    ),
-    truncateText: true,
-  },
-  {
-    field: 'lastCompletedRun',
-    name: i18n.COLUMN_LAST_COMPLETE_RUN,
-    render: (value: TableData['lastCompletedRun']) => {
-      return value == null ? (
-        getEmptyTagValue()
-      ) : (
-        <PreferenceFormattedDate value={new Date(value)} />
-      );
+  history: H.History,
+  canUserCRUD: boolean
+): RulesColumns[] => {
+  const cols: RulesColumns[] = [
+    {
+      field: 'rule',
+      name: i18n.COLUMN_RULE,
+      render: (value: TableData['rule']) => <EuiLink href={value.href}>{value.name}</EuiLink>,
+      truncateText: true,
+      width: '24%',
     },
-    sortable: true,
-    truncateText: true,
-    width: '16%',
-  },
-  {
-    field: 'lastResponse',
-    name: i18n.COLUMN_LAST_RESPONSE,
-    render: (value: TableData['lastResponse']) => {
-      return value == null ? (
-        getEmptyTagValue()
-      ) : (
-        <>
-          {value.type === 'Fail' ? (
-            <EuiTextColor color="danger">
-              {value.type} <EuiIconTip content={value.message} type="iInCircle" />
-            </EuiTextColor>
-          ) : (
-            <EuiTextColor color="secondary">{value.type}</EuiTextColor>
-          )}
-        </>
-      );
+    {
+      field: 'method',
+      name: i18n.COLUMN_METHOD,
+      truncateText: true,
     },
-    truncateText: true,
-  },
-  {
-    field: 'tags',
-    name: i18n.COLUMN_TAGS,
-    render: (value: TableData['tags']) => (
-      <div>
-        <>
-          {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={i}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </>
-      </div>
-    ),
-    truncateText: true,
-    width: '20%',
-  },
-  {
-    align: 'center',
-    field: 'activate',
-    name: i18n.COLUMN_ACTIVATE,
-    render: (value: TableData['activate'], item: TableData) => (
-      <RuleSwitch
-        dispatch={dispatch}
-        id={item.id}
-        enabled={item.activate}
-        isLoading={item.isLoading}
-      />
-    ),
-    sortable: true,
-    width: '85px',
-  },
-  {
-    actions: getActions(dispatch, history),
-    width: '40px',
-  } as EuiTableActionsColumnType<TableData>,
-];
+    {
+      field: 'severity',
+      name: i18n.COLUMN_SEVERITY,
+      render: (value: TableData['severity']) => (
+        <EuiHealth
+          color={
+            value === 'low'
+              ? euiLightVars.euiColorVis0
+              : value === 'medium'
+              ? euiLightVars.euiColorVis5
+              : value === 'high'
+              ? euiLightVars.euiColorVis7
+              : euiLightVars.euiColorVis9
+          }
+        >
+          {value}
+        </EuiHealth>
+      ),
+      truncateText: true,
+    },
+    {
+      field: 'lastCompletedRun',
+      name: i18n.COLUMN_LAST_COMPLETE_RUN,
+      render: (value: TableData['lastCompletedRun']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <PreferenceFormattedDate value={new Date(value)} />
+        );
+      },
+      sortable: true,
+      truncateText: true,
+      width: '16%',
+    },
+    {
+      field: 'lastResponse',
+      name: i18n.COLUMN_LAST_RESPONSE,
+      render: (value: TableData['lastResponse']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <>
+            {value.type === 'Fail' ? (
+              <EuiTextColor color="danger">
+                {value.type} <EuiIconTip content={value.message} type="iInCircle" />
+              </EuiTextColor>
+            ) : (
+              <EuiTextColor color="secondary">{value.type}</EuiTextColor>
+            )}
+          </>
+        );
+      },
+      truncateText: true,
+    },
+    {
+      field: 'tags',
+      name: i18n.COLUMN_TAGS,
+      render: (value: TableData['tags']) => (
+        <div>
+          <>
+            {value.map((tag, i) => (
+              <EuiBadge color="hollow" key={i}>
+                {tag}
+              </EuiBadge>
+            ))}
+          </>
+        </div>
+      ),
+      truncateText: true,
+      width: '20%',
+    },
+  ];
+  const actions: RulesColumns[] = [
+    {
+      align: 'center',
+      field: 'activate',
+      name: i18n.COLUMN_ACTIVATE,
+      render: (value: TableData['activate'], item: TableData) => (
+        <RuleSwitch
+          dispatch={dispatch}
+          id={item.id}
+          enabled={item.activate}
+          isLoading={item.isLoading}
+        />
+      ),
+      sortable: true,
+      width: '85px',
+    },
+    {
+      actions: getActions(dispatch, history),
+      width: '40px',
+    } as EuiTableActionsColumnType<TableData>,
+  ];
+
+  return canUserCRUD ? [...cols, ...actions] : cols;
+};

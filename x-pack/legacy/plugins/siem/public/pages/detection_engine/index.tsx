@@ -7,6 +7,8 @@
 import React, { useEffect } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+
 import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
 
@@ -28,6 +30,8 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
     signalIndexName,
     createSignalIndex,
   ] = useSignalIndex();
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const canUserCRUD = (uiCapabilities?.siem?.crud as boolean) ?? false;
 
   useEffect(() => {
     if (
@@ -45,6 +49,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
     <Switch>
       <Route exact path={detectionEnginePath} strict>
         <DetectionEngineComponent
+          canUserCRUD={canUserCRUD}
           loading={indexNameLoading || privilegeLoading}
           isSignalIndexExists={isSignalIndexExists}
           isUserAuthenticated={isAuthenticated}
@@ -54,17 +59,21 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
       {isSignalIndexExists && isAuthenticated && (
         <>
           <Route exact path={`${detectionEnginePath}/rules`}>
-            <RulesComponent />
+            <RulesComponent canUserCRUD={canUserCRUD} />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/create`}>
-            <CreateRuleComponent />
-          </Route>
+          {canUserCRUD && (
+            <Route path={`${detectionEnginePath}/rules/create`}>
+              <CreateRuleComponent />
+            </Route>
+          )}
           <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
-            <RuleDetailsComponent signalsIndex={signalIndexName} />
+            <RuleDetailsComponent signalsIndex={signalIndexName} canUserCRUD={canUserCRUD} />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
-            <EditRuleComponent />
-          </Route>
+          {canUserCRUD && (
+            <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
+              <EditRuleComponent />
+            </Route>
+          )}
         </>
       )}
 

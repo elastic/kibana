@@ -6,7 +6,10 @@
 
 import { useEffect, useState } from 'react';
 
+import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { useStateToaster } from '../../../components/toasters';
 import { getUserPrivilege } from './api';
+import * as i18n from './translations';
 
 type Return = [boolean, boolean | null, boolean | null];
 
@@ -18,6 +21,7 @@ export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
   const [hasWrite, setHasWrite] = useState<boolean | null>(null);
+  const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -41,6 +45,7 @@ export const usePrivilegeUser = (): Return => {
         if (isSubscribed) {
           setAuthenticated(false);
           setHasWrite(false);
+          errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {

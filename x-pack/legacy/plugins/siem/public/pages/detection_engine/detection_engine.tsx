@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { HeaderSection } from '../../components/header_section';
 
 interface DetectionEngineComponentProps {
+  canUserCRUD: boolean;
   loading: boolean;
   isSignalIndexExists: boolean | null;
   isUserAuthenticated: boolean | null;
@@ -34,7 +35,7 @@ interface DetectionEngineComponentProps {
 }
 
 export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({ loading, isSignalIndexExists, isUserAuthenticated, signalsIndex }) => {
+  ({ canUserCRUD, loading, isSignalIndexExists, isUserAuthenticated, signalsIndex }) => {
     const [lastSignals] = useSignalInfo({});
     if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
       return (
@@ -88,7 +89,12 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                     {({ to, from }) =>
                       !loading ? (
                         isSignalIndexExists && (
-                          <SignalsTable from={from} signalsIndex={signalsIndex ?? ''} to={to} />
+                          <SignalsTable
+                            canUserCRUD={canUserCRUD}
+                            from={from}
+                            signalsIndex={signalsIndex ?? ''}
+                            to={to}
+                          />
                         )
                       ) : (
                         <EuiPanel>

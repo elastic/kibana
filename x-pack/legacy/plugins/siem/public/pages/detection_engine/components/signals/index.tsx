@@ -88,6 +88,7 @@ interface DispatchProps {
 }
 
 interface OwnProps {
+  canUserCRUD: boolean;
   defaultFilters?: esFilters.Filter[];
   from: number;
   signalsIndex: string;
@@ -98,6 +99,7 @@ type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
+    canUserCRUD,
     createTimeline,
     clearEventsDeleted,
     clearEventsLoading,
@@ -228,6 +230,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       (totalCount: number) => {
         return (
           <SignalsUtilityBar
+            canUserCRUD={canUserCRUD}
             areEventsLoading={loadingEventIds.length > 0}
             clearSelection={clearSelectionCallback}
             isFilteredToOpen={filterGroup === FILTER_OPEN}
@@ -241,6 +244,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         );
       },
       [
+        canUserCRUD,
         clearSelectionCallback,
         filterGroup,
         loadingEventIds.length,
@@ -254,12 +258,13 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const additionalActions = useMemo(
       () =>
         getSignalsActions({
+          canUserCRUD,
           createTimeline: createTimelineCallback,
           setEventsLoading: setEventsLoadingCallback,
           setEventsDeleted: setEventsDeletedCallback,
           status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         }),
-      [createTimelineCallback, filterGroup]
+      [canUserCRUD, createTimelineCallback, filterGroup]
     );
 
     const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
@@ -279,9 +284,9 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         queryFields: requiredFieldsForActions,
         timelineActions: additionalActions,
         title: i18n.SIGNALS_TABLE_TITLE,
-        selectAll,
+        selectAll: canUserCRUD ? selectAll : false,
       }),
-      [additionalActions, selectAll]
+      [additionalActions, canUserCRUD, selectAll]
     );
 
     return (
