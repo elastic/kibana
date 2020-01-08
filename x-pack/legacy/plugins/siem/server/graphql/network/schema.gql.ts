@@ -225,6 +225,7 @@ export const networkSchema = gql`
       sort: NetworkDnsSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
+      stackByField: String
     ): NetworkDnsData!
     NetworkHttp(
       id: String

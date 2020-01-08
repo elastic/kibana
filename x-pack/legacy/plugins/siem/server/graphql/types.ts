@@ -2353,6 +2353,8 @@ export interface NetworkDnsSourceArgs {
   timerange: TimerangeInput;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -3199,6 +3201,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     defaultIndex: string[];
+
+    stackByField?: Maybe<string>;
   }
 
   export type NetworkHttpResolver<

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
 import { AnomaliesQueryTabBodyProps } from './types';
@@ -13,7 +13,7 @@ import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs'
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { MatrixHistogramContainer } from '../../matrix_histogram';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../helpers';
 
 const ID = 'anomaliesOverTimeQuery';
@@ -52,6 +52,14 @@ export const AnomaliesQueryTabBody = ({
     flowTarget,
     ip
   );
+
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
 
   return (
     <>

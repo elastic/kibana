@@ -16,7 +16,7 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
-} from '../../../components/matrix_histogram/types';
+} from '../../../containers/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { getMatrixHistogramQuery } from '../../../containers/helpers';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';

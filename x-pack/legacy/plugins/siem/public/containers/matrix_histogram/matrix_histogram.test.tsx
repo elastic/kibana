@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { MatrixHistogram } from '.';
+import { MatrixHistogram } from './matrix_histogram';
 import { EventsOverTimeGqlQuery as mockQuery } from '../../pages/hosts/navigation';
 
 jest.mock('../../lib/kibana');
@@ -41,6 +41,7 @@ describe('Matrix Histogram Component', () => {
     isPtrIncluded: false,
     query: mockQuery,
     setQuery: jest.fn(),
+    stackByField: 'mockStackField',
     skip: false,
     sourceId: 'default',
     stackByOptions: [{ text: 'text', value: 'value' }],

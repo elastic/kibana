@@ -8,7 +8,7 @@ import { get, groupBy, map, toPairs, getOr } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UpdateDateRange, ChartSeriesData } from '../charts/common';
+import { UpdateDateRange, ChartSeriesData } from '../../components/charts/common';
 import {
   MatrixHistogramDataTypes,
   MatrixHistogramMappingTypes,
@@ -17,8 +17,8 @@ import {
   MatrixHistogramQuery,
 } from './types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { useStateToaster } from '../toasters';
-import { errorToToaster } from '../ml/api/error_to_toaster';
+import { useStateToaster } from '../../components/toasters';
+import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../../containers/helpers';
 import { useApolloClient } from '../../utils/apollo_context';
@@ -167,6 +167,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
           result => {
             if (isSubscribed) {
               const isDataKeyAnArray = Array.isArray(dataKey);
+
               const rootDataKey = isDataKeyAnArray ? dataKey[0] : `${dataKey}Histogram`;
               const histogramDataKey = isDataKeyAnArray ? dataKey[1] : `${dataKey}OverTimeByModule`;
               const source = getOr({}, `data.source.${rootDataKey}`, result);
@@ -205,6 +206,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       abortCtrl.abort();
     };
   }, [
+    inspect,
+    totalCount,
     defaultIndex,
     query,
     filterQuery,

@@ -16,9 +16,9 @@ import {
   Maybe,
   Source,
 } from '../../graphql/types';
-import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
+import { UpdateDateRange } from '../../components/charts/common';
 
 export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 export type MatrixHistogramMappingTypes = Record<

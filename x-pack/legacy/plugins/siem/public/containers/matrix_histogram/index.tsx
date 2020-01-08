@@ -10,16 +10,13 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { inputsModel, State, inputsSelectors, hostsModel, networkModel } from '../../store';
 import { QueryTemplateProps } from '../query_template';
-import { withKibana } from '../../lib/kibana';
 
 import { MatrixOverTimeHistogramData, Maybe } from '../../graphql/types';
-import { MatrixHistogram } from '../../components/matrix_histogram';
-import {
-  MatrixHistogramOption,
-  MatrixHistogramMappingTypes,
-} from '../../components/matrix_histogram/types';
+import { MatrixHistogramOption, MatrixHistogramMappingTypes } from './types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
+import { MatrixHistogram } from './matrix_histogram';
+export { MatrixHistogram } from './matrix_histogram';
 
 export interface EventsArgs {
   endDate: number;
@@ -65,6 +62,5 @@ const makeMapStateToProps = () => {
 };
 
 export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
+  connect(makeMapStateToProps)
 )(MatrixHistogram);

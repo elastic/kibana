@@ -2351,6 +2351,8 @@ export interface NetworkDnsSourceArgs {
   timerange: TimerangeInput;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -3227,6 +3229,7 @@ export namespace GetNetworkDnsQuery {
   export type Variables = {
     sourceId: string;
     sort: NetworkDnsSortField;
+    stackByField?: Maybe<string>;
     isPtrIncluded: boolean;
     timerange: TimerangeInput;
     pagination: PaginationInputPaginated;

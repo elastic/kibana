@@ -12,12 +12,10 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
-import { BarChart } from '../charts/barchart';
-import { HeaderSection } from '../header_section';
+
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import { Loader } from '../loader';
-import { Panel } from '../panel';
+
 import { getBarchartConfigs, getCustomChartData, useQuery } from './utils';
 import {
   MatrixHistogramProps,
@@ -25,15 +23,18 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { generateTablePaginationOptions } from '../paginated_table/helpers';
-import { ChartSeriesData } from '../charts/common';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { ChartSeriesData } from '../../components/charts/common';
+import { HeaderSection } from '../../components/header_section';
+import { Panel } from '../../components/panel';
+import { Loader } from '../../components/loader';
+import { BarChart } from '../../components/charts/barchart';
 
 export const MatrixHistogram = React.memo(
   ({
     activePage,
     dataKey,
     defaultStackByOption,
-    deleteQuery,
     endDate,
     filterQuery,
     hideHistogramIfEmpty = false,

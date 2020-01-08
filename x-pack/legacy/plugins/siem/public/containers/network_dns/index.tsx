@@ -27,13 +27,13 @@ import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
-import { MatrixHistogram } from '../../components/matrix_histogram';
-import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
+import { MatrixHistogram } from '../matrix_histogram';
 
-const ID = 'networkDnsQuery';
-const HISTOGRAM_ID = 'networkDnsHistogramQuery';
+export const NETWORK_DNS_ID = 'networkDnsQuery';
+export const NETWORK_DNS_HISTOGRAM_ID = 'networkDnsHistogramQuery';
 export interface NetworkDnsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
@@ -48,6 +48,7 @@ export interface NetworkDnsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
+  id: string;
   children: (args: NetworkDnsArgs) => React.ReactNode;
   type: networkModel.NetworkType;
 }
@@ -88,7 +89,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
       sort,
       endDate,
       filterQuery,
-      id = ID,
+      id = NETWORK_DNS_ID,
       isInspected,
       isPtrIncluded,
       kibana,
@@ -166,7 +167,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
 const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       ...getNetworkDnsSelector(state),
@@ -181,7 +182,7 @@ const makeMapStateToProps = () => {
 const makeMapHistogramStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = HISTOGRAM_ID }: OwnProps) => {
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       ...getNetworkDnsSelector(state),
@@ -201,6 +202,5 @@ export const NetworkDnsQuery = compose<React.ComponentClass<OwnProps>>(
 )(NetworkDnsComponentQuery);
 
 export const NetworkDnsHistogramQuery = compose<React.ComponentClass<DnsHistogramOwnProps>>(
-  connect(makeMapHistogramStateToProps),
-  withKibana
+  connect(makeMapHistogramStateToProps)
 )(MatrixHistogram);

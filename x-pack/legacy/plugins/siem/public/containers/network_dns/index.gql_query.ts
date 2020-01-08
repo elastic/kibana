@@ -10,6 +10,7 @@ export const networkDnsQuery = gql`
   query GetNetworkDnsQuery(
     $sourceId: ID!
     $sort: NetworkDnsSortField!
+    $stackByField: String
     $isPtrIncluded: Boolean!
     $timerange: TimerangeInput!
     $pagination: PaginationInputPaginated!
@@ -27,6 +28,7 @@ export const networkDnsQuery = gql`
         pagination: $pagination
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        stackByField: $stackByField
       ) {
         totalCount
         edges @skip(if: $isHistogram) {

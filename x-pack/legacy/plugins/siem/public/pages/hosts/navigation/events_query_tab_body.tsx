@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import gql from 'graphql-tag';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../containers/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { getMatrixHistogramQuery } from '../../../containers/helpers';
 
@@ -36,6 +36,13 @@ export const EventsQueryTabBody = ({
   startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: EVENTS_HISTOGRAM_ID });
+      }
+    };
+  }, []);
   return (
     <>
       <MatrixHistogramContainer

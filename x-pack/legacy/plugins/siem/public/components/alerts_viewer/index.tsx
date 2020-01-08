@@ -11,7 +11,7 @@ import gql from 'graphql-tag';
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
-import { MatrixHistogramOption } from '../matrix_histogram/types';
+import { MatrixHistogramOption } from '../../containers/matrix_histogram/types';
 import { getMatrixHistogramQuery } from '../../containers/helpers';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 const ID = 'alertsOverTimeQuery';
@@ -19,10 +19,6 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
   {
     text: i18n.ALERTS_STACK_BY_MODULE,
     value: 'event.module',
-  },
-  {
-    text: i18n.ALERTS_DOCUMENT_TYPE,
-    value: 'event.type',
   },
 ];
 const dataKey = 'Alerts';
@@ -51,7 +47,6 @@ export const AlertsView = ({
     <>
       <MatrixHistogramContainer
         dataKey={dataKey}
-        deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[0]}
         endDate={endDate}
         filterQuery={filterQuery}
