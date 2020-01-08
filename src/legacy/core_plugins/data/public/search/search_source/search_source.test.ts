@@ -23,12 +23,14 @@ import {
   setSearchService,
   setUiSettings,
   setInjectedMetadata,
+  setHttp,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
 
 import {
   injectedMetadataServiceMock,
   uiSettingsServiceMock,
+  httpServiceMock,
 } from '../../../../../../core/public/mocks';
 
 setUiSettings(uiSettingsServiceMock.createStartContract());
@@ -36,6 +38,7 @@ setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
 setSearchService({
   search: jest.fn(),
 });
+setHttp(httpServiceMock.createStartContract());
 
 jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
