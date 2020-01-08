@@ -18,12 +18,14 @@
  */
 
 const _ = require('lodash');
-const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
+
+import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
+const { ScriptHighlightRules } = require('./script_highlight_rules');
 
 const jsonRules = function(root) {
   root = root ? root : 'json';
   const rules = {};
-  rules[root] = [
+  const xJsonRules = [
     {
       token: [
         'variable',
@@ -112,6 +114,24 @@ const jsonRules = function(root) {
       regex: '.+?',
     },
   ];
+
+  rules[root] = xJsonRules;
+  rules[root + '-sql'] = [
+    {
+      token: [
+        'variable',
+        'whitespace',
+        'ace.punctuation.colon',
+        'whitespace',
+        'punctuation.start_triple_quote',
+      ],
+      regex: '("query")(\\s*?)(:)(\\s*?)(""")',
+      next: 'sql-start',
+      merge: false,
+      push: true,
+    },
+  ].concat(xJsonRules);
+
   rules.string_literal = [
     {
       token: 'punctuation.end_triple_quote',
@@ -129,6 +149,13 @@ const jsonRules = function(root) {
 export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, 'script-', [
+    {
+      token: 'punctuation.end_triple_quote',
+      regex: '"""',
+      next: 'pop',
+    },
+  ]);
+  otherRules.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [
     {
       token: 'punctuation.end_triple_quote',
       regex: '"""',

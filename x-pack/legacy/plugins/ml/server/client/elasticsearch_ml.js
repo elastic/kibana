@@ -169,7 +169,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST',
   });
 
-  ml.estimateDataFrameAnalyticsMemoryUsage = ca({
+  ml.explainDataFrameAnalytics = ca({
     urls: [
       {
         fmt: '/_ml/data_frame/analytics/_explain',

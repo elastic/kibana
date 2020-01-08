@@ -70,7 +70,6 @@ export default () =>
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
-      defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
       // keep them for BWC, remove when not used in Legacy.
       // validation should be in sync with one in New platform.
       // https://github.com/elastic/kibana/blob/master/src/core/server/http/http_config.ts

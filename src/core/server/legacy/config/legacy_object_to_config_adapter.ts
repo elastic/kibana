@@ -64,7 +64,6 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     return {
       autoListen: configValue.autoListen,
       basePath: configValue.basePath,
-      defaultRoute: configValue.defaultRoute,
       cors: configValue.cors,
       customResponseHeaders: configValue.customResponseHeaders,
       host: configValue.host,
