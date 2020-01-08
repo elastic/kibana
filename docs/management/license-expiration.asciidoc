@@ -26,22 +26,6 @@ cluster.
 * SQL support is disabled.
 * Aggregations provided by the analytics plugin are no longer usable.
 
-[[expiration-logstash]]
-==== {ls} pipeline management
-
-* Cannot create new pipelines or edit or delete existing pipelines from the UI.
-* Cannot list or view existing pipelines from the UI.
-* Cannot run Logstash instances which are registered to listen to existing pipelines.
-//TBD: * Logstash will continue to poll centrally-managed pipelines
-
-[[expiration-kibana]]
-==== {kib}
-
-* Users can still log into {kib}.
-* It is still usable for data exploration and visualization, but some features
-are disabled.
-* The license management UI is available to easily upgrade your license. See
-<<update-license>> and <<managing-licenses>>.
 
 [[expiration-watcher]]
 ==== {stack} {alert-features}
@@ -103,11 +87,27 @@ stats APIs fail with a `security_exception` and return a 403 HTTP status code.
 This message enables automatic monitoring systems to easily detect the license
 failure without immediately impacting other users.
 
+[[expiration-logstash]]
+==== {ls} pipeline management
+
+* Cannot create new pipelines or edit or delete existing pipelines from the UI.
+* Cannot list or view existing pipelines from the UI.
+* Cannot run Logstash instances which are registered to listen to existing pipelines.
+//TBD: * Logstash will continue to poll centrally-managed pipelines
+
+[[expiration-kibana]]
+==== {kib}
+
+* Users can still log into {kib}.
+* It is still usable for data exploration and visualization, but some features
+are disabled.
+* The license management UI is available to easily upgrade your license. See
+<<update-license>> and <<managing-licenses>>.
 
 [[expiration-reporting]]
 ==== {kib} {report-features}
 
-* Reporting is no longer be available in {kib}.
+* Reporting is no longer available in {kib}.
 * Report generation URLs stop working.
 * Existing reports are no longer accessible.
 
