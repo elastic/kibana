@@ -70,7 +70,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       down={get<number>(count, 'down', 0)}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
-      dataTestSubjPrefix={'xpack.uptime.snapshot.donutChart'}
+      dataTestSubjPrefix={"xpack.uptime.snapshot.donutChart"}
     />
   </ChartWrapper>
 );
@@ -125,8 +125,8 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 });
 
-// @ts-ignore connect is expecting null | undefined for some reason
 export const Snapshot = connect<StoreProps, DispatchProps, OwnProps>(
+  // @ts-ignore connect is expecting null | undefined for some reason
   mapStateToProps,
   mapDispatchToProps
 )(Container);
