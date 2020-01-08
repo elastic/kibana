@@ -493,7 +493,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    queryFilter.setFilters(queryFilter.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };

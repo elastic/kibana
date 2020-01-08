@@ -472,11 +472,13 @@ export class DashboardAppController {
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-        []
+        queryFilter.getGlobalFilters()
       );
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
-      setTimeout(queryFilter.removeAll, 0);
+      setTimeout(() => {
+        queryFilter.setFilters(queryFilter.getGlobalFilters());
+      }, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
