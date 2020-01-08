@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,6 +18,8 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  EuiCodeBlock,
+  EuiText,
 } from '@elastic/eui';
 
 import 'brace/theme/textmate';
@@ -278,37 +279,13 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           {verification ? (
-            <EuiCodeEditor
-              data-test-subj="verificationCodeEditor"
-              mode="json"
-              theme="textmate"
-              width="100%"
-              isReadOnly
-              value={JSON.stringify(
+            <EuiCodeBlock language="json" inline={false} data-test-subj="verificationCodeBlock">
+              {JSON.stringify(
                 verification.valid ? verification.response : verification.error,
                 null,
                 2
               )}
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-                maxLines: Infinity,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
-              minLines={6}
-              aria-label={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
-                  defaultMessage="Verification details repository '{name}'"
-                  values={{
-                    name,
-                  }}
-                />
-              }
-            />
+            </EuiCodeBlock>
           ) : null}
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
@@ -338,81 +315,62 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   );
 
   const renderCleanup = () => (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryDetails.cleanupTitle"
-            defaultMessage="Clean Unreferenced Data"
+            defaultMessage="Repository cleanup"
           />
         </h3>
       </EuiTitle>
       {cleanup ? (
         <Fragment>
           <EuiSpacer size="s" />
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryDetails.cleanupDetailsTitle"
-                defaultMessage="Details"
-              />
-            </h4>
-          </EuiTitle>
+          <EuiText>
+            <p>
+              You can clean up a repository to delete any unreferenced data from a snapshot. This
+              may provide storage space savings. Note: If you regularly delete snapshots, this
+              functionality will likely not be as beneficial and should be used less frequently.
+            </p>
+          </EuiText>
           <EuiSpacer size="s" />
-          {cleanup ? (
-            <EuiCodeEditor
-              data-test-subj="cleanupCodeEditor"
-              mode="json"
-              theme="textmate"
-              width="100%"
-              isReadOnly
-              value={JSON.stringify(cleanup.cleaned ? cleanup.response : cleanup.error, null, 2)}
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-                maxLines: Infinity,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
-              minLines={6}
-              aria-label={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.cleanupDetails"
-                  defaultMessage="Cleanup details for repository '{name}'"
-                  values={{
-                    name,
-                  }}
-                />
-              }
+          {cleanup?.cleaned ? (
+            <div>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryDetails.cleanupDetailsTitle"
+                    defaultMessage="Details"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiCodeBlock language="json" inline={false} data-test-subj="cleanupCodeBlock">
+                {JSON.stringify(cleanup.response, null, 2)}
+              </EuiCodeBlock>
+            </div>
+          ) : (
+            <EuiCallOut
+              title="Sorry, there was an error cleaning the repository."
+              color="danger"
+              iconType="alert"
             />
-          ) : null}
-          <EuiSpacer size="m" />
-          <EuiButton onClick={cleanupRepository} color="primary" isLoading={isLoadingCleanup}>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
-              defaultMessage="Cleanup repository"
-            />
-          </EuiButton>
+          )}
         </Fragment>
-      ) : (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiButton
-            onClick={cleanupRepository}
-            color="primary"
-            isLoading={isLoadingCleanup}
-            data-test-subj="cleanupRepositoryButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
-              defaultMessage="Cleanup repository"
-            />
-          </EuiButton>
-        </Fragment>
-      )}
-    </Fragment>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiButton
+        onClick={cleanupRepository}
+        color="primary"
+        isLoading={isLoadingCleanup}
+        data-test-subj="cleanupRepositoryButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
+          defaultMessage="Cleanup repository"
+        />
+      </EuiButton>
+    </>
   );
 
   const renderFooter = () => {

@@ -59,7 +59,7 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     },
     async performRepositoryCleanup() {
       await testSubjects.click('cleanupRepositoryButton');
-      return await testSubjects.getVisibleText('cleanupCodeEditor');
+      return await testSubjects.getVisibleText('cleanupCodeBlock');
     },
   };
 }
