@@ -314,7 +314,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.geoPointLongDescription"
-          defaultMessage="Geo-point fields accept latitude and longitude pairs. Use to search within a bounding box, aggregate documents geographically, and sort documents by distance."
+          defaultMessage="Geo-point fields accept latitude and longitude pairs. Use this data type to search within a bounding box, aggregate documents geographically, and sort documents by distance."
         />
       </p>
     ),
