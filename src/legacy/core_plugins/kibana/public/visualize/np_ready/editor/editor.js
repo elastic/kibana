@@ -502,7 +502,9 @@ function VisualizeAppController(
     $state.query = savedQuery.attributes.query;
     $state.save();
 
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = queryFilter.getGlobalFilters();
+    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
