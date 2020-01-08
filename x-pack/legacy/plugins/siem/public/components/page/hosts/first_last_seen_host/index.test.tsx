@@ -15,8 +15,6 @@ import { TestProviders } from '../../../../mock';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
-jest.mock('../../../../lib/kibana');
-
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
