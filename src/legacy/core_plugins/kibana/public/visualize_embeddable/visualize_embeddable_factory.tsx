@@ -33,12 +33,10 @@ import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
-
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-
+import { SavedObjectLoader } from 'ui/saved_objects';
 import { Legacy } from 'kibana';
-
 import { SavedObjectAttributes } from 'kibana/server';
 import {
   EmbeddableFactory,
@@ -71,6 +69,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private readonly visTypes: TypesStart;
+  private savedVisualizations?: SavedObjectLoader;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     return new VisualizeEmbeddableFactory(visualizations.types);
@@ -129,14 +128,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public getSavedVisualizations() {
-    const services = {
-      savedObjectsClient: npStart.core.savedObjects.client,
-      indexPatterns: npStart.plugins.data.indexPatterns,
-      chrome: npStart.core.chrome,
-      overlays: npStart.core.overlays,
-    };
-
-    return createSavedVisLoader(services);
+    if (!this.savedVisualizations) {
+      const services = {
+        savedObjectsClient: npStart.core.savedObjects.client,
+        indexPatterns: npStart.plugins.data.indexPatterns,
+        chrome: npStart.core.chrome,
+        overlays: npStart.core.overlays,
+      };
+      this.savedVisualizations = createSavedVisLoader(services);
+    }
+    return this.savedVisualizations;
   }
 
   public async createFromObject(
