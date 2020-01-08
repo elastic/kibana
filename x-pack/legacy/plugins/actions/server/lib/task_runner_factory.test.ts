@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import { ExecutorError } from './executor_error';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';

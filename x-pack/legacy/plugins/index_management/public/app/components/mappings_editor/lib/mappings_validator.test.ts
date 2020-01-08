@@ -6,11 +6,6 @@
 
 import { validateMappings, validateProperties, isObject } from './mappings_validator';
 
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: '',
-  validateIndexPattern: () => ({}),
-}));
-
 describe('Mappings configuration validator', () => {
   it('should convert non object to empty object', () => {
     const tests = ['abc', 123, [], null, undefined];

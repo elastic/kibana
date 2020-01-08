@@ -149,17 +149,6 @@ export const PARAMETERS_DEFINITION = {
             message: commonErrorMessages.spacesNotAllowed,
           }),
         },
-        {
-          validator: fieldValidators.containsCharsField({
-            chars: '.',
-            message: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.nameWithDotErrorMessage',
-              {
-                defaultMessage: 'Cannot contain a dot (.).',
-              }
-            ),
-          }),
-        },
       ],
     },
   },

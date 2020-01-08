@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useObservable } from '../../../../../../../src/plugins/kibana_react/public';
+import useObservable from 'react-use/lib/useObservable';
 import { ILicense } from '../../../../../../plugins/licensing/public';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';

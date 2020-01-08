@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, Chart, getAxisId, Position, timeFormatter, Settings } from '@elastic/charts';
+import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -69,7 +69,7 @@ export const DurationChart = ({
           <Chart>
             <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
             <Axis
-              id={getAxisId('bottom')}
+              id="bottom"
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={timeFormatter(getChartDateLabel(min, max))}
@@ -79,7 +79,7 @@ export const DurationChart = ({
             />
             <Axis
               domain={{ min: 0 }}
-              id={getAxisId('left')}
+              id="left"
               position={Position.Left}
               tickFormat={d => getTickFormat(d)}
               title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
