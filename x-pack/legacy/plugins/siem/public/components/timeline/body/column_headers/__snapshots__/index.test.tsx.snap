@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
-<EventsThead
+<styled.div
   data-test-subj="column-headers"
 >
-  <EventsTrHeader>
-    <EventsThGroupActions
+  <styled.div>
+    <styled.div
       actionsColumnWidth={115}
       data-test-subj="actions-container"
       justifyContent="space-between"
     >
-      <EventsTh>
-        <EventsThContent
+      <styled.div>
+        <styled.div
           textAlign="center"
         >
-          <Connect(StatefulFieldsBrowserComponent)
+          <Connect(Component)
             browserFields={
               Object {
                 "agent": Object {
@@ -478,9 +478,9 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
             toggleColumn={[MockFunction]}
             width={900}
           />
-        </EventsThContent>
-      </EventsTh>
-    </EventsThGroupActions>
+        </styled.div>
+      </styled.div>
+    </styled.div>
     <Connect(Droppable)
       direction="horizontal"
       droppableId="droppableId.timelineColumns.test"
@@ -494,6 +494,6 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     >
       <Component />
     </Connect(Droppable)>
-  </EventsTrHeader>
-</EventsThead>
+  </styled.div>
+</styled.div>
 `;
