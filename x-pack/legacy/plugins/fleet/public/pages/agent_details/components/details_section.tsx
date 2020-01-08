@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -16,10 +16,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiButtonEmpty,
+  EuiIconTip,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
-import { ConnectedLink, AgentHealth, AgentUnenrollProvider } from '../../../components';
+import { ConnectedLink, AgentHealth, AgentUnenrollProvider, Loading } from '../../../components';
+import { useRequest } from '../../../hooks';
 import { useAgentRefresh } from '../hooks';
 import { AgentMetadataFlyout } from './metadata_flyout';
 
@@ -50,6 +53,12 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 
+  // Fetch policy information
+  const { isLoading: isPolicyLoading, data: policyData } = useRequest({
+    path: `/api/ingest/policies/${agent.policy_id}`,
+    method: 'get',
+  });
+
   const items = [
     {
       title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
@@ -73,10 +82,26 @@ export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
       title: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
         defaultMessage: 'Policy',
       }),
-      description: (
+      description: isPolicyLoading ? (
+        <Loading />
+      ) : policyData && policyData.item ? (
         <ConnectedLink color="primary" path={`/policies/${agent.policy_id}`}>
-          {agent.policy_id}
+          {policyData.item.name}
         </ConnectedLink>
+      ) : (
+        <Fragment>
+          <EuiIconTip
+            position="bottom"
+            color="primary"
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentDetails.unavailablePolicyTooltipText"
+                defaultMessage="This policy is no longer available"
+              />
+            }
+          />{' '}
+          <EuiTextColor color="subdued">{agent.policy_id}</EuiTextColor>
+        </Fragment>
       ),
     },
   ];
