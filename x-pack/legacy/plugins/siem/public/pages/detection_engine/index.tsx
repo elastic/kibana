@@ -7,11 +7,9 @@
 import React, { useEffect } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
 import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
-
+import { useKibana } from '../../lib/kibana';
 import { CreateRuleComponent } from './rules/create';
 import { DetectionEngineComponent } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
