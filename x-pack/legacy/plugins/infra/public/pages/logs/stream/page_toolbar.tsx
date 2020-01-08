@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
 import { Toolbar } from '../../../components/eui';
@@ -60,7 +60,20 @@ export const LogsToolbar = () => {
     jumpToTargetPositionTime,
     startLiveStreaming,
     stopLiveStreaming,
+    startDate,
+    endDate,
+    updateDateRange,
   } = useContext(LogPositionState.Context);
+
+  const handleTimeChange = useCallback(
+    ({ start, end, isInvalid }) => {
+      if (!isInvalid) {
+        updateDateRange({ startDate: start, endDate: end });
+      }
+    },
+    [updateDateRange]
+  );
+
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -121,6 +134,7 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker start={startDate} end={endDate} onTimeChange={handleTimeChange} />
           <LogTimeControls
             currentTime={visibleMidpointTime}
             isLiveStreaming={isAutoReloading}
