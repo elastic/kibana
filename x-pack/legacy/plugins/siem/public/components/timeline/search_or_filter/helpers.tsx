@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';

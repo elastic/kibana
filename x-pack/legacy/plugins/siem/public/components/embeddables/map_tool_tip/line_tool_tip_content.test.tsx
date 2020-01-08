@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { LineToolTipContentComponent } from './line_tool_tip_content';
 import { FeatureProperty } from '../types';
 import { SUM_OF_DESTINATION_BYTES, SUM_OF_SOURCE_BYTES } from '../map_config';
@@ -27,6 +26,6 @@ describe('LineToolTipContent', () => {
     const wrapper = shallow(
       <LineToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

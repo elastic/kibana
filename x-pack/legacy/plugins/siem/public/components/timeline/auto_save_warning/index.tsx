@@ -11,7 +11,7 @@ import {
   EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 

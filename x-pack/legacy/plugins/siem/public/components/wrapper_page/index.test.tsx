@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -21,7 +20,7 @@ describe('WrapperPage', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
+    expect(wrapper.find('WrapperPage')).toMatchSnapshot();
   });
 
   describe('restrict width', () => {
@@ -34,7 +33,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
+      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is number', () => {
@@ -46,7 +45,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
+      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
     });
 
     test('custom max width when restrictWidth is string', () => {
@@ -58,7 +57,7 @@ describe('WrapperPage', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('WrapperPage'))).toMatchSnapshot();
+      expect(wrapper.find('WrapperPage')).toMatchSnapshot();
     });
   });
 });

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
@@ -170,13 +172,11 @@ export const getSignalsActions = ({
   setEventsDeleted,
   createTimeline,
   status,
-  kbnVersion,
 }: {
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  kbnVersion: string;
 }): TimelineAction[] => [
   {
     getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
@@ -209,7 +209,6 @@ export const getSignalsActions = ({
               status,
               setEventsLoading,
               setEventsDeleted,
-              kbnVersion,
             })
           }
           iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
