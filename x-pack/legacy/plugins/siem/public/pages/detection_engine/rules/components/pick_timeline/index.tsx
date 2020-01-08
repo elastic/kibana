@@ -6,7 +6,6 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-// import styled from 'styled-components';
 
 import { SearchTimelineSuperSelect } from '../../../../../components/timeline/search_super_select';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -43,7 +42,7 @@ export const PickTimeline = ({
   }, [field.value]);
 
   const handleOnTimelineChange = useCallback(
-    (title: string, id: string) => {
+    (title: string, id: string | null) => {
       if (id === null) {
         field.setValue({ id, title: null });
       } else if (timelineTitle !== title && timelineId !== id) {

@@ -38,7 +38,7 @@ export const schema: FormSchema = {
           i18n.translate(
             'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
             {
-              defaultMessage: 'An index patterns for signals is required.',
+              defaultMessage: 'Index patterns for signals is required.',
             }
           )
         ),

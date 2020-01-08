@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -83,15 +83,23 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
+  const label = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={false}>{field.label}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{field.labelAppend}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [field.label, field.labelAppend]
+  );
 
   return (
     <StyledEuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
+      label={label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth
+      fullWidth={false}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >

@@ -64,9 +64,9 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   );
   return (
     <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
-      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
+      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
         <EuiFlexItemWidth direction={direction} key={`description-step-rule-${index}`} grow={false}>
-          <EuiDescriptionList listItems={chunckListItems} />
+          <EuiDescriptionList listItems={chunkListItems} />
         </EuiFlexItemWidth>
       ))}
     </EuiFlexGroup>

@@ -185,7 +185,7 @@ export const QueryBarDefineRule = ({
   const onCloseTimelineModal = useCallback(() => {
     setLoadingTimeline(true);
     onCloseTimelineSearch();
-  }, []);
+  }, [onCloseTimelineSearch]);
 
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
@@ -211,7 +211,7 @@ export const QueryBarDefineRule = ({
         saved_id: '',
       });
     },
-    [browserFields, indexPattern]
+    [browserFields, field, indexPattern]
   );
 
   const onMutation = (event: unknown, observer: unknown) => {

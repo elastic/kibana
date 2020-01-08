@@ -11,12 +11,14 @@ import {
   EuiSelectable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiTextColor,
   EuiFilterButton,
   EuiFilterGroup,
   EuiSpacer,
 } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
+import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
 import { createGlobalStyle } from 'styled-components';
@@ -40,7 +42,7 @@ interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
-  onTimelineChange: (timelineTitle: string, timelineId: string) => void;
+  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
 
 const basicSuperSelectOptions = [
@@ -50,25 +52,26 @@ const basicSuperSelectOptions = [
   },
 ];
 
-const basicSelectableOptions = [
+const getBasicSelectableOptions = (timelineId: string) => [
   {
     description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
     label: i18n.DEFAULT_TIMELINE_TITLE,
     id: null,
     title: i18n.DEFAULT_TIMELINE_TITLE,
+    checked: timelineId === '-1' ? 'on' : undefined,
   } as Option,
 ];
 
-const OriginalPageSize = 3;
-const PopoverHeight = 90;
-const TimelineItemHeight = 50;
+const ORIGINAL_PAGE_SIZE = 50;
+const POPOVER_HEIGHT = 260;
+const TIMELINE_ITEM_HEIGHT = 50;
 const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProps> = ({
   isDisabled,
   timelineId,
   timelineTitle,
   onTimelineChange,
 }) => {
-  const [pageSize, setPageSize] = useState(OriginalPageSize);
+  const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchTimelineValue, setSearchTimelineValue] = useState('');
@@ -92,19 +95,25 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   const renderTimelineOption = useCallback((option, searchValue) => {
     return (
-      <>
-        <EuiHighlight search={searchValue}>
-          {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-        </EuiHighlight>
-        <br />
-        <EuiTextColor color="subdued">
-          <small>
-            {option.description != null && option.description.trim().length > 0
-              ? option.description
-              : getEmptyTagValue()}
-          </small>
-        </EuiTextColor>
-      </>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
+        {option.checked === 'on' && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="check" color="primary" />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiHighlight search={searchValue}>
+            {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
+          </EuiHighlight>
+          <EuiTextColor color="subdued">
+            <small>
+              {option.description != null && option.description.trim().length > 0
+                ? option.description
+                : getEmptyTagValue()}
+            </small>
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }, []);
 
@@ -113,7 +122,12 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
       (option: { checked: string }) => option.checked === 'on'
     );
     if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
-      onTimelineChange(selectedTimeline[0].title, selectedTimeline[0].id);
+      onTimelineChange(
+        isEmpty(selectedTimeline[0].title)
+          ? i18nTimeline.UNTITLED_TIMELINE
+          : selectedTimeline[0].title,
+        selectedTimeline[0].id
+      );
     }
     setIsPopoverOpen(false);
   }, []);
@@ -140,7 +154,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
           scrollHeight > heightTrigger
         ) {
           setHeightTrigger(scrollHeight);
-          setPageSize(pageSize + OriginalPageSize);
+          setPageSize(pageSize + ORIGINAL_PAGE_SIZE);
         }
       }
     },
@@ -168,7 +182,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         popoverClassName="timeline-search-super-select-popover"
       />
     ),
-    [handleOpenPopover, timelineId, timelineTitle]
+    [handleOpenPopover, isDisabled, timelineId, timelineTitle]
   );
 
   return (
@@ -205,10 +219,10 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
             </EuiFlexGroup>
             <EuiSpacer size="xs" />
             <EuiSelectable
-              height={PopoverHeight}
+              height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}
               listProps={{
-                rowHeight: TimelineItemHeight,
+                rowHeight: TIMELINE_ITEM_HEIGHT,
                 showIcons: false,
                 virtualizedProps: ({
                   onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
@@ -226,7 +240,9 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               }}
               singleSelection={true}
               options={[
-                ...(!onlyFavorites && searchTimelineValue === '' ? basicSelectableOptions : []),
+                ...(!onlyFavorites && searchTimelineValue === ''
+                  ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
+                  : []),
                 ...timelines.map(
                   (t, index) =>
                     ({
@@ -235,6 +251,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                       id: t.savedObjectId,
                       key: `${t.title}-${index}`,
                       title: t.title,
+                      checked: t.savedObjectId === timelineId ? 'on' : undefined,
                     } as Option)
                 ),
               ]}

@@ -35,11 +35,23 @@ const ResizeEuiPanel = styled(EuiPanel)<{
   .euiAccordion__childWrapper {
     height: ${props => (props.height !== -1 ? `${props.height}px !important` : 'auto')};
   }
+  .euiAccordion__button {
+    cursor: default !important;
+    &:hover {
+      text-decoration: none !important;
+    }
+  }
 `;
 
 const MyEuiPanel = styled(EuiPanel)`
   .euiAccordion__iconWrapper {
     display: none;
+  }
+  .euiAccordion__button {
+    cursor: default !important;
+    &:hover {
+      text-decoration: none !important;
+    }
   }
 `;
 

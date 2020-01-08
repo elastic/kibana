@@ -46,7 +46,6 @@ export const AddItem = ({
   validate,
 }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  // const [items, setItems] = useState(['']);
   const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
 
   const inputsRef = useRef<HTMLInputElement[]>([]);

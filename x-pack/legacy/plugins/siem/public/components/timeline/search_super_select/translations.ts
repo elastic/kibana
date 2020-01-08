@@ -20,6 +20,6 @@ export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
 export const SEARCH_BOX_TIMELINE_PLACEHOLDER = i18n.translate(
   'xpack.siem.timeline.searchBoxPlaceholder',
   {
-    defaultMessage: 'e.g.timeline name or description',
+    defaultMessage: 'e.g. timeline name or description',
   }
 );

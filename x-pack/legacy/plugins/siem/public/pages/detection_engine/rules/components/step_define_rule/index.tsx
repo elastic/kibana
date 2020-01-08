@@ -131,7 +131,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
     const handleResetIndices = useCallback(() => {
       const indexField = form.getFields().index;
       indexField.setValue(indicesConfig);
-    }, [indicesConfig]);
+    }, [form, indicesConfig]);
 
     const handleOpenTimelineSearch = useCallback(() => {
       setOpenTimelineSearch(true);
