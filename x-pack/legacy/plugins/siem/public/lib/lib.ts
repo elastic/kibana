@@ -24,7 +24,6 @@ export interface AppFrameworkAdapter {
   darkMode?: boolean;
   indexPattern?: string;
   anomalyScore?: number;
-  kbnVersion?: string;
   scaledDateFormat?: string;
   timezone?: string;
 
