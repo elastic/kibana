@@ -62,7 +62,7 @@ export default function(kibana) {
     uiExports: {
       hacks: [
         'plugins/kibana/discover/legacy',
-        'plugins/kibana/dev_tools/legacy',
+        'plugins/kibana/dev_tools',
         'plugins/kibana/visualize/legacy',
       ],
       savedObjectTypes: [
