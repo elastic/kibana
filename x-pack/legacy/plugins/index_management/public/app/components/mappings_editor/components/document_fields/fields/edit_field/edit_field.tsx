@@ -145,7 +145,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
                     {/* Field path */}
                     <EuiFlexGroup>
-                      <EuiFlexItem style={{ display: 'flex', flexDirection: 'row' }}>
+                      <EuiFlexItem grow={false}>
                         <CodeBlock padding="small">
                           {field.path.map((path, i) =>
                             i < field.path.length - 1 ? (
