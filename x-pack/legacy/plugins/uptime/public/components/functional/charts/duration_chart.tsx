@@ -66,32 +66,32 @@ export const DurationChart = ({
           </h4>
         </EuiTitle>
         <ChartWrapper height="400px" loading={loading}>
-          <Chart>
-            <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
-            <Axis
-              id="bottom"
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={timeFormatter(getChartDateLabel(min, max))}
-              title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-                defaultMessage: 'Timestamp',
-              })}
-            />
-            <Axis
-              domain={{ min: 0 }}
-              id="left"
-              position={Position.Left}
-              tickFormat={d => getTickFormat(d)}
-              title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-                defaultMessage: 'Duration ms',
-              })}
-            />
-            {hasLines ? (
+          {hasLines ? (
+            <Chart>
+              <Settings xDomain={{ min, max }} showLegend={true} legendPosition={Position.Bottom} />
+              <Axis
+                id="bottom"
+                position={Position.Bottom}
+                showOverlappingTicks={true}
+                tickFormat={timeFormatter(getChartDateLabel(min, max))}
+                title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
+                  defaultMessage: 'Timestamp',
+                })}
+              />
+              <Axis
+                domain={{ min: 0 }}
+                id="left"
+                position={Position.Left}
+                tickFormat={d => getTickFormat(d)}
+                title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
+                  defaultMessage: 'Duration ms',
+                })}
+              />
               <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
-            ) : (
-              <DurationChartEmptyState />
-            )}
-          </Chart>
+            </Chart>
+          ) : (
+            <DurationChartEmptyState />
+          )}
         </ChartWrapper>
       </EuiPanel>
     </>
