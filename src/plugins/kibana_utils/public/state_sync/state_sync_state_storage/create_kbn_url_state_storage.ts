@@ -20,17 +20,17 @@
 import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import { History } from 'history';
-import { ISyncStrategy } from './types';
+import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
   getStateFromKbnUrl,
   setStateToKbnUrl,
 } from '../../state_management/url';
 
-export interface IKbnUrlSyncStrategy extends ISyncStrategy {
-  toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<string>;
-  fromStorage: <State = unknown>(syncKey: string) => State | null;
-  storageChange$: <State = unknown>(syncKey: string) => Observable<State | null>;
+export interface IKbnUrlStateStorage extends IStateStorage {
+  set: <State>(key: string, state: State, opts?: { replace: boolean }) => Promise<string>;
+  get: <State = unknown>(key: string) => State | null;
+  change$: <State = unknown>(key: string) => Observable<State | null>;
 
   // cancels any pending url updates
   cancel: () => void;
@@ -44,24 +44,24 @@ export interface IKbnUrlSyncStrategy extends ISyncStrategy {
  * Replicates what was implemented in state (AppState, GlobalState)
  * Both expanded and hashed use cases
  */
-export const createKbnUrlSyncStrategy = (
+export const createKbnUrlStateStorage = (
   { useHash = false, history }: { useHash: boolean; history?: History } = { useHash: false }
-): IKbnUrlSyncStrategy => {
+): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
   return {
-    toStorage: <State>(
-      syncKey: string,
+    set: <State>(
+      key: string,
       state: State,
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
       // syncState() utils doesn't wait for this promise
       return url.updateAsync(
-        currentUrl => setStateToKbnUrl(syncKey, state, { useHash }, currentUrl),
+        currentUrl => setStateToKbnUrl(key, state, { useHash }, currentUrl),
         replace
       );
     },
-    fromStorage: syncKey => getStateFromKbnUrl(syncKey),
-    storageChange$: <State>(syncKey: string) =>
+    get: key => getStateFromKbnUrl(key),
+    change$: <State>(key: string) =>
       new Observable(observer => {
         const unlisten = url.listen(() => {
           observer.next();
@@ -71,7 +71,7 @@ export const createKbnUrlSyncStrategy = (
           unlisten();
         };
       }).pipe(
-        map(() => getStateFromKbnUrl<State>(syncKey)),
+        map(() => getStateFromKbnUrl<State>(key)),
         share()
       ),
     flush: ({ replace = false }: { replace?: boolean } = {}) => {

@@ -18,7 +18,7 @@
  */
 
 import { BaseStateContainer } from '../state_containers/types';
-import { ISyncStrategy } from './state_sync_strategies';
+import { IStateStorage } from './state_sync_state_storage';
 
 export interface INullableBaseStateContainer<State> extends BaseStateContainer<State> {
   // State container for stateSync() have to accept "null"
@@ -30,13 +30,13 @@ export interface INullableBaseStateContainer<State> extends BaseStateContainer<S
 
 export interface IStateSyncConfig<
   State = unknown,
-  SyncStrategy extends ISyncStrategy = ISyncStrategy
+  StateStorage extends IStateStorage = IStateStorage
 > {
   /**
    * Storage key to use for syncing,
-   * e.g. syncKey '_a' should sync state to ?_a query param
+   * e.g. storageKey '_a' should sync state to ?_a query param
    */
-  syncKey: string;
+  storageKey: string;
   /**
    * State container to keep in sync with storage, have to implement INullableBaseStateContainer<State> interface
    * The idea is that ./state_containers/ should be used as a state container,
@@ -44,13 +44,13 @@ export interface IStateSyncConfig<
    */
   stateContainer: INullableBaseStateContainer<State>;
   /**
-   * Sync strategy to use,
-   * Sync strategy is responsible for serialising / deserialising and persisting / retrieving stored state
+   * State storage to use,
+   * State storage is responsible for serialising / deserialising and persisting / retrieving stored state
    *
    * There are common strategies already implemented:
-   * './state_sync_strategies/'
+   * './state_sync_state_storage/'
    * which replicate what State (AppState, GlobalState) in legacy world did
    *
    */
-  syncStrategy: SyncStrategy;
+  stateStorage: StateStorage;
 }

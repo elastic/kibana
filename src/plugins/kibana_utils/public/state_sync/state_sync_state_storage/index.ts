@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { ISyncStrategy } from './types';
-import { createKbnUrlSyncStrategy, IKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
+import { IStateStorage } from './types';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import {
-  createSessionStorageSyncStrategy,
-  ISessionStorageSyncStrategy,
-} from './create_session_storage_sync_strategy';
+  createSessionStorageStateStorage,
+  ISessionStorageStateStorage,
+} from './create_session_storage_state_storage';
 
 export {
-  ISyncStrategy,
-  IKbnUrlSyncStrategy,
-  ISessionStorageSyncStrategy,
-  createKbnUrlSyncStrategy,
-  createSessionStorageSyncStrategy,
+  IStateStorage,
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
 };

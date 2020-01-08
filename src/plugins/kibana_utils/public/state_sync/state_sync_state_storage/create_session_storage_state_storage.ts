@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { ISyncStrategy } from './types';
+import { IStateStorage } from './types';
 
-export interface ISessionStorageSyncStrategy extends ISyncStrategy {
-  toStorage: <State>(syncKey: string, state: State) => void;
-  fromStorage: <State = unknown>(syncKey: string) => State | null;
+export interface ISessionStorageStateStorage extends IStateStorage {
+  set: <State>(key: string, state: State) => void;
+  get: <State = unknown>(key: string) => State | null;
 }
 
-export const createSessionStorageSyncStrategy = (
+export const createSessionStorageStateStorage = (
   storage: Storage = window.sessionStorage
-): ISessionStorageSyncStrategy => {
+): ISessionStorageStateStorage => {
   return {
-    toStorage: <State>(syncKey: string, state: State) =>
-      storage.setItem(syncKey, JSON.stringify(state)),
-    fromStorage: (syncKey: string) => JSON.parse(storage.getItem(syncKey)!),
+    set: <State>(key: string, state: State) => storage.setItem(key, JSON.stringify(state)),
+    get: (key: string) => JSON.parse(storage.getItem(key)!),
   };
 };

@@ -18,27 +18,27 @@
  */
 
 import {
-  createSessionStorageSyncStrategy,
-  ISessionStorageSyncStrategy,
-} from './create_session_storage_sync_strategy';
+  createSessionStorageStateStorage,
+  ISessionStorageStateStorage,
+} from './create_session_storage_state_storage';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
-describe('SessionStorageSyncStrategy', () => {
-  let storage: StubBrowserStorage;
-  let syncStrategy: ISessionStorageSyncStrategy;
+describe('SessionStorageStateStorage', () => {
+  let browserStorage: StubBrowserStorage;
+  let stateStorage: ISessionStorageStateStorage;
   beforeEach(() => {
-    storage = new StubBrowserStorage();
-    syncStrategy = createSessionStorageSyncStrategy(storage);
+    browserStorage = new StubBrowserStorage();
+    stateStorage = createSessionStorageStateStorage(browserStorage);
   });
 
   it('should synchronously sync to storage', () => {
     const state = { state: 'state' };
-    syncStrategy.toStorage('key', state);
-    expect(syncStrategy.fromStorage('key')).toEqual(state);
-    expect(storage.getItem('key')).not.toBeNull();
+    stateStorage.set('key', state);
+    expect(stateStorage.get('key')).toEqual(state);
+    expect(browserStorage.getItem('key')).not.toBeNull();
   });
 
-  it('should not implement storageChange$', () => {
-    expect(syncStrategy.storageChange$).not.toBeDefined();
+  it('should not implement change$', () => {
+    expect(stateStorage.change$).not.toBeDefined();
   });
 });

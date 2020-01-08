@@ -20,7 +20,7 @@
 import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
 import { BaseStateContainer, createStateContainer } from '../../public/state_containers';
 import {
-  createKbnUrlSyncStrategy,
+  createKbnUrlStateStorage,
   syncState,
   INullableBaseStateContainer,
 } from '../../public/state_sync';
@@ -30,8 +30,8 @@ const tick = () => new Promise(resolve => setTimeout(resolve));
 const stateContainer = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 const { start, stop } = syncState({
   stateContainer: withDefaultState(stateContainer, defaultState),
-  syncKey: '_s',
-  syncStrategy: createKbnUrlSyncStrategy(),
+  storageKey: '_s',
+  stateStorage: createKbnUrlStateStorage(),
 });
 
 start();

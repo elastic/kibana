@@ -25,13 +25,14 @@ import {
   TodoState,
 } from '../../demos/state_containers/todomvc';
 import { syncState, syncStates } from './state_sync';
-import { ISyncStrategy } from './state_sync_strategies/types';
+import { IStateStorage } from './state_sync_state_storage/types';
 import { Observable, Subject } from 'rxjs';
 import {
-  createSessionStorageSyncStrategy,
-  createKbnUrlSyncStrategy,
-  IKbnUrlSyncStrategy,
-} from './state_sync_strategies';
+  createSessionStorageStateStorage,
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from './state_sync_state_storage';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
@@ -43,14 +44,13 @@ describe('state_sync', () => {
       container.set(defaultState);
     });
     const storageChange$ = new Subject<TodoState | null>();
-    let testSyncStrategy: ISyncStrategy;
+    let testStateStorage: IStateStorage;
 
     beforeEach(() => {
-      testSyncStrategy = {
-        toStorage: jest.fn(),
-        fromStorage: jest.fn(),
-        storageChange$: <State>(key: string) =>
-          storageChange$.asObservable() as Observable<State | null>,
+      testStateStorage = {
+        set: jest.fn(),
+        get: jest.fn(),
+        change$: <State>(key: string) => storageChange$.asObservable() as Observable<State | null>,
       };
     });
 
@@ -58,31 +58,31 @@ describe('state_sync', () => {
       const key = '_s';
       const { start, stop } = syncState({
         stateContainer: withDefaultState(container, defaultState),
-        syncKey: key,
-        syncStrategy: testSyncStrategy,
+        storageKey: key,
+        stateStorage: testStateStorage,
       });
       start();
 
       // initial sync of state to storage is not happening
-      expect(testSyncStrategy.toStorage).not.toBeCalled();
+      expect(testStateStorage.set).not.toBeCalled();
 
       container.transitions.add({
         id: 1,
         text: 'Learning transitions...',
         completed: false,
       });
-      expect(testSyncStrategy.toStorage).toBeCalledWith(key, container.getState());
+      expect(testStateStorage.set).toBeCalledWith(key, container.getState());
       stop();
     });
 
     it('should sync storage to state', () => {
       const key = '_s';
       const storageState1 = [{ id: 1, text: 'todo', completed: false }];
-      (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState1);
+      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState1);
       const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
-        syncKey: key,
-        syncStrategy: testSyncStrategy,
+        storageKey: key,
+        stateStorage: testStateStorage,
       });
       start();
 
@@ -90,7 +90,7 @@ describe('state_sync', () => {
       expect(container.getState()).toEqual(defaultState);
 
       const storageState2 = [{ id: 1, text: 'todo', completed: true }];
-      (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState2);
+      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState2);
       storageChange$.next(storageState2);
 
       expect(container.getState()).toEqual(storageState2);
@@ -102,14 +102,14 @@ describe('state_sync', () => {
       const key = '_s';
       const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
-        syncKey: key,
-        syncStrategy: testSyncStrategy,
+        storageKey: key,
+        stateStorage: testStateStorage,
       });
       start();
-      (testSyncStrategy.toStorage as jest.Mock).mockClear();
+      (testStateStorage.set as jest.Mock).mockClear();
 
       container.set(defaultState);
-      expect(testSyncStrategy.toStorage).not.toBeCalled();
+      expect(testStateStorage.set).not.toBeCalled();
 
       stop();
     });
@@ -118,14 +118,14 @@ describe('state_sync', () => {
       const key = '_s';
       const { stop, start } = syncState({
         stateContainer: withDefaultState(container, defaultState),
-        syncKey: key,
-        syncStrategy: testSyncStrategy,
+        storageKey: key,
+        stateStorage: testStateStorage,
       });
       start();
 
       const originalState = container.getState();
       const storageState = [...originalState];
-      (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => storageState);
+      (testStateStorage.get as jest.Mock).mockImplementation(() => storageState);
       storageChange$.next(storageState);
 
       expect(container.getState()).toBe(originalState);
@@ -138,13 +138,13 @@ describe('state_sync', () => {
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: '_s',
-          syncStrategy: testSyncStrategy,
+          storageKey: '_s',
+          stateStorage: testStateStorage,
         },
       ]);
       start();
 
-      (testSyncStrategy.fromStorage as jest.Mock).mockImplementation(() => null);
+      (testStateStorage.get as jest.Mock).mockImplementation(() => null);
       storageChange$.next(null);
 
       expect(container.getState()).toEqual(defaultState);
@@ -158,9 +158,9 @@ describe('state_sync', () => {
     const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 
     let sessionStorage: StubBrowserStorage;
-    let sessionStorageSyncStrategy: ISyncStrategy;
+    let sessionStorageSyncStrategy: ISessionStorageStateStorage;
     let history: History;
-    let urlSyncStrategy: IKbnUrlSyncStrategy;
+    let urlSyncStrategy: IKbnUrlStateStorage;
     const getCurrentUrl = () => history.createHref(history.location);
     const tick = () => new Promise(resolve => setTimeout(resolve));
 
@@ -169,22 +169,22 @@ describe('state_sync', () => {
 
       window.location.href = '/';
       sessionStorage = new StubBrowserStorage();
-      sessionStorageSyncStrategy = createSessionStorageSyncStrategy(sessionStorage);
+      sessionStorageSyncStrategy = createSessionStorageStateStorage(sessionStorage);
       history = createBrowserHistory();
-      urlSyncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
+      urlSyncStrategy = createKbnUrlStateStorage({ useHash: false, history });
     });
 
     it('change to one storage should also update other storage', () => {
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: urlSyncStrategy,
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
         },
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: sessionStorageSyncStrategy,
+          storageKey: key,
+          stateStorage: sessionStorageSyncStrategy,
         },
       ]);
       start();
@@ -202,8 +202,8 @@ describe('state_sync', () => {
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: urlSyncStrategy,
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
         },
       ]);
       start();
@@ -230,8 +230,8 @@ describe('state_sync', () => {
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: urlSyncStrategy,
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
         },
       ]);
       start();
@@ -265,8 +265,8 @@ describe('state_sync', () => {
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
-          syncKey: key,
-          syncStrategy: urlSyncStrategy,
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
         },
       ]);
       start();

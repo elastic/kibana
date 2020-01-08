@@ -34,8 +34,8 @@ import {
 import {
   BaseStateContainer,
   INullableBaseStateContainer,
-  createKbnUrlSyncStrategy,
-  createSessionStorageSyncStrategy,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
   createStateContainer,
   createStateContainerReactHelpers,
   PureTransition,
@@ -192,12 +192,12 @@ export const TodoAppPage: React.FC<{
   useEffect(() => {
     // have to sync with history passed to react-router
     // history v5 will be singleton and this will not be needed
-    const urlSyncStrategy = createKbnUrlSyncStrategy({
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
       useHash: useHashedUrl,
       history: props.history,
     });
 
-    const sessionStorageSyncStrategy = createSessionStorageSyncStrategy();
+    const sessionStorageStateStorage = createSessionStorageStateStorage();
 
     /**
      * Restoring global state:
@@ -209,8 +209,8 @@ export const TodoAppPage: React.FC<{
       globalStateKey,
       initialAppUrl.current
     );
-    const globalStateFromCurrentUrl = urlSyncStrategy.fromStorage<GlobalState>(globalStateKey);
-    const globalStateFromSessionStorage = sessionStorageSyncStrategy.fromStorage<GlobalState>(
+    const globalStateFromCurrentUrl = kbnUrlStateStorage.get<GlobalState>(globalStateKey);
+    const globalStateFromSessionStorage = sessionStorageStateStorage.get<GlobalState>(
       globalStateKey
     );
 
@@ -221,8 +221,8 @@ export const TodoAppPage: React.FC<{
       ...globalStateFromInitialUrl,
     };
     globalStateContainer.set(initialGlobalState);
-    urlSyncStrategy.toStorage(globalStateKey, initialGlobalState, { replace: true });
-    sessionStorageSyncStrategy.toStorage(globalStateKey, initialGlobalState);
+    kbnUrlStateStorage.set(globalStateKey, initialGlobalState, { replace: true });
+    sessionStorageStateStorage.set(globalStateKey, initialGlobalState);
 
     /**
      * Restoring app local state:
@@ -232,27 +232,27 @@ export const TodoAppPage: React.FC<{
     const appStateKey = `_todo-${props.appInstanceId}`;
     const initialAppState: TodoState =
       getStateFromKbnUrl<TodoState>(appStateKey, initialAppUrl.current) ||
-      urlSyncStrategy.fromStorage<TodoState>(appStateKey) ||
+      kbnUrlStateStorage.get<TodoState>(appStateKey) ||
       defaultState;
     container.set(initialAppState);
-    urlSyncStrategy.toStorage(appStateKey, initialAppState, { replace: true });
+    kbnUrlStateStorage.set(appStateKey, initialAppState, { replace: true });
 
     // start syncing only when made sure, that state in synced
     const { stop, start } = syncStates([
       {
         stateContainer: withDefaultState(container, defaultState),
-        syncKey: appStateKey,
-        syncStrategy: urlSyncStrategy,
+        storageKey: appStateKey,
+        stateStorage: kbnUrlStateStorage,
       },
       {
         stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
-        syncKey: globalStateKey,
-        syncStrategy: urlSyncStrategy,
+        storageKey: globalStateKey,
+        stateStorage: kbnUrlStateStorage,
       },
       {
         stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
-        syncKey: globalStateKey,
-        syncStrategy: sessionStorageSyncStrategy,
+        storageKey: globalStateKey,
+        stateStorage: sessionStorageStateStorage,
       },
     ]);
 

@@ -21,7 +21,7 @@ import { EMPTY, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
-import { ISyncStrategy } from './state_sync_strategies';
+import { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
 
 /**
@@ -31,30 +31,30 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  * Examples:
  *
  * 1. the simplest use case
- * const syncStrategy = createKbnUrlSyncStrategy();
+ * const stateStorage = createKbnUrlStateStorage();
  * syncState({
- *   syncKey: '_s',
+ *   storageKey: '_s',
  *   stateContainer,
- *   syncStrategy
+ *   stateStorage
  * });
  *
  * 2. conditionally configuring sync strategy
- * const syncStrategy = createKbnUrlSyncStrategy({useHash: config.get('state:stateContainerInSessionStorage')})
+ * const stateStorage = createKbnUrlStateStorage({useHash: config.get('state:stateContainerInSessionStorage')})
  * syncState({
- *   syncKey: '_s',
+ *   storageKey: '_s',
  *   stateContainer,
- *   syncStrategy
+ *   stateStorage
  * });
  *
  * 3. implementing custom sync strategy
- * const localStorageSyncStrategy = {
- *   toStorage: (syncKey, state) => localStorage.setItem(syncKey, JSON.stringify(state)),
- *   fromStorage: (syncKey) => localStorage.getItem(syncKey) ? JSON.parse(localStorage.getItem(syncKey)) : null
+ * const localStorageStateStorage = {
+ *   set: (storageKey, state) => localStorage.setItem(storageKey, JSON.stringify(state)),
+ *   get: (storageKey) => localStorage.getItem(storageKey) ? JSON.parse(localStorage.getItem(storageKey)) : null
  * };
  * syncState({
- *   syncKey: '_s',
+ *   storageKey: '_s',
  *   stateContainer,
- *   syncStrategy: localStorageSyncStrategy
+ *   stateStorage: localStorageStateStorage
  * });
  *
  * 4. Transform state before serialising
@@ -64,13 +64,13 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  *  * Providing default values
  * const stateToStorage = (s) => ({ tab: s.tab });
  * syncState({
- *   syncKey: '_s',
+ *   storageKey: '_s',
  *   stateContainer: {
  *     get: () => stateToStorage(stateContainer.get()),
  *     set: stateContainer.set(({ tab }) => ({ ...stateContainer.get(), tab }),
  *     state$: stateContainer.state$.pipe(map(stateToStorage))
  *   },
- *   syncStrategy
+ *   stateStorage
  * });
  *
  * Caveats:
@@ -80,45 +80,43 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  */
 export type StopSyncStateFnType = () => void;
 export type StartSyncStateFnType = () => void;
-export interface ISyncStateRef<SyncStrategy extends ISyncStrategy = ISyncStrategy> {
+export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> {
   // stop syncing state with storage
   stop: StopSyncStateFnType;
-  // start syncing state
+  // start syncing state with storage
   start: StartSyncStateFnType;
 }
-export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = ISyncStrategy>(
-  stateSyncConfig: IStateSyncConfig<State, SyncStrategy>
-): ISyncStateRef {
+export function syncState<State = unknown, StateStorage extends IStateStorage = IStateStorage>({
+  storageKey,
+  stateStorage,
+  stateContainer,
+}: IStateSyncConfig<State, IStateStorage>): ISyncStateRef {
   const subscriptions: Subscription[] = [];
-  const { toStorage, fromStorage, storageChange$ } = stateSyncConfig.syncStrategy;
 
   const updateState = () => {
-    const newState = fromStorage<State>(stateSyncConfig.syncKey);
-    const oldState = stateSyncConfig.stateContainer.get();
+    const newState = stateStorage.get<State>(storageKey);
+    const oldState = stateContainer.get();
     if (!defaultComparator(newState, oldState)) {
-      stateSyncConfig.stateContainer.set(newState);
+      stateContainer.set(newState);
     }
   };
 
   const updateStorage = () => {
-    const newStorageState = stateSyncConfig.stateContainer.get();
-    const oldStorageState = fromStorage<State>(stateSyncConfig.syncKey);
+    const newStorageState = stateContainer.get();
+    const oldStorageState = stateStorage.get<State>(storageKey);
     if (!defaultComparator(newStorageState, oldStorageState)) {
-      toStorage(stateSyncConfig.syncKey, newStorageState);
+      stateStorage.set(storageKey, newStorageState);
     }
   };
 
-  const onStateChange$ = stateSyncConfig.stateContainer.state$.pipe(
-    distinctUntilChangedWithInitialValue(stateSyncConfig.stateContainer.get(), defaultComparator),
+  const onStateChange$ = stateContainer.state$.pipe(
+    distinctUntilChangedWithInitialValue(stateContainer.get(), defaultComparator),
     tap(() => updateStorage())
   );
 
-  const onStorageChange$ = storageChange$
-    ? storageChange$(stateSyncConfig.syncKey).pipe(
-        distinctUntilChangedWithInitialValue(
-          fromStorage(stateSyncConfig.syncKey),
-          defaultComparator
-        ),
+  const onStorageChange$ = stateStorage.change$
+    ? stateStorage.change$(storageKey).pipe(
+        distinctUntilChangedWithInitialValue(stateStorage.get(storageKey), defaultComparator),
         tap(() => {
           updateState();
         })
@@ -127,9 +125,9 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
 
   return {
     stop: () => {
-      // if syncStrategy has any cancellation logic, then run it
-      if (stateSyncConfig.syncStrategy.cancel) {
-        stateSyncConfig.syncStrategy.cancel();
+      // if stateStorage has any cancellation logic, then run it
+      if (stateStorage.cancel) {
+        stateStorage.cancel();
       }
 
       subscriptions.forEach(s => s.unsubscribe());
@@ -148,13 +146,13 @@ export function syncState<State = unknown, SyncStrategy extends ISyncStrategy = 
  * multiple different sync configs
  * syncStates([
  *   {
- *     syncKey: '_s1',
- *     syncStrategy: syncStrategy1,
+ *     storageKey: '_s1',
+ *     stateStorage: stateStorage1,
  *     stateContainer: stateContainer1,
  *   },
  *   {
- *     syncKey: '_s2',
- *     syncStrategy: syncStrategy2,
+ *     storageKey: '_s2',
+ *     stateStorage: stateStorage2,
  *     stateContainer: stateContainer2,
  *   },
  * ]);

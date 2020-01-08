@@ -49,13 +49,13 @@ export {
 export {
   syncState,
   syncStates,
-  createKbnUrlSyncStrategy,
-  createSessionStorageSyncStrategy,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
   IStateSyncConfig,
   ISyncStateRef,
-  IKbnUrlSyncStrategy,
+  IKbnUrlStateStorage,
   INullableBaseStateContainer,
-  ISessionStorageSyncStrategy,
+  ISessionStorageStateStorage,
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';

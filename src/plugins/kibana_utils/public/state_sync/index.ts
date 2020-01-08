@@ -18,11 +18,11 @@
  */
 
 export {
-  createKbnUrlSyncStrategy,
-  createSessionStorageSyncStrategy,
-  IKbnUrlSyncStrategy,
-  ISessionStorageSyncStrategy,
-} from './state_sync_strategies';
+  createSessionStorageStateStorage,
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from './state_sync_state_storage';
 export { IStateSyncConfig, INullableBaseStateContainer } from './types';
 export {
   syncState,

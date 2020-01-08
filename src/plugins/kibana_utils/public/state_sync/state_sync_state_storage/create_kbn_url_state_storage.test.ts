@@ -17,57 +17,56 @@
  * under the License.
  */
 import '../../storage/hashed_item_store/mock';
-import { createKbnUrlSyncStrategy, IKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
-import { ISyncStrategy } from './types';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-describe('KbnUrlSyncStrategy', () => {
+describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {
-    let syncStrategy: IKbnUrlSyncStrategy;
+    let urlStateStorage: IKbnUrlStateStorage;
     let history: History;
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
       history.push('/');
-      syncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
+      urlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
     });
 
     it('should persist state to url', async () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
-      await syncStrategy.toStorage(key, state);
+      await urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
-      expect(syncStrategy.fromStorage(key)).toEqual(state);
+      expect(urlStateStorage.get(key)).toEqual(state);
     });
 
     it('should flush state to url', () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
-      syncStrategy.toStorage(key, state);
+      urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      syncStrategy.flush();
+      urlStateStorage.flush();
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
-      expect(syncStrategy.fromStorage(key)).toEqual(state);
+      expect(urlStateStorage.get(key)).toEqual(state);
     });
 
     it('should cancel url updates', async () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
-      const pr = syncStrategy.toStorage(key, state);
+      const pr = urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      syncStrategy.cancel();
+      urlStateStorage.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      expect(syncStrategy.fromStorage(key)).toEqual(null);
+      expect(urlStateStorage.get(key)).toEqual(null);
     });
 
     it('should notify about url changes', async () => {
-      expect(syncStrategy.storageChange$).toBeDefined();
+      expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
       const destroy$ = new Subject();
-      const result = syncStrategy.storageChange$!(key)
+      const result = urlStateStorage.change$!(key)
         .pipe(takeUntil(destroy$), toArray())
         .toPromise();
 
@@ -83,28 +82,28 @@ describe('KbnUrlSyncStrategy', () => {
   });
 
   describe('useHash: true', () => {
-    let syncStrategy: ISyncStrategy;
+    let urlStateStorage: IKbnUrlStateStorage;
     let history: History;
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
       history.push('/');
-      syncStrategy = createKbnUrlSyncStrategy({ useHash: true, history });
+      urlStateStorage = createKbnUrlStateStorage({ useHash: true, history });
     });
 
     it('should persist state to url', async () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
-      await syncStrategy.toStorage(key, state);
+      await urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=h@487e077"`);
-      expect(syncStrategy.fromStorage(key)).toEqual(state);
+      expect(urlStateStorage.get(key)).toEqual(state);
     });
 
     it('should notify about url changes', async () => {
-      expect(syncStrategy.storageChange$).toBeDefined();
+      expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
       const destroy$ = new Subject();
-      const result = syncStrategy.storageChange$!(key)
+      const result = urlStateStorage.change$!(key)
         .pipe(takeUntil(destroy$), toArray())
         .toPromise();
 

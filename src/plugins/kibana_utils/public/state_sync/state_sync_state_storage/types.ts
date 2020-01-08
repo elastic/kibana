@@ -20,32 +20,32 @@
 import { Observable } from 'rxjs';
 
 /**
- * Any SyncStrategy have to implement ISyncStrategy interface
- * SyncStrategy is responsible for:
+ * Any StateStorage have to implement IStateStorage interface
+ * StateStorage is responsible for:
  * * state serialisation / deserialization
  * * persisting to and retrieving from storage
  *
- * For an example take a look at already implemented URL sync strategies
+ * For an example take a look at already implemented KbnUrl state storage
  */
-export interface ISyncStrategy {
+export interface IStateStorage {
   /**
    * Take in a state object, should serialise and persist
    */
-  toStorage: <State>(syncKey: string, state: State) => any;
+  set: <State>(key: string, state: State) => any;
 
   /**
    * Should retrieve state from the storage and deserialize it
    */
-  fromStorage: <State = unknown>(syncKey: string) => State | null;
+  get: <State = unknown>(key: string) => State | null;
 
   /**
-   * Should notify when the storage has changed
+   * Should notify when the stored state has changed
    */
-  storageChange$?: <State = unknown>(syncKey: string) => Observable<State | null>;
+  change$?: <State = unknown>(key: string) => Observable<State | null>;
 
   /**
    * Optional method to cancel any pending activity
-   * syncState() will call it, if it is provided by SyncStrategy
+   * syncState() will call it, if it is provided by IStateStorage
    */
   cancel?: () => void;
 }
