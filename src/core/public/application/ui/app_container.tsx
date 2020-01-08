@@ -65,7 +65,7 @@ export const AppContainer: FunctionComponent<Props> = ({ mounter, appId }: Props
 
     mount();
     return unmount;
-  });
+  }, [mounter]);
 
   return (
     <Fragment>
