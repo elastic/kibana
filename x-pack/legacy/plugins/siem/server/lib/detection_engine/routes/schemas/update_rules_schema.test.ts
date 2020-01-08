@@ -867,7 +867,7 @@ describe('update rules schema', () => {
     ).toBeTruthy();
   });
 
-  test('timeline_id validates', () => {
+  test('validates with timeline_id and timeline_title', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -886,7 +886,7 @@ describe('update rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('You cannot omit timeline_title when timeline_id are present', () => {
+  test('You cannot omit timeline_title when timeline_id is present', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -900,12 +900,30 @@ describe('update rules schema', () => {
         type: 'saved_query',
         saved_id: 'some id',
         timeline_id: 'some-id',
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have a null value for timeline_title when timeline_id is present', () => {
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'saved_query',
+        saved_id: 'some id',
+        timeline_id: 'timeline-id',
         timeline_title: null,
       }).error
     ).toBeTruthy();
   });
 
-  test('You can have timeline_title empty string when timeline_id are present', () => {
+  test('You cannot have empty string for timeline_title when timeline_id is present', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -921,10 +939,10 @@ describe('update rules schema', () => {
         timeline_id: 'some-id',
         timeline_title: '',
       }).error
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 
-  test('You cannot have timeline_title whithout timeline_id', () => {
+  test('You cannot have timeline_title with an empty timeline_id', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -938,6 +956,24 @@ describe('update rules schema', () => {
         type: 'saved_query',
         saved_id: 'some id',
         timeline_id: '',
+        timeline_title: 'some-title',
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have timeline_title without timeline_id', () => {
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'saved_query',
+        saved_id: 'some id',
         timeline_title: 'some-title',
       }).error
     ).toBeTruthy();
