@@ -120,14 +120,11 @@ describe('WebhookActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
       />
     );
-    expect(wrapper.find('[data-test-subj="webhookAddHeaderButton"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookViewHeadersButton"]').length > 0).toBeTruthy();
     wrapper
-      .find('[data-test-subj="webhookAddHeaderButton"]')
+      .find('[data-test-subj="webhookViewHeadersButton"]')
       .first()
       .simulate('click');
-    expect(wrapper.find('[data-test-subj="webhookHeadersKeyInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookHeadersValueInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();

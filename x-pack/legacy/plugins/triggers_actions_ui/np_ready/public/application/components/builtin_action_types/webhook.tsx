@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButton,
   EuiButtonIcon,
   EuiText,
   EuiTitle,
@@ -388,7 +387,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
       <EuiSpacer size="m" />
       <EuiSwitch
-        data-test-subj="webhookAddHeaderButton"
+        data-test-subj="webhookViewHeadersButton"
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton',
           {

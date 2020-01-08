@@ -131,7 +131,7 @@ export const ActionConnectorForm = ({
       i18n.translate(
         'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
         {
-          defaultMessage: "'{message}' '{connectorName}",
+          defaultMessage: "{message} '{connectorName}'",
           values: {
             message,
             connectorName: savedConnector ? savedConnector.name : '',
