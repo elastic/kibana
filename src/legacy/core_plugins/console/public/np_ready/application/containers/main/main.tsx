@@ -19,19 +19,12 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiCallOut,
-  EuiPageContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
 
-import { TopNavMenu, WelcomePanel, HelpPanel } from '../../components';
+import { TopNavMenu, WelcomePanel, HelpPanel, SomethingWentWrongCallout } from '../../components';
 
 import { useServicesContext, useEditorReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
@@ -56,77 +49,58 @@ export function Main() {
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
-
   const { done, error } = useDataInit();
 
-  if (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-    return (
-      <EuiPageContent>
-        <EuiCallOut
-          iconType="alert"
-          color="danger"
-          title={i18n.translate('console.loadingErrorTitle', {
-            defaultMessage: 'Something went wrong',
-          })}
-        >
-          <EuiText>
-            <p>
-              {i18n.translate('console.loadingErrorMessage', {
-                defaultMessage:
-                  'We could not load data from Elasticsearch at the moment. Please ensure that the remote instance is accessible.',
-              })}
-            </p>
-          </EuiText>
-        </EuiCallOut>
-      </EuiPageContent>
-    );
-  }
-
   return (
-    <div id="consoleRoot">
-      <EuiFlexGroup
-        className="consoleContainer"
-        gutterSize="none"
-        direction="column"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle className="euiScreenReaderOnly">
-            <h1>
-              {i18n.translate('console.pageHeading', {
-                defaultMessage: 'Console',
-              })}
-            </h1>
-          </EuiTitle>
-          <TopNavMenu
-            disabled={!done}
-            items={getTopNavConfig({
-              onClickHistory: () => setShowHistory(!showingHistory),
-              onClickSettings: () => setShowSettings(true),
-              onClickHelp: () => setShowHelp(!showHelp),
-            })}
-          />
-        </EuiFlexItem>
-        {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
-        <EuiFlexItem>
-          <Editor loading={!done} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {done && showWelcome ? (
-        <WelcomePanel
-          onDismiss={() => {
-            storage.set('version_welcome_shown', '@@SENSE_REVISION');
-            setShowWelcomePanel(false);
-          }}
-        />
+    <>
+      {error ? (
+        <EuiPageContent>
+          <SomethingWentWrongCallout error={error} />
+        </EuiPageContent>
       ) : null}
+      <div id="consoleRoot">
+        <EuiFlexGroup
+          className="consoleContainer"
+          gutterSize="none"
+          direction="column"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle className="euiScreenReaderOnly">
+              <h1>
+                {i18n.translate('console.pageHeading', {
+                  defaultMessage: 'Console',
+                })}
+              </h1>
+            </EuiTitle>
+            <TopNavMenu
+              disabled={!done}
+              items={getTopNavConfig({
+                onClickHistory: () => setShowHistory(!showingHistory),
+                onClickSettings: () => setShowSettings(true),
+                onClickHelp: () => setShowHelp(!showHelp),
+              })}
+            />
+          </EuiFlexItem>
+          {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
+          <EuiFlexItem>
+            <Editor loading={!done} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+        {done && showWelcome ? (
+          <WelcomePanel
+            onDismiss={() => {
+              storage.set('version_welcome_shown', '@@SENSE_REVISION');
+              setShowWelcomePanel(false);
+            }}
+          />
+        ) : null}
 
-      {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-    </div>
+        {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+
+        {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
+      </div>
+    </>
   );
 }

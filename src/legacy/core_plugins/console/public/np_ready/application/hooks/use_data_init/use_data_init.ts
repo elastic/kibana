@@ -44,6 +44,7 @@ export const useDataInit = () => {
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {
+          // For now, we always take the first text object returned.
           dispatch({ type: 'setCurrentTextObject', payload: results[0] });
         }
       } catch (e) {

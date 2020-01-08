@@ -45,8 +45,8 @@ const pluginInstance = plugin({} as any);
     ...npSetup.plugins,
     __LEGACY: {
       elasticsearchUrl: chrome.getInjected('elasticsearchUrl'),
-      category: FeatureCatalogueCategory.ADMIN,
       I18nContext,
+      category: FeatureCatalogueCategory.ADMIN,
     },
   });
   await pluginInstance.start(npStart.core);
