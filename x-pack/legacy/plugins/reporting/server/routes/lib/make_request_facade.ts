@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../../types';
+import { RequestQuery } from 'hapi';
+import { Legacy } from 'kibana';
+import {
+  RequestFacade,
+  ReportingRequestPayload,
+  ReportingRequestPre,
+  ReportingRequestQuery,
+} from '../../../types';
 
-export function makeRequestFacade(request: RequestFacade): RequestFacade {
+export function makeRequestFacade(request: Legacy.Request): RequestFacade {
   // This condition is for unit tests
   const getSavedObjectsClient = request.getSavedObjectsClient
     ? request.getSavedObjectsClient.bind(request)
@@ -16,10 +23,11 @@ export function makeRequestFacade(request: RequestFacade): RequestFacade {
     headers: request.headers,
     auth: request.auth, // for getUser
     params: request.params,
-    payload: request.payload,
-    query: request.query,
-    pre: request.pre,
+    payload: (request.payload as object) as ReportingRequestPayload,
+    query: ((request.query as RequestQuery) as object) as ReportingRequestQuery,
+    pre: (request.pre as Record<string, any>) as ReportingRequestPre,
     getBasePath: request.getBasePath,
     route: request.route,
+    raw: request.raw,
   };
 }

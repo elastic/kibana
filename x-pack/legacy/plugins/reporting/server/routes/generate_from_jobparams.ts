@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import boom from 'boom';
 import Joi from 'joi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import { ServerFacade, ReportingResponseToolkit } from '../../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
@@ -55,7 +56,7 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (originalRequest: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(originalRequest);
       let jobParamsRison: string | null;
 

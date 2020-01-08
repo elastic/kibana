@@ -80,6 +80,16 @@ export type EnqueueJobFn = <JobParamsType>(
   request: RequestFacade
 ) => Promise<Job>;
 
+export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
+export type ReportingRequestQuery = ListQuery | GenerateQuery; // FIXME weird
+
+export interface ReportingRequestPre {
+  management: {
+    jobTypes: any;
+  };
+  user: any;
+}
+
 export interface RequestFacade {
   getBasePath: Legacy.Request['getBasePath'];
   getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
@@ -87,14 +97,10 @@ export interface RequestFacade {
   headers: Legacy.Request['headers'];
   params: Legacy.Request['params'];
   payload: JobParamPostPayload | GenerateExportTypePayload;
-  query: ListQuery & GenerateQuery;
+  query: ReportingRequestQuery;
   route: Legacy.Request['route'];
-  pre: {
-    management: {
-      jobTypes: any;
-    };
-    user: any;
-  };
+  pre: ReportingRequestPre;
+  raw: Legacy.Request['raw'];
 }
 
 export type ResponseFacade = ResponseObject & {
