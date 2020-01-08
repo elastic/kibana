@@ -21,6 +21,6 @@ export const GraphTitle = connect<GraphTitleProps, {}, {}, GraphState>((state: G
   title: metaDataSelector(state).title,
 }))(({ title }: GraphTitleProps) => (
   <EuiScreenReaderOnly>
-    <h1>{title}</h1>
+    <h1 id="graphHeading">{title}</h1>
   </EuiScreenReaderOnly>
 ));

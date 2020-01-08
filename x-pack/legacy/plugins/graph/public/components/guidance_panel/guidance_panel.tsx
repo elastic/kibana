@@ -53,6 +53,7 @@ function ListItem({
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
+      aria-current={state === 'active' ? 'step' : undefined}
     >
       {state !== 'disabled' && (
         <span
@@ -96,7 +97,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h1>
+            <h1 id="graphHeading">
               {i18n.translate('xpack.graph.guidancePanel.title', {
                 defaultMessage: 'Three steps to your graph',
               })}
@@ -104,7 +105,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ul className="gphGuidancePanel__list">
+          <ol className="gphGuidancePanel__list" aria-describedby="graphHeading">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <EuiLink onClick={onOpenDatasourcePicker}>
                 {i18n.translate(
@@ -116,7 +117,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
-              <EuiLink onClick={onOpenFieldPicker}>
+              <EuiLink onClick={onOpenFieldPicker} disabled={!hasFields && !hasDatasource}>
                 {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
                   defaultMessage: 'Add fields.',
                 })}
@@ -128,7 +129,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
                 defaultMessage="Enter a query in the search bar to start exploring. Don't know where to start? {topTerms}."
                 values={{
                   topTerms: (
-                    <EuiLink onClick={onFillWorkspace}>
+                    <EuiLink onClick={onFillWorkspace} disabled={!hasFields}>
                       {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
                         defaultMessage: 'Graph the top terms',
                       })}
@@ -137,7 +138,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
                 }}
               />
             </ListItem>
-          </ul>
+          </ol>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

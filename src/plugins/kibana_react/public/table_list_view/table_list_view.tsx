@@ -67,6 +67,8 @@ export interface TableListViewProps {
   tableListTitle: string;
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
+  ariaDescribedby?: string;
+  headingId?: string;
 }
 
 export interface TableListViewState {
@@ -463,7 +465,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>{this.props.tableListTitle}</h1>
+              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
@@ -498,7 +500,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
+        <EuiPageBody aria-describedby={this.props.ariaDescribedby}>
+          {this.renderPageContent()}
+        </EuiPageBody>
       </EuiPage>
     );
   }
