@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { HttpSetup } from 'src/core/public';
 
 let spacesFeatureDescription: string;
 
@@ -20,5 +20,5 @@ export const getSpacesFeatureDescription = () => {
   return spacesFeatureDescription;
 };
 
-export const getManageSpacesUrl = () =>
-  npSetup.core.http.basePath.prepend(`/app/kibana#/management/spaces/list`);
+export const getManageSpacesUrl = (basePath: HttpSetup['basePath']) =>
+  basePath.prepend(`/app/kibana#/management/spaces/list`);

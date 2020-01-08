@@ -6,5 +6,5 @@
   "requiredPlugins": ["features", "licensing"],
   "optionalPlugins": ["security", "home", "usageCollection"],
   "server": true,
-  "ui": false
+  "ui": true
 }

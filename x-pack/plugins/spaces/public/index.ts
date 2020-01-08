@@ -5,7 +5,7 @@
  */
 import { SpacesPlugin } from './plugin';
 
-export { SpaceAvatar } from './space_avatar';
+export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 
 export const plugin = () => {
   return new SpacesPlugin();
