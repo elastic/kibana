@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   EuiBadge,
   EuiBasicTable,
@@ -22,15 +23,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect, useState } from 'react';
-// @ts-ignore formatNumber
-import { formatNumber } from '@elastic/eui/lib/services/format';
+import React, { Fragment, useState } from 'react';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
 import { LocationName } from './../location_name';
-import { Criteria, Pagination } from './../monitor_list';
+import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 
 interface PingListQueryResult {
@@ -38,10 +38,9 @@ interface PingListQueryResult {
 }
 
 interface PingListProps {
-  onSelectedStatusChange: (status: string | null) => void;
+  onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
   onPageCountChange: (itemCount: number) => void;
-  onUpdateApp: () => void;
   pageSize: number;
   selectedOption: string;
   selectedLocation: EuiComboBoxOptionProps[];
@@ -77,18 +76,13 @@ export const PingListComponent = ({
   onPageCountChange,
   onSelectedLocationChange,
   onSelectedStatusChange,
-  onUpdateApp,
   pageSize,
   selectedOption,
   selectedLocation,
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
-  useEffect(() => {
-    onUpdateApp();
-  }, [selectedOption]);
-
-  const statusOptions: EuiComboBoxOptionProps[] = [
+  const statusOptions = [
     {
       label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
         defaultMessage: 'All',
@@ -182,16 +176,16 @@ export const PingListComponent = ({
       render: (error: string) => error ?? '-',
     },
   ];
-
   const pings: Ping[] = data?.allPings?.pings ?? [];
-
-  const hasStatus: boolean = pings.some(
-    (currentPing: Ping) => !!currentPing?.http?.response?.status_code
+  const hasStatus: boolean = pings.reduce(
+    (hasHttpStatus: boolean, currentPing: Ping) =>
+      hasHttpStatus || !!currentPing.http?.response?.status_code,
+    false
   );
   if (hasStatus) {
     columns.push({
       field: 'http.response.status_code',
-      align: 'center',
+      align: 'right',
       name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
         defaultMessage: 'Response code',
       }),
@@ -266,7 +260,7 @@ export const PingListComponent = ({
                           if (typeof selectedOptions[0].value === 'string') {
                             onSelectedStatusChange(
                               // @ts-ignore it's definitely a string
-                              selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                              selectedOptions[0].value !== '' ? selectedOptions[0].value : undefined
                             );
                           }
                         }}
@@ -309,7 +303,9 @@ export const PingListComponent = ({
           itemId="id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
-          onChange={(criteria: Criteria) => onPageCountChange(criteria.page!.size)}
+          onChange={(criteria: CriteriaWithPagination<Ping>) =>
+            onPageCountChange(criteria.page!.size)
+          }
         />
       </EuiPanel>
     </Fragment>

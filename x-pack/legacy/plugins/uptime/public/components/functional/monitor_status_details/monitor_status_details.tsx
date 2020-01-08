@@ -28,7 +28,7 @@ export const MonitorStatusDetailsComponent = ({
 }: MonitorStatusBarProps) => {
   useEffect(() => {
     loadMonitorLocations(monitorId);
-  }, [monitorId, dateStart, dateEnd]);
+  }, [loadMonitorLocations, monitorId, dateStart, dateEnd]);
 
   return (
     <EuiPanel>
