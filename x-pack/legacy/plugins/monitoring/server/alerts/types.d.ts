@@ -9,19 +9,29 @@ import { AlertExecutorOptions } from '../../../alerting';
 export interface AlertLicense {
   status: string;
   type: string;
-  expiry_date_in_millis: number;
-  cluster_uuid: string;
-  cluster_name: string;
+  expiryDateMS: number;
+  clusterUuid: string;
+  clusterName: string;
 }
 
 export interface AlertState {
-  [clusterUuid: string]: {
-    expired_check_date_in_millis: number | Moment;
-  };
+  [clusterUuid: string]: AlertClusterState;
+}
+
+export interface AlertClusterState {
+  expiredCheckDateMS: number | Moment;
+  ui: AlertClusterUiState;
+}
+
+export interface AlertClusterUiState {
+  isFiring: boolean;
+  severity: number;
+  message: string | null;
+  resolvedMS: number;
 }
 
 export interface AlertCluster {
-  cluster_uuid: string;
+  clusterUuid: string;
 }
 
 export interface LicenseExpirationAlertExecutorOptions extends AlertExecutorOptions {

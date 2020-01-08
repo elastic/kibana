@@ -26,7 +26,7 @@ export async function fetchLicenses(
           filter: [
             {
               terms: {
-                cluster_uuid: clusters.map(cluster => cluster.cluster_uuid),
+                cluster_uuid: clusters.map(cluster => cluster.clusterUuid),
               },
             },
             {
@@ -48,9 +48,15 @@ export async function fetchLicenses(
   };
 
   const response = await callCluster('search', params);
-  return get<any>(response, 'hits.hits').map((hit: any) => ({
-    ...get(hit, '_source.license', {}),
-    cluster_uuid: get(hit, '_source.cluster_uuid'),
-    cluster_name: get(hit, '_source.cluster_name') || get(hit, '_source.cluster_uuid'),
-  }));
+  return get<any>(response, 'hits.hits').map((hit: any) => {
+    const rawLicense: any = get(hit, '_source.license', {});
+    const license: AlertLicense = {
+      status: rawLicense.status,
+      type: rawLicense.type,
+      expiryDateMS: rawLicense.expiry_date_in_millis,
+      clusterUuid: get(hit, '_source.cluster_uuid'),
+      clusterName: get(hit, '_source.cluster_name') || get(hit, '_source.cluster_uuid'),
+    };
+    return license;
+  });
 }

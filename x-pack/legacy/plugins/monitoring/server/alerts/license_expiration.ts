@@ -5,13 +5,23 @@
  */
 
 import moment from 'moment';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
+import { ALERT_TYPE_LICENSE_EXPIRATION, CALCULATE_DURATION_UNTIL } from '../../common/constants';
+// @ts-ignore
+import { formatTimestampToDuration } from '../../common';
 import { AlertType } from '../../../alerting';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { AlertLicense, AlertState, LicenseExpirationAlertExecutorOptions } from './types';
+import {
+  AlertLicense,
+  AlertState,
+  AlertClusterState,
+  AlertClusterUiState,
+  LicenseExpirationAlertExecutorOptions,
+} from './types';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
@@ -65,13 +75,15 @@ export const getLicenseExpiration = (
       const result: AlertState = { ...state };
 
       for (const license of licenses) {
-        const licenseState = state[license.cluster_uuid] || {};
-        const $expiry = moment.utc(license.expiry_date_in_millis);
+        const licenseState: AlertClusterState = state[license.clusterUuid] || {};
+        const $expiry = moment.utc(license.expiryDateMS);
         let isExpired = false;
+        let severity = 0;
 
         if (license.status !== 'active') {
           isExpired = true;
-        } else if (license.expiry_date_in_millis) {
+          severity = 2001;
+        } else if (license.expiryDateMS) {
           for (let i = EXPIRES_DAYS.length - 1; i >= 0; i--) {
             if (license.type === 'trial' && i < 2) {
               break;
@@ -80,38 +92,69 @@ export const getLicenseExpiration = (
             const $fromNow = moment().add(EXPIRES_DAYS[i], 'days');
             if ($fromNow.isAfter($expiry)) {
               isExpired = true;
+              severity = 1000 * i;
+              break;
             }
           }
         }
 
-        let expiredCheckDate = licenseState.expired_check_date_in_millis;
+        const ui: AlertClusterUiState = get<AlertClusterUiState>(licenseState, 'ui', {
+          isFiring: false,
+          message: null,
+          severity: 0,
+          resolvedMS: 0,
+        });
+        let resolved = ui.resolvedMS;
+        let message = ui.message;
+        let expiredCheckDate = licenseState.expiredCheckDateMS;
         const instance = services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION);
 
-        if (isExpired && !licenseState.expired_check_date_in_millis) {
+        if (isExpired && !licenseState.expiredCheckDateMS) {
           logger.debug(`License will expire soon, sending email`);
           instance.scheduleActions('default', {
             subject: 'NEW X-Pack Monitoring: License Expiration',
             message: `Cluster '${
-              license.cluster_name
+              license.clusterName
             }' license is going to expire on ${$expiry.format()}. Please update your license.`,
             to: emailAddress,
           });
           expiredCheckDate = moment().valueOf();
-        } else if (!isExpired && licenseState.expired_check_date_in_millis) {
+          message = i18n.translate('xpack.monitoring.alerts.ui.licenseExpiration.firingMessage', {
+            defaultMessage: `This cluster's license is going to expire in {relative} at {absolute}.`,
+            values: {
+              relative: formatTimestampToDuration(
+                license.expiryDateMS,
+                CALCULATE_DURATION_UNTIL,
+                null
+              ),
+              absolute: moment.tz(license.expiryDateMS, moment.tz.guess()).format('LLL z'),
+            },
+          });
+          resolved = 0;
+        } else if (!isExpired && licenseState.expiredCheckDateMS) {
           logger.debug(`License expiration has been resolved, sending email`);
           instance.scheduleActions('default', {
             subject: 'RESOLVED X-Pack Monitoring: License Expiration',
             message: `This cluster alert has been resolved: Cluster '${
-              license.cluster_name
+              license.clusterName
             }' license was going to expire on ${$expiry.format()}.`,
             to: emailAddress,
           });
           expiredCheckDate = 0;
+          message = i18n.translate('xpack.monitoring.alerts.ui.licenseExpiration.resolvedMessage', {
+            defaultMessage: `This cluster's license is active.`,
+          });
+          resolved = +new Date();
         }
 
-        result[license.cluster_uuid] = {
-          ...licenseState,
-          expired_check_date_in_millis: expiredCheckDate,
+        result[license.clusterUuid] = {
+          expiredCheckDateMS: expiredCheckDate,
+          ui: {
+            message,
+            isFiring: expiredCheckDate > 0,
+            severity,
+            resolvedMS: resolved,
+          },
         };
       }
 

@@ -48,6 +48,6 @@ export async function fetchClusters(callCluster: any): Promise<AlertCluster[]> {
 
   const response = await callCluster('search', params);
   return get(response, 'aggregations.clusters.buckets', []).map((bucket: AggregationResult) => ({
-    cluster_uuid: bucket.key,
+    clusterUuid: bucket.key,
   }));
 }
