@@ -16,9 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { StringUtils } from './string_utils';
 
-import _ from 'lodash';
+describe('StringUtils class', () => {
+  describe('static upperFirst', () => {
+    test('should converts the first character of string to upper case', () => {
+      expect(StringUtils.upperFirst()).toBe('');
+      expect(StringUtils.upperFirst('')).toBe('');
 
-export function isNumeric(v: any): boolean {
-  return !_.isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !_.isNaN(parseFloat(v))));
-}
+      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
+    });
+  });
+});
