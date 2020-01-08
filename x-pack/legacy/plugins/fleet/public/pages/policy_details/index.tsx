@@ -21,6 +21,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { DEFAULT_POLICY_ID } from '../../../common/constants';
 import { Loading, ConnectedLink, PolicyDeleteProvider } from '../../components';
 import { useLibs, sendRequest } from '../../hooks';
 import {
@@ -140,7 +141,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
       <Layout>
         <FormattedMessage
           id="xpack.fleet.policyDetails.policyNotFoundErrorTitle"
-          defaultMessage="Policy ID '{id}' not found"
+          defaultMessage="Policy '{id}' not found"
           values={{
             id: policyId,
           }}
@@ -214,6 +215,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                             setRedirectToPoliciesList(true);
                           });
                         }}
+                        disabled={policyId === DEFAULT_POLICY_ID}
                       >
                         <FormattedMessage
                           id="xpack.fleet.policyDetails.deletePolicyButtonLabel"
