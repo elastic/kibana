@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import { CategoryExample } from '../../../../../common/results_loader';
 
@@ -22,7 +23,12 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
   const columns = [
     {
       field: 'example',
-      name: 'Examples',
+      name: i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldExamples.title',
+        {
+          defaultMessage: 'Examples',
+        }
+      ),
       render: (example: any) => (
         <EuiText size="s">
           <code>{example}</code>

@@ -75,7 +75,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
             <Contents
               onChange={onJSONChange}
               title={i18n.translate('xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.title', {
-                defaultMessage: 'Edit categorization  JSON',
+                defaultMessage: 'Edit categorization JSON',
               })}
               value={categorizationAnalyzerString}
             />

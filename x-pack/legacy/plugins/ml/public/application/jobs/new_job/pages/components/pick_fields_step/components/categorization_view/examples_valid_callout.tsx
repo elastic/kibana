@@ -14,6 +14,8 @@ import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categoriz
 import {
   NUMBER_OF_CATEGORY_EXAMPLES,
   CATEGORY_EXAMPLES_MULTIPLIER,
+  CATEGORY_EXAMPLES_ERROR_LIMIT,
+  CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../../../../../common/constants/new_job';
 
 type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
@@ -35,7 +37,7 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
     }
   );
 
-  if (examplesValid < 0.2) {
+  if (examplesValid < CATEGORY_EXAMPLES_ERROR_LIMIT) {
     color = 'danger';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.invalid',
@@ -43,7 +45,7 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
         defaultMessage: 'Selected category field is invalid',
       }
     );
-  } else if (examplesValid < 0.75) {
+  } else if (examplesValid < CATEGORY_EXAMPLES_WARNING_LIMIT) {
     color = 'warning';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.possiblyInvalid',
