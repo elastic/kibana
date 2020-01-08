@@ -44,10 +44,7 @@ ES message: Logstash will continue to poll centrally-managed pipelines
 [[expiration-beats]]
 ==== Beats
 
-////
-TBD
-ES message: Beats will continue to poll centrally-managed configuration
-////
+*  Beats will continue to poll centrally-managed configuration.
 
 [[expiration-watcher]]
 ==== {stack} {alert-features}
