@@ -26,14 +26,9 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description1"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
             defaultMessage="Look for anomalies in the number of categories."
           />
-          {/* <br />
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description1"
-            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing."
-          /> */}
         </>
       }
       selectable={{ onClick, isSelected }}
@@ -53,14 +48,9 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description1"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
             defaultMessage="Look for rare categories."
           />
-          {/* <br />
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description1"
-            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing."
-          /> */}
         </>
       }
       selectable={{ onClick, isSelected }}

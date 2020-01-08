@@ -26,19 +26,15 @@ export const CategorizationView: FC<Props> = ({ isActive, setCanProceed }) => {
     }
   }, [categoryFieldValid, settingsValid]);
 
-  return (
+  return isActive === false ? (
+    <CategorizationDetectorsSummary />
+  ) : (
     <>
-      {isActive === false ? (
-        <CategorizationDetectorsSummary />
-      ) : (
+      <CategorizationDetectors setIsValid={setCategoryFieldValid} />
+      {categoryFieldValid && (
         <>
-          <CategorizationDetectors setIsValid={setCategoryFieldValid} />
-          {categoryFieldValid && (
-            <>
-              <EuiHorizontalRule margin="l" />
-              <CategorizationSettings setIsValid={setSettingsValid} />
-            </>
-          )}
+          <EuiHorizontalRule margin="l" />
+          <CategorizationSettings setIsValid={setSettingsValid} />
         </>
       )}
     </>

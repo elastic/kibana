@@ -7,8 +7,7 @@
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CATEGORY_EXAMPLES_MULTIPLIER } from '../../../../common/constants/new_job';
 import { CategoryId, Category, Token } from '../../../../common/types/categories';
-
-type callWithRequestType = (action: string, params: any) => Promise<any>;
+import { callWithRequestType } from '../../../../common/types/kibana';
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
   async function categorizationExamples(

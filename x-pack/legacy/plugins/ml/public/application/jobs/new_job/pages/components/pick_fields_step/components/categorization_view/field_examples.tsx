@@ -36,22 +36,22 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
       ),
     },
   ];
-  const items = fieldExamples.map((example, e) => {
+  const items = fieldExamples.map((example, i) => {
     const txt = [];
     let tokenCounter = 0;
     let buffer = '';
-    let i = 0;
-    while (i < example.text.length) {
+    let charCount = 0;
+    while (charCount < example.text.length) {
       const token = example.tokens[tokenCounter];
-      if (token && i === token.start_offset) {
+      if (token && charCount === token.start_offset) {
         txt.push(buffer);
         buffer = '';
-        txt.push(<Token key={`${e}${i}`}>{token.token}</Token>);
-        i += token.end_offset - token.start_offset;
+        txt.push(<Token key={`${i}${charCount}`}>{token.token}</Token>);
+        charCount += token.end_offset - token.start_offset;
         tokenCounter++;
       } else {
-        buffer += example.text[i];
-        i++;
+        buffer += example.text[charCount];
+        charCount++;
       }
     }
     txt.push(buffer);
