@@ -48,7 +48,7 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
             defaultMessage="Look for rare categories."
           />
         </>
