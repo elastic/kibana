@@ -61,7 +61,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiLink
               onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}
-              data-test-subj={'repositoryLink_' + name}
+              data-test-subj="repositoryLink"
             >
               {name}
             </EuiLink>
