@@ -279,9 +279,9 @@ const replaceAliasIdByAliasPath = (
 };
 
 export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields): Fields => {
-  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
-    const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
+  const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
+  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach(id => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
