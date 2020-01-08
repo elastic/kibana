@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+/* eslint-disable react/display-name */
+
+import React from 'react';
 
 import { defaultToEmptyTag } from '../../empty_value';
 
