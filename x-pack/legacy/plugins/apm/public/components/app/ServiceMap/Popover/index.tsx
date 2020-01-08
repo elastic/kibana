@@ -64,7 +64,6 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     };
   }, [cy]);
 
-  const container = (cy?.container() as HTMLElement) ?? undefined;
   const renderedHeight = selectedNode?.renderedHeight() ?? 0;
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
@@ -80,18 +79,21 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   };
   const trigger = <div className="trigger" style={triggerStyle} />;
 
+  const zoom = cy?.zoom() ?? 1;
+  const height = selectedNode?.height() ?? 0;
+  const translateY = y - (zoom + 1) * (height / 2);
   const popoverStyle: CSSProperties = {
     position: 'absolute',
-    transform: `translate(${x}px, ${y + renderedHeight / 2}px)`
+    transform: `translate(${x}px, ${translateY}px)`
   };
 
   return (
     <EuiPopover
-      container={container}
-      style={popoverStyle}
+      anchorPosition={'upCenter'}
+      button={trigger}
       closePopover={() => {}}
       isOpen={isOpen}
-      button={trigger}
+      style={popoverStyle}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
