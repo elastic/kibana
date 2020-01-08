@@ -30,7 +30,6 @@ export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
-        ariaDescribedby="graphListingHeading"
         headingId="graphListingHeading"
         createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}

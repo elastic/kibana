@@ -67,7 +67,10 @@ export interface TableListViewProps {
   tableListTitle: string;
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
-  ariaDescribedby?: string;
+  /**
+   * Id of the heading element describing the table. This id will be used as `aria-describedby` of the wrapper element.
+   * If the table is not empty, this component renders its own h1 element using the same id.
+   */
   headingId?: string;
 }
 
@@ -500,7 +503,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody aria-describedby={this.props.ariaDescribedby}>
+        <EuiPageBody aria-describedby={this.props.headingId}>
           {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>
