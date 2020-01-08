@@ -20,13 +20,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={false}>
         <SnapshotHeading down={8} total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart
-          up={4}
-          down={8}
-          height={SNAPSHOT_CHART_HEIGHT}
-          width={SNAPSHOT_CHART_WIDTH}
-          dataTestSubjPrefix={'foo'}
-        />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
       </ChartWrapper>
     );
     expect(component).toMatchSnapshot();
@@ -37,13 +31,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading down={8} total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart
-          up={4}
-          down={8}
-          height={SNAPSHOT_CHART_HEIGHT}
-          width={SNAPSHOT_CHART_WIDTH}
-          dataTestSubjPrefix={'foo'}
-        />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
       </ChartWrapper>
     );
     expect(component).toMatchSnapshot();
@@ -54,13 +42,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading down={8} total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart
-          up={4}
-          down={8}
-          height={SNAPSHOT_CHART_HEIGHT}
-          width={SNAPSHOT_CHART_WIDTH}
-          dataTestSubjPrefix={'foo'}
-        />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
       </ChartWrapper>
     );
 
@@ -82,13 +64,7 @@ describe('ChartWrapper component', () => {
       <ChartWrapper loading={true}>
         <SnapshotHeading down={8} total={12} />
         <EuiSpacer size="xs" />
-        <DonutChart
-          up={4}
-          down={8}
-          height={SNAPSHOT_CHART_HEIGHT}
-          width={SNAPSHOT_CHART_WIDTH}
-          dataTestSubjPrefix={'foo'}
-        />
+        <DonutChart up={4} down={8} height={SNAPSHOT_CHART_HEIGHT} width={SNAPSHOT_CHART_WIDTH} />
       </ChartWrapper>
     );
 

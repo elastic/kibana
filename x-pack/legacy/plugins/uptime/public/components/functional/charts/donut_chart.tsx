@@ -16,10 +16,9 @@ interface DonutChartProps {
   height: number;
   up: number;
   width: number;
-  dataTestSubjPrefix: string;
 }
 
-export const DonutChart = ({ height, down, up, width, dataTestSubjPrefix }: DonutChartProps) => {
+export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
 
   const {
@@ -85,7 +84,7 @@ export const DonutChart = ({ height, down, up, width, dataTestSubjPrefix }: Donu
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <DonutChartLegend down={down} up={up} dataTestSubjPrefix={dataTestSubjPrefix} />
+        <DonutChartLegend down={down} up={up} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

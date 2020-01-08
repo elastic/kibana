@@ -23,10 +23,9 @@ const LegendContainer = styled.div`
 interface Props {
   down: number;
   up: number;
-  dataTestSubjPrefix: string;
 }
 
-export const DonutChartLegend = ({ down, up, dataTestSubjPrefix }: Props) => {
+export const DonutChartLegend = ({ down, up }: Props) => {
   const {
     colors: { gray, danger },
   } = useContext(UptimeSettingsContext);
@@ -38,7 +37,7 @@ export const DonutChartLegend = ({ down, up, dataTestSubjPrefix }: Props) => {
         message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.downRowLabel', {
           defaultMessage: 'Down',
         })}
-        dataTestSubjPrefix={dataTestSubjPrefix}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
@@ -47,7 +46,7 @@ export const DonutChartLegend = ({ down, up, dataTestSubjPrefix }: Props) => {
         message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.upRowLabel', {
           defaultMessage: 'Up',
         })}
-        dataTestSubjPrefix={dataTestSubjPrefix}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
       />
     </LegendContainer>
   );

@@ -15,7 +15,6 @@ describe('DonutChart component', () => {
       up: 95,
       height: 125,
       width: 125,
-      dataTestSubjPrefix: 'foo',
     };
 
     const wrapper = shallowWithIntl(<DonutChart {...props} />);
@@ -28,7 +27,6 @@ describe('DonutChart component', () => {
       up: 95,
       height: 125,
       width: 125,
-      dataTestSubjPrefix: 'foo',
     };
 
     const wrapper = renderWithIntl(<DonutChart {...props} />);

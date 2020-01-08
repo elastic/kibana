@@ -16,7 +16,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
   </EuiFlexItem>
   <EuiFlexItem>
     <DonutChartLegend
-      dataTestSubjPrefix="foo"
       down={32}
       up={95}
     />
@@ -104,7 +103,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
         <span
           class="euiFlexItem c2"
-          data-test-subj="foo.down"
+          data-test-subj="xpack.uptime.snapshot.donutChart.up"
         >
           32
         </span>
@@ -152,7 +151,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
         <span
           class="euiFlexItem c2"
-          data-test-subj="foo.up"
+          data-test-subj="xpack.uptime.snapshot.donutChart.down"
         >
           95
         </span>

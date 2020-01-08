@@ -121,7 +121,6 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
       size="xs"
     />
     <DonutChart
-      dataTestSubjPrefix="foo"
       down={8}
       height={144}
       up={4}
@@ -252,7 +251,6 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
       size="xs"
     />
     <DonutChart
-      dataTestSubjPrefix="foo"
       down={8}
       height={144}
       up={4}
