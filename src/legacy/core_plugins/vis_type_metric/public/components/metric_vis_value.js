@@ -42,11 +42,14 @@ class MetricVisValue extends Component {
       'mtrVis__container-isfilterable': hasFilter,
     });
 
+    const handleClick = hasFilter ? this.onClick : null;
+
     const metricComponent = (
       <div
         className={containerClassName}
         style={{ backgroundColor: metric.bgColor }}
-        onClick={hasFilter ? this.onClick : null}
+        onClick={handleClick}
+        onKeyPress={handleClick}
         tabIndex={hasFilter ? 0 : null}
         role={hasFilter ? 'button' : null}
       >
