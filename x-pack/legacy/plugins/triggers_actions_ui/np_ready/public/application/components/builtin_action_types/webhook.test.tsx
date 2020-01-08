@@ -120,9 +120,9 @@ describe('WebhookActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
       />
     );
-    expect(wrapper.find('[data-test-subj="webhookViewHeadersButton"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
     wrapper
-      .find('[data-test-subj="webhookViewHeadersButton"]')
+      .find('[data-test-subj="webhookViewHeadersSwitch"]')
       .first()
       .simulate('click');
     expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
