@@ -190,6 +190,19 @@ These snapshots are built on a nightly basis which expire after a couple weeks. 
 yarn es snapshot
 ```
 
+##### Keeping data between snapshots
+
+If you want to keep the data inside your Elasticsearch between usages of this command,
+you should use the following command, to keep your data folder outside the downloaded snapshot 
+folder:
+
+```bash
+yarn es snapshot -E path.data=../data
+```
+
+The same parameter can be used with the source and archive command shown in the following
+paragraphs.
+
 #### Source
 
 By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
