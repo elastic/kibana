@@ -10,6 +10,11 @@ import { TimeKey } from '../../../../common/time';
 
 type TimeKeyOrNull = TimeKey | null;
 
+interface DateRange {
+  startDate: string;
+  endDate: string;
+}
+
 interface VisiblePositions {
   startKey: TimeKeyOrNull;
   middleKey: TimeKeyOrNull;
@@ -27,6 +32,8 @@ export interface LogPositionStateParams {
   visibleMidpoint: TimeKeyOrNull;
   visibleMidpointTime: number | null;
   visibleTimeInterval: { start: number; end: number } | null;
+  startDate: string;
+  endDate: string;
 }
 
 export interface LogPositionCallbacks {
@@ -35,7 +42,10 @@ export interface LogPositionCallbacks {
   reportVisiblePositions: (visPos: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
+  updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
+
+const DEFAULT_DATE_RANGE: DateRange = { startDate: 'now-1d', endDate: 'now' };
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
   // Of the two dependencies `middleKey` and `targetPosition`, return
@@ -70,6 +80,10 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     pagesAfterEnd: Infinity,
   });
 
+  // We group the `startDate` and `endDate` values in the same object to be able
+  // to set both at the same time, saving a re-render
+  const [dateRange, setDateRange] = useState<DateRange>(DEFAULT_DATE_RANGE);
+
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
   const visibleMidpoint = useVisibleMidpoint(middleKey, targetPosition);
@@ -77,6 +91,30 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   const visibleTimeInterval = useMemo(
     () => (startKey && endKey ? { start: startKey.time, end: endKey.time } : null),
     [startKey, endKey]
+  );
+
+  // Allow setting `startDate` and `endDate` separately, or together
+  const updateDateRange = useCallback(
+    (newDateRange: Partial<DateRange>) => {
+      // Prevent unnecessary re-renders
+      if (!('startDate' in newDateRange) && !('endDate' in newDateRange)) {
+        return;
+      }
+      if (
+        newDateRange.startDate === dateRange.startDate &&
+        newDateRange.endDate === dateRange.endDate
+      ) {
+        return;
+      }
+
+      setDateRange(previousDateRange => {
+        return {
+          startDate: newDateRange.startDate || previousDateRange.startDate,
+          endDate: newDateRange.endDate || previousDateRange.endDate,
+        };
+      });
+    },
+    [dateRange]
   );
 
   const state = {
@@ -88,6 +126,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     visibleMidpoint,
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,
+    ...dateRange,
   };
 
   const callbacks = {
@@ -99,6 +138,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     reportVisiblePositions,
     startLiveStreaming: useCallback(() => setIsAutoReloading(true), [setIsAutoReloading]),
     stopLiveStreaming: useCallback(() => setIsAutoReloading(false), [setIsAutoReloading]),
+    updateDateRange,
   };
 
   return { ...state, ...callbacks };
