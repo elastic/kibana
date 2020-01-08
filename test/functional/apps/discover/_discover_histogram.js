@@ -24,27 +24,32 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultIndex: 'long-window-logstash-*',
+    'dateFormat:tz': 'Europe/Berlin',
   };
 
   describe('discover histogram', function describeIndexTests() {
     before(async function() {
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace(defaultSettings);
-
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await PageObjects.common.navigateToApp('home');
+      await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('visualize');
+      await esArchiver.load('discover');
+
+      log.debug('create long_window_logstash index pattern');
+      // NOTE: long_window_logstash load does NOT create index pattern
+      await PageObjects.settings.createIndexPattern('long-window-logstash-');
+      await kibanaServer.uiSettings.replace(defaultSettings);
+      await browser.refresh();
+
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Europe/Berlin' });
-      await browser.refresh();
-      await PageObjects.header.awaitKibanaChrome();
-      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+      // NOTE: For some reason without setting this relative time, the abs times will not fetch data.
+      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');
