@@ -73,6 +73,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
     const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    initCategorizationSettings();
     jobCreator.cloneFromExistingJob(job, datafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
@@ -131,18 +132,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     // auto set the time range if creating a new advanced job
     autoSetTimeRange = isAdvancedJobCreator(jobCreator);
-  }
-
-  if (isCategorizationJobCreator(jobCreator)) {
-    // categorization job will always use a count agg, so give it
-    // to the job creator now
-    const count = newJobCapsService.getAggById('count');
-    const rare = newJobCapsService.getAggById('rare');
-    const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
-    jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
-
-    const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
-    jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
+    initCategorizationSettings();
   }
 
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
@@ -157,6 +147,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         }),
         text: error,
       });
+    }
+  }
+
+  function initCategorizationSettings() {
+    if (isCategorizationJobCreator(jobCreator)) {
+      // categorization job will always use a count agg, so give it
+      // to the job creator now
+      const count = newJobCapsService.getAggById('count');
+      const rare = newJobCapsService.getAggById('rare');
+      const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
+      jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
+
+      const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
+      jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
     }
   }
 
