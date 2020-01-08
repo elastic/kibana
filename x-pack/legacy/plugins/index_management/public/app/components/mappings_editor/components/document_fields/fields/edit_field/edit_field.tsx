@@ -15,15 +15,16 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
   EuiSpacer,
   EuiCallOut,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
+import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
@@ -115,9 +116,6 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                                   })}
                             </h2>
                           </EuiTitle>
-
-                          {/* Field path */}
-                          <EuiCode>{field.path}</EuiCode>
                         </div>
                       </EuiFlexItem>
 
@@ -142,6 +140,23 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                             }
                           )}
                         </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    {/* Field path */}
+                    <EuiFlexGroup>
+                      <EuiFlexItem style={{ display: 'flex', flexDirection: 'row' }}>
+                        <CodeBlock padding="small">
+                          {field.path.map((path, i) =>
+                            i < field.path.length - 1 ? (
+                              <span key={i}>
+                                {path} <EuiIcon type="sortRight" />{' '}
+                              </span>
+                            ) : (
+                              path
+                            )
+                          )}
+                        </CodeBlock>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlyoutHeader>

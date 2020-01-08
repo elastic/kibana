@@ -78,7 +78,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
 
     if (field.source.type !== previousField.source.type) {
       const aliases = getAllDescendantAliases(field, fields)
-        .map(id => byId[id].path)
+        .map(id => byId[id].path.join(' > '))
         .sort();
       const hasAliases = Boolean(aliases.length);
       const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(

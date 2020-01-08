@@ -175,7 +175,7 @@ export interface NormalizedField extends FieldMeta {
   id: string;
   parentId?: string;
   nestedDepth: number;
-  path: string;
+  path: string[];
   source: Omit<Field, 'properties' | 'fields'>;
   isMultiField: boolean;
 }

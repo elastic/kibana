@@ -212,7 +212,10 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
       // .filter((_, index) => index < 500)
       .map(field => ({
         field,
-        metadata: getSearchMetadata(searchData, { path: field.path, type: field.source.type }),
+        metadata: getSearchMetadata(searchData, {
+          path: field.path.join(' > '),
+          type: field.source.type,
+        }),
       }))
       .filter(({ metadata }) => metadata.score > 0)
       .sort(sortResult)

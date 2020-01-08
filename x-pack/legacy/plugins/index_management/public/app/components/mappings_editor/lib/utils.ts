@@ -103,7 +103,7 @@ const replaceAliasPathByAliasId = (
   Object.entries(byId).forEach(([id, field]) => {
     if (field.source.type === 'alias') {
       const aliasTargetField = Object.values(byId).find(
-        _field => _field.path === field.source.path
+        _field => _field.path.join('.') === field.source.path
       );
 
       if (aliasTargetField) {
@@ -222,7 +222,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
           parentId,
           nestedDepth,
           isMultiField,
-          path: paths.length ? `${paths.join('.')}.${propName}` : propName,
+          path: paths.length ? [...paths, propName] : [propName],
           source: rest,
           ...meta,
         };
@@ -259,7 +259,7 @@ const replaceAliasIdByAliasPath = (
   const updatedById = { ...byId };
 
   Object.entries(aliases).forEach(([targetId, aliasesIds]) => {
-    const path = updatedById[targetId] ? updatedById[targetId].path : '';
+    const path = updatedById[targetId] ? updatedById[targetId].path.join('.') : '';
 
     aliasesIds.forEach(id => {
       const aliasField = updatedById[id];
@@ -308,13 +308,13 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
 export const updateFieldsPathAfterFieldNameChange = (
   field: NormalizedField,
   byId: NormalizedFields['byId']
-): { updatedFieldPath: string; updatedById: NormalizedFields['byId'] } => {
+): { updatedFieldPath: string[]; updatedById: NormalizedFields['byId'] } => {
   const updatedById = { ...byId };
-  const paths = field.parentId ? byId[field.parentId].path.split('.') : [];
+  const paths = field.parentId ? byId[field.parentId].path : [];
 
   const updateFieldPath = (_field: NormalizedField, _paths: string[]): void => {
     const { name } = _field.source;
-    const path = _paths.length === 0 ? name : `${_paths.join('.')}.${name}`;
+    const path = _paths.length === 0 ? [name] : [..._paths, name];
 
     updatedById[_field.id] = {
       ..._field,
