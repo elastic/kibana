@@ -28,8 +28,6 @@ interface Props {
 }
 
 export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
-  const themeBackground = darkMode ? '#25262e' : '#f5f7fa';
-
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -42,11 +40,9 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             width: 100%;
             height: 100%;
             margin: 0;
-            background-color: ${themeBackground};
           }
 
           .kibanaWelcomeView {
-            background-color: ${themeBackground};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;

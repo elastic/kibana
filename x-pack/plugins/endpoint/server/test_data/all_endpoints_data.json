@@ -1,0 +1,348 @@
+{
+  "took": 3,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 9,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": [
+      {
+        "_index": "endpoint-agent",
+        "_id": "UV_6SG8B9c_DH2QsbOZd",
+        "_score": null,
+        "_source": {
+          "machine_id": "606267a9-2e51-42b4-956e-6cc7812e3447",
+          "created_at": "2019-12-27T20:09:28.377Z",
+          "host": {
+            "name": "natalee-2",
+            "hostname": "natalee-2.example.com",
+            "ip": "10.5.220.127",
+            "mac_address": "17-5f-c9-f8-ca-d6",
+            "os": {
+              "name": "windows 6.3",
+              "full": "Windows Server 2012R2"
+            }
+          },
+          "endpoint": {
+            "domain": "example.com",
+            "is_base_image": false,
+            "active_directory_distinguished_name": "CN=natalee-2,DC=example,DC=com",
+            "active_directory_hostname": "natalee-2.example.com",
+            "upgrade": {
+              "status": null,
+              "updated_at": null
+            },
+            "isolation": {
+              "status": false,
+              "request_status": null,
+              "updated_at": null
+            },
+            "policy": {
+              "name": "With Eventing",
+              "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+            },
+            "sensor": {
+              "persistence": true,
+              "status": {}
+            }
+          }
+        },
+        "fields": {
+          "machine_id": [
+            "606267a9-2e51-42b4-956e-6cc7812e3447"
+          ]
+        },
+        "sort": [
+          1577477368377
+        ],
+        "inner_hits": {
+          "most_recent": {
+            "hits": {
+              "total": {
+                "value": 3,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "endpoint-agent",
+                  "_id": "UV_6SG8B9c_DH2QsbOZd",
+                  "_score": null,
+                  "_source": {
+                    "machine_id": "606267a9-2e51-42b4-956e-6cc7812e3447",
+                    "created_at": "2019-12-27T20:09:28.377Z",
+                    "host": {
+                      "name": "natalee-2",
+                      "hostname": "natalee-2.example.com",
+                      "ip": "10.5.220.127",
+                      "mac_address": "17-5f-c9-f8-ca-d6",
+                      "os": {
+                        "name": "windows 6.3",
+                        "full": "Windows Server 2012R2"
+                      }
+                    },
+                    "endpoint": {
+                      "domain": "example.com",
+                      "is_base_image": false,
+                      "active_directory_distinguished_name": "CN=natalee-2,DC=example,DC=com",
+                      "active_directory_hostname": "natalee-2.example.com",
+                      "upgrade": {
+                        "status": null,
+                        "updated_at": null
+                      },
+                      "isolation": {
+                        "status": false,
+                        "request_status": null,
+                        "updated_at": null
+                      },
+                      "policy": {
+                        "name": "With Eventing",
+                        "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+                      },
+                      "sensor": {
+                        "persistence": true,
+                        "status": {}
+                      }
+                    }
+                  },
+                  "sort": [
+                    1577477368377
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "_index": "endpoint-agent",
+        "_id": "Ul_6SG8B9c_DH2QsbOZd",
+        "_score": null,
+        "_source": {
+          "machine_id": "8ec625e1-a80c-4c9f-bdfd-496060aa6310",
+          "created_at": "2019-12-27T20:09:28.377Z",
+          "host": {
+            "name": "luttrell-2",
+            "hostname": "luttrell-2.example.com",
+            "ip": "10.246.84.193",
+            "mac_address": "dc-d-88-14-c3-c6",
+            "os": {
+              "name": "windows 6.3",
+              "full": "Windows Server 2012R2"
+            }
+          },
+          "endpoint": {
+            "domain": "example.com",
+            "is_base_image": false,
+            "active_directory_distinguished_name": "CN=luttrell-2,DC=example,DC=com",
+            "active_directory_hostname": "luttrell-2.example.com",
+            "upgrade": {
+              "status": null,
+              "updated_at": null
+            },
+            "isolation": {
+              "status": false,
+              "request_status": null,
+              "updated_at": null
+            },
+            "policy": {
+              "name": "Default",
+              "id": "00000000-0000-0000-0000-000000000000"
+            },
+            "sensor": {
+              "persistence": true,
+              "status": {}
+            }
+          }
+        },
+        "fields": {
+          "machine_id": [
+            "8ec625e1-a80c-4c9f-bdfd-496060aa6310"
+          ]
+        },
+        "sort": [
+          1577477368377
+        ],
+        "inner_hits": {
+          "most_recent": {
+            "hits": {
+              "total": {
+                "value": 3,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "endpoint-agent",
+                  "_id": "Ul_6SG8B9c_DH2QsbOZd",
+                  "_score": null,
+                  "_source": {
+                    "machine_id": "8ec625e1-a80c-4c9f-bdfd-496060aa6310",
+                    "created_at": "2019-12-27T20:09:28.377Z",
+                    "host": {
+                      "name": "luttrell-2",
+                      "hostname": "luttrell-2.example.com",
+                      "ip": "10.246.84.193",
+                      "mac_address": "dc-d-88-14-c3-c6",
+                      "os": {
+                        "name": "windows 6.3",
+                        "full": "Windows Server 2012R2"
+                      }
+                    },
+                    "endpoint": {
+                      "domain": "example.com",
+                      "is_base_image": false,
+                      "active_directory_distinguished_name": "CN=luttrell-2,DC=example,DC=com",
+                      "active_directory_hostname": "luttrell-2.example.com",
+                      "upgrade": {
+                        "status": null,
+                        "updated_at": null
+                      },
+                      "isolation": {
+                        "status": false,
+                        "request_status": null,
+                        "updated_at": null
+                      },
+                      "policy": {
+                        "name": "Default",
+                        "id": "00000000-0000-0000-0000-000000000000"
+                      },
+                      "sensor": {
+                        "persistence": true,
+                        "status": {}
+                      }
+                    }
+                  },
+                  "sort": [
+                    1577477368377
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "_index": "endpoint-agent",
+        "_id": "U1_6SG8B9c_DH2QsbOZd",
+        "_score": null,
+        "_source": {
+          "machine_id": "853a308c-6e6d-4b92-a32b-2f623b6c8cf4",
+          "created_at": "2019-12-27T20:09:28.377Z",
+          "host": {
+            "name": "akeylah-7",
+            "hostname": "akeylah-7.example.com",
+            "ip": "10.252.242.44",
+            "mac_address": "27-b9-51-21-31-a",
+            "os": {
+              "name": "windows 6.3",
+              "full": "Windows Server 2012R2"
+            }
+          },
+          "endpoint": {
+            "domain": "example.com",
+            "is_base_image": false,
+            "active_directory_distinguished_name": "CN=akeylah-7,DC=example,DC=com",
+            "active_directory_hostname": "akeylah-7.example.com",
+            "upgrade": {
+              "status": null,
+              "updated_at": null
+            },
+            "isolation": {
+              "status": false,
+              "request_status": null,
+              "updated_at": null
+            },
+            "policy": {
+              "name": "With Eventing",
+              "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+            },
+            "sensor": {
+              "persistence": true,
+              "status": {}
+            }
+          }
+        },
+        "fields": {
+          "machine_id": [
+            "853a308c-6e6d-4b92-a32b-2f623b6c8cf4"
+          ]
+        },
+        "sort": [
+          1577477368377
+        ],
+        "inner_hits": {
+          "most_recent": {
+            "hits": {
+              "total": {
+                "value": 3,
+                "relation": "eq"
+              },
+              "max_score": null,
+              "hits": [
+                {
+                  "_index": "endpoint-agent",
+                  "_id": "U1_6SG8B9c_DH2QsbOZd",
+                  "_score": null,
+                  "_source": {
+                    "machine_id": "853a308c-6e6d-4b92-a32b-2f623b6c8cf4",
+                    "created_at": "2019-12-27T20:09:28.377Z",
+                    "host": {
+                      "name": "akeylah-7",
+                      "hostname": "akeylah-7.example.com",
+                      "ip": "10.252.242.44",
+                      "mac_address": "27-b9-51-21-31-a",
+                      "os": {
+                        "name": "windows 6.3",
+                        "full": "Windows Server 2012R2"
+                      }
+                    },
+                    "endpoint": {
+                      "domain": "example.com",
+                      "is_base_image": false,
+                      "active_directory_distinguished_name": "CN=akeylah-7,DC=example,DC=com",
+                      "active_directory_hostname": "akeylah-7.example.com",
+                      "upgrade": {
+                        "status": null,
+                        "updated_at": null
+                      },
+                      "isolation": {
+                        "status": false,
+                        "request_status": null,
+                        "updated_at": null
+                      },
+                      "policy": {
+                        "name": "With Eventing",
+                        "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+                      },
+                      "sensor": {
+                        "persistence": true,
+                        "status": {}
+                      }
+                    }
+                  },
+                  "sort": [
+                    1577477368377
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "total": {
+      "value": 3
+    }
+  }
+}

@@ -31,7 +31,6 @@ export interface UpdateSignalStatusActionProps {
   status: 'open' | 'closed';
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  kbnVersion: string;
 }
 
 export type SendSignalsToTimeline = () => void;
