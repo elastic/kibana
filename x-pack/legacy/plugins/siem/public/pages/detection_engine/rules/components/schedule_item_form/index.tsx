@@ -86,8 +86,12 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
   const label = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
-        <EuiFlexItem grow={false}>{field.label}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{field.labelAppend}</EuiFlexItem>
+        <EuiFlexItem grow={false} component="span">
+          {field.label}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} component="span">
+          {field.labelAppend}
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [field.label, field.labelAppend]

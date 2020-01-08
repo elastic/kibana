@@ -21,14 +21,13 @@ import { Option } from '@elastic/eui/src/components/selectable/types';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ListProps } from 'react-virtualized';
-import { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 import { AllTimelinesQuery } from '../../../containers/timeline/all';
 import { getEmptyTagValue } from '../../empty_value';
 import { isUntitled } from '../../../components/open_timeline/helpers';
 import * as i18nTimeline from '../../../components/open_timeline/translations';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
-
 import * as i18n from './translations';
 
 const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
@@ -36,6 +35,14 @@ const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
     visibility: hidden;
     z-index: 0;
   }
+`;
+
+const MyEuiHighlight = styled(EuiHighlight)<{ selected: boolean }>`
+  padding-left: ${({ selected }) => (selected ? '3px' : '0px')};
+`;
+
+const MyEuiTextColor = styled(EuiTextColor)<{ selected: boolean }>`
+  padding-left: ${({ selected }) => (selected ? '20px' : '0px')};
 `;
 
 interface SearchTimelineSuperSelectProps {
@@ -95,25 +102,20 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   const renderTimelineOption = useCallback((option, searchValue) => {
     return (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="flexStart">
-        {option.checked === 'on' && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="check" color="primary" />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiHighlight search={searchValue}>
-            {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-          </EuiHighlight>
-          <EuiTextColor color="subdued">
-            <small>
-              {option.description != null && option.description.trim().length > 0
-                ? option.description
-                : getEmptyTagValue()}
-            </small>
-          </EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        {option.checked === 'on' && <EuiIcon type="check" color="primary" />}
+        <MyEuiHighlight search={searchValue} selected={option.checked === 'on'}>
+          {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
+        </MyEuiHighlight>
+        <br />
+        <MyEuiTextColor color="subdued" component="span" selected={option.checked === 'on'}>
+          <small>
+            {option.description != null && option.description.trim().length > 0
+              ? option.description
+              : getEmptyTagValue()}
+          </small>
+        </MyEuiTextColor>
+      </>
     );
   }, []);
 
