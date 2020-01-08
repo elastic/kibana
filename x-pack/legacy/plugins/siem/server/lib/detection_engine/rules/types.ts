@@ -58,6 +58,14 @@ export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
   payload: { file: HapiReadableStream };
 }
 
+export interface ExportRulesRequestRest {
+  objects: Array<{ rule_id: string }>;
+}
+
+export interface ExportRulesRequest extends RequestFacade {
+  payload: ExportRulesRequestRest;
+}
+
 export type QueryRequest = Omit<RequestFacade, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };

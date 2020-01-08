@@ -102,6 +102,29 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
   });
 };
 
+export const transformRulesToNdjson = ({
+  rules,
+  includeCount,
+}: {
+  rules: Array<Partial<OutputRuleAlertRest>>;
+  includeCount: boolean;
+}): string => {
+  const stringRules = rules
+    .filter(rule => rule.immutable !== true)
+    .map(rule => `${JSON.stringify(rule)}`);
+  if (includeCount) {
+    return [...stringRules, JSON.stringify({ export_count: stringRules.length })].join('\n');
+  } else {
+    return stringRules.join('\n');
+  }
+};
+
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[]
+): Array<Partial<OutputRuleAlertRest>> => {
+  return alerts.map(alert => transformAlertToRule(alert));
+};
+
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
   if (isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(alert => transformAlertToRule(alert));

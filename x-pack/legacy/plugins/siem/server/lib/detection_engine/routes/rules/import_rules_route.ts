@@ -28,7 +28,7 @@ import { ImportRuleAlertRest } from '../../types';
 import { transformOrImportError } from './utils';
 import { updateRules } from '../../rules/update_rules';
 
-export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
@@ -43,11 +43,13 @@ export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         options: {
           abortEarly: false,
         },
+        // TODO: Move this to a schema file
         query: Joi.object()
           .keys({
             overwrite: Joi.boolean().default(false),
           })
           .default(),
+        // TODO: Move this to a schema file
         payload: Joi.object({
           file: Joi.object().required(),
         }).default(),
@@ -214,6 +216,6 @@ export const createImportRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const importRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createImportRulesBulkRoute(server));
+export const importRulesRoute = (server: ServerFacade): void => {
+  server.route(createImportRulesRoute(server));
 };

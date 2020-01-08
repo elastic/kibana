@@ -21,6 +21,11 @@ export const index = Joi.array()
 export const interval = Joi.string();
 export const query = Joi.string();
 export const language = Joi.string().valid('kuery', 'lucene');
+export const objects = Joi.array().items(
+  Joi.object({
+    rule_id,
+  }).required()
+);
 export const output_index = Joi.string();
 export const saved_id = Joi.string();
 export const timeline_id = Joi.string();
