@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import * as React from 'react';
+import React from 'react';
 
 import { defaultToEmptyTag } from '../../empty_value';
 

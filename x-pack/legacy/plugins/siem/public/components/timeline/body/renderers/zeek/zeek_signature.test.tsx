@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
@@ -37,7 +36,7 @@ describe('ZeekSignature', () => {
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
       const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

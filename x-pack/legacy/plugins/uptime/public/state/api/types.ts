@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as logPositionActions from './actions';
-import * as logPositionSelectors from './selectors';
-
-export { logPositionActions, logPositionSelectors };
-export * from './reducer';
+export interface BaseParams {
+  basePath: string;
+  dateStart: string;
+  dateEnd: string;
+  filters?: string;
+  statusFilter?: string;
+  location?: string;
+}
