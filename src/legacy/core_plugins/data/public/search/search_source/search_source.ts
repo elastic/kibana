@@ -101,7 +101,7 @@ export class SearchSource {
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
-  esCli: ApiCaller;
+  private esCli: ApiCaller;
 
   constructor(private fields: SearchSourceFields = {}) {
     const http = getHttp();
@@ -205,7 +205,7 @@ export class SearchSource {
     return this.parent;
   }
 
-  getEsUrl(http: CoreStart['http']) {
+  private getEsUrl(http: CoreStart['http']) {
     const a = document.createElement('a');
     a.href = http.basePath.prepend('/elasticsearch');
     const protocolPort = /https/.test(a.protocol) ? 443 : 80;
