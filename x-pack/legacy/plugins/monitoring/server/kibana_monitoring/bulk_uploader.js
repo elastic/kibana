@@ -40,7 +40,7 @@ export class BulkUploader {
     }
 
     this._timer = null;
-    // Hold sending and fetching usage until monitoring.bulk is susccessful. This means that we
+    // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
     // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
     // every tick when ES is failing or monitoring is disabled.
     this._holdSendingUsage = false;
