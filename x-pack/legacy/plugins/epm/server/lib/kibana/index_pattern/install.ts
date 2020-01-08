@@ -34,13 +34,13 @@ export async function installIndexPatterns(
   // separate logs and metrics datasets
   const logsDatasets = datasets.filter(dataset => dataset.type === 'logs');
   const metricsDatasets = datasets.filter(dataset => dataset.type === 'metric');
-  createIndexPattern({
+  await createIndexPattern({
     datasetType: 'logs',
     datasets: logsDatasets,
     registryPackageInfo,
     savedObjectsClient,
   });
-  createIndexPattern({
+  await createIndexPattern({
     datasetType: 'metrics',
     datasets: metricsDatasets,
     registryPackageInfo,
@@ -68,7 +68,7 @@ const createIndexPattern = async ({
 
   const kibanaIndexPatternFields = makeKibanaIndexPatternFields(allFields);
 
-  savedObjectsClient.create(KibanaAssetType.indexPattern, {
+  await savedObjectsClient.create(KibanaAssetType.indexPattern, {
     title: datasetType + '-*',
     fields: JSON.stringify(kibanaIndexPatternFields),
   });
