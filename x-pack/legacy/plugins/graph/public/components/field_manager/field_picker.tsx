@@ -119,11 +119,21 @@ function toOptions(
       // don't show non-aggregatable fields, except for the case when they are already selected.
       // this is necessary to ensure backwards compatibility with existing workspaces that might
       // contain non-aggregatable fields.
-      .filter(field => field.aggregatable || field.selected)
+      .filter(field => isExplorable(field) || field.selected)
       .map(field => ({
         label: field.name,
         prepend: <FieldIcon type={field.type} size="m" useColor />,
         checked: field.selected ? 'on' : undefined,
       }))
   );
+}
+
+const explorableTypes = ['string', 'number', 'date', 'ip', 'boolean'];
+
+function isExplorable(field: WorkspaceField) {
+  if (!field.aggregatable) {
+    return false;
+  }
+
+  return explorableTypes.includes(field.type);
 }
