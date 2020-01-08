@@ -55,15 +55,6 @@ describe('panning interaction', () => {
             translationShouldBeCloseTo([50, 50]);
           });
         });
-        describe('when the user then cancels panning', () => {
-          beforeEach(() => {
-            const action: CameraAction = { type: 'userCanceledPanning' };
-            store.dispatch(action);
-          });
-          it('should have a translation of 0,0', () => {
-            translationShouldBeCloseTo([0, 0]);
-          });
-        });
       });
     });
   });
