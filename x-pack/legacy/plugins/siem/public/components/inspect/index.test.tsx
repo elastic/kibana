@@ -44,7 +44,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} inputId="timeline" show={true} title="My title" />
+          <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(
@@ -58,13 +58,7 @@ describe('Inspect Button', () => {
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton
-            compact={true}
-            queryId={newQuery.id}
-            inputId="timeline"
-            show={true}
-            title="My title"
-          />
+          <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(
@@ -78,7 +72,7 @@ describe('Inspect Button', () => {
     test('Eui Icon Button', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} show={true} title="My title" />
+          <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(
@@ -92,13 +86,7 @@ describe('Inspect Button', () => {
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton
-            compact={true}
-            inputId="timeline"
-            queryId={newQuery.id}
-            show={true}
-            title="My title"
-          />
+          <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(
@@ -112,7 +100,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button disabled', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton isDisabled={true} queryId={newQuery.id} show={true} title="My title" />
+          <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
@@ -121,7 +109,7 @@ describe('Inspect Button', () => {
     test('Eui Icon Button disabled', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton isDisabled={true} queryId={newQuery.id} show={true} title="My title" />
+          <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
@@ -143,7 +131,7 @@ describe('Inspect Button', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop store={store}>
-            <InspectButton queryId={newQuery.id} show={true} title="My title" />
+            <InspectButton queryId={newQuery.id} title="My title" />
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
@@ -167,7 +155,7 @@ describe('Inspect Button', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop store={store}>
-            <InspectButton queryId={newQuery.id} show={true} title="My title" />
+            <InspectButton queryId={newQuery.id} title="My title" />
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
@@ -197,7 +185,7 @@ describe('Inspect Button', () => {
     test('Do not Open Inspect Modal if it is loading', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} show={true} title="My title" />
+          <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
       store.getState().inputs.global.queries[0].loading = true;

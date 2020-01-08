@@ -8,9 +8,8 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal/es6/react';
 import { ActionCreator } from 'typescript-fsa';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -19,14 +18,29 @@ import { inputsActions } from '../../store/inputs';
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
-const InspectContainer = styled.div<{ showInspect: boolean }>`
-  .euiButtonIcon {
-    ${props => (props.showInspect ? 'opacity: 1;' : 'opacity: 0')};
+export const BUTTON_CLASS = 'inspectButtonComponent';
+
+export const InspectButtonContainer = styled.div<{ show?: boolean }>`
+  display: flex;
+  flex-grow: 1;
+
+  .${BUTTON_CLASS} {
+    opacity: 0;
     transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
+
+  ${({ show }) =>
+    show &&
+    css`
+      &:hover .${BUTTON_CLASS} {
+        opacity: 1;
+      }
+    `}
 `;
 
-InspectContainer.displayName = 'InspectContainer';
+InspectButtonContainer.defaultProps = {
+  show: true,
+};
 
 interface OwnProps {
   compact?: boolean;
@@ -35,7 +49,6 @@ interface OwnProps {
   inspectIndex?: number;
   isDisabled?: boolean;
   onCloseInspect?: () => void;
-  show: boolean;
   title: string | React.ReactElement | React.ReactNode;
 }
 
@@ -70,7 +83,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   queryId = '',
   selectedInspectIndex,
   setIsInspected,
-  show,
   title = '',
 }) => {
   const isShowingModal = !loading && selectedInspectIndex === inspectIndex && isInspected;
@@ -97,36 +109,33 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 
   return (
     <>
-      <InspectContainer
-        data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
-        showInspect={show}
-      >
-        {inputId === 'timeline' && !compact && (
-          <EuiButtonEmpty
-            aria-label={i18n.INSPECT}
-            data-test-subj="inspect-empty-button"
-            color="text"
-            iconSide="left"
-            iconType="inspect"
-            isDisabled={loading || isDisabled}
-            isLoading={loading}
-            onClick={handleClick}
-          >
-            {i18n.INSPECT}
-          </EuiButtonEmpty>
-        )}
-        {(inputId === 'global' || compact) && (
-          <EuiButtonIcon
-            aria-label={i18n.INSPECT}
-            data-test-subj="inspect-icon-button"
-            iconSize="m"
-            iconType="inspect"
-            isDisabled={loading || isDisabled}
-            title={i18n.INSPECT}
-            onClick={handleClick}
-          />
-        )}
-      </InspectContainer>
+      {inputId === 'timeline' && !compact && (
+        <EuiButtonEmpty
+          className={BUTTON_CLASS}
+          aria-label={i18n.INSPECT}
+          data-test-subj="inspect-empty-button"
+          color="text"
+          iconSide="left"
+          iconType="inspect"
+          isDisabled={loading || isDisabled}
+          isLoading={loading}
+          onClick={handleClick}
+        >
+          {i18n.INSPECT}
+        </EuiButtonEmpty>
+      )}
+      {(inputId === 'global' || compact) && (
+        <EuiButtonIcon
+          className={BUTTON_CLASS}
+          aria-label={i18n.INSPECT}
+          data-test-subj="inspect-icon-button"
+          iconSize="m"
+          iconType="inspect"
+          isDisabled={loading || isDisabled}
+          title={i18n.INSPECT}
+          onClick={handleClick}
+        />
+      )}
       <ModalInspectQuery
         closeModal={handleCloseModal}
         isShowing={isShowingModal}
@@ -157,17 +166,4 @@ const mapDispatchToProps = {
 export const InspectButton = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(
-  React.memo(InspectButtonComponent, (prevProps, nextProps) => {
-    // we don't want to update modal content after when it's open
-    if (
-      prevProps.isInspected &&
-      nextProps.isInspected &&
-      deepEqual(prevProps.inspect, nextProps.inspect)
-    ) {
-      return true;
-    }
-
-    return deepEqual(prevProps, nextProps);
-  })
-);
+)(React.memo(InspectButtonComponent));

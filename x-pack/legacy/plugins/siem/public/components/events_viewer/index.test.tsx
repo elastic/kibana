@@ -16,6 +16,7 @@ import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
+import { BUTTON_CLASS } from '../inspect';
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../containers/detection_engine/rules/fetch_index_patterns');
@@ -76,10 +77,10 @@ describe('StatefulEventsViewer', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="transparent-inspect-container"]`)
+        .find(`.${BUTTON_CLASS}`)
         .first()
         .exists()
-    ).toBe(true);
+    ).toHaveStyleRule('opacity', 0);
   });
 
   test('it renders an opaque inspect button when it has mouse focus', async () => {
@@ -104,9 +105,9 @@ describe('StatefulEventsViewer', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="opaque-inspect-container"]`)
+        .find(`.${BUTTON_CLASS}`)
         .first()
         .exists()
-    ).toBe(true);
+    ).toHaveStyleRule('opacity', 1);
   });
 });

@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -23,6 +23,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { TimelineTypeContextProps } from '../timeline/timeline_context';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
 
 export interface OwnProps {
@@ -114,7 +115,6 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     upsertColumn,
     utilityBar,
   }) => {
-    const [showInspect, setShowInspect] = useState(false);
     const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
       defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
     );
@@ -155,11 +155,8 @@ const StatefulEventsViewerComponent = React.memo<Props>(
       [columns, id, upsertColumn, removeColumn]
     );
 
-    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
-    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-
     return (
-      <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
+      <InspectButtonContainer>
         <EventsViewer
           browserFields={browserFields ?? {}}
           columns={columns}
@@ -176,14 +173,13 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           kqlMode={kqlMode}
           onChangeItemsPerPage={onChangeItemsPerPage}
           query={query}
-          showInspect={showInspect}
           start={start}
           sort={sort!}
           timelineTypeContext={timelineTypeContext}
           toggleColumn={toggleColumn}
           utilityBar={utilityBar}
         />
-      </div>
+      </InspectButtonContainer>
     );
   },
   (prevProps, nextProps) =>

@@ -82,7 +82,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     <EuiPopover
       anchorPosition="downCenter"
       button={
-        <ForwardRef(Styled(EuiIcon))
+        <ForwardRef(Icon)
           type="iInCircle"
         />
       }
@@ -105,9 +105,9 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                <ForwardRef(Styled(EuiText))>
+                <ForwardRef(LargeScore)>
                   17
-                </ForwardRef(Styled(EuiText))>
+                </ForwardRef(LargeScore)>
               </React.Fragment>,
               "title": "Max Anomaly Score",
             },
