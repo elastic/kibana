@@ -60,7 +60,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
           values={
             Object {
               "mlJobTipsLink": <ForwardRef
-                href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/create-jobs.html#job-tips"
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
                 target="_blank"
               >
                 <FormattedMessage
@@ -150,7 +150,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
           values={
             Object {
               "mlJobTipsLink": <ForwardRef
-                href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/create-jobs.html#job-tips"
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
                 target="_blank"
               >
                 <FormattedMessage

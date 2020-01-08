@@ -24,7 +24,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'visEditor', 'header', 'discover']);
 
   return new (class DashboardVisualizations {
     async createAndAddTSVBVisualization(name) {
@@ -107,8 +107,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
       await this.ensureNewVisualizationDialogIsShowing();
       await PageObjects.visualize.clickMarkdownWidget();
-      await PageObjects.visualize.setMarkdownTxt(markdown);
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setMarkdownTxt(markdown);
+      await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
   })();

@@ -90,6 +90,8 @@ export {
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
+  // utils
+  parseInterval,
 } from '../common';
 
 // Export plugin after all other imports
