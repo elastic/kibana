@@ -96,12 +96,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/vis_type_markdown/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/vis_type_metric/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
