@@ -17,40 +17,20 @@
  * under the License.
  */
 
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from './case_conversion';
+import { keysToSnakeCaseShallow } from './case_conversion';
 
 describe('keysToSnakeCaseShallow', () => {
-  it("should convert all of an object's keys to snake case", () => {
-    const result = keysToSnakeCaseShallow({
+  test("should convert all of an object's keys to snake case", () => {
+    const data = {
       camelCase: 'camel_case',
       'kebab-case': 'kebab_case',
       snake_case: 'snake_case',
-    });
+    };
 
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "camel_case": "camel_case",
-  "kebab_case": "kebab_case",
-  "snake_case": "snake_case",
-}
-`);
-  });
-});
+    const result = keysToSnakeCaseShallow(data);
 
-describe('keysToCamelCaseShallow', () => {
-  it("should convert all of an object's keys to camel case", () => {
-    const result = keysToCamelCaseShallow({
-      camelCase: 'camelCase',
-      'kebab-case': 'kebabCase',
-      snake_case: 'snakeCase',
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "camelCase": "camelCase",
-  "kebabCase": "kebabCase",
-  "snakeCase": "snakeCase",
-}
-`);
+    expect(result.camel_case).toBe('camel_case');
+    expect(result.kebab_case).toBe('kebab_case');
+    expect(result.snake_case).toBe('snake_case');
   });
 });
