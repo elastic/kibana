@@ -29,6 +29,17 @@ const mockedAlert = {
       },
     },
   ],
+  consumer: 'bar',
+  name: 'abc',
+  tags: ['foo'],
+  enabled: true,
+  muteAll: false,
+  createdBy: '',
+  updatedBy: '',
+  apiKey: '',
+  apiKeyOwner: '',
+  throttle: '30s',
+  mutedInstanceIds: [],
 };
 
 beforeEach(() => jest.resetAllMocks());

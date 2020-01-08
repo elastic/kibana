@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';

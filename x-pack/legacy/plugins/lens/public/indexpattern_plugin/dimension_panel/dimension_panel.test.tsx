@@ -610,7 +610,7 @@ describe('IndexPatternDimensionPanel', () => {
       });
     });
 
-    it('should indicate document compatibility with selected field operation', () => {
+    it('should select the Records field when count is selected', () => {
       const initialState: IndexPatternPrivateState = {
         ...state,
         layers: {
@@ -639,12 +639,9 @@ describe('IndexPatternDimensionPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-count"]')
         .simulate('click');
 
-      const options = wrapper.find(EuiComboBox).prop('options');
-
-      expect(options![0]['data-test-subj']).not.toContain('Incompatible');
-      options![1].options!.map(option =>
-        expect(option['data-test-subj']).toContain('Incompatible')
-      );
+      const newColumnState = setState.mock.calls[0][0].layers.first.columns.col2;
+      expect(newColumnState.operationType).toEqual('count');
+      expect(newColumnState.sourceField).toEqual('Records');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {

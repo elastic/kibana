@@ -5,7 +5,7 @@
  */
 
 import { SIGNALS_ID } from '../../../../common/constants';
-import { FindRuleParams } from './types';
+import { FindRuleParams, RuleAlertType } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {
   if (filter == null) {
@@ -33,5 +33,10 @@ export const findRules = async ({
       sortOrder,
       sortField,
     },
-  });
+  }) as Promise<{
+    page: number;
+    perPage: number;
+    total: number;
+    data: RuleAlertType[];
+  }>;
 };
