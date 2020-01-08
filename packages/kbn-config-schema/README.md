@@ -148,7 +148,7 @@ Validates input data as a boolean.
 __Output type:__ `boolean`
 
 __Options:__
-  * `defaultValue: boolean | string | Reference<boolean | string> | (() => boolean | string)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `defaultValue: boolean | Reference<boolean> | (() => boolean)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: boolean | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
 __Usage:__
