@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header', 'timePicker', 'visualize']);
+  const PageObjects = getPageObjects(['timePicker', 'visualize', 'visChart', 'vegaChart']);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const log = getService('log');
@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         it.skip('should have some initial vega spec text', async function() {
-          const vegaSpec = await PageObjects.visualize.getVegaSpec();
+          const vegaSpec = await PageObjects.vegaChart.getSpec();
           expect(vegaSpec)
             .to.contain('{')
             .and.to.contain('data');
@@ -48,7 +48,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('should have view and control containers', async function() {
-          const view = await PageObjects.visualize.getVegaViewContainer();
+          const view = await PageObjects.vegaChart.getViewContainer();
           expect(view).to.be.ok();
           const size = await view.getSize();
           expect(size)
@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
           expect(size.width).to.be.above(0);
           expect(size.height).to.be.above(0);
 
-          const controls = await PageObjects.visualize.getVegaControlContainer();
+          const controls = await PageObjects.vegaChart.getControlContainer();
           expect(controls).to.be.ok();
         });
       });
@@ -73,9 +73,9 @@ export default function({ getService, getPageObjects }) {
         });
 
         it.skip('should render different data in response to filter change', async function() {
-          await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart');
+          await PageObjects.vegaChart.expectVisToMatchScreenshot('vega_chart');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
-          await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart_filtered');
+          await PageObjects.vegaChart.expectVisToMatchScreenshot('vega_chart_filtered');
         });
       });
     });
