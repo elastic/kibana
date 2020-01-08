@@ -476,16 +476,8 @@
         ],
       },
       {
-        groupSlug: 'pegjs',
-        groupName: 'pegjs related packages',
         groupSlug: 'license-checker',
         groupName: 'license-checker related packages',
-        packageNames: [
-          'pegjs',
-          '@types/pegjs',
-        ],
-      },
-      {
         packageNames: [
           'license-checker',
           '@types/license-checker',
@@ -679,6 +671,14 @@
         packageNames: [
           'parse-link-header',
           '@types/parse-link-header',
+        ],
+      },
+      {
+        groupSlug: 'pegjs',
+        groupName: 'pegjs related packages',
+        packageNames: [
+          'pegjs',
+          '@types/pegjs',
         ],
       },
       {
