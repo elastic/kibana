@@ -39,10 +39,12 @@ export async function getTraceSampleIds({
 }) {
   const isTop = !after;
 
-  const { start, end, client, indices, uiFiltersES } = setup;
+  const { start, end, client, indices, uiFiltersES, config } = setup;
 
   const rangeEnd = end;
-  const rangeStart = isTop ? Math.max(rangeEnd - 60 * 1000 * 60) : start;
+  const rangeStart = isTop
+    ? rangeEnd - config['xpack.apm.serviceMapInitialTimeRange']
+    : start;
 
   const rangeQuery = { range: rangeFilter(rangeStart, rangeEnd) };
 
