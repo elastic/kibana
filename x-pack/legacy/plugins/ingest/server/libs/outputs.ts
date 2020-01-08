@@ -23,7 +23,7 @@ export class OutputsLib {
         id: 'default',
         name: 'default',
         type: OutputType.Elasticsearch,
-        url: this.libs.framework.getSetting('defaultOutputHost'),
+        hosts: [this.libs.framework.getSetting('defaultOutputHost')],
         ingest_pipeline: 'default',
       },
     ];
