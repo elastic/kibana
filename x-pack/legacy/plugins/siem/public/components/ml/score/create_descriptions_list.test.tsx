@@ -6,7 +6,7 @@
 
 import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { mockAnomalies } from '../mock';
 import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
