@@ -20,13 +20,13 @@ import {
   awaitTaskRunResult,
   TaskLifecycleEvent,
 } from './task_manager';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../../src/core/server';
+import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 
-const savedObjectsClient = savedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {

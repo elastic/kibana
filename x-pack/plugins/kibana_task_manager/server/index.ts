@@ -11,11 +11,18 @@ import { configSchema } from './config';
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
 export {
-  TaskManagerPlugin,
-  TaskManagerPluginSetupContract,
-  TaskManagerPluginStartContract,
+  TaskInstance,
+  ConcreteTaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+  RunContext,
+} from './task';
+
+export {
+  TaskManagerPlugin as TaskManager,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from './plugin';
-export { TaskManagerConfig } from './config';
 
 export const config = {
   schema: configSchema,

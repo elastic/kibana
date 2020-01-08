@@ -5,11 +5,11 @@
  */
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { TaskManager } from '../../task_manager/server';
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { LegacyTaskManagerApi } from '../../task_manager/server';
 
 export interface LegacyConfig {
   get: (key: string) => string | number | boolean;
@@ -21,7 +21,7 @@ export interface OssTelemetrySetupDependencies {
     config: LegacyConfig;
     xpackMainStatus: { kbnServer: KbnServer };
   };
-  taskManager?: TaskManager;
+  taskManager?: LegacyTaskManagerApi;
 }
 
 export class OssTelemetryPlugin implements Plugin {

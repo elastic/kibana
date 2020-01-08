@@ -9,31 +9,16 @@ import {
   SavedObjectsSerializer,
   SavedObjectsSchema,
   CoreSetup,
-  SavedObjectsClientContract,
-} from '../../../../../src/core/server';
-import { Logger } from './types';
+  ISavedObjectsRepository,
+} from '../../../../src/core/server';
 import { TaskManager } from './task_manager';
-
-export interface PluginContract {
-  fetch: TaskManager['fetch'];
-  remove: TaskManager['remove'];
-  schedule: TaskManager['schedule'];
-  runNow: TaskManager['runNow'];
-  ensureScheduled: TaskManager['ensureScheduled'];
-  addMiddleware: TaskManager['addMiddleware'];
-  registerTaskDefinitions: TaskManager['registerTaskDefinitions'];
-}
-
-export interface LifecycleContract {
-  start: TaskManager['start'];
-  stop: TaskManager['stop'];
-}
+import { Logger } from './types';
 
 export interface LegacyDeps {
   config: any;
   savedObjectSchemas: any;
   elasticsearch: Pick<IClusterClient, 'callAsInternalUser'>;
-  savedObjectsRepository: SavedObjectsClientContract;
+  savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
 }
 

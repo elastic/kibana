@@ -11,12 +11,12 @@ import { performance } from 'perf_hooks';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
 import {
-  SavedObjectsClientContract,
   SavedObjectsSerializer,
   IScopedClusterClient,
-} from '../../../../../src/core/server';
+  ISavedObjectsRepository,
+} from '../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
-import { TaskManagerConfig } from '../../../../plugins/kibana_task_manager/server';
+import { TaskManagerConfig } from './config';
 
 import { Logger } from './types';
 import {
@@ -63,7 +63,7 @@ export interface TaskManagerOpts {
   logger: Logger;
   config: TaskManagerConfig;
   callAsInternalUser: IScopedClusterClient['callAsInternalUser'];
-  savedObjectsRepository: SavedObjectsClientContract;
+  savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
   taskManagerId: string;
 }

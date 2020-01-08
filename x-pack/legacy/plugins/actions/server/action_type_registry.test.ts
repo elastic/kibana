@@ -10,7 +10,7 @@ import { ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
 import { configUtilsMock } from './actions_config.mock';
 
-const mockTaskManager = taskManagerMock.create();
+const mockTaskManager = taskManagerMock.setup();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),

@@ -16,7 +16,9 @@ import {
 } from 'elasticsearch';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { RunContext, TaskManager } from '../../../task_manager/server';
+import { RunContext } from '../../../../../plugins/kibana_task_manager/server';
+import { getAsLegacyTaskManager, LegacyTaskManagerApi } from '../../../task_manager/server';
+
 import { getVisualizationCounts } from './visualization_counts';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
@@ -40,7 +42,7 @@ type ClusterDeleteType = (
 ) => Promise<DeleteDocumentByQueryResponse>;
 
 export function initializeLensTelemetry(core: CoreSetup, server: Server) {
-  const taskManager = getTaskManager(server);
+  const taskManager = getAsLegacyTaskManager(server);
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
   } else {
@@ -49,16 +51,7 @@ export function initializeLensTelemetry(core: CoreSetup, server: Server) {
   }
 }
 
-function getTaskManager(server: Server) {
-  if (server?.newPlatform?.start?.plugins?.kibanaTaskManager) {
-    return {
-      ...server.newPlatform.setup.plugins.kibanaTaskManager,
-      ...server.newPlatform.start.plugins.kibanaTaskManager,
-    } as TaskManager;
-  }
-}
-
-function registerLensTelemetryTask(server: Server, taskManager: TaskManager) {
+function registerLensTelemetryTask(server: Server, taskManager: LegacyTaskManagerApi) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -69,7 +62,7 @@ function registerLensTelemetryTask(server: Server, taskManager: TaskManager) {
   });
 }
 
-function scheduleTasks(server: Server, taskManager: TaskManager) {
+function scheduleTasks(server: Server, taskManager: LegacyTaskManagerApi) {
   const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;

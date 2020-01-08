@@ -6,7 +6,8 @@
 
 import { createTaskManager, LegacyDeps } from './create_task_manager';
 import { mockLogger } from './test_utils';
-import { CoreSetup, UuidServiceSetup, SavedObjectsClient } from 'kibana/server';
+import { CoreSetup, UuidServiceSetup } from 'kibana/server';
+import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 
 jest.mock('./task_manager');
 
@@ -26,7 +27,7 @@ describe('createTaskManager', () => {
     elasticsearch: {
       callAsInternalUser: jest.fn(),
     },
-    savedObjectsRepository: {} as SavedObjectsClient,
+    savedObjectsRepository: savedObjectsRepositoryMock.create(),
     logger: mockLogger(),
   });
 

@@ -9,7 +9,7 @@ import { Legacy } from 'kibana';
 import { PLUGIN_ID } from './constants';
 import { OssTelemetryPlugin } from './server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
-import { TaskManager } from '../task_manager';
+import { getAsLegacyTaskManager } from '../task_manager/server';
 
 export const ossTelemetry: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -31,7 +31,7 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
       } as PluginInitializerContext);
       plugin.setup(server.newPlatform.setup.core, {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
-        taskManager: getTaskManager(server),
+        taskManager: getAsLegacyTaskManager(server),
         __LEGACY: {
           config: server.config(),
           xpackMainStatus: ((server.plugins.xpack_main as unknown) as { status: any }).status
@@ -41,13 +41,3 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
     },
   });
 };
-
-function getTaskManager(server: Legacy.Server) {
-  if (server?.newPlatform?.start?.plugins?.kibanaTaskManager) {
-    return {
-      ...(server.newPlatform.setup.plugins.kibanaTaskManager || {}),
-      ...(server.newPlatform.start.plugins.kibanaTaskManager || {}),
-    } as TaskManager;
-  }
-  return undefined;
-}

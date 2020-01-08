@@ -5,15 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { TaskManager } from '../../../../../task_manager/server';
+import { LegacyTaskManagerApi } from '../../../../../task_manager/server';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
 
-async function isTaskManagerReady(taskManager: TaskManager | undefined) {
+async function isTaskManagerReady(taskManager?: LegacyTaskManagerApi) {
   const result = await fetch(taskManager);
   return result !== null;
 }
 
-async function fetch(taskManager: TaskManager | undefined) {
+async function fetch(taskManager?: LegacyTaskManagerApi) {
   if (!taskManager) {
     return null;
   }
@@ -38,7 +38,7 @@ async function fetch(taskManager: TaskManager | undefined) {
   return docs;
 }
 
-export function getUsageCollector(taskManager: TaskManager | undefined) {
+export function getUsageCollector(taskManager?: LegacyTaskManagerApi) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;

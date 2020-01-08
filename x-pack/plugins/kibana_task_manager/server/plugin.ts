@@ -7,34 +7,27 @@ import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
 import { Observable, combineLatest, Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { once } from 'lodash';
-import {
-  LifecycleContract,
-  TaskManager as TaskManagerContract,
-} from '../../../legacy/plugins/task_manager/server';
-import {
-  TaskDictionary,
-  TaskDefinition,
-  Middleware,
-} from '../../../legacy/plugins/task_manager/server';
+import { TaskDictionary, TaskDefinition } from './task';
+import { TaskManager } from './task_manager';
+import { createTaskManager, LegacyDeps } from './create_task_manager';
 import { TaskManagerConfig } from './config';
+import { Middleware } from './lib/middleware';
 
-export type LegacyApi = TaskManagerContract & LifecycleContract;
-export type LegacySetup = (core: any, deps: any) => LegacyApi;
-
-export type TaskManagerPluginSetupContract = {
+export type PluginLegacyDependencies = Pick<LegacyDeps, 'savedObjectSchemas'>;
+export type TaskManagerSetupContract = {
   config$: Observable<TaskManagerConfig>;
-  registerLegacyAPI: (LegacyPlugin: LegacySetup) => void;
-} & Pick<TaskManagerContract, 'addMiddleware' | 'registerTaskDefinitions'>;
+  registerLegacyAPI: (legacyDependencies: PluginLegacyDependencies) => Promise<TaskManager>;
+} & Pick<TaskManager, 'addMiddleware' | 'registerTaskDefinitions'>;
 
-export type TaskManagerPluginStartContract = Omit<
-  TaskManagerContract,
-  'addMiddleware' | 'registerTaskDefinitions'
+export type TaskManagerStartContract = Pick<
+  TaskManager,
+  'fetch' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
 >;
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerPluginSetupContract, TaskManagerPluginStartContract> {
-  legacyTaskManager$: Subject<LegacyApi> = new Subject<LegacyApi>();
-  taskManager: Promise<LegacyApi> = this.legacyTaskManager$.pipe(first()).toPromise();
+  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
+  legacyTaskManager$: Subject<TaskManager> = new Subject<TaskManager>();
+  taskManager: Promise<TaskManager> = this.legacyTaskManager$.pipe(first()).toPromise();
   currentConfig: TaskManagerConfig;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -42,21 +35,28 @@ export class TaskManagerPlugin
     this.currentConfig = {} as TaskManagerConfig;
   }
 
-  public setup(core: CoreSetup, plugins: any): TaskManagerPluginSetupContract {
+  public setup(core: CoreSetup, plugins: any): TaskManagerSetupContract {
     const logger = this.initContext.logger.get('kibanaTaskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
     const savedObjectsRepository = core.savedObjects.createInternalRepository(['task']);
     return {
       config$,
-      registerLegacyAPI: once((createTaskManager: LegacySetup) => {
+      registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
         combineLatest(config$, core.elasticsearch.adminClient$).subscribe(
           async ([config, elasticsearch]) => {
             this.legacyTaskManager$.next(
-              createTaskManager(core, { logger, config, elasticsearch, savedObjectsRepository })
+              createTaskManager(core, {
+                logger,
+                config,
+                elasticsearch,
+                savedObjectsRepository,
+                ...__LEGACY,
+              })
             );
             this.legacyTaskManager$.complete();
           }
         );
+        return this.taskManager;
       }),
       addMiddleware: (middleware: Middleware) => {
         this.taskManager.then(tm => tm.addMiddleware(middleware));
@@ -67,7 +67,7 @@ export class TaskManagerPlugin
     };
   }
 
-  public start(): TaskManagerPluginStartContract {
+  public start(): TaskManagerStartContract {
     return {
       fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
       remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),

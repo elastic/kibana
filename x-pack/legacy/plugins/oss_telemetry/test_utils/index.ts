@@ -6,13 +6,28 @@
 
 import { APICaller, CoreSetup } from 'kibana/server';
 
-import { TaskInstance, TaskManager } from '../../task_manager/server';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import {
+  ConcreteTaskInstance,
+  TaskStatus,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/kibana_task_manager/server';
+import { LegacyTaskManagerApi } from '../../task_manager';
 
-export const getMockTaskInstance = (): TaskInstance => ({
+export const getMockTaskInstance = (
+  overrides: Partial<ConcreteTaskInstance> = {}
+): ConcreteTaskInstance => ({
   state: { runs: 0, stats: {} },
   taskType: 'test',
   params: {},
+  id: '',
+  scheduledAt: new Date(),
+  attempts: 1,
+  status: TaskStatus.Idle,
+  runAt: new Date(),
+  startedAt: null,
+  retryAt: null,
+  ownerId: null,
+  ...overrides,
 });
 
 const defaultMockSavedObjects = [
@@ -38,8 +53,24 @@ export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObject
   }) as unknown) as APICaller;
 };
 
-export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => {
-  return () => Promise.resolve({ docs });
+export const getMockTaskFetch = (
+  docs: ConcreteTaskInstance[] = defaultMockTaskDocs
+): Partial<jest.Mocked<LegacyTaskManagerApi>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      return Promise.resolve({ docs, searchAfter: [] });
+    }),
+  } as Partial<jest.Mocked<LegacyTaskManagerApi>>;
+};
+
+export const getMockThrowingTaskFetch = (
+  throws: Error
+): Partial<jest.Mocked<LegacyTaskManagerApi>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      throw throws;
+    }),
+  } as Partial<jest.Mocked<LegacyTaskManagerApi>>;
 };
 
 export const getMockConfig = () => {
@@ -47,11 +78,6 @@ export const getMockConfig = () => {
     get: () => '',
   };
 };
-
-export const getMockTaskManager = (fetch: any = getMockTaskFetch()): TaskManager => ({
-  ...taskManagerMock.create(),
-  fetch,
-});
 
 export const getCluster = () => ({
   callWithInternalUser: getMockCallWithInternal(),

@@ -6,27 +6,15 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import {
-  PluginContract,
-  LifecycleContract,
-  createTaskManager,
-  LegacyDeps,
-} from './create_task_manager';
-import { CoreSetup } from '../../../../../src/core/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManagerPluginSetupContract } from '../../../../plugins/kibana_task_manager/server';
-export { Middleware } from './lib/middleware';
-export { TaskDictionary, TaskDefinition } from './task';
+import { TaskManagerSetupContract } from '../../../../plugins/kibana_task_manager/server';
 
-export { PluginContract as TaskManager, LifecycleContract };
-export {
-  TaskInstance,
-  ConcreteTaskInstance,
-  TaskRunCreatorFunction,
-  TaskStatus,
-  RunContext,
-} from './task';
+export { LegacyTaskManagerApi, getAsLegacyTaskManager } from './legacy';
+
+// Once all plugins are migrated to NP, this can be removed
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TaskManager } from '../../../../plugins/kibana_task_manager/server/task_manager';
 
 const savedObjectSchemas = {
   task: {
@@ -47,31 +35,10 @@ export function taskManager(kibana: any) {
     config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        max_attempts: Joi.number()
-          .description(
-            'The maximum number of times a task will be attempted before being abandoned as failed'
-          )
-          .min(1)
-          .default(3),
-        poll_interval: Joi.number()
-          .description('How often, in milliseconds, the task manager will look for more work.')
-          .min(100)
-          .default(3000),
-        request_capacity: Joi.number()
-          .description('How many requests can Task Manager buffer before it rejects new requests.')
-          .min(1)
-          // a nice round contrived number, feel free to change as we learn how it behaves
-          .default(1000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
           .default('.kibana_task_manager')
           .invalid(['.tasks']),
-        max_workers: Joi.number()
-          .description(
-            'The maximum number of tasks that this Kibana instance will run simultaneously.'
-          )
-          .min(1) // disable the task manager rather than trying to specify it with 0 workers
-          .default(10),
       }).default();
     },
     async init(server: Legacy.Server) {
@@ -83,15 +50,20 @@ export function taskManager(kibana: any) {
         },
       } = server;
 
-      await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI(
-        (core: CoreSetup, deps: Omit<LegacyDeps, 'savedObjectsSchema'>) => {
-          const tm = createTaskManager(core, { ...deps, savedObjectSchemas });
+      await (kibanaTaskManager as TaskManagerSetupContract)
+        .registerLegacyAPI({
+          savedObjectSchemas,
+        })
+        .then((taskManagerPlugin: TaskManager) => {
+          // we can't tell the Kibana Platform Task Manager plugin to
+          // to wait to `start` as that happens before legacy plugins
+          // instead we will start the internal Task Manager plugin when
+          // all legacy plugins have finished initializing
+          // Once all plugins are migrated to NP, this can be removed
           this.kbnServer.afterPluginsInit(() => {
-            tm.start();
+            taskManagerPlugin.start();
           });
-          return tm;
-        }
-      );
+        });
     },
     uiExports: {
       mappings,

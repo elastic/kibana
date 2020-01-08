@@ -8,7 +8,10 @@ import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
 import { ActionsConfigType } from './types';
-import { TaskManager } from '../../task_manager/server';
+import {
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../plugins/kibana_task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
@@ -27,7 +30,7 @@ import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
 interface Plugins extends Hapi.PluginProperties {
-  task_manager: TaskManager;
+  task_manager: TaskManagerStartContract & TaskManagerSetupContract;
 }
 
 export interface Server extends Legacy.Server {
@@ -41,14 +44,9 @@ export interface KibanaConfig {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-export type TaskManagerSetupContract = Pick<
-  TaskManager,
-  'addMiddleware' | 'registerTaskDefinitions'
->;
 
 /**
  * New platform interfaces

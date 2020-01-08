@@ -23,7 +23,7 @@ const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
-const mockTaskManager = taskManagerMock.create();
+const mockTaskManager = taskManagerMock.setup();
 
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,

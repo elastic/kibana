@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManagerStartContract } from '../../../../../../legacy/plugins/alerting/server/shim';
+import { TaskManagerStartContract } from '../../../../../../plugins/kibana_task_manager/server';
 
 const taskManagerQuery = (...filters: any[]) => ({
   bool: {

@@ -5,12 +5,12 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TaskManager } from '../../../../../task_manager/server';
+import { LegacyTaskManagerApi } from '../../../../../task_manager/server';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(
   collectorSet: UsageCollectionSetup,
-  taskManager: TaskManager | undefined
+  taskManager?: LegacyTaskManagerApi
 ): void {
   const collector = collectorSet.makeUsageCollector(getUsageCollector(taskManager));
   collectorSet.registerCollector(collector);
