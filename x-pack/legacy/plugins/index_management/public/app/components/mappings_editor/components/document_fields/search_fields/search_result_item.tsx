@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,7 +54,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
         )} */}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.searchResult.editFieldButtonLabel', {
               defaultMessage: 'Edit',
             })}
           </EuiButtonEmpty>
@@ -63,9 +63,12 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
           <DeleteFieldProvider>
             {deleteField => (
               <EuiButtonEmpty onClick={() => deleteField(field)} data-test-subj="removeFieldButton">
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel', {
-                  defaultMessage: 'Remove',
-                })}
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.searchResult.removeFieldButtonLabel',
+                  {
+                    defaultMessage: 'Remove',
+                  }
+                )}
               </EuiButtonEmpty>
             )}
           </DeleteFieldProvider>

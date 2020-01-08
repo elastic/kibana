@@ -378,6 +378,14 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
+        // If we have a search in progress, we reexecute the search to
+        // update or result array
+        search: Boolean(state.search.term)
+          ? {
+              ...state.search,
+              result: searchFields(state.search.term, updatedFields.byId),
+            }
+          : state.search,
       };
     }
     case 'field.edit': {
@@ -476,6 +484,14 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
           status: 'idle',
         },
+        // If we have a search in progress, we reexecute the search to
+        // update or result array
+        search: Boolean(state.search.term)
+          ? {
+              ...state.search,
+              result: searchFields(state.search.term, updatedFields.byId),
+            }
+          : state.search,
       };
     }
     case 'field.toggleExpand': {
