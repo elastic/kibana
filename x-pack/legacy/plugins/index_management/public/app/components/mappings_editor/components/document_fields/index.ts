@@ -6,8 +6,4 @@
 
 export * from './document_fields';
 
-export * from './document_fields_header';
-
-export * from './document_fields_json_editor';
-
 export * from './editor_toggle_controls';

@@ -14,8 +14,8 @@ import {
   State,
   Dispatch,
 } from './reducer';
-import { Field, FieldsEditor } from './types';
-import { normalize, deNormalize, canUseMappingsEditor } from './lib';
+import { Field } from './types';
+import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
@@ -39,12 +39,7 @@ const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
-  children: (params: {
-    state: State;
-    dispatch: Dispatch;
-    editor: FieldsEditor;
-    getProperties(): Mappings['properties'];
-  }) => React.ReactNode;
+  children: (params: { state: State }) => React.ReactNode;
   defaultValue: { configuration: MappingsConfiguration; fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
 }
@@ -55,10 +50,6 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const parsedFieldsDefaultValue = useMemo(() => normalize(defaultValue.fields), [
     defaultValue.fields,
   ]);
-
-  // const { maxNestedDepth } = parsedFieldsDefaultValue;
-  // const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
-  const canUseDefaultEditor = true;
 
   const initialState: State = {
     isValid: undefined,
@@ -73,7 +64,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     fields: parsedFieldsDefaultValue,
     documentFields: {
       status: 'idle',
-      editor: canUseDefaultEditor ? 'default' : 'json',
+      editor: 'default',
     },
     fieldsJsonEditor: {
       format: () => ({}),
@@ -172,14 +163,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
   return (
     <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>
-        {children({
-          state,
-          dispatch,
-          editor: state.documentFields.editor,
-          getProperties: () => deNormalize(state.fields),
-        })}
-      </DispatchContext.Provider>
+      <DispatchContext.Provider value={dispatch}>{children({ state })}</DispatchContext.Provider>
     </StateContext.Provider>
   );
 });

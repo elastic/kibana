@@ -8,17 +8,11 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import {
-  ConfigurationForm,
-  DocumentFieldsHeader,
-  DocumentFields,
-  DocumentFieldsJsonEditor,
-} from './components';
+import { ConfigurationForm, DocumentFields } from './components';
 import { IndexSettings } from './types';
 import { State } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
-import { SearchResult } from './components/document_fields/search_fields';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
@@ -78,32 +72,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
   return (
     <IndexSettingsProvider indexSettings={indexSettings}>
       <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue}>
-        {({ editor: editorType, state, dispatch, getProperties }) => {
-          const editor =
-            editorType === 'json' ? (
-              <DocumentFieldsJsonEditor defaultValue={getProperties()} />
-            ) : (
-              <DocumentFields />
-            );
-
-          const content =
-            selectedTab === 'fields' ? (
-              <>
-                <DocumentFieldsHeader
-                  searchValue={state.search.term}
-                  onSearchChange={value => dispatch({ type: 'search:update', value })}
-                />
-                <EuiSpacer size="m" />
-                {state.search.term.trim() !== '' ? (
-                  <SearchResult result={state.search.result} />
-                ) : (
-                  editor
-                )}
-              </>
-            ) : (
-              <ConfigurationForm defaultValue={state.configuration.defaultValue} />
-            );
-
+        {({ state }) => {
           return (
             <div className="mappingsEditor">
               <EuiTabs>
@@ -127,7 +96,11 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
 
               <EuiSpacer size="l" />
 
-              {content}
+              {selectedTab === 'fields' ? (
+                <DocumentFields />
+              ) : (
+                <ConfigurationForm defaultValue={state.configuration.defaultValue} />
+              )}
             </div>
           );
         }}
