@@ -8,6 +8,32 @@
             "type": "beats_state",
             "beats_state" : {
             "state" : {
+              "functionbeat" : {
+                  // TODO; see final snippet in https://github.com/elastic/beats/pull/14876
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
+            "state" : {
+              "functionbeat" : {
+                  // TODO; see final snippet in https://github.com/elastic/beats/pull/14876
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
+            "state" : {
               "heartbeat" : {
                   "endpoints" : 2,
                   "http" : {
