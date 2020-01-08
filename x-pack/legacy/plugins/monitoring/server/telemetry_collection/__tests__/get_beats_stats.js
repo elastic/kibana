@@ -168,6 +168,9 @@ describe('Get Beats Stats', () => {
             },
             monitors: 3,
           },
+          functionbeat: {
+            // TODO
+          },
         },
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 405,
