@@ -9,10 +9,6 @@ interface FilterField {
   fieldName: string;
 }
 
-interface FilterSlices {
-  [key: string]: any;
-}
-
 /**
  * These are the only filter fields we are looking to catch at the moment.
  * If your code needs to support custom fields, introduce a second parameter to
@@ -25,8 +21,11 @@ const filterWhitelist: FilterField[] = [
   { name: 'schemes', fieldName: 'monitor.type' },
 ];
 
-export const parseFiltersMap = (filterMapString: string): FilterSlices => {
-  const filterSlices: FilterSlices = {};
+export const parseFiltersMap = (filterMapString: string) => {
+  if (!filterMapString) {
+    return {};
+  }
+  const filterSlices: { [key: string]: any } = {};
   try {
     const map = new Map<string, string[]>(JSON.parse(filterMapString));
     filterWhitelist.forEach(({ name, fieldName }) => {
