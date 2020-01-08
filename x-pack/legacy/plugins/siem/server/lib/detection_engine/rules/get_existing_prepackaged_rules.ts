@@ -9,7 +9,33 @@ import { AlertsClient } from '../../../../../alerting';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
-export const DEFAULT_PER_PAGE: number = 100;
+export const DEFAULT_PER_PAGE = 100;
+export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`;
+export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
+
+export const getNonPackagedRulesCount = async ({
+  alertsClient,
+}: {
+  alertsClient: AlertsClient;
+}): Promise<number> => {
+  return getRulesCount({ alertsClient, filter: FILTER_NON_PREPACKED_RULES });
+};
+
+export const getRulesCount = async ({
+  alertsClient,
+  filter,
+}: {
+  alertsClient: AlertsClient;
+  filter: string;
+}): Promise<number> => {
+  const firstRule = await findRules({
+    alertsClient,
+    filter,
+    perPage: 1,
+    page: 1,
+  });
+  return firstRule.total;
+};
 
 export const getRules = async ({
   alertsClient,
@@ -71,7 +97,7 @@ export const getNonPackagedRules = async ({
   return getRules({
     alertsClient,
     perPage,
-    filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`,
+    filter: FILTER_NON_PREPACKED_RULES,
   });
 };
 
@@ -85,6 +111,6 @@ export const getExistingPrepackagedRules = async ({
   return getRules({
     alertsClient,
     perPage,
-    filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`,
+    filter: FILTER_PREPACKED_RULES,
   });
 };

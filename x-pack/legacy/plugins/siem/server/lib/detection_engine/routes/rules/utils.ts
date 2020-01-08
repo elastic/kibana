@@ -104,18 +104,13 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
 
 export const transformRulesToNdjson = ({
   rules,
-  includeCount,
 }: {
   rules: Array<Partial<OutputRuleAlertRest>>;
-  includeCount: boolean;
 }): string => {
-  const stringRules = rules
-    .filter(rule => rule.immutable !== true)
-    .map(rule => `${JSON.stringify(rule)}`);
-  if (includeCount) {
-    return [...stringRules, JSON.stringify({ export_count: stringRules.length })].join('\n');
+  if (rules.length !== 0) {
+    return rules.map(rule => JSON.stringify(rule)).join('\n');
   } else {
-    return stringRules.join('\n');
+    return '';
   }
 };
 

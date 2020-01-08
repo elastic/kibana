@@ -59,7 +59,7 @@ export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
 }
 
 export interface ExportRulesRequestRest {
-  objects: Array<{ rule_id: string }>;
+  objects: Array<{ rule_id: string }> | null | undefined;
 }
 
 export interface ExportRulesRequest extends RequestFacade {

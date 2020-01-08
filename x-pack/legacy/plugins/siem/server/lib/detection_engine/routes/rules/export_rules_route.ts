@@ -10,9 +10,10 @@ import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ExportRulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
-import { transformAlertsToRules, transformRulesToNdjson } from './utils';
-import { getNonPackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema } from '../schemas/export_rules_schema';
+import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
+import { getExportAll } from '../../rules/get_export_all';
 
 export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -36,24 +37,31 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       if (!alertsClient || !actionsClient) {
         return headers.response().code(404);
       }
+      // TODO: Add a query parameter for if we export details or not
+      const exportBoolean = true;
 
       const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
-      const ruleAlertTypes = await getNonPackagedRules({ alertsClient });
-      const rules = transformAlertsToRules(ruleAlertTypes);
-      if (rules.length > exportSizeLimit) {
+      if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
         return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+      } else {
+        const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
+        if (nonPackagedRulesCount > exportSizeLimit) {
+          return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+        }
       }
-      // TODO: Add the parameter of: excludeExportDetails: true | false and remove this if false
-      // TODO: Filter out any immutable rules before including them.
-      const rulesNdjson = transformRulesToNdjson({ rules, includeCount: true });
 
-      return (
-        headers
-          .response(`${rulesNdjson}\n`)
-          // TODO: Add a file parameter to use a different filename for the UI if it wants
-          .header('Content-Disposition', `attachment; filename="export.ndjson"`)
-          .header('Content-Type', 'application/ndjson')
-      );
+      const exported =
+        request.payload?.objects != null
+          ? await getExportByObjectIds(alertsClient, request.payload.objects)
+          : await getExportAll(alertsClient);
+
+      const response = exportBoolean
+        ? headers.response(`${exported.rulesNdjson}${exported.exportDetails}`)
+        : headers.response(exported.rulesNdjson);
+
+      return response
+        .header('Content-Disposition', `attachment; filename="export.ndjson"`) // TODO: Add a file parameter to use a different filename for the UI if it wants
+        .header('Content-Type', 'application/ndjson');
     },
   };
 };
