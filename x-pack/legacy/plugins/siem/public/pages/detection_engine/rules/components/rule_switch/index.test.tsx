@@ -8,7 +8,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { RuleSwitchComponent } from './index';
-jest.mock('../../../../../lib/kibana');
 
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {
