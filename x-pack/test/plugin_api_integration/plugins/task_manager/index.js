@@ -32,6 +32,7 @@ export default function TaskTestingAPI(kibana) {
         ...server.newPlatform.setup.plugins.taskManager,
         ...server.newPlatform.start.plugins.taskManager,
       };
+      const legacyTaskManager = server.plugins.task_manager;
 
       const defaultSampleTaskConfig = {
         timeout: '1m',
@@ -131,7 +132,7 @@ export default function TaskTestingAPI(kibana) {
         },
       });
 
-      initRoutes(server, taskManager, taskTestingEvents);
+      initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents);
     },
   });
 }

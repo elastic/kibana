@@ -10,6 +10,12 @@ import {
   TaskManagerStartContract,
 } from '../../../../plugins/task_manager/server';
 
+export type LegacyTaskManagerApi = Pick<
+  TaskManagerSetupContract,
+  'addMiddleware' | 'registerTaskDefinitions'
+> &
+  TaskManagerStartContract;
+
 export function getTaskManagerSetup(server: Server): TaskManagerSetupContract | undefined {
   return server?.newPlatform?.setup?.plugins?.taskManager as TaskManagerSetupContract;
 }

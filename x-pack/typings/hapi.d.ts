@@ -10,6 +10,7 @@ import { XPackMainPlugin } from '../legacy/plugins/xpack_main/server/xpack_main'
 import { SecurityPlugin } from '../legacy/plugins/security';
 import { ActionsPlugin, ActionsClient } from '../legacy/plugins/actions';
 import { AlertingPlugin, AlertsClient } from '../legacy/plugins/alerting';
+import { LegacyTaskManagerApi } from '../legacy/plugins/task_manager/server';
 
 declare module 'hapi' {
   interface Request {
@@ -21,5 +22,6 @@ declare module 'hapi' {
     security?: SecurityPlugin;
     actions?: ActionsPlugin;
     alerting?: AlertingPlugin;
+    task_manager?: LegacyTaskManagerApi;
   }
 }
