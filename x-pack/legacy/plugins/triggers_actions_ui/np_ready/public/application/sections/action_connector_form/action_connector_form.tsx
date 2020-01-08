@@ -111,7 +111,7 @@ export const ActionConnectorForm = ({
           error = errorRes;
         });
 
-      message = "Created '{connectorName}'";
+      message = 'Created';
     } else {
       await updateActionConnector({ http, connector, id: connector.id })
         .then(res => {
@@ -120,7 +120,7 @@ export const ActionConnectorForm = ({
         .catch(errorRes => {
           error = errorRes;
         });
-      message = "Updated '{connectorName}'";
+      message = 'Updated';
     }
     if (error) {
       return {
@@ -131,8 +131,9 @@ export const ActionConnectorForm = ({
       i18n.translate(
         'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
         {
-          defaultMessage: message,
+          defaultMessage: "'{message}' '{connectorName}",
           values: {
+            message,
             connectorName: savedConnector ? savedConnector.name : '',
           },
         }
@@ -151,7 +152,7 @@ export const ActionConnectorForm = ({
             label={
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.actionConnectorForm.actionNameLabel"
-                defaultMessage="Name"
+                defaultMessage="Connector name"
               />
             }
             isInvalid={errors.name.length > 0 && connector.name !== undefined}
@@ -161,6 +162,7 @@ export const ActionConnectorForm = ({
               fullWidth
               isInvalid={errors.name.length > 0 && connector.name !== undefined}
               name="name"
+              placeholder="untitled"
               data-test-subj="nameInput"
               value={connector.name || ''}
               onChange={e => {
