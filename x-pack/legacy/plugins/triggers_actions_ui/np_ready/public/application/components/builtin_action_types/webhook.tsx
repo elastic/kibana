@@ -387,9 +387,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
       <EuiSpacer size="m" />
       <EuiSwitch
-        data-test-subj="webhookViewHeadersButton"
+        data-test-subj="webhookViewHeadersSwitch"
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton',
+          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.viewHeadersSwitch',
           {
             defaultMessage: 'Add HTTP header',
           }
