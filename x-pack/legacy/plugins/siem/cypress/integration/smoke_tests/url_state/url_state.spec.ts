@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   ABSOLUTE_DATE_RANGE,
   DATE_PICKER_ABSOLUTE_INPUT,
@@ -33,10 +32,6 @@ import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { NAVIGATION_HOSTS_ALL_HOSTS, NAVIGATION_HOSTS_ANOMALIES } from '../../lib/hosts/selectors';
 
 describe('url state', () => {
-  afterEach(() => {
-    return logout();
-  });
-
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
