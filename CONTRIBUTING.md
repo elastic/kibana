@@ -190,7 +190,7 @@ These snapshots are built on a nightly basis which expire after a couple weeks. 
 yarn es snapshot
 ```
 
-##### Keeping data during restarts
+##### Keeping data between snapshots
 
 If you want to keep the data inside your Elasticsearch between usages of this command,
 you should use the following command, to keep your data folder outside the downloaded snapshot 
