@@ -128,10 +128,10 @@ Validates input data as a number.
 __Output type:__ `number`
 
 __Options:__
-  * `defaultValue: number | string | Reference<number | string> | (() => number | string)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `defaultValue: number | Reference<number> | (() => number)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: number | string) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
-  * `min: number | string` - defines a minimum value the number should have.
-  * `max: number | string` - defines a maximum value the number should have.
+  * `min: number` - defines a minimum value the number should have.
+  * `max: number` - defines a maximum value the number should have.
 
 __Usage:__
 ```typescript
