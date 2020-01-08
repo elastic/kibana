@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CameraAction } from './store/camera';
-import { DataAction } from './store/data';
 
-export type ResolverAction = CameraAction | DataAction;
+interface ServerReturnedResolverData {
+  readonly type: 'serverReturnedResolverData';
+  readonly payload: Record<string, any>;
+}
+
+export type DataAction = ServerReturnedResolverData;

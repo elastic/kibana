@@ -5,6 +5,7 @@
  */
 
 import * as cameraSelectors from './camera/selectors';
+import * as dataSelectors from './data/selectors';
 import { ResolverState } from '../types';
 
 /**
@@ -35,11 +36,23 @@ export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale
  */
 export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);
 
+export const processNodePositionsAndEdgeLineSegments = composeSelectors(
+  dataStateSelector,
+  dataSelectors.processNodePositionsAndEdgeLineSegments
+);
+
 /**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
   return state.camera;
+}
+
+/**
+ * Returns the data state from within ResolverState
+ */
+function dataStateSelector(state: ResolverState) {
+  return state.data;
 }
 
 /**

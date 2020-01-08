@@ -5,8 +5,10 @@
  */
 import { Reducer, combineReducers } from 'redux';
 import { cameraReducer } from './camera/reducer';
+import { dataReducer } from './data/reducer';
 import { ResolverState, ResolverAction } from '../types';
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = combineReducers({
   camera: cameraReducer,
+  data: dataReducer,
 });

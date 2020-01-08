@@ -14,6 +14,11 @@ export interface ResolverState {
    * Contains the state of the camera. This includes panning interactions, transform, and projection.
    */
   readonly camera: CameraState;
+
+  /**
+   * Contains the state associated with event data (process events and possibly other event types).
+   */
+  readonly data: DataState;
 }
 
 interface PanningState {
@@ -59,6 +64,10 @@ export interface CameraState {
   readonly latestFocusedWorldCoordinates: Vector2 | null;
 }
 
+export interface DataState {
+  readonly results: ProcessEvent[];
+}
+
 export type Vector2 = readonly [number, number];
 
 export type Vector3 = readonly [number, number, number];
@@ -91,3 +100,31 @@ export type Matrix3 = readonly [
   number,
   number
 ];
+
+type eventSubtypeFull =
+  | 'creation_event'
+  | 'fork_event'
+  | 'exec_event'
+  | 'already_running'
+  | 'termination_event';
+
+type eventTypeFull = 'process_event' | 'alert_event';
+
+export interface ProcessEvent {
+  readonly event_timestamp: number;
+  readonly event_type: number;
+  readonly machine_id: string;
+  readonly data_buffer: {
+    event_subtype_full: eventSubtypeFull;
+    event_type_full: eventTypeFull;
+    node_id: number;
+    source_id?: number;
+    process_name: string;
+    process_path: string;
+  };
+}
+
+export interface GraphableProcessesPidMaps {
+  processesByUniqueParentPid: Map<number | undefined, ProcessEvent[]>;
+  processesByUniquePid: Map<number, ProcessEvent>;
+}

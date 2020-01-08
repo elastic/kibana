@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2 } from '../types';
+import { Vector2, ProcessEvent } from '../types';
 import * as selectors from '../store/selectors';
 
 export const ProcessEventDot = styled(
@@ -20,7 +20,7 @@ export const ProcessEventDot = styled(
     }: {
       className?: string;
       worldPosition: Vector2;
-      processEvent: any;
+      processEvent: ProcessEvent;
     }) => {
       const projectionMatrix = useSelector(selectors.projectionMatrix);
       const [left, top] = applyMatrix3(worldPosition, projectionMatrix);

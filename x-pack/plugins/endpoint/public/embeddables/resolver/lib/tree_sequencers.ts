@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: type root and children
-export function* depthFirstPreorder({ root, children }) {
+export function* depthFirstPreorder<T>(root: T, children: (parent: T) => T[]): Iterable<T> {
   const nodesToVisit = [root];
   while (nodesToVisit.length !== 0) {
     const currentNode = nodesToVisit.shift();
-    nodesToVisit.unshift(...(children(currentNode) || []));
-    yield currentNode;
+    if (currentNode !== undefined) {
+      nodesToVisit.unshift(...(children(currentNode) || []));
+      yield currentNode;
+    }
   }
 }
 
-export function* levelOrder({ root, children }) {
+export function* levelOrder<T>(root: T, children: (parent: T) => T[]): Iterable<T> {
   let level = [root];
   while (level.length !== 0) {
     let nextLevel = [];

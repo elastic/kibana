@@ -15,7 +15,6 @@ import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 import { DiagnosticDot } from './diagnostic_dot';
 import { ProcessEventDot } from './process_event_dot';
 import { EdgeLine } from './edge_line';
-import * as dataSelectors from '../store/data/selectors';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -30,7 +29,7 @@ const Resolver = styled(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
 
     const { processNodePositions, edgeLineSegments } = useSelector(
-      dataSelectors.processNodePositionsAndEdgeLineSegments
+      selectors.processNodePositionsAndEdgeLineSegments
     );
 
     const [ref, setRef] = useState<null | HTMLDivElement>(null);
