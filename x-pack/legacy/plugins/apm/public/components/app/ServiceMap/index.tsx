@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import datemath from '@elastic/datemath';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
 import {
   Connection,
@@ -47,7 +48,7 @@ ${theme.euiColorLightShade}`,
   margin: `-${theme.gutterTypes.gutterLarge}`
 };
 
-const MAX_REQUESTS = 5;
+const MAX_REQUESTS = 15;
 
 function getConnectionNodeId(
   node: ConnectionNode,
@@ -84,6 +85,10 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const percentageLoadedRef = useRef(0);
+  const [percentageLoaded, setPercentageLoaded] = useState(
+    percentageLoadedRef.current
+  );
 
   const { search } = useLocation();
 
@@ -125,8 +130,89 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     }
   };
 
+  const _getNext = async (input: {
+    after?: string | undefined;
+    start?: string;
+    end?: string;
+  }) => {
+    const { uiFilters: strippedUiFilters, ...query } = params;
+    if (!(input.start && input.end)) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await callApmApi({
+        pathname: '/api/apm/service-map',
+        params: {
+          query: {
+            ...query,
+            start: input.start,
+            end: input.end,
+            uiFilters: JSON.stringify(strippedUiFilters),
+            after: input.after
+          }
+        }
+      });
+      setResponses(resp => resp.concat(data));
+      setIsLoading(false);
+
+      const shouldGetNext = responses.length + 1 < MAX_REQUESTS && data.after;
+
+      if (shouldGetNext) {
+        percentageLoadedRef.current += 5;
+        setPercentageLoaded(percentageLoadedRef.current);
+        await _getNext({ ...input, after: data.after });
+      }
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
+  const getNextProgressive = async (input: { reset?: boolean }) => {
+    const { start, end } = params;
+
+    if (input.reset) {
+      setResponses([]);
+      percentageLoadedRef.current = 5;
+      setPercentageLoaded(percentageLoadedRef.current);
+    }
+
+    await _getNext({
+      start: datemath.parse('now-5m')?.toISOString(),
+      end: datemath.parse('now')?.toISOString()
+    });
+    percentageLoadedRef.current = 20;
+    setPercentageLoaded(percentageLoadedRef.current);
+    await _getNext({
+      start: datemath.parse('now-15m')?.toISOString(),
+      end: datemath.parse('now-5m')?.toISOString(),
+      after: 'top'
+    });
+    percentageLoadedRef.current = 40;
+    setPercentageLoaded(percentageLoadedRef.current);
+    await _getNext({
+      start: datemath.parse('now-30m')?.toISOString(),
+      end: datemath.parse('now-15m')?.toISOString(),
+      after: 'top'
+    });
+    percentageLoadedRef.current = 60;
+    setPercentageLoaded(percentageLoadedRef.current);
+    await _getNext({
+      start: datemath.parse('now-1h')?.toISOString(),
+      end: datemath.parse('now-30m')?.toISOString(),
+      after: 'top'
+    });
+    percentageLoadedRef.current = 80;
+    setPercentageLoaded(percentageLoadedRef.current);
+    if (start && end) {
+      await _getNext({ start, end, after: 'top' });
+    }
+    percentageLoadedRef.current = 100;
+    setPercentageLoaded(percentageLoadedRef.current);
+  };
+
   useEffect(() => {
-    getNext({ reset: true });
+    // getNext({ reset: true });
+    getNextProgressive({ reset: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
@@ -214,7 +300,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     (license?.type === 'platinum' || license?.type === 'trial');
 
   return isValidPlatinumLicense ? (
-    <LoadingOverlay isLoading={isLoading}>
+    <LoadingOverlay isLoading={isLoading} percentageLoaded={percentageLoaded}>
       <Cytoscape
         elements={elements}
         serviceName={serviceName}

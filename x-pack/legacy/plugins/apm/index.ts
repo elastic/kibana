@@ -72,7 +72,7 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // service map
         serviceMapEnabled: Joi.boolean().default(false),
-        serviceMapInitialTimeRange: Joi.number().default(60 * 1000 * 60) // last 1 hour
+        serviceMapInitialTimeRange: Joi.number().default(60 * 1000 * 15) // last 15 minutes
       }).default();
     },
 
