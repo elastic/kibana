@@ -5,12 +5,15 @@
  */
 
 import { notFound, notImplemented } from 'boom';
-import { Request } from 'hapi';
 import { get } from 'lodash';
-
 import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
-import { KbnServer } from '../../../../types';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  ServerFacade,
+  RequestFacade,
+} from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -29,13 +32,9 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (
-  jobParams: JobParamsPanelCsv,
-  headers: any,
-  req: Request
-) => Promise<JobDocPayloadPanelCsv>;
-
-function createJobFn(server: KbnServer): CreateJobFn {
+export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
+  JobParamsPanelCsv
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -46,7 +45,7 @@ function createJobFn(server: KbnServer): CreateJobFn {
   return async function createJob(
     jobParams: JobParamsPanelCsv,
     headers: any,
-    req: Request
+    req: RequestFacade
   ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
@@ -96,11 +95,8 @@ function createJobFn(server: KbnServer): CreateJobFn {
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
-}
-
-export const createJobFactory = oncePerServer(createJobFn);
+};

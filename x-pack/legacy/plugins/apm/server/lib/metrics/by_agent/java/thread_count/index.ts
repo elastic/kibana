@@ -10,7 +10,11 @@ import {
   METRIC_JAVA_THREAD_COUNT,
   SERVICE_AGENT_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -39,10 +43,15 @@ const chartBase: ChartBase = {
   series
 };
 
-export async function getThreadCountChart(setup: Setup, serviceName: string) {
+export async function getThreadCountChart(
+  setup: Setup & SetupTimeRange & SetupUIFilters,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },

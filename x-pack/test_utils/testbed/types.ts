@@ -85,7 +85,7 @@ export interface TestBed<T = string> {
      *
      * @param switchTestSubject The test subject of the EuiSwitch (can be a nested path. e.g. "myForm.mySwitch").
      */
-    toggleEuiSwitch: (switchTestSubject: T) => void;
+    toggleEuiSwitch: (switchTestSubject: T, isChecked?: boolean) => void;
     /**
      * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
      * in order to register the value set. This helpers automatically does that.

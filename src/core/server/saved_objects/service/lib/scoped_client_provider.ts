@@ -55,9 +55,19 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * Provider for the Scoped Saved Object Client.
+ * @internal
  */
-export class ScopedSavedObjectsClientProvider<Request = unknown> {
+export type ISavedObjectsClientProvider<T = unknown> = Pick<
+  SavedObjectsClientProvider<T>,
+  keyof SavedObjectsClientProvider
+>;
+
+/**
+ * Provider for the Scoped Saved Objects Client.
+ *
+ * @internal
+ */
+export class SavedObjectsClientProvider<Request = unknown> {
   private readonly _wrapperFactories = new PriorityCollection<{
     id: string;
     factory: SavedObjectsClientWrapperFactory<Request>;
@@ -85,7 +95,7 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
     this._wrapperFactories.add(priority, { id, factory });
   }
 
-  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory<Request>) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }

@@ -33,7 +33,7 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    ...extraParams
+    ...extraParams,
   };
 }
 
@@ -41,9 +41,10 @@ function createStubKbnServer(extraParams) {
   return {
     plugins: [],
     config: {
-      get: sinon.stub()
+      get: sinon
+        .stub()
         .withArgs('server.basePath')
-        .returns('')
+        .returns(''),
     },
     server: {},
     ...extraParams,
@@ -100,7 +101,7 @@ describe('ui apps / UiApp', () => {
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -151,7 +152,7 @@ describe('ui apps / UiApp', () => {
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -160,7 +161,7 @@ describe('ui apps / UiApp', () => {
     /*
      * The "hidden" and "listed" flags have an bound relationship. The "hidden"
      * flag gets cast to a boolean value, and the "listed" flag is dependent on
-      * "hidden"
+     * "hidden"
      */
     describe('hidden flag', () => {
       describe('is cast to boolean value', () => {
@@ -287,7 +288,7 @@ describe('ui apps / UiApp', () => {
       it('throws an error at instantiation', () => {
         expect(() => {
           createUiApp(createStubUiAppSpec({ pluginId: 'foo' }));
-        }).to.throwException((error) => {
+        }).to.throwException(error => {
           expect(error.message).to.match(/Unknown plugin id/);
         });
       });

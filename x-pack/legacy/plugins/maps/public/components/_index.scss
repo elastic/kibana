@@ -1,15 +1,3 @@
-.mapMetricEditorPanel {
-  margin-bottom: $euiSizeS;
-}
-
-.mapGeometryFilter__geoFieldSuperSelect {
-  height: $euiSizeL * 2;
-}
-
-.mapGeometryFilter__geoFieldSuperSelectWrapper {
-  height: $euiSizeL * 3;
-}
-
-.mapGeometryFilter__geoFieldItem {
-  padding: $euiSizeXS;
-}
+@import './metric_editors';
+@import './geometry_filter';
+@import './tooltip_selector';

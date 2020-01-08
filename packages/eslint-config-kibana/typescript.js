@@ -18,7 +18,6 @@ module.exports = {
         '@typescript-eslint',
         'ban',
         'import',
-        'jsx-a11y',
         'prefer-object-spread',
       ],
 
@@ -70,13 +69,32 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', 'array-simple'],
-          '@typescript-eslint/ban-types': 'error',
+          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
+          '@typescript-eslint/ban-types': ['error', {
+            types: {
+              SFC: {
+                message: 'Use FC or FunctionComponent instead.',
+                fixWith: 'FC'
+              },
+              'React.SFC': {
+                message: 'Use FC or FunctionComponent instead.',
+                fixWith: 'React.FC'
+              },
+              StatelessComponent: {
+                message: 'Use FunctionComponent instead.',
+                fixWith: 'FunctionComponent'
+              },
+              'React.StatelessComponent': {
+                message: 'Use FunctionComponent instead.',
+                fixWith: 'React.FunctionComponent'
+              }
+            }
+          }],
           'camelcase': 'off',
           '@typescript-eslint/camelcase': ['error', {
             'properties': 'never',
             'ignoreDestructuring': true,
-            'allow': ['^[A-Z0-9_]+$']
+            'allow': ['^[A-Z0-9_]+$', '^UNSAFE_']
           }],
           '@typescript-eslint/class-name-casing': 'error',
           '@typescript-eslint/explicit-member-accessibility': ['error',
@@ -89,28 +107,25 @@ module.exports = {
               }
             }
           ],
-          'indent': 'off',
-          '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',
-          '@typescript-eslint/prefer-interface': 'error',
+          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
             'default': ['public-static-field', 'static-field', 'instance-field']
           }],
-          '@typescript-eslint/no-angle-bracket-type-assertion': 'error',
+          '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
+          '@typescript-eslint/no-extra-non-null-assertion': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
-          '@typescript-eslint/no-triple-slash-reference': 'error',
+          '@typescript-eslint/triple-slash-reference': ['error', {
+            path: 'never',
+            types: 'never',
+            lib: 'never'
+          }],
           '@typescript-eslint/no-var-requires': 'error',
-          '@typescript-eslint/type-annotation-spacing': 'error',
           '@typescript-eslint/unified-signatures': 'error',
-          'arrow-body-style': 'error',
-          'arrow-parens': 'error',
-          'comma-dangle': ['error', 'always-multiline'],
           'constructor-super': 'error',
-          'curly': 'error',
           'dot-notation': 'error',
-          'eol-last': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
           'import/order': ['error', {
@@ -121,37 +136,27 @@ module.exports = {
             ],
           }],
           'max-classes-per-file': ['error', 1],
-          'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
-          'new-parens': 'error',
           'no-bitwise': 'error',
           'no-caller': 'error',
           'no-cond-assign': 'error',
           'no-console': 'error',
           'no-debugger': 'error',
           'no-empty': 'error',
+          'no-extend-native': 'error',
           'no-eval': 'error',
-          'no-multiple-empty-lines': 'error',
           'no-new-wrappers': 'error',
           'no-shadow': 'error',
           'no-throw-literal': 'error',
-          'no-trailing-spaces': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',
           'no-unused-expressions': 'error',
           'no-unused-labels': 'error',
           'no-var': 'error',
-          'object-curly-spacing': 'error',
           'object-shorthand': 'error',
+          'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
-          'quotes': ['error', 'double', { 'avoidEscape': true }],
-          'quote-props': ['error', 'consistent-as-needed'],
+          'prefer-rest-params': 'error',
           'radix': 'error',
-          'semi': 'error',
-          'space-before-function-paren': ['error', {
-            'anonymous': 'never',
-            'named': 'never',
-            'asyncArrow': 'always'
-          }],
           'spaced-comment': ["error", "always", {
             "exceptions": ["/"]
           }],
@@ -165,33 +170,6 @@ module.exports = {
             {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
 
           ],
-          'jsx-a11y/accessible-emoji': 'error',
-          'jsx-a11y/alt-text': 'error',
-          'jsx-a11y/anchor-has-content': 'error',
-          'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
-          'jsx-a11y/aria-props': 'error',
-          'jsx-a11y/aria-proptypes': 'error',
-          'jsx-a11y/aria-role': 'error',
-          'jsx-a11y/aria-unsupported-elements': 'error',
-          'jsx-a11y/click-events-have-key-events': 'error',
-          'jsx-a11y/heading-has-content': 'error',
-          'jsx-a11y/html-has-lang': 'error',
-          'jsx-a11y/iframe-has-title': 'error',
-          'jsx-a11y/interactive-supports-focus': 'error',
-          'jsx-a11y/media-has-caption': 'error',
-          'jsx-a11y/mouse-events-have-key-events': 'error',
-          'jsx-a11y/no-access-key': 'error',
-          'jsx-a11y/no-distracting-elements': 'error',
-          'jsx-a11y/no-interactive-element-to-noninteractive-role': 'error',
-          'jsx-a11y/no-noninteractive-element-interactions': 'error',
-          'jsx-a11y/no-noninteractive-element-to-interactive-role': 'error',
-          'jsx-a11y/no-onchange': 'error',
-          'jsx-a11y/no-redundant-roles': 'error',
-          'jsx-a11y/role-has-required-aria-props': 'error',
-          'jsx-a11y/role-supports-aria-props': 'error',
-          'jsx-a11y/scope': 'error',
-          'jsx-a11y/tabindex-no-positive': 'error',
-          'jsx-a11y/label-has-associated-control': 'error',
           'import/no-default-export': 'error',
         },
         eslintConfigPrettierTypescriptEslintRules

@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/interpreter/common';
+import { ExpressionFunction, KibanaContext, KibanaDatatable } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
+import { toAbsoluteDates } from '../indexpattern_plugin/auto_date';
 
 interface MergeTables {
   layerIds: string[];
@@ -16,7 +16,7 @@ interface MergeTables {
 
 export const mergeTables: ExpressionFunction<
   'lens_merge_tables',
-  null,
+  KibanaContext | null,
   MergeTables,
   LensMultiTable
 > = {
@@ -38,9 +38,9 @@ export const mergeTables: ExpressionFunction<
     },
   },
   context: {
-    types: ['null'],
+    types: ['kibana_context', 'null'],
   },
-  fn(_ctx, { layerIds, tables }: MergeTables) {
+  fn(ctx, { layerIds, tables }: MergeTables) {
     const resultTables: Record<string, KibanaDatatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
@@ -48,6 +48,21 @@ export const mergeTables: ExpressionFunction<
     return {
       type: 'lens_multitable',
       tables: resultTables,
+      dateRange: getDateRange(ctx),
     };
   },
 };
+
+function getDateRange(ctx?: KibanaContext | null) {
+  if (!ctx || !ctx.timeRange) {
+    return;
+  }
+
+  const dateRange = toAbsoluteDates({ fromDate: ctx.timeRange.from, toDate: ctx.timeRange.to });
+
+  if (!dateRange) {
+    return;
+  }
+
+  return dateRange;
+}

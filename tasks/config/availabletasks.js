@@ -17,16 +17,16 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   const config = {
     availabletasks: {
       tasks: {
         options: {
           filter: 'exclude',
-          tasks: ['availabletasks', 'tasks']
-        }
-      }
-    }
+          tasks: ['availabletasks', 'tasks'],
+        },
+      },
+    },
   };
   grunt.registerTask('tasks', ['availabletasks']);
   grunt.config.merge(config);

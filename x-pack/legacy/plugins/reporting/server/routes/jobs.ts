@@ -5,9 +5,16 @@
  */
 
 import boom from 'boom';
-import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, KbnServer } from '../../types';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  Logger,
+  RequestFacade,
+  ReportingResponseToolkit,
+  JobDocOutput,
+  JobSource,
+} from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -19,7 +26,11 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: KbnServer) {
+export function registerJobInfoRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  logger: Logger
+) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -28,14 +39,12 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
-      // @ts-ignore
-      const page = parseInt(request.query.page, 10) || 0;
-      // @ts-ignore
-      const size = Math.min(100, parseInt(request.query.size, 10) || 10);
-      // @ts-ignore
-      const jobIds = request.query.ids ? request.query.ids.split(',') : null;
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query;
+      const page = parseInt(queryPage, 10) || 0;
+      const size = Math.min(100, parseInt(querySize, 10) || 10);
+      const jobIds = queryIds ? queryIds.split(',') : null;
 
       const results = jobsQuery.list(
         request.pre.management.jobTypes,
@@ -52,8 +61,8 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
@@ -63,13 +72,12 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        (doc: any): JobDoc => {
-          const job = doc._source;
+        ({ _source: job }: JobSource<any>): JobDocOutput => {
           if (!job) {
             throw boom.notFound();
           }
@@ -89,13 +97,13 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then(
-        (doc: any): JobDoc => {
-          const job: JobDoc = doc._source;
+      return jobsQuery
+        .get(request.pre.user, docId)
+        .then(({ _source: job }: JobSource<any>): JobSource<any>['_source'] => {
           if (!job) {
             throw boom.notFound();
           }
@@ -106,24 +114,23 @@ export function registerJobs(server: KbnServer) {
           }
 
           return {
-            ...doc._source,
+            ...job,
             payload: {
               ...payload,
               headers: undefined,
             },
           };
-        }
-      );
+        });
     },
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server);
+  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
-    config: getRouteConfigDownload(),
-    handler: async (request: Request, h: ResponseToolkit) => {
+    options: getRouteConfigDownload(),
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(
@@ -135,13 +142,15 @@ export function registerJobs(server: KbnServer) {
       const { statusCode } = response;
 
       if (statusCode !== 200) {
-        const logLevel = statusCode === 500 ? 'error' : 'debug';
-        server.log(
-          [logLevel, 'reporting', 'download'],
-          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-            response.source
-          )}]`
-        );
+        if (statusCode === 500) {
+          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+        } else {
+          logger.debug(
+            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+              response.source
+            )}]`
+          );
+        }
       }
 
       if (!response.isBoom) {

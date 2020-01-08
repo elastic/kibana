@@ -28,41 +28,46 @@ export interface WorkspaceNode {
   scaledSize: number;
   parent: WorkspaceNode | null;
   color: string;
+  isSelected?: boolean;
 }
 
 export interface WorkspaceEdge {
   weight: number;
   width: number;
-  inferred: boolean;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
+  isSelected?: boolean;
+}
+
+export interface ServerResultNode {
+  field: string;
+  term: string;
+  id: string;
+  label: string;
+  color: string;
+  icon: FontawesomeIcon;
+  data: {
+    field: string;
+    term: string;
+  };
+}
+
+export interface ServerResultEdge {
+  source: number;
+  target: number;
+  weight: number;
+  width: number;
+  doc_count?: number;
 }
 
 export interface GraphData {
-  nodes: Array<{
-    field: string;
-    term: string;
-    id: string;
-    label: string;
-    color: string;
-    icon: FontawesomeIcon;
-    data: {
-      field: string;
-      term: string;
-    };
-  }>;
-  edges: Array<{
-    source: number;
-    target: number;
-    weight: number;
-    width: number;
-    doc_count?: number;
-    inferred: boolean;
-  }>;
+  nodes: ServerResultNode[];
+  edges: ServerResultEdge[];
 }
 
 export interface Workspace {
+  options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
@@ -83,6 +88,15 @@ export interface Workspace {
    * @param newData
    */
   mergeGraph(newData: GraphData): void;
+
+  /**
+   * Fills in missing connections between the selected nodes.
+   * @param connections The number of connections to fill in. Defaults to 10
+   */
+  fillInGraph(connections?: number): void;
+
+  runLayout(): void;
+  stopLayout(): void;
 }
 
 export type ExploreRequest = any;

@@ -5,9 +5,18 @@
  */
 
 import React from 'react';
-import { SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
+import { SaveResult } from '../legacy_imports';
+
+export type SaveWorkspaceHandler = (
+  saveOptions: {
+    confirmOverwrite: boolean;
+    isTitleDuplicateConfirmed: boolean;
+    onTitleDuplicate: () => void;
+  },
+  dataConsent: boolean
+) => Promise<SaveResult>;
 
 export function openSaveModal({
   savePolicy,
@@ -19,14 +28,7 @@ export function openSaveModal({
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
-  saveWorkspace: (
-    saveOptions: {
-      confirmOverwrite: boolean;
-      isTitleDuplicateConfirmed: boolean;
-      onTitleDuplicate: () => void;
-    },
-    dataConsent: boolean
-  ) => Promise<SaveResult>;
+  saveWorkspace: SaveWorkspaceHandler;
   showSaveModal: (el: React.ReactNode) => void;
 }) {
   const currentTitle = workspace.title;

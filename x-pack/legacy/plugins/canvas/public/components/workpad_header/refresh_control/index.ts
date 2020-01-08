@@ -20,7 +20,4 @@ const mapDispatchToProps = {
   doRefresh: fetchAllRenderables,
 };
 
-export const RefreshControl = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const RefreshControl = connect(mapStateToProps, mapDispatchToProps)(Component);

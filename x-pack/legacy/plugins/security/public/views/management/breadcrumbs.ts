@@ -74,3 +74,15 @@ export function getCreateRoleBreadcrumbs() {
     },
   ];
 }
+
+export function getApiKeysBreadcrumbs() {
+  return [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
+        defaultMessage: 'API Keys',
+      }),
+      href: '#/management/security/api_keys',
+    },
+  ];
+}

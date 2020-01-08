@@ -21,50 +21,60 @@ import sinon from 'sinon';
 // TODO: We should not be importing from the data plugin directly here; this is only necessary
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
-import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
+
 import {
   FieldList,
-  getRoutes,
-  formatHitProvider,
-  flattenHitWrapper,
-} from 'ui/index_patterns';
-import { fieldFormats } from 'ui/registry/field_formats';
+  FIELD_FORMAT_IDS,
+  IndexPattern,
+  indexPatterns,
+} from '../../plugins/data/public';
 
-export default function () {
+import { setFieldFormats } from '../../plugins/data/public/services';
 
-  function StubIndexPattern(pattern, getConfig, timeField, fields) {
-    this.id = pattern;
-    this.title = pattern;
-    this.popularizeField = sinon.stub();
-    this.timeFieldName = timeField;
-    this.isTimeBased = () => Boolean(this.timeFieldName);
-    this.getConfig = getConfig;
-    this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
-    this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
-    this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
-    this.getSourceFiltering = sinon.stub();
-    this.metaFields = ['_id', '_type', '_source'];
-    this.fieldFormatMap = {};
-    this.routes = getRoutes();
+setFieldFormats({
+  getDefaultInstance: () => ({
+    getConverterFor: () => value => value,
+    convert: value => JSON.stringify(value),
+  }),
+});
 
-    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
-    this.flattenHit = flattenHitWrapper(this, this.metaFields);
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
-    this.fieldsFetcher = { apiClient: { baseUrl: '' } };
-    this.formatField = this.formatHit.formatField;
+import { getFieldFormatsRegistry } from './stub_field_formats';
 
-    this._reindexFields = function () {
-      this.fields = new FieldList(this, this.fields || fields);
-    };
+export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
+  const registeredFieldFormats = getFieldFormatsRegistry(core);
 
-    this.stubSetFieldFormat = function (fieldName, id, params) {
-      const FieldFormat = fieldFormats.byId[id];
-      this.fieldFormatMap[fieldName] = new FieldFormat(params);
-      this._reindexFields();
-    };
+  this.id = pattern;
+  this.title = pattern;
+  this.popularizeField = sinon.stub();
+  this.timeFieldName = timeField;
+  this.isTimeBased = () => Boolean(this.timeFieldName);
+  this.getConfig = getConfig;
+  this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
+  this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+  this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
+  this.getSourceFiltering = sinon.stub();
+  this.metaFields = ['_id', '_type', '_source'];
+  this.fieldFormatMap = {};
+  this.routes = indexPatterns.getRoutes();
 
+  this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
+  this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
+  this.formatHit = indexPatterns.formatHitProvider(
+    this,
+    registeredFieldFormats.getDefaultInstance(FIELD_FORMAT_IDS.STRING)
+  );
+  this.fieldsFetcher = { apiClient: { baseUrl: '' } };
+  this.formatField = this.formatHit.formatField;
+
+  this._reindexFields = function() {
+    this.fields = new FieldList(this, this.fields || fields);
+  };
+
+  this.stubSetFieldFormat = function(fieldName, id, params) {
+    const FieldFormat = registeredFieldFormats.getType(id);
+    this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
-  }
+  };
 
-  return StubIndexPattern;
+  this._reindexFields();
 }

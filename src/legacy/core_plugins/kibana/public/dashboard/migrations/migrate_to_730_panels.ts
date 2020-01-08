@@ -34,7 +34,7 @@ import {
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from '../types';
+} from '../np_ready/types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

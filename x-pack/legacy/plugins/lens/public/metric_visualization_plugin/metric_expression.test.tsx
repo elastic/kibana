@@ -9,7 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { FieldFormat } from 'ui/registry/field_formats';
+import { FieldFormat } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -17,7 +17,11 @@ function sampleArgs() {
     tables: {
       l1: {
         type: 'kibana_datatable',
-        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        columns: [
+          { id: 'a', name: 'a' },
+          { id: 'b', name: 'b' },
+          { id: 'c', name: 'c' },
+        ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },
     },
@@ -52,18 +56,9 @@ describe('metric_expression', () => {
 
       expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
         .toMatchInlineSnapshot(`
-        <div
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
-              "textAlign": "center",
-            }
-          }
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportTitle="My fanci metric chart"
         >
           <AutoScale>
             <div
@@ -88,7 +83,7 @@ describe('metric_expression', () => {
               My fanci metric chart
             </div>
           </AutoScale>
-        </div>
+        </VisualizationContainer>
       `);
     });
 
@@ -104,18 +99,9 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <div
-          style={
-            Object {
-              "alignItems": "center",
-              "display": "flex",
-              "flexDirection": "column",
-              "justifyContent": "center",
-              "maxHeight": "100%",
-              "maxWidth": "100%",
-              "textAlign": "center",
-            }
-          }
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportTitle="My fanci metric chart"
         >
           <AutoScale>
             <div
@@ -130,7 +116,7 @@ describe('metric_expression', () => {
               10110
             </div>
           </AutoScale>
-        </div>
+        </VisualizationContainer>
       `);
     });
   });

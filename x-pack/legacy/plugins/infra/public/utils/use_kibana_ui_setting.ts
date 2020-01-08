@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { npSetup } from 'ui/new_platform';
-import { useObservable } from './use_observable';
+import useObservable from 'react-use/lib/useObservable';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested
@@ -28,10 +28,15 @@ import { useObservable } from './use_observable';
 export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
   const uiSettingsClient = npSetup.core.uiSettings;
 
-  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
+  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [
+    defaultValue,
+    key,
+    uiSettingsClient,
+  ]);
   const uiSetting = useObservable(uiSetting$);
 
   const setUiSetting = useCallback((value: any) => uiSettingsClient.set(key, value), [
+    key,
     uiSettingsClient,
   ]);
 

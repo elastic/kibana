@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  createSplitStream,
-  createConcatStream,
-  createPromiseFromStreams,
-} from './';
+import { createSplitStream, createConcatStream, createPromiseFromStreams } from './';
 
 async function split(stream, input) {
   const concat = createConcatStream();

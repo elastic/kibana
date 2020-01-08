@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import {
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_ASSETS,
@@ -12,43 +11,55 @@ import {
   DEFAULT_WORKPAD_CSS,
 } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
+import { getCoreStart } from '../legacy';
 
-const basePath = chrome.getBasePath();
-const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;
-const apiPathAssets = `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
-const apiPathStructures = `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
+const getApiPath = function() {
+  const basePath = getCoreStart().http.basePath.get();
+  return `${basePath}${API_ROUTE_WORKPAD}`;
+};
+
+const getApiPathStructures = function() {
+  const basePath = getCoreStart().http.basePath.get();
+  return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
+};
+
+const getApiPathAssets = function() {
+  const basePath = getCoreStart().http.basePath.get();
+  return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
+};
 
 export function create(workpad) {
-  return fetch.post(apiPath, { ...workpad, assets: workpad.assets || {} });
+  return fetch.post(getApiPath(), { ...workpad, assets: workpad.assets || {} });
 }
 
 export function get(workpadId) {
-  return fetch.get(`${apiPath}/${workpadId}`).then(({ data: workpad }) => {
+  return fetch.get(`${getApiPath()}/${workpadId}`).then(({ data: workpad }) => {
     // shim old workpads with new properties
     return { css: DEFAULT_WORKPAD_CSS, ...workpad };
   });
 }
 
+// TODO: I think this function is never used.  Look into and remove the corresponding route as well
 export function update(id, workpad) {
-  return fetch.put(`${apiPath}/${id}`, workpad);
+  return fetch.put(`${getApiPath()}/${id}`, workpad);
 }
 
 export function updateWorkpad(id, workpad) {
-  return fetch.put(`${apiPathStructures}/${id}`, workpad);
+  return fetch.put(`${getApiPathStructures()}/${id}`, workpad);
 }
 
 export function updateAssets(id, workpadAssets) {
-  return fetch.put(`${apiPathAssets}/${id}`, workpadAssets);
+  return fetch.put(`${getApiPathAssets()}/${id}`, workpadAssets);
 }
 
 export function remove(id) {
-  return fetch.delete(`${apiPath}/${id}`);
+  return fetch.delete(`${getApiPath()}/${id}`);
 }
 
 export function find(searchTerm) {
   const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
 
   return fetch
-    .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : ''}&perPage=10000`)
+    .get(`${getApiPath()}/find?name=${validSearchTerm ? searchTerm : ''}&perPage=10000`)
     .then(({ data: workpads }) => workpads);
 }

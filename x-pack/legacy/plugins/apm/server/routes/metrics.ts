@@ -20,18 +20,23 @@ export const metricsChartsRoute = createRoute(() => ({
       t.type({
         agentName: t.string
       }),
+      t.partial({
+        serviceNodeName: t.string
+      }),
       uiFiltersRt,
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { agentName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { agentName, serviceNodeName } = params.query;
     return await getMetricsChartDataByAgent({
       setup,
       serviceName,
-      agentName
+      agentName,
+      serviceNodeName
     });
   }
 }));

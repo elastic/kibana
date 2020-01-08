@@ -17,18 +17,37 @@
  * under the License.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { CoreSetup, CoreStart, Logger, PluginInitializerContext, PluginName } from 'kibana/server';
+import {
+  CoreSetup,
+  CoreStart,
+  LegacyRenderOptions,
+  Logger,
+  PluginInitializerContext,
+  PluginConfigDescriptor,
+  PluginName,
+} from 'kibana/server';
 
-export const config = {
-  schema: schema.object({
-    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
-  }),
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+  deprecations: ({ rename, unused, renameFromRoot }) => [
+    rename('securityKey', 'secret'),
+    renameFromRoot('oldtestbed.uiProp', 'testbed.uiProp'),
+    unused('deprecatedProperty'),
+  ],
 };
-
-type ConfigType = TypeOf<typeof config.schema>;
 
 class Plugin {
   private readonly log: Logger;
@@ -43,10 +62,44 @@ class Plugin {
     );
 
     const router = core.http.createRouter();
-    router.get({ path: '/ping', validate: false }, async (context, req, res) => {
-      const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
-      return res.ok({ body: `Pong: ${response}` });
-    });
+    router.get(
+      { path: '/requestcontext/elasticsearch', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        return res.ok({ body: `Elasticsearch: ${response}` });
+      }
+    );
+
+    router.get(
+      { path: '/requestcontext/savedobjectsclient', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.savedObjects.client.find({ type: 'TYPE' });
+        return res.ok({ body: `SavedObjects client: ${JSON.stringify(response)}` });
+      }
+    );
+
+    router.get(
+      {
+        path: '/requestcontext/render/{id}',
+        validate: {
+          params: schema.object({
+            id: schema.maybe(schema.string()),
+          }),
+        },
+      },
+      async (context, req, res) => {
+        const { id } = req.params;
+        const options: Partial<LegacyRenderOptions> = { app: { getId: () => id! } };
+        const body = await context.core.rendering.render(options);
+
+        return res.ok({
+          body,
+          headers: {
+            'content-securty-policy': core.http.csp.header,
+          },
+        });
+      }
+    );
 
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(
@@ -55,9 +108,7 @@ class Plugin {
           return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
-        mergeMap(client => client.callAsInternalUser('ping'))
-      ),
+      pingElasticsearch: () => core.elasticsearch.adminClient.callAsInternalUser('ping'),
     };
   }
 

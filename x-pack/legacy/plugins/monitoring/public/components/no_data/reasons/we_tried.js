@@ -5,11 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiText,
-  EuiHorizontalRule,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function WeTried() {
@@ -28,8 +24,8 @@ export function WeTried() {
         <p>
           <FormattedMessage
             id="xpack.monitoring.noData.reasons.noMonitoringDataFoundDescription"
-            defaultMessage="No monitoring data found. Try setting the time filter to &quot;Last 1
-            hour&quot; or check if data is available for a different time period."
+            defaultMessage='No monitoring data found. Try setting the time filter to "Last 1
+            hour" or check if data is available for a different time period.'
           />
         </p>
         <p>

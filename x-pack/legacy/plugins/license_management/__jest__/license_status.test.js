@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicenseStatus } from '../public/sections/license_dashboard/license_status';
+import { LicenseStatus } from '../public/np_ready/application/sections/license_dashboard/license_status';
 import { createMockLicense, getComponent } from './util';
 
 describe('LicenseStatus component', () => {
   test('should display normally when license is active', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('gold')
+        license: createMockLicense('gold'),
       },
       LicenseStatus
     );
@@ -20,7 +20,7 @@ describe('LicenseStatus component', () => {
   test('should display display warning is expired', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('platinum', 0)
+        license: createMockLicense('platinum', 0),
       },
       LicenseStatus
     );

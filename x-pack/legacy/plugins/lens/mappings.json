@@ -8,12 +8,27 @@
         "type": "keyword"
       },
       "state": {
-        "enabled": false,
-        "type": "object"
+        "type": "flattened"
       },
       "expression": {
         "index": false,
         "type": "keyword"
+      }
+    }
+  },
+  "lens-ui-telemetry": {
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      },
+      "count": {
+        "type": "integer"
       }
     }
   }

@@ -177,7 +177,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     <>
       {models.map((item, index) => (
         <Fragment key={item.id}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             {config.renderInputRow(item, index, onChangeValue)}
             <EuiFlexItem grow={false}>
               <EuiButtonIcon

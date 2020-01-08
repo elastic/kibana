@@ -4,29 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiCheckbox, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { DraggableFieldBadge } from '../draggables/field_badge';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
-import { getColumnsWithTimestamp, getExampleText, getIconFromType } from '../event_details/helpers';
 import { getDraggableFieldId, getDroppableId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
+import { DraggableFieldBadge } from '../draggables/field_badge';
 import { getEmptyValue } from '../empty_value';
-import { OnUpdateColumns } from '../timeline/events';
+import { getColumnsWithTimestamp, getExampleText, getIconFromType } from '../event_details/helpers';
 import { SelectableText } from '../selectable_text';
-import { TruncatableText } from '../truncatable_text';
-
-import { FieldName } from './field_name';
-
-import * as i18n from './translations';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { OnUpdateColumns } from '../timeline/events';
+import { TruncatableText } from '../truncatable_text';
+import { FieldName } from './field_name';
+import * as i18n from './translations';
 
 const TypeIcon = styled(EuiIcon)`
   margin-left: 5px;
@@ -172,18 +172,18 @@ export const getFieldColumns = () => [
     field: 'field',
     name: i18n.FIELD,
     sortable: true,
-    render: (field: React.ReactNode) => <>{field}</>,
+    render: (field: React.ReactNode, _: FieldItem) => <>{field}</>,
     width: '250px',
   },
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description: string) => (
-      <EuiToolTip position="top" content={description}>
-        <TruncatableText size="xs" width="390px">
-          {description}
-        </TruncatableText>
-      </EuiToolTip>
+    render: (description: string, _: FieldItem) => (
+      <TruncatableText>
+        <EuiToolTip position="top" content={description}>
+          <>{description}</>
+        </EuiToolTip>
+      </TruncatableText>
     ),
     sortable: true,
     truncateText: true,

@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function iptablesLogsSpecProvider(server, context) {
+export function iptablesLogsSpecProvider(context) {
   const moduleName = 'iptables';
   const platforms = ['DEB', 'RPM'];
   return {

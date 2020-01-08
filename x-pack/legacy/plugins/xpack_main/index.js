@@ -6,10 +6,6 @@
 
 import { resolve } from 'path';
 import dedent from 'dedent';
-import {
-  XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
-} from '../../server/lib/constants';
-import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_config_with_deprecated';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
@@ -17,16 +13,10 @@ import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
 import { has } from 'lodash';
 
-function movedToTelemetry(configPath) {
-  return (settings, log) => {
-    if (has(settings, configPath)) {
-      log(`Config key ${configPath} is deprecated. Use "xpack.telemetry.${configPath}" instead.`);
-    }
-  };
-}
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
-export const xpackMain = (kibana) => {
+import { registerMonitoringCollection } from './server/telemetry_collection';
+
+export const xpackMain = kibana => {
   return new kibana.Plugin({
     id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
@@ -41,7 +31,6 @@ export const xpackMain = (kibana) => {
           enabled: Joi.boolean().default(),
           url: Joi.string().default(),
         }).default(), // deprecated
-        xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
       }).default();
     },
 
@@ -54,15 +43,12 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
-      hacks: [
-        'plugins/xpack_main/hacks/check_xpack_info_change',
-      ],
+      hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
       replaceInjectedVars,
       injectDefaultVars(server) {
         const config = server.config();
 
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
         };
@@ -85,20 +71,32 @@ export const xpackMain = (kibana) => {
       }
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+      registerMonitoringCollection();
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),
-        savedObjectTypes: server.savedObjects.types
+        savedObjectTypes: server.savedObjects.types,
       });
 
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
     },
-    deprecations: () => [
-      movedToTelemetry('telemetry.config'),
-      movedToTelemetry('telemetry.url'),
-      movedToTelemetry('telemetry.enabled'),
-    ],
+    deprecations: () => {
+      function movedToTelemetry(configPath) {
+        return (settings, log) => {
+          if (has(settings, configPath)) {
+            log(
+              `Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`
+            );
+          }
+        };
+      }
+      return [
+        movedToTelemetry('telemetry.config'),
+        movedToTelemetry('telemetry.url'),
+        movedToTelemetry('telemetry.enabled'),
+      ];
+    },
   });
 };

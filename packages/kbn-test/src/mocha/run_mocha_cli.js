@@ -63,7 +63,16 @@ export function runMochaCli() {
   if (!opts._.length) {
     globby
       .sync(
-        ['src/**/__tests__/**/*.js', 'packages/**/__tests__/**/*.js', 'tasks/**/__tests__/**/*.js'],
+        [
+          'src/**/__tests__/**/*.js',
+          'packages/**/__tests__/**/*.js',
+          'tasks/**/__tests__/**/*.js',
+          'x-pack/common/**/__tests__/**/*.js',
+          'x-pack/server/**/__tests__/**/*.js',
+          `x-pack/legacy/plugins/*/__tests__/**/*.js`,
+          `x-pack/legacy/plugins/*/common/**/__tests__/**/*.js`,
+          `x-pack/legacy/plugins/*/**/server/**/__tests__/**/*.js`,
+        ],
         {
           cwd: REPO_ROOT,
           onlyFiles: true,

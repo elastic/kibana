@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | testing custom expressions"`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' font={font size=12} openLinksInNewTab=true "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with percentage mode should have percentage format 1`] = `"metricvis percentage=true metric={visdimension 0 format='percent' } "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function without buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"buckets\\":[1,2]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"bucket\\":1}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=false 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":false,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":4,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":5,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[0,3]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=true 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":true,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":2,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":4,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":5,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[0,3]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[],\\"splitRow\\":[1,2]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[3],\\"splitRow\\":[2,4]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with boolean param showLabel 1`] = `"tagcloud metric={visdimension 0} showLabel=false "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with buckets 1`] = `"tagcloud metric={visdimension 0} bucket={visdimension 1 } "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function without buckets 1`] = `"tagcloud metric={visdimension 0} "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles undefined markdown function 1`] = `"markdownvis '' font={font size=12} openLinksInNewTab=true "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;

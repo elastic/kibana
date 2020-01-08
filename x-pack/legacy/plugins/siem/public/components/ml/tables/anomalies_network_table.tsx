@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { useContext } from 'react';
-import styled from 'styled-components';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 import * as i18n from './translations';
 import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
@@ -16,19 +14,19 @@ import { Loader } from '../../loader';
 import { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
-import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
+import { Panel } from '../../panel';
 
 const sorting = {
   sort: {
     field: 'anomaly.severity',
     direction: 'desc',
   },
-};
+} as const;
 
 export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
   ({ startDate, endDate, narrowDateRange, skip, ip, type, flowTarget }): JSX.Element | null => {
@@ -50,9 +48,9 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       narrowDateRange
     );
     const pagination = {
-      pageIndex: 0,
-      pageSize: 10,
-      totalItemCount: getSizeFromAnomalies(tableData),
+      initialPageIndex: 0,
+      initialPageSize: 10,
+      totalItemCount: networks.length,
       pageSizeOptions: [5, 10, 20, 50],
       hidePerPageOptions: false,
     };
@@ -61,8 +59,8 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       return null;
     } else {
       return (
-        <Panel loading={{ loading }}>
-          <HeaderPanel
+        <Panel loading={loading}>
+          <HeaderSection
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
             )}`}
@@ -71,8 +69,10 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
           />
 
           <BasicTable
+            // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             compressed
+            // @ts-ignore ...which leads to `networks` not "matching" the columns
             items={networks}
             pagination={pagination}
             sorting={sorting}
@@ -87,17 +87,5 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
   },
   networkEquality
 );
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 AnomaliesNetworkTable.displayName = 'AnomaliesNetworkTable';

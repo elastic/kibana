@@ -8,8 +8,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
-import chrome from 'ui/chrome';
-import { UICapabilities } from 'ui/capabilities';
+import { CanvasStartDeps, CoreStart } from '../../plugin';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 // @ts-ignore Untyped local
 import { App } from '../../components/app';
@@ -17,35 +17,38 @@ import { AngularStrings } from '../../../i18n';
 
 const { CanvasRootController: strings } = AngularStrings;
 
-export function CanvasRootController(
-  canvasStore: Store,
-  $scope: any, // Untyped in Kibana
-  $element: any, // Untyped in Kibana
-  uiCapabilities: UICapabilities
-) {
-  const domNode = $element[0];
+export function CanvasRootControllerFactory(coreStart: CoreStart, plugins: CanvasStartDeps) {
+  return function CanvasRootController(
+    canvasStore: Store,
+    $scope: any, // Untyped in Kibana
+    $element: any // Untyped in Kibana
+  ) {
+    const domNode = $element[0];
 
-  // set the read-only badge when appropriate
-  chrome.badge.set(
-    uiCapabilities.canvas.save
-      ? undefined
-      : {
-          text: strings.getReadOnlyBadgeText(),
-          tooltip: strings.getReadOnlyBadgeTooltip(),
-          iconType: 'glasses',
-        }
-  );
+    // set the read-only badge when appropriate
+    coreStart.chrome.setBadge(
+      coreStart.application.capabilities.canvas.save
+        ? undefined
+        : {
+            text: strings.getReadOnlyBadgeText(),
+            tooltip: strings.getReadOnlyBadgeTooltip(),
+            iconType: 'glasses',
+          }
+    );
 
-  render(
-    <I18nProvider>
-      <Provider store={canvasStore}>
-        <App />
-      </Provider>
-    </I18nProvider>,
-    domNode
-  );
+    render(
+      <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
+        <I18nProvider>
+          <Provider store={canvasStore}>
+            <App />
+          </Provider>
+        </I18nProvider>
+      </KibanaContextProvider>,
+      domNode
+    );
 
-  $scope.$on('$destroy', () => {
-    unmountComponentAtNode(domNode);
-  });
+    $scope.$on('$destroy', () => {
+      unmountComponentAtNode(domNode);
+    });
+  };
 }

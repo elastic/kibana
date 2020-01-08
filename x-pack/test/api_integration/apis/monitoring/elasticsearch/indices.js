@@ -10,7 +10,7 @@ import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all
 import indicesRedClusterFixture from './fixtures/indices_red_cluster';
 import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -19,7 +19,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
       const timeRange = {
         min: '2017-10-05T20:31:48.000Z',
-        max: '2017-10-05T20:35:12.000Z'
+        max: '2017-10-05T20:35:12.000Z',
       };
 
       before('load archive', () => {
@@ -32,7 +32,9 @@ export default function ({ getService }) {
 
       it('should summarize the non-system indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=false')
+          .post(
+            '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=false'
+          )
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
@@ -42,7 +44,9 @@ export default function ({ getService }) {
 
       it('should summarize all indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=true')
+          .post(
+            '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices?show_system_indices=true'
+          )
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
@@ -55,7 +59,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-red-platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
-        max: '2017-10-06T20:15:30.000Z'
+        max: '2017-10-06T20:15:30.000Z',
       };
 
       before('load clusters archive', () => {
@@ -68,7 +72,9 @@ export default function ({ getService }) {
 
       it('should summarize the non-system indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=false')
+          .post(
+            '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=false'
+          )
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
@@ -77,7 +83,9 @@ export default function ({ getService }) {
 
       it('should summarize all indices with stats', async () => {
         const { body } = await supertest
-          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=true')
+          .post(
+            '/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices?show_system_indices=true'
+          )
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);

@@ -18,13 +18,11 @@
  */
 
 import sinon from 'sinon';
-import Wreck from '@hapi/wreck';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
-
+import { createResponseStub } from './stubs';
 import { createProxyRoute } from '../../';
-
-import { createWreckResponseStub } from './stubs';
+import * as requestModule from '../../request';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -33,12 +31,11 @@ describe('Console Proxy Route', () => {
 
   beforeEach(() => {
     request = async (method, path, response) => {
-      sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub(response));
-
+      sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub(response));
       const server = new Server();
       server.route(
         createProxyRoute({
-          baseUrl: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
         })
       );
 

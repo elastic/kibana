@@ -6,8 +6,7 @@
 
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React, { useEffect, useState } from 'react';
 
 import * as i18n from './translations';
 
@@ -16,11 +15,7 @@ interface LastUpdatedAtProps {
   updatedAt: number;
 }
 
-interface LastUpdatedAtState {
-  date: number;
-}
-
-export const Updated = pure<{ date: number; prefix: string; updatedAt: number }>(
+export const Updated = React.memo<{ date: number; prefix: string; updatedAt: number }>(
   ({ date, prefix, updatedAt }) => (
     <>
       {prefix}
@@ -37,46 +32,37 @@ export const Updated = pure<{ date: number; prefix: string; updatedAt: number }>
 
 Updated.displayName = 'Updated';
 
-export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastUpdatedAtState> {
-  public readonly state = {
-    date: Date.now(),
-  };
-  private timerID?: NodeJS.Timeout;
+const prefix = ` ${i18n.UPDATED} `;
 
-  public componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 10000);
+export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(({ compact = false, updatedAt }) => {
+  const [date, setDate] = useState(Date.now());
+
+  function tick() {
+    setDate(Date.now());
   }
 
-  public componentWillUnmount() {
-    clearInterval(this.timerID!);
-  }
+  useEffect(() => {
+    const timerID = setInterval(() => tick(), 10000);
+    return () => {
+      clearInterval(timerID);
+    };
+  }, []);
 
-  public tick() {
-    this.setState({
-      date: Date.now(),
-    });
-  }
+  return (
+    <EuiToolTip
+      data-test-subj="timeline-stream-tool-tip"
+      content={
+        <>
+          <Updated date={date} prefix={prefix} updatedAt={updatedAt} />
+        </>
+      }
+    >
+      <EuiText size="s">
+        <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
+        {!compact ? <Updated date={date} prefix={prefix} updatedAt={updatedAt} /> : null}
+      </EuiText>
+    </EuiToolTip>
+  );
+});
 
-  public render() {
-    const { compact = false } = this.props;
-    const prefix = ` ${i18n.UPDATED} `;
-
-    return (
-      <EuiToolTip
-        data-test-subj="timeline-stream-tool-tip"
-        content={
-          <>
-            <Updated date={this.state.date} prefix={prefix} updatedAt={this.props.updatedAt} />
-          </>
-        }
-      >
-        <EuiText size="s">
-          <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
-          {!compact ? (
-            <Updated date={this.state.date} prefix={prefix} updatedAt={this.props.updatedAt} />
-          ) : null}
-        </EuiText>
-      </EuiToolTip>
-    );
-  }
-}
+LastUpdatedAt.displayName = 'LastUpdatedAt';

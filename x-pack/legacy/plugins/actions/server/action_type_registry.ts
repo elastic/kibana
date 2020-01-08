@@ -6,47 +6,27 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
-import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import {
-  ActionType,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from './types';
-
+import { TaskManagerSetupContract } from './shim';
+import { RunContext } from '../../task_manager/server';
+import { ExecutorError, TaskRunnerFactory } from './lib';
+import { ActionType } from './types';
+import { ActionsConfigurationUtilities } from './actions_config';
 interface ConstructorOptions {
-  isSecurityEnabled: boolean;
-  taskManager: TaskManager;
-  getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
+  taskManager: TaskManagerSetupContract;
+  taskRunnerFactory: TaskRunnerFactory;
+  actionsConfigUtils: ActionsConfigurationUtilities;
 }
 
 export class ActionTypeRegistry {
-  private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
+  private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly actionsConfigUtils: ActionsConfigurationUtilities;
 
-  constructor({
-    getServices,
-    taskManager,
-    encryptedSavedObjectsPlugin,
-    spaceIdToNamespace,
-    getBasePath,
-    isSecurityEnabled,
-  }: ConstructorOptions) {
-    this.taskManager = taskManager;
-    this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
-      isSecurityEnabled,
-      getServices,
-      actionTypeRegistry: this,
-      encryptedSavedObjectsPlugin,
-      spaceIdToNamespace,
-      getBasePath,
-    });
+  constructor(constructorParams: ConstructorOptions) {
+    this.taskManager = constructorParams.taskManager;
+    this.taskRunnerFactory = constructorParams.taskRunnerFactory;
+    this.actionsConfigUtils = constructorParams.actionsConfigUtils;
   }
 
   /**
@@ -54,6 +34,13 @@ export class ActionTypeRegistry {
    */
   public has(id: string) {
     return this.actionTypes.has(id);
+  }
+
+  /**
+   * Throws error if action type is not enabled.
+   */
+  public ensureActionTypeEnabled(id: string) {
+    this.actionsConfigUtils.ensureActionTypeEnabled(id);
   }
 
   /**
@@ -86,7 +73,7 @@ export class ActionTypeRegistry {
           // Don't retry other kinds of errors
           return false;
         },
-        createTaskRunner: this.taskRunCreatorFunction,
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
   }
@@ -109,12 +96,13 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns a list of registered action types [{ id, name }]
+   * Returns a list of registered action types [{ id, name, enabled }]
    */
   public list() {
     return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
       name: actionType.name,
+      enabled: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
     }));
   }
 }

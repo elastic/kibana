@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { findObjectByTitle } from '../find_object_by_title';
+import { findObjectByTitle } from '../helpers/find_object_by_title';
 import { SimpleSavedObject } from '../../../../../core/public';
 
 describe('findObjectByTitle', () => {
@@ -38,10 +38,14 @@ describe('findObjectByTitle', () => {
   });
 
   it('matches any case', async () => {
-    const indexPattern = new SimpleSavedObject(savedObjectsClient, { attributes: { title: 'foo' } });
-    savedObjectsClient.find.returns(Promise.resolve({
-      savedObjects: [indexPattern]
-    }));
+    const indexPattern = new SimpleSavedObject(savedObjectsClient, {
+      attributes: { title: 'foo' },
+    });
+    savedObjectsClient.find.returns(
+      Promise.resolve({
+        savedObjects: [indexPattern],
+      })
+    );
 
     const match = await findObjectByTitle(savedObjectsClient, 'index-pattern', 'FOO');
     expect(match).to.eql(indexPattern);

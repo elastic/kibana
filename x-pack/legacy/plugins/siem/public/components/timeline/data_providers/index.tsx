@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import { rgba } from 'polished';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -13,7 +13,6 @@ import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineProvidersPrefix,
   IS_DRAGGING_CLASS_NAME,
-  TEN_PERCENT_ALPHA_HEX_SUFFIX,
 } from '../../drag_and_drop/helpers';
 import {
   OnChangeDataProviderKqlQuery,
@@ -44,7 +43,7 @@ interface Props {
 
 const DropTargetDataProvidersContainer = styled.div`
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
-    background: ${({ theme }) => `${theme.eui.euiColorSuccess}${TEN_PERCENT_ALPHA_HEX_SUFFIX}`};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
     border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
 
     & .euiTextColor--subdued {
@@ -91,7 +90,7 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = pure<Props>(
+export const DataProviders = React.memo<Props>(
   ({
     browserFields,
     id,

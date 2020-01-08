@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { FollowerIndexForm } from '../../public/app/components/follower_index_form/follower_index_form';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;
@@ -31,9 +29,7 @@ describe('Edit Auto-follow pattern', () => {
     let find;
     let component;
 
-    const remoteClusters = [
-      { name: 'new-york', seeds: ['localhost:123'], isConnected: true },
-    ];
+    const remoteClusters = [{ name: 'new-york', seeds: ['localhost:123'], isConnected: true }];
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
@@ -85,7 +81,9 @@ describe('Edit Auto-follow pattern', () => {
         try {
           expect(value).toBe(expected);
         } catch {
-          throw new Error(`Input "${input}" does not equal "${expected}". (Value received: "${value}")`);
+          throw new Error(
+            `Input "${input}" does not equal "${expected}". (Value received: "${value}")`
+          );
         }
       });
     });
@@ -99,7 +97,9 @@ describe('Edit Auto-follow pattern', () => {
     let form;
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRemoteClustersResponse([{ name: 'new-york', seeds: ['localhost:123'], isConnected: false }]);
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        { name: 'new-york', seeds: ['localhost:123'], isConnected: false },
+      ]);
       httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
       ({ component, find, exists, actions, form } = setup());
 
@@ -111,8 +111,9 @@ describe('Edit Auto-follow pattern', () => {
       const error = find('remoteClusterFormField.notConnectedError');
 
       expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').text())
-        .toBe(`Can't edit follower index because remote cluster '${FOLLOWER_INDEX_EDIT.remoteCluster}' is not connected`);
+      expect(error.find('.euiCallOutHeader__title').text()).toBe(
+        `Can't edit follower index because remote cluster '${FOLLOWER_INDEX_EDIT.remoteCluster}' is not connected`
+      );
       expect(exists('remoteClusterFormField.notConnectedError.editButton')).toBe(true);
     });
 

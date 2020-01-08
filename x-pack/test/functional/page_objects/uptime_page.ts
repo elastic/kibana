@@ -11,6 +11,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const uptimeService = getService('uptime');
 
   return new (class UptimePage {
+    public async goToUptimePageAndSetDateRange(
+      datePickerStartValue: string,
+      datePickerEndValue: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+    }
+
     public async goToUptimeOverviewAndLoadData(
       datePickerStartValue: string,
       datePickerEndValue: string,
@@ -35,15 +43,32 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       }
     }
 
-    public async inputFilterQuery(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      filterQuery: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+    public async inputFilterQuery(filterQuery: string) {
       await uptimeService.setFilterText(filterQuery);
-      await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
+    }
+
+    public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
+      await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+    }
+
+    public async pageUrlContains(value: string) {
+      return await uptimeService.urlContains(value);
+    }
+
+    public async changePage(direction: 'next' | 'prev') {
+      if (direction === 'next') {
+        await uptimeService.goToNextPage();
+      } else if (direction === 'prev') {
+        await uptimeService.goToPreviousPage();
+      }
+    }
+
+    public async setStatusFilter(value: 'up' | 'down') {
+      if (value === 'up') {
+        await uptimeService.setStatusFilterUp();
+      } else if (value === 'down') {
+        await uptimeService.setStatusFilterDown();
+      }
     }
   })();
 }

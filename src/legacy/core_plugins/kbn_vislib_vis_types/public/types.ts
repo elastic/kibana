@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { TimeMarker } from 'ui/vislib/visualizations/time_marker';
 import {
   Positions,
   ChartModes,
   ChartTypes,
   AxisModes,
+  AxisTypes,
   InterpolationModes,
   Rotates,
   ScaleTypes,
@@ -33,11 +36,26 @@ export interface CommonVislibParams {
   legendPosition: Positions;
 }
 
-interface Labels {
-  filter: boolean;
+export interface ColorSchemaVislibParams {
+  colorSchema: ColorSchemas;
+  invertColors: boolean;
+}
+
+export interface Labels {
+  color?: string;
+  filter?: boolean;
+  overwriteColor?: boolean;
   rotate?: Rotates;
   show: boolean;
-  truncate: number | null;
+  truncate?: number | null;
+}
+
+export interface Style {
+  bgFill: string;
+  bgColor: boolean;
+  labelColor: boolean;
+  subText: string;
+  fontSize: number;
 }
 
 export interface Scale {
@@ -52,8 +70,8 @@ export interface Scale {
 
 interface ThresholdLine {
   show: boolean;
-  value: number;
-  width: number;
+  value: number | null;
+  width: number | null;
   style: ThresholdLineStyles;
   color: string;
 }
@@ -64,9 +82,9 @@ export interface Axis {
   position: Positions;
   scale: Scale;
   show: boolean;
-  style: object;
+  style: Style;
   title: { text: string };
-  type: string;
+  type: AxisTypes;
 }
 
 export interface ValueAxis extends Axis {
@@ -97,4 +115,5 @@ export interface BasicVislibParams extends CommonVislibParams {
     valueAxis?: string;
   };
   seriesParams: SeriesParam[];
+  times: TimeMarker[];
 }

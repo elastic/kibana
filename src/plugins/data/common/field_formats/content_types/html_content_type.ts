@@ -17,17 +17,17 @@
  * under the License.
  */
 import { escape, isFunction } from 'lodash';
-import { FieldFormatConvert, IFieldFormat, HtmlConventTypeConvert } from '../types';
-
+import { IFieldFormat, HtmlContextTypeConvert } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
-const CONTEXT_TYPE = 'html';
+export const HTML_CONTEXT_TYPE = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,
-  fieldFormatConvert: FieldFormatConvert
-): HtmlConventTypeConvert => {
-  const fallbackHtml: HtmlConventTypeConvert = (value, field, hit) => {
+  convert?: HtmlContextTypeConvert
+): HtmlContextTypeConvert => {
+  const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const { field, hit } = options;
     const formatted = escape(format.convert(value, 'text'));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
@@ -35,39 +35,33 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (fieldFormatConvert[CONTEXT_TYPE] || fallbackHtml) as HtmlConventTypeConvert;
+  return (convert || fallbackHtml) as HtmlContextTypeConvert;
 };
 
 export const setup = (
   format: IFieldFormat,
-  fieldFormatConvert: FieldFormatConvert
-): FieldFormatConvert => {
-  const convert = getConvertFn(format, fieldFormatConvert);
+  htmlContextTypeConvert?: HtmlContextTypeConvert
+): HtmlContextTypeConvert => {
+  const convert = getConvertFn(format, htmlContextTypeConvert);
 
-  const recurse: HtmlConventTypeConvert = (value, field, hit, meta) => {
+  const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
       return asPrettyString(value);
     }
 
     if (!value || !isFunction(value.map)) {
-      return convert.call(format, value, field, hit, meta);
+      return convert.call(format, value, options);
     }
 
-    const subValues = value.map((v: any) => {
-      return recurse(v, field, hit, meta);
-    });
-    const useMultiLine = subValues.some((sub: any) => {
-      return sub.indexOf('\n') > -1;
-    });
+    const subValues = value.map((v: any) => recurse(v, options));
+    const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
   };
 
-  const wrap: HtmlConventTypeConvert = (value, field, hit, meta) => {
-    return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
+  const wrap: HtmlContextTypeConvert = (value, options) => {
+    return `<span ng-non-bindable>${recurse(value, options)}</span>`;
   };
 
-  return {
-    [CONTEXT_TYPE]: wrap,
-  };
+  return wrap;
 };

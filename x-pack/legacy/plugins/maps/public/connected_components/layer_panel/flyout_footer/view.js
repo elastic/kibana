@@ -6,17 +6,15 @@
 
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
-  hasStateChanged }) => {
+export const FlyoutFooter = ({
+  cancelLayerPanel,
+  saveLayerEdits,
+  removeLayer,
+  hasStateChanged,
+}) => {
   const removeBtn = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
@@ -33,15 +31,11 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
     </EuiFlexItem>
   );
 
-
-  const cancelButtonLabel =   hasStateChanged ? (<FormattedMessage
-    id="xpack.maps.layerPanel.footer.cancelButtonLabel"
-    defaultMessage="Cancel"
-  />) : (<FormattedMessage
-    id="xpack.maps.layerPanel.footer.closeButtonLabel"
-    defaultMessage="Close"
-  />);
-
+  const cancelButtonLabel = hasStateChanged ? (
+    <FormattedMessage id="xpack.maps.layerPanel.footer.cancelButtonLabel" defaultMessage="Cancel" />
+  ) : (
+    <FormattedMessage id="xpack.maps.layerPanel.footer.closeButtonLabel" defaultMessage="Close" />
+  );
 
   return (
     <EuiFlexGroup responsive={false}>
@@ -55,16 +49,11 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiSpacer/>
+        <EuiSpacer />
       </EuiFlexItem>
       {removeBtn}
       <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={!hasStateChanged}
-          iconType="check"
-          onClick={saveLayerEdits}
-          fill
-        >
+        <EuiButton disabled={!hasStateChanged} iconType="check" onClick={saveLayerEdits} fill>
           <FormattedMessage
             id="xpack.maps.layerPanel.footer.saveAndCloseButtonLabel"
             defaultMessage="Save & close"

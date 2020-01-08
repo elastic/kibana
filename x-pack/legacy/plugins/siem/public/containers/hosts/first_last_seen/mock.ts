@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../../default_index_pattern';
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
 
 import { HostFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
@@ -33,7 +34,7 @@ export const mockFirstLastSeenHostQuery: MockedProvidedQuery[] = [
       variables: {
         sourceId: 'default',
         hostName: 'kibana-siem',
-        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        defaultIndex: defaultIndexPattern,
       },
     },
     result: {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('saved_objects', () => {
     loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./bulk_get'));
@@ -29,6 +29,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./import'));
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_update'));
     loadTestFile(require.resolve('./migrations'));
   });
 }

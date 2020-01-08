@@ -26,7 +26,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker', 'visChart']);
 
   type Duration =
     | 'Milliseconds'
@@ -43,12 +43,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
   class VisualBuilderPage {
     public async resetPage(
-      fromTime = '2015-09-19 06:31:44.000',
-      toTime = '2015-09-22 18:31:44.000'
+      fromTime = 'Sep 19, 2015 @ 06:31:44.000',
+      toTime = 'Sep 22, 2015 @ 18:31:44.000'
     ) {
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
+      await PageObjects.common.sleep(2000);
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
@@ -99,7 +101,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getMetricValue() {
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
@@ -108,7 +110,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
       await input.type(markdown, { charByChar: true });
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async clearMarkdown() {
@@ -248,7 +250,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
+      const formatterEl = await testSubjects.find('tsvbDataFormatPicker');
       await comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
     }
 
@@ -302,10 +304,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getRhythmChartLegendValue(nth = 0) {
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -346,7 +348,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const prevAggs = await testSubjects.findAll('aggSelector');
       const elements = await testSubjects.findAll('addMetricAddBtn');
       await elements[nth].click();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await retry.waitFor('new agg is added', async () => {
         const currentAggs = await testSubjects.findAll('aggSelector');
         return currentAggs.length > prevAggs.length;
@@ -413,7 +415,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
-      await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      await retry.try(async () => {
+        await comboBox.clearInputField('metricsIndexPatternFieldsSelect');
+        await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
+      });
     }
 
     /**
@@ -452,10 +457,22 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+      const fieldEl = await this.getFieldForAggregation(aggNth);
+
+      await comboBox.setElement(fieldEl, field);
+    }
+
+    public async checkFieldForAggregationValidity(aggNth: number = 0): Promise<boolean> {
+      const fieldEl = await this.getFieldForAggregation(aggNth);
+
+      return await comboBox.checkValidity(fieldEl);
+    }
+
+    public async getFieldForAggregation(aggNth: number = 0): Promise<WebElementWrapper> {
       const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
-      const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
-      await comboBox.setElement(fieldEl, field);
+
+      return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
     }
 
     public async clickColorPicker(): Promise<void> {
@@ -468,7 +485,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await this.checkColorPickerPopUpIsPresent();
       await find.setValue('.tvbColorPickerPopUp input', colorHex);
       await this.clickColorPicker();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -477,10 +494,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const prevRenderingCount = await PageObjects.visChart.getVisualizationRenderingCount();
       const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
       await changePreviewBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visChart.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async checkPreviewIsDisabled(): Promise<void> {
@@ -491,7 +508,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async cloneSeries(nth: number = 0): Promise<void> {
       const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     /**
@@ -508,10 +525,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async deleteSeries(nth: number = 0): Promise<void> {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const prevRenderingCount = await PageObjects.visChart.getVisualizationRenderingCount();
       const cloneBtnArray = await testSubjects.findAll('AddDeleteBtn');
       await cloneBtnArray[nth].click();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+      await PageObjects.visChart.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async getLegendItems(): Promise<WebElementWrapper[]> {

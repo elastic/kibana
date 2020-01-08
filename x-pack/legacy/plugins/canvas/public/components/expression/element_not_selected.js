@@ -7,14 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
+
+const { ExpressionElementNotSelected: strings } = ComponentStrings;
 
 export const ElementNotSelected = ({ done }) => (
   <div>
-    <div>Select an element to show expression input</div>
+    <div>{strings.getSelectDescription()}</div>
     {done && (
       <EuiButton size="s" onClick={done}>
         {' '}
-        Close
+        {strings.getCloseButtonLabel()}
       </EuiButton>
     )}
   </div>

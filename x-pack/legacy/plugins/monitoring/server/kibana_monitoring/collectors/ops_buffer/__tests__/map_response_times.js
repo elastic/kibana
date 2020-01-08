@@ -25,12 +25,12 @@ describe('Map response times', () => {
     const responseTimes = {
       '5600': {
         avg: 1,
-        max: 10
+        max: 10,
       },
       '5602': {
         avg: 3,
-        max: 200
-      }
+        max: 200,
+      },
     };
     const expected = { average: 3, max: 200 };
     expect(isEqual(mapResponseTimes(responseTimes), expected)).to.be(true);
@@ -40,16 +40,16 @@ describe('Map response times', () => {
     const responseTimes = {
       '5600': {
         avg: 5,
-        max: 10
+        max: 10,
       },
       '5602': {
         avg: 3,
-        max: 200
+        max: 200,
       },
       '5604': {
         // no average
-        max: 105
-      }
+        max: 105,
+      },
     };
     const expected = { average: 5, max: 200 };
     expect(isEqual(mapResponseTimes(responseTimes), expected)).to.be(true);

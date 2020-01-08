@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
+import * as i18n from '../translations';
 import {
   DeleteTimelines,
   OnOpenTimeline,
@@ -22,14 +22,18 @@ import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 
-import * as i18n from '../translations';
+// there are a number of type mismatches across this file
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none;
+    animation: none; /* Prevents applying max-height from animation */
+  }
+
+  .euiTableRow-isExpandedRow .euiTableCellContent__text {
+    width: 100%; /* Fixes collapsing nested flex content in IE11 */
   }
 `;
-
 BasicTable.displayName = 'BasicTable';
 
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
@@ -91,7 +95,7 @@ export interface TimelinesTableProps {
  * Renders a table that displays metadata about timelines, (i.e. name,
  * description, etc.)
  */
-export const TimelinesTable = pure<TimelinesTableProps>(
+export const TimelinesTable = React.memo<TimelinesTableProps>(
   ({
     deleteTimelines,
     defaultPageSize,
@@ -123,7 +127,7 @@ export const TimelinesTable = pure<TimelinesTableProps>(
 
     const sorting = {
       sort: {
-        field: sortField,
+        field: sortField as keyof OpenTimelineResult,
         direction: sortDirection,
       },
     };
@@ -144,6 +148,7 @@ export const TimelinesTable = pure<TimelinesTableProps>(
           onToggleShowNotes,
           showExtendedColumnsAndActions,
         })}
+        compressed
         data-test-subj="timelines-table"
         isExpandable={true}
         isSelectable={showExtendedColumnsAndActions}
@@ -160,5 +165,4 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     );
   }
 );
-
 TimelinesTable.displayName = 'TimelinesTable';

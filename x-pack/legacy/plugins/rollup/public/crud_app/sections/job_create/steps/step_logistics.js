@@ -26,12 +26,13 @@ import {
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl, cronUrl } from '../../../services';
 import { StepError } from './components';
 
-const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
+
+const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 export class StepLogisticsUi extends Component {
@@ -233,12 +234,12 @@ export class StepLogisticsUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateLogisticsTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogisticsTitle"
                   defaultMessage="Logistics"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -276,12 +277,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionIdTitle"
                     defaultMessage="Name"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -316,12 +317,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowTitle"
                     defaultMessage="Data flow"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -393,12 +394,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionScheduleTitle"
                     defaultMessage="Schedule"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -415,12 +416,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
                     defaultMessage="How many documents do you want to roll up at a time?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             }
             description={
@@ -456,12 +457,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             }
             description={

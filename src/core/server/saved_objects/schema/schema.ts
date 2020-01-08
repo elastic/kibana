@@ -17,19 +17,21 @@
  * under the License.
  */
 
-import { Config } from '../../config';
+import { LegacyConfig } from '../../legacy';
 
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  indexPattern?: ((config: Config) => string) | string;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;
 }
 
+/** @internal */
 export interface SavedObjectsSchemaDefinition {
   [key: string]: SavedObjectsSchemaTypeDefinition;
 }
 
+/** @internal */
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
@@ -44,7 +46,8 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  public getIndexForType(config: Config, type: string): string | undefined {
+  // TODO: Remove dependency on config when we move SavedObjectsSchema to NP
+  public getIndexForType(config: LegacyConfig, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
       const { indexPattern } = this.definition[type];
       return typeof indexPattern === 'function' ? indexPattern(config) : indexPattern;

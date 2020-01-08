@@ -12,12 +12,6 @@ An object that handles registration of context providers and configuring handler
 export interface ContextSetup 
 ```
 
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [createContextContainer()](./kibana-plugin-server.contextsetup.createcontextcontainer.md) | Creates a new [IContextContainer](./kibana-plugin-server.icontextcontainer.md) for a service owner. |
-
 ## Remarks
 
 A [IContextContainer](./kibana-plugin-server.icontextcontainer.md) can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and configuring a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
@@ -85,24 +79,23 @@ Say we're creating a plugin for rendering visualizations that allows new renderi
 export interface VizRenderContext {
   core: {
     i18n: I18nStart;
-    uiSettings: UISettingsClientContract;
+    uiSettings: IUiSettingsClient;
   }
   [contextName: string]: unknown;
 }
 
 export type VizRenderer = (context: VizRenderContext, domElement: HTMLElement) => () => void;
+// When a renderer is bound via `contextContainer.createHandler` this is the type that will be returned.
+type BoundVizRenderer = (domElement: HTMLElement) => () => void;
 
 class VizRenderingPlugin {
-  private readonly vizRenderers = new Map<string, ((domElement: HTMLElement) => () => void)>();
+  private readonly contextContainer?: IContextContainer<VizRenderer>;
+  private readonly vizRenderers = new Map<string, BoundVizRenderer>();
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   setup(core) {
-    this.contextContainer = core.context.createContextContainer<
-      VizRenderContext,
-      ReturnType<VizRenderer>,
-      [HTMLElement]
-    >();
+    this.contextContainer = core.context.createContextContainer();
 
     return {
       registerContext: this.contextContainer.registerContext,
@@ -136,4 +129,10 @@ class VizRenderingPlugin {
 }
 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [createContextContainer()](./kibana-plugin-server.contextsetup.createcontextcontainer.md) | Creates a new [IContextContainer](./kibana-plugin-server.icontextcontainer.md) for a service owner. |
 

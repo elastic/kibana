@@ -27,24 +27,37 @@ describe('dev/build/lib/version_info', () => {
     it('returns unchanged package.version, build sha, and build number', async () => {
       const versionInfo = await getVersionInfo({
         isRelease: true,
-        pkg
+        pkg,
       });
 
       expect(versionInfo).to.have.property('buildVersion', pkg.version);
-      expect(versionInfo).to.have.property('buildSha').match(/^[0-9a-f]{40}$/);
-      expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
+      expect(versionInfo)
+        .to.have.property('buildSha')
+        .match(/^[0-9a-f]{40}$/);
+      expect(versionInfo)
+        .to.have.property('buildNumber')
+        .a('number')
+        .greaterThan(1000);
     });
   });
   describe('isRelease = false', () => {
     it('returns snapshot version, build sha, and build number', async () => {
       const versionInfo = await getVersionInfo({
         isRelease: false,
-        pkg
+        pkg,
       });
 
-      expect(versionInfo).to.have.property('buildVersion').contain(pkg.version).match(/-SNAPSHOT$/);
-      expect(versionInfo).to.have.property('buildSha').match(/^[0-9a-f]{40}$/);
-      expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
+      expect(versionInfo)
+        .to.have.property('buildVersion')
+        .contain(pkg.version)
+        .match(/-SNAPSHOT$/);
+      expect(versionInfo)
+        .to.have.property('buildSha')
+        .match(/^[0-9a-f]{40}$/);
+      expect(versionInfo)
+        .to.have.property('buildNumber')
+        .a('number')
+        .greaterThan(1000);
     });
   });
 
@@ -53,9 +66,11 @@ describe('dev/build/lib/version_info', () => {
       const versionInfo = await getVersionInfo({
         isRelease: true,
         versionQualifier: 'beta55',
-        pkg
+        pkg,
       });
-      expect(versionInfo).to.have.property('buildVersion').be(pkg.version + '-beta55');
+      expect(versionInfo)
+        .to.have.property('buildVersion')
+        .be(pkg.version + '-beta55');
     });
   });
 });

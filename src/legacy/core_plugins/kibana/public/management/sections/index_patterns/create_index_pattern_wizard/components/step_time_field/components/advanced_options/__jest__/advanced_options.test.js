@@ -18,13 +18,13 @@
  */
 
 import React from 'react';
-import { AdvancedOptionsComponent } from '../advanced_options';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { AdvancedOptions } from '../advanced_options';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 describe('AdvancedOptions', () => {
   it('should render normally', () => {
-    const component = shallowWithIntl(
-      <AdvancedOptionsComponent
+    const component = shallowWithI18nProvider(
+      <AdvancedOptions
         showingAdvancedOptions={true}
         indexPatternId={'foobar'}
         toggleAdvancedOptions={() => {}}
@@ -36,8 +36,8 @@ describe('AdvancedOptions', () => {
   });
 
   it('should hide if not showing', () => {
-    const component = shallowWithIntl(
-      <AdvancedOptionsComponent
+    const component = shallowWithI18nProvider(
+      <AdvancedOptions
         showingAdvancedOptions={false}
         indexPatternId={'foobar'}
         toggleAdvancedOptions={() => {}}

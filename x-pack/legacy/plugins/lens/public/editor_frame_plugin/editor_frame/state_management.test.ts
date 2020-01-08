@@ -26,6 +26,7 @@ describe('editor_frame state management', () => {
         core: coreMock.createSetup(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
+        filters: [],
       };
     });
 

@@ -19,11 +19,7 @@
 
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -31,7 +27,10 @@ export const Header = () => (
   <div>
     <EuiTitle size="s">
       <h3>
-        <FormattedMessage id="kbn.management.editIndexPattern.sourceHeader" defaultMessage="Source filters"/>
+        <FormattedMessage
+          id="kbn.management.editIndexPattern.sourceHeader"
+          defaultMessage="Source filters"
+        />
       </h3>
     </EuiTitle>
     <EuiText>

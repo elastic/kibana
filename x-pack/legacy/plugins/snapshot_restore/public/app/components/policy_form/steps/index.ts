@@ -10,7 +10,7 @@ import { PolicyValidation } from '../../../services/validation';
 export interface StepProps {
   policy: SlmPolicyPayload;
   indices: string[];
-  updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>) => void;
+  updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>, validationHelperData?: any) => void;
   isEditing: boolean;
   currentUrl: string;
   errors: PolicyValidation['errors'];
@@ -19,4 +19,5 @@ export interface StepProps {
 
 export { PolicyStepLogistics } from './step_logistics';
 export { PolicyStepSettings } from './step_settings';
+export { PolicyStepRetention } from './step_retention';
 export { PolicyStepReview } from './step_review';

@@ -2,7 +2,7 @@
 === CSV
 
 [float]
-==== Job Parameters
+==== Job parameters
 If integrating with Reporting via a custom UI, the following job parameters must be Rison encoded and posted to
 the aforementioned generate job url:
 

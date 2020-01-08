@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../../default_index_pattern';
 import { GetLastEventTimeQuery, LastEventIndexKey } from '../../../graphql/types';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
@@ -27,11 +28,11 @@ interface MockLastEventTimeQuery {
   };
 }
 
-const getTimeTwelveDaysAgo = () => {
+const getTimeTwelveMinutesAgo = () => {
   const d = new Date();
   const ts = d.getTime();
-  const twelveDays = ts - 12 * 24 * 60 * 60 * 1000;
-  return new Date(twelveDays).toISOString();
+  const twelveMinutes = ts - 12 * 60 * 1000;
+  return new Date(twelveMinutes).toISOString();
 };
 
 export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
@@ -42,7 +43,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         sourceId: 'default',
         indexKey: LastEventIndexKey.hosts,
         details: {},
-        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        defaultIndex: defaultIndexPattern,
       },
     },
     result: {
@@ -50,7 +51,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         source: {
           id: 'default',
           LastEventTime: {
-            lastSeen: getTimeTwelveDaysAgo(),
+            lastSeen: getTimeTwelveMinutesAgo(),
             errorMessage: null,
           },
         },

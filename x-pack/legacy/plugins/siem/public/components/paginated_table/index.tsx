@@ -5,6 +5,7 @@
  */
 import {
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -13,28 +14,35 @@ import {
   EuiGlobalToastListToast as Toast,
   EuiLoadingContent,
   EuiPagination,
-  EuiPanel,
   EuiPopover,
+  Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import React, { memo, useState, useEffect, useCallback, ComponentType } from 'react';
+import styled from 'styled-components';
 
-import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
-import { DomainsColumns } from '../page/network/domains_table/columns';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
-import { NetworkTopNFlowColumns } from '../page/network/network_top_n_flow_table/columns';
+import { NetworkHttpColumns } from '../page/network/network_http_table/columns';
+import {
+  NetworkTopNFlowColumns,
+  NetworkTopNFlowColumnsIpDetails,
+} from '../page/network/network_top_n_flow_table/columns';
+import {
+  NetworkTopCountriesColumns,
+  NetworkTopCountriesColumnsIpDetails,
+} from '../page/network/network_top_countries_table/columns';
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
+import { Panel } from '../panel';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -63,12 +71,14 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | DomainsColumns
-  | DomainsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
+  | NetworkHttpColumns
+  | NetworkTopCountriesColumns
+  | NetworkTopCountriesColumnsIpDetails
   | NetworkTopNFlowColumns
+  | NetworkTopNFlowColumnsIpDetails
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -100,15 +110,17 @@ export interface BasicTableProps<T> {
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
 }
+type Func<T> = (arg: T) => string | number;
 
-export interface Columns<T> {
+export interface Columns<T, U = T> {
+  align?: string;
   field?: string;
-  name: string | React.ReactNode;
-  isMobileHeader?: boolean;
-  sortable?: boolean;
-  truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  isMobileHeader?: boolean;
+  name: string | React.ReactNode;
+  render?: (item: T, node: U) => React.ReactNode;
+  sortable?: boolean | Func<T>;
+  truncateText?: boolean;
   width?: string;
 }
 
@@ -215,15 +227,17 @@ export const PaginatedTable = memo<SiemTables>(
         </EuiContextMenuItem>
       ));
     const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
       <Panel
-        data-test-subj={`${dataTestSubj}-${loading}`}
-        loading={{ loading }}
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
+        data-test-subj={`${dataTestSubj}-loading-${loading}`}
+        loading={loading}
+        onMouseEnter={handleOnMouseEnter}
+        onMouseLeave={handleOnMouseLeave}
       >
-        <HeaderPanel
+        <HeaderSection
           id={id}
           showInspect={!loadingInitial && showInspect}
           subtitle={
@@ -234,26 +248,31 @@ export const PaginatedTable = memo<SiemTables>(
           tooltip={headerTooltip}
         >
           {!loadingInitial && headerSupplement}
-        </HeaderPanel>
+        </HeaderSection>
 
         {loadingInitial ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
+            {
+              // @ts-ignore avoid some type mismatches
+            }
             <BasicTable
+              // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
               compressed
               items={pageOfItems}
               onChange={onChange}
+              // @ts-ignore TS complains sorting.field is type `never`
               sorting={
                 sorting
                   ? {
                       sort: {
-                        field: sorting.field,
+                        field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                         direction: sorting.direction,
                       },
                     }
-                  : null
+                  : undefined
               }
             />
             <FooterAction>
@@ -293,19 +312,10 @@ export const PaginatedTable = memo<SiemTables>(
 
 PaginatedTable.displayName = 'PaginatedTable';
 
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
-
-const BasicTable = styled(EuiBasicTable)`
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(
+  EuiBasicTable as BasicTableType
+)`
   tbody {
     th,
     td {
@@ -316,41 +326,39 @@ const BasicTable = styled(EuiBasicTable)`
       display: block;
     }
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup).attrs({
+const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   responsive: false,
-})`
-  margin-top: ${props => props.theme.eui.euiSizeXS};
+}))`
+  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 FooterAction.displayName = 'FooterAction';
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  ${props => css`
-    @media only screen and (min-width: ${props.theme.eui.euiBreakpoints.m}) {
-      .euiButtonIcon:last-child {
-        margin-left: 28px;
-      }
-
-      .euiPagination {
-        position: relative;
-      }
-
-      .euiPagination::before {
-        bottom: 0;
-        color: ${props.theme.eui.euiButtonColorDisabled};
-        content: '\\2026';
-        font-size: ${props.theme.eui.euiFontSizeS};
-        padding: 5px ${props.theme.eui.euiSizeS};
-        position: absolute;
-        right: ${props.theme.eui.euiSizeL};
-      }
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    .euiButtonIcon:last-child {
+      margin-left: 28px;
     }
-  `}
+
+    .euiPagination {
+      position: relative;
+    }
+
+    .euiPagination::before {
+      bottom: 0;
+      color: ${({ theme }) => theme.eui.euiButtonColorDisabled};
+      content: '\\2026';
+      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+      padding: 5px ${({ theme }) => theme.eui.euiSizeS};
+      position: absolute;
+      right: ${({ theme }) => theme.eui.euiSizeL};
+    }
+  }
 `;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

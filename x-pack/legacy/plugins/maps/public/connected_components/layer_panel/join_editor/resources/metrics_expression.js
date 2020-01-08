@@ -16,23 +16,24 @@ import {
 } from '@elastic/eui';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
-export class MetricsExpression extends Component {
+import { METRIC_TYPE } from '../../../../../common/constants';
 
+export class MetricsExpression extends Component {
   state = {
     isPopoverOpen: false,
   };
 
   _togglePopover = () => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
-  }
+  };
 
   _closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   _renderMetricsEditor = () => {
     if (!this.props.rightFields) {
@@ -53,12 +54,12 @@ export class MetricsExpression extends Component {
         onChange={this.props.onChange}
       />
     );
-  }
+  };
 
   render() {
     const metricExpressions = this.props.metrics
       .filter(({ type, field }) => {
-        if (type === 'count') {
+        if (type === METRIC_TYPE.COUNT) {
           return true;
         }
 
@@ -69,18 +70,21 @@ export class MetricsExpression extends Component {
       })
       .map(({ type, field }) => {
         // do not use metric label so field and aggregation are not obscured.
-        if (type === 'count') {
+        if (type === METRIC_TYPE.COUNT) {
           return 'count';
         }
 
         return `${type} ${field}`;
       });
-    const useMetricDescription = i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsDescription', {
-      defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
-      values: {
-        metricsLength: metricExpressions.length
+    const useMetricDescription = i18n.translate(
+      'xpack.maps.layerPanel.metricsExpression.useMetricsDescription',
+      {
+        defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
+        values: {
+          metricsLength: metricExpressions.length,
+        },
       }
-    });
+    );
     return (
       <EuiPopover
         id="metricsPopover"
@@ -121,12 +125,10 @@ export class MetricsExpression extends Component {
 
 MetricsExpression.propTypes = {
   metrics: PropTypes.array,
-  rightFields: PropTypes.object,  // indexPattern.fields IndexedArray object
+  rightFields: PropTypes.array,
   onChange: PropTypes.func.isRequired,
 };
 
 MetricsExpression.defaultProps = {
-  metrics: [
-    { type: 'count' }
-  ]
+  metrics: [{ type: METRIC_TYPE.COUNT }],
 };

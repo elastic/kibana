@@ -10,6 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;
@@ -18,7 +19,7 @@ interface IBucket {
 
 // TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
 interface IDistribution {
-  totalHits: number;
+  noHits: boolean;
   buckets: IBucket[];
   bucketSize: number;
 }
@@ -51,15 +52,16 @@ interface Props {
   title: React.ReactNode;
 }
 
+const tooltipHeader = (bucket: FormattedBucket) =>
+  asRelativeDateTimeRange(bucket.x0, bucket.x);
+
 export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
   );
 
-  const isEmpty = distribution.totalHits === 0;
-
-  if (isEmpty) {
+  if (distribution.noHits) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -75,6 +77,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time"
         buckets={buckets}

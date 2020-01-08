@@ -18,21 +18,23 @@
  */
 
 import { configModel } from './dll_config_model';
-import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } from './dll_allowed_modules';
-import { fromRoot } from '../../legacy/utils';
+import {
+  notInNodeModulesOrWebpackShims,
+  notInNodeModules,
+  inDllPluginPublic,
+} from './dll_allowed_modules';
+import { fromRoot } from '../../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 
 const readFileAsync = promisify(fs.readFile);
-const mkdirpAsync = promisify(mkdirp);
-const existsAsync = promisify(fs.exists);
+const mkdirAsync = promisify(fs.mkdir);
+const accessAsync = promisify(fs.access);
 const writeFileAsync = promisify(fs.writeFile);
-const rimrafAsync = promisify(rimraf);
 
 export class DllCompiler {
   static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
@@ -50,7 +52,7 @@ export class DllCompiler {
       manifestExt: '.manifest.dll.json',
       styleExt: '.style.dll.css',
       outputPath: fromRoot('built_assets/dlls'),
-      publicPath: PUBLIC_PATH_PLACEHOLDER
+      publicPath: PUBLIC_PATH_PLACEHOLDER,
     };
   }
 
@@ -79,27 +81,19 @@ export class DllCompiler {
   }
 
   getDllPath() {
-    return this.resolvePath(
-      `${this.rawDllConfig.entryName}${this.rawDllConfig.dllExt}`
-    );
+    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.dllExt}`);
   }
 
   getEntryPath() {
-    return this.resolvePath(
-      `${this.rawDllConfig.entryName}${this.rawDllConfig.entryExt}`
-    );
+    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.entryExt}`);
   }
 
   getManifestPath() {
-    return this.resolvePath(
-      `${this.rawDllConfig.entryName}${this.rawDllConfig.manifestExt}`
-    );
+    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.manifestExt}`);
   }
 
   getStylePath() {
-    return this.resolvePath(
-      `${this.rawDllConfig.entryName}${this.rawDllConfig.styleExt}`
-    );
+    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.styleExt}`);
   }
 
   async ensureEntryFileExists() {
@@ -111,7 +105,7 @@ export class DllCompiler {
       this.getManifestPath(),
       JSON.stringify({
         name: this.rawDllConfig.entryName,
-        content: {}
+        content: {},
       })
     );
   }
@@ -129,13 +123,14 @@ export class DllCompiler {
   }
 
   async ensurePathExists(filePath) {
-    const exists = await existsAsync(filePath);
-
-    if (!exists) {
-      await mkdirpAsync(path.dirname(filePath));
+    try {
+      await accessAsync(filePath);
+    } catch (e) {
+      await mkdirAsync(path.dirname(filePath), { recursive: true });
+      return false;
     }
 
-    return exists;
+    return true;
   }
 
   async ensureOutputPathExists() {
@@ -168,7 +163,10 @@ export class DllCompiler {
     await this.upsertEntryFile(dllEntries);
 
     try {
-      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
+      this.logWithMetadata(
+        ['info', 'optimize:dynamic_dll_plugin'],
+        'Client vendors dll compilation started'
+      );
 
       await this.runWebpack(dllConfig());
 
@@ -208,13 +206,16 @@ export class DllCompiler {
         // If a critical error occurs or we have
         // errors in the stats compilation,
         // reject the promise and logs the errors
-        const webpackErrors = err || (stats.hasErrors() && stats.toString({
-          all: false,
-          colors: true,
-          errors: true,
-          errorDetails: true,
-          moduleTrace: true
-        }));
+        const webpackErrors =
+          err ||
+          (stats.hasErrors() &&
+            stats.toString({
+              all: false,
+              colors: true,
+              errors: true,
+              errorDetails: true,
+              moduleTrace: true,
+            }));
 
         if (webpackErrors) {
           // Reject with webpack fatal errors
@@ -225,7 +226,7 @@ export class DllCompiler {
         // bundled inside the dll bundle
         const notAllowedModules = [];
 
-        stats.compilation.modules.forEach((module) => {
+        stats.compilation.modules.forEach(module => {
           // ignore if no module or userRequest are defined
           if (!module || !module.resource) {
             return;
@@ -245,10 +246,10 @@ export class DllCompiler {
 
           // A module is not allowed if it's not a node_module, a webpackShim
           // or the reasons from being bundled into the dll are not node_modules
-          if(notInNodeModulesOrWebpackShims(module.resource)) {
+          if (notInNodeModulesOrWebpackShims(module.resource)) {
             const reasons = module.reasons || [];
 
-            reasons.forEach((reason) => {
+            reasons.forEach(reason => {
               // Skip if we can't read the reason info
               if (!reason || !reason.module || !reason.module.resource) {
                 return;
@@ -268,12 +269,16 @@ export class DllCompiler {
           // Delete the built dll, as it contains invalid modules, and reject listing
           // all the not allowed modules
           try {
-            await rimrafAsync(this.rawDllConfig.outputPath);
+            await del(this.rawDllConfig.outputPath);
           } catch (e) {
             return reject(e);
           }
 
-          return reject(`The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join('\n')}`);
+          return reject(
+            `The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join(
+              '\n'
+            )}`
+          );
         }
 
         // Otherwise it has succeed

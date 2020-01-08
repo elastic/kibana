@@ -33,11 +33,11 @@ import { keyCodes } from '@elastic/eui';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
-import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
-import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 import { AggGroupNames } from './agg_groups';
 
-const defaultEditor = function ($rootScope, $compile) {
+import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+
+const defaultEditor = function($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -50,14 +50,16 @@ const defaultEditor = function ($rootScope, $compile) {
         this.vis.type.editorConfig.optionTabs = [
           {
             name: 'options',
-            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', {
+              defaultMessage: 'Options',
+            }),
             editor: this.vis.type.editorConfig.optionsTemplate,
-          }
+          },
         ];
       }
     }
 
-    render({ uiState, timeRange, filters, appState }) {
+    render({ uiState, timeRange, filters, query, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -66,7 +68,7 @@ const defaultEditor = function ($rootScope, $compile) {
         //$scope.$apply();
       };
 
-      return new Promise(resolve => {
+      return new Promise(async resolve => {
         if (!this.$scope) {
           this.$scope = $scope = $rootScope.$new();
 
@@ -98,13 +100,16 @@ const defaultEditor = function ($rootScope, $compile) {
               $scope.autoApplyEnabled = !$scope.autoApplyEnabled;
             };
 
-            $scope.$watch('vis.dirty', _.debounce(() => {
-              if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
-              $scope.stageEditableVis();
-            }, 800));
+            $scope.$watch(
+              'vis.dirty',
+              _.debounce(() => {
+                if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
+                $scope.stageEditableVis();
+              }, 800)
+            );
           }
 
-          $scope.submitEditorWithKeyboard = (event) => {
+          $scope.submitEditorWithKeyboard = event => {
             if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
               event.preventDefault();
               event.stopPropagation();
@@ -122,27 +127,40 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          $scope.$watch(() => {
-            return $scope.vis.getSerializableState($scope.state);
-          }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            const responseAggs = $scope.state.aggs.getResponseAggs();
-            $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
-            $scope.metricAggs = responseAggs.filter(agg =>
-              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
-            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
-            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
-          }, true);
+          $scope.$watch(
+            () => {
+              return $scope.vis.getSerializableState($scope.state);
+            },
+            function(newState) {
+              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
+              const responseAggs = $scope.state.aggs.getResponseAggs();
+              $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
+              $scope.metricAggs = responseAggs.filter(
+                agg => _.get(agg, 'schema.group') === AggGroupNames.Metrics
+              );
+              const lastParentPipelineAgg = _.findLast(
+                $scope.metricAggs,
+                ({ type }) => type.subtype === parentPipelineAggHelper.subtype
+              );
+              $scope.lastParentPipelineAggTitle =
+                lastParentPipelineAgg && lastParentPipelineAgg.type.title;
+            },
+            true
+          );
 
           // fires when visualization state changes, and we need to copy changes to editorState
-          $scope.$watch(() => {
-            return $scope.vis.getCurrentState(false);
-          }, (newState) => {
-            if (!_.isEqual(newState, $scope.oldState)) {
-              $scope.state = $scope.vis.copyCurrentState(true);
-              $scope.oldState = newState;
-            }
-          }, true);
+          $scope.$watch(
+            () => {
+              return $scope.vis.getCurrentState(false);
+            },
+            newState => {
+              if (!_.isEqual(newState, $scope.oldState)) {
+                $scope.state = $scope.vis.copyCurrentState(true);
+                $scope.oldState = newState;
+              }
+            },
+            true
+          );
 
           // Load the default editor template, attach it to the DOM and compile it.
           // It should be added to the DOM before compiling, to prevent some resize
@@ -157,32 +175,28 @@ const defaultEditor = function ($rootScope, $compile) {
 
         if (!this._handler) {
           const visualizationEl = this.el.find('.visEditor__canvas')[0];
-          getVisualizeLoader().then(loader => {
-            if (!visualizationEl) {
-              return;
-            }
-            this._loader = loader;
-            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
+
+          this._handler = await embeddables
+            .getEmbeddableFactory('visualization')
+            .createFromObject(this.savedObj, {
               uiState: uiState,
-              listenOnChange: false,
+              appState,
               timeRange: timeRange,
-              filters: filters,
-              appState: appState,
+              filters: filters || [],
+              query: query,
             });
-          });
+          this._handler.render(visualizationEl);
         } else {
-          this._handler.update({
+          this._handler.updateInput({
             timeRange: timeRange,
-            filters: filters,
+            filters: filters || [],
+            query: query,
           });
         }
-
       });
     }
 
-    resize() {
-
-    }
+    resize() {}
 
     destroy() {
       if (this.$scope) {
@@ -195,7 +209,5 @@ const defaultEditor = function ($rootScope, $compile) {
     }
   };
 };
-
-VisEditorTypesRegistryProvider.register(defaultEditor);
 
 export { defaultEditor };

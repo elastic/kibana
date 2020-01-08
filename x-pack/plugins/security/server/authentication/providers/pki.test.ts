@@ -583,7 +583,7 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({ accessToken: 'foo' });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
   });
 });

@@ -23,7 +23,11 @@ type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 
 declare module 'axios/lib/adapters/xhr';
 
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};
+
+type MockedKeys<T> = { [P in keyof T]: jest.Mocked<Writable<T[P]>> };
 
 type DeeplyMockedKeys<T> = {
   [P in keyof T]: T[P] extends (...args: any[]) => any

@@ -9,6 +9,9 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { ColorPickerPopover } from '../../components/color_picker_popover';
+import { ArgTypesStrings } from '../../../i18n';
+
+const { Color: strings } = ArgTypesStrings;
 
 const ColorArgInput = ({ onValueChange, argValue, workpad }) => (
   <EuiFlexGroup gutterSize="s">
@@ -28,8 +31,8 @@ ColorArgInput.propTypes = {
 
 export const color = () => ({
   name: 'color',
-  displayName: 'Color',
-  help: 'Color picker',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(ColorArgInput),
   default: '#000000',
 });

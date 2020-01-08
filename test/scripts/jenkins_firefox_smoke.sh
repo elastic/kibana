@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+  node scripts/build --debug --oss;
+  linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-oss-*-linux-x86_64.tar.gz')"
+  installDir="$PARENT_DIR/install/kibana"
+  mkdir -p "$installDir"
+  tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 else
-  source src/dev/ci_setup/setup_env.sh
-fi
+  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
+  destDir=${installDir}-${CI_WORKER_NUMBER}
+  cp -R "$installDir" "$destDir"
 
-node scripts/build --debug --oss;
-linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-oss-*-linux-x86_64.tar.gz')"
-installDir="$PARENT_DIR/install/kibana"
-mkdir -p "$installDir"
-tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+  export KIBANA_INSTALL_DIR="$destDir"
+fi
 
 export TEST_BROWSER_HEADLESS=1
 
@@ -22,5 +24,3 @@ checks-reporter-with-killswitch "Firefox smoke test" \
     --kibana-install-dir "$installDir" \
     --include-tag "smoke" \
     --config test/functional/config.firefox.js;
-
-source "$KIBANA_DIR/test/scripts/jenkins_xpack_firefox_smoke.sh"

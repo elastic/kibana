@@ -13,10 +13,6 @@ import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
-  static childContextTypes = {
-    router: PropTypes.object.isRequired,
-  };
-
   static propTypes = {
     showLoading: PropTypes.bool.isRequired,
     onLoad: PropTypes.func.isRequired,
@@ -25,6 +21,10 @@ export class Router extends React.PureComponent {
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
     setFullscreen: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    router: PropTypes.object.isRequired,
   };
 
   state = {
@@ -37,7 +37,7 @@ export class Router extends React.PureComponent {
     return { router };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);

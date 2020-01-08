@@ -28,6 +28,11 @@ export enum ColorSchemas {
   GreenToRed = 'Green to Red',
 }
 
+export interface ColorSchema {
+  value: ColorSchemas;
+  text: string;
+}
+
 export const vislibColorMaps = {
   // Sequential
   [ColorSchemas.Blues]: {

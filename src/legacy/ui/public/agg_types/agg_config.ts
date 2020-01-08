@@ -26,20 +26,21 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggType, FieldParamType, BucketAggType } from '.';
+import { npStart } from 'ui/new_platform';
+import { ISearchSource, FetchOptions } from '../courier/types';
+import { AggType } from './agg_type';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
-// @ts-ignore
-import { fieldFormats } from '../registry/field_formats';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
+import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
-  id: string;
   enabled: boolean;
   type: string;
-  schema: string;
   params: any;
+  id?: string;
+  schema?: string;
 }
 
 const unknownSchema: Schema = {
@@ -139,7 +140,10 @@ export class AggConfig {
 
     // setters
     this.setType(opts.type);
-    this.setSchema(opts.schema);
+
+    if (opts.schema) {
+      this.setSchema(opts.schema);
+    }
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
@@ -194,8 +198,12 @@ export class AggConfig {
     });
   }
 
+  getParam(key: string): any {
+    return _.get(this.params, key);
+  }
+
   write(aggs?: AggConfigs) {
-    return writeParams(this.type.params, this, aggs);
+    return writeParams<AggConfig>(this.type.params, this, aggs);
   }
 
   isFilterable() {
@@ -203,7 +211,9 @@ export class AggConfig {
   }
 
   createFilter(key: string, params = {}) {
-    if (!this.isFilterable()) {
+    const createFilter = this.type.createFilter;
+
+    if (!createFilter) {
       throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
 
@@ -217,23 +227,23 @@ export class AggConfig {
       throw new TypeError(message);
     }
 
-    return this.type.createFilter(this, key, params);
+    return createFilter(this, key, params);
   }
 
   /**
    *  Hook for pre-flight logic, see AggType#onSearchRequestStart
    *  @param {Courier.SearchSource} searchSource
-   *  @param {Courier.SearchRequest} searchRequest
+   *  @param {Courier.FetchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, searchRequest: any) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.all(
       this.type.params.map((param: any) =>
-        param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest)
+        param.modifyAggConfigOnSearchRequestStart(this, searchSource, options)
       )
     );
   }
@@ -247,7 +257,7 @@ export class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggConfigs: AggConfigs) {
+  toDsl(aggConfigs?: AggConfigs) {
     if (this.type.hasNoDsl) return;
     const output = this.write(aggConfigs) as any;
 
@@ -320,9 +330,9 @@ export class AggConfig {
     return this.type.getValue(this, bucket);
   }
 
-  getKey(bucket: any, key: string) {
-    if (this.type instanceof BucketAggType) {
-      return (this.type as BucketAggType).getKey(bucket, key, this);
+  getKey(bucket: any, key?: string) {
+    if (this.type.getKey) {
+      return this.type.getKey(bucket, key, this);
     } else {
       return '';
     }
@@ -330,6 +340,7 @@ export class AggConfig {
 
   getFieldDisplayName() {
     const field = this.getField();
+
     return field ? field.displayName || this.fieldName() : '';
   }
 
@@ -359,17 +370,22 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType: string, defaultFormat: any) {
+  fieldFormatter(contentType?: ContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
-    if (format) return format.getConverterFor(contentType);
+
+    if (format) {
+      return format.getConverterFor(contentType);
+    }
+
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType: string, defaultFormat: any) {
+  fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
+    const fieldFormats = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance('string');
+    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 
@@ -408,13 +424,15 @@ export class AggConfig {
     }
 
     this.__type = type;
+    let availableFields = [];
 
-    const fieldParam =
-      this.type && (this.type.params.find((p: any) => p.type === 'field') as FieldParamType);
-    // @ts-ignore
-    const availableFields = fieldParam
-      ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
-      : [];
+    const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
+
+    if (fieldParam) {
+      // @ts-ignore
+      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+    }
+
     // clear out the previous params except for a few special ones
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it

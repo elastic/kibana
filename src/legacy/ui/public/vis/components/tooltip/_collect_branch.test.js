@@ -28,9 +28,7 @@ describe('collectBranch()', () => {
       { id: 'col2', name: 'Bucket2 Formatted Name' },
       { id: 'col3', name: 'Bucket3 Formatted Name' },
     ],
-    rows: [
-      { col1: 'bucket1', col2: 'bucket2', col3: 'bucket3' },
-    ],
+    rows: [{ col1: 'bucket1', col2: 'bucket2', col3: 'bucket3' }],
   };
 
   beforeEach(() => {

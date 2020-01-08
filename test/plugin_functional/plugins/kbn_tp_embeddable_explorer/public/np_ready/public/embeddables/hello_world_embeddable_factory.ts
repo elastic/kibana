@@ -17,8 +17,12 @@
  * under the License.
  */
 
-import { setup } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { HelloWorldEmbeddableFactory } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+// eslint-disable-next-line
+import { npSetup } from '../../../../../../../../src/legacy/ui/public/new_platform';
+// eslint-disable-next-line
+import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from '../../../../../../../../examples/embeddable_examples/public';
 
-const factory = new HelloWorldEmbeddableFactory();
-setup.registerEmbeddableFactory(factory.type, factory);
+npSetup.plugins.embeddable.registerEmbeddableFactory(
+  HELLO_WORLD_EMBEDDABLE,
+  new HelloWorldEmbeddableFactory()
+);

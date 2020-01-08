@@ -4,9 +4,10 @@
 
 ## AuthenticationHandler type
 
+See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
+export declare type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 ```

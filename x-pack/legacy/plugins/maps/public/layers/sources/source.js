@@ -7,7 +7,6 @@
 import { copyPersistentState } from '../../reducers/util';
 
 export class AbstractSource {
-
   static isIndexingSource = false;
 
   static renderEditor() {
@@ -95,8 +94,16 @@ export class AbstractSource {
     return null;
   }
 
+  getApplyGlobalQuery() {
+    return !!this._descriptor.applyGlobalQuery;
+  }
+
   getIndexPatternIds() {
-    return  [];
+    return [];
+  }
+
+  getQueryableIndexPatternIds() {
+    return [];
   }
 
   getGeoGridPrecision() {
@@ -115,9 +122,21 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  supportsElasticsearchFilters() {
+  isESSource() {
     return false;
   }
+
+  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
+  async getPreIndexedShape(/* properties */) {
+    return null;
+  }
+
+  // Returns function used to format value
+  async getFieldFormatter(/* fieldName */) {
+    return null;
+  }
+
+  async loadStylePropsMeta() {
+    throw new Error(`Source#loadStylePropsMeta not implemented`);
+  }
 }
-
-

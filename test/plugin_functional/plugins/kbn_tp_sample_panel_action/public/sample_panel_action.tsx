@@ -20,11 +20,9 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { npStart, npSetup } from 'ui/new_platform';
 
-import {
-  CONTEXT_MENU_TRIGGER,
-  IEmbeddable,
-} from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface ActionContext {
   embeddable: IEmbeddable;
@@ -39,16 +37,18 @@ function createSamplePanelAction() {
         return;
       }
       npStart.core.overlays.openFlyout(
-        <React.Fragment>
-          <EuiFlyoutHeader>
-            <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-              <h1>{embeddable.getTitle()}</h1>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
-          </EuiFlyoutBody>
-        </React.Fragment>,
+        toMountPoint(
+          <React.Fragment>
+            <EuiFlyoutHeader>
+              <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
+                <h1>{embeddable.getTitle()}</h1>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
+            </EuiFlyoutBody>
+          </React.Fragment>
+        ),
         {
           'data-test-subj': 'samplePanelActionFlyout',
         }

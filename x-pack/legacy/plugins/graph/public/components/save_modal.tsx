@@ -47,7 +47,7 @@ export function SaveModal({
       title={title}
       showCopyOnSave={showCopyOnSave}
       objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
-        defaultMessage: 'workspace',
+        defaultMessage: 'graph',
       })}
       options={
         <>

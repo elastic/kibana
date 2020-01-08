@@ -24,13 +24,16 @@ export function LicenseText({ license, showLicenseExpiration }) {
         defaultMessage="{licenseType} license {willExpireOn}"
         values={{
           licenseType: capitalize(license.type),
-          willExpireOn: license.expiry_date_in_millis === undefined ? '' : (
-            <FormattedMessage
-              id="xpack.monitoring.cluster.overview.licenseText.expireDateText"
-              defaultMessage="will expire on {expiryDate}"
-              values={{ expiryDate: formatDateLocal(license.expiry_date_in_millis) }}
-            />
-          )
+          willExpireOn:
+            license.expiry_date_in_millis === undefined ? (
+              ''
+            ) : (
+              <FormattedMessage
+                id="xpack.monitoring.cluster.overview.licenseText.expireDateText"
+                defaultMessage="will expire on {expiryDate}"
+                values={{ expiryDate: formatDateLocal(license.expiry_date_in_millis) }}
+              />
+            ),
         }}
       />
     </EuiLink>

@@ -10,12 +10,12 @@ export const buildFieldsTermAggregation = (esFields: readonly string[]): Aggrega
   esFields.reduce<AggregationRequest>(
     (res, field) => ({
       ...res,
-      ...getAggregationTypeFromField(field),
+      ...getTermsAggregationTypeFromField(field),
     }),
     {}
   );
 
-const getAggregationTypeFromField = (field: string): AggregationRequest => {
+const getTermsAggregationTypeFromField = (field: string): AggregationRequest => {
   return {
     [field.replace(/\./g, '_')]: {
       terms: {

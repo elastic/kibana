@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
@@ -62,24 +62,24 @@ export const DEFAULT_CHART_OPTIONS: MetricsExplorerChartOptions = {
 
 export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'system.cpu.user.pct',
     color: MetricsExplorerColor.color0,
   },
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'kubernetes.pod.cpu.usage.node.pct',
     color: MetricsExplorerColor.color1,
   },
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'docker.cpu.total.pct',
     color: MetricsExplorerColor.color2,
   },
 ];
 
 export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
-  aggregation: MetricsExplorerAggregation.avg,
+  aggregation: 'avg',
   metrics: DEFAULT_METRICS,
 };
 
@@ -102,7 +102,7 @@ function useStateWithLocalStorage<State>(
   const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(state));
-  }, [state]);
+  }, [key, state]);
   return [state, setState];
 }
 
@@ -121,6 +121,11 @@ export const useMetricsExplorerOptions = () => {
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
+    defaultViewState: {
+      options: DEFAULT_OPTIONS,
+      chartOptions: DEFAULT_CHART_OPTIONS,
+      currentTimerange: DEFAULT_TIMERANGE,
+    },
     options,
     chartOptions,
     setChartOptions,

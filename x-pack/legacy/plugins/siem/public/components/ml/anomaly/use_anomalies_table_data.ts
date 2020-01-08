@@ -14,12 +14,9 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import {
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_TIMEZONE_BROWSER,
-  DEFAULT_KBN_VERSION,
-} from '../../../../common/constants';
+import { useUiSetting$ } from '../../../lib/kibana';
+import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import { useTimeZone } from '../../../hooks';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -67,9 +64,10 @@ export const useAnomaliesTableData = ({
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
-  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const timeZone = useTimeZone();
+  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
+
+  const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -82,23 +80,20 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (userPermissions && !skip && siemJobs.length > 0) {
+      if (userPermissions && !skip && siemJobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {
-              jobIds: siemJobs,
+              jobIds: siemJobIds,
               criteriaFields: criteriaFieldsInput,
               aggregationInterval: 'auto',
               threshold: getThreshold(anomalyScore, threshold),
               earliestMs,
               latestMs,
               influencers: influencersInput,
-              dateFormatTz: timezone,
+              dateFormatTz: timeZone,
               maxRecords: 500,
               maxExamples: 10,
-            },
-            {
-              'kbn-version': kbnVersion,
             },
             abortCtrl.signal
           );
@@ -114,7 +109,7 @@ export const useAnomaliesTableData = ({
         }
       } else if (!userPermissions && isSubscribed) {
         setLoading(false);
-      } else if (siemJobs.length === 0 && isSubscribed) {
+      } else if (siemJobIds.length === 0 && isSubscribed) {
         setLoading(false);
       } else if (isSubscribed) {
         setTableData(null);
@@ -134,7 +129,7 @@ export const useAnomaliesTableData = ({
     endDate,
     skip,
     userPermissions,
-    siemJobs.join(),
+    siemJobIds.sort().join(),
   ]);
 
   return [loading, tableData];

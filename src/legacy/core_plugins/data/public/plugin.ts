@@ -17,32 +17,29 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { SearchService, SearchStart } from './search';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
-export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
+import {
+  setFieldFormats,
+  setNotifications,
+  setIndexPatterns,
+  setQueryService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+
+export interface DataPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /**
- * Interface for this plugin's returned `setup` contract.
+ * Interface for this plugin's returned `start` contract.
  *
  * @public
  */
-export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
-  search: SearchSetup;
+export interface DataStart {
+  search: SearchStart;
 }
 
 /**
@@ -56,48 +53,26 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependencies> {
-  // Exposed services, sorted alphabetically
-  private readonly filter: FilterService = new FilterService();
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
 
-  private setupApi!: DataSetup;
+export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings, http } = core;
-    const savedObjectsClient = __LEGACY.savedObjectsClient;
+  public setup(core: CoreSetup) {}
 
-    const indexPatternsService = this.indexPatterns.setup({
-      uiSettings,
-      savedObjectsClient,
-      http,
-    });
+  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+    // This is required for when Angular code uses Field and FieldList.
+    setFieldFormats(data.fieldFormats);
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setNotifications(core.notifications);
 
-    this.setupApi = {
-      indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        uiSettings,
-        indexPatterns: indexPatternsService.indexPatterns,
-      }),
-      query: this.query.setup(),
-      search: this.search.setup(savedObjectsClient),
-    };
-
-    return this.setupApi;
-  }
-
-  public start(core: CoreStart) {
     return {
-      ...this.setupApi!,
+      search: this.search.start(core),
     };
   }
 
   public stop() {
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.query.stop();
     this.search.stop();
   }
 }

@@ -18,46 +18,42 @@
  */
 
 import sinon from 'sinon';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
+import del from 'del';
 import Logger from '../lib/logger';
 import list from './list';
 import { join } from 'path';
-import { writeFileSync, appendFileSync } from 'fs';
-
+import { writeFileSync, appendFileSync, mkdirSync } from 'fs';
 
 function createPlugin(name, version, pluginBaseDir) {
   const pluginDir = join(pluginBaseDir, name);
-  mkdirp.sync(pluginDir);
+  mkdirSync(pluginDir, { recursive: true });
   appendFileSync(join(pluginDir, 'package.json'), '{"version": "' + version + '"}');
 }
 
-describe('kibana cli', function () {
-
-  describe('plugin lister', function () {
-
+describe('kibana cli', function() {
+  describe('plugin lister', function() {
     const pluginDir = join(__dirname, '.test.data.list');
     let logger;
 
     const settings = {
-      pluginDir: pluginDir
+      pluginDir: pluginDir,
     };
 
-    beforeEach(function () {
+    beforeEach(function() {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
-      mkdirp.sync(pluginDir);
+      del.sync(pluginDir);
+      mkdirSync(pluginDir, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
-    it('list all of the folders in the plugin folder', function () {
+    it('list all of the folders in the plugin folder', function() {
       createPlugin('plugin1', '5.0.0-alpha2', pluginDir);
       createPlugin('plugin2', '3.2.1', pluginDir);
       createPlugin('plugin3', '1.2.3', pluginDir);
@@ -69,7 +65,7 @@ describe('kibana cli', function () {
       expect(logger.log.calledWith('plugin3@1.2.3')).toBe(true);
     });
 
-    it('ignore folders that start with a period', function () {
+    it('ignore folders that start with a period', function() {
       createPlugin('.foo', '1.0.0', pluginDir);
       createPlugin('plugin1', '5.0.0-alpha2', pluginDir);
       createPlugin('plugin2', '3.2.1', pluginDir);
@@ -82,7 +78,7 @@ describe('kibana cli', function () {
       expect(logger.log.calledWith('.bar@1.0.0')).toBe(false);
     });
 
-    it('list should only list folders', function () {
+    it('list should only list folders', function() {
       createPlugin('plugin1', '1.0.0', pluginDir);
       createPlugin('plugin2', '1.0.0', pluginDir);
       createPlugin('plugin3', '1.0.0', pluginDir);
@@ -95,26 +91,24 @@ describe('kibana cli', function () {
       expect(logger.log.calledWith('plugin3@1.0.0')).toBe(true);
     });
 
-    it('list should throw an exception if a plugin does not have a package.json', function () {
+    it('list should throw an exception if a plugin does not have a package.json', function() {
       createPlugin('plugin1', '1.0.0', pluginDir);
-      mkdirp.sync(join(pluginDir, 'empty-plugin'));
+      mkdirSync(join(pluginDir, 'empty-plugin'), { recursive: true });
 
-      expect(function () {
+      expect(function() {
         list(settings, logger);
       }).toThrowError('Unable to read package.json file for plugin empty-plugin');
     });
 
-    it('list should throw an exception if a plugin have an empty package.json', function () {
+    it('list should throw an exception if a plugin have an empty package.json', function() {
       createPlugin('plugin1', '1.0.0', pluginDir);
       const invalidPluginDir = join(pluginDir, 'invalid-plugin');
-      mkdirp.sync(invalidPluginDir);
+      mkdirSync(invalidPluginDir, { recursive: true });
       appendFileSync(join(invalidPluginDir, 'package.json'), '');
 
-      expect(function () {
+      expect(function() {
         list(settings, logger);
       }).toThrowError('Unable to read package.json file for plugin invalid-plugin');
     });
-
   });
-
 });

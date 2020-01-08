@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionBreakdown() {
   const {
@@ -15,39 +13,31 @@ export function useTransactionBreakdown() {
     uiFilters
   } = useUrlParams();
 
-  const {
-    data = { kpis: [], timeseries: [] },
-    error,
-    status
-  } = useFetcher(() => {
-    if (serviceName && start && end && transactionType) {
-      return callApmApi({
-        pathname:
-          '/api/apm/services/{serviceName}/transaction_groups/breakdown',
-        params: {
-          path: { serviceName },
-          query: {
-            start,
-            end,
-            transactionName,
-            transactionType,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data = { kpis: [], timeseries: [] }, error, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end && transactionType) {
+        return callApmApi({
+          pathname:
+            '/api/apm/services/{serviceName}/transaction_groups/breakdown',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              transactionName,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
-
-  const receivedDataDuringLifetime = useRef(false);
-
-  if (data && data.kpis.length) {
-    receivedDataDuringLifetime.current = true;
-  }
+        });
+      }
+    },
+    [serviceName, start, end, transactionType, transactionName, uiFilters]
+  );
 
   return {
     data,
     status,
-    error,
-    receivedDataDuringLifetime: receivedDataDuringLifetime.current
+    error
   };
 }

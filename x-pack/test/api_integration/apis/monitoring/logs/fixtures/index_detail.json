@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "logs": [{
-    "timestamp": "2019-03-15T17:07:21.089Z",
+    "timestamp": 1552669641089,
     "component": "o.e.n.Node",
     "node": "Elastic-MBP.local",
     "index": ".monitoring-es",

@@ -26,14 +26,13 @@ import { Data } from './data';
 
 const DEFAULT_VIS_CONFIG = {
   style: {
-    margin: { top: 10, right: 3, bottom: 5, left: 3 }
+    margin: { top: 10, right: 3, bottom: 5, left: 3 },
   },
   alerts: [],
   categoryAxes: [],
   valueAxes: [],
-  grid: {}
+  grid: {},
 };
-
 
 export class VisConfig {
   constructor(visConfigArgs, data, uiState, el) {

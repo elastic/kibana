@@ -13,11 +13,11 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
   EuiLink,
   EuiIcon,
   EuiToolTip,
-  EuiText,
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
@@ -31,7 +31,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { name, snapshotName, schedule, repository, config } = policy;
+  const { name, snapshotName, schedule, repository, config, retention } = policy;
   const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
     indices: undefined,
     includeGlobalState: undefined,
@@ -48,8 +48,35 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   const hiddenIndicesCount =
     displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
+  const serializedPolicy = serializePolicy(policy);
+  const { retention: serializedRetention } = serializedPolicy;
+
+  const EditStepTooltip = ({ step }: { step: number }) => (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
+          defaultMessage="Edit"
+        />
+      }
+    >
+      <EuiLink onClick={() => updateCurrentStep(step)}>
+        <EuiIcon
+          type="pencil"
+          aria-label={i18n.translate(
+            'xpack.snapshotRestore.policyForm.stepReview.editIconAriaLabel',
+            {
+              defaultMessage: 'Edit step',
+            }
+          )}
+        />
+      </EuiLink>
+    </EuiToolTip>
+  );
+
   const renderSummaryTab = () => (
     <Fragment>
+      {/* Logistics summary */}
       <EuiSpacer size="m" />
       <EuiTitle size="s">
         <h3>
@@ -57,18 +84,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionLogisticsTitle"
             defaultMessage="Logistics"
           />{' '}
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
-                defaultMessage="Edit"
-              />
-            }
-          >
-            <EuiLink onClick={() => updateCurrentStep(1)}>
-              <EuiIcon type="pencil" />
-            </EuiLink>
-          </EuiToolTip>
+          <EditStepTooltip step={1} />
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -125,24 +141,15 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      {/* Snapshot settings summary */}
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionSettingsTitle"
             defaultMessage="Snapshot settings"
           />{' '}
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
-                defaultMessage="Edit"
-              />
-            }
-          >
-            <EuiLink onClick={() => updateCurrentStep(2)}>
-              <EuiIcon type="pencil" />
-            </EuiLink>
-          </EuiToolTip>
+          <EditStepTooltip step={2} />
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -279,12 +286,69 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {/* Retention summary */}
+      {serializedRetention ? (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.sectionRetentionTitle"
+                defaultMessage="Snapshot retention"
+              />{' '}
+              <EditStepTooltip step={3} />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <EuiDescriptionList textStyle="reverse">
+            {retention!.expireAfterValue && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.expireAfterLabel"
+                    defaultMessage="Delete after"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {retention!.expireAfterValue}
+                  {retention!.expireAfterUnit}
+                </EuiDescriptionListDescription>
+              </Fragment>
+            )}
+            {retention!.minCount && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.minCountLabel"
+                    defaultMessage="Min count"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{retention!.minCount}</EuiDescriptionListDescription>
+              </Fragment>
+            )}
+            {retention!.maxCount && (
+              <Fragment>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.maxCountLabel"
+                    defaultMessage="Max count"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{retention!.maxCount}</EuiDescriptionListDescription>
+              </Fragment>
+            )}
+          </EuiDescriptionList>
+        </Fragment>
+      ) : null}
     </Fragment>
   );
 
   const renderRequestTab = () => {
     const endpoint = `PUT _slm/policy/${name}`;
-    const json = JSON.stringify(serializePolicy(policy), null, 2);
+    const json = JSON.stringify(serializedPolicy, null, 2);
+
     return (
       <Fragment>
         <EuiSpacer size="m" />
@@ -298,12 +362,12 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   return (
     <Fragment>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.stepReviewTitle"
             defaultMessage="Review policy"
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiTabbedContent

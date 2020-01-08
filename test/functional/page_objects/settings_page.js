@@ -55,9 +55,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
-      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-        await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
-      }
+      await retry.waitFor('index pattern info flyout', async () => {
+        if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+          await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
+        } else return true;
+      });
     }
 
     async getAdvancedSettings(propertyName) {
@@ -73,7 +75,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(
+        `advancedSetting-editField-${propertyName}`,
+        'checked'
+      );
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -186,8 +191,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       // passing in zero-based index, but adding 1 for css 1-based indexes
       return await find.byCssSelector(
         'table.euiTable tbody tr:nth-child(' +
-        (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-        (colNumber + 1) + ')'
+          (rowNumber + 1) +
+          ') td.euiTableRowCell:nth-child(' +
+          (colNumber + 1) +
+          ')'
       );
     }
 
@@ -201,8 +208,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getScriptedFieldsTabCount() {
       const selector = '[data-test-subj="tab-count-scriptedFields"]';
       return await retry.try(async () => {
-        const theText = await (await find.byCssSelector(selector))
-          .getVisibleText();
+        const theText = await (await find.byCssSelector(selector)).getVisibleText();
         return theText.replace(/\((.*)\)/, '$1');
       });
     }
@@ -237,8 +243,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
-            language +
-            '"]'
+          language +
+          '"]'
       );
     }
 
@@ -250,9 +256,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async openControlsByName(name) {
       await this.filterField(name);
-      const tableFields = await (await find.byCssSelector(
-        'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child'
-      )).getVisibleText();
+      const tableFields = await (
+        await find.byCssSelector(
+          'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child'
+        )
+      ).getVisibleText();
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
@@ -285,13 +293,38 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await indexLink.click();
     }
 
-    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
+    async getIndexPatternList() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+    }
+
+    async isIndexPatternListEmpty() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      const indexPatternList = await this.getIndexPatternList();
+      return indexPatternList.length === 0;
+    }
+
+    async removeLogstashIndexPatternIfExist() {
+      if (!(await this.isIndexPatternListEmpty())) {
+        await this.clickIndexPatternLogstash();
+        await this.removeIndexPattern();
+      }
+    }
+
+    async createIndexPattern(
+      indexPatternName,
+      timefield = '@timestamp',
+      isStandardIndexPattern = true
+    ) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
+        if (!isStandardIndexPattern) {
+          await this.clickCreateNewRollupButton();
+        }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
@@ -323,6 +356,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
+    }
+
+    async clickCreateNewRollupButton() {
+      await testSubjects.click('createRollupIndexPatternButton');
     }
 
     async getIndexPatternIdFromUrl() {
@@ -510,7 +547,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
       await find.clickByCssSelector(aceEditorCssSelector);
       for (let i = 0; i < 1000; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
@@ -580,6 +617,26 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async checkImportSucceeded() {
+      await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+    }
+
+    async checkNoneImported() {
+      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
+    }
+
+    async checkImportConflictsWarning() {
+      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', { timeout: 20000 });
+    }
+
+    async checkImportLegacyWarning() {
+      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', { timeout: 20000 });
+    }
+
+    async checkImportFailedWarning() {
+      await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
     }
@@ -631,7 +688,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       for (const row of rows) {
         const titleCell = await row.findByCssSelector('td:nth-child(3)');
         const title = await titleCell.getVisibleText();
-
 
         const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);

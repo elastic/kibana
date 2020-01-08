@@ -27,10 +27,12 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
   const metricFieldFormatter = metric.format;
 
   if (!buckets.length) {
-    slices = [{
-      name: metricColumn.name,
-      size: table.rows[0][metricColumn.id],
-    }];
+    slices = [
+      {
+        name: metricColumn.name,
+        size: table.rows[0][metricColumn.id],
+      },
+    ];
     names[metricColumn.name] = metricColumn.name;
   } else {
     slices = [];
@@ -46,7 +48,7 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
         const size = row[bucketValueColumn.id];
         names[name] = name;
 
-        let slice  = dataLevel.find(slice => slice.name === name);
+        let slice = dataLevel.find(slice => slice.name === name);
         if (!slice) {
           slice = {
             name,
@@ -75,9 +77,7 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
     names: toArray(names),
     tooltipFormatter: metricFieldFormatter,
     slices: {
-      children: [
-        ...slices
-      ]
-    }
+      children: [...slices],
+    },
   };
 };

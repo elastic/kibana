@@ -8,12 +8,34 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningJobSourceSelectionProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
-    async selectSourceIndexPattern(indexPattern: string) {
-      const subj = 'paginatedListItem-' + indexPattern;
-      await testSubjects.clickWhenNotDisabled(subj);
-      await testSubjects.existOrFail('mlPageJobTypeSelection');
+    async assertSourceListContainsEntry(sourceName: string) {
+      await testSubjects.existOrFail(`savedObjectTitle${sourceName}`);
+    },
+
+    async filterSourceSelection(sourceName: string) {
+      await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
+        clearWithKeyboard: true,
+      });
+      await this.assertSourceListContainsEntry(sourceName);
+    },
+
+    async selectSource(sourceName: string, nextPageSubj: string) {
+      await this.filterSourceSelection(sourceName);
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
+        await testSubjects.existOrFail(nextPageSubj, { timeout: 10 * 1000 });
+      });
+    },
+
+    async selectSourceForAnomalyDetectionJob(sourceName: string) {
+      await this.selectSource(sourceName, 'mlPageJobTypeSelection');
+    },
+
+    async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
+      await this.selectSource(sourceName, 'mlPageIndexDataVisualizer');
     },
   };
 }

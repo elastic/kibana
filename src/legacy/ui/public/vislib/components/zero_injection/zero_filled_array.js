@@ -18,9 +18,9 @@
  */
 
 /*
-  * Accepts an array of x axis values (strings or numbers).
-  * Returns a zero filled array.
-*/
+ * Accepts an array of x axis values (strings or numbers).
+ * Returns a zero filled array.
+ */
 export function createZeroFilledArray(arr, label) {
   if (!Array.isArray(arr)) {
     throw new Error('createZeroFilledArray expects an array of strings or numbers');
@@ -28,12 +28,12 @@ export function createZeroFilledArray(arr, label) {
 
   const zeroFilledArray = [];
 
-  arr.forEach(function (val) {
+  arr.forEach(function(val) {
     zeroFilledArray.push({
       x: val,
       xi: Infinity,
       y: 0,
-      series: label
+      series: label,
     });
   });
 

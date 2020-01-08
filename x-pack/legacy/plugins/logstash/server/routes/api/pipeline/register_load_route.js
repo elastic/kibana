@@ -8,19 +8,14 @@ import Boom from 'boom';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { Pipeline } from '../../../models/pipeline';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchPipeline(callWithRequest, pipelineId) {
   return callWithRequest('get', {
     index: INDEX_NAMES.PIPELINES,
     id: pipelineId,
-    _source: [
-      'description',
-      'username',
-      'pipeline',
-      'pipeline_settings'
-    ],
-    ignore: [ 404 ]
+    _source: ['description', 'username', 'pipeline', 'pipeline_settings'],
+    ignore: [404],
   });
 }
 
@@ -30,12 +25,12 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/logstash/pipeline/{id}',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const pipelineId = request.params.id;
 
       return fetchPipeline(callWithRequest, pipelineId)
-        .then((pipelineResponseFromES) => {
+        .then(pipelineResponseFromES => {
           if (!pipelineResponseFromES.found) {
             throw Boom.notFound();
           }
@@ -43,10 +38,10 @@ export function registerLoadRoute(server) {
           const pipeline = Pipeline.fromUpstreamJSON(pipelineResponseFromES);
           return pipeline.downstreamJSON;
         })
-        .catch((e) => Boom.boomify(e));
+        .catch(e => Boom.boomify(e));
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

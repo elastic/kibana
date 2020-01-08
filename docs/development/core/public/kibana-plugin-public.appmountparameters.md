@@ -15,6 +15,6 @@ export interface AppMountParameters
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [appBasePath](./kibana-plugin-public.appmountparameters.appbasepath.md) | <code>string</code> | The base path for configuring the application's router. |
+|  [appBasePath](./kibana-plugin-public.appmountparameters.appbasepath.md) | <code>string</code> | The route path for configuring navigation to the application. This string should not include the base path from HTTP. |
 |  [element](./kibana-plugin-public.appmountparameters.element.md) | <code>HTMLElement</code> | The container element to render the application into. |
 

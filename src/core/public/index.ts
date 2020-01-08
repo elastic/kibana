@@ -40,11 +40,17 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
@@ -53,37 +59,51 @@ import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
-import {
-  ErrorToastOptions,
-  NotificationsSetup,
-  NotificationsStart,
-  Toast,
-  ToastInput,
-  ToastsApi,
-} from './notifications';
+import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
+import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+export { PackageInfo, EnvironmentMode } from '../server/types';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  ApplicationSetup,
+  ApplicationStart,
+  App,
+  AppBase,
+  AppMount,
+  AppMountDeprecated,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+} from './application';
 
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -91,10 +111,16 @@ export {
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from './saved_objects';
 
 export {
-  HttpServiceBase,
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,
@@ -102,18 +128,29 @@ export {
   HttpErrorResponse,
   HttpErrorRequest,
   HttpInterceptor,
-  HttpResponse,
+  IHttpResponse,
   HttpHandler,
-  HttpBody,
+  IBasePath,
+  IAnonymousPaths,
+  IHttpInterceptController,
+  IHttpFetchError,
+  IHttpResponseInterceptorOverrides,
 } from './http';
 
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+
 export {
-  OverlayStart,
-  OverlayBannerMount,
-  OverlayBannerUnmount,
-  OverlayBannersStart,
-  OverlayRef,
-} from './overlays';
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+  ErrorToastOptions,
+} from './notifications';
+
+export { MountPoint, UnmountCallback } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -124,10 +161,13 @@ export {
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /** {@link ContextSetup} */
+  /**
+   * {@link ContextSetup}
+   * @deprecated
+   */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
@@ -135,8 +175,24 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
-  /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
+
+  /**
+   * Allows plugins to get access to APIs available in start inside async
+   * handlers, such as {@link App.mount}. Promise will not resolve until Core
+   * and plugin dependencies have completed `start`.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -165,8 +221,17 @@ export interface CoreStart {
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
-  /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -179,7 +244,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -200,27 +265,32 @@ export interface LegacyCoreStart extends CoreStart {
 }
 
 export {
-  ApplicationSetup,
-  ApplicationStart,
   Capabilities,
   ChromeBadge,
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,
-  ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
   HttpSetup,
@@ -234,10 +304,6 @@ export {
   PluginInitializerContext,
   SavedObjectsStart,
   PluginOpaqueId,
-  Toast,
-  ToastInput,
-  ToastsApi,
-  UiSettingsClient,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   UiSettingsState,
 };

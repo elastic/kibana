@@ -24,10 +24,14 @@ export function parseTileKey(tileKey) {
   const tileCount = Math.pow(2, zoom);
 
   if (x >= tileCount) {
-    throw new Error(`Tile key is malformed, expected x to be less than ${tileCount}, you provided ${x}`);
+    throw new Error(
+      `Tile key is malformed, expected x to be less than ${tileCount}, you provided ${x}`
+    );
   }
   if (y >= tileCount) {
-    throw new Error(`Tile key is malformed, expected y to be less than ${tileCount}, you provided ${y}`);
+    throw new Error(
+      `Tile key is malformed, expected y to be less than ${tileCount}, you provided ${y}`
+    );
   }
 
   return { x, y, zoom, tileCount };
@@ -37,15 +41,30 @@ function sinh(x) {
   return (Math.exp(x) - Math.exp(-x)) / 2;
 }
 
+// Calculate the minimum precision required to adequtely draw the box
+// bounds.
+//
+// ceil(abs(log10(tileSize))) tells us how many decimals of precision
+// are minimally required to represent the number after rounding.
+//
+// We add one extra decimal level of precision because, at high zoom
+// levels rounding exactly can cause the boxes to render as uneven sizes
+// (some will be slightly larger and some slightly smaller)
+function precisionRounding(v, minPrecision, binSize) {
+  let precision = Math.ceil(Math.abs(Math.log10(binSize))) + 1;
+  precision = Math.max(precision, minPrecision);
+  return _.round(v, precision);
+}
+
 function tileToLatitude(y, tileCount) {
-  const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y / tileCount)));
-  const lat = 180 / Math.PI * radians;
-  return _.round(lat, DECIMAL_DEGREES_PRECISION);
+  const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y) / tileCount));
+  const lat = (180 / Math.PI) * radians;
+  return precisionRounding(lat, DECIMAL_DEGREES_PRECISION, 180 / tileCount);
 }
 
 function tileToLongitude(x, tileCount) {
-  const lon = (x / tileCount * 360) - 180;
-  return _.round(lon, DECIMAL_DEGREES_PRECISION);
+  const lon = (x / tileCount) * 360 - 180;
+  return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, 360 / tileCount);
 }
 
 export function getTileBoundingBox(tileKey) {

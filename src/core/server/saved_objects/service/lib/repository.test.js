@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import _ from 'lodash';
 
-import { delay } from 'bluebird';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
@@ -34,7 +33,6 @@ jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
 describe('SavedObjectsRepository', () => {
   let callAdminCluster;
-  let onBeforeWrite;
   let savedObjectsRepository;
   let migrator;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
@@ -47,7 +45,6 @@ describe('SavedObjectsRepository', () => {
       hits: [
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'index-pattern:logstash-*',
           _score: 1,
           ...mockVersionProps,
@@ -63,7 +60,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'config:6.0.0-alpha1',
           _score: 1,
           ...mockVersionProps,
@@ -78,7 +74,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'index-pattern:stocks-*',
           _score: 1,
           ...mockVersionProps,
@@ -94,7 +89,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'globaltype:something',
           _score: 1,
           ...mockVersionProps,
@@ -116,7 +110,6 @@ describe('SavedObjectsRepository', () => {
       hits: [
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:index-pattern:logstash-*',
           _score: 1,
           ...mockVersionProps,
@@ -133,7 +126,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:config:6.0.0-alpha1',
           _score: 1,
           ...mockVersionProps,
@@ -149,7 +141,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:index-pattern:stocks-*',
           _score: 1,
           ...mockVersionProps,
@@ -166,7 +157,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'globaltype:something',
           _score: 1,
           ...mockVersionProps,
@@ -260,10 +250,9 @@ describe('SavedObjectsRepository', () => {
 
   beforeEach(() => {
     callAdminCluster = jest.fn();
-    onBeforeWrite = jest.fn();
     migrator = {
       migrateDocument: jest.fn(doc => doc),
-      awaitMigration: async () => ({ status: 'skipped' }),
+      runMigrations: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -278,28 +267,22 @@ describe('SavedObjectsRepository', () => {
       schema,
       serializer,
       allowedTypes,
-      onBeforeWrite,
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
     getSearchDslNS.getSearchDsl.mockReset();
   });
 
-  afterEach(() => {});
-
   describe('#create', () => {
     beforeEach(() => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
       }));
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
       await expect(
         savedObjectsRepository.create(
@@ -313,7 +296,7 @@ describe('SavedObjectsRepository', () => {
           }
         )
       ).resolves.toBeDefined();
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -361,7 +344,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('index', expect.any(Object));
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should use default index', async () => {
@@ -370,8 +352,8 @@ describe('SavedObjectsRepository', () => {
         title: 'Logstash',
       });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledWith(
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
         'index',
         expect.objectContaining({
           index: '.kibana-test',
@@ -385,8 +367,8 @@ describe('SavedObjectsRepository', () => {
         title: 'Logstash',
       });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledWith(
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
         'index',
         expect.objectContaining({
           index: 'beats',
@@ -419,6 +401,36 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts custom refresh settings', async () => {
+      await savedObjectsRepository.create(
+        'index-pattern',
+        {
+          id: 'logstash-*',
+          title: 'Logstash',
+        },
+        {
+          refresh: true,
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
+      });
+    });
+
     it('should use create action if ID defined and overwrite=false', async () => {
       await savedObjectsRepository.create(
         'index-pattern',
@@ -432,7 +444,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('create', expect.any(Object));
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('allows for id to be provided', async () => {
@@ -451,8 +462,6 @@ describe('SavedObjectsRepository', () => {
           id: 'index-pattern:logstash-*',
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('self-generates an ID', async () => {
@@ -467,8 +476,6 @@ describe('SavedObjectsRepository', () => {
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
@@ -495,7 +502,6 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -520,7 +526,6 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -546,15 +551,34 @@ describe('SavedObjectsRepository', () => {
           }),
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('defaults to empty references array if none are provided', async () => {
+      await savedObjectsRepository.create(
+        'index-pattern',
+        {
+          title: 'Logstash',
+        },
+        {
+          id: 'logstash-*',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.objectContaining({
+            references: [],
+          }),
+        })
+      );
     });
   });
 
   describe('#bulkCreate', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
       callAdminCluster.mockReturnValue({
         items: [
           { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
@@ -576,7 +600,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch request', async () => {
@@ -623,8 +647,62 @@ describe('SavedObjectsRepository', () => {
           references: [{ name: 'ref_0', type: 'test', id: '2' }],
         },
       ]);
+    });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [{ create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } }],
+      });
+
+      await savedObjectsRepository.bulkCreate([
+        {
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        },
+      ]);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
+        ],
+      });
+
+      await savedObjectsRepository.bulkCreate(
+        [
+          {
+            type: 'config',
+            id: 'one',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          },
+          {
+            type: 'index-pattern',
+            id: 'two',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+          },
+        ],
+        {
+          refresh: true,
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
+      });
     });
 
     it('migrates the docs', async () => {
@@ -731,10 +809,7 @@ describe('SavedObjectsRepository', () => {
         })
       );
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-
       callAdminCluster.mockReset();
-      onBeforeWrite.mockReset();
 
       callAdminCluster.mockReturnValue({
         items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }],
@@ -754,8 +829,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('mockReturnValue document errors', async () => {
@@ -764,7 +837,6 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               error: {
                 reason: 'type[config] missing',
@@ -773,7 +845,6 @@ describe('SavedObjectsRepository', () => {
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -811,14 +882,12 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               ...mockVersionProps,
             },
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -863,7 +932,6 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'foo-namespace:config:one',
               _index: '.kibana-test',
               _primary_term: 1,
@@ -872,7 +940,6 @@ describe('SavedObjectsRepository', () => {
           },
           {
             create: {
-              _type: '_doc',
               _id: 'foo-namespace:index-pattern:two',
               _primary_term: 1,
               _seq_no: 2,
@@ -913,7 +980,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -922,14 +988,12 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               ...mockVersionProps,
             },
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -962,7 +1026,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -990,7 +1053,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should return objects in the same order regardless of type', () => {});
@@ -998,9 +1060,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#delete', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
       callAdminCluster.mockReturnValue({ result: 'deleted' });
       await expect(
         savedObjectsRepository.delete('index-pattern', 'logstash-*', {
@@ -1008,7 +1068,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('throws notFound when ES is unable to find the document', async () => {
@@ -1036,8 +1096,6 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id when providing no namespace for namespaced type`, async () => {
@@ -1051,8 +1109,6 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
@@ -1068,8 +1124,28 @@ describe('SavedObjectsRepository', () => {
         index: '.kibana-test',
         ignore: [404],
       });
+    });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
+      await savedObjectsRepository.delete('globaltype', 'logstash-*');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it(`accepts a custom refresh setting`, async () => {
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
+      await savedObjectsRepository.delete('globaltype', 'logstash-*', {
+        refresh: false,
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: false,
+      });
     });
   });
 
@@ -1078,7 +1154,6 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
       expect(savedObjectsRepository.deleteByNamespace()).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('requires namespace to be a string', async () => {
@@ -1087,7 +1162,6 @@ describe('SavedObjectsRepository', () => {
         savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
@@ -1096,7 +1170,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(result).toEqual(deleteByQueryResults);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
 
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
         namespace: 'my-namespace',
@@ -1110,24 +1183,41 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
       });
     });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue(deleteByQueryResults);
+      await savedObjectsRepository.deleteByNamespace('my-namespace');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      callAdminCluster.mockReturnValue(deleteByQueryResults);
+      await savedObjectsRepository.deleteByNamespace('my-namespace', { refresh: true });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
+      });
+    });
   });
 
   describe('#find', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
       await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('requires type to be defined', async () => {
       await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('requires searchFields be an array if defined', async () => {
@@ -1137,7 +1227,6 @@ describe('SavedObjectsRepository', () => {
         throw new Error('expected find() to reject');
       } catch (error) {
         expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(onBeforeWrite).not.toHaveBeenCalled();
         expect(error.message).toMatch('must be an array');
       }
     });
@@ -1149,39 +1238,106 @@ describe('SavedObjectsRepository', () => {
         throw new Error('expected find() to reject');
       } catch (error) {
         expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(onBeforeWrite).not.toHaveBeenCalled();
         expect(error.message).toMatch('must be an array');
       }
     });
 
-    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
-      async () => {
-        callAdminCluster.mockReturnValue(namespacedSearchResults);
-        const relevantOpts = {
-          namespace: 'foo-namespace',
-          search: 'foo*',
-          searchFields: ['foo'],
-          type: ['bar'],
-          sortField: 'name',
-          sortOrder: 'desc',
-          defaultSearchOperator: 'AND',
-          hasReference: {
-            type: 'foo',
-            id: '1',
-          },
-        };
+    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl', async () => {
+      callAdminCluster.mockReturnValue(namespacedSearchResults);
+      const relevantOpts = {
+        namespace: 'foo-namespace',
+        search: 'foo*',
+        searchFields: ['foo'],
+        type: ['bar'],
+        sortField: 'name',
+        sortOrder: 'desc',
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'foo',
+          id: '1',
+        },
+        kueryNode: undefined,
+      };
 
-        await savedObjectsRepository.find(relevantOpts);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, relevantOpts);
-      });
+      await savedObjectsRepository.find(relevantOpts);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, relevantOpts);
+    });
+
+    it('accepts KQL filter and passes keuryNode to getSearchDsl', async () => {
+      callAdminCluster.mockReturnValue(namespacedSearchResults);
+      const findOpts = {
+        namespace: 'foo-namespace',
+        search: 'foo*',
+        searchFields: ['foo'],
+        type: ['dashboard'],
+        sortField: 'name',
+        sortOrder: 'desc',
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'foo',
+          id: '1',
+        },
+        indexPattern: undefined,
+        filter: 'dashboard.attributes.otherField: *',
+      };
+
+      await savedObjectsRepository.find(findOpts);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
+      expect(kueryNode).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "type": "literal",
+              "value": "dashboard.otherField",
+            },
+            Object {
+              "type": "wildcard",
+              "value": "@kuery-wildcard@",
+            },
+            Object {
+              "type": "literal",
+              "value": false,
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('KQL filter syntax errors rejects with bad request', async () => {
+      callAdminCluster.mockReturnValue(namespacedSearchResults);
+      const findOpts = {
+        namespace: 'foo-namespace',
+        search: 'foo*',
+        searchFields: ['foo'],
+        type: ['dashboard'],
+        sortField: 'name',
+        sortOrder: 'desc',
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'foo',
+          id: '1',
+        },
+        indexPattern: undefined,
+        filter: 'dashboard.attributes.otherField:<',
+      };
+
+      await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
+        [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
+        dashboard.attributes.otherField:<
+        --------------------------------^: Bad Request]
+      `);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(0);
+    });
 
     it('merges output of getSearchDsl into es request body', async () => {
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
       getSearchDslNS.getSearchDsl.mockReturnValue({ query: 1, aggregations: 2 });
       await savedObjectsRepository.find({ type: 'foo' });
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledWith(
         'search',
         expect.objectContaining({
@@ -1250,8 +1406,6 @@ describe('SavedObjectsRepository', () => {
           from: 50,
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('can filter by fields', async () => {
@@ -1273,8 +1427,6 @@ describe('SavedObjectsRepository', () => {
           ],
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('should set rest_total_hits_as_int to true on a request', async () => {
@@ -1288,7 +1440,6 @@ describe('SavedObjectsRepository', () => {
   describe('#get', () => {
     const noNamespaceResult = {
       _id: 'index-pattern:logstash-*',
-      _type: '_doc',
       ...mockVersionProps,
       _source: {
         type: 'index-pattern',
@@ -1301,7 +1452,6 @@ describe('SavedObjectsRepository', () => {
     };
     const namespacedResult = {
       _id: 'foo-namespace:index-pattern:logstash-*',
-      _type: '_doc',
       ...mockVersionProps,
       _source: {
         namespace: 'foo-namespace',
@@ -1315,22 +1465,19 @@ describe('SavedObjectsRepository', () => {
     };
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
       callAdminCluster.mockResolvedValue(noNamespaceResult);
       await expect(
         savedObjectsRepository.get('index-pattern', 'logstash-*')
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response when there is no namespace', async () => {
       callAdminCluster.mockResolvedValue(noNamespaceResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
         id: 'logstash-*',
         type: 'index-pattern',
@@ -1346,7 +1493,6 @@ describe('SavedObjectsRepository', () => {
     it('formats Elasticsearch response when there are namespaces', async () => {
       callAdminCluster.mockResolvedValue(namespacedResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
         id: 'logstash-*',
         type: 'index-pattern',
@@ -1365,7 +1511,6 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
       });
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1379,7 +1524,6 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue(noNamespaceResult);
       await savedObjectsRepository.get('index-pattern', 'logstash-*');
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1395,7 +1539,6 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
       });
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
@@ -1408,9 +1551,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkGet', () => {
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
       callAdminCluster.mockReturnValue({ docs: [] });
       await expect(
@@ -1421,7 +1562,7 @@ describe('SavedObjectsRepository', () => {
         ])
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
+      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('prepends type to id when getting objects when there is no namespace', async () => {
@@ -1446,8 +1587,6 @@ describe('SavedObjectsRepository', () => {
           },
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('prepends namespace and type appropriately to id when getting objects when there is a namespace', async () => {
@@ -1477,8 +1616,6 @@ describe('SavedObjectsRepository', () => {
           },
         })
       );
-
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('mockReturnValue early for empty objects argument', async () => {
@@ -1488,21 +1625,18 @@ describe('SavedObjectsRepository', () => {
 
       expect(response.saved_objects).toHaveLength(0);
       expect(callAdminCluster).not.toHaveBeenCalled();
-      expect(onBeforeWrite).not.toHaveBeenCalled();
     });
 
     it('handles missing ids gracefully', async () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'config:good',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test' } },
           },
           {
-            _type: '_doc',
             _id: 'config:bad',
             found: false,
           },
@@ -1524,14 +1658,12 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'config:good',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test' } },
           },
           {
-            _type: '_doc',
             _id: 'config:bad',
             found: false,
           },
@@ -1543,7 +1675,6 @@ describe('SavedObjectsRepository', () => {
         { id: 'bad', type: 'config' },
       ]);
 
-      expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
       expect(savedObjects).toHaveLength(2);
@@ -1566,21 +1697,18 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'one',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test1' } },
           },
           {
-            _type: '_doc',
             _id: 'three',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test3' } },
           },
           {
-            _type: '_doc',
             _id: 'five',
             found: true,
             ...mockVersionProps,
@@ -1628,7 +1756,7 @@ describe('SavedObjectsRepository', () => {
         {
           error: {
             error: 'Bad Request',
-            message: 'Unsupported saved object type: \'invalidtype\': Bad Request',
+            message: "Unsupported saved object type: 'invalidtype': Bad Request",
             statusCode: 400,
           },
           id: 'two',
@@ -1637,7 +1765,7 @@ describe('SavedObjectsRepository', () => {
         {
           error: {
             error: 'Bad Request',
-            message: 'Unsupported saved object type: \'invalidtype\': Bad Request',
+            message: "Unsupported saved object type: 'invalidtype': Bad Request",
             statusCode: 400,
           },
           id: 'four',
@@ -1655,16 +1783,13 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       callAdminCluster.mockResolvedValue({
         _id: `${type}:${id}`,
-        _type: '_doc',
         ...mockVersionProps,
         result: 'updated',
       });
     });
 
     it('waits until migrations are complete before proceeding', async () => {
-      migrator.awaitMigration = jest.fn(async () =>
-        expect(callAdminCluster).not.toHaveBeenCalled()
-      );
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
       await expect(
         savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, {
@@ -1672,7 +1797,7 @@ describe('SavedObjectsRepository', () => {
         })
       ).resolves.toBeDefined();
 
-      expect(migrator.awaitMigration).toHaveReturnedTimes(1);
+      expect(migrator.runMigrations).toHaveReturnedTimes(1);
     });
 
     it('mockReturnValue current ES document _seq_no and _primary_term encoded as version', async () => {
@@ -1730,6 +1855,54 @@ describe('SavedObjectsRepository', () => {
       );
     });
 
+    it('does not pass references if omitted', async () => {
+      await savedObjectsRepository.update(type, id, { title: 'Testing' });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).not.toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            }),
+          },
+        })
+      );
+    });
+
+    it('passes references if they are provided', async () => {
+      await savedObjectsRepository.update(type, id, { title: 'Testing' }, { references: ['foo'] });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: ['foo'],
+            }),
+          },
+        })
+      );
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      await savedObjectsRepository.update(type, id, { title: 'Testing' }, { references: [] });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            }),
+          },
+        })
+      );
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.update(
         'index-pattern',
@@ -1769,8 +1942,6 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -1811,8 +1982,6 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
@@ -1854,15 +2023,537 @@ describe('SavedObjectsRepository', () => {
         refresh: 'wait_for',
         index: '.kibana-test',
       });
+    });
 
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.update('globaltype', 'foo', {
+        name: 'bar',
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      await savedObjectsRepository.update(
+        'globaltype',
+        'foo',
+        {
+          name: 'bar',
+        },
+        {
+          refresh: true,
+          namespace: 'foo-namespace',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
+      });
+    });
+  });
+
+  describe('#bulkUpdate', () => {
+    const { generateSavedObject, reset } = (() => {
+      let count = 0;
+      return {
+        generateSavedObject(overrides) {
+          count++;
+          return _.merge(
+            {
+              type: 'index-pattern',
+              id: `logstash-${count}`,
+              attributes: { title: `Testing ${count}` },
+              references: [
+                {
+                  name: 'ref_0',
+                  type: 'test',
+                  id: '1',
+                },
+              ],
+            },
+            overrides
+          );
+        },
+        reset() {
+          count = 0;
+        },
+      };
+    })();
+
+    beforeEach(() => {
+      reset();
+    });
+
+    const mockValidResponse = objects =>
+      callAdminCluster.mockReturnValue({
+        items: objects.map(items => ({
+          update: {
+            _id: `${items.type}:${items.id}`,
+            ...mockVersionProps,
+            result: 'updated',
+          },
+        })),
+      });
+
+    it('waits until migrations are complete before proceeding', async () => {
+      const objects = [generateSavedObject(), generateSavedObject()];
+
+      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
+
+      mockValidResponse(objects);
+
+      await expect(
+        savedObjectsRepository.bulkUpdate([generateSavedObject()])
+      ).resolves.toBeDefined();
+
+      expect(migrator.runMigrations).toHaveReturnedTimes(1);
+    });
+
+    it('returns current ES document, _seq_no and _primary_term encoded as version', async () => {
+      const objects = [generateSavedObject(), generateSavedObject()];
+
+      mockValidResponse(objects);
+
+      const response = await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(response.saved_objects[0]).toMatchObject({
+        ..._.pick(objects[0], 'id', 'type', 'attributes'),
+        version: mockVersion,
+        references: objects[0].references,
+      });
+      expect(response.saved_objects[1]).toMatchObject({
+        ..._.pick(objects[1], 'id', 'type', 'attributes'),
+        version: mockVersion,
+        references: objects[1].references,
+      });
+    });
+
+    it('handles a mix of succesfull updates and errors', async () => {
+      const objects = [
+        generateSavedObject(),
+        {
+          type: 'invalid-type',
+          id: 'invalid',
+          attributes: { title: 'invalid' },
+        },
+        generateSavedObject(),
+        generateSavedObject({
+          id: 'version_clash',
+        }),
+      ];
+
+      callAdminCluster.mockReturnValue({
+        items: objects
+          // remove invalid from mocks
+          .filter(item => item.id !== 'invalid')
+          .map(items => {
+            switch (items.id) {
+              case 'version_clash':
+                return {
+                  update: {
+                    _id: `${items.type}:${items.id}`,
+                    error: {
+                      type: 'version_conflict_engine_exception',
+                    },
+                  },
+                };
+              default:
+                return {
+                  update: {
+                    _id: `${items.type}:${items.id}`,
+                    ...mockVersionProps,
+                    result: 'updated',
+                  },
+                };
+            }
+          }),
+      });
+
+      const {
+        saved_objects: [firstUpdatedObject, invalidType, secondUpdatedObject, versionClashObject],
+      } = await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(firstUpdatedObject).toMatchObject({
+        ..._.pick(objects[0], 'id', 'type', 'attributes', 'references'),
+        version: mockVersion,
+      });
+
+      expect(invalidType).toMatchObject({
+        ..._.pick(objects[1], 'id', 'type'),
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid').output
+          .payload,
+      });
+
+      expect(secondUpdatedObject).toMatchObject({
+        ..._.pick(objects[2], 'id', 'type', 'attributes', 'references'),
+        version: mockVersion,
+      });
+
+      expect(versionClashObject).toMatchObject({
+        ..._.pick(objects[3], 'id', 'type'),
+        error: { statusCode: 409, message: 'version conflict, document already exists' },
+      });
+    });
+
+    it('doesnt call Elasticsearch if there are no valid objects to update', async () => {
+      const objects = [
+        {
+          type: 'invalid-type',
+          id: 'invalid',
+          attributes: { title: 'invalid' },
+        },
+        {
+          type: 'invalid-type',
+          id: 'invalid 2',
+          attributes: { title: 'invalid' },
+        },
+      ];
+
+      const {
+        saved_objects: [invalidType, invalidType2],
+      } = await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).not.toHaveBeenCalled();
+
+      expect(invalidType).toMatchObject({
+        ..._.pick(objects[0], 'id', 'type'),
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid').output
+          .payload,
+      });
+
+      expect(invalidType2).toMatchObject({
+        ..._.pick(objects[1], 'id', 'type'),
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid 2')
+          .output.payload,
+      });
+    });
+
+    it('accepts version', async () => {
+      const objects = [
+        generateSavedObject({
+          version: encodeHitVersion({
+            _seq_no: 100,
+            _primary_term: 200,
+          }),
+        }),
+        generateSavedObject({
+          version: encodeHitVersion({
+            _seq_no: 300,
+            _primary_term: 400,
+          }),
+        }),
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [
+        ,
+        {
+          body: [{ update: firstUpdate }, , { update: secondUpdate }],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(firstUpdate).toMatchObject({
+        if_seq_no: 100,
+        if_primary_term: 200,
+      });
+
+      expect(secondUpdate).toMatchObject({
+        if_seq_no: 300,
+        if_primary_term: 400,
+      });
+    });
+
+    it('does not pass references if omitted', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+        },
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [
+        ,
+        {
+          body: [, { doc: firstDoc }],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(firstDoc).not.toMatchObject({
+        references: [],
+      });
+    });
+
+    it('passes references if they are provided', async () => {
+      const objects = [
+        generateSavedObject({
+          references: [
+            {
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
+            },
+          ],
+        }),
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [
+        ,
+        {
+          body: [, { doc }],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(doc).toMatchObject({
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          references: [],
+        },
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [
+        ,
+        {
+          body: [, { doc }],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(doc).toMatchObject({
+        references: [],
+      });
+    });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          references: [],
+        },
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: 'wait_for' });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          references: [],
+        },
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects, { refresh: true });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: true });
+    });
+
+    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
+      const objects = [generateSavedObject(), generateSavedObject()];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects, {
+        namespace: 'foo-namespace',
+      });
+
+      const [
+        ,
+        {
+          body: [
+            { update: firstUpdate },
+            { doc: firstUpdateDoc },
+            { update: secondUpdate },
+            { doc: secondUpdateDoc },
+          ],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(firstUpdate).toMatchObject({
+        _id: 'foo-namespace:index-pattern:logstash-1',
+        _index: '.kibana-test',
+      });
+
+      expect(firstUpdateDoc).toMatchObject({
+        updated_at: mockTimestamp,
+        'index-pattern': { title: 'Testing 1' },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
+
+      expect(secondUpdate).toMatchObject({
+        _id: 'foo-namespace:index-pattern:logstash-2',
+        _index: '.kibana-test',
+      });
+
+      expect(secondUpdateDoc).toMatchObject({
+        updated_at: mockTimestamp,
+        'index-pattern': { title: 'Testing 2' },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
+      const objects = [generateSavedObject(), generateSavedObject()];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      const [
+        ,
+        {
+          body: [
+            { update: firstUpdate },
+            { doc: firstUpdateDoc },
+            { update: secondUpdate },
+            { doc: secondUpdateDoc },
+          ],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(firstUpdate).toMatchObject({
+        _id: 'index-pattern:logstash-1',
+        _index: '.kibana-test',
+      });
+
+      expect(firstUpdateDoc).toMatchObject({
+        updated_at: mockTimestamp,
+        'index-pattern': { title: 'Testing 1' },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
+
+      expect(secondUpdate).toMatchObject({
+        _id: 'index-pattern:logstash-2',
+        _index: '.kibana-test',
+      });
+
+      expect(secondUpdateDoc).toMatchObject({
+        updated_at: mockTimestamp,
+        'index-pattern': { title: 'Testing 2' },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
+      const objects = [
+        generateSavedObject({
+          type: 'globaltype',
+          id: 'foo',
+          namespace: 'foo-namespace',
+        }),
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      const [
+        ,
+        {
+          body: [{ update }, { doc }],
+        },
+      ] = callAdminCluster.mock.calls[0];
+
+      expect(update).toMatchObject({
+        _id: 'globaltype:foo',
+        _index: '.kibana-test',
+      });
+
+      expect(doc).toMatchObject({
+        updated_at: mockTimestamp,
+        globaltype: { title: 'Testing 1' },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      });
     });
   });
 
   describe('#incrementCounter', () => {
     beforeEach(() => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',
@@ -1882,7 +2573,6 @@ describe('SavedObjectsRepository', () => {
 
     it('formats Elasticsearch response', async () => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',
@@ -1946,6 +2636,29 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
+        namespace: 'foo-namespace',
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
+        namespace: 'foo-namespace',
+        refresh: true,
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
+      });
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
         namespace: 'foo-namespace',
@@ -1958,8 +2671,6 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('config');
       expect(requestDoc.body.upsert.type).toBe('config');
       expect(requestDoc).toHaveProperty('body.upsert.config');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
@@ -1972,13 +2683,10 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('config');
       expect(requestDoc.body.upsert.type).toBe('config');
       expect(requestDoc).toHaveProperty('body.upsert.config');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',
@@ -2005,8 +2713,6 @@ describe('SavedObjectsRepository', () => {
       expect(requestDoc.body.script.params.type).toBe('globaltype');
       expect(requestDoc.body.upsert.type).toBe('globaltype');
       expect(requestDoc).toHaveProperty('body.upsert.globaltype');
-
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
     it('should assert that the "type" and "counterFieldName" arguments are strings', () => {
@@ -2055,41 +2761,8 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe('onBeforeWrite', () => {
-    it('blocks calls to callCluster of requests', async () => {
-      onBeforeWrite.mockReturnValue(delay(500));
-      callAdminCluster.mockReturnValue({ result: 'deleted', found: true });
-
-      const deletePromise = savedObjectsRepository.delete('foo', 'id');
-      await delay(100);
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).not.toHaveBeenCalled();
-      await deletePromise;
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-    });
-
-    it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
-      expect.assertions(4);
-
-      const es401 = new elasticsearch.errors[401]();
-      expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
-      onBeforeWrite.mockImplementation(() => {
-        throw es401;
-      });
-
-      try {
-        await savedObjectsRepository.delete('foo', 'id');
-      } catch (error) {
-        expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-        expect(error).toBe(es401);
-        expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
-      }
-    });
-  });
-
   describe('types on custom index', () => {
-    it('should error when attempting to \'update\' an unsupported type', async () => {
+    it("should error when attempting to 'update' an unsupported type", async () => {
       await expect(
         savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
       ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
@@ -2097,25 +2770,25 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('unsupported types', () => {
-    it('should error when attempting to \'update\' an unsupported type', async () => {
+    it("should error when attempting to 'update' an unsupported type", async () => {
       await expect(
         savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
       ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
     });
 
-    it('should error when attempting to \'get\' an unsupported type', async () => {
+    it("should error when attempting to 'get' an unsupported type", async () => {
       await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(
         new Error('Not Found')
       );
     });
 
-    it('should return an error object when attempting to \'create\' an unsupported type', async () => {
+    it("should return an error object when attempting to 'create' an unsupported type", async () => {
       await expect(
         savedObjectsRepository.create('hiddenType', { title: 'some title' })
-      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
+      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
     });
 
-    it('should not return hidden saved ojects when attempting to \'find\' support and unsupported types', async () => {
+    it("should not return hidden saved ojects when attempting to 'find' support and unsupported types", async () => {
       callAdminCluster.mockReturnValue({
         hits: {
           total: 1,
@@ -2147,7 +2820,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('should return empty results when attempting to \'find\' an unsupported type', async () => {
+    it("should return empty results when attempting to 'find' an unsupported type", async () => {
       callAdminCluster.mockReturnValue({
         hits: {
           total: 0,
@@ -2163,7 +2836,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('should return empty results when attempting to \'find\' more than one unsupported types', async () => {
+    it("should return empty results when attempting to 'find' more than one unsupported types", async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
       callAdminCluster.mockReturnValue({
         status: 200,
@@ -2181,13 +2854,13 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('should error when attempting to \'delete\' hidden types', async () => {
+    it("should error when attempting to 'delete' hidden types", async () => {
       await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(
         new Error('Not Found')
       );
     });
 
-    it('should error when attempting to \'bulkCreate\' an unsupported type', async () => {
+    it("should error when attempting to 'bulkCreate' an unsupported type", async () => {
       callAdminCluster.mockReturnValue({
         items: [
           {
@@ -2220,7 +2893,7 @@ describe('SavedObjectsRepository', () => {
           {
             error: {
               error: 'Bad Request',
-              message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
+              message: "Unsupported saved object type: 'hiddenType': Bad Request",
               statusCode: 400,
             },
             id: 'two',
@@ -2230,10 +2903,10 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
+    it("should error when attempting to 'incrementCounter' for an unsupported type", async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
+      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
     });
   });
 });

@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import * as React from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -13,131 +13,40 @@ import {
   Droppable,
 } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
-import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
 import { TruncatableText } from '../truncatable_text';
-
 import { getDraggableId, getDroppableId } from './helpers';
+import { ProviderContainer } from './provider_container';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
 
 DragEffects.displayName = 'DragEffects';
 
+export const DraggablePortalContext = createContext<boolean>(false);
+export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
+
 const Wrapper = styled.div`
-  .euiPageBody & {
-    display: inline-block;
+  display: inline-block;
+  max-width: 100%;
+
+  [data-rbd-placeholder-context-id] {
+    display: none !important;
   }
 `;
 
 Wrapper.displayName = 'Wrapper';
 
-const ProviderContainer = styled.div<{ isDragging: boolean }>`
-  ${({ theme, isDragging }) => css`
-    // ALL DRAGGABLES
-
-    &,
-    &::before,
-    &::after {
-      transition: background ${theme.eui.euiAnimSpeedFast} ease,
-        color ${theme.eui.euiAnimSpeedFast} ease;
-    }
-
-    .euiBadge,
-    .euiBadge__text {
-      cursor: grab;
-    }
-
-    // PAGE DRAGGABLES
-
-    ${!isDragging &&
-      `
-      .euiPageBody & {
-        z-index: ${theme.eui.euiZLevel0} !important;
-      }
-
-      {
-        border-radius: 2px;
-        padding: 0 4px 0 8px;
-        position: relative;
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${theme.eui.euiColorMediumShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(-135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%);
-          background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
-          background-size: 2px 2px;
-          bottom: 2px;
-          content: '';
-          display: block;
-          left: 2px;
-          position: absolute;
-          top: 2px;
-          width: 4px;
-        }
-      }
-
-
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
-      tr:hover & {
-        background-color: ${theme.eui.euiColorLightShade};
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${theme.eui.euiColorDarkShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(-135deg, ${theme.eui.euiColorDarkShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorDarkShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorDarkShade} 75%);
-        }
-      }
-
-      &:hover,
-      &:focus,
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &:hover,
-      .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
-      tr:hover &:hover,
-      tr:hover &:focus {
-        background-color: ${theme.eui.euiColorPrimary};
-
-        &,
-        & a {
-          color: ${theme.eui.euiColorEmptyShade};
-        }
-
-        &::before {
-          background-image: linear-gradient(
-              135deg,
-              ${theme.eui.euiColorEmptyShade} 25%,
-              transparent 25%
-            ),
-            linear-gradient(-135deg, ${theme.eui.euiColorEmptyShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%);
-        }
-      }
-    `}
-
-    ${isDragging &&
-      `
-      .euiPageBody & {
-        z-index: ${theme.eui.euiZLevel9} !important;
-      `}
-  `}
+const ProviderContentWrapper = styled.span`
+  > span.euiToolTipAnchor {
+    display: block; /* allow EuiTooltip content to be truncatable */
+  }
 `;
-
-ProviderContainer.displayName = 'ProviderContainer';
 
 interface OwnProps {
   dataProvider: DataProvider;
@@ -147,7 +56,7 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
-  width?: string;
+  truncate?: boolean;
 }
 
 interface DispatchProps {
@@ -165,28 +74,17 @@ type Props = OwnProps & DispatchProps;
  * Wraps a draggable component to handle registration / unregistration of the
  * data provider associated with the item being dropped
  */
-class DraggableWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
-    isEqual(dataProvider, this.props.dataProvider) &&
-    render !== this.props.render &&
-    width === this.props.width
-      ? false
-      : true;
 
-  public componentDidMount() {
-    const { dataProvider, registerProvider } = this.props;
+const DraggableWrapperComponent = React.memo<Props>(
+  ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
+    const usePortal = useDraggablePortalContext();
 
-    registerProvider!({ provider: dataProvider });
-  }
-
-  public componentWillUnmount() {
-    const { dataProvider, unRegisterProvider } = this.props;
-
-    unRegisterProvider!({ id: dataProvider.id });
-  }
-
-  public render() {
-    const { dataProvider, render, width } = this.props;
+    useEffect(() => {
+      registerProvider!({ provider: dataProvider });
+      return () => {
+        unRegisterProvider!({ id: dataProvider.id });
+      };
+    }, []);
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
@@ -198,34 +96,32 @@ class DraggableWrapperComponent extends React.Component<Props> {
                 index={0}
                 key={getDraggableId(dataProvider.id)}
               >
-                {(provided, snapshot) => {
-                  return (
+                {(provided, snapshot) => (
+                  <ConditionalPortal usePortal={snapshot.isDragging && usePortal}>
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
+                      ref={provided.innerRef}
                       data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
                       style={{
                         ...provided.draggableProps.style,
                       }}
                     >
-                      {width != null && !snapshot.isDragging ? (
-                        <TruncatableText
-                          data-test-subj="draggable-truncatable-content"
-                          size="xs"
-                          width={width}
-                        >
+                      {truncate && !snapshot.isDragging ? (
+                        <TruncatableText data-test-subj="draggable-truncatable-content">
                           {render(dataProvider, provided, snapshot)}
                         </TruncatableText>
                       ) : (
-                        <span data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}>
+                        <ProviderContentWrapper
+                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                        >
                           {render(dataProvider, provided, snapshot)}
-                        </span>
+                        </ProviderContentWrapper>
                       )}
                     </ProviderContainer>
-                  );
-                }}
+                  </ConditionalPortal>
+                )}
               </Draggable>
               {droppableProvided.placeholder}
             </div>
@@ -233,13 +129,33 @@ class DraggableWrapperComponent extends React.Component<Props> {
         </Droppable>
       </Wrapper>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      isEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+      prevProps.render !== nextProps.render &&
+      prevProps.truncate === nextProps.truncate
+    );
   }
-}
+);
 
-export const DraggableWrapper = connect(
-  null,
-  {
-    registerProvider: dragAndDropActions.registerProvider,
-    unRegisterProvider: dragAndDropActions.unRegisterProvider,
-  }
-)(DraggableWrapperComponent);
+DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
+
+export const DraggableWrapper = connect(null, {
+  registerProvider: dragAndDropActions.registerProvider,
+  unRegisterProvider: dragAndDropActions.unRegisterProvider,
+})(DraggableWrapperComponent);
+
+DraggableWrapper.displayName = 'DraggableWrapper';
+
+/**
+ * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
+ * from containers that have css transforms
+ *
+ * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
+ */
+const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
+  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+);
+
+ConditionalPortal.displayName = 'ConditionalPortal';

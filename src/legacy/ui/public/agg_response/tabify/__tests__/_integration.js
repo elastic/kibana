@@ -22,37 +22,39 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('tabifyAggResponse Integration', function () {
-  let Vis;
+describe('tabifyAggResponse Integration', function() {
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
   function normalizeIds(vis) {
-    vis.aggs.aggs.forEach(function (agg, i) {
+    vis.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
   }
 
-  it('transforms a simple response properly', function () {
+  it('transforms a simple response properly', function() {
     const vis = new Vis(indexPattern, {
       type: 'histogram',
-      aggs: []
+      aggs: [],
     });
     normalizeIds(vis);
 
     const resp = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly, {
-      metricsAtAllLevels: vis.isHierarchical()
+      metricsAtAllLevels: vis.isHierarchical(),
     });
 
-    expect(resp).to.have.property('rows').and.property('columns');
+    expect(resp)
+      .to.have.property('rows')
+      .and.property('columns');
     expect(resp.rows).to.have.length(1);
     expect(resp.columns).to.have.length(1);
 
@@ -60,7 +62,7 @@ describe('tabifyAggResponse Integration', function () {
     expect(resp.columns[0]).to.have.property('aggConfig', vis.aggs[0]);
   });
 
-  describe('transforms a complex response', function () {
+  describe('transforms a complex response', function() {
     this.slow(1000);
 
     let vis;
@@ -70,15 +72,15 @@ describe('tabifyAggResponse Integration', function () {
     let os;
     let esResp;
 
-    beforeEach(function () {
+    beforeEach(function() {
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
           { type: 'terms', schema: 'split', params: { field: 'extension' } },
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
-        ]
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+        ],
       });
       normalizeIds(vis);
 
@@ -94,8 +96,10 @@ describe('tabifyAggResponse Integration', function () {
 
     // check that the columns of a table are formed properly
     function expectColumns(table, aggs) {
-      expect(table.columns).to.be.an('array').and.have.length(aggs.length);
-      aggs.forEach(function (agg, i) {
+      expect(table.columns)
+        .to.be.an('array')
+        .and.have.length(aggs.length);
+      aggs.forEach(function(agg, i) {
         expect(table.columns[i]).to.have.property('aggConfig', agg);
       });
     }
@@ -103,7 +107,7 @@ describe('tabifyAggResponse Integration', function () {
     // check that a row has expected values
     function expectRow(row, asserts) {
       expect(row).to.be.an('object');
-      asserts.forEach(function (assert, i) {
+      asserts.forEach(function(assert, i) {
         if (row[`col-${i}`]) {
           assert(row[`col-${i}`]);
         }
@@ -118,14 +122,12 @@ describe('tabifyAggResponse Integration', function () {
 
     // check for an OS term
     function expectExtension(val) {
-      expect(val)
-        .to.match(/^(js|png|html|css|jpg)$/);
+      expect(val).to.match(/^(js|png|html|css|jpg)$/);
     }
 
     // check for an OS term
     function expectOS(val) {
-      expect(val)
-        .to.match(/^(win|mac|linux)$/);
+      expect(val).to.match(/^(win|mac|linux)$/);
     }
 
     // check for something like an average bytes result
@@ -134,7 +136,7 @@ describe('tabifyAggResponse Integration', function () {
       expect(val === 0 || val > 1000).to.be.ok();
     }
 
-    it('for non-hierarchical vis', function () {
+    it('for non-hierarchical vis', function() {
       // the default for a non-hierarchical vis is to display
       // only complete rows, and only put the metrics at the end.
 
@@ -142,17 +144,12 @@ describe('tabifyAggResponse Integration', function () {
 
       expectColumns(tabbed, [ext, src, os, avg]);
 
-      tabbed.rows.forEach(function (row) {
-        expectRow(row, [
-          expectExtension,
-          expectCountry,
-          expectOS,
-          expectAvgBytes
-        ]);
+      tabbed.rows.forEach(function(row) {
+        expectRow(row, [expectExtension, expectCountry, expectOS, expectAvgBytes]);
       });
     });
 
-    it('for hierarchical vis', function () {
+    it('for hierarchical vis', function() {
       // since we have partialRows we expect that one row will have some empty
       // values, and since the vis is hierarchical and we are NOT using
       // minimalColumns we should expect the partial row to be completely after
@@ -163,14 +160,14 @@ describe('tabifyAggResponse Integration', function () {
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);
 
-      tabbed.rows.forEach(function (row) {
+      tabbed.rows.forEach(function(row) {
         expectRow(row, [
           expectExtension,
           expectAvgBytes,
           expectCountry,
           expectAvgBytes,
           expectOS,
-          expectAvgBytes
+          expectAvgBytes,
         ]);
       });
     });

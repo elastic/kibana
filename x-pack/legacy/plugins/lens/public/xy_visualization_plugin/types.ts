@@ -6,10 +6,15 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunction,
-  ArgumentType,
-} from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction, ArgumentType } from 'src/plugins/expressions/common';
+import chartAreaSVG from '../assets/chart_area.svg';
+import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
+import chartBarSVG from '../assets/chart_bar.svg';
+import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
+import chartBarHorizontalSVG from '../assets/chart_bar_horizontal.svg';
+import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked.svg';
+import chartLineSVG from '../assets/chart_line.svg';
+
 import { VisualizationType } from '..';
 
 export interface LegendConfig {
@@ -175,7 +180,14 @@ export const layerConfig: ExpressionFunction<
   },
 };
 
-export type SeriesType = 'bar' | 'line' | 'area' | 'bar_stacked' | 'area_stacked';
+export type SeriesType =
+  | 'bar'
+  | 'bar_horizontal'
+  | 'line'
+  | 'area'
+  | 'bar_stacked'
+  | 'bar_horizontal_stacked'
+  | 'area_stacked';
 
 export interface LayerConfig {
   hide?: boolean;
@@ -199,7 +211,6 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig;
   layers: LayerArgs[];
-  isHorizontal: boolean;
 }
 
 // Persisted parts of the state
@@ -207,7 +218,6 @@ export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
   layers: LayerConfig[];
-  isHorizontal: boolean;
 }
 
 export type State = XYState;
@@ -217,20 +227,39 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: 'visBarVertical',
+    largeIcon: chartBarSVG,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
   },
   {
+    id: 'bar_horizontal',
+    icon: 'visBarHorizontal',
+    largeIcon: chartBarHorizontalSVG,
+    label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
+      defaultMessage: 'Horizontal bar',
+    }),
+  },
+  {
     id: 'bar_stacked',
-    icon: 'visBarVertical',
+    icon: 'visBarVerticalStacked',
+    largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
-      defaultMessage: 'Stacked Bar',
+      defaultMessage: 'Stacked bar',
+    }),
+  },
+  {
+    id: 'bar_horizontal_stacked',
+    icon: 'visBarHorizontalStacked',
+    largeIcon: chartBarHorizontalStackedSVG,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
+      defaultMessage: 'Stacked horizontal bar',
     }),
   },
   {
     id: 'line',
     icon: 'visLine',
+    largeIcon: chartLineSVG,
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
@@ -238,15 +267,17 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'area',
     icon: 'visArea',
+    largeIcon: chartAreaSVG,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
   },
   {
     id: 'area_stacked',
-    icon: 'visArea',
+    icon: 'visAreaStacked',
+    largeIcon: chartAreaStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
-      defaultMessage: 'Stacked Area',
+      defaultMessage: 'Stacked area',
     }),
   },
 ];

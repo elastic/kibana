@@ -20,50 +20,55 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('TabbedAggResponseWriter class', function () {
-  let Vis;
+describe('TabbedAggResponseWriter class', function() {
   let Private;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
+  beforeEach(
+    ngMock.inject(function($injector) {
+      Private = $injector.get('Private');
 
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-  const splitAggConfig = [ {
-    type: 'terms',
-    params: {
-      field: 'geo.src',
-    }
-  }];
+  const splitAggConfig = [
+    {
+      type: 'terms',
+      params: {
+        field: 'geo.src',
+      },
+    },
+  ];
 
-  const twoSplitsAggConfig =  [{
-    type: 'terms',
-    params: {
-      field: 'geo.src',
-    }
-  }, {
-    type: 'terms',
-    params: {
-      field: 'machine.os.raw',
-    }
-  }];
+  const twoSplitsAggConfig = [
+    {
+      type: 'terms',
+      params: {
+        field: 'geo.src',
+      },
+    },
+    {
+      type: 'terms',
+      params: {
+        field: 'machine.os.raw',
+      },
+    },
+  ];
 
   const createResponseWritter = (aggs = [], opts = {}) => {
-    const vis = new Vis(indexPattern, { type: 'histogram',  aggs: aggs });
+    const vis = new Vis(indexPattern, { type: 'histogram', aggs: aggs });
     return new TabbedAggResponseWriter(vis.getAggConfig(), opts);
   };
 
-  describe('Constructor', function () {
+  describe('Constructor', function() {
     let responseWriter;
     beforeEach(() => {
-      responseWriter  = createResponseWritter(twoSplitsAggConfig);
+      responseWriter = createResponseWritter(twoSplitsAggConfig);
     });
 
     it('creates aggStack', () => {
@@ -75,22 +80,24 @@ describe('TabbedAggResponseWriter class', function () {
     });
 
     it('correctly generates columns with metricsAtAllLevels set to true', () => {
-      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, { metricsAtAllLevels: true });
+      const minimalColumnsResponseWriter = createResponseWritter(twoSplitsAggConfig, {
+        metricsAtAllLevels: true,
+      });
       expect(minimalColumnsResponseWriter.columns.length).to.eql(4);
     });
 
-    describe('sets timeRange', function () {
-      it('to the first nested object\'s range', function () {
+    describe('sets timeRange', function() {
+      it("to the first nested object's range", function() {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
         const range = {
           gte: 0,
-          lte: 100
+          lte: 100,
         };
 
         const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           timeRange: {
-            '@timestamp': range
-          }
+            '@timestamp': range,
+          },
         });
 
         expect(writer.timeRange.gte).to.be(range.gte);
@@ -98,22 +105,22 @@ describe('TabbedAggResponseWriter class', function () {
         expect(writer.timeRange.name).to.be('@timestamp');
       });
 
-      it('to undefined if no nested object', function () {
+      it('to undefined if no nested object', function() {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
 
         const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
-          timeRange: {}
+          timeRange: {},
         });
         expect(writer).to.have.property('timeRange', undefined);
       });
     });
   });
 
-  describe('row()', function () {
+  describe('row()', function() {
     let responseWriter;
 
     beforeEach(() => {
-      responseWriter  = createResponseWritter(splitAggConfig, { partialRows: true });
+      responseWriter = createResponseWritter(splitAggConfig, { partialRows: true });
     });
 
     it('adds the row to the array', () => {
@@ -132,7 +139,7 @@ describe('TabbedAggResponseWriter class', function () {
       expect(responseWriter.rows[0]).to.eql({ 'col-0': 'US', 'col-1': 5 });
     });
 
-    it('doesn\'t add an empty row', () => {
+    it("doesn't add an empty row", () => {
       responseWriter.row();
       expect(responseWriter.rows.length).to.eql(0);
     });
@@ -142,7 +149,7 @@ describe('TabbedAggResponseWriter class', function () {
     let responseWriter;
 
     beforeEach(() => {
-      responseWriter  = createResponseWritter(splitAggConfig);
+      responseWriter = createResponseWritter(splitAggConfig);
     });
 
     it('produces correct response', () => {

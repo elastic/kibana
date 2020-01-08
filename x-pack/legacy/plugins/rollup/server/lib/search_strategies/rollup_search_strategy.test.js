@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { getRollupSearchStrategy } from './rollup_search_strategy';
 
 describe('Rollup Search Strategy', () => {
@@ -37,7 +37,11 @@ describe('Rollup Search Strategy', () => {
     RollupSearchCapabilities = jest.fn(() => 'capabilities');
     callWithRequest = jest.fn().mockImplementation(() => rollupResolvedData);
 
-    RollupSearchStrategy = getRollupSearchStrategy(AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities);
+    RollupSearchStrategy = getRollupSearchStrategy(
+      AbstractSearchStrategy,
+      RollupSearchRequest,
+      RollupSearchCapabilities
+    );
   });
 
   test('should create instance of RollupSearchRequest', () => {
@@ -54,22 +58,28 @@ describe('Rollup Search Strategy', () => {
       rollupSearchStrategy = new RollupSearchStrategy(server);
       rollupSearchStrategy.getRollupData = jest.fn(() => ({
         [rollupIndex]: {
-          rollup_jobs: [{
-            job_id: 'test',
-            rollup_index: rollupIndex,
-            index_pattern: 'kibana*',
-            fields: {
-              order_date: [{
-                agg: 'date_histogram',
-                delay: '1m',
-                interval: '1m',
-                time_zone: 'UTC',
-              }],
-              day_of_week: [{
-                agg: 'terms',
-              }],
+          rollup_jobs: [
+            {
+              job_id: 'test',
+              rollup_index: rollupIndex,
+              index_pattern: 'kibana*',
+              fields: {
+                order_date: [
+                  {
+                    agg: 'date_histogram',
+                    delay: '1m',
+                    interval: '1m',
+                    time_zone: 'UTC',
+                  },
+                ],
+                day_of_week: [
+                  {
+                    agg: 'terms',
+                  },
+                ],
+              },
             },
-          }],
+          ],
         },
       }));
     });
@@ -102,7 +112,9 @@ describe('Rollup Search Strategy', () => {
 
       const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
 
-      expect(callWithRequest).toHaveBeenCalledWith('rollup.rollupIndexCapabilities', { indexPattern });
+      expect(callWithRequest).toHaveBeenCalledWith('rollup.rollupIndexCapabilities', {
+        indexPattern,
+      });
       expect(rollupSearchStrategy.getCallWithRequestInstance).toHaveBeenCalledWith(request);
       expect(rollupData).toBe('data');
     });
@@ -136,9 +148,10 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('should return fields for wildcard', async () => {
-      const fields = await rollupSearchStrategy.getFieldsForWildcard(request, indexPattern,
-        { fieldsCapabilities, rollupIndex },
-      );
+      const fields = await rollupSearchStrategy.getFieldsForWildcard(request, indexPattern, {
+        fieldsCapabilities,
+        rollupIndex,
+      });
 
       expect(fields).toEqual([
         {

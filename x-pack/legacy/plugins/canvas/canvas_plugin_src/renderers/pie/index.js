@@ -9,12 +9,15 @@ import 'jquery';
 import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
+import { RendererStrings } from '../../../i18n';
 import { pie as piePlugin } from './plugins/pie';
+
+const { pie: strings } = RendererStrings;
 
 export const pie = () => ({
   name: 'pie',
-  displayName: 'Pie chart',
-  help: 'Render a pie chart from data',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: false,
   render(domNode, config, handlers) {
     if (!includes($.plot.plugins, piePlugin)) {

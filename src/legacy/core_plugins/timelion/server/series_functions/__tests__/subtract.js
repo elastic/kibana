@@ -24,7 +24,6 @@ const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('subtract.js', () => {
-
   let seriesList;
   beforeEach(() => {
     seriesList = require('./fixtures/seriesList.js')();
@@ -43,7 +42,12 @@ describe('subtract.js', () => {
   it('it subtracts all series in seriesList to single series when only one argument is supplied', async () => {
     const outputSeries = await invoke(fn, [seriesList]);
     expect(outputSeries.output.list.length).to.eql(1);
-    expect(_.map(outputSeries.output.list[0].data, 1)).to.eql([-165.1415926535, -136, 19.561, -2.3424234999999998]);
+    expect(_.map(outputSeries.output.list[0].data, 1)).to.eql([
+      -165.1415926535,
+      -136,
+      19.561,
+      -2.3424234999999998,
+    ]);
   });
 
   it('it subtracts a number', async () => {
@@ -59,9 +63,7 @@ describe('subtract.js', () => {
   it('it subtracts a seriesList with one series', async () => {
     const seriesListWithOneSeries = {
       type: 'seriesList',
-      list: [
-        _.cloneDeep(seriesList.list[1])
-      ]
+      list: [_.cloneDeep(seriesList.list[1])],
     };
     const outputSeries = await invoke(fn, [seriesList, seriesListWithOneSeries]);
     expect(_.map(outputSeries.output.list[1].data, 1)).to.eql([0, 0, 0, 0]);
@@ -75,5 +77,4 @@ describe('subtract.js', () => {
     expect(_.map(outputSeries.output.list[3].data, 1)).to.eql([0, 0, 0, 0]);
     expect(_.map(outputSeries.output.list[4].data, 1)).to.eql([0, 0, 0, 0]);
   });
-
 });

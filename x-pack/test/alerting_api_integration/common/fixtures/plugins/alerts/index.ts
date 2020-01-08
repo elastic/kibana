@@ -14,7 +14,38 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok', actionId: '' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -94,6 +125,7 @@ export default function(kibana: any) {
           return {
             status: 'error',
             retry: new Date(params.retryAt),
+            actionId: '',
           };
         },
       };
@@ -155,13 +187,15 @@ export default function(kibana: any) {
           });
           return {
             status: 'ok',
+            actionId: '',
           };
         },
       };
-      server.plugins.actions.registerType(indexRecordActionType);
-      server.plugins.actions.registerType(failingActionType);
-      server.plugins.actions.registerType(rateLimitedActionType);
-      server.plugins.actions.registerType(authorizationActionType);
+      server.plugins.actions.setup.registerType(noopActionType);
+      server.plugins.actions.setup.registerType(indexRecordActionType);
+      server.plugins.actions.setup.registerType(failingActionType);
+      server.plugins.actions.setup.registerType(rateLimitedActionType);
+      server.plugins.actions.setup.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
@@ -311,15 +345,15 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: [],
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.registerType(neverFiringAlertType);
-      server.plugins.alerting.registerType(failingAlertType);
-      server.plugins.alerting.registerType(validationAlertType);
-      server.plugins.alerting.registerType(authorizationAlertType);
-      server.plugins.alerting.registerType(noopAlertType);
+      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.setup.registerType(neverFiringAlertType);
+      server.plugins.alerting.setup.registerType(failingAlertType);
+      server.plugins.alerting.setup.registerType(validationAlertType);
+      server.plugins.alerting.setup.registerType(authorizationAlertType);
+      server.plugins.alerting.setup.registerType(noopAlertType);
     },
   });
 }

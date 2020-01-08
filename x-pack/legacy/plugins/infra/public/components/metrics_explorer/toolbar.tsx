@@ -5,9 +5,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -23,13 +23,16 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
+import { SavedViewsToolbarControls } from '../saved_views/toolbar_control';
+import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
+import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 
 interface Props {
-  intl: InjectedIntl;
-  derivedIndexPattern: StaticIndexPattern;
+  derivedIndexPattern: IIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
+  defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null) => void;
@@ -37,90 +40,103 @@ interface Props {
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
+  onViewStateChange: (vs: MetricExplorerViewState) => void;
 }
 
-export const MetricsExplorerToolbar = injectI18n(
-  ({
-    timeRange,
-    derivedIndexPattern,
-    options,
-    onTimeChange,
-    onRefresh,
-    onGroupByChange,
-    onFilterQuerySubmit,
-    onMetricsChange,
-    onAggregationChange,
-    chartOptions,
-    onChartOptionsChange,
-  }: Props) => {
-    const isDefaultOptions =
-      options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
-    return (
-      <Toolbar>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={options.aggregation === MetricsExplorerAggregation.count ? 2 : false}>
-            <MetricsExplorerAggregationPicker
-              fullWidth
-              options={options}
-              onChange={onAggregationChange}
-            />
-          </EuiFlexItem>
-          {options.aggregation !== MetricsExplorerAggregation.count && (
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.infra.metricsExplorer.aggregationLabel"
-                defaultMessage="of"
-              />
-            </EuiText>
-          )}
-          {options.aggregation !== MetricsExplorerAggregation.count && (
-            <EuiFlexItem grow={2}>
-              <MetricsExplorerMetrics
-                autoFocus={isDefaultOptions}
-                fields={derivedIndexPattern.fields}
-                options={options}
-                onChange={onMetricsChange}
-              />
-            </EuiFlexItem>
-          )}
+export const MetricsExplorerToolbar = ({
+  timeRange,
+  derivedIndexPattern,
+  options,
+  onTimeChange,
+  onRefresh,
+  onGroupByChange,
+  onFilterQuerySubmit,
+  onMetricsChange,
+  onAggregationChange,
+  chartOptions,
+  onChartOptionsChange,
+  defaultViewState,
+  onViewStateChange,
+}: Props) => {
+  const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
+  return (
+    <Toolbar>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={options.aggregation === 'count' ? 2 : false}>
+          <MetricsExplorerAggregationPicker
+            fullWidth
+            options={options}
+            onChange={onAggregationChange}
+          />
+        </EuiFlexItem>
+        {options.aggregation !== 'count' && (
           <EuiText size="s" color="subdued">
             <FormattedMessage
-              id="xpack.infra.metricsExplorer.groupByToolbarLabel"
-              defaultMessage="graph per"
+              id="xpack.infra.metricsExplorer.aggregationLabel"
+              defaultMessage="of"
             />
           </EuiText>
-          <EuiFlexItem grow={1}>
-            <MetricsExplorerGroupBy
-              onChange={onGroupByChange}
+        )}
+        {options.aggregation !== 'count' && (
+          <EuiFlexItem grow={2}>
+            <MetricsExplorerMetrics
+              autoFocus={isDefaultOptions}
               fields={derivedIndexPattern.fields}
               options={options}
+              onChange={onMetricsChange}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <MetricsExplorerKueryBar
-              derivedIndexPattern={derivedIndexPattern}
-              onSubmit={onFilterQuerySubmit}
-              value={options.filterQuery}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <MetricsExplorerChartOptionsComponent
-              onChange={onChartOptionsChange}
-              chartOptions={chartOptions}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
-            <EuiSuperDatePicker
-              start={timeRange.from}
-              end={timeRange.to}
-              onTimeChange={({ start, end }) => onTimeChange(start, end)}
-              onRefresh={onRefresh}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Toolbar>
-    );
-  }
-);
+        )}
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.infra.metricsExplorer.groupByToolbarLabel"
+            defaultMessage="graph per"
+          />
+        </EuiText>
+        <EuiFlexItem grow={1}>
+          <MetricsExplorerGroupBy
+            onChange={onGroupByChange}
+            fields={derivedIndexPattern.fields}
+            options={options}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <MetricsExplorerKueryBar
+            derivedIndexPattern={derivedIndexPattern}
+            onSubmit={onFilterQuerySubmit}
+            value={options.filterQuery}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <MetricsExplorerChartOptionsComponent
+            onChange={onChartOptionsChange}
+            chartOptions={chartOptions}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <SavedViewsToolbarControls
+            defaultViewState={defaultViewState}
+            viewState={{
+              options,
+              chartOptions,
+              currentTimerange: timeRange,
+            }}
+            viewType={metricsExplorerViewSavedObjectType}
+            onViewChange={onViewStateChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
+          <EuiSuperDatePicker
+            start={timeRange.from}
+            end={timeRange.to}
+            onTimeChange={({ start, end }) => onTimeChange(start, end)}
+            onRefresh={onRefresh}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Toolbar>
+  );
+};

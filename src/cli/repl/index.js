@@ -43,7 +43,13 @@ export function startRepl(kbnServer) {
     replServer.context.repl = {
       printDepth: PRINT_DEPTH,
       print(obj, depth = null) {
-        console.log(promisePrint(obj, () => replServer.displayPrompt(), () => depth));
+        console.log(
+          promisePrint(
+            obj,
+            () => replServer.displayPrompt(),
+            () => depth
+          )
+        );
         return '';
       },
     };
@@ -66,7 +72,7 @@ function prettyPrint(text, o, depth) {
 // This lets us handle promises more gracefully than the default REPL,
 // which doesn't show the results.
 function promiseFriendlyWriter({ displayPrompt, getPrintDepth }) {
-  return (result) => promisePrint(result, displayPrompt, getPrintDepth);
+  return result => promisePrint(result, displayPrompt, getPrintDepth);
 }
 
 function promisePrint(result, displayPrompt, getPrintDepth) {
@@ -77,8 +83,8 @@ function promisePrint(result, displayPrompt, getPrintDepth) {
     Promise.resolve()
       .then(() => console.log('Waiting for promise...'))
       .then(() => result)
-      .then((o) => prettyPrint('Promise Resolved: \n', o, depth))
-      .catch((err) => prettyPrint('Promise Rejected: \n', err, depth))
+      .then(o => prettyPrint('Promise Resolved: \n', o, depth))
+      .catch(err => prettyPrint('Promise Rejected: \n', err, depth))
       .then(displayPrompt);
     return '';
   }

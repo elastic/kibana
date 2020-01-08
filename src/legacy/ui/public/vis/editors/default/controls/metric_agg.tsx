@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { safeMakeLabel, isCompatibleAggregation } from '../../../../agg_types/agg_utils';
+import { useAvailableOptions, useFallbackMetric, useValidation } from './agg_utils';
 import { AggParamEditorProps } from '..';
 
 const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
-const isCompatibleAgg = isCompatibleAggregation(aggFilter);
 const EMPTY_VALUE = 'EMPTY_VALUE';
+const DEFAULT_OPTIONS = [{ text: '', value: EMPTY_VALUE, hidden: true }];
 
 function MetricAggParamEditor({
   agg,
@@ -34,71 +34,32 @@ function MetricAggParamEditor({
   setValue,
   setValidity,
   setTouched,
-  metricAggs,
+  metricAggs = [],
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.metricLabel', {
     defaultMessage: 'Metric',
   });
   const isValid = !!value;
 
-  useEffect(() => {
-    setValidity(isValid);
-  }, [isValid]);
+  useValidation(setValidity, isValid);
+  useFallbackMetric(setValue, aggFilter, metricAggs, value);
 
-  useEffect(() => {
-    if (metricAggs && value && value !== 'custom') {
-      // ensure that metricAgg is set to a valid agg
-      const respAgg = metricAggs
-        .filter(isCompatibleAgg)
-        .find(aggregation => aggregation.id === value);
-
-      if (!respAgg) {
-        setValue();
-      }
-    }
-  }, [metricAggs]);
-
-  const options = metricAggs
-    ? metricAggs
-        .filter(respAgg => respAgg.type.name !== agg.type.name)
-        .map(respAgg => ({
-          text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {
-            defaultMessage: 'Metric: {safeMakeLabel}',
-            values: {
-              safeMakeLabel: safeMakeLabel(respAgg),
-            },
-          }),
-          value: respAgg.id,
-          disabled: !isCompatibleAgg(respAgg),
-        }))
-    : [];
-
-  options.push({
-    text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
-      defaultMessage: 'Custom metric',
-    }),
-    value: 'custom',
-    disabled: false,
-  });
-
-  if (!value) {
-    options.unshift({ text: '', value: EMPTY_VALUE, disabled: false });
-  }
+  const filteredMetrics = useMemo(
+    () => metricAggs.filter(respAgg => respAgg.type.name !== agg.type.name),
+    [metricAggs, agg.type.name]
+  );
+  const options = useAvailableOptions(aggFilter, filteredMetrics, DEFAULT_OPTIONS);
+  const onChange = useCallback(ev => setValue(ev.target.value), [setValue]);
 
   return (
-    <EuiFormRow
-      label={label}
-      fullWidth={true}
-      isInvalid={showValidation ? !isValid : false}
-      compressed
-    >
+    <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
       <EuiSelect
+        compressed
+        fullWidth
         options={options}
         value={value || EMPTY_VALUE}
-        onChange={ev => setValue(ev.target.value)}
-        fullWidth={true}
-        compressed
-        isInvalid={showValidation ? !isValid : false}
+        onChange={onChange}
+        isInvalid={showValidation && !isValid}
         onBlur={setTouched}
         data-test-subj={`visEditorSubAggMetric${agg.id}`}
       />
@@ -106,4 +67,4 @@ function MetricAggParamEditor({
   );
 }
 
-export { MetricAggParamEditor };
+export { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor };

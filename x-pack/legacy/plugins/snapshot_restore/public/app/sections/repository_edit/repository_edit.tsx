@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
-import { RepositoryForm, SectionError, SectionLoading } from '../../components';
+import { RepositoryForm, SectionError, SectionLoading, Error } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -87,7 +87,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   const renderError = () => {
-    const notFound = repositoryError.status === 404;
+    const notFound = (repositoryError as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -111,7 +111,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error loading repository details"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };

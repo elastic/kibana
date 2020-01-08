@@ -6,20 +6,18 @@
 
 import Hapi from 'hapi';
 
-export function updateApiKeyRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{id}/_update_api_key',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const updateApiKeyRoute = {
+  method: 'POST',
+  path: '/api/alert/{id}/_update_api_key',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.updateApiKey({ id: request.params.id });
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.updateApiKey({ id: request.params.id });
+    return h.response();
+  },
+};

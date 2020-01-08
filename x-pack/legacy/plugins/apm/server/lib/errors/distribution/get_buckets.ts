@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
-import { idx } from '@kbn/elastic-idx';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 
 export async function getBuckets({
   serviceName,
@@ -23,9 +26,9 @@ export async function getBuckets({
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { start, end, uiFiltersES, client, indices } = setup;
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
@@ -38,7 +41,7 @@ export async function getBuckets({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 0,
       query: {
@@ -64,15 +67,15 @@ export async function getBuckets({
 
   const resp = await client.search(params);
 
-  const buckets = (
-    idx(resp.aggregations, _ => _.distribution.buckets) || []
-  ).map(bucket => ({
-    key: bucket.key,
-    count: bucket.doc_count
-  }));
+  const buckets = (resp.aggregations?.distribution.buckets || []).map(
+    bucket => ({
+      key: bucket.key,
+      count: bucket.doc_count
+    })
+  );
 
   return {
-    totalHits: resp.hits.total,
+    noHits: resp.hits.total.value === 0,
     buckets
   };
 }

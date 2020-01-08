@@ -5,34 +5,36 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { JobsTable } from './jobs_table';
-import { mockJobsSummaryResponse } from '../__mocks__/api';
+import React from 'react';
+import { JobsTableComponent } from './jobs_table';
+import { mockSiemJobs } from '../__mocks__/api';
 import { cloneDeep } from 'lodash/fp';
+import { SiemJob } from '../types';
 
-describe('JobsTable', () => {
+describe('JobsTableComponent', () => {
+  let siemJobs: SiemJob[];
   let onJobStateChangeMock = jest.fn();
   beforeEach(() => {
+    siemJobs = cloneDeep(mockSiemJobs);
     onJobStateChangeMock = jest.fn();
   });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <JobsTable
+      <JobsTableComponent
         isLoading={true}
-        jobs={mockJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render the hyperlink which points specifically to the job id', () => {
     const wrapper = mount(
-      <JobsTable
+      <JobsTableComponent
         isLoading={true}
-        jobs={mockJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -41,16 +43,17 @@ describe('JobsTable', () => {
         .find('[data-test-subj="jobs-table-link"]')
         .first()
         .props().href
-    ).toEqual('/test/base/path/app/ml#/jobs?mlManagement=(jobId:rc-rare-process-windows-5)');
+    ).toEqual(
+      '/test/base/path/app/ml#/jobs?mlManagement=(jobId:linux_anomalous_network_activity_ecs)'
+    );
   });
 
   test('should render the hyperlink with URI encodings which points specifically to the job id', () => {
-    const cloneJobsSummaryResponse = cloneDeep(mockJobsSummaryResponse);
-    cloneJobsSummaryResponse[0].id = 'job id with spaces';
+    siemJobs[0].id = 'job id with spaces';
     const wrapper = mount(
-      <JobsTable
+      <JobsTableComponent
         isLoading={true}
-        jobs={cloneJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -64,30 +67,26 @@ describe('JobsTable', () => {
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {
     const wrapper = mount(
-      <JobsTable
+      <JobsTableComponent
         isLoading={false}
-        jobs={mockJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
     wrapper
-      .find('[data-test-subj="job-switch"] input')
+      .find('button[data-test-subj="job-switch"]')
       .first()
-      .simulate('change', {
+      .simulate('click', {
         target: { checked: true },
       });
-    expect(onJobStateChangeMock.mock.calls[0]).toEqual([
-      'rc-rare-process-windows-5',
-      1561402325194,
-      true,
-    ]);
+    expect(onJobStateChangeMock.mock.calls[0]).toEqual([siemJobs[0], 1571022859393, true]);
   });
 
   test('should have a switch when it is not in the loading state', () => {
     const wrapper = mount(
-      <JobsTable
+      <JobsTableComponent
         isLoading={false}
-        jobs={mockJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -96,9 +95,9 @@ describe('JobsTable', () => {
 
   test('should not have a switch when it is in the loading state', () => {
     const wrapper = mount(
-      <JobsTable
+      <JobsTableComponent
         isLoading={true}
-        jobs={mockJobsSummaryResponse}
+        jobs={siemJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );

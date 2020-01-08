@@ -13,24 +13,22 @@ interface GetRequest extends Hapi.Request {
   };
 }
 
-export function getRoute(server: Hapi.Server) {
-  server.route({
-    method: 'GET',
-    path: `/api/alert/{id}`,
-    options: {
-      tags: ['access:alerting-read'],
-      validate: {
-        params: Joi.object()
-          .keys({
-            id: Joi.string().required(),
-          })
-          .required(),
-      },
+export const getAlertRoute = {
+  method: 'GET',
+  path: `/api/alert/{id}`,
+  options: {
+    tags: ['access:alerting-read'],
+    validate: {
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    async handler(request: GetRequest) {
-      const { id } = request.params;
-      const alertsClient = request.getAlertsClient!();
-      return await alertsClient.get({ id });
-    },
-  });
-}
+  },
+  async handler(request: GetRequest) {
+    const { id } = request.params;
+    const alertsClient = request.getAlertsClient!();
+    return await alertsClient.get({ id });
+  },
+};

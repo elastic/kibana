@@ -6,8 +6,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { getIconFromType } from '../../../../event_details/helpers';
@@ -19,30 +18,26 @@ const IconType = styled(EuiIcon)`
   position: relative;
   top: -2px;
 `;
-
 IconType.displayName = 'IconType';
 
 const P = styled.p`
   margin-bottom: 5px;
 `;
-
 P.displayName = 'P';
 
 const ToolTipTableMetadata = styled.span`
   margin-right: 5px;
 `;
-
 ToolTipTableMetadata.displayName = 'ToolTipTableMetadata';
 
 const ToolTipTableValue = styled.span`
   word-wrap: break-word;
 `;
-
 ToolTipTableValue.displayName = 'ToolTipTableValue';
 
-export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) => (
+export const HeaderToolTipContent = React.memo<{ header: ColumnHeader }>(({ header }) => (
   <>
-    {!isEmpty(header.category) ? (
+    {!isEmpty(header.category) && (
       <P>
         <ToolTipTableMetadata data-test-subj="category">
           {i18n.CATEGORY}
@@ -50,7 +45,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
         </ToolTipTableMetadata>
         <ToolTipTableValue data-test-subj="category-value">{header.category}</ToolTipTableValue>
       </P>
-    ) : null}
+    )}
     <P>
       <ToolTipTableMetadata data-test-subj="field">
         {i18n.FIELD}
@@ -68,7 +63,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>
-    {!isEmpty(header.description) ? (
+    {!isEmpty(header.description) && (
       <P>
         <ToolTipTableMetadata data-test-subj="description">
           {i18n.DESCRIPTION}
@@ -78,8 +73,7 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
           {header.description}
         </ToolTipTableValue>
       </P>
-    ) : null}
+    )}
   </>
 ));
-
 HeaderToolTipContent.displayName = 'HeaderToolTipContent';

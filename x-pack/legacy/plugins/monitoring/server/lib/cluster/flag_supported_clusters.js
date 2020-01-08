@@ -8,7 +8,13 @@ import { get, set, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { LOGGING_TAG, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
-async function findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, kibanaUuid, serverLog) {
+async function findSupportedBasicLicenseCluster(
+  req,
+  clusters,
+  kbnIndexPattern,
+  kibanaUuid,
+  serverLog
+) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/findSupportedBasicLicenseCluster');
 
   serverLog(
@@ -24,24 +30,26 @@ async function findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, 
     ignoreUnavailable: true,
     filterPath: 'hits.hits._source.cluster_uuid',
     body: {
-      sort: { 'timestamp': { order: 'desc' } },
+      sort: { timestamp: { order: 'desc' } },
       query: {
         bool: {
           filter: [
             { term: { type: 'kibana_stats' } },
             { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
-            { range: { timestamp: { gte, lte, format: 'strict_date_optional_time' } } }
-          ]
-        }
-      }
-    }
+            { range: { timestamp: { gte, lte, format: 'strict_date_optional_time' } } },
+          ],
+        },
+      },
+    },
   });
   const supportedClusterUuid = get(kibanaDataResult, 'hits.hits[0]._source.cluster_uuid');
   const supportedCluster = find(clusters, { cluster_uuid: supportedClusterUuid });
   // only this basic cluster is supported
   set(supportedCluster, 'isSupported', true);
 
-  serverLog(`Found basic license admin cluster UUID for Monitoring UI support: ${supportedClusterUuid}.`);
+  serverLog(
+    `Found basic license admin cluster UUID for Monitoring UI support: ${supportedClusterUuid}.`
+  );
 
   return clusters;
 }
@@ -64,8 +72,8 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/flagSupportedClusters');
 
   const config = req.server.config();
-  const serverLog = (msg) => req.server.log(['debug', LOGGING_TAG, 'supported-clusters'], msg);
-  const flagAllSupported = (clusters) => {
+  const serverLog = msg => req.server.log(['debug', LOGGING_TAG, 'supported-clusters'], msg);
+  const flagAllSupported = clusters => {
     clusters.forEach(cluster => {
       if (cluster.license) {
         cluster.isSupported = true;
@@ -74,7 +82,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     return clusters;
   };
 
-  return async function (clusters) {
+  return async function(clusters) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
     let linkedClusterCount = 0;
@@ -102,11 +110,19 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
       // if all linked are basic licenses
       if (linkedClusterCount === basicLicenseCount) {
         const kibanaUuid = config.get('server.uuid');
-        return await findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, kibanaUuid, serverLog);
+        return await findSupportedBasicLicenseCluster(
+          req,
+          clusters,
+          kbnIndexPattern,
+          kibanaUuid,
+          serverLog
+        );
       }
 
       // if some non-basic licenses
-      serverLog('Found some basic license clusters in monitoring data. Only non-basic will be supported.');
+      serverLog(
+        'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
+      );
       clusters.forEach(cluster => {
         if (cluster.license && cluster.license.type !== 'basic') {
           cluster.isSupported = true;
@@ -119,5 +135,4 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     serverLog('Found single cluster in monitoring data.');
     return flagAllSupported(clusters);
   };
-
 }

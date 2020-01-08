@@ -4,6 +4,8 @@
 
 ## ToastsApi.addSuccess() method
 
+Adds a new toast pre-configured with the success color and check icon.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,9 +16,11 @@ addSuccess(toastOrTitle: ToastInput): Toast;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toastOrTitle | <code>ToastInput</code> |  |
+|  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-public.toastinput.md) |
 
 <b>Returns:</b>
 
 `Toast`
+
+a [Toast](./kibana-plugin-public.toast.md)
 

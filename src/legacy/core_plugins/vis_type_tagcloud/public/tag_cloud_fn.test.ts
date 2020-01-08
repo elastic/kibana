@@ -19,8 +19,8 @@
 
 import { createTagCloudFn } from './tag_cloud_fn';
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(createTagCloudFn);
@@ -39,7 +39,7 @@ describe('interpreter/functions#tagcloud', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig);
+    const actual = fn(context, visConfig, undefined);
     expect(actual).toMatchSnapshot();
   });
 });

@@ -18,3 +18,4 @@
  */
 
 export { configureAppAngularModule } from './angular_config';
+export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';

@@ -17,5 +17,6 @@
  * under the License.
  */
 
+require('../src/apm')(process.env.ELASTIC_APM_PROXY_SERVICE_NAME || 'kibana-proxy');
 require('../src/setup_node_env');
 require('../src/cli/cli');

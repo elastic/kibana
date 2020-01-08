@@ -76,7 +76,7 @@ exports[`LayerControl is rendered 1`] = `
 </Fragment>
 `;
 
-exports[`LayerControl props Should not render LayerTOC when isLayerTOCOpen is false 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
@@ -92,7 +92,42 @@ exports[`LayerControl props Should not render LayerTOC when isLayerTOCOpen is fa
 </EuiToolTip>
 `;
 
-exports[`LayerControl props isReadOnly 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <EuiButtonIcon
+    aria-label="Expand layers panel"
+    className="mapLayerControl__openLayerTOCButton"
+    color="text"
+    iconType="alert"
+    onClick={[Function]}
+  />
+</EuiToolTip>
+`;
+
+exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <button
+    aria-label="Expand layers panel"
+    className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
+    onClick={[Function]}
+    type="button"
+  >
+    <EuiLoadingSpinner
+      size="m"
+    />
+  </button>
+</EuiToolTip>
+`;
+
+exports[`LayerControl isReadOnly 1`] = `
 <Fragment>
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"

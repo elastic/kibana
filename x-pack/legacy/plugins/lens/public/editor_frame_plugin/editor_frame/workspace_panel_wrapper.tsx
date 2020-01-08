@@ -6,34 +6,23 @@
 
 import React from 'react';
 import { EuiPageContent, EuiPageContentHeader, EuiPageContentBody } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Action } from './state_management';
 
 interface Props {
   title: string;
-  dispatch: React.Dispatch<Action>;
   children: React.ReactNode | React.ReactNode[];
 }
 
-export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
+export function WorkspacePanelWrapper({ children, title }: Props) {
   return (
-    <EuiPageContent className="lnsPageContent">
-      <EuiPageContentHeader className="lnsPageContentHeader">
-        <input
-          type="text"
-          className="euiFieldText lnsTitleInput"
-          placeholder={i18n.translate('xpack.lens.chartTitlePlaceholder', {
-            defaultMessage: 'Title',
-          })}
-          data-test-subj="lns_ChartTitle"
-          value={title}
-          onChange={e => dispatch({ type: 'UPDATE_TITLE', title: e.target.value })}
-          aria-label={i18n.translate('xpack.lens.chartTitleAriaLabel', {
-            defaultMessage: 'Title',
-          })}
-        />
-      </EuiPageContentHeader>
-      <EuiPageContentBody className="lnsPageContentBody">{children}</EuiPageContentBody>
+    <EuiPageContent className="lnsWorkspacePanelWrapper">
+      {title && (
+        <EuiPageContentHeader className="lnsWorkspacePanelWrapper__pageContentHeader">
+          <span data-test-subj="lns_ChartTitle">{title}</span>
+        </EuiPageContentHeader>
+      )}
+      <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+        {children}
+      </EuiPageContentBody>
     </EuiPageContent>
   );
 }

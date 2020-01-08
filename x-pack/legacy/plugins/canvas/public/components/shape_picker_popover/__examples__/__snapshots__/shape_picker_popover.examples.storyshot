@@ -13,20 +13,24 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
   <div
     className="euiPopover__anchor"
   >
-    <button
-      className="euiLink euiLink--primary"
-      onClick={[Function]}
-      style={
-        Object {
-          "fontSize": 0,
-        }
-      }
-      type="button"
+    <div
+      className="euiPanel euiPanel--paddingSmall"
     >
-      <div
-        className="canvasShapePreview"
-      />
-    </button>
+      <button
+        className="euiLink euiLink--primary"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasShapePreview"
+        />
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -44,27 +48,31 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
   <div
     className="euiPopover__anchor"
   >
-    <button
-      className="euiLink euiLink--primary"
-      onClick={[Function]}
-      style={
-        Object {
-          "fontSize": 0,
-        }
-      }
-      type="button"
+    <div
+      className="euiPanel euiPanel--paddingSmall"
     >
-      <div
-        className="canvasShapePreview"
-        dangerouslySetInnerHTML={
+      <button
+        className="euiLink euiLink--primary"
+        onClick={[Function]}
+        style={
           Object {
-            "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
-      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"></rect>
-    </svg>",
+            "fontSize": 0,
           }
         }
-      />
-    </button>
+        type="button"
+      >
+        <div
+          className="canvasShapePreview"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
+      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"></rect>
+    </svg>",
+            }
+          }
+        />
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -82,27 +90,31 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
   <div
     className="euiPopover__anchor"
   >
-    <button
-      className="euiLink euiLink--primary"
-      onClick={[Function]}
-      style={
-        Object {
-          "fontSize": 0,
-        }
-      }
-      type="button"
+    <div
+      className="euiPanel euiPanel--paddingSmall"
     >
-      <div
-        className="canvasShapePreview"
-        dangerouslySetInnerHTML={
+      <button
+        className="euiLink euiLink--primary"
+        onClick={[Function]}
+        style={
           Object {
-            "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
-      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"></rect>
-    </svg>",
+            "fontSize": 0,
           }
         }
-      />
-    </button>
+        type="button"
+      >
+        <div
+          className="canvasShapePreview"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
+      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"></rect>
+    </svg>",
+            }
+          }
+        />
+      </button>
+    </div>
   </div>
 </div>
 `;

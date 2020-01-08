@@ -18,12 +18,16 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
+import {
+  SectionError,
+  SectionLoading,
+  SnapshotDeleteProvider,
+  Error,
+} from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
@@ -125,7 +129,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       content = <TabFailures snapshotState={snapshotState} indexFailures={indexFailures} />;
     }
   } else if (error) {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -148,7 +152,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading repository"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   } else {
@@ -196,14 +200,18 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                             onSnapshotDeleted
                           )
                         }
-                        isDisabled={snapshotDetails.isManagedRepository}
+                        isDisabled={
+                          snapshotDetails.managedRepository &&
+                          snapshotDetails.isLastSuccessfulSnapshot
+                        }
                         title={
-                          snapshotDetails.isManagedRepository
+                          snapshotDetails.managedRepository &&
+                          snapshotDetails.isLastSuccessfulSnapshot
                             ? i18n.translate(
                                 'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
                                 {
                                   defaultMessage:
-                                    'You cannot delete a snapshot stored in a managed repository.',
+                                    'You cannot delete the last successful snapshot stored in a managed repository.',
                                 }
                               )
                             : null
@@ -251,33 +259,24 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
-                {snapshotId}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiText size="s">
-              <p>
-                <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
-                    defaultMessage="'{repositoryName}' repository"
-                    values={{ repositoryName }}
-                  />
-                </EuiLink>
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
+        <EuiText>
+          <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
+            {snapshotId}
+          </h2>
+          <p>
+            <small>
+              <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
+                  defaultMessage="'{repositoryName}' repository"
+                  values={{ repositoryName }}
+                />
+              </EuiLink>
+            </small>
+          </p>
+        </EuiText>
         {tabs}
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>

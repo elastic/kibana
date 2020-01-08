@@ -8,32 +8,31 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
+import { getActionType } from './pagerduty';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
+import { Logger } from '../../../../../../src/core/server';
+import { configUtilsMock } from '../actions_config.mock';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
-const NO_OP_FN = () => {};
 
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 let actionType: ActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-});
-
-beforeEach(() => {
-  services.log = NO_OP_FN;
+  mockedLogger = logger;
 });
 
 describe('get()', () => {
@@ -54,6 +53,40 @@ describe('validateConfig()', () => {
       validateConfig(actionType, { shouldNotBeHere: true });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
+    );
+  });
+
+  test('should validate and pass when the pagerduty url is whitelisted', () => {
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: url => {
+          expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
+        },
+      },
+    });
+
+    expect(
+      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' })
+    ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
+  });
+
+  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: _ => {
+          throw new Error(`target url is not whitelisted`);
+        },
+      },
+    });
+
+    expect(() => {
+      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring pagerduty action: target url is not whitelisted"`
     );
   });
 });
@@ -125,8 +158,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -148,11 +187,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for trigger', async () => {
@@ -179,8 +219,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -206,11 +252,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for acknowledge', async () => {
@@ -237,8 +284,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -255,11 +308,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for resolve', async () => {
@@ -286,8 +340,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -304,11 +364,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury throws', async () => {
@@ -320,15 +381,23 @@ describe('execute()', () => {
       throw new Error('doing some testing');
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                        Object {
-                          "message": "error in pagerduty action \\"some-action-id\\" posting event: doing some testing",
-                          "status": "error",
-                        }
-                `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event",
+        "serviceMessage": "doing some testing",
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 429', async () => {
@@ -340,16 +409,23 @@ describe('execute()', () => {
       return { status: 429, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: status 429, retry later",
-                    "retry": true,
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: http status 429, retry later",
+        "retry": true,
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 501', async () => {
@@ -361,16 +437,23 @@ describe('execute()', () => {
       return { status: 501, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: status 501, retry later",
-                    "retry": true,
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: http status 501, retry later",
+        "retry": true,
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 418', async () => {
@@ -382,14 +465,21 @@ describe('execute()', () => {
       return { status: 418, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: unexpected status 418",
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: unexpected status 418",
+        "status": "error",
+      }
+    `);
   });
 });

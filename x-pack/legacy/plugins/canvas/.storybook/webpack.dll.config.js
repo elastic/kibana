@@ -30,8 +30,6 @@ module.exports = {
     '@storybook/addon-knobs',
     '@storybook/addon-knobs/react',
     '@storybook/addon-knobs/register',
-    '@storybook/addon-options',
-    '@storybook/addon-options/register',
     '@storybook/core',
     '@storybook/core/dist/server/common/polyfills.js',
     '@storybook/react',

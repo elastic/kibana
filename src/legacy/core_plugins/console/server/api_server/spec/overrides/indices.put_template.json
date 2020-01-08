@@ -1,10 +1,16 @@
 {
   "indices.put_template": {
     "data_autocomplete_rules": {
-      "template": "index*",
-      "warmers": { "__scope_link": "_warmer" },
+      "index_patterns": [],
       "mappings": { "__scope_link": "put_mapping" },
-      "settings": { "__scope_link": "put_settings" }
+      "settings": { "__scope_link": "put_settings" },
+      "version": 0,
+      "order": 0,
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      }
     },
     "patterns": [
       "_template/{template}"

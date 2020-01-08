@@ -1,21 +1,10 @@
-//
-// Misc elements -- found in agg_types/controls/*.html
-//
-
-.visEditorAgg__rangesTable {
-  td {
-    padding: 0 $euiSizeS $euiSizeS 0;
-
-    &:last-child {
-      padding-right: 0;
-    }
-  }
-}
-
 .visEditorAgg__subAgg {
   border: $euiBorderThick;
   border-radius: $euiBorderRadius;
   background-color: transparent;
-  margin: $euiSizeS 0;
   padding: $euiSizeS;
+}
+
+.visEditorAgg__subAgg + .visEditorAggParam__string {
+  margin-top: $euiSize;
 }

@@ -16,6 +16,8 @@ import {
   EuiButton,
   EuiSelect,
   EuiSpacer,
+  EuiTextAlign,
+  EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
@@ -42,6 +44,7 @@ export class GeometryFilterForm extends Component {
     intitialGeometryLabel: PropTypes.string.isRequired,
     onSubmit: PropTypes.func.isRequired,
     isFilterGeometryClosed: PropTypes.bool,
+    errorMsg: PropTypes.string,
   };
 
   static defaultProps = {
@@ -110,9 +113,9 @@ export class GeometryFilterForm extends Component {
     const spatialRelations = this.props.isFilterGeometryClosed
       ? Object.values(ES_SPATIAL_RELATIONS)
       : Object.values(ES_SPATIAL_RELATIONS).filter(relation => {
-        // can not filter by within relation when filtering geometry is not closed
-        return relation !== ES_SPATIAL_RELATIONS.WITHIN;
-      });
+          // can not filter by within relation when filtering geometry is not closed
+          return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+        });
     const options = spatialRelations.map(relation => {
       return {
         value: relation,
@@ -152,10 +155,12 @@ export class GeometryFilterForm extends Component {
         value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
       };
     });
+    let error;
+    if (this.props.errorMsg) {
+      error = <EuiFormErrorText>{this.props.errorMsg}</EuiFormErrorText>;
+    }
     return (
       <EuiForm className={this.props.className}>
-        <EuiSpacer size="s" />
-
         <EuiFormRow
           label={i18n.translate('xpack.maps.geometryFilterForm.geometryLabelLabel', {
             defaultMessage: 'Geometry label',
@@ -190,14 +195,21 @@ export class GeometryFilterForm extends Component {
 
         {this._renderRelationInput()}
 
-        <EuiButton
-          size="s"
-          fill
-          onClick={this._onSubmit}
-          isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
-        >
-          {this.props.buttonLabel}
-        </EuiButton>
+        <EuiSpacer size="m" />
+
+        {error}
+
+        <EuiTextAlign textAlign="right">
+          <EuiButton
+            size="s"
+            fill
+            onClick={this._onSubmit}
+            isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
+            isLoading={this.props.isLoading}
+          >
+            {this.props.buttonLabel}
+          </EuiButton>
+        </EuiTextAlign>
       </EuiForm>
     );
   }

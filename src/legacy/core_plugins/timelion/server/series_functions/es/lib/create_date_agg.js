@@ -30,15 +30,15 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
         time_zone: tlConfig.time.timezone,
         extended_bounds: {
           min: tlConfig.time.from,
-          max: tlConfig.time.to
+          max: tlConfig.time.to,
         },
-        min_doc_count: 0
-      }
-    }
+        min_doc_count: 0,
+      },
+    },
   };
 
   dateAgg.time_buckets.aggs = {};
-  _.each(config.metric, function (metric) {
+  _.each(config.metric, function(metric) {
     metric = metric.split(':');
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
@@ -46,8 +46,8 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       dateAgg.time_buckets.aggs[metric] = {
         bucket_script: {
           buckets_path: '_count',
-          script: { source: '_value', lang: 'expression' }
-        }
+          script: { source: '_value', lang: 'expression' },
+        },
       };
     } else if (metric[0] && metric[1]) {
       const metricName = metric[0] + '(' + metric[1] + ')';
@@ -59,7 +59,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
         dateAgg.time_buckets.aggs[metricName][metric[0]].percents = percentList;
       }
     } else {
-      throw new Error ('`metric` requires metric:field or simply count');
+      throw new Error('`metric` requires metric:field or simply count');
     }
   });
 

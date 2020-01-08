@@ -9,7 +9,7 @@ import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
 const getClusterUuid = async callCluster => {
-  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
   return uuid;
 };
 
@@ -23,8 +23,8 @@ export function settingsRoute(server, kbnServer) {
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
 
       try {
-        const { collectorSet } = server.usage;
-        const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
+        const { usageCollection } = server.newPlatform.setup.plugins;
+        const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
         let settings = await settingsCollector.fetch(callCluster);
         if (!settings) {
@@ -32,15 +32,20 @@ export function settingsRoute(server, kbnServer) {
         }
         const uuid = await getClusterUuid(callCluster);
 
-        const kibana = getKibanaInfoForStats(server, kbnServer);
+        const kibana = getKibanaInfoForStats({
+          kbnServerStatus: kbnServer.status,
+          kbnServerVersion: kbnServer.version,
+          config: server.config(),
+        });
+
         return {
           cluster_uuid: uuid,
           settings: {
             ...settings,
             kibana,
-          }
+          },
         };
-      } catch(err) {
+      } catch (err) {
         req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
         if (err.isBoom) {
           return err;
@@ -48,6 +53,6 @@ export function settingsRoute(server, kbnServer) {
           return boomify(err, { statusCode: err.statusCode, message: err.message });
         }
       }
-    }
+    },
   });
 }

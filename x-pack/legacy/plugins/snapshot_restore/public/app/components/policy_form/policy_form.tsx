@@ -13,9 +13,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
 import { useAppDependencies } from '../../index';
-import { PolicyStepLogistics, PolicyStepSettings, PolicyStepReview } from './steps';
+import {
+  PolicyStepLogistics,
+  PolicyStepSettings,
+  PolicyStepRetention,
+  PolicyStepReview,
+} from './steps';
 import { PolicyNavigation } from './navigation';
 
 interface Props {
@@ -53,7 +59,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const stepMap: { [key: number]: any } = {
     1: PolicyStepLogistics,
     2: PolicyStepSettings,
-    3: PolicyStepReview,
+    3: PolicyStepRetention,
+    4: PolicyStepReview,
   };
   const CurrentStepForm = stepMap[currentStep];
 
@@ -63,6 +70,11 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     config: {
       ...(originalPolicy.config || {}),
     },
+    retention: {
+      ...(originalPolicy.retention || {
+        expireAfterUnit: TIME_UNITS.DAY,
+      }),
+    },
   });
 
   // Policy validation state
@@ -71,9 +83,12 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     errors: {},
   });
 
-  const updatePolicy = (updatedFields: any): void => {
+  const updatePolicy = (
+    updatedFields: Partial<SlmPolicyPayload>,
+    validationHelperData = {}
+  ): void => {
     const newPolicy = { ...policy, ...updatedFields };
-    const newValidation = validatePolicy(newPolicy);
+    const newValidation = validatePolicy(newPolicy, validationHelperData);
     setPolicy(newPolicy);
     setValidation(newValidation);
   };
@@ -161,7 +176,9 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                     fill
                     iconType="arrowRight"
                     onClick={() => onNext()}
+                    iconSide="right"
                     disabled={!validation.isValid}
+                    data-test-subj="nextButton"
                   >
                     <FormattedMessage
                       id="xpack.snapshotRestore.policyForm.nextButtonLabel"
@@ -173,11 +190,12 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
-                    color="secondary"
+                    fill={isEditing && policy.isManagedPolicy ? false : true}
+                    color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}
+                    data-test-subj="submitButton"
                   >
                     {isSaving ? (
                       <FormattedMessage

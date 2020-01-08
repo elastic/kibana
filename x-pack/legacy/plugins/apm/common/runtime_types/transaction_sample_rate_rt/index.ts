@@ -10,8 +10,8 @@ export const transactionSampleRateRt = new t.Type<number, number, unknown>(
   'TransactionSampleRate',
   t.number.is,
   (input, context) => {
-    const value = Number(input);
-    return value >= 0 && value <= 1 && Number(value.toFixed(3)) === value
+    const value = parseFloat(input as string);
+    return value >= 0 && value <= 1 && parseFloat(value.toFixed(3)) === value
       ? t.success(value)
       : t.failure(input, context);
   },

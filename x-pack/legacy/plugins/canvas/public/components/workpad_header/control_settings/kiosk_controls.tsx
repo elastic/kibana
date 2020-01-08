@@ -10,15 +10,15 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiFormLabel,
+  EuiTitle,
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiFlexGroup,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { timeDuration } from '../../../lib/time_duration';
 import { CustomInterval } from './custom_interval';
@@ -36,17 +36,23 @@ interface Props {
 }
 
 interface ListGroupProps {
+  'aria-labelledby'?: string;
+  className: string;
   children: ReactNode;
 }
-
 interface RefreshItemProps {
   duration: number;
   label: string;
+  descriptionId: string;
 }
 
-const ListGroup = ({ children }: ListGroupProps) => (
-  <ul style={{ listStyle: 'none', margin: 0 }}>{[children]}</ul>
+const ListGroup = ({ children, ...rest }: ListGroupProps) => (
+  <ul style={{ listStyle: 'none', margin: 0 }} {...rest}>
+    {[children]}
+  </ul>
 );
+
+const generateId = htmlIdGenerator();
 
 export const KioskControls = ({
   autoplayEnabled,
@@ -54,13 +60,16 @@ export const KioskControls = ({
   onSetEnabled,
   onSetInterval,
 }: Props) => {
-  const RefreshItem = ({ duration, label }: RefreshItemProps) => (
+  const RefreshItem = ({ duration, label, descriptionId }: RefreshItemProps) => (
     <li>
-      <EuiLink onClick={() => onSetInterval(duration)}>{label}</EuiLink>
+      <EuiLink onClick={() => onSetInterval(duration)} aria-describedby={descriptionId}>
+        {label}
+      </EuiLink>
     </li>
   );
 
   const interval = timeDuration(autoplayInterval);
+  const intervalTitleId = generateId();
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
@@ -68,40 +77,55 @@ export const KioskControls = ({
         <EuiDescriptionList textStyle="reverse">
           <EuiDescriptionListTitle>{strings.getTitle()}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <span>{timeStrings.getCycleTimeText(interval.length, interval.format)}</span>
+            {timeStrings.getCycleTimeText(interval.length, interval.format)}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
         <EuiHorizontalRule margin="m" />
 
-        <div>
-          <EuiSwitch
-            checked={autoplayEnabled}
-            label={strings.getCycleToggleSwitch()}
-            onChange={ev => onSetEnabled(ev.target.checked)}
-          />
-          <EuiSpacer size="m" />
-        </div>
+        <EuiSwitch
+          checked={autoplayEnabled}
+          label={strings.getCycleToggleSwitch()}
+          onChange={ev => onSetEnabled(ev.target.checked)}
+        />
+        <EuiSpacer size="m" />
 
-        <EuiFormLabel>{strings.getCycleFormLabel()}</EuiFormLabel>
+        <EuiTitle size="xxxs" id={intervalTitleId}>
+          <p>{strings.getCycleFormLabel()}</p>
+        </EuiTitle>
         <EuiSpacer size="s" />
-
         <EuiText size="s">
-          <EuiFlexGrid gutterSize="s" columns={2}>
-            <EuiFlexItem>
-              <ListGroup>
-                <RefreshItem duration={5000} label={getSecondsText(5)} />
-                <RefreshItem duration={10000} label={getSecondsText(10)} />
-                <RefreshItem duration={30000} label={getSecondsText(30)} />
-              </ListGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ListGroup>
-                <RefreshItem duration={60000} label={getMinutesText(1)} />
-                <RefreshItem duration={300000} label={getMinutesText(5)} />
-                <RefreshItem duration={900000} label={getMinutesText(15)} />
-              </ListGroup>
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          <ListGroup aria-labelledby={intervalTitleId} className="canvasControlSettings__list">
+            <RefreshItem
+              duration={5000}
+              label={getSecondsText(5)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={10000}
+              label={getSecondsText(10)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={30000}
+              label={getSecondsText(30)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={60000}
+              label={getMinutesText(1)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={300000}
+              label={getMinutesText(5)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={900000}
+              label={getMinutesText(15)}
+              descriptionId={intervalTitleId}
+            />
+          </ListGroup>
         </EuiText>
       </EuiFlexItem>
 

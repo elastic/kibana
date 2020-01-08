@@ -53,7 +53,7 @@ const assertStatsAndMetrics = body => {
   expect(body.concurrent_connections).to.be.a('number');
 };
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   describe('kibana stats api', () => {
     describe('basic', () => {
@@ -145,4 +145,3 @@ export default function ({ getService }) {
     });
   });
 }
-

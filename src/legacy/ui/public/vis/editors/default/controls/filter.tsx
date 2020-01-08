@@ -20,10 +20,11 @@
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, QueryBarInput } from 'plugins/data';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
-import { Storage } from '../../../../storage';
+import { Query, QueryStringInput } from '../../../../../../../plugins/data/public';
+import { Storage } from '../../../../../../../plugins/kibana_utils/public';
+import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
@@ -82,6 +83,7 @@ function FilterRow({
     </div>
   );
 
+  // TODO: KibanaContextProvider should be raised to the top of the vis plugin
   return (
     <EuiForm>
       <EuiFormRow
@@ -89,20 +91,24 @@ function FilterRow({
         labelAppend={FilterControl}
         fullWidth={true}
       >
-        <QueryBarInput
-          query={value}
-          indexPatterns={[agg.getIndexPattern()]}
-          appName="filtersAgg"
-          onChange={(query: Query) => onChangeValue(id, query, customLabel)}
-          disableAutoFocus={!autoFocus}
-          data-test-subj={dataTestSubj}
-          bubbleSubmitEvent={true}
-          languageSwitcherPopoverAnchorPosition="leftDown"
-          store={localStorage}
-          uiSettings={npStart.core.uiSettings}
-          http={npStart.core.http}
-          savedObjectsClient={npStart.core.savedObjects.client}
-        />
+        <KibanaContextProvider
+          services={{
+            appName: 'filtersAgg',
+            storage: localStorage,
+            data: npStart.plugins.data,
+            ...npStart.core,
+          }}
+        >
+          <QueryStringInput
+            query={value}
+            indexPatterns={[agg.getIndexPattern()]}
+            onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+            disableAutoFocus={!autoFocus}
+            dataTestSubj={dataTestSubj}
+            bubbleSubmitEvent={true}
+            languageSwitcherPopoverAnchorPosition="leftDown"
+          />
+        </KibanaContextProvider>
       </EuiFormRow>
       {showCustomLabel ? (
         <EuiFormRow
@@ -129,7 +135,7 @@ function FilterRow({
           />
         </EuiFormRow>
       ) : null}
-      <EuiSpacer />
+      <EuiSpacer size="m" />
     </EuiForm>
   );
 }

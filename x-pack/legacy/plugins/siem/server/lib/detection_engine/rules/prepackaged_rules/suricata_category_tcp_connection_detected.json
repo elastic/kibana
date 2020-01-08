@@ -1,0 +1,17 @@
+{
+  "rule_id": "ddf402cf-307d-4f46-a25d-dce3aee1ad13",
+  "risk_score": 50,
+  "description": "Suricata Category - TCP Connection Detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - TCP Connection Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"A TCP connection was detected\" or rule.category: \"A TCP connection was detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

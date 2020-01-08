@@ -41,7 +41,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       },
     ]
   }
-  hidePerPageOptions={false}
   initialPageSize={25}
   initialSortDirection="desc"
   initialSortField="latestOccurrenceAt"
@@ -75,7 +74,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <div
                   className="euiPopover euiPopover--anchorDownRight"
-                  id="sortPopover"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
@@ -94,10 +92,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                         className="euiButtonEmpty__content"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -123,7 +122,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
@@ -133,7 +132,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               data-test-subj="tableHeaderCell_groupId_0"
               role="columnheader"
               scope="col"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableCellContent"
@@ -150,7 +153,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               data-test-subj="tableHeaderCell_message_1"
               role="columnheader"
               scope="col"
-              width="50%"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
             >
               <div
                 className="euiTableCellContent"
@@ -167,6 +174,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight"
@@ -183,6 +195,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               data-test-subj="tableHeaderCell_occurrenceCount_3"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <button
                 className="euiTableHeaderButton"
@@ -213,6 +230,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <button
                 className="euiTableHeaderButton euiTableHeaderButton-isSorted"
@@ -229,10 +251,12 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     Latest occurrence
                   </span>
                   <svg
+                    aria-hidden={true}
                     aria-label="Sorted in descending order"
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -255,6 +279,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             <td
               className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
               colSpan={5}
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignCenter"
@@ -269,71 +298,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </tr>
         </tbody>
       </table>
-    </div>
-    <div>
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <div
-              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-              id="customizablePagination"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
-            >
-              <div
-                className="euiPopover__anchor"
-              >
-                <button
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <span
-                    className="euiButtonEmpty__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height={16}
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
-                    <span
-                      className="euiButtonEmpty__text"
-                    >
-                      Rows per page
-                      : 
-                      25
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <span />
-          </div>
-        </div>
-      </EuiFlexGroup>
     </div>
   </div>
 </Memo(UnoptimizedManagedTable)>
@@ -404,7 +368,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       },
     ]
   }
-  hidePerPageOptions={false}
   initialPageSize={25}
   initialSortDirection="desc"
   initialSortField="latestOccurrenceAt"
@@ -469,7 +432,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <div
                   className="euiPopover euiPopover--anchorDownRight"
-                  id="sortPopover"
                   onKeyDown={[Function]}
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
@@ -488,10 +450,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         className="euiButtonEmpty__content"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -517,7 +480,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
@@ -527,7 +490,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               data-test-subj="tableHeaderCell_groupId_0"
               role="columnheader"
               scope="col"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableCellContent"
@@ -544,7 +511,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               data-test-subj="tableHeaderCell_message_1"
               role="columnheader"
               scope="col"
-              width="50%"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
             >
               <div
                 className="euiTableCellContent"
@@ -561,6 +532,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight"
@@ -577,6 +553,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               data-test-subj="tableHeaderCell_occurrenceCount_3"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <button
                 className="euiTableHeaderButton"
@@ -607,6 +588,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
               role="columnheader"
               scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <button
                 className="euiTableHeaderButton euiTableHeaderButton-isSorted"
@@ -623,10 +609,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     Latest occurrence
                   </span>
                   <svg
+                    aria-hidden={true}
                     aria-label="Sorted in descending order"
                     className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -648,7 +636,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           >
             <td
               className="euiTableRowCell"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -658,64 +650,107 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
-                  href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
+                  serviceName="opbeans-python"
                 >
-                  a0ce2
-                </a>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              width="50%"
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Error message and culprit
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  className="c1"
-                >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                   >
                     <a
-                      className="euiLink euiLink--primary c2"
+                      className="euiLink euiLink--primary c0"
                       href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noreferrer"
                     >
-                      About to blow up!
+                      a0ce2
                     </a>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                    >
-                      elasticapm.contrib.django.client.capture
-                    </div>
-                  </span>
-                </div>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            About to blow up!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          elasticapm.contrib.django.client.capture
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -723,6 +758,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -737,6 +777,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -746,7 +791,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578797)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
               </div>
             </td>
           </tr>
@@ -755,7 +806,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           >
             <td
               className="euiTableRowCell"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -765,64 +820,107 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
-                  href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
+                  serviceName="opbeans-python"
                 >
-                  f3ac9
-                </a>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              width="50%"
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Error message and culprit
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  className="c1"
-                >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                   >
                     <a
-                      className="euiLink euiLink--primary c2"
+                      className="euiLink euiLink--primary c0"
                       href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
                       rel="noreferrer"
                     >
-                      AssertionError: 
+                      f3ac9
                     </a>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                    >
-                      opbeans.views.oopsie
-                    </div>
-                  </span>
-                </div>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: 
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.oopsie
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -830,6 +928,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -844,6 +947,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -853,7 +961,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578797)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
               </div>
             </td>
           </tr>
@@ -862,7 +976,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           >
             <td
               className="euiTableRowCell"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -872,18 +990,33 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
-                  href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="e90863d04b7a692435305f09bbe8c840"
+                  serviceName="opbeans-python"
                 >
-                  e9086
-                </a>
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      e9086
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
               className="euiTableRowCell"
-              width="50%"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -893,43 +1026,71 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <div
-                  className="c1"
+                <styled.div
+                  className=""
                 >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <div
+                    className="c1"
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
-                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                      rel="noreferrer"
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      AssertionError: Bad luck!
-                    </a>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="e90863d04b7a692435305f09bbe8c840"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: Bad luck!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      opbeans.tasks.update_stats
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.tasks.update_stats
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -937,6 +1098,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -951,6 +1117,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -960,7 +1131,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578796)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578796)
+                </span>
               </div>
             </td>
           </tr>
@@ -969,7 +1146,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           >
             <td
               className="euiTableRowCell"
-              width="96px"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -979,18 +1160,33 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
-                  href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
+                  serviceName="opbeans-python"
                 >
-                  8673d
-                </a>
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      8673d
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
               className="euiTableRowCell"
-              width="50%"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1000,43 +1196,71 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <div
-                  className="c1"
+                <styled.div
+                  className=""
                 >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <div
+                    className="c1"
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
-                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                      rel="noreferrer"
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      Customer with ID 8517 not found
-                    </a>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            Customer with ID 8517 not found
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      opbeans.views.customer
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.customer
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -1044,6 +1268,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1058,6 +1287,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </td>
             <td
               className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
             >
               <div
                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1067,7 +1301,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578773)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578773)
+                </span>
               </div>
             </td>
           </tr>
@@ -1088,53 +1328,72 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <div
-              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-              id="customizablePagination"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
-            >
-              <div
-                className="euiPopover__anchor"
-              >
-                <button
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <span
-                    className="euiButtonEmpty__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height={16}
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
-                    <span
-                      className="euiButtonEmpty__text"
-                    >
-                      Rows per page
-                      : 
-                      25
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+          />
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <span />
+            <div
+              className="euiPagination"
+              role="group"
+            >
+              <button
+                aria-label="Previous page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-previous"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+              <button
+                aria-label="Page 1 of 1"
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                data-test-subj="pagination-button-0"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1
+                  </span>
+                </span>
+              </button>
+              <button
+                aria-label="Next page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-next"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </EuiFlexGroup>

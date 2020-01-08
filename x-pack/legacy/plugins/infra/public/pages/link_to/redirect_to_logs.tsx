@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n } from '@kbn/i18n/react';
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
-import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
+import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
@@ -22,7 +21,7 @@ interface RedirectToLogsProps extends RedirectToLogsType {
   }>;
 }
 
-export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsProps) => {
+export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
   const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
   const searchString = compose(
@@ -32,4 +31,4 @@ export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsPro
   )('');
 
   return <Redirect to={`/logs/stream?${searchString}`} />;
-});
+};

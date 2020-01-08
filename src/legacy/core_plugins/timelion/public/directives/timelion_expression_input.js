@@ -43,9 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-
 import grammar from 'raw-loader!../chain.peg';
-import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -57,9 +55,8 @@ import { comboBoxKeyCodes } from '@elastic/eui';
 import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
 const Parser = PEG.generate(grammar);
-const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
+export function TimelionExpInput($http, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {
@@ -70,7 +67,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
     },
     replace: true,
     template: timelionExpressionInputTemplate,
-    link: function (scope, elem) {
+    link: function(scope, elem) {
       const argValueSuggestions = Private(ArgValueSuggestionsProvider);
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
@@ -79,7 +76,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
       scope.suggestions = new Suggestions();
 
       function init() {
-        $http.get('../api/timelion/functions').then(function (resp) {
+        $http.get('../api/timelion/functions').then(function(resp) {
           Object.assign(functionReference, {
             byName: _.indexBy(resp.data, 'name'),
             list: resp.data,
@@ -127,7 +124,12 @@ app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
           }
         }
 
-        const updatedExpression = insertAtLocation(insertedValue, scope.sheet, min + insertPositionMinOffset, max);
+        const updatedExpression = insertAtLocation(
+          insertedValue,
+          scope.sheet,
+          min + insertPositionMinOffset,
+          max
+        );
         scope.sheet = updatedExpression;
 
         const newCaretOffset = min + insertedValue.length;
@@ -267,13 +269,13 @@ app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
       };
 
       scope.getActiveSuggestionId = () => {
-        if(scope.suggestions.isVisible && scope.suggestions.index > -1) {
+        if (scope.suggestions.isVisible && scope.suggestions.index > -1) {
           return `timelionSuggestion${scope.suggestions.index}`;
         }
         return '';
       };
 
       init();
-    }
+    },
   };
-});
+}

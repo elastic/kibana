@@ -1,0 +1,17 @@
+{
+  "rule_id": "1c70f5d5-eae0-4d00-b35a-d34ca607094e",
+  "risk_score": 50,
+  "description": "Suricata Category - Potential Corporate Privacy Violation",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Potential Corporate Privacy Violation",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Potential Corporate Privacy Violation\" or rule.category: \"Potential Corporate Privacy Violation\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

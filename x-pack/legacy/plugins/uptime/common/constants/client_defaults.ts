@@ -18,11 +18,6 @@ export const CLIENT_DEFAULTS = {
     { start: 'now/M', end: 'now', label: 'Month to date' },
     { start: 'now/y', end: 'now', label: 'Year to date' },
   ],
-  /**
-   * Designate how many checks a monitor summary can have
-   * before condensing them.
-   */
-  CONDENSED_CHECK_LIMIT: 12,
   DATE_RANGE_START: 'now-15m',
   DATE_RANGE_END: 'now',
   FILTERS: '',
@@ -31,6 +26,6 @@ export const CLIENT_DEFAULTS = {
   MONITOR_LIST_SORT_DIRECTION: 'asc',
   MONITOR_LIST_SORT_FIELD: 'monitor_id',
   SEARCH: '',
-  SELECTED_PING_LIST_STATUS: 'down',
+  SELECTED_PING_LIST_STATUS: '',
   STATUS_FILTER: '',
 };

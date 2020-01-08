@@ -66,7 +66,9 @@ describe('job_service - job_caps', () => {
       expect(response).toEqual(farequoteJobCapsEmpty);
       done();
     });
+  });
 
+  describe('cloudwatch newJobCaps()', () => {
     it('can get rollup job caps for rollup index pattern', async done => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = true;

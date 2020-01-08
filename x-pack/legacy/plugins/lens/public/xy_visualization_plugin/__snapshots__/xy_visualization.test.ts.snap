@@ -5,9 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "isHorizontal": Array [
-          false,
-        ],
         "layers": Array [
           Object {
             "chain": Array [

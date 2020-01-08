@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 
@@ -42,7 +42,7 @@ jest.mock('../components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
-  }
+  },
 }));
 jest.mock('ui/scripting_languages', () => ({
   getSupportedScriptingLanguages: () => ['painless'],
@@ -51,9 +51,9 @@ jest.mock('ui/scripting_languages', () => ({
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     scriptedFields: {
-      painless: 'painlessDocs'
-    }
-  }
+      painless: 'painlessDocs',
+    },
+  },
 }));
 
 const helpers = {
@@ -62,19 +62,16 @@ const helpers = {
 };
 
 const indexPattern = {
-  getScriptedFields: () => ([
+  getScriptedFields: () => [
     { name: 'ScriptedField', lang: 'painless', script: 'x++' },
     { name: 'JustATest', lang: 'painless', script: 'z++' },
-  ])
+  ],
 };
 
 describe('ScriptedFieldsTable', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <ScriptedFieldsTable
-        indexPattern={indexPattern}
-        helpers={helpers}
-      />
+    const component = shallowWithI18nProvider(
+      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
     // Allow the componentWillMount code to execute
@@ -86,11 +83,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = shallowWithIntl(
-      <ScriptedFieldsTable
-        indexPattern={indexPattern}
-        helpers={helpers}
-      />
+    const component = shallowWithI18nProvider(
+      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
     // Allow the componentWillMount code to execute
@@ -105,14 +99,14 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the lang filter', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
-          getScriptedFields: () => ([
+          getScriptedFields: () => [
             { name: 'ScriptedField', lang: 'painless', script: 'x++' },
             { name: 'JustATest', lang: 'painless', script: 'z++' },
             { name: 'Bad', lang: 'somethingElse', script: 'z++' },
-          ])
+          ],
         }}
         helpers={helpers}
       />
@@ -130,10 +124,10 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should hide the table if there are no scripted fields', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
-          getScriptedFields: () => ([])
+          getScriptedFields: () => [],
         }}
         helpers={helpers}
       />
@@ -148,11 +142,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should show a delete modal', async () => {
-    const component = shallowWithIntl(
-      <ScriptedFieldsTable
-        indexPattern={indexPattern}
-        helpers={helpers}
-      />
+    const component = shallowWithI18nProvider(
+      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
     );
 
     await component.update(); // Fire `componentWillMount()`
@@ -165,7 +156,7 @@ describe('ScriptedFieldsTable', () => {
 
   it('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
           ...indexPattern,

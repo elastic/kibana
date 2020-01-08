@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { SearchService, SearchSetup } from './search_service';
+export { SearchService, SearchSetup, SearchStart } from './search_service';
 
-export * from './search_bar';
+export { getRequestInspectorStats, getResponseInspectorStats } from './utils';

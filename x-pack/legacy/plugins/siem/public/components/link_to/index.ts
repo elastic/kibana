@@ -5,7 +5,11 @@
  */
 
 export { LinkToPage } from './link_to';
+export {
+  getDetectionEngineUrl,
+  RedirectToDetectionEnginePage,
+} from './redirect_to_detection_engine';
 export { getOverviewUrl, RedirectToOverviewPage } from './redirect_to_overview';
-export { getHostsUrl } from './redirect_to_hosts';
-export { getNetworkUrl, RedirectToNetworkPage } from './redirect_to_network';
+export { getHostsUrl, getHostDetailsUrl } from './redirect_to_hosts';
+export { getNetworkUrl, getIPDetailsUrl, RedirectToNetworkPage } from './redirect_to_network';
 export { getTimelinesUrl, RedirectToTimelinesPage } from './redirect_to_timelines';

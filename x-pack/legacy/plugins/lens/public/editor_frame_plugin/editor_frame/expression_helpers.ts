@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
+import { esFilters, TimeRange, Query } from '../../../../../../../src/plugins/data/public';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -38,9 +36,13 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[string, Ast]> = datasourceExpressions.map(
-    ([layerId, expr]) => [layerId, typeof expr === 'string' ? fromExpression(expr) : expr]
-  );
+  const parsedDatasourceExpressions: Array<[
+    string,
+    Ast
+  ]> = datasourceExpressions.map(([layerId, expr]) => [
+    layerId,
+    typeof expr === 'string' ? fromExpression(expr) : expr,
+  ]);
 
   const datafetchExpression: ExpressionFunctionAST = {
     type: 'function',
@@ -71,7 +73,7 @@ export function prependKibanaContext(
   }: {
     timeRange?: TimeRange;
     query?: Query;
-    filters?: Filter[];
+    filters?: esFilters.Filter[];
   }
 ): Ast {
   const parsedExpression = typeof expression === 'string' ? fromExpression(expression) : expression;
@@ -86,7 +88,7 @@ export function prependKibanaContext(
         arguments: {
           timeRange: timeRange ? [JSON.stringify(timeRange)] : [],
           query: query ? [JSON.stringify(query)] : [],
-          filters: filters ? [JSON.stringify(filters)] : [],
+          filters: [JSON.stringify(filters || [])],
         },
       },
       ...parsedExpression.chain,
@@ -121,13 +123,14 @@ export function buildExpression({
   const visualizationExpression = visualization.toExpression(visualizationState, framePublicAPI);
 
   const expressionContext = removeDateRange
-    ? { query: framePublicAPI.query }
+    ? { query: framePublicAPI.query, filters: framePublicAPI.filters }
     : {
         query: framePublicAPI.query,
         timeRange: {
           from: framePublicAPI.dateRange.fromDate,
           to: framePublicAPI.dateRange.toDate,
         },
+        filters: framePublicAPI.filters,
       };
 
   const completeExpression = prependDatasourceExpression(

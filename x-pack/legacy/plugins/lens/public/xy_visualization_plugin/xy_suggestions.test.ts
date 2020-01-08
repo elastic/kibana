@@ -100,7 +100,9 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+      ] as TableSuggestion[]).map(table =>
+        expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
+      )
     );
   });
 
@@ -113,21 +115,22 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "area_stacked",
-                "splitAccessor": "aaa",
-                "x": "date",
-                "y": Array [
-                  "bytes",
-                ],
-              },
-            ]
-        `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "aaa",
+          "x": "date",
+          "y": Array [
+            "bytes",
+          ],
+        },
+      ]
+    `);
   });
 
   test('does not suggest multiple splits', () => {
@@ -144,6 +147,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestions).toHaveLength(0);
@@ -157,22 +161,23 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "area_stacked",
-                "splitAccessor": "product",
-                "x": "date",
-                "y": Array [
-                  "price",
-                  "quantity",
-                ],
-              },
-            ]
-        `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "product",
+          "x": "date",
+          "y": Array [
+            "price",
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('uses datasource provided title if available', () => {
@@ -184,6 +189,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
         label: 'Datasource title',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -199,7 +205,6 @@ describe('xy_suggestions', () => {
         changeType: 'reduced',
       },
       state: {
-        isHorizontal: false,
         legend: { isVisible: true, position: 'bottom' },
         preferredSeriesType: 'bar',
         layers: [
@@ -212,6 +217,7 @@ describe('xy_suggestions', () => {
           },
         ],
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -226,15 +232,51 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'reduced',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
     expect(suggestion.hide).toBeFalsy();
   });
 
-  test('suggests an area chart for unchanged table and existing bar chart on non-ordinal x axis', () => {
+  test('only makes a seriesType suggestion for unchanged table without split', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'date',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].state).toEqual({
+      ...currentState,
+      preferredSeriesType: 'line',
+      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
+    });
+    expect(suggestions[0].title).toEqual('Line chart');
+  });
+
+  test('suggests seriesType and stacking when there is a split', () => {
+    const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -247,7 +289,7 @@ describe('xy_suggestions', () => {
         },
       ],
     };
-    const [suggestion, ...rest] = getSuggestions({
+    const [seriesSuggestion, stackSuggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
@@ -255,22 +297,27 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(1);
-    expect(suggestion.state).toEqual({
+    expect(rest).toHaveLength(0);
+    expect(seriesSuggestion.state).toEqual({
       ...currentState,
-      preferredSeriesType: 'area',
-      layers: [{ ...currentState.layers[0], seriesType: 'area' }],
+      preferredSeriesType: 'line',
+      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
     });
-    expect(suggestion.previewIcon).toEqual('visArea');
-    expect(suggestion.title).toEqual('Area chart');
+    expect(stackSuggestion.state).toEqual({
+      ...currentState,
+      preferredSeriesType: 'bar_stacked',
+      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
+    });
+    expect(seriesSuggestion.title).toEqual('Line chart');
+    expect(stackSuggestion.title).toEqual('Stacked');
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -291,60 +338,52 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(1);
-    expect(suggestion.state).toEqual({
-      ...currentState,
-      isHorizontal: true,
-    });
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
+    expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 
-  test('suggests a stacked chart for unchanged table and unstacked chart', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+  test('suggests stacking for unchanged table that has a split', () => {
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
         {
-          accessors: ['price', 'quantity'],
+          accessors: ['price'],
           layerId: 'first',
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessor: 'date',
           xAccessor: 'product',
         },
       ],
     };
-    const suggestion = getSuggestions({
+    const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
-        columns: [numCol('price'), numCol('quantity'), strCol('product')],
+        columns: [numCol('price'), dateCol('date'), strCol('product')],
         layerId: 'first',
         changeType: 'unchanged',
       },
       state: currentState,
-    })[1];
+      keptLayerIds: [],
+    });
+
+    const suggestion = suggestions[suggestions.length - 1];
 
     expect(suggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'bar_stacked',
-      layers: [
-        {
-          ...currentState.layers[0],
-          seriesType: 'bar_stacked',
-        },
-      ],
+      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
     });
     expect(suggestion.title).toEqual('Stacked');
   });
 
   test('keeps column to dimension mappings on extended tables', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -365,6 +404,7 @@ describe('xy_suggestions', () => {
         changeType: 'extended',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -380,6 +420,45 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('overwrites column to dimension mappings if a date dimension is added', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), strCol('product'), dateCol('timestamp')],
+        layerId: 'first',
+        changeType: 'extended',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'timestamp',
+          splitAccessor: 'product',
+        },
+      ],
+    });
+  });
+
   test('handles two numeric values', () => {
     (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
@@ -389,6 +468,44 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
+    });
+
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+                        Array [
+                          Object {
+                            "seriesType": "bar_stacked",
+                            "splitAccessor": "ddd",
+                            "x": "quantity",
+                            "y": Array [
+                              "price",
+                            ],
+                          },
+                        ]
+                `);
+  });
+
+  test('handles ip', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('ddd');
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('quantity'),
+          {
+            columnId: 'myip',
+            operation: {
+              dataType: 'ip',
+              label: 'Top 5 myip',
+              isBucketed: true,
+              scale: 'ordinal',
+            },
+          },
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -396,9 +513,9 @@ describe('xy_suggestions', () => {
               Object {
                 "seriesType": "bar_stacked",
                 "splitAccessor": "ddd",
-                "x": "quantity",
+                "x": "myip",
                 "y": Array [
-                  "price",
+                  "quantity",
                 ],
               },
             ]
@@ -424,19 +541,20 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "seriesType": "bar_stacked",
-          "splitAccessor": "eee",
-          "x": "mybool",
-          "y": Array [
-            "num votes",
-          ],
-        },
-      ]
-    `);
+                  Array [
+                    Object {
+                      "seriesType": "bar_stacked",
+                      "splitAccessor": "eee",
+                      "x": "mybool",
+                      "y": Array [
+                        "num votes",
+                      ],
+                    },
+                  ]
+            `);
   });
 });

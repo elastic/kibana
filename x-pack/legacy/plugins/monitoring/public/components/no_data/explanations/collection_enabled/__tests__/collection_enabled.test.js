@@ -19,13 +19,9 @@ describe('ExplainCollectionEnabled', () => {
     const reason = {
       property: 'xpack.monitoring.collection.enabled',
       data: '-1',
-      context: 'cluster'
+      context: 'cluster',
     };
-    component = (
-      <ExplainCollectionEnabled
-        {...{ reason, enabler }}
-      />
-    );
+    component = <ExplainCollectionEnabled {...{ reason, enabler }} />;
   });
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {

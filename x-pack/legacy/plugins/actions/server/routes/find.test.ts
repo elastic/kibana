@@ -5,10 +5,10 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { findRoute } from './find';
+import { findActionRoute } from './find';
 
 const { server, actionsClient } = createMockServer();
-findRoute(server);
+server.route(findActionRoute);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -23,9 +23,9 @@ it('sends proper arguments to action find function', async () => {
       'page=1&' +
       'search=text*&' +
       'default_search_operator=AND&' +
-      'search_fields=description&' +
-      'sort_field=description&' +
-      'fields=description',
+      'search_fields=name&' +
+      'sort_field=name&' +
+      'fields=name',
   };
   const expectedResult = {
     total: 0,
@@ -41,23 +41,24 @@ it('sends proper arguments to action find function', async () => {
   expect(response).toEqual(expectedResult);
   expect(actionsClient.find).toHaveBeenCalledTimes(1);
   expect(actionsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "options": Object {
-      "defaultSearchOperator": "AND",
-      "fields": Array [
-        "description",
-      ],
-      "hasReference": undefined,
-      "page": 1,
-      "perPage": 1,
-      "search": "text*",
-      "searchFields": Array [
-        "description",
-      ],
-      "sortField": "description",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "options": Object {
+          "defaultSearchOperator": "AND",
+          "fields": Array [
+            "name",
+          ],
+          "filter": undefined,
+          "hasReference": undefined,
+          "page": 1,
+          "perPage": 1,
+          "search": "text*",
+          "searchFields": Array [
+            "name",
+          ],
+          "sortField": "name",
+        },
+      },
+    ]
+  `);
 });

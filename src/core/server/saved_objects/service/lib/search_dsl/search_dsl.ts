@@ -23,6 +23,8 @@ import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../../plugins/data/server';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -36,6 +38,7 @@ interface GetSearchDslOptions {
     type: string;
     id: string;
   };
+  kueryNode?: esKuery.KueryNode;
 }
 
 export function getSearchDsl(
@@ -52,6 +55,7 @@ export function getSearchDsl(
     sortOrder,
     namespace,
     hasReference,
+    kueryNode,
   } = options;
 
   if (!type) {
@@ -63,7 +67,7 @@ export function getSearchDsl(
   }
 
   return {
-    ...getQueryParams(
+    ...getQueryParams({
       mappings,
       schema,
       namespace,
@@ -71,8 +75,9 @@ export function getSearchDsl(
       search,
       searchFields,
       defaultSearchOperator,
-      hasReference
-    ),
+      hasReference,
+      kueryNode,
+    }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

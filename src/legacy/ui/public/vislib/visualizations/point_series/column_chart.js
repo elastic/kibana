@@ -37,7 +37,7 @@ const defaults = {
 function datumWidth(defaultWidth, datum, nextDatum, scale, gutterWidth, groupCount = 1) {
   let datumWidth = defaultWidth;
   if (nextDatum) {
-    datumWidth = ((scale(nextDatum.x) - scale(datum.x)) - gutterWidth) / groupCount;
+    datumWidth = (scale(nextDatum.x) - scale(datum.x) - gutterWidth) / groupCount;
     // To handle data-sets with holes, do not let width be larger than default.
     if (datumWidth > defaultWidth) {
       datumWidth = defaultWidth;
@@ -69,18 +69,18 @@ export class ColumnChart extends PointSeries {
     const tooltip = this.baseChart.tooltip;
     const isTooltip = this.handler.visConfig.get('tooltip.show');
 
-    const layer = svg.append('g')
+    const layer = svg
+      .append('g')
       .attr('class', 'series histogram')
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
-    const bars = layer.selectAll('rect')
-      .data(data.values.filter(function (d) {
+    const bars = layer.selectAll('rect').data(
+      data.values.filter(function(d) {
         return !_.isNull(d.y);
-      }));
+      })
+    );
 
-    bars
-      .exit()
-      .remove();
+    bars.exit().remove();
 
     bars
       .enter()
@@ -112,7 +112,6 @@ export class ColumnChart extends PointSeries {
       return this.addStackedBars(bars);
     }
     return this.addGroupedBars(bars);
-
   }
 
   /**
@@ -147,9 +146,12 @@ export class ColumnChart extends PointSeries {
 
     function x(d, i) {
       if (isTimeScale) {
-        return xScale(d.x) + datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum;
+        return (
+          xScale(d.x) +
+          datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum
+        );
       }
-      return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
+      return xScale(d.x) + (xScale.rangeBand() / groupCount) * groupNum;
     }
 
     function y(d) {
@@ -203,9 +205,11 @@ export class ColumnChart extends PointSeries {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
     const layer = d3.select(bars[0].parentNode);
-    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
-      return !_.isNull(d.y);
-    }));
+    const barLabels = layer.selectAll('text').data(
+      chartData.values.filter(function(d) {
+        return !_.isNull(d.y);
+      })
+    );
 
     if (isLabels) {
       const colorFunc = this.handler.data.getColorFunc();
@@ -265,9 +269,12 @@ export class ColumnChart extends PointSeries {
 
     function x(d, i) {
       if (isTimeScale) {
-        return xScale(d.x) + datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum;
+        return (
+          xScale(d.x) +
+          datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum
+        );
       }
-      return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
+      return xScale(d.x) + (xScale.rangeBand() / groupCount) * groupNum;
     }
 
     function y(d) {
@@ -321,13 +328,13 @@ export class ColumnChart extends PointSeries {
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
     const layer = d3.select(bars[0].parentNode);
-    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
-      return !_.isNull(d.y);
-    }));
+    const barLabels = layer.selectAll('text').data(
+      chartData.values.filter(function(d) {
+        return !_.isNull(d.y);
+      })
+    );
 
-    barLabels
-      .exit()
-      .remove();
+    barLabels.exit().remove();
 
     if (isLabels) {
       const labelColor = this.handler.data.getColorFunc()(chartData.label);
@@ -359,8 +366,8 @@ export class ColumnChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function (selection) {
-      selection.each(function () {
+    return function(selection) {
+      selection.each(function() {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 
@@ -372,7 +379,7 @@ export class ColumnChart extends PointSeries {
         }
 
         self.events.emit('rendered', {
-          chart: self.chartData
+          chart: self.chartData,
         });
 
         return svg;

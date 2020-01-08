@@ -33,19 +33,10 @@ import {
 
 export const ConfirmationButtonTypes = {
   CONFIRM: CONFIRM_BUTTON,
-  CANCEL: CANCEL_BUTTON
+  CANCEL: CANCEL_BUTTON,
 };
 
-/**
- * @typedef {Object} ConfirmModalOptions
- * @property {String} confirmButtonText
- * @property {String=} cancelButtonText
- * @property {function} onConfirm
- * @property {function=} onCancel
- * @property {String=} title - If given, shows a title on the confirm modal.
- */
-
-module.factory('confirmModal', function ($rootScope, $compile) {
+export function confirmModalFactory($rootScope, $compile) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -57,9 +48,9 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     const defaultOptions = {
       onCancel: noop,
       cancelButtonText: i18n.translate('common.ui.modals.cancelButtonLabel', {
-        defaultMessage: 'Cancel'
+        defaultMessage: 'Cancel',
       }),
-      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
+      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM,
     };
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {
@@ -114,4 +105,15 @@ module.factory('confirmModal', function ($rootScope, $compile) {
       }
     }
   };
-});
+}
+
+/**
+ * @typedef {Object} ConfirmModalOptions
+ * @property {String} confirmButtonText
+ * @property {String=} cancelButtonText
+ * @property {function} onConfirm
+ * @property {function=} onCancel
+ * @property {String=} title - If given, shows a title on the confirm modal.
+ */
+
+module.factory('confirmModal', confirmModalFactory);

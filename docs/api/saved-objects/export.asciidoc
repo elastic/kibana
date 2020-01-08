@@ -4,36 +4,61 @@
 <titleabbrev>Export objects</titleabbrev>
 ++++
 
-experimental[] Retrieve a set of saved objects that you want to import into {kib}.
+experimental[] Retrieve sets of saved objects that you want to import into {kib}.
 
 [[saved-objects-api-export-request]]
 ==== Request
 
 `POST /api/saved_objects/_export`
 
+`POST /s/<space_id>/api/saved_objects/_export`
+
+[[saved-objects-api-export-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[saved-objects-api-export-request-request-body]]
 ==== Request body
 
 `type`::
   (Optional, array|string) The saved object types to include in the export.
-  
+
 `objects`::
   (Optional, array) A list of objects to export.
-  
+
 `includeReferencesDeep`::
   (Optional, boolean) Includes all of the referenced objects in the exported objects.
+
+`excludeExportDetails`::
+  (Optional, boolean) Do not add export details entry at the end of the stream.
 
 TIP: You must include `type` or `objects` in the request body.
 
 [[saved-objects-api-export-request-response-body]]
 ==== Response body
 
-The format of the response body includes newline delimited JSON.
+The format of the response body is newline delimited JSON. Each exported object is exported as a valid JSON record and separated by the newline character '\n'. 
+
+When `excludeExportDetails=false` (the default) we append an export result details record at the end of the file after all the saved object records. The export result details object has the following format:
+
+[source,json]
+--------------------------------------------------
+{
+  "exportedCount": 27,
+  "missingRefCount": 2,
+  "missingReferences": [
+    { "id": "an-id", "type": "visualisation"},
+    { "id": "another-id", "type": "index-pattern"}
+  ]
+}
+--------------------------------------------------
 
 [[export-objects-api-create-request-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 [[ssaved-objects-api-create-example]]
@@ -50,6 +75,18 @@ POST api/saved_objects/_export
 --------------------------------------------------
 // KIBANA
 
+Export all index pattern saved objects and exclude the export summary from the stream:
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_export
+{
+  "type": "index-pattern",
+  "excludeExportDetails": true
+}
+--------------------------------------------------
+// KIBANA
+
 Export a specific saved object:
 
 [source,js]
@@ -62,6 +99,23 @@ POST api/saved_objects/_export
       "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
     }
   ]
+}
+--------------------------------------------------
+// KIBANA
+
+Export a specific saved object and it's related objects :
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_export
+{
+  "objects": [
+    {
+      "type": "dashboard",
+      "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
+    }
+  ],
+  "includeReferencesDeep": true
 }
 --------------------------------------------------
 // KIBANA

@@ -26,7 +26,7 @@ import '../../../../persisted_state';
 import { Axis } from '../../../lib/axis';
 import { VisConfig } from '../../../lib/vis_config';
 
-describe('Vislib Axis Class Test Suite', function () {
+describe('Vislib Axis Class Test Suite', function() {
   let persistedState;
   let yAxis;
   let el;
@@ -39,7 +39,7 @@ describe('Vislib Axis Class Test Suite', function () {
       date: true,
       interval: 30000,
       max: 1408734982458,
-      min: 1408734082458
+      min: 1408734082458,
     },
     series: [
       {
@@ -47,149 +47,156 @@ describe('Vislib Axis Class Test Suite', function () {
         values: [
           {
             x: 1408734060000,
-            y: 8
+            y: 8,
           },
           {
             x: 1408734090000,
-            y: 23
+            y: 23,
           },
           {
             x: 1408734120000,
-            y: 30
+            y: 30,
           },
           {
             x: 1408734130000,
-            y: 30
+            y: 30,
           },
           {
             x: 1408734150000,
-            y: 28
-          }
-        ]
+            y: 28,
+          },
+        ],
       },
       {
         label: 'Count2',
         values: [
           {
             x: 1408734060000,
-            y: 8
+            y: 8,
           },
           {
             x: 1408734090000,
-            y: 23
+            y: 23,
           },
           {
             x: 1408734120000,
-            y: 30
+            y: 30,
           },
           {
             x: 1408734140000,
-            y: 30
+            y: 30,
           },
           {
             x: 1408734150000,
-            y: 28
-          }
-        ]
-      }
+            y: 28,
+          },
+        ],
+      },
     ],
-    xAxisFormatter: function (thing) {
+    xAxisFormatter: function(thing) {
       return new Date(thing);
     },
     xAxisLabel: 'Date Histogram',
-    yAxisLabel: 'Count'
+    yAxisLabel: 'Count',
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    persistedState = new ($injector.get('PersistedState'))();
+  beforeEach(
+    ngMock.inject(function($injector) {
+      persistedState = new ($injector.get('PersistedState'))();
 
-    el = d3.select('body').append('div')
-      .attr('class', 'visAxis--x')
-      .style('height', '40px');
+      el = d3
+        .select('body')
+        .append('div')
+        .attr('class', 'visAxis--x')
+        .style('height', '40px');
 
-    fixture = el.append('div')
-      .attr('class', 'x-axis-div');
+      fixture = el.append('div').attr('class', 'x-axis-div');
 
-    const visConfig = new VisConfig({
-      type: 'histogram'
-    }, data, persistedState, $('.x-axis-div')[0]);
-    yAxis = new Axis(visConfig, {
-      type: 'value',
-      id: 'ValueAxis-1'
-    });
+      const visConfig = new VisConfig(
+        {
+          type: 'histogram',
+        },
+        data,
+        persistedState,
+        $('.x-axis-div')[0]
+      );
+      yAxis = new Axis(visConfig, {
+        type: 'value',
+        id: 'ValueAxis-1',
+      });
 
-    seriesData = data.series.map(series => {
-      return series.values;
-    });
-  }));
+      seriesData = data.series.map(series => {
+        return series.values;
+      });
+    })
+  );
 
-  afterEach(function () {
+  afterEach(function() {
     fixture.remove();
     el.remove();
   });
 
-  describe('_stackNegAndPosVals Method', function () {
-
-    it('should correctly stack positive values', function () {
+  describe('_stackNegAndPosVals Method', function() {
+    it('should correctly stack positive values', function() {
       const expectedResult = [
         {
           x: 1408734060000,
           y: 8,
-          y0: 8
+          y0: 8,
         },
         {
           x: 1408734090000,
           y: 23,
-          y0: 23
+          y0: 23,
         },
         {
           x: 1408734120000,
           y: 30,
-          y0: 30
+          y0: 30,
         },
         {
           x: 1408734140000,
           y: 30,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734150000,
           y: 28,
-          y0: 28
-        }
+          y0: 28,
+        },
       ];
       const stackedData = yAxis._stackNegAndPosVals(seriesData);
       expect(stackedData[1]).to.eql(expectedResult);
     });
 
-    it('should correctly stack pos and neg values', function () {
+    it('should correctly stack pos and neg values', function() {
       const expectedResult = [
         {
           x: 1408734060000,
           y: 8,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734090000,
           y: 23,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734120000,
           y: 30,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734140000,
           y: 30,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734150000,
           y: 28,
-          y0: 0
-        }
+          y0: 0,
+        },
       ];
       const dataClone = _.cloneDeep(seriesData);
       dataClone[0].forEach(value => {
@@ -199,41 +206,40 @@ describe('Vislib Axis Class Test Suite', function () {
       expect(stackedData[1]).to.eql(expectedResult);
     });
 
-    it('should correctly stack mixed pos and neg values', function () {
+    it('should correctly stack mixed pos and neg values', function() {
       const expectedResult = [
         {
           x: 1408734060000,
           y: 8,
-          y0: 8
+          y0: 8,
         },
         {
           x: 1408734090000,
           y: 23,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734120000,
           y: 30,
-          y0: 30
+          y0: 30,
         },
         {
           x: 1408734140000,
           y: 30,
-          y0: 0
+          y0: 0,
         },
         {
           x: 1408734150000,
           y: 28,
-          y0: 28
-        }
+          y0: 28,
+        },
       ];
       const dataClone = _.cloneDeep(seriesData);
       dataClone[0].forEach((value, i) => {
-        if ((i % 2) === 1) value.y = -value.y;
+        if (i % 2 === 1) value.y = -value.y;
       });
       const stackedData = yAxis._stackNegAndPosVals(dataClone);
       expect(stackedData[1]).to.eql(expectedResult);
     });
-
   });
 });

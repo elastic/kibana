@@ -19,30 +19,25 @@ export function beatsOverviewRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
-
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
-        const [
-          latest,
-          stats,
-          metrics,
-        ] = await Promise.all([
+        const [latest, stats, metrics] = await Promise.all([
           getLatestStats(req, beatsIndexPattern, clusterUuid),
           getStats(req, beatsIndexPattern, clusterUuid),
           getMetrics(req, beatsIndexPattern, metricSet),
@@ -51,12 +46,11 @@ export function beatsOverviewRoute(server) {
         return {
           ...latest,
           stats,
-          metrics
+          metrics,
         };
       } catch (err) {
         throw handleError(err, req);
       }
-
-    }
+    },
   });
 }

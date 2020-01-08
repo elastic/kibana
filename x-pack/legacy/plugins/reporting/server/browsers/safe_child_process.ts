@@ -22,10 +22,7 @@ export function safeChildProcess(
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGTERM').pipe(mapTo('SIGTERM')),
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGINT').pipe(mapTo('SIGINT')),
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGBREAK').pipe(mapTo('SIGBREAK'))
-  ).pipe(
-    take(1),
-    share()
-  );
+  ).pipe(take(1), share());
 
   const ownTerminateMapToKill$ = ownTerminateSignal$.pipe(
     tap(signal => {

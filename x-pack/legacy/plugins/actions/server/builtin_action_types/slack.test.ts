@@ -5,74 +5,31 @@
  */
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
+import { configUtilsMock } from '../actions_config.mock';
 
 const ACTION_TYPE_ID = '.slack';
 
-const NO_OP_FN = () => {};
-
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
-function getServices(): Services {
-  return services;
-}
-
-let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
 
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
-
-async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
-  const { params } = options;
-  const { message } = params;
-  if (message == null) throw new Error('message property required in parameter');
-
-  const failureMatch = message.match(/^failure: (.*)$/);
-  if (failureMatch != null) {
-    const failMessage = failureMatch[1];
-    throw new Error(`slack mockExecutor failure: ${failMessage}`);
-  }
-
-  return {
-    text: `slack mockExecutor success: ${message}`,
-  };
-}
-
 beforeAll(() => {
-  actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
-    isSecurityEnabled: true,
-    taskManager: taskManagerMock.create(),
-    encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
-  });
-  actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-
-  test('ensure action type is valid', () => {
-    expect(actionType).toBeTruthy();
+  actionType = getActionType({
+    async executor(options: ActionTypeExecutorOptions): Promise<any> {},
+    configurationUtilities: configUtilsMock,
   });
 });
 
-describe('action is registered', () => {
-  test('gets registered with builtin actions', () => {
-    expect(actionTypeRegistry.has(ACTION_TYPE_ID)).toEqual(true);
-  });
-
+describe('action registeration', () => {
   test('returns action type', () => {
-    const returnedActionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-    expect(returnedActionType.id).toEqual(ACTION_TYPE_ID);
-    expect(returnedActionType.name).toEqual('slack');
+    expect(actionType.id).toEqual(ACTION_TYPE_ID);
+    expect(actionType.name).toEqual('slack');
   });
 });
 
@@ -118,12 +75,67 @@ describe('validateActionTypeSecrets()', () => {
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
   });
+
+  test('should validate and pass when the slack webhookUrl is whitelisted', () => {
+    actionType = getActionType({
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: url => {
+          expect(url).toEqual('https://api.slack.com/');
+        },
+      },
+    });
+
+    expect(validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' })).toEqual({
+      webhookUrl: 'https://api.slack.com/',
+    });
+  });
+
+  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+    actionType = getActionType({
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: url => {
+          throw new Error(`target url is not whitelisted`);
+        },
+      },
+    });
+
+    expect(() => {
+      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: error configuring slack action: target url is not whitelisted"`
+    );
+  });
 });
 
 describe('execute()', () => {
+  beforeAll(() => {
+    async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
+      const { params } = options;
+      const { message } = params;
+      if (message == null) throw new Error('message property required in parameter');
+
+      const failureMatch = message.match(/^failure: (.*)$/);
+      if (failureMatch != null) {
+        const failMessage = failureMatch[1];
+        throw new Error(`slack mockExecutor failure: ${failMessage}`);
+      }
+
+      return {
+        text: `slack mockExecutor success: ${message}`,
+      };
+    }
+
+    actionType = getActionType({
+      executor: mockSlackExecutor,
+      configurationUtilities: configUtilsMock,
+    });
+  });
+
   test('calls the mock executor with success', async () => {
     const response = await actionType.executor({
-      id: 'some-id',
+      actionId: 'some-id',
       services,
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
@@ -139,7 +151,7 @@ Object {
   test('calls the mock executor with failure', async () => {
     await expect(
       actionType.executor({
-        id: 'some-id',
+        actionId: 'some-id',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },

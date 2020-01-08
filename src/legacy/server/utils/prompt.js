@@ -30,7 +30,7 @@ import { createInterface } from 'readline';
 export function confirm(question, options = {}) {
   const rl = createInterface({
     input: options.input || process.stdin,
-    output: options.output || process.stdout
+    output: options.output || process.stdout,
   });
 
   return new Promise(resolve => {
@@ -66,7 +66,7 @@ export function question(question, options = {}) {
   const rl = createInterface({ input, output });
 
   return new Promise(resolve => {
-    input.on('data', (char) => {
+    input.on('data', char => {
       char = char + '';
 
       switch (char) {

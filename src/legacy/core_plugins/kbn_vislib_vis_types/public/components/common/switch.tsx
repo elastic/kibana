@@ -19,33 +19,32 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 interface SwitchOptionProps<ParamName extends string> {
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   label?: string;
   tooltip?: string;
   disabled?: boolean;
   value?: boolean;
-  noStyle?: boolean;
   paramName: ParamName;
   setValue: (paramName: ParamName, value: boolean) => void;
 }
 
 function SwitchOption<ParamName extends string>({
-  dataTestSubj,
+  'data-test-subj': dataTestSubj,
   tooltip,
   label,
   disabled,
-  noStyle = false,
   paramName,
   value = false,
   setValue,
 }: SwitchOptionProps<ParamName>) {
   return (
-    <div className={noStyle ? undefined : 'visEditorSidebar__switchOptionFormRow'}>
+    <EuiFormRow fullWidth={true} compressed={true}>
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
+          compressed={true}
           label={label}
           checked={value}
           disabled={disabled}
@@ -53,7 +52,7 @@ function SwitchOption<ParamName extends string>({
           onChange={ev => setValue(paramName, ev.target.checked)}
         />
       </EuiToolTip>
-    </div>
+    </EuiFormRow>
   );
 }
 

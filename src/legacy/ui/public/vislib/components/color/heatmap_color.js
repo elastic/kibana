@@ -30,7 +30,6 @@ function enforceBounds(x) {
   }
 }
 
-
 function interpolateLinearly(x, values) {
   // Split values into four lists
   const xValues = [];

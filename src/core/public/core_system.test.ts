@@ -42,6 +42,8 @@ import {
   MockRenderingService,
   RenderingServiceConstructor,
   MockContextService,
+  IntegrationsServiceConstructor,
+  MockIntegrationsService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -62,6 +64,7 @@ const defaultCoreSystemParams = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 });
 
 function createCoreSystem(params = {}) {
@@ -85,6 +88,7 @@ describe('constructor', () => {
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -167,6 +171,25 @@ describe('#setup()', () => {
     expect(MockContextService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('injects legacy dependency to context#setup()', async () => {
+    const pluginA = Symbol();
+    const pluginB = Symbol();
+    const pluginDependencies = new Map<symbol, symbol[]>([
+      [pluginA, []],
+      [pluginB, [pluginA]],
+    ]);
+    MockPluginsService.getOpaqueIds.mockReturnValue(pluginDependencies);
+    await setupCore();
+
+    expect(MockContextService.setup).toHaveBeenCalledWith({
+      pluginDependencies: new Map([
+        [pluginA, []],
+        [pluginB, [pluginA]],
+        [MockLegacyPlatformService.legacyId, [pluginA, pluginB]],
+      ]),
+    });
+  });
+
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
@@ -195,6 +218,11 @@ describe('#setup()', () => {
   it('calls plugin#setup()', async () => {
     await setupCore();
     expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls integrations#setup()', async () => {
+    await setupCore();
+    expect(MockIntegrationsService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -279,6 +307,11 @@ describe('#start()', () => {
       targetDomElement: expect.any(HTMLElement),
     });
   });
+
+  it('calls start#setup()', async () => {
+    await startCore();
+    expect(MockIntegrationsService.start).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#stop()', () => {
@@ -327,6 +360,14 @@ describe('#stop()', () => {
     expect(MockI18nService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockI18nService.stop).toHaveBeenCalled();
+  });
+
+  it('calls integrations.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockIntegrationsService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockIntegrationsService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {

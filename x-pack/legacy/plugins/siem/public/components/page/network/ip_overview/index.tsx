@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useContext, useState } from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
+import React, { useContext, useState, useCallback } from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
-import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../lib/kibana';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -28,7 +26,7 @@ import {
   whoisRenderer,
 } from '../../../field_renderers/field_renderers';
 import * as i18n from './translations';
-import { OverviewWrapper } from '../../index';
+import { DescriptionListStyled, OverviewWrapper } from '../../index';
 import { Loader } from '../../../loader';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
@@ -52,16 +50,6 @@ interface OwnProps {
 
 export type IpOverviewProps = OwnProps;
 
-const DescriptionListStyled = styled(EuiDescriptionList)`
-  ${({ theme }) => `
-    dt {
-      font-size: ${theme.eui.euiFontSizeXS} !important;
-    }
-  `}
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
-
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
@@ -70,7 +58,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   );
 };
 
-export const IpOverview = pure<IpOverviewProps>(
+export const IpOverview = React.memo<IpOverviewProps>(
   ({
     id,
     ip,
@@ -86,7 +74,7 @@ export const IpOverview = pure<IpOverviewProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
-    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const typeData: Overview = data[flowTarget]!;
     const column: DescriptionList[] = [
       {
@@ -125,8 +113,14 @@ export const IpOverview = pure<IpOverviewProps>(
     const descriptionLists: Readonly<DescriptionList[][]> = [
       firstColumn,
       [
-        { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
-        { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
+        {
+          title: i18n.FIRST_SEEN,
+          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+        },
+        {
+          title: i18n.LAST_SEEN,
+          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+        },
       ],
       [
         {
@@ -145,11 +139,12 @@ export const IpOverview = pure<IpOverviewProps>(
         { title: i18n.REPUTATION, description: reputationRenderer(ip) },
       ],
     ];
+
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+
     return (
-      <OverviewWrapper
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
-      >
+      <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <InspectButton
           queryId={id}
           show={showInspect}

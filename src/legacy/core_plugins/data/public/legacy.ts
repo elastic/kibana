@@ -35,14 +35,12 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { LegacyDependenciesPlugin } from './shim/legacy_dependencies_plugin';
 import { plugin } from '.';
 
 const dataPlugin = plugin();
-const legacyPlugin = new LegacyDependenciesPlugin();
 
-export const setup = dataPlugin.setup(npSetup.core, {
-  __LEGACY: legacyPlugin.setup(),
+export const setup = dataPlugin.setup(npSetup.core);
+
+export const start = dataPlugin.start(npStart.core, {
+  data: npStart.plugins.data,
 });
-
-export const start = dataPlugin.start(npStart.core);

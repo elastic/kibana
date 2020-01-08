@@ -7,12 +7,12 @@
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
 import { StateSetter, FramePublicAPI } from '../../types';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -23,6 +23,7 @@ interface DataPanelWrapperProps {
   core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
+  filters: esFilters.Filter[];
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -45,6 +46,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     core: props.core,
     query: props.query,
     dateRange: props.dateRange,
+    filters: props.filters,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
@@ -54,7 +56,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"
-          className="lnsDatasourceSwitch"
+          className="lnsDataPanelWrapper__switchSource"
           button={
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
@@ -98,7 +100,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       )}
       {props.activeDatasource && !props.datasourceIsLoading && (
         <NativeRenderer
-          className="lnsSidebarContainer"
+          className="lnsDataPanelWrapper"
           render={props.datasourceMap[props.activeDatasource].renderDataPanel}
           nativeProps={datasourceProps}
         />

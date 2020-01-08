@@ -8,8 +8,8 @@ import { isPlainObject, omit, get, set } from 'lodash';
 import rison from 'rison-node';
 
 const stateTypeKeys = {
-  'global': '_g',
-  'app': '_a',
+  global: '_g',
+  app: '_a',
 };
 
 class KibanaState {
@@ -21,7 +21,7 @@ class KibanaState {
     const queryValue = query[propId];
 
     this.exists = Boolean(queryValue);
-    this.state = (queryValue) ? rison.decode(queryValue) : {};
+    this.state = queryValue ? rison.decode(queryValue) : {};
     this.type = type;
   }
 

@@ -1,4 +1,5 @@
 /* @notice
+ *
  * This product includes code that is based on flot-charts, which was available
  * under a "MIT" license.
  *

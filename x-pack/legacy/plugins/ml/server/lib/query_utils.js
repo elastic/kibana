@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
-  * Contains utility functions for building and processing queries.
-  */
+ * Contains utility functions for building and processing queries.
+ */
 
 // Builds the base filter criteria used in queries,
 // adding criteria for the time range and an optional query.
@@ -20,9 +18,9 @@ export function buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, que
         [timeFieldName]: {
           gte: earliestMs,
           lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     });
   }
 
@@ -44,10 +42,10 @@ export function buildSamplerAggregation(aggs, samplerShardSize) {
   return {
     sample: {
       sampler: {
-        shard_size: samplerShardSize
+        shard_size: samplerShardSize,
       },
-      aggs
-    }
+      aggs,
+    },
   };
 }
 

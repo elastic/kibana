@@ -1,5 +1,5 @@
 .visEditorAggParam--half {
-  margin-top: $euiSize;
+  margin: $euiSize 0;
   display: inline-block;
   width: calc(50% - #{$euiSizeS / 2});
 }

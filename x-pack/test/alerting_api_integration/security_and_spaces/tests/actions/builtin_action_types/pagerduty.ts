@@ -17,6 +17,7 @@ import {
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
@@ -24,11 +25,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      pagerdutySimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
-        ExternalServiceSimulator.PAGERDUTY
-      )}`;
+      pagerdutySimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
@@ -38,8 +37,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty action',
+          name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
@@ -48,10 +50,10 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A pagerduty action',
+        name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
 
@@ -63,10 +65,10 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A pagerduty action',
+        name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
     });
@@ -76,8 +78,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty action',
+          name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
           secrets: {},
         })
         .expect(400)
@@ -91,12 +96,32 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should return unsuccessfully when default pagerduty url is not whitelisted', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A pagerduty action',
+          actionTypeId: '.pagerduty',
+          secrets: {},
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+          });
+        });
+    });
+
     it('should create pagerduty simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty simulator',
+          name: 'A pagerduty simulator',
           actionTypeId: '.pagerduty',
           config: {
             apiUrl: pagerdutySimulatorURL,
@@ -122,6 +147,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result).to.eql({
         status: 'ok',
+        actionId: simulatedActionId,
         data: {
           dedup_key: `action:${simulatedActionId}`,
           message: 'Event processed',
@@ -141,9 +167,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: unexpected status 418/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: unexpected status 418/);
     });
 
     it('should handle a 429 pagerduty error', async () => {
@@ -159,7 +183,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.equal('error');
       expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 429, retry later/
+        /error posting pagerduty event: http status 429, retry later/
       );
       expect(result.retry).to.equal(true);
     });
@@ -176,9 +200,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 502, retry later/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: http status 502/);
       expect(result.retry).to.equal(true);
     });
   });

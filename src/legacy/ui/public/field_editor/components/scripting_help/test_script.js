@@ -31,11 +31,18 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
+
+const { uiSettings } = npStart.core;
+
+import { esQuery } from '../../../../../../plugins/data/public';
+
 export class TestScript extends Component {
   state = {
     isLoading: false,
     additionalFields: [],
-  }
+  };
 
   componentDidMount() {
     if (this.props.script) {
@@ -43,14 +50,8 @@ export class TestScript extends Component {
     }
   }
 
-  previewScript = async () => {
-    const {
-      indexPattern,
-      lang,
-      name,
-      script,
-      executeScript,
-    } = this.props;
+  previewScript = async searchContext => {
+    const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
       return;
@@ -60,20 +61,32 @@ export class TestScript extends Component {
       isLoading: true,
     });
 
+    let query;
+    if (searchContext) {
+      const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+      query = esQuery.buildEsQuery(
+        this.props.indexPattern,
+        searchContext.query,
+        null,
+        esQueryConfigs
+      );
+    }
+
     const scriptResponse = await executeScript({
       name,
       lang,
       script,
       indexPatternTitle: indexPattern.title,
+      query,
       additionalFields: this.state.additionalFields.map(option => {
         return option.value;
-      })
+      }),
     });
 
     if (scriptResponse.status !== 200) {
       this.setState({
         isLoading: false,
-        previewData: scriptResponse
+        previewData: scriptResponse,
       });
       return;
     }
@@ -86,13 +99,13 @@ export class TestScript extends Component {
         ...hit.fields,
       })),
     });
-  }
+  };
 
-  onAdditionalFieldsChange = (selectedOptions) => {
+  onAdditionalFieldsChange = selectedOptions => {
     this.setState({
-      additionalFields: selectedOptions
+      additionalFields: selectedOptions,
     });
-  }
+  };
 
   renderPreview() {
     const { previewData } = this.state;
@@ -103,11 +116,7 @@ export class TestScript extends Component {
 
     if (previewData.error) {
       return (
-        <EuiCallOut
-          title="There's an error in your script"
-          color="danger"
-          iconType="cross"
-        >
+        <EuiCallOut title="There's an error in your script" color="danger" iconType="cross">
           <EuiCodeBlock
             language="json"
             className="scriptPreviewCodeBlock"
@@ -121,7 +130,9 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiTitle size="xs"><p>First 10 results</p></EuiTitle>
+        <EuiTitle size="xs">
+          <p>First 10 results</p>
+        </EuiTitle>
         <EuiSpacer size="s" />
         <EuiCodeBlock
           language="json"
@@ -157,7 +168,7 @@ export class TestScript extends Component {
         label: fieldType,
         options: fieldsList.sort().map(fieldName => {
           return { value: fieldName, label: fieldName };
-        })
+        }),
       });
     });
 
@@ -169,26 +180,36 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow
-          label="Additional fields"
-        >
+        <EuiFormRow label="Additional fields" fullWidth>
           <EuiComboBox
             placeholder="Select..."
             options={fields}
             selectedOptions={this.state.additionalFields}
             onChange={this.onAdditionalFieldsChange}
             data-test-subj="additionalFieldsSelect"
+            fullWidth
           />
         </EuiFormRow>
 
-        <EuiButton
-          onClick={this.previewScript}
-          disabled={this.props.script ? false : true}
-          isLoading={this.state.isLoading}
-          data-test-subj="runScriptButton"
-        >
-          Run script
-        </EuiButton>
+        <div className="testScript__searchBar">
+          <SearchBar
+            showFilterBar={false}
+            showDatePicker={false}
+            showQueryInput={true}
+            query={{ language: uiSettings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this.previewScript}
+            indexPatterns={[this.props.indexPattern]}
+            customSubmitButton={
+              <EuiButton
+                disabled={this.props.script ? false : true}
+                isLoading={this.state.isLoading}
+                data-test-subj="runScriptButton"
+              >
+                Run script
+              </EuiButton>
+            }
+          />
+        </div>
       </Fragment>
     );
   }
@@ -200,8 +221,9 @@ export class TestScript extends Component {
         <EuiText>
           <h3>Preview results</h3>
           <p>
-            Run your script to preview the first 10 results. You can also select some
-            additional fields to include in your results to gain more context.
+            Run your script to preview the first 10 results. You can also select some additional
+            fields to include in your results to gain more context or add a query to filter on
+            specific documents.
           </p>
         </EuiText>
         <EuiSpacer />

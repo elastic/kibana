@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import multipleClustersFixture from './fixtures/multiple_clusters';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/logs_multiple_clusters';
     const timeRange = {
       min: '2019-08-23T14:14:31.686Z',
-      max: '2019-08-23T15:14:31.686Z'
+      max: '2019-08-23T15:14:31.686Z',
     };
     const codePaths = ['logs'];
 

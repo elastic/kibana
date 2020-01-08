@@ -1,0 +1,14 @@
+{
+  "transform.delete_transform": {
+    "url_params": {
+      "force": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_transform/{transform_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-transform.html"
+  }
+}

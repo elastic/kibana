@@ -19,27 +19,22 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'home',
-    'settings',
-    'discover',
-  ]);
+  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
 
-  describe('test large strings', function () {
-    before(async function () {
+  describe('test large strings', function() {
+    before(async function() {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'testlargestring'  });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
-    it('verify the large string book present', async function () {
+    it('verify the large string book present', async function() {
       const ExpectedDoc =
         'mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare' +
         ' This eBook is for the use of anyone anywhere in the United States' +
@@ -61,8 +56,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('test large data', function () {
-      it('search Newsletter should show the correct hit count', async function () {
+    describe('test large data', function() {
+      it('search Newsletter should show the correct hit count', async function() {
         const expectedHitCount = '1';
         await queryBar.setQuery('Newsletter');
         await queryBar.submitQuery();
@@ -73,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('the search term Newsletter should be highlighted in the field data', async function () {
+      it('the search term Newsletter should be highlighted in the field data', async function() {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be(1);

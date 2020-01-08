@@ -11,6 +11,9 @@ import { templateFromReactComponent } from '../../../lib/template_from_react_com
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';
 import { ExpressionAST } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
+
+const { SeriesStyle: strings } = ArgTypesStrings;
 
 interface Props {
   argValue: ExpressionAST;
@@ -23,7 +26,7 @@ const formatLabel = (label: string, props: Props) => {
   if (typeof label !== 'string') {
     props.renderError();
   }
-  return `Style: ${label}`;
+  return `${strings.getStyleLabel()}: ${label}`;
 };
 
 const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
@@ -34,9 +37,9 @@ const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
         this.props.setLabel(formatLabel(label, this.props));
       }
     },
-    componentWillReceiveProps(newProps) {
-      const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0', '');
-      if (newLabel && this.props.label !== formatLabel(newLabel, this.props)) {
+    componentDidUpdate(prevProps) {
+      const newLabel = get(this.props.argValue, 'chain.0.arguments.label.0', '');
+      if (newLabel && prevProps.label !== formatLabel(newLabel, this.props)) {
         this.props.setLabel(formatLabel(newLabel, this.props));
       }
     },
@@ -51,8 +54,8 @@ EnhancedExtendedTemplate.propTypes = {
 
 export const seriesStyle = () => ({
   name: 'seriesStyle',
-  displayName: 'Series style',
-  help: 'Set the style for a selected named series',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   template: templateFromReactComponent(EnhancedExtendedTemplate),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
   default: '{seriesStyle}',

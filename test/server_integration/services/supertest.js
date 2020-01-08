@@ -26,7 +26,8 @@ export function KibanaSupertestProvider({ getService }, options) {
   const config = getService('config');
   const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
 
-  const kibanaServerCert = config.get('kbnTestServer.serverArgs')
+  const kibanaServerCert = config
+    .get('kbnTestServer.serverArgs')
     .filter(arg => arg.startsWith('--server.ssl.certificate'))
     .map(arg => arg.split('=').pop())
     .map(path => readFileSync(path))
@@ -41,10 +42,12 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertestAsPromised(formatUrl({
-    ...kibanaServerConfig,
-    auth: false
-  }));
+  return supertestAsPromised(
+    formatUrl({
+      ...kibanaServerConfig,
+      auth: false,
+    })
+  );
 }
 
 export function ElasticsearchSupertestProvider({ getService }) {

@@ -17,7 +17,7 @@ import { uncovertMetricNames } from '../../convert_metric_names';
  * @param {Object} timeOptions: min, max, and bucketSize needed for date histogram creation
  * @return {Array} node info combined with metrics for each node
  */
-export function handleResponse(response, clusterStats, shardStats, timeOptions = {}) {
+export function handleResponse(response, clusterStats, shardStats, pageOfNodes, timeOptions = {}) {
   if (!get(response, 'hits.hits')) {
     return [];
   }
@@ -39,15 +39,12 @@ export function handleResponse(response, clusterStats, shardStats, timeOptions =
   }, {});
   const nodesMetrics = mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions); // summarize the metrics of online nodes
 
-  const nodes = [];
   // nodesInfo is the source of truth for the nodeIds, where nodesMetrics will lack metrics for offline nodes
-  Object.keys(nodesInfo).forEach(nodeId => {
-    nodes.push({
-      ...nodesInfo[nodeId],
-      ...nodesMetrics[nodeId],
-      resolver: nodeId,
-    });
-  });
+  const nodes = pageOfNodes.map(node => ({
+    ...nodesInfo[node.uuid],
+    ...nodesMetrics[node.uuid],
+    resolver: node.uuid,
+  }));
 
   return nodes;
 }

@@ -1,0 +1,348 @@
+.ml-time-series-explorer {
+  width: 100%;
+  display: inline-block;
+  color: $euiColorDarkShade;
+
+  .no-results-container {
+    text-align: center;
+    font-size: $euiFontSizeL;
+    padding-top: 60px; // SASSTODO: variabalize
+
+    .no-results {
+      background-color: $euiFocusBackgroundColor;
+      padding: $euiSize;
+      border-radius: $euiBorderRadius;
+      display: inline-block;
+
+      i {
+        color: $euiColorPrimary;
+        margin-right: $euiSizeXS;
+      }
+
+      div:nth-child(2) {
+        margin-top: $euiSizeS;
+        font-size: $euiFontSizeXS;
+      }
+    }
+  }
+
+  .single-metric-request-callout {
+    margin: 0 $euiSize;
+  }
+
+  .results-container {
+    padding: $euiSize;
+
+    .panel-title {
+      color: $euiTitleColor;
+    }
+
+    .entity-count-text {
+      color: $euiColorSecondary;
+      font-size: $euiFontSizeS;
+    }
+  }
+
+  .series-controls {
+    padding: $euiSize $euiSize 0px $euiSize;
+
+    div.entity-controls {
+      display: inline-block;
+      padding-left: $euiSize;
+
+      input.entity-input-blank {
+        border-color: $euiColorDanger;
+      }
+
+      .entity-input {
+        width: 300px;
+      }
+    }
+
+    button {
+      margin-left: $euiSizeXS;
+    }
+  }
+
+  .forecast-controls {
+    float: right;
+  }
+
+  .ml-anomalies-controls {
+    padding-top: $euiSizeXS;
+  }
+
+  .ml-timeseries-chart {
+    svg {
+      font-size: $euiFontSizeXS;
+      font-family: $euiFontFamily;
+    }
+
+    .axis path, .axis line {
+      fill: none;
+      stroke: $euiBorderColor;
+      shape-rendering: crispEdges;
+      pointer-events: none;
+    }
+
+    .axis text {
+      fill: $euiTextColor;
+    }
+
+    .axis .tick line {
+      stroke: rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-border {
+      stroke: $euiBorderColor;
+      fill: none;
+      stroke-width: 1;
+      shape-rendering: crispEdges;
+    }
+
+    .chart-border-highlight {
+      stroke: $euiColorDarkShade;
+      stroke-width: 2;
+    }
+    .chart-border-highlight:hover {
+      opacity: 1;
+    }
+
+    .area {
+      stroke-width: 1;
+    }
+
+    .area.bounds {
+      fill: rgba(50, 167, 194, 0.25); // Needs variable
+      pointer-events: none;
+    }
+
+    .values-line {
+      fill: none;
+      stroke: #32a7c2; // Needs variable
+      stroke-width: 2;
+      pointer-events: none;
+    }
+
+    .values-line.forecast {
+      stroke: #cca300; // Needs variable
+      pointer-events: none;
+    }
+
+    .values-dots circle {
+      fill: #32a7c2; // Needs variable
+      stroke-width: 0;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    .area.forecast {
+      fill: rgba(204, 163, 0, 0.25); // Needs variable
+      pointer-events: none;
+    }
+
+    .metric-value {
+      opacity: 1;
+      fill: transparent;
+      stroke: #32a7c2;
+      stroke-width: 0px;
+    }
+
+    .anomaly-marker {
+      stroke-width: 1px;
+      stroke: #aaaaaa; // Needs variable
+    }
+
+    .anomaly-marker.critical {
+      fill: $mlColorCritical;
+    }
+
+    .anomaly-marker.major {
+      fill: $mlColorMajor;
+    }
+
+    .anomaly-marker.minor {
+      fill: $mlColorMinor;
+    }
+
+    .anomaly-marker.warning {
+      fill: $mlColorWarning;
+    }
+
+    .anomaly-marker.low {
+      fill: #d2e9f7; // Needs variable
+    }
+
+    .metric-value:hover,
+    .anomaly-marker:hover,
+    .anomaly-marker.highlighted {
+      stroke-width: 6px;
+      stroke-opacity: 0.65;
+      stroke: #32a7c2;
+    }
+
+    rect.scheduled-event-marker {
+      stroke-width: 1px;
+      stroke: $euiColorMediumShade;
+      fill: $euiColorLightShade;
+      pointer-events: none;
+    }
+
+    .forecast {
+      .metric-value,
+      .metric-value:hover {
+        stroke: #cca300;
+      }
+    }
+
+    .focus-chart {
+      .x-axis-background {
+        line {
+          fill: none;
+          shape-rendering: crispEdges;
+          stroke: $euiColorLightestShade;
+        }
+
+        rect {
+          fill: $euiColorLightestShade;
+        }
+      }
+
+      .focus-zoom {
+        fill: $euiColorDarkShade;
+
+        a {
+          text {
+            fill: $euiColorPrimary;
+            cursor: pointer;
+          }
+        }
+
+        a:hover, a:active, a:focus {
+          text-decoration: underline;
+        }
+
+      }
+    }
+
+    .context-chart {
+      .x.axis path {
+        display: none;
+      }
+
+      .axis text {
+        font-size: 10px;
+        fill: $euiTextColor;
+      }
+
+      .area.context {
+        fill: rgba(50, 167, 194, 0.25); // Needs variable
+      }
+
+      .values-line {
+        stroke-width: 1;
+      }
+
+      .area.context.forecast {
+        fill: rgba(204, 163, 0, 0.25); // Needs variable
+      }
+
+      .mask {
+        polygon {
+          fill-opacity: 0.1;
+        }
+
+        .area.bounds {
+          fill: #d6d6d6;
+        }
+
+        .values-line {
+          stroke-width: 1;
+          stroke: #b8b8b8;
+        }
+
+        .values-dots circle {
+          fill: #b8b8b8;
+          stroke-width: 0;
+        }
+      }
+
+    }
+
+    .swimlane .axis text {
+      display: none;
+    }
+
+    .swimlane rect.swimlane-cell-hidden {
+      display: none;
+    }
+
+    .brush .extent {
+      stroke: #aaaaaa;
+      fill-opacity: 0;
+      shape-rendering: crispEdges;
+    }
+
+    .brush .extent {
+      stroke: $euiColorDarkShade;
+      stroke-width: 2;
+      cursor: move;
+    }
+
+    .brush .extent:hover {
+      opacity: 1;
+    }
+
+    .top-border {
+      fill: $euiColorEmptyShade;
+    }
+
+    foreignObject.brush-handle {
+      pointer-events: none;
+      padding-top: 1px;
+    }
+
+    div.brush-handle-inner {
+      border: 1px solid $euiColorDarkShade;
+      background-color: $euiColorLightShade;
+      height: 70px;
+      width: 10px;
+      text-align: center;
+      cursor: ew-resize;
+      margin-top: 9px;
+
+      i.fa {
+        margin-top: 30px;
+      }
+    }
+
+    div.brush-handle-inner-left {
+      border-radius: $euiBorderRadius 0px 0px $euiBorderRadius;
+    }
+    div.brush-handle-inner-right {
+      border-radius: 0px $euiBorderRadius $euiBorderRadius 0px;
+    }
+
+    rect.brush-handle {
+      stroke-width: 1;
+      stroke: $euiColorDarkShade;
+      fill: $euiColorLightShade;
+      pointer-events: none;
+    }
+
+    rect.brush-handle:hover {
+      opacity: 1;
+    }
+  }
+}
+
+/* Hides the progress bar's background so it doesn't look like it increases the thickness
+   of the horizontal bar below the tab menu elements in its inactive state. */
+.mlTimeSeriesExplorerProgress {
+  background-color: $euiColorEmptyShade;
+  &::-moz-progress-bar, &::-webkit-progress-bar {
+    background-color: $euiColorEmptyShade;
+  }
+}

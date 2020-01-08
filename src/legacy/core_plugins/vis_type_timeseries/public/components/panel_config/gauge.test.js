@@ -22,17 +22,11 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('plugins/data', () => {
   return {
-    QueryBarInput: () => <div className="queryBarInput" />,
+    QueryStringInput: () => <div className="queryStringInput" />,
   };
 });
 
 import { GaugePanelConfig } from './gauge';
-
-jest.mock('plugins/data', () => {
-  return {
-    QueryBar: () => <div className="queryBar" />,
-  };
-});
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {

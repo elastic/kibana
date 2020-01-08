@@ -38,8 +38,8 @@ export function handleResponse(response) {
       ...accum,
       {
         version: current.key,
-        count: get(current, 'uuids.buckets.length')
-      }
+        count: get(current, 'uuids.buckets.length'),
+      },
     ];
   }, []);
 
@@ -48,8 +48,8 @@ export function handleResponse(response) {
       ...accum,
       {
         type: capitalize(current.key),
-        count: get(current, 'uuids.buckets.length')
-      }
+        count: get(current, 'uuids.buckets.length'),
+      },
     ];
   }, []);
 
@@ -65,15 +65,16 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
 
   const config = req.server.config();
   const lastDayFilter = { range: { timestamp: { gte: 'now-1d/d', lte: 'now/d' } } };
-  const beatUuidAgg = { // size of these buckets determines actual # of beats in each kind of aggregation
+  const beatUuidAgg = {
+    // size of these buckets determines actual # of beats in each kind of aggregation
     aggs: {
       uuids: {
         terms: {
           field: 'beats_stats.beat.uuid',
           size: config.get('xpack.monitoring.max_bucket_size'),
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const params = {
@@ -84,7 +85,7 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
     body: {
       query: createBeatsQuery({
         clusterUuid,
-        filters: [ lastDayFilter ],
+        filters: [lastDayFilter],
       }),
       aggs: {
         active_counts: {
@@ -95,24 +96,23 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
               { key: 'last5m', from: 'now-5m/m', to: 'now' },
               { key: 'last20m', from: 'now-20m/m', to: 'now' },
               { key: 'last1h', from: 'now-1h/h', to: 'now' },
-              { key: 'last1d', from: 'now-1d/d', to: 'now' }
-            ]
+              { key: 'last1d', from: 'now-1d/d', to: 'now' },
+            ],
           },
-          ...beatUuidAgg
+          ...beatUuidAgg,
         },
         versions: {
           terms: { field: 'beats_stats.beat.version', size: 5 },
-          ...beatUuidAgg
+          ...beatUuidAgg,
         },
         types: {
           terms: { field: 'beats_stats.beat.type', size: 5 },
-          ...beatUuidAgg
-        }
-      }
-    }
+          ...beatUuidAgg,
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse);
+  return callWithRequest(req, 'search', params).then(handleResponse);
 }

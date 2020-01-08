@@ -5,21 +5,16 @@
  */
 
 import React from 'react';
-import { render, fireEvent, cleanup } from 'react-testing-library';
-import 'react-testing-library/cleanup-after-each';
+import { render, fireEvent } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
-import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
-import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { ISavedObject } from '../../../../services/rest/savedObjects';
-import { LegacyCoreStart } from 'src/core/public';
-
-jest.mock('ui/kfetch');
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
-    <TransactionActionMenu transaction={transaction as Transaction} />
+    <TransactionActionMenu transaction={transaction as Transaction} />,
+    { wrapper: MockApmPluginContextWrapper }
   );
 
   fireEvent.click(rendered.getByText('Actions'));
@@ -28,26 +23,6 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 describe('TransactionActionMenu component', () => {
-  beforeEach(() => {
-    const coreMock = ({
-      http: {
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
-    jest
-      .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
-      .mockReturnValue({ id: 'foo' } as ISavedObject);
-    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    cleanup();
-  });
-
   it('should always render the discover link', async () => {
     const { queryByText } = await renderTransaction(
       Transactions.transactionWithMinimalData

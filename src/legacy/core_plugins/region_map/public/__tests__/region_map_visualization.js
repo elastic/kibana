@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
@@ -39,7 +39,7 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -47,10 +47,9 @@ import { createRegionMapTypeDefinition } from '../region_map_type';
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
 
-describe('RegionMapsVisualizationTests', function () {
+describe('RegionMapsVisualizationTests', function() {
   let domNode;
   let RegionMapsVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let dependencies;
@@ -87,6 +86,8 @@ describe('RegionMapsVisualizationTests', function () {
     ],
   };
 
+  let visRegComplete = false;
+
   beforeEach(ngMock.module('kibana'));
 
   let getManifestStub;
@@ -106,13 +107,17 @@ describe('RegionMapsVisualizationTests', function () {
         uiSettings,
       };
 
-      visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+      if (!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.createBaseVisualization(
+          createRegionMapTypeDefinition(dependencies)
+        );
+      }
 
-      Vis = Private(visModule.VisProvider);
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
 
-      ChoroplethLayer.prototype._makeJsonAjaxCall = async function () {
+      ChoroplethLayer.prototype._makeJsonAjaxCall = async function() {
         //simulate network call
         return new Promise(resolve => {
           setTimeout(() => {
@@ -142,13 +147,13 @@ describe('RegionMapsVisualizationTests', function () {
     })
   );
 
-  afterEach(function () {
+  afterEach(function() {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
     getManifestStub.removeStub();
   });
 
-  describe('RegionMapVisualization - basics', function () {
-    beforeEach(async function () {
+  describe('RegionMapVisualization - basics', function() {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
@@ -186,12 +191,12 @@ describe('RegionMapsVisualizationTests', function () {
       };
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should instantiate at zoom level 2', async function () {
+    it('should instantiate at zoom level 2 (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -205,7 +210,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should update after resetting join field', async function () {
+    it('should update after resetting join field', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -231,7 +236,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should resize', async function () {
+    it('should resize (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -268,7 +273,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterSecondResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data', async function () {
+    it('should redo data (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -312,7 +317,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterDataChangeAndResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data and color ramp', async function () {
+    it('should redo data and color ramp (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -338,7 +343,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterDataAndColorChange).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should zoom and center elsewhere', async function () {
+    it('should zoom and center elsewhere', async function() {
       vis.params.mapZoom = 4;
       vis.params.mapCenter = [36, -85];
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
@@ -28,20 +28,24 @@ export default function ({ getService, getPageObjects }) {
   //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
 
   describe('mgmt saved objects', function describeIndexTests() {
-    beforeEach(async function () {
+    beforeEach(async function() {
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
     });
 
-    afterEach(async function () {
+    afterEach(async function() {
       await esArchiver.unload('discover');
     });
 
-    it('should import saved objects mgmt', async function () {
-
+    it('should import saved objects mgmt', async function() {
       await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'mgmt_import_objects.json'));
-      await PageObjects.settings.associateIndexPattern('4c3f3c30-ac94-11e8-a651-614b2788174a', 'logstash-*');
+      await PageObjects.settings.importFile(
+        path.join(__dirname, 'exports', 'mgmt_import_objects.json')
+      );
+      await PageObjects.settings.associateIndexPattern(
+        '4c3f3c30-ac94-11e8-a651-614b2788174a',
+        'logstash-*'
+      );
       await PageObjects.settings.clickConfirmChanges();
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -50,9 +54,6 @@ export default function ({ getService, getPageObjects }) {
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('mysavedsearch')).to.be(true);
       expect(objects.includes('mysavedviz')).to.be(true);
-
     });
-
   });
-
 }

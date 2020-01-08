@@ -18,21 +18,17 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { LegacyPluginInitializer } from '../../../../src/legacy/types';
+
+export const visualizations: LegacyPluginInitializer = kibana =>
+  new kibana.Plugin({
+    id: 'visualizations',
+    publicDir: resolve(__dirname, 'public'),
+    require: [],
+    uiExports: {
+      interpreter: ['plugins/visualizations/expressions/boot'],
+    },
+  });
 
 // eslint-disable-next-line import/no-default-export
-export default function VisualizationsPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'visualizations',
-    require: ['data'],
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-  };
-
-  return new kibana.Plugin(config);
-}
+export default visualizations;

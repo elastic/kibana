@@ -22,10 +22,13 @@ import { AggConfig, VisState, VisParams } from '../../..';
 import { AggParams } from '../agg_params';
 import { AggGroupNames } from '../agg_groups';
 
-export type OnAggParamsChange = (
-  params: AggParams | VisParams,
-  paramName: string,
-  value: unknown
+export type OnAggParamsChange = <
+  Params extends AggParams | VisParams,
+  ParamName extends keyof Params
+>(
+  params: Params,
+  paramName: ParamName,
+  value: Params[ParamName]
 ) => void;
 
 export interface DefaultEditorAggCommonProps {

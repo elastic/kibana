@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,28 +16,16 @@ import {
 } from '../types';
 import { State, SeriesType, XYState } from './types';
 import { generateId } from '../id_generator';
+import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
-  date: 0,
-  string: 1,
-  boolean: 2,
-  number: 3,
+  document: 0,
+  date: 1,
+  string: 2,
+  ip: 3,
+  boolean: 4,
+  number: 5,
 };
-
-function getIconForSeries(type: SeriesType): EuiIconType {
-  switch (type) {
-    case 'area':
-    case 'area_stacked':
-      return 'visArea';
-    case 'bar':
-    case 'bar_stacked':
-      return 'visBarVertical';
-    case 'line':
-      return 'visLine';
-    default:
-      throw new Error('unknown series type');
-  }
-}
 
 /**
  * Generate suggestions for the xy chart.
@@ -48,6 +35,7 @@ function getIconForSeries(type: SeriesType): EuiIconType {
 export function getSuggestions({
   table,
   state,
+  keptLayerIds,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   if (
     // We only render line charts for multi-row queries. We require at least
@@ -61,7 +49,7 @@ export function getSuggestions({
     return [];
   }
 
-  const suggestions = getSuggestionForColumns(table, state);
+  const suggestions = getSuggestionForColumns(table, keptLayerIds, state);
 
   if (suggestions && suggestions instanceof Array) {
     return suggestions;
@@ -72,32 +60,35 @@ export function getSuggestions({
 
 function getSuggestionForColumns(
   table: TableSuggestion,
+  keptLayerIds: string[],
   currentState?: State
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
-    return getSuggestionsForLayer(
-      table.layerId,
-      table.changeType,
-      x,
-      values,
+    return getSuggestionsForLayer({
+      layerId: table.layerId,
+      changeType: table.changeType,
+      xValue: x,
+      yValues: values,
       splitBy,
       currentState,
-      table.label
-    );
+      tableLabel: table.label,
+      keptLayerIds,
+    });
   } else if (buckets.length === 0) {
     const [x, ...yValues] = prioritizeColumns(values);
-    return getSuggestionsForLayer(
-      table.layerId,
-      table.changeType,
-      x,
+    return getSuggestionsForLayer({
+      layerId: table.layerId,
+      changeType: table.changeType,
+      xValue: x,
       yValues,
-      undefined,
+      splitBy: undefined,
       currentState,
-      table.label
-    );
+      tableLabel: table.label,
+      keptLayerIds,
+    });
   }
 }
 
@@ -119,7 +110,14 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  if (currentXColumnIndex) {
+  const currentXDataType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+
+  if (
+    currentXDataType &&
+    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+  ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
   }
@@ -127,7 +125,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentSplitColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.splitAccessor
   );
-  if (currentSplitColumnIndex) {
+  if (currentSplitColumnIndex > -1) {
     const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
     prioritizedBuckets.push(splitBy);
   }
@@ -144,21 +142,29 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
   );
 }
 
-function getSuggestionsForLayer(
-  layerId: string,
-  changeType: TableChangeType,
-  xValue: TableSuggestionColumn,
-  yValues: TableSuggestionColumn[],
-  splitBy?: TableSuggestionColumn,
-  currentState?: State,
-  tableLabel?: string
-): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
+function getSuggestionsForLayer({
+  layerId,
+  changeType,
+  xValue,
+  yValues,
+  splitBy,
+  currentState,
+  tableLabel,
+  keptLayerIds,
+}: {
+  layerId: string;
+  changeType: TableChangeType;
+  xValue: TableSuggestionColumn;
+  yValues: TableSuggestionColumn[];
+  splitBy?: TableSuggestionColumn;
+  currentState?: State;
+  tableLabel?: string;
+  keptLayerIds: string[];
+}): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
-  const isHorizontal = currentState ? currentState.isHorizontal : false;
 
   const options = {
-    isHorizontal,
     currentState,
     seriesType,
     layerId,
@@ -167,6 +173,7 @@ function getSuggestionsForLayer(
     splitBy,
     changeType,
     xValue,
+    keptLayerIds,
   };
 
   const isSameState = currentState && changeType === 'unchanged';
@@ -178,48 +185,54 @@ function getSuggestionsForLayer(
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-
-  if (xValue.operation.scale === 'ordinal') {
+  if (seriesType !== 'line' && xValue.operation.scale === 'ordinal') {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        isHorizontal: !options.isHorizontal,
+        seriesType:
+          seriesType === 'bar_horizontal'
+            ? 'bar'
+            : seriesType === 'bar_horizontal_stacked'
+            ? 'bar_stacked'
+            : 'bar_horizontal',
       })
     );
   } else {
     // change chart type for interval or ratio scales on x axis
-    const newSeriesType = flipSeriesType(seriesType);
+    const newSeriesType = altSeriesType(seriesType);
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         seriesType: newSeriesType,
-        title: newSeriesType.startsWith('area')
-          ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
-              defaultMessage: 'Area chart',
-            })
-          : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+        title: newSeriesType.startsWith('bar')
+          ? i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
               defaultMessage: 'Bar chart',
+            })
+          : i18n.translate('xpack.lens.xySuggestions.lineChartTitle', {
+              defaultMessage: 'Line chart',
             }),
       })
     );
   }
 
-  // flip between stacked/unstacked
-  sameStateSuggestions.push(
-    buildSuggestion({
-      ...options,
-      seriesType: toggleStackSeriesType(seriesType),
-      title: seriesType.endsWith('stacked')
-        ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
-            defaultMessage: 'Unstacked',
-          })
-        : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
-            defaultMessage: 'Stacked',
-          }),
-    })
-  );
+  if (seriesType !== 'line' && splitBy) {
+    // flip between stacked/unstacked
+    sameStateSuggestions.push(
+      buildSuggestion({
+        ...options,
+        seriesType: toggleStackSeriesType(seriesType),
+        title: seriesType.endsWith('stacked')
+          ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
+              defaultMessage: 'Unstacked',
+            })
+          : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
+              defaultMessage: 'Stacked',
+            }),
+      })
+    );
+  }
 
   return sameStateSuggestions;
 }
@@ -239,18 +252,21 @@ function toggleStackSeriesType(oldSeriesType: SeriesType) {
   }
 }
 
-function flipSeriesType(oldSeriesType: SeriesType) {
+// Until the area chart rendering bug is fixed, avoid suggesting area charts
+// https://github.com/elastic/elastic-charts/issues/388
+function altSeriesType(oldSeriesType: SeriesType) {
   switch (oldSeriesType) {
     case 'area':
-      return 'bar';
+      return 'line';
     case 'area_stacked':
       return 'bar_stacked';
     case 'bar':
-      return 'area';
+      return 'line';
     case 'bar_stacked':
-      return 'area_stacked';
+      return 'line';
+    case 'line':
     default:
-      return 'bar';
+      return 'bar_stacked';
   }
 }
 
@@ -260,17 +276,25 @@ function getSeriesType(
   xValue: TableSuggestionColumn,
   changeType: TableChangeType
 ): SeriesType {
-  const defaultType = xValue.operation.dataType === 'date' ? 'area_stacked' : 'bar_stacked';
+  const defaultType = 'bar_stacked';
+
+  const oldLayer = getExistingLayer(currentState, layerId);
+  const oldLayerSeriesType = oldLayer ? oldLayer.seriesType : false;
+
+  const closestSeriesType =
+    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
+
+  // Attempt to keep the seriesType consistent on initial add of a layer
+  // Ordinal scales should always use a bar because there is no interpolation between buckets
+  if (xValue.operation.scale && xValue.operation.scale === 'ordinal') {
+    return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
+  }
+
   if (changeType === 'initial') {
     return defaultType;
-  } else {
-    const oldLayer = getExistingLayer(currentState, layerId);
-    return (
-      (oldLayer && oldLayer.seriesType) ||
-      (currentState && currentState.preferredSeriesType) ||
-      defaultType
-    );
   }
+
+  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
 }
 
 function getSuggestionTitle(
@@ -307,7 +331,6 @@ function getSuggestionTitle(
 }
 
 function buildSuggestion({
-  isHorizontal,
   currentState,
   seriesType,
   layerId,
@@ -316,9 +339,9 @@ function buildSuggestion({
   splitBy,
   changeType,
   xValue,
+  keptLayerIds,
 }: {
   currentState: XYState | undefined;
-  isHorizontal: boolean;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
@@ -326,6 +349,7 @@ function buildSuggestion({
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
   changeType: TableChangeType;
+  keptLayerIds: string[];
 }) {
   const newLayer = {
     ...(getExistingLayer(currentState, layerId) || {}),
@@ -336,14 +360,16 @@ function buildSuggestion({
     accessors: yValues.map(col => col.columnId),
   };
 
+  const keptLayers = currentState
+    ? currentState.layers.filter(
+        layer => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
+      )
+    : [];
+
   const state: State = {
-    isHorizontal,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
-    layers: [
-      ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
-      newLayer,
-    ],
+    layers: [...keptLayers, newLayer],
   };
 
   return {

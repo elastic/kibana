@@ -7,18 +7,24 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
-import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { HttpServiceSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
+import {
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  IRouter,
+  IScopedClusterClient,
+} from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ElasticsearchServiceSetup } from 'src/core/server';
+import { CloudSetup } from '../../../../../plugins/cloud/server';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
-// @ts-ignore: could not find declaration file for module
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-// @ts-ignore: could not find declaration file for module
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
-// @ts-ignore: could not find declaration file for module
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
@@ -30,14 +36,11 @@ import { dataFeedRoutes } from '../routes/datafeeds';
 import { indicesRoutes } from '../routes/indices';
 // @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
-// @ts-ignore: could not find declaration file for module
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
 // @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
-// @ts-ignore: could not find declaration file for module
-import { dataFrameRoutes } from '../routes/data_frame';
 // @ts-ignore: could not find declaration file for module
 import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 // @ts-ignore: could not find declaration file for module
@@ -58,10 +61,15 @@ import { jobServiceRoutes } from '../routes/job_service';
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
-// @ts-ignore: could not find declaration file for module
 import { initMlServerLog, LogInitialization } from '../client/log';
+import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server';
+// @ts-ignore: could not find declaration file for module
+import { elasticsearchJsPlugin } from '../client/elasticsearch_ml';
 
-export interface MlHttpServiceSetup extends HttpServiceSetup {
+export const PLUGIN_ID = 'ml';
+
+type CoreHttpSetup = CoreSetup['http'];
+export interface MlHttpServiceSetup extends CoreHttpSetup {
   route(route: ServerRoute | ServerRoute[]): void;
 }
 
@@ -70,16 +78,10 @@ export interface MlXpackMainPlugin extends XPackMainPlugin {
 }
 
 export interface MlCoreSetup {
-  addAppLinksToSampleDataset: () => any;
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
-  savedObjects: SavedObjectsService;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
-    };
-  };
+  savedObjects: SavedObjectsLegacyService;
+  elasticsearch: ElasticsearchServiceSetup;
 }
 export interface MlInitializerContext extends PluginInitializerContext {
   legacyConfig: KibanaConfig;
@@ -90,31 +92,40 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
+  usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
+  home?: HomeServerPluginSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
+
 export interface RouteInitialization {
   commonRouteConfig: any;
   config?: any;
   elasticsearchPlugin: ElasticsearchPlugin;
+  elasticsearchService: ElasticsearchServiceSetup;
   route(route: ServerRoute | ServerRoute[]): void;
-  xpackMainPlugin?: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsService;
+  router: IRouter;
+  xpackMainPlugin: MlXpackMainPlugin;
+  savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  cloud?: CloudSetup;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
+  savedObjects: SavedObjectsLegacyService;
+}
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    ml?: {
+      mlClient: IScopedClusterClient;
     };
-  };
-  savedObjects: SavedObjectsService;
+  }
 }
 
 export class Plugin {
-  private readonly pluginId: string = 'ml';
+  private readonly pluginId: string = PLUGIN_ID;
   private config: any;
   private log: Logger;
 
@@ -125,7 +136,7 @@ export class Plugin {
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
     const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
-    const { addAppLinksToSampleDataset, http, injectUiAppVars } = core;
+    const { http, injectUiAppVars } = core;
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
@@ -137,10 +148,12 @@ export class Plugin {
 
       // Add links to the Kibana sample data sets if ml is enabled
       // and there is a full license (trial or platinum).
-      if (mlFeature.isEnabled() === true) {
+      if (mlFeature.isEnabled() === true && plugins.home) {
         const licenseCheckResults = mlFeature.getLicenseCheckResults();
         if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
-          addLinksToSampleDatasets({ addAppLinksToSampleDataset });
+          addLinksToSampleDatasets({
+            addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
+          });
         }
       }
     });
@@ -193,24 +206,33 @@ export class Plugin {
       };
     });
 
+    // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
+    const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
+    http.registerRouteHandlerContext('ml', (context, request) => {
+      return {
+        mlClient: mlClient.asScoped(request),
+      };
+    });
+
     const routeInitializationDeps: RouteInitialization = {
       commonRouteConfig,
       route: http.route,
+      router: http.createRouter(),
       elasticsearchPlugin: plugins.elasticsearch,
+      elasticsearchService: core.elasticsearch,
+      xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
       ...routeInitializationDeps,
       config: this.config,
-      xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
+      cloud: plugins.cloud,
     };
-
     const usageInitializationDeps: UsageInitialization = {
       elasticsearchPlugin: plugins.elasticsearch,
-      usage: core.usage,
       savedObjects: core.savedObjects,
     };
 
@@ -221,7 +243,6 @@ export class Plugin {
     annotationRoutes(routeInitializationDeps);
     jobRoutes(routeInitializationDeps);
     dataFeedRoutes(routeInitializationDeps);
-    dataFrameRoutes(routeInitializationDeps);
     dataFrameAnalyticsRoutes(routeInitializationDeps);
     indicesRoutes(routeInitializationDeps);
     jobValidationRoutes(extendedRouteInitializationDeps);
@@ -238,7 +259,7 @@ export class Plugin {
     fileDataVisualizerRoutes(extendedRouteInitializationDeps);
 
     initMlServerLog(logInitializationDeps);
-    makeMlUsageCollector(usageInitializationDeps);
+    makeMlUsageCollector(plugins.usageCollection, usageInitializationDeps);
   }
 
   public stop() {}

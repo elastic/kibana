@@ -5,32 +5,65 @@
  */
 
 import * as rt from 'io-ts';
-import { kfetch } from 'ui/kfetch';
-import { getJobId, getDatafeedId } from '../../../../../common/log_analysis';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { npStart } from 'ui/new_platform';
 
-export const callDeleteJobs = async (spaceId: string, sourceId: string) => {
+import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+
+export const callDeleteJobs = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
-  const deleteJobsResponse = await kfetch({
+  const deleteJobsResponse = await npStart.core.http.fetch('/api/ml/jobs/delete_jobs', {
     method: 'POST',
-    pathname: '/api/ml/jobs/delete_jobs',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
-        jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
+        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });
 
-  return deleteJobsResponse;
+  return pipe(
+    deleteJobsResponsePayloadRT.decode(deleteJobsResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
-export const callStopDatafeed = async (spaceId: string, sourceId: string) => {
+export const callGetJobDeletionTasks = async () => {
+  const jobDeletionTasksResponse = await npStart.core.http.fetch(
+    '/api/ml/jobs/deleting_jobs_tasks'
+  );
+
+  return pipe(
+    getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
+};
+
+export const callStopDatafeeds = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
   // Stop datafeed due to https://github.com/elastic/kibana/issues/44652
-  const stopDatafeedResponse = await kfetch({
+  const stopDatafeedResponse = await npStart.core.http.fetch('/api/ml/jobs/stop_datafeeds', {
     method: 'POST',
-    pathname: `/api/ml/datafeeds/${getDatafeedId(spaceId, sourceId, 'log-entry-rate')}/_stop`,
+    body: JSON.stringify(
+      stopDatafeedsRequestPayloadRT.encode({
+        datafeedIds: jobTypes.map(jobType => getDatafeedId(spaceId, sourceId, jobType)),
+      })
+    ),
   });
 
-  return stopDatafeedResponse;
+  return pipe(
+    stopDatafeedsResponsePayloadRT.decode(stopDatafeedResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 export const deleteJobsRequestPayloadRT = rt.type({
@@ -38,3 +71,27 @@ export const deleteJobsRequestPayloadRT = rt.type({
 });
 
 export type DeleteJobsRequestPayload = rt.TypeOf<typeof deleteJobsRequestPayloadRT>;
+
+export const deleteJobsResponsePayloadRT = rt.record(
+  rt.string,
+  rt.type({
+    deleted: rt.boolean,
+  })
+);
+
+export type DeleteJobsResponsePayload = rt.TypeOf<typeof deleteJobsResponsePayloadRT>;
+
+export const getJobDeletionTasksResponsePayloadRT = rt.type({
+  jobIds: rt.array(rt.string),
+});
+
+export const stopDatafeedsRequestPayloadRT = rt.type({
+  datafeedIds: rt.array(rt.string),
+});
+
+export const stopDatafeedsResponsePayloadRT = rt.record(
+  rt.string,
+  rt.type({
+    stopped: rt.boolean,
+  })
+);

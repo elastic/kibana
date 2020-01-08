@@ -19,13 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('app navigation', function describeIndexTests() {
-
     before(async () => {
       await PageObjects.common.navigateToApp('settings');
     });
@@ -36,5 +35,4 @@ export default function ({ getService, getPageObjects }) {
       expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
     });
   });
-
 }

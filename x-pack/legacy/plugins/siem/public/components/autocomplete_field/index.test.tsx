@@ -7,11 +7,10 @@
 import { EuiFieldSearch } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 
@@ -117,7 +116,7 @@ describe('Autocomplete', () => {
           value={''}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it is rendering with placeholder', () => {

@@ -13,49 +13,43 @@ export function Stats({ stats }) {
   const {
     total,
     types,
-    stats: {
-      bytesSent,
-      totalEvents,
-    }
+    stats: { bytesSent, totalEvents },
   } = stats;
 
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.beats.overview.totalBeatsLabel', {
-        defaultMessage: 'Total Beats'
+        defaultMessage: 'Total Beats',
       }),
       value: formatMetric(total, 'int_commas'),
-      'data-test-subj': 'totalBeats'
+      'data-test-subj': 'totalBeats',
     },
   ];
 
-  metrics.push(...types.map(({ type, count }) => ({
-    label: type,
-    value: formatMetric(count, 'int_commas'),
-    'data-test-subj': 'typeCount',
-    'data-test-type-count': `${type}:${count}`
-  })));
+  metrics.push(
+    ...types.map(({ type, count }) => ({
+      label: type,
+      value: formatMetric(count, 'int_commas'),
+      'data-test-subj': 'typeCount',
+      'data-test-type-count': `${type}:${count}`,
+    }))
+  );
 
   metrics.push({
     label: i18n.translate('xpack.monitoring.beats.overview.totalEventsLabel', {
-      defaultMessage: 'Total Events'
+      defaultMessage: 'Total Events',
     }),
     value: formatMetric(totalEvents, '0.[0]a'),
-    'data-test-subj': 'totalEvents'
+    'data-test-subj': 'totalEvents',
   });
 
   metrics.push({
     label: i18n.translate('xpack.monitoring.beats.overview.bytesSentLabel', {
-      defaultMessage: 'Bytes Sent'
+      defaultMessage: 'Bytes Sent',
     }),
     value: formatMetric(bytesSent, 'byte'),
-    'data-test-subj': 'bytesSent'
+    'data-test-subj': 'bytesSent',
   });
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="beatsSummaryStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="beatsSummaryStatus" />;
 }

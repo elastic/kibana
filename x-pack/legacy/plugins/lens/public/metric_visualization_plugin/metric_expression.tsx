@@ -6,12 +6,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public/expressions';
+import {
+  ExpressionFunction,
+  IInterpreterRenderFunction,
+  IInterpreterRenderHandlers,
+} from '../../../../../../src/plugins/expressions/public';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
+import { VisualizationContainer } from '../visualization_container';
 
 export interface MetricChartProps {
   data: LensMultiTable;
@@ -75,12 +79,15 @@ export const getMetricChartRenderer = (
   formatFactory: FormatFactory
 ): IInterpreterRenderFunction<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
-  displayName: 'Metric Chart',
-  help: 'Metric Chart Renderer',
+  displayName: 'Metric chart',
+  help: 'Metric chart renderer',
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: MetricChartProps, _handlers: unknown) => {
-    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode);
+  render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
+    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
+      handlers.done();
+    });
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
 
@@ -105,17 +112,7 @@ export function MetricChart({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        textAlign: 'center',
-      }}
-    >
+    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
@@ -126,6 +123,6 @@ export function MetricChart({
           </div>
         )}
       </AutoScale>
-    </div>
+    </VisualizationContainer>
   );
 }

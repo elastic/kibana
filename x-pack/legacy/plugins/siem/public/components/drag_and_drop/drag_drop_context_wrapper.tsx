@@ -5,11 +5,12 @@
  */
 
 import { defaultTo, noop } from 'lodash/fp';
-import * as React from 'react';
-import { DragDropContext, DropResult, ResponderProvided, DragStart } from 'react-beautiful-dnd';
+import React, { useCallback } from 'react';
+import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
 import { dragAndDropModel, dragAndDropSelectors } from '../../store';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
@@ -20,6 +21,7 @@ import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
   IS_DRAGGING_CLASS_NAME,
+  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
   draggableIsField,
@@ -57,43 +59,47 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export class DragDropContextWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ children, dataProviders }: Props) =>
-    children === this.props.children && dataProviders !== this.props.dataProviders // prevent re-renders when data providers are added or removed, but all other props are the same
-      ? false
-      : true;
+export const DragDropContextWrapperComponent = React.memo<Props>(
+  ({ browserFields, children, dataProviders, dispatch }) => {
+    const onDragEnd = useCallback(
+      (result: DropResult) => {
+        enableScrolling();
 
-  public render() {
-    const { children } = this.props;
+        if (dataProviders != null) {
+          onDragEndHandler({
+            browserFields,
+            result,
+            dataProviders,
+            dispatch,
+          });
+        }
 
+        if (!draggableIsField(result)) {
+          document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+        }
+
+        if (draggableIsField(result)) {
+          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+        }
+      },
+      [browserFields, dataProviders]
+    );
     return (
-      <DragDropContext onDragEnd={this.onDragEnd} onDragStart={onDragStart}>
+      // @ts-ignore
+      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
         {children}
       </DragDropContext>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.children === nextProps.children &&
+      prevProps.dataProviders === nextProps.dataProviders
+    ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
+);
 
-  private onDragEnd: (result: DropResult, provided: ResponderProvided) => void = (
-    result: DropResult
-  ) => {
-    const { browserFields, dataProviders, dispatch } = this.props;
-
-    enableScrolling();
-
-    if (dataProviders != null) {
-      onDragEndHandler({
-        browserFields,
-        result,
-        dataProviders,
-        dispatch,
-      });
-    }
-
-    if (!draggableIsField(result)) {
-      document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-    }
-  };
-}
+DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
@@ -108,7 +114,9 @@ const mapStateToProps = (state: State) => {
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
 
-const onDragStart = (initial: DragStart) => {
+DragDropContextWrapper.displayName = 'DragDropContextWrapper';
+
+const onBeforeCapture = (before: BeforeCapture) => {
   const x =
     window.pageXOffset !== undefined
       ? window.pageXOffset
@@ -121,8 +129,12 @@ const onDragStart = (initial: DragStart) => {
 
   window.onscroll = () => window.scrollTo(x, y);
 
-  if (!draggableIsField(initial)) {
+  if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
+  }
+
+  if (draggableIsField(before)) {
+    document.body.classList.add(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
   }
 };
 

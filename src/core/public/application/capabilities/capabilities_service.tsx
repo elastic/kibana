@@ -17,44 +17,18 @@
  * under the License.
  */
 
+import { Capabilities } from '../../../types/capabilities';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { LegacyApp, App } from '../types';
-import { InjectedMetadataStart } from '../../injected_metadata';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
-  apps: ReadonlyMap<string, App>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
-  injectedMetadata: InjectedMetadataStart;
-}
-
-/**
- * The read-only set of capabilities available for the current UI session.
- * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
- * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
- * @public
- */
-export interface Capabilities {
-  /** Navigation link capabilities. */
-  navLinks: Record<string, boolean>;
-
-  /** Management section capabilities. */
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-
-  /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
-  catalogue: Record<string, boolean>;
-
-  /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
+  appIds: string[];
+  http: HttpStart;
 }
 
 /** @internal */
 export interface CapabilitiesStart {
   capabilities: RecursiveReadonly<Capabilities>;
-  availableApps: ReadonlyMap<string, App>;
-  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
 }
 
 /**
@@ -62,30 +36,14 @@ export interface CapabilitiesStart {
  * @internal
  */
 export class CapabilitiesService {
-  public async start({
-    apps,
-    legacyApps,
-    injectedMetadata,
-  }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = new Map(
-      [...apps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
-
-    const availableLegacyApps = new Map(
-      [...legacyApps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
+  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
+    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+      body: JSON.stringify({ applications: appIds }),
+    });
 
     return {
-      availableApps,
-      availableLegacyApps,
-      capabilities,
+      capabilities: deepFreeze(capabilities),
     };
   }
 }

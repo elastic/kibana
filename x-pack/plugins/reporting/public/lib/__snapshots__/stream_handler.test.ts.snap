@@ -1,0 +1,214 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stream handler findChangedStatusJobs finds changed status jobs 1`] = `
+Object {
+  "completed": Array [
+    Object {
+      "csvContainsFormulas": false,
+      "id": "job-source-mock1",
+      "maxSizeReached": false,
+      "status": "completed",
+      "title": "specimen",
+      "type": "spectacular",
+    },
+  ],
+  "failed": Array [
+    Object {
+      "csvContainsFormulas": false,
+      "id": "job-source-mock2",
+      "maxSizeReached": false,
+      "status": "failed",
+      "title": "specimen",
+      "type": "spectacular",
+    },
+  ],
+}
+`;
+
+exports[`stream handler showNotifications show csv formulas warning 1`] = `
+Array [
+  Object {
+    "data-test-subj": "completeReportCsvFormulasWarning",
+    "text": MountPoint {
+      "reactNode": <React.Fragment>
+        <p>
+          <FormattedMessage
+            defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+            id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <ReportLink
+            getUrl={[Function]}
+          />
+        </p>
+        <DownloadButton
+          getUrl={[Function]}
+          job={
+            Object {
+              "csvContainsFormulas": true,
+              "id": "yas3",
+              "status": "completed",
+              "title": "Yas",
+              "type": "yas",
+            }
+          }
+        />
+      </React.Fragment>,
+    },
+    "title": MountPoint {
+      "reactNode": <FormattedMessage
+        defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+        id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
+        values={
+          Object {
+            "reportObjectTitle": "Yas",
+            "reportObjectType": "yas",
+          }
+        }
+      />,
+    },
+  },
+]
+`;
+
+exports[`stream handler showNotifications show failed job toast 1`] = `
+Array [
+  Object {
+    "data-test-subj": "completeReportFailure",
+    "iconType": undefined,
+    "text": MountPoint {
+      "reactNode": <React.Fragment>
+        <EuiCallOut
+          color="danger"
+          iconType="alert"
+          size="m"
+          title="The reporting job failed"
+        >
+          this is the completed report data
+        </EuiCallOut>
+        <EuiSpacer />
+        <p>
+          <FormattedMessage
+            defaultMessage="More information is available at {path}."
+            id="xpack.reporting.publicNotifier.error.checkManagement"
+            values={
+              Object {
+                "path": <a>
+                  <FormattedMessage
+                    defaultMessage="Management > Kibana > Reporting"
+                    id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
+                    values={Object {}}
+                  />
+                </a>,
+              }
+            }
+          />
+        </p>
+      </React.Fragment>,
+    },
+    "title": MountPoint {
+      "reactNode": <FormattedMessage
+        defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
+        id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
+        values={
+          Object {
+            "reportObjectTitle": "Yas 7",
+            "reportObjectType": "yas",
+          }
+        }
+      />,
+    },
+  },
+]
+`;
+
+exports[`stream handler showNotifications show max length warning 1`] = `
+Array [
+  Object {
+    "data-test-subj": "completeReportMaxSizeWarning",
+    "text": MountPoint {
+      "reactNode": <React.Fragment>
+        <p>
+          <FormattedMessage
+            defaultMessage="The report reached the max size and contains partial data."
+            id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <ReportLink
+            getUrl={[Function]}
+          />
+        </p>
+        <DownloadButton
+          getUrl={[Function]}
+          job={
+            Object {
+              "id": "yas2",
+              "maxSizeReached": true,
+              "status": "completed",
+              "title": "Yas",
+              "type": "yas",
+            }
+          }
+        />
+      </React.Fragment>,
+    },
+    "title": MountPoint {
+      "reactNode": <FormattedMessage
+        defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
+        id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
+        values={
+          Object {
+            "reportObjectTitle": "Yas",
+            "reportObjectType": "yas",
+          }
+        }
+      />,
+    },
+  },
+]
+`;
+
+exports[`stream handler showNotifications show success 1`] = `
+Array [
+  Object {
+    "color": "success",
+    "data-test-subj": "completeReportSuccess",
+    "text": MountPoint {
+      "reactNode": <React.Fragment>
+        <p>
+          <ReportLink
+            getUrl={[Function]}
+          />
+        </p>
+        <DownloadButton
+          getUrl={[Function]}
+          job={
+            Object {
+              "id": "yas1",
+              "status": "completed",
+              "title": "Yas",
+              "type": "yas",
+            }
+          }
+        />
+      </React.Fragment>,
+    },
+    "title": MountPoint {
+      "reactNode": <FormattedMessage
+        defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
+        id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
+        values={
+          Object {
+            "reportObjectTitle": "Yas",
+            "reportObjectType": "yas",
+          }
+        }
+      />,
+    },
+  },
+]
+`;

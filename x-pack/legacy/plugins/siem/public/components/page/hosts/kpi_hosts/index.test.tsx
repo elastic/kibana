@@ -7,8 +7,7 @@
 import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import { KpiHostsComponent } from '.';
+import { KpiHostsComponentBase } from '.';
 import * as statItems from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
 import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
@@ -21,7 +20,7 @@ describe('kpiHostsComponent', () => {
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostsData}
           from={from}
           id={ID}
@@ -30,12 +29,12 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render KpiHostsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostsData}
           from={from}
           id={ID}
@@ -44,12 +43,12 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render KpiHostDetailsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostDetailsData}
           from={from}
           id={ID}
@@ -58,42 +57,50 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
-  describe.each([
-    [mockKpiHostsData, kpiHostsMapping],
-    [mockKpiHostDetailsData, kpiHostDetailsMapping],
-  ])('it should handle KpiHostsProps and KpiHostDetailsProps', (data, mapping) => {
-    let mockUseKpiMatrixStatus: jest.SpyInstance;
-    beforeAll(() => {
-      mockUseKpiMatrixStatus = jest.spyOn(statItems, 'useKpiMatrixStatus');
-    });
+  const table = [
+    [mockKpiHostsData, kpiHostsMapping] as [typeof mockKpiHostsData, typeof kpiHostsMapping],
+    [mockKpiHostDetailsData, kpiHostDetailsMapping] as [
+      typeof mockKpiHostDetailsData,
+      typeof kpiHostDetailsMapping
+    ],
+  ];
 
-    beforeEach(() => {
-      shallow(
-        <KpiHostsComponent
-          data={data}
-          from={from}
-          id={ID}
-          loading={false}
-          to={to}
-          narrowDateRange={narrowDateRange}
-        />
-      );
-    });
+  describe.each(table)(
+    'it should handle KpiHostsProps and KpiHostDetailsProps',
+    (data, mapping) => {
+      let mockUseKpiMatrixStatus: jest.SpyInstance;
+      beforeAll(() => {
+        mockUseKpiMatrixStatus = jest.spyOn(statItems, 'useKpiMatrixStatus');
+      });
 
-    afterEach(() => {
-      mockUseKpiMatrixStatus.mockClear();
-    });
+      beforeEach(() => {
+        shallow(
+          <KpiHostsComponentBase
+            data={data}
+            from={from}
+            id={ID}
+            loading={false}
+            to={to}
+            narrowDateRange={narrowDateRange}
+          />
+        );
+      });
 
-    afterAll(() => {
-      mockUseKpiMatrixStatus.mockRestore();
-    });
+      afterEach(() => {
+        mockUseKpiMatrixStatus.mockClear();
+      });
 
-    test(`it should apply correct mapping by given data type`, () => {
-      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
-    });
-  });
+      afterAll(() => {
+        mockUseKpiMatrixStatus.mockRestore();
+      });
+
+      test(`it should apply correct mapping by given data type`, () => {
+        expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
+      });
+    }
+  );
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Readable } from 'stream';
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
 import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
 export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
@@ -30,5 +30,9 @@ export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
         }
       })
     )
-    .pipe(createFilterStream<SavedObject>(obj => !!obj));
+    .pipe(
+      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
+        obj => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
+      )
+    );
 }

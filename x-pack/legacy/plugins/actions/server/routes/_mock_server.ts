@@ -5,10 +5,10 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../actions_client.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
@@ -21,8 +21,9 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
 
   const actionsClient = actionsClientMock.create();
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const savedObjectsClient = SavedObjectsClientMock.create();
-  const encryptedSavedObjects = encryptedSavedObjectsMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
+  const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+  const encryptedSavedObjectsStart = encryptedSavedObjectsMock.createStart();
 
   server.config = () => {
     return {
@@ -38,20 +39,14 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.register({
     name: 'actions',
     register(pluginServer: Hapi.Server) {
-      pluginServer.expose('registerType', actionTypeRegistry.register);
-      pluginServer.expose('listTypes', actionTypeRegistry.list);
-    },
-  });
-
-  server.register({
-    name: 'encrypted_saved_objects',
-    register(pluginServer: Hapi.Server) {
-      pluginServer.expose('isEncryptionError', encryptedSavedObjects.isEncryptionError);
-      pluginServer.expose('registerType', encryptedSavedObjects.registerType);
-      pluginServer.expose(
-        'getDecryptedAsInternalUser',
-        encryptedSavedObjects.getDecryptedAsInternalUser
-      );
+      pluginServer.expose({
+        setup: {
+          registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+        },
+        start: {
+          listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
+        },
+      });
     },
   });
 
@@ -59,5 +54,12 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.decorate('request', 'getActionsClient', () => actionsClient);
   server.decorate('request', 'getBasePath', () => '/s/my-space');
 
-  return { server, savedObjectsClient, actionsClient, actionTypeRegistry };
+  return {
+    server,
+    savedObjectsClient,
+    actionsClient,
+    actionTypeRegistry,
+    encryptedSavedObjectsSetup,
+    encryptedSavedObjectsStart,
+  };
 }

@@ -14,6 +14,7 @@ import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { Logger } from '../../../../../../src/core/server';
 
 // config definition
 enum WebhookMethods {
@@ -46,7 +47,13 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export function getActionType(configurationUtilities: ActionsConfigurationUtilities): ActionType {
+export function getActionType({
+  logger,
+  configurationUtilities,
+}: {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}): ActionType {
   return {
     id: '.webhook',
     name: 'webhook',
@@ -57,7 +64,7 @@ export function getActionType(configurationUtilities: ActionsConfigurationUtilit
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)(configurationUtilities),
+    executor: curry(executor)({ logger }),
   };
 }
 
@@ -79,13 +86,10 @@ function valdiateActionTypeConfig(
 
 // action executor
 export async function executor(
-  configurationUtilities: ActionsConfigurationUtilities,
+  { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const log = (level: string, msg: string) =>
-    execOptions.services.log([level, 'actions', 'webhook'], msg);
-
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
@@ -107,98 +111,86 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    log('debug', `response from webhook action "${id}": [HTTP ${status}] ${statusText}`);
+    logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-    return successResult(data);
+    return successResult(actionId, data);
   } else {
     const { error } = result;
 
     if (error.response) {
       const { status, statusText, headers: responseHeaders } = error.response;
       const message = `[${status}] ${statusText}`;
-      log(`warn`, `error on ${id} webhook event: ${message}`);
+      logger.warn(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
       if (status >= 500) {
-        return retryResult(id, message);
+        return retryResult(actionId, message);
       }
 
       // special handling for rate limiting
       if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
-          map(retry => retryResultSeconds(id, message, retry)),
-          getOrElse(() => retryResult(id, message))
+          map(retry => retryResultSeconds(actionId, message, retry)),
+          getOrElse(() => retryResult(actionId, message))
         );
       }
-      return errorResultInvalid(id, message);
+      return errorResultInvalid(actionId, message);
     }
 
-    const message = i18n.translate('xpack.actions.builtin.webhook.unreachableRemoteWebhook', {
-      defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
-    });
-    log(`warn`, `error on ${id} webhook action: ${message}`);
-    return errorResultUnreachable(id, message);
+    logger.warn(`error on ${actionId} webhook action: unexpected error`);
+    return errorResultUnexpectedError(actionId);
   }
 }
 
 // Action Executor Result w/ internationalisation
-function successResult(data: any): ActionTypeExecutorResult {
-  return { status: 'ok', data };
+function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data, actionId };
 }
 
-function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {
+function errorResultInvalid(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
-    defaultMessage:
-      'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
-    values: {
-      id,
-      message,
-    },
+    defaultMessage: 'error calling webhook, invalid response',
   });
   return {
     status: 'error',
     message: errMessage,
+    actionId,
+    serviceMessage,
   };
 }
 
-function errorResultUnreachable(id: string, message: string): ActionTypeExecutorResult {
+function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
-    defaultMessage:
-      'Unreachable Webhook: an error occurred in webhook action "{id}" calling a remote webhook: {message}',
-    values: {
-      id,
-      message,
-    },
+    defaultMessage: 'error calling webhook, unexpected error',
   });
   return {
     status: 'error',
     message: errMessage,
+    actionId,
   };
 }
 
-function retryResult(id: string, message: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage:
-        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry later',
-      values: {
-        id,
-      },
+      defaultMessage: 'error calling webhook, retry later',
     }
   );
   return {
     status: 'error',
     message: errMessage,
     retry: true,
+    actionId,
+    serviceMessage,
   };
 }
 
 function retryResultSeconds(
-  id: string,
-  message: string,
+  actionId: string,
+  serviceMessage: string,
 
   retryAfter: number
 ): ActionTypeExecutorResult {
@@ -208,12 +200,9 @@ function retryResultSeconds(
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
     {
-      defaultMessage:
-        'Invalid Response: an error occurred in webhook action "{id}" calling a remote webhook, retry at {retryString}: {message}',
+      defaultMessage: 'error calling webhook, retry at {retryString}',
       values: {
-        id,
         retryString,
-        message,
       },
     }
   );
@@ -221,5 +210,7 @@ function retryResultSeconds(
     status: 'error',
     message: errMessage,
     retry,
+    actionId,
+    serviceMessage,
   };
 }

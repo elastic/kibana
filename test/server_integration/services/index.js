@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { KibanaSupertestProvider, KibanaSupertestWithoutAuthProvider, ElasticsearchSupertestProvider } from './supertest';
+export {
+  KibanaSupertestProvider,
+  KibanaSupertestWithoutAuthProvider,
+  ElasticsearchSupertestProvider,
+} from './supertest';

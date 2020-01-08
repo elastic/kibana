@@ -16,9 +16,9 @@ describe('XPackInfo routes', () => {
       route: sinon.stub(),
       plugins: {
         xpack_main: {
-          info: sinon.stub({ isAvailable() {}, toJSON() {} })
-        }
-      }
+          info: sinon.stub({ isAvailable() {}, toJSON() {} }),
+        },
+      },
     };
 
     xpackInfoRoute(serverStub);
@@ -28,7 +28,7 @@ describe('XPackInfo routes', () => {
     sinon.assert.calledWithExactly(serverStub.route, {
       method: 'GET',
       path: '/api/xpack/v1/info',
-      handler: sinon.match.func
+      handler: sinon.match.func,
     });
   });
 
@@ -49,7 +49,7 @@ describe('XPackInfo routes', () => {
       license: {
         type: 'gold',
         isActive: true,
-        expiryDateInMillis: 1509368280381
+        expiryDateInMillis: 1509368280381,
       },
       features: {
         security: {
@@ -58,9 +58,9 @@ describe('XPackInfo routes', () => {
           showLinks: false,
           allowRoleDocumentLevelSecurity: false,
           allowRoleFieldLevelSecurity: false,
-          linksMessage: 'Message'
-        }
-      }
+          linksMessage: 'Message',
+        },
+      },
     });
 
     const onRouteHandler = serverStub.route.firstCall.args[0].handler;
@@ -70,7 +70,7 @@ describe('XPackInfo routes', () => {
       license: {
         type: 'gold',
         is_active: true,
-        expiry_date_in_millis: 1509368280381
+        expiry_date_in_millis: 1509368280381,
       },
       features: {
         security: {
@@ -79,9 +79,9 @@ describe('XPackInfo routes', () => {
           show_links: false,
           allow_role_document_level_security: false,
           allow_role_field_level_security: false,
-          links_message: 'Message'
-        }
-      }
+          links_message: 'Message',
+        },
+      },
     });
   });
 });

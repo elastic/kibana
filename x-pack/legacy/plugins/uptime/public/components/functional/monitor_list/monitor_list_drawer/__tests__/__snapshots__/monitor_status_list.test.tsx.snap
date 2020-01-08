@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusList component renders checks 1`] = `
+<Fragment>
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "Unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
+  />
+</Fragment>
+`;
+
+exports[`MonitorStatusList component renders null in place of child status with missing ip 1`] = `
+<Fragment>
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "Unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
+  />
+</Fragment>
+`;

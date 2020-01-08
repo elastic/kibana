@@ -19,8 +19,8 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import Promise from 'bluebird';
-import { keyMap } from 'ui/utils/key_map';
+import Bluebird from 'bluebird';
+import { keyMap } from 'ui/directives/key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
 
 /**
@@ -52,12 +52,12 @@ const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
  * @param  {[type]} sequence - an array of events
  * @async
  */
-export default function ($el, sequence) {
+export default function($el, sequence) {
   const modifierState = {
     ctrlKey: false,
     shiftKey: false,
     altKey: false,
-    metaKey: false
+    metaKey: false,
   };
 
   return doList(_.clone(sequence));
@@ -70,7 +70,7 @@ export default function ($el, sequence) {
   }
 
   function doList(list) {
-    return Promise.try(function () {
+    return Bluebird.try(function() {
       if (!list || !list.length) return;
 
       let event = list[0];
@@ -80,32 +80,31 @@ export default function ($el, sequence) {
 
       switch (event.type) {
         case 'press':
-          return Promise.resolve()
+          return Bluebird.resolve()
             .then(_.partial(fire, 'keydown', event.key))
             .then(_.partial(fire, 'keypress', event.key))
             .then(_.partial(doList, event.events))
             .then(_.partial(fire, 'keyup', event.key));
 
         case 'wait':
-          return Promise.delay(event.ms);
+          return Bluebird.delay(event.ms);
 
         case 'repeat':
           return (function again(remaining) {
-            if (!remaining) return Promise.resolve();
+            if (!remaining) return Bluebird.resolve();
             remaining = remaining - 1;
-            return Promise.resolve()
+            return Bluebird.resolve()
               .then(_.partial(fire, 'keydown', event.key, true))
               .then(_.partial(fire, 'keypress', event.key, true))
               .then(_.partial(again, remaining));
-          }(event.count));
+          })(event.count);
 
         default:
           throw new TypeError('invalid event type "' + event.type + '"');
       }
-    })
-      .then(function () {
-        if (_.size(list) > 1) return doList(list.slice(1));
-      });
+    }).then(function() {
+      if (_.size(list) > 1) return doList(list.slice(1));
+    });
   }
 
   function fire(type, key) {

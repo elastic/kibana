@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
+import { apmImport, apmInit } from '../apm';
+
+export const appEntryTemplate = bundle => `
 /**
  * Kibana entry file
  *
@@ -34,11 +36,13 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
-
+${apmImport()}
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
+
+${apmInit('injectedMetadata.vars.apmConfig')}
 
 i18n.load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)

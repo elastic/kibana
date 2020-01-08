@@ -36,7 +36,7 @@ When security is enabled, users who create alerts will need the `manage_api_key`
 
 ### Methods
 
-**server.plugins.alerting.registerType(options)**
+**server.plugins.alerting.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -44,6 +44,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
+|actionGroups|An explicit list of groups the alert type may schedule actions for. Alert `actions` validation will use this array to ensure groups are valid.|string[]|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
@@ -70,7 +71,7 @@ This example receives server and threshold as parameters. It will read the CPU u
 ```
 import { schema } from '@kbn/config-schema';
 ...
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -80,6 +81,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -128,7 +130,7 @@ server.plugins.alerting.registerType({
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -137,6 +139,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -194,9 +197,11 @@ Payload:
 |Property|Description|Type|
 |---|---|---|
 |enabled|Indicate if you want the alert to start executing on an interval basis after it has been created.|boolean| 
+|name|A name to reference and search in the future.|string|
+|tags|A list of keywords to reference and search in the future.|string[]|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
-|alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
+|params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
@@ -237,8 +242,10 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
-|alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
+|name|A name to reference and search in the future.|string|
+|tags|A list of keywords to reference and search in the future.|string[]|
+|params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `POST /api/alert/{id}/_enable`: Enable an alert
@@ -257,6 +264,53 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
+#### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to mute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to mute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
+
+#### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to unmute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to unmute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
+
+#### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+
+##### Schedule Formats
+A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+There are plans to support multiple other schedule formats in the near fuiture.
 
 ## Alert instance factory
 

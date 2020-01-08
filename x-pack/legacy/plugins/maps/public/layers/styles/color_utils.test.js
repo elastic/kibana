@@ -31,7 +31,7 @@ describe('getRGBColorRangeStrings', () => {
       'rgb(106,173,213)',
       'rgb(65,145,197)',
       'rgb(32,112,180)',
-      'rgb(7,47,107)'
+      'rgb(7,47,107)',
     ]);
   });
 });
@@ -46,7 +46,7 @@ describe('getHexColorRangeStrings', () => {
       '#6aadd5',
       '#4191c5',
       '#2070b4',
-      '#072f6b'
+      '#072f6b',
     ]);
   });
 });
@@ -60,14 +60,22 @@ describe('getColorRampCenterColor', () => {
 describe('getColorRampStops', () => {
   it('Should create color stops for color ramp', () => {
     expect(getColorRampStops('Blues')).toEqual([
-      0, '#f7faff',
-      0.125, '#ddeaf7',
-      0.25, '#c5daee',
-      0.375, '#9dc9e0',
-      0.5, '#6aadd5',
-      0.625, '#4191c5',
-      0.75, '#2070b4',
-      0.875, '#072f6b'
+      0,
+      '#f7faff',
+      0.125,
+      '#ddeaf7',
+      0.25,
+      '#c5daee',
+      0.375,
+      '#9dc9e0',
+      0.5,
+      '#6aadd5',
+      0.625,
+      '#4191c5',
+      0.75,
+      '#2070b4',
+      0.875,
+      '#072f6b',
     ]);
   });
 });
@@ -82,9 +90,10 @@ describe('getLinearGradient', () => {
       'rgb(106,173,213)',
       'rgb(65,145,197)',
       'rgb(32,112,180)',
-      'rgb(7,47,107)'
+      'rgb(7,47,107)',
     ];
-    // eslint-disable-next-line max-len
-    expect(getLinearGradient(colorRamp)).toBe('linear-gradient(to right, rgb(247,250,255) 0%, rgb(221,234,247)       14%, rgb(197,218,238)       28%, rgb(157,201,224)       42%, rgb(106,173,213)       57%, rgb(65,145,197)       71%, rgb(32,112,180)       85%, rgb(7,47,107) 100%)');
+    expect(getLinearGradient(colorRamp)).toBe(
+      'linear-gradient(to right, rgb(247,250,255) 0%, rgb(221,234,247)       14%, rgb(197,218,238)       28%, rgb(157,201,224)       42%, rgb(106,173,213)       57%, rgb(65,145,197)       71%, rgb(32,112,180)       85%, rgb(7,47,107) 100%)'
+    );
   });
 });

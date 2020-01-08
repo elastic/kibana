@@ -4,25 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
+
+jest.mock('../../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
@@ -47,7 +54,7 @@ describe('Users Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Connect(UsersTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -75,7 +82,7 @@ describe('Users Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -87,7 +94,7 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
@@ -96,7 +103,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

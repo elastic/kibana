@@ -19,7 +19,7 @@ test(`gets logo from uiSettings`, async () => {
     baz: 'quix',
   };
 
-  const { conditionalHeaders } = await getConditionalHeaders({
+  const conditionalHeaders = await getConditionalHeaders({
     job: {} as JobDocPayloadPDF,
     filteredHeaders: permittedHeaders,
     server: mockServer,

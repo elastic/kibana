@@ -6,15 +6,15 @@
 
 import {
   Direction,
-  FlowTargetNew,
-  NetworkTopNFlowSortField,
-  NetworkTopNFlowFields,
+  FlowTargetSourceDest,
+  NetworkTopTablesSortField,
+  NetworkTopTablesFields,
 } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
-const getCountAgg = (flowTarget: FlowTargetNew) => ({
+const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_n_flow_count: {
     cardinality: {
       field: `${flowTarget}.ip`,
@@ -32,6 +32,7 @@ export const buildTopNFlowQuery = ({
     fields: { timestamp },
   },
   timerange: { from, to },
+  ip,
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -48,9 +49,21 @@ export const buildTopNFlowQuery = ({
         ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
-        bool: {
-          filter,
-        },
+        bool: ip
+          ? {
+              filter,
+              should: [
+                {
+                  term: {
+                    [`${getOppositeField(flowTarget)}.ip`]: ip,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            }
+          : {
+              filter,
+            },
       },
     },
     size: 0,
@@ -60,8 +73,8 @@ export const buildTopNFlowQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTargetNew,
+  networkTopNFlowSortField: NetworkTopTablesSortField,
+  flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
   [flowTarget]: {
@@ -142,12 +155,12 @@ const getFlowTargetAggs = (
   },
 });
 
-export const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew => {
+export const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest => {
   switch (flowTarget) {
-    case FlowTargetNew.source:
-      return FlowTargetNew.destination;
-    case FlowTargetNew.destination:
-      return FlowTargetNew.source;
+    case FlowTargetSourceDest.source:
+      return FlowTargetSourceDest.destination;
+    case FlowTargetSourceDest.destination:
+      return FlowTargetSourceDest.source;
   }
   assertUnreachable(flowTarget);
 };
@@ -159,17 +172,17 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
-const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
+const getQueryOrder = (networkTopNFlowSortField: NetworkTopTablesSortField): QueryOrder => {
   switch (networkTopNFlowSortField.field) {
-    case NetworkTopNFlowFields.bytes_in:
+    case NetworkTopTablesFields.bytes_in:
       return { bytes_in: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.bytes_out:
+    case NetworkTopTablesFields.bytes_out:
       return { bytes_out: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.flows:
+    case NetworkTopTablesFields.flows:
       return { flows: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.destination_ips:
+    case NetworkTopTablesFields.destination_ips:
       return { destination_ips: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.source_ips:
+    case NetworkTopTablesFields.source_ips:
       return { source_ips: networkTopNFlowSortField.direction };
   }
   assertUnreachable(networkTopNFlowSortField.field);

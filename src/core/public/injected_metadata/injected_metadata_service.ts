@@ -19,9 +19,13 @@
 
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { UiSettingsState } from '../ui_settings';
+import {
+  EnvironmentMode,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
 import { deepFreeze } from '../../utils/';
-import { Capabilities } from '..';
 
 /** @public */
 export interface LegacyNavLink {
@@ -31,6 +35,14 @@ export interface LegacyNavLink {
   url: string;
   icon?: string;
   euiIconType?: string;
+}
+
+export interface InjectedPluginMetadata {
+  id: PluginName;
+  plugin: DiscoveredPlugin;
+  config?: {
+    [key: string]: unknown;
+  };
 }
 
 /** @internal */
@@ -46,11 +58,11 @@ export interface InjectedMetadataParams {
     vars: {
       [key: string]: unknown;
     };
-    uiPlugins: Array<{
-      id: PluginName;
-      plugin: DiscoveredPlugin;
-    }>;
-    capabilities: Capabilities;
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
+    uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
@@ -64,8 +76,8 @@ export interface InjectedMetadataParams {
       serverName: string;
       devMode: boolean;
       uiSettings: {
-        defaults: UiSettingsState;
-        user?: UiSettingsState;
+        defaults: Record<string, UiSettingsParams>;
+        user?: Record<string, UserProvidedValues>;
       };
     };
   };
@@ -98,10 +110,6 @@ export class InjectedMetadataService {
 
       getKibanaVersion: () => {
         return this.state.version;
-      },
-
-      getCapabilities: () => {
-        return this.state.capabilities;
       },
 
       getCspConfig: () => {
@@ -149,17 +157,13 @@ export interface InjectedMetadataSetup {
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
-  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };
   /**
    * An array of frontend plugins in topological order.
    */
-  getPlugins: () => Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-  }>;
+  getPlugins: () => InjectedPluginMetadata[];
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
@@ -174,8 +178,8 @@ export interface InjectedMetadataSetup {
     serverName: string;
     devMode: boolean;
     uiSettings: {
-      defaults: UiSettingsState;
-      user?: UiSettingsState | undefined;
+      defaults: Record<string, UiSettingsParams>;
+      user?: Record<string, UserProvidedValues> | undefined;
     };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;

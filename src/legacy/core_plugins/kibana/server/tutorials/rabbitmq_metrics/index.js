@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function rabbitmqMetricsSpecProvider(server, context) {
+export function rabbitmqMetricsSpecProvider(context) {
   const moduleName = 'rabbitmq';
   return {
     id: 'rabbitmqMetrics',
@@ -33,7 +37,8 @@ export function rabbitmqMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.longDescription', {
-      defaultMessage: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
+      defaultMessage:
+        'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
@@ -45,20 +50,23 @@ export function rabbitmqMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'AV4YobKIge1VCbKU_qVo-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'RabbitMQ metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'RabbitMQ metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-rabbitmq.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-rabbitmq.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/rabbitmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

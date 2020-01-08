@@ -15,11 +15,11 @@ export function disableElasticsearchInternalCollectionRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
-        })
-      }
+          clusterUuid: Joi.string().required(),
+        }),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
       // the monitoring data. `try/catch` makes it a little more explicit.
@@ -30,6 +30,6 @@ export function disableElasticsearchInternalCollectionRoute(server) {
         throw handleError(err, req);
       }
       return null;
-    }
+    },
   });
 }

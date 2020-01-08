@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -18,16 +20,17 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
-import { OnUpdateColumns } from '../timeline/events';
-import { WithHoverActions } from '../with_hover_actions';
-
-import * as i18n from './translations';
 import { CountBadge } from '../page';
-import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
+import { WithHoverActions } from '../with_hover_actions';
+import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  .euiText {
+    font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  }
 `;
 
 CategoryName.displayName = 'CategoryName';
@@ -117,7 +120,7 @@ export const getCategoryColumns = ({
     name: '',
     sortable: true,
     truncateText: false,
-    render: (categoryId: string) => (
+    render: (categoryId: string, _: { categoryId: string }) => (
       <LinkContainer>
         <EuiLink data-test-subj="category-link" onClick={() => onCategorySelected(categoryId)}>
           <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">

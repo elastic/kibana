@@ -4,7 +4,7 @@
 <titleabbrev>Get specific role</titleabbrev>
 ++++
 
-Retrieves a specific role.
+Retrieve a specific role.
 
 experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 

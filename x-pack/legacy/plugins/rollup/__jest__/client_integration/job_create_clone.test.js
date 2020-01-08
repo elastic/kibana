@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -133,5 +132,63 @@ describe('Cloning a rollup job through create job wizard', () => {
       // All inputs from job config have been accounted for on the UI
       expect(checkedCountActual).toBe(checkedCountExpected);
     });
+  });
+
+  it('should correctly reset defaults after index pattern changes', async () => {
+    // 1. Logistics
+
+    // Sanity check for rollup job name, i.e., we are in clone mode.
+    expect(find('rollupJobName').props().value).toBe(jobConfig.id + '-copy');
+
+    // Changing the index pattern value after cloning a rollup job should update a number of values.
+    // On each view of the set up wizard we check for the expected state after this change.
+    form.setInputValue('rollupIndexPattern', 'test');
+    // Fires off a network request.
+    await nextTick();
+
+    const {
+      groups: { date_histogram: dateHistogram },
+    } = jobConfig;
+
+    await actions.clickNextStep();
+
+    // 2. Date Histogram
+
+    expect(exists('rollupJobCreateDateHistogramTitle')).toBe(true);
+    expect(find('rollupJobCreateDateFieldSelect').props().value).toBe(dateHistogram.field);
+
+    await actions.clickNextStep();
+
+    // 3. Terms
+
+    expect(exists('rollupJobCreateTermsTitle')).toBe(true);
+    const { tableCellsValues: tableCellValuesTerms } = table.getMetaData('rollupJobTermsFieldList');
+    expect(tableCellValuesTerms[0][0]).toBe('No terms fields added');
+
+    await actions.clickNextStep();
+
+    // 4. Histogram
+
+    expect(exists('rollupJobCreateHistogramTitle')).toBe(true);
+    const { tableCellsValues: tableCellValuesHisto } = table.getMetaData(
+      'rollupJobHistogramFieldList'
+    );
+
+    expect(tableCellValuesHisto[0][0]).toBe('No histogram fields added');
+
+    await actions.clickNextStep();
+
+    // 5. Metrics
+
+    expect(exists('rollupJobCreateMetricsTitle')).toBe(true);
+    const { rows: metricsRows } = table.getMetaData('rollupJobMetricsFieldList');
+    // Empty placeholder value
+    expect(metricsRows.length).toBe(1);
+
+    // 6. Review
+
+    await actions.clickNextStep();
+
+    expect(exists('rollupJobCreateReviewTitle')).toBe(true);
   });
 });

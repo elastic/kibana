@@ -24,10 +24,6 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => 
   start: {},
   setup: {},
 }));
-jest.mock('../../../../../../src/legacy/core_plugins/expressions/public/legacy', () => ({
-  start: {},
-  setup: {},
-}));
 jest.mock('./embeddable/embeddable_factory', () => ({
   EmbeddableFactory: class Mock {},
 }));
@@ -59,6 +55,7 @@ describe('editor_frame plugin', () => {
         onChange: jest.fn(),
         dateRange: { fromDate: '', toDate: '' },
         query: { query: '', language: 'lucene' },
+        filters: [],
       });
       instance.unmount();
     }).not.toThrowError();
@@ -73,6 +70,7 @@ describe('editor_frame plugin', () => {
       onChange: jest.fn(),
       dateRange: { fromDate: '', toDate: '' },
       query: { query: '', language: 'lucene' },
+      filters: [],
     });
     instance.unmount();
 

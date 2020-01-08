@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { listActionTypesRoute } from './list_action_types';
 
 const { server, actionTypeRegistry } = createMockServer();
-listActionTypesRoute(server);
+server.route(listActionTypesRoute);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -23,6 +23,7 @@ it('calls the list function', async () => {
     {
       id: '1',
       name: 'One',
+      enabled: true,
     },
   ];
 

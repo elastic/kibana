@@ -6,23 +6,25 @@
 
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
-import { callApmApi } from '../services/rest/callApmApi';
 
 const INITIAL_DATA = { transactionTypes: [] };
 
 export function useServiceTransactionTypes(urlParams: IUrlParams) {
   const { serviceName, start, end } = urlParams;
-  const { data = INITIAL_DATA } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/transaction_types',
-        params: {
-          path: { serviceName },
-          query: { start, end }
-        }
-      });
-    }
-  }, [serviceName, start, end]);
+  const { data = INITIAL_DATA } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/transaction_types',
+          params: {
+            path: { serviceName },
+            query: { start, end }
+          }
+        });
+      }
+    },
+    [serviceName, start, end]
+  );
 
   return data.transactionTypes;
 }

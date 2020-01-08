@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import {
@@ -36,6 +37,14 @@ import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
 
 const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
 const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+
+jest.mock('../charts/areachart', () => {
+  return { AreaChart: () => <div className="areachart" /> };
+});
+
+jest.mock('../charts/barchart', () => {
+  return { BarChart: () => <div className="barchart" /> };
+});
 
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -83,7 +92,7 @@ describe('Stat Items Component', () => {
     ],
   ])('disable charts', wrapper => {
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should render titles', () => {
@@ -172,7 +181,7 @@ describe('Stat Items Component', () => {
       );
     });
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {

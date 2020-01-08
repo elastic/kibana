@@ -39,6 +39,18 @@ describe('StubBrowserStorage', () => {
     });
   });
 
+  describe('#clear()', () => {
+    it('clears items', () => {
+      const store = new StubBrowserStorage();
+      store.setItem('1', '1');
+      store.setItem('2', '2');
+      store.clear();
+      expect(store.getItem('1')).toBe(null);
+      expect(store.getItem('2')).toBe(null);
+      expect(store.length).toBe(0);
+    });
+  });
+
   describe('#length', () => {
     it('reports the number of items stored', () => {
       const store = new StubBrowserStorage();

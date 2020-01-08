@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export class HttpInterceptHaltError extends Error {
   constructor() {
     super('HTTP Intercept Halt');

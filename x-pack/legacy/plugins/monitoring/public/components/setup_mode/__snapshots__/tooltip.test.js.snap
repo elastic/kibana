@@ -1,0 +1,526 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="At least one server isn’t monitored using Metricbeat. Click to view status."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="danger"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring"
+    >
+      Self monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allInternalCollection should render for beats 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="At least one instance isn’t monitored using Metricbeat. Click to view status."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="danger"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring"
+    >
+      Self monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allInternalCollection should render for elasticsearch 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="At least one node isn’t monitored using Metricbeat. Click to view status."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="danger"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring"
+    >
+      Self monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allInternalCollection should render for kibana 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="At least one instance isn’t monitored using Metricbeat. Click to view status."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="danger"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring"
+    >
+      Self monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allInternalCollection should render for logstash 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="At least one node isn’t monitored using Metricbeat. Click to view status."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="danger"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring"
+    >
+      Self monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for apm 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all servers."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="secondary"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Metricbeat monitoring"
+    >
+      Metricbeat monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for beats 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all instances."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="secondary"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Metricbeat monitoring"
+    >
+      Metricbeat monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for elasticsearch 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all nodes."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="secondary"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Metricbeat monitoring"
+    >
+      Metricbeat monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for kibana 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all instances."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="secondary"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Metricbeat monitoring"
+    >
+      Metricbeat monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for logstash 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all nodes."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="secondary"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Metricbeat monitoring"
+    >
+      Metricbeat monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all servers. Click to view servers and disable self monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring is on"
+    >
+      Self monitoring is on
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring is on"
+    >
+      Self monitoring is on
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip internalCollectionOn should render for elasticsearch 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring is on"
+    >
+      Self monitoring is on
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip internalCollectionOn should render for kibana 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring is on"
+    >
+      Self monitoring is on
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip internalCollectionOn should render for logstash 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="Self monitoring is on"
+    >
+      Self monitoring is on
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip no detectable instances should render for apm 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We did not detect any usage. Click to view servers."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="hollow"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No usage"
+    >
+      No usage
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip no detectable instances should render for beats 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We did not detect any usage. Click to view instances."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="hollow"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No usage"
+    >
+      No usage
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip no detectable instances should render for elasticsearch 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We did not detect any usage. Click to view nodes."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="hollow"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No usage"
+    >
+      No usage
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip no detectable instances should render for kibana 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We did not detect any usage. Click to view instances."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="hollow"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No usage"
+    >
+      No usage
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip no detectable instances should render for logstash 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We did not detect any usage. Click to view nodes."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="hollow"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No usage"
+    >
+      No usage
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip only detectable instances should render for apm 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We detected usage of this product. Click to start monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No monitoring"
+    >
+      No monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip only detectable instances should render for beats 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We detected usage of this product. Click to start monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No monitoring"
+    >
+      No monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip only detectable instances should render for elasticsearch 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We detected usage of this product. Click to start monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No monitoring"
+    >
+      No monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip only detectable instances should render for kibana 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We detected usage of this product. Click to start monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No monitoring"
+    >
+      No monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;
+
+exports[`setupMode SetupModeTooltip only detectable instances should render for logstash 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiToolTip
+    content="We detected usage of this product. Click to start monitoring."
+    delay="regular"
+    position="top"
+  >
+    <EuiBadge
+      color="warning"
+      iconType="flag"
+      onClick={[Function]}
+      onClickAriaLabel="No monitoring"
+    >
+      No monitoring
+    </EuiBadge>
+  </EuiToolTip>
+</EuiFlexItem>
+`;

@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { IndexMigrator } from './index_migrator';
+import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: any;
@@ -30,7 +31,7 @@ describe('IndexMigrator', () => {
       batchSize: 10,
       callCluster: jest.fn(),
       index: '.kibana',
-      log: jest.fn(),
+      log: loggingServiceMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
       scrollDuration: '1m',

@@ -212,6 +212,7 @@ Object {
     "aggs": Object {
       "transactions": Object {
         "terms": Object {
+          "execution_hint": "map",
           "field": "transaction.id",
         },
       },
@@ -236,6 +237,28 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "error.log.level",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "error.log.level": Array [
+                "critical",
+                "error",
+                "fatal",
+              ],
             },
           },
         ],

@@ -1,0 +1,61 @@
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__shardDetailsWrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.prfDevTool__main {
+  height: 100%;
+  order: 2;
+  margin-left: $euiSize;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+
+  // Make only the tab content scroll
+  .search-profiler-tabs {
+    flex-shrink: 0;
+  }
+
+  &__profiletree {
+    height: 100%;
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  &__emptyTreePlaceholder {
+    h1 {
+      font-size: $euiSizeL;
+      color: $euiColorMediumShade;
+    }
+    p {
+      font-size: $euiSize;
+      color: $euiColorMediumShade;
+    }
+    h1,
+    p {
+      cursor: default;
+      user-select: none;
+    }
+    // Slight offset from the top.
+    margin: 5% 0 auto;
+    text-align: center;
+  }
+}
+
+@include euiPanel('.prfDevTool__main');
+
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__container {
+    flex-direction: column;
+  }
+
+  .prfDevTool__main {
+    flex: 0 0 auto;
+  }
+
+  .prfDevTool__main {
+    margin: $euiSize 0;
+  }
+}

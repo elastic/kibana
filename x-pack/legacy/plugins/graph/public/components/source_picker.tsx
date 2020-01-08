@@ -8,12 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { CoreStart } from 'src/core/public';
-import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/public';
-import { IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
+import { SavedObjectFinderUi } from '../../../../../../src/plugins/kibana_react/public';
 import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
-  currentIndexPattern?: IndexPattern;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
@@ -24,11 +22,10 @@ const fixedPageSize = 8;
 export function SourcePicker({
   savedObjects,
   uiSettings,
-  currentIndexPattern,
   onIndexPatternSelected,
 }: SourcePickerProps) {
   return (
-    <SavedObjectFinder
+    <SavedObjectFinderUi
       savedObjects={savedObjects}
       uiSettings={uiSettings}
       onChoose={(_id, _type, _name, indexPattern) => {
@@ -36,7 +33,7 @@ export function SourcePicker({
       }}
       showFilter={false}
       noItemsMessage={i18n.translate('xpack.graph.sourceModal.notFoundLabel', {
-        defaultMessage: 'No matching indices found.',
+        defaultMessage: 'No data sources found.',
       })}
       savedObjectMetaData={[
         {
@@ -45,9 +42,8 @@ export function SourcePicker({
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.indexPattern', {
             defaultMessage: 'Index pattern',
           }),
-          showSavedObject: indexPattern =>
-            !indexPattern.attributes.type &&
-            (!currentIndexPattern || currentIndexPattern.id !== indexPattern.id),
+          showSavedObject: indexPattern => !indexPattern.attributes.type,
+          includeFields: ['type'],
         },
       ]}
       fixedPageSize={fixedPageSize}

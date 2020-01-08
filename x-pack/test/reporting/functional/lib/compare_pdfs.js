@@ -6,13 +6,12 @@
 
 import path from 'path';
 import fs from 'fs';
-import { promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
+import { promisify } from 'util';
 import { PDFImage } from 'pdf-image';
 import PDFJS from 'pdfjs-dist';
 import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
-const mkdirAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
@@ -21,13 +20,16 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
   const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
 
-  await mkdirAsync(sessionDirectoryPath);
-  await mkdirAsync(failureDirectoryPath);
+  await mkdirAsync(sessionDirectoryPath, { recursive: true });
+  await mkdirAsync(failureDirectoryPath, { recursive: true });
 
   const actualPdfFileName = path.basename(actualPdfPath, '.pdf');
   const baselinePdfFileName = path.basename(baselinePdfPath, '.pdf');
 
-  const baselineCopyPath = path.resolve(sessionDirectoryPath, `${baselinePdfFileName}_baseline.pdf`);
+  const baselineCopyPath = path.resolve(
+    sessionDirectoryPath,
+    `${baselinePdfFileName}_baseline.pdf`
+  );
   const actualCopyPath = path.resolve(sessionDirectoryPath, `${actualPdfFileName}_actual.pdf`);
 
   // Don't cause a test failure if the baseline snapshot doesn't exist - we don't have all OS's covered and we
@@ -43,8 +45,7 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   log.debug(`writeFileSync: ${actualCopyPath}`);
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
-  const convertOptions = {
-  };
+  const convertOptions = {};
 
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
@@ -70,7 +71,13 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
     log.debug(`Converting actual pdf page ${pageNum} to png`);
     const actualPagePng = await actualPdfImage.convertPage(pageNum);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
-    diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, sessionDirectoryPath, log);
+    diffTotal += await comparePngs(
+      actualPagePng,
+      expectedPagePng,
+      diffPngPath,
+      sessionDirectoryPath,
+      log
+    );
     pageNum++;
   }
 

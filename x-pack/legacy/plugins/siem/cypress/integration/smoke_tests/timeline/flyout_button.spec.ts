@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_FLYOUT_BODY,
   TIMELINE_NOT_READY_TO_DROP_BUTTON,
@@ -19,10 +18,6 @@ import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
 describe('timeline flyout button', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('toggles open the timeline', () => {
@@ -41,7 +36,7 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_NOT_READY_TO_DROP_BUTTON).should(
       'have.css',
       'background',
-      'rgba(125, 226, 209, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
+      'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
     );
   });
 });

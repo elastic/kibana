@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
@@ -28,21 +28,23 @@ export default function ({ getService, getPageObjects }) {
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
-      beforeEach(async function () {
+      beforeEach(async function() {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
       });
 
-      afterEach(async function () {
+      afterEach(async function() {
         await esArchiver.unload('management');
       });
 
-      it('should import saved objects', async function () {
+      it('should import saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects.ndjson')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
@@ -50,11 +52,16 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
+      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson')
+        );
+        await PageObjects.settings.checkImportConflictsWarning();
+        await PageObjects.settings.associateIndexPattern(
+          'd1e4c910-a2e6-11e7-bb30-233be9be6a15',
+          'logstash-*'
+        );
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.clickImportDone();
@@ -64,14 +71,17 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should allow the user to override duplicate saved objects', async function () {
+      it('should allow the user to override duplicate saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
 
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.ndjson'), false);
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
+          false
+        );
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -82,14 +92,17 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to cancel overriding duplicate saved objects', async function () {
+      it('should allow the user to cancel overriding duplicate saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
 
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.ndjson'), false);
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
+          false
+        );
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -100,16 +113,20 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should import saved objects linked to saved searches', async function () {
+      it('should import saved objects linked to saved searches', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -118,11 +135,13 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
+      it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
+        );
+        await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -131,17 +150,18 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
+      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson'));
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson')
+        );
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -154,8 +174,10 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -169,13 +191,14 @@ export default function ({ getService, getPageObjects }) {
         // First, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -187,21 +210,23 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('.json file', () => {
-      beforeEach(async function () {
+      beforeEach(async function() {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
       });
 
-      afterEach(async function () {
+      afterEach(async function() {
         await esArchiver.unload('management');
       });
 
-      it('should import saved objects', async function () {
+      it('should import saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects.json')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
@@ -209,11 +234,17 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
+      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects-conflicts.json')
+        );
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
+        await PageObjects.settings.associateIndexPattern(
+          'd1e4c910-a2e6-11e7-bb30-233be9be6a15',
+          'logstash-*'
+        );
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.clickImportDone();
@@ -223,14 +254,18 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should allow the user to override duplicate saved objects', async function () {
+      it('should allow the user to override duplicate saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
 
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_exists.json'),
+          false
+        );
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -241,14 +276,18 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to cancel overriding duplicate saved objects', async function () {
+      it('should allow the user to cancel overriding duplicate saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
 
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_exists.json'),
+          false
+        );
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -259,16 +298,20 @@ export default function ({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should import saved objects linked to saved searches', async function () {
+      it('should import saved objects linked to saved searches', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_saved_search.json')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -277,11 +320,13 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
+      it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+        );
+        await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -290,27 +335,30 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
+      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
         // First, import the saved search
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_saved_search.json')
+        );
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         // Second, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+        );
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -322,8 +370,10 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
+        );
+        await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -337,13 +387,14 @@ export default function ({ getService, getPageObjects }) {
         // First, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
+        );
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();

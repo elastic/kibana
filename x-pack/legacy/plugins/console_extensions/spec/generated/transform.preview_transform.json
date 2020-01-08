@@ -1,0 +1,11 @@
+{
+  "transform.preview_transform": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_transform/_preview"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/preview-transform.html"
+  }
+}

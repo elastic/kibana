@@ -1,0 +1,437 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<I18nProvider>
+  <EuiForm
+    className="kbnShareContextMenu__finalPanel"
+    data-test-subj="shareUrlForm"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <FormattedMessage
+          defaultMessage="Can't share as saved object until the {objectType} has been saved."
+          id="share.urlPanel.canNotShareAsSavedObjectHelpText"
+          values={
+            Object {
+              "objectType": "dashboard",
+            }
+          }
+        />
+      }
+      label={
+        <FormattedMessage
+          defaultMessage="Generate the link as"
+          id="share.urlPanel.generateLinkAsLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="snapshot"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "data-test-subj": "exportAsSnapshot",
+              "id": "snapshot",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Snapshot"
+                    id="share.urlPanel.snapshotLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        id="share.urlPanel.snapshotDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+            Object {
+              "data-test-subj": "exportAsSavedObject",
+              "disabled": true,
+              "id": "savedObject",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Saved object"
+                    id="share.urlPanel.savedObjectLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                        id="share.urlPanel.savedObjectDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      data-test-subj="createShortUrl"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={false}
+            data-test-subj="useShortUrl"
+            label={
+              <FormattedMessage
+                defaultMessage="Short URL"
+                id="share.urlPanel.shortUrlLabel"
+                values={Object {}}
+              />
+            }
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiIconTip
+            content={
+              <FormattedMessage
+                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                id="share.urlPanel.shortUrlHelpText"
+                values={Object {}}
+              />
+            }
+            position="bottom"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiCopy
+      afterMessage="Copied"
+      anchorClassName="eui-displayBlock"
+      textToCopy="http://localhost/"
+    >
+      <Component />
+    </EuiCopy>
+  </EuiForm>
+</I18nProvider>
+`;
+
+exports[`should enable saved object export option when objectId is provided 1`] = `
+<I18nProvider>
+  <EuiForm
+    className="kbnShareContextMenu__finalPanel"
+    data-test-subj="shareUrlForm"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Generate the link as"
+          id="share.urlPanel.generateLinkAsLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="snapshot"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "data-test-subj": "exportAsSnapshot",
+              "id": "snapshot",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Snapshot"
+                    id="share.urlPanel.snapshotLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        id="share.urlPanel.snapshotDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+            Object {
+              "data-test-subj": "exportAsSavedObject",
+              "disabled": false,
+              "id": "savedObject",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Saved object"
+                    id="share.urlPanel.savedObjectLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                        id="share.urlPanel.savedObjectDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      data-test-subj="createShortUrl"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={false}
+            data-test-subj="useShortUrl"
+            label={
+              <FormattedMessage
+                defaultMessage="Short URL"
+                id="share.urlPanel.shortUrlLabel"
+                values={Object {}}
+              />
+            }
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiIconTip
+            content={
+              <FormattedMessage
+                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                id="share.urlPanel.shortUrlHelpText"
+                values={Object {}}
+              />
+            }
+            position="bottom"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiCopy
+      afterMessage="Copied"
+      anchorClassName="eui-displayBlock"
+      textToCopy="http://localhost/"
+    >
+      <Component />
+    </EuiCopy>
+  </EuiForm>
+</I18nProvider>
+`;
+
+exports[`should hide short url section when allowShortUrl is false 1`] = `
+<I18nProvider>
+  <EuiForm
+    className="kbnShareContextMenu__finalPanel"
+    data-test-subj="shareUrlForm"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Generate the link as"
+          id="share.urlPanel.generateLinkAsLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="snapshot"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "data-test-subj": "exportAsSnapshot",
+              "id": "snapshot",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Snapshot"
+                    id="share.urlPanel.snapshotLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        id="share.urlPanel.snapshotDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+            Object {
+              "data-test-subj": "exportAsSavedObject",
+              "disabled": false,
+              "id": "savedObject",
+              "label": <ForwardRef
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <FormattedMessage
+                    defaultMessage="Saved object"
+                    id="share.urlPanel.savedObjectLabel"
+                    values={Object {}}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                        id="share.urlPanel.savedObjectDescription"
+                        values={
+                          Object {
+                            "objectType": "dashboard",
+                          }
+                        }
+                      />
+                    }
+                    position="bottom"
+                  />
+                </EuiFlexItem>
+              </ForwardRef>,
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiCopy
+      afterMessage="Copied"
+      anchorClassName="eui-displayBlock"
+      textToCopy="http://localhost/"
+    >
+      <Component />
+    </EuiCopy>
+  </EuiForm>
+</I18nProvider>
+`;

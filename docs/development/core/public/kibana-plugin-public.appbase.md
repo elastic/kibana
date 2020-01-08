@@ -21,5 +21,5 @@ export interface AppBase
 |  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> |  |
 |  [order](./kibana-plugin-public.appbase.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
 |  [title](./kibana-plugin-public.appbase.title.md) | <code>string</code> | The title of the application. |
-|  [tooltip$](./kibana-plugin-public.appbase.tooltip$.md) | <code>Observable&lt;string&gt;</code> | An observable for a tooltip shown when hovering over app link. |
+|  [tooltip$](./kibana-plugin-public.appbase.tooltip_.md) | <code>Observable&lt;string&gt;</code> | An observable for a tooltip shown when hovering over app link. |
 

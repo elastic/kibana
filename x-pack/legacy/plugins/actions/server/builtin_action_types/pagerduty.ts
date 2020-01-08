@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -17,10 +20,10 @@ const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-const ConfigSchema = schema.object({
+const configSchemaProps = {
   apiUrl: schema.nullable(schema.string()),
-});
-
+};
+const ConfigSchema = schema.object(configSchemaProps);
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -84,95 +87,118 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-export function getActionType(): ActionType {
+export function getActionType({
+  logger,
+  configurationUtilities,
+}: {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}): ActionType {
   return {
     id: '.pagerduty',
     name: 'pagerduty',
     validate: {
-      config: ConfigSchema,
+      config: schema.object(configSchemaProps, {
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+      }),
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(executor)({ logger }),
   };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ActionTypeConfigType
+) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
+  } catch (whitelistError) {
+    return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
+      defaultMessage: 'error configuring pagerduty action: {message}',
+      values: {
+        message: whitelistError.message,
+      },
+    });
+  }
+}
+
+function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
+  return config.apiUrl || PAGER_DUTY_API_URL;
 }
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
-  const apiUrl = config.apiUrl || PAGER_DUTY_API_URL;
+  const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
     'Content-Type': 'application/json',
     'X-Routing-Key': secrets.routingKey,
   };
-  const data = getBodyForEventAction(id, params);
+  const data = getBodyForEventAction(actionId, params);
 
   let response;
   try {
     response = await postPagerduty({ apiUrl, data, headers, services });
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
-      defaultMessage: 'error in pagerduty action "{id}" posting event: {errorMessage}',
-      values: {
-        id,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error posting pagerduty event',
     });
-    services.log(
-      ['warn', 'actions', 'pagerduty'],
-      `error thrown posting pagerduty event: ${err.message}`
-    );
+    logger.warn(`error thrown posting pagerduty event: ${err.message}`);
     return {
       status: 'error',
+      actionId,
       message,
+      serviceMessage: err.message,
     };
   }
 
-  services.log(
-    ['debug', 'actions', 'pagerduty'],
-    `response posting pagerduty event: ${response.status}`
-  );
+  logger.debug(`response posting pagerduty event: ${response.status}`);
 
   if (response.status === 202) {
     return {
       status: 'ok',
+      actionId,
       data: response.data,
     };
   }
 
   if (response.status === 429 || response.status >= 500) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingRetryErrorMessage', {
-      defaultMessage:
-        'error in pagerduty action "{id}" posting event: status {status}, retry later',
+      defaultMessage: 'error posting pagerduty event: http status {status}, retry later',
       values: {
-        id,
         status: response.status,
       },
     });
 
     return {
       status: 'error',
+      actionId,
       message,
       retry: true,
     };
   }
 
   const message = i18n.translate('xpack.actions.builtin.pagerduty.postingUnexpectedErrorMessage', {
-    defaultMessage: 'error in pagerduty action "{id}" posting event: unexpected status {status}',
+    defaultMessage: 'error posting pagerduty event: unexpected status {status}',
     values: {
-      id,
       status: response.status,
     },
   });
 
   return {
     status: 'error',
+    actionId,
     message,
   };
 }

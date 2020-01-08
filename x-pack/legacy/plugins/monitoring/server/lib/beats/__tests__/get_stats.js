@@ -12,10 +12,10 @@ describe('beats/get_stats', () => {
     expect(handleResponse()).to.eql({
       stats: {
         bytesSent: null,
-        totalEvents: null
+        totalEvents: null,
       },
       total: null,
-      types: []
+      types: [],
     });
   });
 
@@ -26,26 +26,26 @@ describe('beats/get_stats', () => {
         types: {
           buckets: [
             { key: 'filebeat', uuids: { buckets: new Array(1000) } },
-            { key: 'metricbeat', uuids: { buckets: new Array(1200) } }
-          ]
+            { key: 'metricbeat', uuids: { buckets: new Array(1200) } },
+          ],
         },
         min_events_total: { value: 83472836 },
         max_events_total: { value: 89972836 },
         min_bytes_sent_total: { value: 293476 },
         max_bytes_sent_total: { value: 333476 },
-      }
+      },
     };
 
     expect(handleResponse(response)).to.eql({
       stats: {
         bytesSent: 40000,
-        totalEvents: 6500000
+        totalEvents: 6500000,
       },
       total: 2200,
       types: [
         { type: 'Filebeat', count: 1000 },
-        { type: 'Metricbeat', count: 1200 }
-      ]
+        { type: 'Metricbeat', count: 1200 },
+      ],
     });
   });
 
@@ -56,14 +56,14 @@ describe('beats/get_stats', () => {
         types: {
           buckets: [
             { key: 'filebeat', uuids: { buckets: new Array(1000) } },
-            { key: 'metricbeat', uuids: { buckets: new Array(1200) } }
-          ]
+            { key: 'metricbeat', uuids: { buckets: new Array(1200) } },
+          ],
         },
         min_events_total: { value: 89972836 },
         max_events_total: { value: 662836 },
         min_bytes_sent_total: { value: 293476 },
         max_bytes_sent_total: { value: 88476 },
-      }
+      },
     };
 
     expect(handleResponse(response)).to.eql({
@@ -74,8 +74,8 @@ describe('beats/get_stats', () => {
       total: 2200,
       types: [
         { type: 'Filebeat', count: 1000 },
-        { type: 'Metricbeat', count: 1200 }
-      ]
+        { type: 'Metricbeat', count: 1200 },
+      ],
     });
   });
 });

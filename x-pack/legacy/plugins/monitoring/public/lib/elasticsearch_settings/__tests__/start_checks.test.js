@@ -11,7 +11,7 @@ describe('Start Checks of Elasticsearch Settings', () => {
   const getHttp = data => ({
     get() {
       return Promise.resolve({ data });
-    }
+    },
   });
 
   it('should go through a list of checkers and run their executor until the no_data reason found', async () => {
@@ -35,7 +35,7 @@ describe('Start Checks of Elasticsearch Settings', () => {
     expect(await startChecks(checkers, mockSetInModel)).toEqual({
       reason: { context: 'unit_test 03' },
       isLoading: false,
-      checkMessage: null
+      checkMessage: null,
     });
   });
 });

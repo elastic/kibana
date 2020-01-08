@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { Typeahead } from './typeahead';
-import { getIndexPattern } from '../../../lib/adapters/index_pattern';
-import { UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
+import {
+  AutocompleteProviderRegister,
+  AutocompleteSuggestion,
+  esKuery,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/public';
+import { useIndexPattern } from '../../../hooks';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -27,17 +29,18 @@ interface State {
   isLoadingIndexPattern: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: StaticIndexPattern) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
+function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 function getSuggestions(
   query: string,
   selectionStart: number,
-  apmIndexPattern: StaticIndexPattern
+  apmIndexPattern: IIndexPattern,
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
 ) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
+  const autocompleteProvider = autocomplete.getProvider('kuery');
   if (!autocompleteProvider) {
     return [];
   }
@@ -58,21 +61,27 @@ function getSuggestions(
   return suggestions;
 }
 
-export function KueryBar() {
+interface Props {
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+}
+
+export function KueryBar({ autocomplete }: Props) {
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
-  const { basePath } = useContext(UptimeSettingsContext);
   const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
+  useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
+
   useEffect(() => {
-    getIndexPattern(basePath, (result: any) => setIndexPattern(toStaticIndexPattern(result)));
-    setIsLoadingIndexPattern(false);
-  }, []);
+    if (indexPattern !== undefined) {
+      setIsLoadingIndexPattern(false);
+    }
+  }, [indexPattern]);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 
@@ -90,7 +99,12 @@ export function KueryBar() {
     currentRequestCheck = currentRequest;
 
     try {
-      let suggestions = await getSuggestions(inputValue, selectionStart, indexPattern);
+      let suggestions = await getSuggestions(
+        inputValue,
+        selectionStart,
+        indexPattern,
+        autocomplete
+      );
       suggestions = suggestions
         .filter((suggestion: AutocompleteSuggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

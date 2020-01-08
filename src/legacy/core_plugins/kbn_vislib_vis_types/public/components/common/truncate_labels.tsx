@@ -23,11 +23,11 @@ import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface TruncateLabelsOptionProps {
   disabled?: boolean;
-  value: number | null;
+  value?: number | null;
   setValue: (paramName: 'truncate', value: null | number) => void;
 }
 
-function TruncateLabelsOption({ disabled, value, setValue }: TruncateLabelsOptionProps) {
+function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabelsOptionProps) {
   const onChange = (ev: ChangeEvent<HTMLInputElement>) =>
     setValue('truncate', ev.target.value === '' ? null : parseFloat(ev.target.value));
 

@@ -1,7 +1,0 @@
-[[markdown-widget]]
-== Markdown Widget
-
-The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. Kibana renders the text you enter
-in this field and displays the results on the dashboard. You can click the *Help* link to go to the
-https://help.github.com/articles/github-flavored-markdown/[help page] for GitHub flavored Markdown. Click *Apply* to
-display the rendered text in the Preview pane or *Discard* to revert to a previous version.

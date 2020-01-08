@@ -57,9 +57,9 @@ it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
 it('passes latest value from toasts$ to <EuiGlobalToastList />', () => {
   const el = shallow(
     render({
-      toasts$: Rx.from([[], [1], [1, 2]]) as any,
+      toasts$: Rx.from([[], [{ id: 1 }], [{ id: 1 }, { id: 2 }]]) as any,
     })
   );
 
-  expect(el.find(EuiGlobalToastList).prop('toasts')).toEqual([1, 2]);
+  expect(el.find(EuiGlobalToastList).prop('toasts')).toEqual([{ id: 1 }, { id: 2 }]);
 });

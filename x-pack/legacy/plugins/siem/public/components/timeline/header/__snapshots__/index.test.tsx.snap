@@ -150,6 +150,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     show={true}
   />
   <Connect(StatefulSearchOrFilterComponent)
+    browserFields={Object {}}
     indexPattern={
       Object {
         "fields": Array [
@@ -228,6 +229,12 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
           Object {
             "aggregatable": true,
             "name": "agent.test8",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
             "searchable": true,
             "type": "string",
           },

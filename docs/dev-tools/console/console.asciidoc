@@ -12,6 +12,8 @@ To get started, go to *Dev Tools > Console*.
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
+NOTE: You are unable to interact with the REST API of {kib} with the Console.
+
 [float]
 [[console-api]]
 === Write requests

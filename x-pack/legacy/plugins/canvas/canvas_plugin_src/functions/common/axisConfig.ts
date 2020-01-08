@@ -5,9 +5,9 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
 import { Position } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   show: boolean;

@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
-import { mount } from 'enzyme';
 
 const mockUseLastEventTimeQuery: jest.Mock = useLastEventTimeQuery as jest.Mock;
 jest.mock('../../containers/events/last_event_time', () => ({
@@ -23,6 +22,8 @@ jest.mock('../../containers/events/last_event_time', () => ({
 }));
 
 describe('Last Event Time Stat', () => {
+  const mount = useMountAppended();
+
   beforeEach(() => {
     mockUseLastEventTimeQuery.mockReset();
   });
@@ -53,8 +54,7 @@ describe('Last Event Time Stat', () => {
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-
-    expect(wrapper.html()).toBe('<span class="euiToolTipAnchor">Last event: 12 days ago</span>');
+    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
   });
   test('Bad date time string', async () => {
     mockUseLastEventTimeQuery.mockImplementation(() => ({

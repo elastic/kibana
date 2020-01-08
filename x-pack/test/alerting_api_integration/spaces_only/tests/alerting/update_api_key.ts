@@ -6,8 +6,14 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  AlertUtils,
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 /**
  * Eventhough security is disabled, this test checks the API behavior.
@@ -15,49 +21,52 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('update_api_key', () => {
-    const objectRemover = new ObjectRemover(supertest);
+    const objectRemover = new ObjectRemover(supertestWithoutAuth);
+    const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
     after(() => objectRemover.removeAll());
 
     it('should handle update alert api key appropriately', async () => {
-      const { body: createdAlert } = await supertest
+      const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-      await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_update_api_key`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
+      await alertUtils.updateApiKey(createdAlert.id);
 
-      const { body: updatedAlert } = await supertest
+      const { body: updatedAlert } = await supertestWithoutAuth
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(updatedAlert.apiKeyOwner).to.eql(null);
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest: supertestWithoutAuth,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdAlert.id,
+      });
     });
 
     it(`shouldn't update alert api key from another space`, async () => {
-      const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+      const { body: createdAlert } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
 
-      await supertest
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}/_update_api_key`)
-        .set('kbn-xsrf', 'foo')
-        .expect(404, {
-          statusCode: 404,
-          error: 'Not Found',
-          message: `Saved object [alert/${createdAlert.id}] not found`,
-        });
+      await alertUtils.getUpdateApiKeyRequest(createdAlert.id).expect(404, {
+        statusCode: 404,
+        error: 'Not Found',
+        message: `Saved object [alert/${createdAlert.id}] not found`,
+      });
     });
   });
 }

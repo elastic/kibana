@@ -56,9 +56,7 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-  ],
+  "index": "myIndex",
   "terminateAfter": 1,
 }
 `;
@@ -110,7 +108,7 @@ Object {
     "myIndex",
     "myIndex",
   ],
-  "terminate_after": 1,
+  "terminateAfter": 1,
 }
 `;
 
@@ -228,8 +226,6 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-  ],
+  "index": "myIndex",
 }
 `;

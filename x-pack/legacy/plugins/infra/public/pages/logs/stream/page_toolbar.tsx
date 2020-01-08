@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
@@ -19,12 +19,12 @@ import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_c
 import { LogTimeControls } from '../../../components/logging/log_time_controls';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { WithLogFilter } from '../../../containers/logs/with_log_filter';
-import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogPositionState } from '../../../containers/logs/log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 
-export const LogsToolbar = injectI18n(({ intl }) => {
+export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
   const {
@@ -37,7 +37,12 @@ export const LogsToolbar = injectI18n(({ intl }) => {
     textScale,
     textWrap,
   } = useContext(LogViewConfiguration.Context);
-
+  const {
+    filterQueryDraft,
+    isFilterQueryDraftValid,
+    applyLogFilterQuery,
+    setLogFilterQueryDraft,
+  } = useContext(LogFilterState.Context);
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
 
   const {
@@ -49,44 +54,41 @@ export const LogsToolbar = injectI18n(({ intl }) => {
     goToPreviousHighlight,
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
+  const {
+    visibleMidpointTime,
+    isAutoReloading,
+    jumpToTargetPositionTime,
+    startLiveStreaming,
+    stopLiveStreaming,
+  } = useContext(LogPositionState.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
             {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-              <WithLogFilter indexPattern={derivedIndexPattern}>
-                {({
-                  applyFilterQueryFromKueryExpression,
-                  filterQueryDraft,
-                  isFilterQueryDraftValid,
-                  setFilterQueryDraftFromKueryExpression,
-                }) => (
-                  <AutocompleteField
-                    isLoadingSuggestions={isLoadingSuggestions}
-                    isValid={isFilterQueryDraftValid}
-                    loadSuggestions={loadSuggestions}
-                    onChange={(expression: string) => {
-                      setSurroundingLogsId(null);
-                      setFilterQueryDraftFromKueryExpression(expression);
-                    }}
-                    onSubmit={(expression: string) => {
-                      setSurroundingLogsId(null);
-                      applyFilterQueryFromKueryExpression(expression);
-                    }}
-                    placeholder={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
-                      defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
-                    })}
-                    suggestions={suggestions}
-                    value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                    aria-label={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
-                      defaultMessage: 'Search for log entries',
-                    })}
-                  />
+              <AutocompleteField
+                isLoadingSuggestions={isLoadingSuggestions}
+                isValid={isFilterQueryDraftValid}
+                loadSuggestions={loadSuggestions}
+                onChange={(expression: string) => {
+                  setSurroundingLogsId(null);
+                  setLogFilterQueryDraft(expression);
+                }}
+                onSubmit={(expression: string) => {
+                  setSurroundingLogsId(null);
+                  applyLogFilterQuery(expression);
+                }}
+                placeholder={i18n.translate(
+                  'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
+                  { defaultMessage: 'Search for log entries… (e.g. host.name:host-1)' }
                 )}
-              </WithLogFilter>
+                suggestions={suggestions}
+                value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                aria-label={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel', {
+                  defaultMessage: 'Search for log entries',
+                })}
+              />
             )}
           </WithKueryAutocompletion>
         </EuiFlexItem>
@@ -119,29 +121,18 @@ export const LogsToolbar = injectI18n(({ intl }) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <WithLogPosition resetOnUnmount>
-            {({
-              visibleMidpointTime,
-              isAutoReloading,
-              jumpToTargetPositionTime,
-              startLiveStreaming,
-              stopLiveStreaming,
-              targetPosition,
-            }) => (
-              <LogTimeControls
-                currentTime={visibleMidpointTime}
-                isLiveStreaming={isAutoReloading}
-                jumpToTime={jumpToTargetPositionTime}
-                startLiveStreaming={() => {
-                  startLiveStreaming();
-                  setSurroundingLogsId(null);
-                }}
-                stopLiveStreaming={stopLiveStreaming}
-              />
-            )}
-          </WithLogPosition>
+          <LogTimeControls
+            currentTime={visibleMidpointTime}
+            isLiveStreaming={isAutoReloading}
+            jumpToTime={jumpToTargetPositionTime}
+            startLiveStreaming={() => {
+              startLiveStreaming();
+              setSurroundingLogsId(null);
+            }}
+            stopLiveStreaming={stopLiveStreaming}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>
   );
-});
+};

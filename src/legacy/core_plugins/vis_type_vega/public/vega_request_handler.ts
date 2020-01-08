@@ -16,13 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
-import { timefilter } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
+import { esFilters, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
 
-// @ts-ignore
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
 // @ts-ignore
@@ -35,24 +30,26 @@ import { VisParams } from './vega_fn';
 
 interface VegaRequestHandlerParams {
   query: Query;
-  filters: Filter;
+  filters: esFilters.Filter;
   timeRange: TimeRange;
   visParams: VisParams;
 }
 
 export function createVegaRequestHandler({
   es,
-  uiSettings,
+  plugins,
+  core: { uiSettings },
   serviceSettings,
 }: VegaVisualizationDependencies) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
+  const { timefilter } = plugins.data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
   return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {
     timeCache.setTimeRange(timeRange);
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
-    const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
     const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
     return vp.parseAsync();

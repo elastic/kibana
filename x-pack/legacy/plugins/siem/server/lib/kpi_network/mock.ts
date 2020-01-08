@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../default_index_pattern';
 import { RequestBasicOptions } from '../framework/types';
 
 export const mockOptions: RequestBasicOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',

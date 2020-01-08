@@ -6,6 +6,7 @@
 
 import { CoreStart } from 'src/core/public';
 import React from 'react';
+import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
 import { SourceModal } from '../components/source_modal';
 import { IndexPatternSavedObject } from '../types';
 
@@ -15,7 +16,7 @@ export function openSourceModal(
     savedObjects,
     uiSettings,
   }: {
-    overlays: CoreStart['overlays'];
+    overlays: KibanaReactOverlays;
     savedObjects: CoreStart['savedObjects'];
     uiSettings: CoreStart['uiSettings'];
   },

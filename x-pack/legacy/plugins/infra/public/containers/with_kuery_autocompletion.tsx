@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
-
+import { npStart } from 'ui/new_platform';
+import { AutocompleteSuggestion, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
+
+const getAutocompleteProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
@@ -17,7 +18,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: AutocompleteSuggestion[];
   }>;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface WithKueryAutocompletionLifecycleState {

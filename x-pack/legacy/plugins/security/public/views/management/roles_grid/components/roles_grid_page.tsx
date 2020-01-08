@@ -15,14 +15,14 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   EuiButtonIcon,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { Role } from '../../../../../common/model/role';
+import { Role } from '../../../../../common/model';
 import { isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
@@ -74,12 +74,12 @@ class RolesGridPageUI extends Component<Props, State> {
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.security.management.roles.roleTitle"
                   defaultMessage="Roles"
                 />
-              </h2>
+              </h1>
             </EuiTitle>
             <EuiText color="subdued" size="s">
               <p>
@@ -109,17 +109,14 @@ class RolesGridPageUI extends Component<Props, State> {
           ) : null}
 
           {
-            // @ts-ignore missing rowProps typedef
             <EuiInMemoryTable
               itemId="name"
               responsive={false}
               columns={this.getColumnConfig(intl)}
               hasActions={true}
               selection={{
-                itemId: 'name',
                 selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-                selectableMessage: (selectable: boolean) =>
-                  !selectable ? 'Role is reserved' : undefined,
+                selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
                 onSelectionChange: (selection: Role[]) => this.setState({ selection }),
               }}
               pagination={{
@@ -145,7 +142,6 @@ class RolesGridPageUI extends Component<Props, State> {
                   direction: 'asc',
                 },
               }}
-              // @ts-ignore missing rowProps typedef
               rowProps={() => {
                 return {
                   'data-test-subj': 'roleRow',
@@ -191,29 +187,22 @@ class RolesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'metadata._reserved',
-        name: (
-          <EuiToolTip content={reservedRoleDesc}>
-            <span className="rolesGridPage__reservedRoleTooltip">
-              <FormattedMessage
-                id="xpack.security.management.roles.reservedColumnName"
-                defaultMessage="Reserved"
-              />
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: ({ metadata }: any) => (metadata && metadata._reserved) || false,
+        field: 'metadata',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.roles.reservedColumnName',
+          defaultMessage: 'Reserved',
+        }),
+        sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (reserved: boolean | undefined) => {
+        render: (metadata: Role['metadata']) => {
           const label = intl.formatMessage({
             id: 'xpack.security.management.roles.reservedRoleIconLabel',
             defaultMessage: 'Reserved role',
           });
 
-          return reserved ? (
+          return metadata && metadata._reserved ? (
             <span title={label}>
               <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
             </span>
@@ -279,7 +268,7 @@ class RolesGridPageUI extends Component<Props, State> {
           },
         ],
       },
-    ];
+    ] as Array<EuiBasicTableColumn<Role>>;
   };
 
   private getVisibleRoles = () => {

@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'src/core/server';
+import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
+import { Plugin, CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { setupRoutes } from './routes';
+import { registerLensUsageCollector, initializeLensTelemetry } from './usage';
+
+export interface PluginSetupContract {
+  savedObjects: SavedObjectsLegacyService;
+  usageCollection: UsageCollectionSetup;
+  config: KibanaConfig;
+  server: Server;
+}
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
-
-  setup(core: CoreSetup) {
-    setupRoutes(core);
+  setup(core: CoreSetup, plugins: PluginSetupContract) {
+    setupRoutes(core, plugins);
+    registerLensUsageCollector(plugins.usageCollection, plugins.server);
+    initializeLensTelemetry(core, plugins.server);
 
     return {};
   }

@@ -18,84 +18,80 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Vis } from 'ui/vis';
-
+import { AggGroupNames, Schemas } from './legacy_imports';
+import { Vis } from '../../visualizations/public';
+import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { createTableVisResponseHandler } from './table_vis_request_handler';
-
-import { TableVisualizationDependencies } from './plugin';
 import tableVisTemplate from './table_vis.html';
+import { TableOptions } from './components/table_vis_options';
+import { TableVisualizationController } from './vis_controller';
 
-export const createTableVisTypeDefinition = (dependencies: TableVisualizationDependencies) => {
-  const responseHandler = createTableVisResponseHandler();
-
-  return dependencies.createAngularVisualization({
-    type: 'table',
-    name: 'table',
-    title: i18n.translate('visTypeTable.tableVisTitle', {
-      defaultMessage: 'Data Table',
-    }),
-    icon: 'visTable',
-    description: i18n.translate('visTypeTable.tableVisDescription', {
-      defaultMessage: 'Display values in a table',
-    }),
-    visConfig: {
-      defaults: {
-        perPage: 10,
-        showPartialRows: false,
-        showMetricsAtAllLevels: false,
-        sort: {
-          columnIndex: null,
-          direction: null,
-        },
-        showTotal: false,
-        totalFunc: 'sum',
-        percentageCol: '',
+export const tableVisTypeDefinition = {
+  type: 'table',
+  name: 'table',
+  title: i18n.translate('visTypeTable.tableVisTitle', {
+    defaultMessage: 'Data Table',
+  }),
+  icon: 'visTable',
+  description: i18n.translate('visTypeTable.tableVisDescription', {
+    defaultMessage: 'Display values in a table',
+  }),
+  visualization: TableVisualizationController,
+  visConfig: {
+    defaults: {
+      perPage: 10,
+      showPartialRows: false,
+      showMetricsAtAllLevels: false,
+      sort: {
+        columnIndex: null,
+        direction: null,
       },
-      template: tableVisTemplate,
+      showTotal: false,
+      totalFunc: 'sum',
+      percentageCol: '',
     },
-    editorConfig: {
-      optionsTemplate: '<table-vis-params></table-vis-params>',
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
-            defaultMessage: 'Metric',
-          }),
-          aggFilter: ['!geo_centroid', '!geo_bounds'],
-          aggSettings: {
-            top_hits: {
-              allowStrings: true,
-            },
+    template: tableVisTemplate,
+  },
+  editorConfig: {
+    optionsTemplate: TableOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
+          defaultMessage: 'Metric',
+        }),
+        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggSettings: {
+          top_hits: {
+            allowStrings: true,
           },
-          min: 1,
-          defaults: [{ type: 'count', schema: 'metric' }],
         },
-        {
-          group: 'buckets',
-          name: 'bucket',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
-            defaultMessage: 'Split rows',
-          }),
-          aggFilter: ['!filter'],
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
-            defaultMessage: 'Split table',
-          }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!filter'],
-        },
-      ]),
-    },
-    responseHandler,
-    hierarchicalData: (vis: Vis) => {
-      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-    },
-  });
+        min: 1,
+        defaults: [{ type: 'count', schema: 'metric' }],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'bucket',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
+          defaultMessage: 'Split rows',
+        }),
+        aggFilter: ['!filter'],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
+          defaultMessage: 'Split table',
+        }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!filter'],
+      },
+    ]),
+  },
+  responseHandler: tableVisResponseHandler,
+  hierarchicalData: (vis: Vis) => {
+    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
+  },
 };

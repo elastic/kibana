@@ -15,12 +15,20 @@ import { getReportingBrowserType } from '../../../state/selectors/app';
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
 // @ts-ignore Untyped local
-import { downloadWorkpad } from '../../../lib/download_workpad';
+import {
+  downloadWorkpad,
+  // @ts-ignore Untyped local
+} from '../../../lib/download_workpad';
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
+// @ts-ignore Untyped local.
+import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
+import { WithKibanaProps } from '../../../index';
 
 import { ComponentStrings } from '../../../../i18n';
+
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 const mapStateToProps = (state: State) => ({
@@ -48,12 +56,18 @@ interface Props {
 
 export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
+  withKibana,
   withProps(
-    ({ workpad, pageCount, enabled }: Props): ComponentProps => ({
+    ({ workpad, pageCount, enabled, kibana }: Props & WithKibanaProps): ComponentProps => ({
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {
-          return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+          const { createPdfUri } = getPdfUrl(
+            workpad,
+            { pageCount },
+            kibana.services.http.basePath.prepend
+          );
+          return getAbsoluteUrl(createPdfUri);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -73,7 +87,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       onExport: type => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount })
+            return createPdf(workpad, { pageCount }, kibana.services.http.basePath.prepend)
               .then(({ data }: { data: { job: { id: string } } }) => {
                 notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),
@@ -87,7 +101,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
               });
           case 'json':
             downloadWorkpad(workpad.id);
-            break;
+            return;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));
         }

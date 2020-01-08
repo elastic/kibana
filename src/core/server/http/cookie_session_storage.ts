@@ -34,17 +34,32 @@ export interface SessionStorageCookieOptions<T> {
    */
   name: string;
   /**
-   * A key used to encrypt a cookie value. Should be at least 32 characters long.
+   * A key used to encrypt a cookie's value. Should be at least 32 characters long.
    */
   encryptionKey: string;
   /**
-   * Function called to validate a cookie content.
+   * Function called to validate a cookie's decrypted value.
    */
-  validate: (sessionValue: T) => boolean | Promise<boolean>;
+  validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
   /**
    * Flag indicating whether the cookie should be sent only via a secure connection.
    */
   isSecure: boolean;
+}
+
+/**
+ * Return type from a function to validate cookie contents.
+ * @public
+ */
+export interface SessionCookieValidationResult {
+  /**
+   * Whether the cookie is valid or not.
+   */
+  isValid: boolean;
+  /**
+   * The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it.
+   */
+  path?: string;
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
@@ -98,15 +113,31 @@ export async function createCookieSessionStorageFactory<T>(
   cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
+  function clearInvalidCookie(req: Request | undefined, path: string = basePath || '/') {
+    // if the cookie did not include the 'path' attribute in the session value, it is a legacy cookie
+    // we will assume that the cookie was created with the current configuration
+    log.debug(`Clearing invalid session cookie`);
+    // need to use Hapi toolkit to clear cookie with defined options
+    if (req) {
+      (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
+    }
+  }
+
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
     password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
+    validateFunc: async (req, session: T | T[]) => {
+      const result = cookieOptions.validate(session);
+      if (!result.isValid) {
+        clearInvalidCookie(req, result.path);
+      }
+      return { valid: result.isValid };
+    },
     isSecure: cookieOptions.isSecure,
     path: basePath,
-    clearInvalid: true,
+    clearInvalid: false,
     isHttpOnly: true,
     isSameSite: false,
   });

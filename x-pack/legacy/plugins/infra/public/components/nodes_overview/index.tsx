@@ -5,17 +5,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import {
-  InfraSnapshotMetricType,
-  InfraSnapshotNode,
-  InfraNodeType,
-  InfraTimerangeInput,
-} from '../../graphql/types';
+import { InfraSnapshotMetricType, InfraSnapshotNode, InfraNodeType } from '../../graphql/types';
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
@@ -24,20 +20,22 @@ import { InfraLoadingPanel } from '../loading';
 import { Map } from '../waffle/map';
 import { ViewSwitcher } from '../waffle/view_switcher';
 import { TableView } from './table';
+import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { convertIntervalToString } from '../../utils/convert_interval_to_string';
 
 interface Props {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
-  nodes: InfraSnapshotNode[];
+  nodes: SnapshotNode[];
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
-  intl: InjectedIntl;
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
+  interval: string;
 }
 
 interface MetricFormatter {
@@ -66,6 +64,38 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
+  [InfraSnapshotMetricType.diskIOReadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.diskIOWriteBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.s3BucketSize]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3TotalRequests]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3NumberOfObjects]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3UploadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3DownloadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.sqsOldestMessage]: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} seconds',
+  },
 };
 
 const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {
@@ -80,131 +110,127 @@ const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBou
   return { min: min(minValues) || 0, max: max(maxValues) || 0 };
 };
 
-export const NodesOverview = injectI18n(
-  class extends React.Component<Props, {}> {
-    public static displayName = 'Waffle';
-    public render() {
-      const {
-        autoBounds,
-        boundsOverride,
-        loading,
-        nodes,
-        nodeType,
-        reload,
-        intl,
-        view,
-        options,
-        timeRange,
-      } = this.props;
-      if (loading) {
-        return (
-          <InfraLoadingPanel
-            height="100%"
-            width="100%"
-            text={intl.formatMessage({
-              id: 'xpack.infra.waffle.loadingDataText',
-              defaultMessage: 'Loading data',
-            })}
-          />
-        );
-      } else if (!loading && nodes && nodes.length === 0) {
-        return (
-          <NoData
-            titleText={intl.formatMessage({
-              id: 'xpack.infra.waffle.noDataTitle',
-              defaultMessage: 'There is no data to display.',
-            })}
-            bodyText={intl.formatMessage({
-              id: 'xpack.infra.waffle.noDataDescription',
-              defaultMessage: 'Try adjusting your time or filter.',
-            })}
-            refetchText={intl.formatMessage({
-              id: 'xpack.infra.waffle.checkNewDataButtonLabel',
-              defaultMessage: 'Check for new data',
-            })}
-            onRefetch={() => {
-              reload();
-            }}
-            testString="noMetricsDataPrompt"
-          />
-        );
-      }
-      const dataBounds = calculateBoundsFromNodes(nodes);
-      const bounds = autoBounds ? dataBounds : boundsOverride;
+export const NodesOverview = class extends React.Component<Props, {}> {
+  public static displayName = 'Waffle';
+  public render() {
+    const {
+      autoBounds,
+      boundsOverride,
+      loading,
+      nodes,
+      nodeType,
+      reload,
+      view,
+      currentTime,
+      options,
+      interval,
+    } = this.props;
+    if (loading) {
       return (
-        <MainContainer>
-          <ViewSwitcherContainer>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <ViewSwitcher view={view} onChange={this.handleViewChange} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-                      defaultMessage="Showing the last 1 minute of data at the selected time"
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ViewSwitcherContainer>
-          {view === 'table' ? (
-            <TableContainer>
-              <TableView
-                nodeType={nodeType}
-                nodes={nodes}
-                options={options}
-                formatter={this.formatter}
-                timeRange={timeRange}
-                onFilter={this.handleDrilldown}
-              />
-            </TableContainer>
-          ) : (
-            <MapContainer>
-              <Map
-                nodeType={nodeType}
-                nodes={nodes}
-                options={options}
-                formatter={this.formatter}
-                timeRange={timeRange}
-                onFilter={this.handleDrilldown}
-                bounds={bounds}
-                dataBounds={dataBounds}
-              />
-            </MapContainer>
-          )}
-        </MainContainer>
+        <InfraLoadingPanel
+          height="100%"
+          width="100%"
+          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+            defaultMessage: 'Loading data',
+          })}
+        />
+      );
+    } else if (!loading && nodes && nodes.length === 0) {
+      return (
+        <NoData
+          titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+            defaultMessage: 'There is no data to display.',
+          })}
+          bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+            defaultMessage: 'Try adjusting your time or filter.',
+          })}
+          refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={() => {
+            reload();
+          }}
+          testString="noMetricsDataPrompt"
+        />
       );
     }
-
-    private handleViewChange = (view: string) => this.props.onViewChange(view);
-
-    // TODO: Change this to a real implementation using the tickFormatter from the prototype as an example.
-    private formatter = (val: string | number) => {
-      const { metric } = this.props.options;
-      const metricFormatter = get(
-        METRIC_FORMATTERS,
-        metric.type,
-        METRIC_FORMATTERS[InfraSnapshotMetricType.count]
-      );
-      if (val == null) {
-        return '';
-      }
-      const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
-      return formatter(val);
-    };
-
-    private handleDrilldown = (filter: string) => {
-      this.props.onDrilldown({
-        kind: 'kuery',
-        expression: filter,
-      });
-      return;
-    };
+    const dataBounds = calculateBoundsFromNodes(nodes);
+    const bounds = autoBounds ? dataBounds : boundsOverride;
+    const intervalAsString = convertIntervalToString(interval);
+    return (
+      <MainContainer>
+        <ViewSwitcherContainer>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <ViewSwitcher view={view} onChange={this.handleViewChange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+                    defaultMessage="Showing the last {duration} of data at the selected time"
+                    values={{ duration: intervalAsString }}
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ViewSwitcherContainer>
+        {view === 'table' ? (
+          <TableContainer>
+            <TableView
+              nodeType={nodeType}
+              nodes={nodes}
+              options={options}
+              formatter={this.formatter}
+              currentTime={currentTime}
+              onFilter={this.handleDrilldown}
+            />
+          </TableContainer>
+        ) : (
+          <MapContainer>
+            <Map
+              nodeType={nodeType}
+              nodes={nodes}
+              options={options}
+              formatter={this.formatter}
+              currentTime={currentTime}
+              onFilter={this.handleDrilldown}
+              bounds={bounds}
+              dataBounds={dataBounds}
+            />
+          </MapContainer>
+        )}
+      </MainContainer>
+    );
   }
-);
+
+  private handleViewChange = (view: string) => this.props.onViewChange(view);
+
+  // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
+  private formatter = (val: string | number) => {
+    const { metric } = this.props.options;
+    const metricFormatter = get(
+      METRIC_FORMATTERS,
+      metric.type,
+      METRIC_FORMATTERS[InfraSnapshotMetricType.count]
+    );
+    if (val == null) {
+      return '';
+    }
+    const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+    return formatter(val);
+  };
+
+  private handleDrilldown = (filter: string) => {
+    this.props.onDrilldown({
+      kind: 'kuery',
+      expression: filter,
+    });
+    return;
+  };
+};
 
 const MainContainer = euiStyled.div`
   position: relative;

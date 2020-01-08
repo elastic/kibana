@@ -74,7 +74,10 @@ const toolkit: OnPreAuthToolkit = {
   rewriteUrl: preAuthResult.rewriteUrl,
 };
 
-/** @public */
+/**
+ * See {@link OnPreAuthToolkit}.
+ * @public
+ */
 export type OnPreAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,

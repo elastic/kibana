@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render icon select when symbolized as Icon 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Symbol type"
+    labelType="label"
+  >
+    <EuiButtonGroup
+      buttonSize="compressed"
+      idSelected="icon"
+      isFullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "circle",
+            "label": "circle marker",
+          },
+          Object {
+            "id": "icon",
+            "label": "icon",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiComboBox
+    compressed={true}
+    fullWidth={false}
+    isClearable={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "label": "symbol1",
+          "value": "symbol1",
+        },
+        Object {
+          "label": "symbol2",
+          "value": "symbol2",
+        },
+      ]
+    }
+    renderOption={[Function]}
+    selectedOptions={
+      Array [
+        Object {
+          "label": "symbol1",
+          "value": "symbol1",
+        },
+      ]
+    }
+    singleSelection={true}
+  />
+</Fragment>
+`;
+
+exports[`Should render symbol select when symbolized as Circle 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Symbol type"
+    labelType="label"
+  >
+    <EuiButtonGroup
+      buttonSize="compressed"
+      idSelected="circle"
+      isFullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "circle",
+            "label": "circle marker",
+          },
+          Object {
+            "id": "icon",
+            "label": "icon",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+</Fragment>
+`;

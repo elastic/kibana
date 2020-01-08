@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
+import React, { useMemo } from 'react';
 import uuid from 'uuid';
-import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
+import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { EventsTdContent, EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
-import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
+import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
+import { useTimelineTypeContext } from '../../timeline_context';
 
 interface Props {
   id: string;
@@ -29,13 +29,17 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventPinned: boolean;
   isEventViewer?: boolean;
   loading: boolean;
+  loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   showNotes: boolean;
   timelineId: string;
   toggleShowNotes: () => void;
@@ -45,10 +49,6 @@ interface Props {
 export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
-
-const EventColumnViewFlexGroup = styled(EuiFlexGroup)`
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-`;
 
 export const EventColumnView = React.memo<Props>(
   ({
@@ -61,38 +61,50 @@ export const EventColumnView = React.memo<Props>(
     eventIdToNoteIds,
     expanded,
     getNotesByIds,
+    isEventPinned = false,
     isEventViewer = false,
     loading,
+    loadingEventIds,
     onColumnResized,
     onEventToggled,
     onPinEvent,
+    onRowSelected,
     onUnPinEvent,
-    pinnedEventIds,
+    selectedEventIds,
+    showCheckboxes,
     showNotes,
     timelineId,
     toggleShowNotes,
     updateNote,
-  }) => (
-    <EventColumnViewFlexGroup
-      alignItems="center"
-      data-test-subj="event-column-view"
-      gutterSize="none"
-    >
-      <EuiFlexItem data-test-subj="actions-column-item" grow={false}>
+  }) => {
+    const timelineTypeContext = useTimelineTypeContext();
+
+    const additionalActions = useMemo<JSX.Element[]>(() => {
+      return (
+        timelineTypeContext.timelineActions?.map(action => (
+          <EventsTdContent key={action.id} textAlign="center">
+            {action.getAction({ eventId: id, data })}
+          </EventsTdContent>
+        )) ?? []
+      );
+    }, [data, timelineTypeContext.timelineActions]);
+
+    return (
+      <EventsTrData data-test-subj="event-column-view">
         <Actions
           actionsColumnWidth={actionsColumnWidth}
+          additionalActions={additionalActions}
           associateNote={associateNote}
-          checked={false}
+          checked={Object.keys(selectedEventIds).includes(id)}
+          onRowSelected={onRowSelected}
           expanded={expanded}
           data-test-subj="actions"
           eventId={id}
-          eventIsPinned={eventIsPinned({
-            eventId: id,
-            pinnedEventIds,
-          })}
+          eventIsPinned={isEventPinned}
           getNotesByIds={getNotesByIds}
           isEventViewer={isEventViewer}
           loading={loading}
+          loadingEventIds={loadingEventIds}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}
           onPinClicked={getPinOnClick({
@@ -100,16 +112,14 @@ export const EventColumnView = React.memo<Props>(
             eventId: id,
             onPinEvent,
             onUnPinEvent,
-            pinnedEventIds,
+            isEventPinned,
           })}
-          showCheckboxes={false}
+          showCheckboxes={showCheckboxes}
           showNotes={showNotes}
           toggleShowNotes={toggleShowNotes}
           updateNote={updateNote}
         />
-      </EuiFlexItem>
 
-      <EuiFlexItem data-test-subj="event-columns-item" grow={false}>
         <DataDrivenColumns
           _id={id}
           columnHeaders={columnHeaders}
@@ -118,9 +128,9 @@ export const EventColumnView = React.memo<Props>(
           onColumnResized={onColumnResized}
           timelineId={timelineId}
         />
-      </EuiFlexItem>
-    </EventColumnViewFlexGroup>
-  ),
+      </EventsTrData>
+    );
+  },
   (prevProps, nextProps) => {
     return (
       prevProps.id === nextProps.id &&
@@ -131,11 +141,14 @@ export const EventColumnView = React.memo<Props>(
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.expanded === nextProps.expanded &&
       prevProps.loading === nextProps.loading &&
-      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+      prevProps.loadingEventIds === nextProps.loadingEventIds &&
+      prevProps.isEventPinned === nextProps.isEventPinned &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
+      prevProps.selectedEventIds === nextProps.selectedEventIds &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes &&
       prevProps.timelineId === nextProps.timelineId
     );
   }
 );
-
 EventColumnView.displayName = 'EventColumnView';

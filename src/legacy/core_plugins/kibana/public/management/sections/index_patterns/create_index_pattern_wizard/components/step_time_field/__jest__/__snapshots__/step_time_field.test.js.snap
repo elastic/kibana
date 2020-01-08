@@ -56,7 +56,6 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
   <EuiCallOut
     color="danger"
     iconType="cross"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Error"
@@ -295,7 +294,6 @@ exports[`StepTimeField should render any error message 1`] = `
   <EuiCallOut
     color="danger"
     iconType="cross"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Error"
