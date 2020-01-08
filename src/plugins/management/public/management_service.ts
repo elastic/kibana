@@ -26,9 +26,6 @@ import { CoreSetup, CoreStart } from '../../../core/public';
 
 export class ManagementService {
   private sections: ManagementSection[] = [];
-  constructor() {
-    this.sections = [];
-  }
 
   private register(
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
@@ -71,11 +68,11 @@ export class ManagementService {
     getAllSections: this.getAllSections.bind(this),
   };
 
-  public setup = (
+  public setup(
     kibanaLegacy: KibanaLegacySetup,
     getLegacyManagement: () => LegacyManagementSection,
     getStartServices: CoreSetup['getStartServices']
-  ) => {
+  ) {
     const register = this.register.bind(this)(
       kibanaLegacy.registerLegacyApp,
       getLegacyManagement,
@@ -95,10 +92,12 @@ export class ManagementService {
       register,
       ...this.sharedInterface,
     };
-  };
+  }
 
-  public start = (navigateToApp: CoreStart['application']['navigateToApp']) => ({
-    navigateToApp, // apps are currently registered as top level apps but this may change in the future
-    ...this.sharedInterface,
-  });
+  public start(navigateToApp: CoreStart['application']['navigateToApp']) {
+    return {
+      navigateToApp, // apps are currently registered as top level apps but this may change in the future
+      ...this.sharedInterface,
+    };
+  }
 }

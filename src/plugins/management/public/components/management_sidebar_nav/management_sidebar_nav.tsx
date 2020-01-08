@@ -26,18 +26,19 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LegacySection, LegacyApp } from '../types';
-import { ManagementApp } from '../management_app';
-import { ManagementSection } from '../management_section';
+import { LegacySection, LegacyApp } from '../../types';
+import { ManagementApp } from '../../management_app';
+import { ManagementSection } from '../../management_section';
 
 interface NavApp {
+  id: string;
+  name: string;
   [key: string]: unknown;
   order: number; // only needed while merging platform and legacy
 }
 
 interface NavSection extends NavApp {
   items: NavApp[];
-  order: number; // only needed while merging platform and legacy
 }
 
 interface ManagementSidebarNavProps {
@@ -104,7 +105,7 @@ const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
 
 const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
 
-export const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
+const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
   sections.map(section => ({
     items: section.getAppsEnabled().map(managementAppToNavItem(selectedId, section.id)),
     ...managementSectionToNavSection(section),
@@ -180,7 +181,6 @@ export class ManagementSidebarNav extends React.Component<
           mobileTitle={this.renderMobileTitle()}
           isOpenOnMobile={this.state.isSideNavOpenOnMobile}
           toggleOpenOnMobile={this.toggleOpenOnMobile}
-          // @ts-ignore
           items={sectionsToItems(
             this.props.getSections(),
             this.props.legacySections,

@@ -20,22 +20,22 @@
 import * as React from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ManagementSidebarNav } from './components';
-import { LegacySection } from './types';
-import { ManagementSection } from './management_section';
+import { ManagementSidebarNav } from '../management_sidebar_nav';
+import { LegacySection } from '../../types';
+import { ManagementSection } from '../../management_section';
 
 interface Props {
   getSections: () => ManagementSection[];
   legacySections: LegacySection[];
   selectedId: string;
-  mountedCallback: (element: HTMLDivElement) => void;
+  onMounted: (element: HTMLDivElement) => void;
 }
 
 export class ManagementChrome extends React.Component<Props> {
   private container = React.createRef<HTMLDivElement>();
   componentDidMount() {
     if (this.container.current) {
-      this.props.mountedCallback(this.container.current);
+      this.props.onMounted(this.container.current);
     }
   }
   render() {

@@ -18,4 +18,3 @@
  */
 
 export { ManagementSidebarNav } from './management_sidebar_nav';
-export { ManagementChrome } from './management_chrome';

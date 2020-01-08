@@ -24,7 +24,7 @@ import { CreateManagementApp, ManagementSectionMount, Unmount } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
-import { ManagementChrome } from './management_chrome';
+import { ManagementChrome } from './components';
 import { ManagementSection } from './management_section';
 import { ChromeBreadcrumb, CoreSetup } from '../../../core/public/';
 
@@ -72,7 +72,7 @@ export class ManagementApp {
             getSections={getSections}
             selectedId={id}
             legacySections={getLegacyManagementSections().items}
-            mountedCallback={async element => {
+            onMounted={async element => {
               appUnmount = await mount({
                 basePath,
                 element,

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
-import { mergeLegacyItems } from '../components/management_sidebar_nav';
+import { IndexedArray } from '../../../../../legacy/ui/public/indexed_array';
+import { mergeLegacyItems } from './management_sidebar_nav';
 
 const toIndexedArray = (initialSet: any[]) =>
   new IndexedArray({
