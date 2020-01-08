@@ -139,6 +139,27 @@ function generateDLL(config) {
         filename: dllStyleFilename,
       }),
     ],
+    // optimization: {
+    //   splitChunks: {
+    //     cacheGroups: {
+    //       // commons: {
+    //       //   name: 'commons',
+    //       //   chunks: 'all',
+    //       //   reuseExistingChunk: true,
+    //       //   minChunks: 2,
+    //       // },
+    //       vendors0: {
+    //         name: 'vendors0',
+    //         chunks: 'initial',
+    //         enforce: true,
+    //         minChunks: 2,
+    //       },
+    //     },
+    //   },
+    // },
+    optimization: {
+      runtimeChunk: 'single',
+    },
     performance: {
       // NOTE: we are disabling this as those hints
       // are more tailored for the final bundles result
@@ -154,6 +175,7 @@ function extendRawConfig(rawConfig) {
   const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
   const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
+  const dllChunks = rawConfig.chunks;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
   const dllBundleName = rawConfig.dllName;
@@ -172,7 +194,13 @@ function extendRawConfig(rawConfig) {
   const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
-  dllEntry[dllEntryName] = [`${dllOutputPath}/${dllEntryName}${dllEntryExt}`];
+  dllChunks.reduce((dllEntryObj, chunk) => {
+    dllEntryObj[`${dllEntryName}${chunk}`] = [
+      `${dllOutputPath}/${dllEntryName}${chunk}${dllEntryExt}`,
+    ];
+    return dllEntryObj;
+  }, dllEntry);
+  // dllEntry[dllEntryName] = [`${dllOutputPath}/${dllEntryName}${dllEntryExt}`];
 
   // Export dll config map
   return {

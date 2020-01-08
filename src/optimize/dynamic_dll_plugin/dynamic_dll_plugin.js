@@ -32,9 +32,20 @@ const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
+  constructor({
+    uiBundles,
+    threadLoaderPoolConfig,
+    logWithMetadata,
+    numberOfChunks,
+    maxCompilations = 1,
+  }) {
     this.logWithMetadata = logWithMetadata || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
+    this.dllCompiler = new DllCompiler(
+      uiBundles,
+      threadLoaderPoolConfig,
+      logWithMetadata,
+      numberOfChunks
+    );
     this.entryPaths = dllEntryTemplate();
     this.afterCompilationEntryPaths = dllEntryTemplate();
     this.maxCompilations = maxCompilations;
@@ -44,7 +55,7 @@ export class DynamicDllPlugin {
 
   async init() {
     await this.dllCompiler.init();
-    this.entryPaths = await this.dllCompiler.readEntryFile();
+    this.entryPaths = await this.dllCompiler.readEntryFiles();
   }
 
   apply(compiler) {
@@ -70,12 +81,14 @@ export class DynamicDllPlugin {
   bindDllReferencePlugin(compiler) {
     const rawDllConfig = this.dllCompiler.rawDllConfig;
     const dllContext = rawDllConfig.context;
-    const dllManifestPath = this.dllCompiler.getManifestPath();
+    const dllManifestPaths = this.dllCompiler.getManifestPaths();
 
-    new webpack.DllReferencePlugin({
-      context: dllContext,
-      manifest: dllManifestPath,
-    }).apply(compiler);
+    dllManifestPaths.forEach(dllChunkManifestPath => {
+      new webpack.DllReferencePlugin({
+        context: dllContext,
+        manifest: dllChunkManifestPath,
+      }).apply(compiler);
+    });
   }
 
   registerInitBasicHooks(compiler) {
@@ -192,7 +205,7 @@ export class DynamicDllPlugin {
         // then will be set to false
         compilation.needsDLLCompilation =
           this.afterCompilationEntryPaths !== this.entryPaths ||
-          !this.dllCompiler.dllExistsSync() ||
+          !this.dllCompiler.dllsExistsSync() ||
           (this.isToForceDLLCreation() && this.performedCompilations === 0);
         this.entryPaths = this.afterCompilationEntryPaths;
 
@@ -337,7 +350,9 @@ export class DynamicDllPlugin {
     // We need to purge the cache into the inputFileSystem
     // for every single built in previous compilation
     // that we rely in next ones.
-    mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
+    this.dllCompiler
+      .getManifestPaths()
+      .forEach(chunkDllManifestPath => mainCompiler.inputFileSystem.purge(chunkDllManifestPath));
 
     this.performedCompilations++;
 
