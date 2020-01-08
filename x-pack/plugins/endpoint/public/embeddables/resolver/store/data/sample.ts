@@ -4,7 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const sampleData = {
+import { ProcessEvent } from '../../types';
+
+interface ProcessEventSampleData {
+  data: {
+    result: {
+      search_results: ProcessEvent[];
+    };
+  };
+}
+
+const rawData = {
   data: {
     code: 200,
     result: {
@@ -1594,3 +1604,5 @@ export const sampleData = {
     timestamp: '2019-12-18T19:31:27.565110',
   },
 };
+
+export const sampleData: ProcessEventSampleData = rawData as ProcessEventSampleData;

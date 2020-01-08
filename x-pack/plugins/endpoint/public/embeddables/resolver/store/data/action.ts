@@ -6,6 +6,7 @@
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
+  // TODO how dare you
   readonly payload: Record<string, any>;
 }
 
