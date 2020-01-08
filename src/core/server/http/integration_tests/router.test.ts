@@ -642,6 +642,116 @@ describe('Response factory', () => {
       });
     });
 
+    it('validate function in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: ({ bar, baz } = {}, { ok, badRequest }) => {
+              if (typeof bar === 'string' && typeof baz === 'number') {
+                return ok({ bar, baz });
+              } else {
+                return badRequest('Wrong payload', ['body']);
+              }
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123',
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.body]: Wrong payload',
+            statusCode: 400,
+          });
+        });
+    });
+
+    it('@kbn/config-schema validation in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: schema.object({
+              bar: schema.string(),
+              baz: schema.number(),
+            }),
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
+    });
+
     it('401 Unauthorized', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');

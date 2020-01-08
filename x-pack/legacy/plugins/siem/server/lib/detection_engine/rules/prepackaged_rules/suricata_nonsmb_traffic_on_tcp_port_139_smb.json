@@ -1,0 +1,17 @@
+{
+  "rule_id": "c259ab53-4b1a-42f6-b204-fe057c521515",
+  "risk_score": 50,
+  "description": "Suricata non-SMB Traffic on TCP Port 139 (SMB)",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-SMB Traffic on TCP Port 139 (SMB)",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610011 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

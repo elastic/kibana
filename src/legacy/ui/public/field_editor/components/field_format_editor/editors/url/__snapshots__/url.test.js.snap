@@ -534,10 +534,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="urlEditorWidth"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -558,10 +555,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="urlEditorHeight"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />

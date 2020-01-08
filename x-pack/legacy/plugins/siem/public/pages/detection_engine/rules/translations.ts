@@ -205,3 +205,46 @@ export const COLUMN_ACTIVATE = i18n.translate(
     defaultMessage: 'Activate',
   }
 );
+
+export const DEFINE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.defineRuleTitle', {
+  defaultMessage: 'Define Rule',
+});
+
+export const ABOUT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.aboutRuleTitle', {
+  defaultMessage: 'About Rule',
+});
+
+export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.scheduleRuleTitle', {
+  defaultMessage: 'Schedule Rule',
+});
+
+export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
+  defaultMessage: 'Definition',
+});
+
+export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutTitle', {
+  defaultMessage: 'About',
+});
+
+export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
+  defaultMessage: 'Schedule',
+});
+
+export const OPTIONAL_FIELD = i18n.translate(
+  'xpack.siem.detectionEngine.rules.optionalFieldDescription',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const CONTINUE = i18n.translate('xpack.siem.detectionEngine.rules.continueButtonTitle', {
+  defaultMessage: 'Continue',
+});
+
+export const UPDATE = i18n.translate('xpack.siem.detectionEngine.rules.updateButtonTitle', {
+  defaultMessage: 'Update',
+});
+
+export const DELETE = i18n.translate('xpack.siem.detectionEngine.rules.deleteDescription', {
+  defaultMessage: 'Delete',
+});

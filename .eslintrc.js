@@ -178,22 +178,9 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
 
@@ -736,15 +723,13 @@ module.exports = {
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-catch': 'warn',
+        'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
         // This will be turned on after bug fixes are mostly complete
         // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-return': 'warn',
+        'no-useless-return': 'error',
         // This will be turned on after bug fixers are mostly complete
         // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
@@ -752,14 +737,13 @@ module.exports = {
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
-        // This style will be turned on after most bugs are fixed
-        // 'prefer-template': 'warn',
+        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
+        'react/display-name': 'error',
         'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        // This style will be turned on after most bugs are fixed
-        // 'react/no-children-prop': 'warn',
+        'react/no-children-prop': 'error',
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
@@ -819,21 +803,6 @@ module.exports = {
         'jsx-a11y/label-has-associated-control': 'off',
         'jsx-a11y/aria-role': 'off',
       },
-    },
-
-    /**
-     * Monitoring overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
-      rules: {
-        'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
-        'no-else-return': 'error',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/monitoring/public/**/*.js'],
-      env: { browser: true },
     },
 
     /**

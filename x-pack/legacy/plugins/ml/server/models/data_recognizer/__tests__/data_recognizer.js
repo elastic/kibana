@@ -16,6 +16,7 @@ describe('ML - data recognizer', () => {
     'auditbeat_process_docker_ecs',
     'auditbeat_process_hosts_ecs',
     'logs_ui_analysis',
+    'logs_ui_categories',
     'metricbeat_system_ecs',
     'nginx_ecs',
     'sample_data_ecommerce',

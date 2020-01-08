@@ -30,6 +30,8 @@ import {
   disableInteractive,
   disableTooltipControl,
   hideToolbarOverlay,
+  hideLayerControl,
+  hideViewControl,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -130,6 +132,14 @@ export class MapEmbeddable extends Embeddable {
 
     if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
       this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
+    }
+
+    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
+      this._store.dispatch(hideLayerControl(this.input.hideLayerControl));
+    }
+
+    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
+      this._store.dispatch(hideViewControl(this.input.hideViewControl));
     }
 
     if (this.input.mapCenter) {

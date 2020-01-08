@@ -55,6 +55,9 @@ export {
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
+  withEmbeddableSubscription,
+  EmbeddableFactoryRenderer,
+  EmbeddableRoot,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

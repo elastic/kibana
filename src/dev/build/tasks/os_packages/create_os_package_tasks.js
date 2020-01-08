@@ -18,7 +18,7 @@
  */
 
 import { runFpm } from './run_fpm';
-import { runDockerGenerator } from './docker_generator';
+import { runDockerGenerator, runDockerGeneratorForUBI } from './docker_generator';
 
 export const CreateDebPackageTask = {
   description: 'Creating deb package',
@@ -45,6 +45,10 @@ export const CreateDockerPackageTask = {
   description: 'Creating docker package',
 
   async run(config, log, build) {
+    // Builds Docker targets for default and oss
     await runDockerGenerator(config, log, build);
+
+    // Builds Docker target default with ubi7 base image
+    await runDockerGeneratorForUBI(config, log, build);
   },
 };

@@ -28,7 +28,7 @@ export interface InfraMetricsAdapter {
   getMetrics(
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
-    request: KibanaRequest // NP_TODO: temporarily needed until metrics getVisData no longer needs full request
+    request: KibanaRequest
   ): Promise<InfraMetricData[]>;
 }
 

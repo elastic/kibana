@@ -459,6 +459,8 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
 
+  AlertsHistogram: AlertsOverTimeData;
+
   AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
@@ -560,10 +562,10 @@ export interface IndexField {
   format?: Maybe<string>;
 }
 
-export interface AnomaliesOverTimeData {
+export interface AlertsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  anomaliesOverTime: MatrixOverTimeHistogramData[];
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -580,6 +582,14 @@ export interface MatrixOverTimeHistogramData {
   y: number;
 
   g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -2139,6 +2149,13 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+}
 export interface AnomaliesOverTimeSourceArgs {
   timerange: TimerangeInput;
 
@@ -2781,6 +2798,8 @@ export namespace SourceResolvers {
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, TContext>;
 
+    AlertsHistogram?: AlertsHistogramResolver<AlertsOverTimeData, TypeParent, TContext>;
+
     AnomaliesOverTime?: AnomaliesOverTimeResolver<AnomaliesOverTimeData, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
@@ -2853,6 +2872,19 @@ export namespace SourceResolvers {
     Parent,
     TContext
   >;
+  export type AlertsHistogramResolver<
+    R = AlertsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AlertsHistogramArgs>;
+  export interface AlertsHistogramArgs {
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+
+    timerange: TimerangeInput;
+  }
+
   export type AnomaliesOverTimeResolver<
     R = AnomaliesOverTimeData,
     Parent = Source,
@@ -3407,11 +3439,11 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace AnomaliesOverTimeDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
+export namespace AlertsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    anomaliesOverTime?: AnomaliesOverTimeResolver<
+    alertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -3422,17 +3454,17 @@ export namespace AnomaliesOverTimeDataResolvers {
 
   export type InspectResolver<
     R = Maybe<Inspect>,
-    Parent = AnomaliesOverTimeData,
+    Parent = AlertsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AnomaliesOverTimeResolver<
+  export type AlertsOverTimeByModuleResolver<
     R = MatrixOverTimeHistogramData[],
-    Parent = AnomaliesOverTimeData,
+    Parent = AlertsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type TotalCountResolver<
     R = number,
-    Parent = AnomaliesOverTimeData,
+    Parent = AlertsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -3478,6 +3510,36 @@ export namespace MatrixOverTimeHistogramDataResolvers {
   export type GResolver<
     R = string,
     Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace AnomaliesOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    anomaliesOverTime?: AnomaliesOverTimeResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AnomaliesOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AnomaliesOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AnomaliesOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AnomaliesOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8707,9 +8769,10 @@ export type IResolvers<TContext = SiemContext> = {
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
-  AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers.Resolvers<TContext>;
+  AlertsOverTimeData?: AlertsOverTimeDataResolvers.Resolvers<TContext>;
   Inspect?: InspectResolvers.Resolvers<TContext>;
   MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
+  AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;

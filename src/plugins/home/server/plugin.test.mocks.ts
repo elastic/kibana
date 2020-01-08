@@ -17,8 +17,11 @@
  * under the License.
  */
 import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
+import { sampleDataRegistryMock } from './services/sample_data/sample_data_registry.mock';
 
-export const registryMock = tutorialsRegistryMock.create();
+export const registryForTutorialsMock = tutorialsRegistryMock.create();
+export const registryForSampleDataMock = sampleDataRegistryMock.create();
 jest.doMock('./services', () => ({
-  TutorialsRegistry: jest.fn(() => registryMock),
+  TutorialsRegistry: jest.fn(() => registryForTutorialsMock),
+  SampleDataRegistry: jest.fn(() => registryForSampleDataMock),
 }));

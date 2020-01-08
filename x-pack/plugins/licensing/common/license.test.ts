@@ -9,9 +9,10 @@ import { LICENSE_CHECK_STATE } from './types';
 import { licenseMock } from './licensing.mock';
 
 describe('License', () => {
-  const basicLicense = licenseMock.create();
-  const basicExpiredLicense = licenseMock.create({ license: { status: 'expired' } });
-  const goldLicense = licenseMock.create({ license: { type: 'gold' } });
+  const basicLicense = licenseMock.createLicense();
+  const basicExpiredLicense = licenseMock.createLicense({ license: { status: 'expired' } });
+  const goldLicense = licenseMock.createLicense({ license: { type: 'gold' } });
+  const enterpriseLicense = licenseMock.createLicense({ license: { type: 'enterprise' } });
 
   const errorMessage = 'unavailable';
   const errorLicense = new License({ error: errorMessage, signature: '' });
@@ -49,32 +50,23 @@ describe('License', () => {
     expect(unavailableLicense.isActive).toBe(false);
   });
 
-  it('isBasic', () => {
-    expect(basicLicense.isBasic).toBe(true);
-    expect(goldLicense.isBasic).toBe(false);
-    expect(errorLicense.isBasic).toBe(false);
-    expect(unavailableLicense.isBasic).toBe(false);
-  });
+  it('hasAtLeast', () => {
+    expect(basicLicense.hasAtLeast('platinum')).toBe(false);
+    expect(basicLicense.hasAtLeast('gold')).toBe(false);
+    expect(basicLicense.hasAtLeast('basic')).toBe(true);
 
-  it('isNotBasic', () => {
-    expect(basicLicense.isNotBasic).toBe(false);
-    expect(goldLicense.isNotBasic).toBe(true);
-    expect(errorLicense.isNotBasic).toBe(false);
-    expect(unavailableLicense.isNotBasic).toBe(false);
-  });
+    expect(errorLicense.hasAtLeast('basic')).toBe(false);
 
-  it('isOneOf', () => {
-    expect(basicLicense.isOneOf('platinum')).toBe(false);
-    expect(basicLicense.isOneOf(['platinum'])).toBe(false);
-    expect(basicLicense.isOneOf(['gold', 'platinum'])).toBe(false);
-    expect(basicLicense.isOneOf(['platinum', 'gold'])).toBe(false);
-    expect(basicLicense.isOneOf(['basic', 'gold'])).toBe(true);
-    expect(basicLicense.isOneOf(['basic'])).toBe(true);
-    expect(basicLicense.isOneOf('basic')).toBe(true);
+    expect(unavailableLicense.hasAtLeast('basic')).toBe(false);
 
-    expect(errorLicense.isOneOf(['basic', 'gold', 'platinum'])).toBe(false);
+    expect(goldLicense.hasAtLeast('basic')).toBe(true);
+    expect(goldLicense.hasAtLeast('gold')).toBe(true);
+    expect(goldLicense.hasAtLeast('platinum')).toBe(false);
 
-    expect(unavailableLicense.isOneOf(['basic', 'gold', 'platinum'])).toBe(false);
+    expect(enterpriseLicense.hasAtLeast('basic')).toBe(true);
+    expect(enterpriseLicense.hasAtLeast('platinum')).toBe(true);
+    expect(enterpriseLicense.hasAtLeast('enterprise')).toBe(true);
+    expect(enterpriseLicense.hasAtLeast('trial')).toBe(false);
   });
 
   it('getUnavailableReason', () => {
@@ -106,12 +98,19 @@ describe('License', () => {
 
       expect(unavailableLicense.check('ccr', 'basic').state).toBe(LICENSE_CHECK_STATE.Unavailable);
       expect(unavailableLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Unavailable);
+
+      expect(enterpriseLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Valid);
+      expect(enterpriseLicense.check('ccr', 'enterprise').state).toBe(LICENSE_CHECK_STATE.Valid);
     });
 
     it('throws in case of unknown license type', () => {
-      expect(
-        () => basicLicense.check('ccr', 'any' as any).state
-      ).toThrowErrorMatchingInlineSnapshot(`"\\"any\\" is not a valid license type"`);
+      expect(() => basicLicense.check('ccr', 'any' as any)).toThrowErrorMatchingInlineSnapshot(
+        `"\\"any\\" is not a valid license type"`
+      );
+
+      expect(() => basicLicense.hasAtLeast('any' as any)).toThrowErrorMatchingInlineSnapshot(
+        `"\\"any\\" is not a valid license type"`
+      );
     });
   });
 });

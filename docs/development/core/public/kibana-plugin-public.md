@@ -56,7 +56,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
 |  [HttpRequestInit](./kibana-plugin-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->s. |
-|  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
+|  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
@@ -118,8 +118,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
-|  [HttpSetup](./kibana-plugin-public.httpsetup.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
-|  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
+|  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpSetup](./kibana-plugin-public.httpsetup.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |

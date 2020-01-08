@@ -12,13 +12,6 @@ APIs for accessing and updating the document title.
 export interface ChromeDocTitle 
 ```
 
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [change(newTitle)](./kibana-plugin-public.chromedoctitle.change.md) | Changes the current document title. |
-|  [reset()](./kibana-plugin-public.chromedoctitle.reset.md) | Resets the document title to it's initial value. (meaning the one present in the title meta at application load.) |
-
 ## Example 1
 
 How to change the title of the document
@@ -36,4 +29,11 @@ How to reset the title of the document to it's initial value
 chrome.docTitle.reset()
 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [change(newTitle)](./kibana-plugin-public.chromedoctitle.change.md) | Changes the current document title. |
+|  [reset()](./kibana-plugin-public.chromedoctitle.reset.md) | Resets the document title to it's initial value. (meaning the one present in the title meta at application load.) |
 

@@ -6,35 +6,37 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Route, Router, Switch } from 'react-router-dom';
+import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
 import { metadata } from 'ui/metadata';
-import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import {
-  CoreStart,
-  Plugin,
   CoreSetup,
-  PluginInitializerContext,
-  PackageInfo
+  CoreStart,
+  PackageInfo,
+  Plugin,
+  PluginInitializerContext
 } from '../../../../../../src/core/public';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
-import { history } from '../utils/history';
-import { LocationProvider } from '../context/LocationContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { px, unit, units } from '../style/variables';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LicenseProvider } from '../context/LicenseContext';
-import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
+import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
+import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
+import { ApmPluginContext } from '../context/ApmPluginContext';
+import { LicenseProvider } from '../context/LicenseContext';
+import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
+import { LocationProvider } from '../context/LocationContext';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
-import { setHelpExtension } from './setHelpExtension';
-import { setReadonlyBadge } from './updateBadge';
+import { px, unit, units } from '../style/variables';
+import { history } from '../utils/history';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
+import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { ApmPluginContext } from '../context/ApmPluginContext';
+import { setReadonlyBadge } from './updateBadge';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -51,7 +53,7 @@ const App = () => {
       <Route component={ScrollToTopOnPathChange} />
       <Switch>
         {routes.map((route, i) => (
-          <Route key={i} {...route} />
+          <ApmRoute key={i} {...route} />
         ))}
       </Switch>
     </MainContainer>
@@ -64,6 +66,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
   home: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface ConfigSchema {

@@ -158,3 +158,15 @@ export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
     !updateDueToFields && !updateDueToSourceQuery && !updateDueToIsTimeAware && !updateDueToTime
   );
 }
+
+export function canSkipFormattersUpdate({ prevDataRequest, nextMeta }) {
+  if (!prevDataRequest) {
+    return false;
+  }
+  const prevMeta = prevDataRequest.getMeta();
+  if (!prevMeta) {
+    return false;
+  }
+
+  return _.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
+}

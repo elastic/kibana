@@ -47,7 +47,7 @@ export function checkLicense(xpackLicenseInfo: XPackInfo): Response {
     };
   }
 
-  const VALID_FULL_LICENSE_MODES = ['trial', 'platinum'];
+  const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_FULL_LICENSE_MODES);
   const licenseType = isLicenseModeValid === true ? LICENSE_TYPE.FULL : LICENSE_TYPE.BASIC;

@@ -26,7 +26,7 @@ export const calculateMetricInterval = async (
   framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   options: Options,
-  modules: string[],
+  modules?: string[],
   nodeType?: InfraNodeType // TODO: check that this type still makes sense
 ) => {
   let from = options.timerange.from;

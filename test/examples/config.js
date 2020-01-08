@@ -24,7 +24,7 @@ export default async function({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [require.resolve('./search')],
+    testFiles: [require.resolve('./search'), require.resolve('./embeddables')],
     services: {
       ...functionalConfig.get('services'),
       ...services,

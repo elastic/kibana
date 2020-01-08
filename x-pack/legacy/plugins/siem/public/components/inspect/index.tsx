@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
@@ -72,72 +72,71 @@ const InspectButtonComponent = React.memo<InspectButtonProps>(
     setIsInspected,
     show,
     title = '',
-  }: InspectButtonProps) => (
-    <InspectContainer
-      data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
-      showInspect={show}
-    >
-      {inputId === 'timeline' && !compact && (
-        <EuiButtonEmpty
-          aria-label={i18n.INSPECT}
-          data-test-subj="inspect-empty-button"
-          color="text"
-          iconSide="left"
-          iconType="inspect"
-          isDisabled={loading || isDisabled}
-          isLoading={loading}
-          onClick={() => {
-            setIsInspected({
-              id: queryId,
-              inputId,
-              isInspected: true,
-              selectedInspectIndex: inspectIndex,
-            });
-          }}
-        >
-          {i18n.INSPECT}
-        </EuiButtonEmpty>
-      )}
-      {(inputId === 'global' || compact) && (
-        <EuiButtonIcon
-          aria-label={i18n.INSPECT}
-          data-test-subj="inspect-icon-button"
-          iconSize="m"
-          iconType="inspect"
-          isDisabled={loading || isDisabled}
-          title={i18n.INSPECT}
-          onClick={() => {
-            setIsInspected({
-              id: queryId,
-              inputId,
-              isInspected: true,
-              selectedInspectIndex: inspectIndex,
-            });
-          }}
-        />
-      )}
-      <ModalInspectQuery
-        closeModal={() => {
-          if (onCloseInspect != null) {
-            onCloseInspect();
+  }: InspectButtonProps) => {
+    const handleClick = useCallback(() => {
+      setIsInspected({
+        id: queryId,
+        inputId,
+        isInspected: true,
+        selectedInspectIndex: inspectIndex,
+      });
+    }, [setIsInspected, queryId, inputId, inspectIndex]);
+
+    const handleCloseModal = useCallback(() => {
+      if (onCloseInspect != null) {
+        onCloseInspect();
+      }
+      setIsInspected({
+        id: queryId,
+        inputId,
+        isInspected: false,
+        selectedInspectIndex: inspectIndex,
+      });
+    }, [onCloseInspect, setIsInspected, queryId, inputId, inspectIndex]);
+
+    return (
+      <InspectContainer
+        data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
+        showInspect={show}
+      >
+        {inputId === 'timeline' && !compact && (
+          <EuiButtonEmpty
+            aria-label={i18n.INSPECT}
+            data-test-subj="inspect-empty-button"
+            color="text"
+            iconSide="left"
+            iconType="inspect"
+            isDisabled={loading || isDisabled}
+            isLoading={loading}
+            onClick={handleClick}
+          >
+            {i18n.INSPECT}
+          </EuiButtonEmpty>
+        )}
+        {(inputId === 'global' || compact) && (
+          <EuiButtonIcon
+            aria-label={i18n.INSPECT}
+            data-test-subj="inspect-icon-button"
+            iconSize="m"
+            iconType="inspect"
+            isDisabled={loading || isDisabled}
+            title={i18n.INSPECT}
+            onClick={handleClick}
+          />
+        )}
+        <ModalInspectQuery
+          closeModal={handleCloseModal}
+          isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
+          request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
+          response={
+            inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
           }
-          setIsInspected({
-            id: queryId,
-            inputId,
-            isInspected: false,
-            selectedInspectIndex: inspectIndex,
-          });
-        }}
-        isShowing={!loading && selectedInspectIndex === inspectIndex && isInspected}
-        request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
-        response={
-          inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
-        }
-        title={title}
-        data-test-subj="inspect-modal"
-      />
-    </InspectContainer>
-  )
+          title={title}
+          data-test-subj="inspect-modal"
+        />
+      </InspectContainer>
+    );
+  }
 );
 
 InspectButtonComponent.displayName = 'InspectButtonComponent';

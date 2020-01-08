@@ -15,7 +15,7 @@ import { fieldToName } from '../../waffle/lib/field_to_display_name';
 import { InfraSnapshotMetricType } from '../../../graphql/types';
 
 interface Props {
-  children: (props: ToolbarProps) => React.ReactElement;
+  children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
 }
 
 export const ToolbarWrapper = (props: Props) => {
@@ -29,20 +29,28 @@ export const ToolbarWrapper = (props: Props) => {
                 changeMetric,
                 changeGroupBy,
                 changeCustomOptions,
+                changeAccount,
+                changeRegion,
                 customOptions,
                 groupBy,
                 metric,
                 nodeType,
+                accountId,
+                region,
               }) =>
                 props.children({
                   createDerivedIndexPattern,
                   changeMetric,
                   changeGroupBy,
+                  changeAccount,
+                  changeRegion,
                   changeCustomOptions,
                   customOptions,
                   groupBy,
                   metric,
                   nodeType,
+                  region,
+                  accountId,
                 })
               }
             </WithWaffleOptions>

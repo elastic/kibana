@@ -22,9 +22,11 @@ import { compress, copyAll, mkdirp, write } from '../../../lib';
 import { dockerfileTemplate } from './templates';
 
 export async function bundleDockerFiles(config, log, build, scope) {
-  log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);
+  log.info(
+    `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
+  );
 
-  const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.versionTag}-docker-build-context`;
+  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.versionTag}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 

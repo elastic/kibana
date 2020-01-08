@@ -47,6 +47,8 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // utils
+  parseInterval,
 } from '../common';
 
 /**
@@ -57,6 +59,7 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor,
   shouldReadFieldFromDocValues,
+  indexPatterns,
 } from './index_patterns';
 export * from './search';
 export {

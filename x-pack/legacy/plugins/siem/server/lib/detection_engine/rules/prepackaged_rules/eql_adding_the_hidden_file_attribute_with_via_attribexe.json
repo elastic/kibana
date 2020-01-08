@@ -1,0 +1,17 @@
+{
+  "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
+  "risk_score": 50,
+  "description": "EQL - Adding the Hidden File Attribute with via attrib.exe",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Adding the Hidden File Attribute with via attrib.exe",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

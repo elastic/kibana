@@ -45,15 +45,16 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_ID
+            field: TRANSACTION_ID,
+            // high cardinality
+            execution_hint: 'map'
           }
         }
       }
     }
-  };
+  } as const;
 
   const resp = await client.search(params);
-
   return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,

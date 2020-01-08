@@ -6,31 +6,18 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { mocksSource } from '../../containers/source/mock';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { TestProviders } from '../../mock';
-import { mockUiSettings } from '../../mock/ui_settings';
+import { TestProviders, mockGlobalState, apolloClientObservable } from '../../mock';
+import { State, createStore } from '../../store';
+import { inputsActions } from '../../store/inputs';
 import { Network } from './network';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    kibana: 'http://www.example.com',
-  },
-}));
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
+import { NetworkRoutes } from './navigation';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -126,5 +113,59 @@ describe('rendering - rendering', () => {
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+  });
+
+  test('it should add the new filters after init', async () => {
+    const newFilters: esFilters.Filter[] = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'host.name': 'ItRocks',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"query": {"bool": {"filter": [{"bool": {"should": [{"match_phrase": {"host.name": "ItRocks"}}],"minimum_should_match": 1}}]}}}',
+        },
+      },
+    ];
+    localSource[0].result.data.source.status.indicesExist = true;
+    const myState: State = mockGlobalState;
+    const myStore = createStore(myState, apolloClientObservable);
+    const wrapper = mount(
+      <TestProviders store={myStore}>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Network {...getMockProps()} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+
+    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    wrapper.update();
+    expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
+      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    );
   });
 });

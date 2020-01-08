@@ -23,6 +23,7 @@ import {
   getScrollZoom,
   isInteractiveDisabled,
   isTooltipControlDisabled,
+  isViewControlHidden,
 } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
@@ -36,6 +37,8 @@ function mapStateToProps(state = {}) {
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
+    disableTooltipControl: isTooltipControlDisabled(state),
+    hideViewControl: isViewControlHidden(state),
   };
 }
 

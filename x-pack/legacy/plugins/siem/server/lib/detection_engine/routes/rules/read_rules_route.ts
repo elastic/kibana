@@ -13,7 +13,7 @@ import { transformError } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { QueryRequest } from './types';
+import { QueryRequest } from '../../rules/types';
 
 export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',

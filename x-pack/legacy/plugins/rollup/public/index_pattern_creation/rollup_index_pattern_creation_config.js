@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
+import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 
 import { RollupPrompt } from './components/rollup_prompt';
 import { setHttpClient, getRollupIndices } from '../services/api';
-import { i18n } from '@kbn/i18n';
+import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
 
 const rollupIndexPatternTypeName = i18n.translate(
   'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
@@ -63,7 +64,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
   async setRollupIndices() {
     try {
-      this.rollupIndicesCapabilities = await getRollupIndices();
+      // This is a hack intended to prevent the getRollupIndices() request from being sent if
+      // we're on /logout. There is a race condition that can arise on that page, whereby this
+      // request resolves after the logout request resolves, and un-clears the session ID.
+      const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
+      if (!isAnonymous) {
+        this.rollupIndicesCapabilities = await getRollupIndices();
+      }
+
       this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
     } catch (e) {
       // Silently swallow failure responses such as expired trials

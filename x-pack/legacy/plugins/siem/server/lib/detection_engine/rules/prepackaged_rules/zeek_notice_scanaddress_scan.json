@@ -1,0 +1,17 @@
+{
+  "rule_id": "9d320fca-4ec1-4511-bdbc-7edf9673c07d",
+  "risk_score": 50,
+  "description": "Address scans detect that a host appears to be scanning some number of destinations on a single port.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Scan::Address_Scan",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Scan::Address_Scan\" or rule.name: \"Scan::Address_Scan\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

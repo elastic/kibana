@@ -211,6 +211,7 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const timelineTypeContext = useTimelineTypeContext();
 
   const loadMore = useCallback(() => {
     setPaginationLoading(true);
@@ -239,7 +240,7 @@ export const FooterComponent = ({
           data-test-subj="LoadingPanelTimeline"
           height="35px"
           showBorder={false}
-          text={isEventViewer ? `${i18n.LOADING_EVENTS}...` : `${i18n.LOADING_TIMELINE_DATA}...`}
+          text={`${timelineTypeContext.loadingText ?? i18n.LOADING_TIMELINE_DATA}...`}
           width="100%"
         />
       </LoadingPanelContainer>

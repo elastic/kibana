@@ -5,11 +5,16 @@
  */
 
 import { management } from 'ui/management';
+import chrome from 'ui/chrome';
 import { BASE_PATH, PLUGIN } from '../common/constants';
 
-management.getSection('elasticsearch').register('license_management', {
-  visible: true,
-  display: PLUGIN.TITLE,
-  order: 99,
-  url: `#${BASE_PATH}home`,
-});
+const licenseManagementUiEnabled = chrome.getInjected('licenseManagementUiEnabled');
+
+if (licenseManagementUiEnabled) {
+  management.getSection('elasticsearch').register('license_management', {
+    visible: true,
+    display: PLUGIN.TITLE,
+    order: 99,
+    url: `#${BASE_PATH}home`,
+  });
+}

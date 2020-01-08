@@ -147,7 +147,7 @@ export function getESClient(
           `${request.url.pathname} ${JSON.stringify(context.params.query)}`
         );
         console.log(`GET ${nextParams.index}/_search`);
-        console.log(JSON.stringify(nextParams.body, null, 4));
+        console.log(JSON.stringify(nextParams.body, null, 2));
       }
 
       return (callMethod('search', nextParams) as unknown) as Promise<

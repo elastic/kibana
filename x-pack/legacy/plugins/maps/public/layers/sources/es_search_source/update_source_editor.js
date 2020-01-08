@@ -22,9 +22,10 @@ import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
-import { SORT_ORDER } from '../../../../common/constants';
+import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { loadIndexSettings } from './load_index_settings';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -43,15 +44,29 @@ export class UpdateSourceEditor extends Component {
     sourceFields: null,
     termFields: null,
     sortFields: null,
+    maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadFields();
+    this.loadIndexSettings();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  async loadIndexSettings() {
+    try {
+      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
+      if (this._isMounted) {
+        this.setState({ maxInnerResultWindow });
+      }
+    } catch (err) {
+      return;
+    }
   }
 
   async loadFields() {
@@ -149,7 +164,7 @@ export class UpdateSourceEditor extends Component {
         >
           <ValidatedRange
             min={1}
-            max={100}
+            max={this.state.maxInnerResultWindow}
             step={1}
             value={this.props.topHitsSize}
             onChange={this.onTopHitsSizeChange}

@@ -35,14 +35,8 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
-import { ILegacyService } from './legacy/legacy_service';
-export const mockLegacyService: ILegacyService = {
-  legacyId: Symbol(),
-  discoverPlugins: jest.fn().mockReturnValue({ uiExports: {} }),
-  setup: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
-};
+import { legacyServiceMock } from './legacy/legacy_service.mock';
+export const mockLegacyService = legacyServiceMock.create();
 jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
@@ -65,7 +59,23 @@ jest.doMock('./context/context_service', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export const mockUiSettingsService = uiSettingsServiceMock.create();
+jest.doMock('./ui_settings/ui_settings_service', () => ({
+  UiSettingsService: jest.fn(() => mockUiSettingsService),
+}));
+
 export const mockEnsureValidConfiguration = jest.fn();
 jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
+}));
+
+import { RenderingService, mockRenderingService } from './rendering/__mocks__/rendering_service';
+export { mockRenderingService };
+jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
+
+import { uuidServiceMock } from './uuid/uuid_service.mock';
+export const mockUuidService = uuidServiceMock.create();
+jest.doMock('./uuid/uuid_service', () => ({
+  UuidService: jest.fn(() => mockUuidService),
 }));

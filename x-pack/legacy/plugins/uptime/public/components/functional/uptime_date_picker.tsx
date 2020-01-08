@@ -20,21 +20,40 @@ interface SuperDateRangePickerRefreshChangedEvent {
   refreshInterval?: number;
 }
 
+export interface CommonlyUsedRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
 interface Props {
   refreshApp: () => void;
+  commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
 type UptimeDatePickerProps = Props;
 
-export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
-  const { refreshApp } = props;
+export const UptimeDatePicker = ({ refreshApp, commonlyUsedRanges }: UptimeDatePickerProps) => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd } = getUrlParams();
+
+  const euiCommonlyUsedRanges = commonlyUsedRanges
+    ? commonlyUsedRanges.map(
+        ({ from, to, display }: { from: string; to: string; display: string }) => {
+          return {
+            start: from,
+            end: to,
+            label: display,
+          };
+        }
+      )
+    : CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES;
+
   return (
     <EuiSuperDatePicker
       start={dateRangeStart}
       end={dateRangeEnd}
-      commonlyUsedRanges={CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES}
+      commonlyUsedRanges={euiCommonlyUsedRanges}
       isPaused={autorefreshIsPaused}
       refreshInterval={autorefreshInterval}
       onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {

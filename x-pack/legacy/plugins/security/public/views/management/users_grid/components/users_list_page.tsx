@@ -17,6 +17,7 @@ import {
   EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiEmptyPrompt,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
@@ -84,7 +85,7 @@ class UsersListPageUI extends Component<Props, State> {
       );
     }
     const path = '#/management/security/';
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<User>> = [
       {
         field: 'full_name',
         name: intl.formatMessage({
@@ -169,8 +170,7 @@ class UsersListPageUI extends Component<Props, State> {
     const selectionConfig = {
       itemId: 'username',
       selectable: (user: User) => !(user.metadata && user.metadata._reserved),
-      selectableMessage: (selectable: boolean) =>
-        !selectable ? 'User is a system user' : undefined,
+      selectableMessage: (selectable: boolean) => (!selectable ? 'User is a system user' : ''),
       onSelectionChange: (updatedSelection: User[]) =>
         this.setState({ selection: updatedSelection }),
     };
@@ -190,7 +190,7 @@ class UsersListPageUI extends Component<Props, State> {
         field: 'full_name',
         direction: 'asc',
       },
-    };
+    } as const;
     const rowProps = () => {
       return {
         'data-test-subj': 'userRow',
@@ -237,7 +237,6 @@ class UsersListPageUI extends Component<Props, State> {
             ) : null}
 
             {
-              // @ts-ignore missing responsive from typedef
               <EuiInMemoryTable
                 itemId="username"
                 columns={columns}
@@ -247,7 +246,6 @@ class UsersListPageUI extends Component<Props, State> {
                 loading={users.length === 0}
                 search={search}
                 sorting={sorting}
-                // @ts-ignore missing responsive from typedef
                 rowProps={rowProps}
                 isSelectable
               />

@@ -31,6 +31,7 @@ export const signalRulesAlertType = ({
     actionGroups: ['default'],
     validate: {
       params: schema.object({
+        createdAt: schema.string(),
         description: schema.string(),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
@@ -40,6 +41,7 @@ export const signalRulesAlertType = ({
         language: schema.nullable(schema.string()),
         outputIndex: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
+        timelineId: schema.nullable(schema.string()),
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
@@ -49,7 +51,9 @@ export const signalRulesAlertType = ({
         threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
+        updatedAt: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        version: schema.number({ defaultValue: 1 }),
       }),
     },
     async executor({ alertId, services, params }) {

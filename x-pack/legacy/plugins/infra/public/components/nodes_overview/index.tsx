@@ -21,6 +21,7 @@ import { Map } from '../waffle/map';
 import { ViewSwitcher } from '../waffle/view_switcher';
 import { TableView } from './table';
 import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { convertIntervalToString } from '../../utils/convert_interval_to_string';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -34,6 +35,7 @@ interface Props {
   view: string;
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
+  interval: string;
 }
 
 interface MetricFormatter {
@@ -121,6 +123,7 @@ export const NodesOverview = class extends React.Component<Props, {}> {
       view,
       currentTime,
       options,
+      interval,
     } = this.props;
     if (loading) {
       return (
@@ -153,6 +156,7 @@ export const NodesOverview = class extends React.Component<Props, {}> {
     }
     const dataBounds = calculateBoundsFromNodes(nodes);
     const bounds = autoBounds ? dataBounds : boundsOverride;
+    const intervalAsString = convertIntervalToString(interval);
     return (
       <MainContainer>
         <ViewSwitcherContainer>
@@ -165,7 +169,8 @@ export const NodesOverview = class extends React.Component<Props, {}> {
                 <p>
                   <FormattedMessage
                     id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-                    defaultMessage="Showing the last 1 minute of data at the selected time"
+                    defaultMessage="Showing the last {duration} of data at the selected time"
+                    values={{ duration: intervalAsString }}
                   />
                 </p>
               </EuiText>

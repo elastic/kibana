@@ -34,6 +34,9 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
             interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
@@ -91,7 +94,6 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
-            interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
             id: Joi.string().optional(),

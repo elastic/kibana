@@ -7,6 +7,8 @@
 - **disableInteractive:** (Boolean) Will disable map interactions, panning, zooming in the map.
 - **disableTooltipControl:** (Boolean) Will disable tooltip which shows relevant information on hover, like Continent name etc
 - **hideToolbarOverlay:** (Boolean) Will disable toolbar, which can be used to navigate to coordinate by entering lat/long and zoom values.
+- **hideLayerControl:** (Boolean) Will hide useful layer control, which can be used to hide/show a layer to get a refined view of the map.
+- **hideViewControl:** (Boolean) Will hide view control at bottom right of the map, which shows lat/lon values based on mouse hover in the map, this is useful to get coordinate value from a particular point in map.
 
 ### Creating a Map embeddable from saved object
 ```

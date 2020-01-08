@@ -8,11 +8,14 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
+import { getActionType } from './pagerduty';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
+import { Logger } from '../../../../../../src/core/server';
+import { configUtilsMock } from '../actions_config.mock';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -24,10 +27,12 @@ const services: Services = {
 };
 
 let actionType: ActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const { actionTypeRegistry } = createActionTypeRegistry();
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  mockedLogger = logger;
 });
 
 describe('get()', () => {
@@ -48,6 +53,40 @@ describe('validateConfig()', () => {
       validateConfig(actionType, { shouldNotBeHere: true });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
+    );
+  });
+
+  test('should validate and pass when the pagerduty url is whitelisted', () => {
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: url => {
+          expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
+        },
+      },
+    });
+
+    expect(
+      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' })
+    ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
+  });
+
+  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+    actionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: _ => {
+          throw new Error(`target url is not whitelisted`);
+        },
+      },
+    });
+
+    expect(() => {
+      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring pagerduty action: target url is not whitelisted"`
     );
   });
 });

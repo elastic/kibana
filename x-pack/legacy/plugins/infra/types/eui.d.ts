@@ -43,32 +43,9 @@ declare module '@elastic/eui' {
   };
   export const EuiSideNav: React.FC<EuiSideNavProps>;
 
-  type EuiErrorBoundaryProps = CommonProps & {
-    children: React.ReactNode;
-  };
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
     sizes: EuiSizesResponsive[];
   };
-
-  type EuiInMemoryTableProps = CommonProps & {
-    items?: any;
-    columns?: any;
-    sorting?: any;
-    search?: any;
-    selection?: any;
-    pagination?: any;
-    itemId?: any;
-    isSelectable?: any;
-    loading?: any;
-    hasActions?: any;
-    message?: any;
-    rowProps?: any;
-    cellProps?: any;
-    responsive?: boolean;
-    itemIdToExpandedRowMap?: any;
-  };
-  export const EuiInMemoryTable: React.FC<EuiInMemoryTableProps>;
 }

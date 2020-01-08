@@ -21,6 +21,7 @@ import {
   language,
   output_index,
   saved_id,
+  timeline_id,
   meta,
   risk_score,
   max_signals,
@@ -32,6 +33,7 @@ import {
   threats,
   references,
   id,
+  version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -50,6 +52,7 @@ export const updateRulesSchema = Joi.object({
   language,
   output_index,
   saved_id,
+  timeline_id,
   meta,
   risk_score,
   max_signals,
@@ -60,4 +63,5 @@ export const updateRulesSchema = Joi.object({
   type,
   threats,
   references,
+  version,
 }).xor('id', 'rule_id');

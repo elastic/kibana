@@ -866,4 +866,22 @@ describe('update rules schema', () => {
       }).error
     ).toBeTruthy();
   });
+
+  test('timeline_id validates', () => {
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'saved_query',
+        saved_id: 'some id',
+        timeline_id: 'some-id',
+      }).error
+    ).toBeFalsy();
+  });
 });

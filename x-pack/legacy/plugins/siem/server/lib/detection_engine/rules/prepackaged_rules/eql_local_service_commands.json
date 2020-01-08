@@ -1,0 +1,17 @@
+{
+  "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
+  "risk_score": 50,
+  "description": "EQL - Local Service Commands",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Local Service Commands",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:sc.exe and process.args:(\"create\" or \"config\" or \"failure\" or \"start\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

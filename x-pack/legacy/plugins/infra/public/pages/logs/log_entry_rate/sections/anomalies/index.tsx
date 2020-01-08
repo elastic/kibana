@@ -12,6 +12,7 @@ import {
   EuiStat,
   EuiTitle,
   EuiLoadingSpinner,
+  EuiButton,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -96,6 +97,11 @@ export const AnomaliesResults: React.FunctionComponent<{
           <EuiTitle size="s" aria-label={title}>
             <h2>{title}</h2>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={viewSetupForUpdate} size="s">
+            Recreate jobs
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />

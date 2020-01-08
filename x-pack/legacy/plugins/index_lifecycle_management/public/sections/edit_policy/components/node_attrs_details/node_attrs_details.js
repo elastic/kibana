@@ -49,7 +49,7 @@ export class NodeAttrsDetails extends PureComponent {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiInMemoryTable
-              items={details}
+              items={details || []}
               columns={[
                 {
                   field: 'nodeId',

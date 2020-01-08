@@ -38,7 +38,7 @@ export function checkLicense(type, active, clusterSource, watcher = true) {
   }
 
   // Disabled because the license type is not valid (basic)
-  if (!includes(['trial', 'standard', 'gold', 'platinum'], type)) {
+  if (!includes(['trial', 'standard', 'gold', 'platinum', 'enterprise'], type)) {
     return Object.assign(licenseInfo, {
       message: i18n.translate(
         'xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription',

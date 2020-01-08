@@ -5,11 +5,10 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { InfraServerPlugin } from './new_platform_plugin';
+import { InfraServerPlugin, InfraPluginSetup } from './new_platform_plugin';
 import { config, InfraConfig } from '../../../../plugins/infra/server';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
-
-export { config, InfraConfig, InfraServerPluginDeps };
+export { config, InfraConfig, InfraServerPluginDeps, InfraPluginSetup };
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

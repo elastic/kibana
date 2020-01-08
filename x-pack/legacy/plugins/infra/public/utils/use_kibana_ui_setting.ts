@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { npSetup } from 'ui/new_platform';
-import { useObservable } from './use_observable';
+import useObservable from 'react-use/lib/useObservable';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested
