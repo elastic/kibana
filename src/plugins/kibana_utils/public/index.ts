@@ -41,6 +41,10 @@ export {
   unhashQuery,
   createUrlTracker,
   useUrlTracker,
+  createKbnUrlControls,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  setStateToKbnUrl,
 } from './state_management/url';
 export {
   syncState,

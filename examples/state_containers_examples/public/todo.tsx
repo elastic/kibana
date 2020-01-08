@@ -33,13 +33,15 @@ import {
 } from '@elastic/eui';
 import {
   BaseStateContainer,
+  INullableBaseStateContainer,
   createKbnUrlSyncStrategy,
+  createSessionStorageSyncStrategy,
   createStateContainer,
   createStateContainerReactHelpers,
   PureTransition,
-  INullableBaseStateContainer,
   syncStates,
   useUrlTracker,
+  getStateFromKbnUrl,
 } from '../../../src/plugins/kibana_utils/public';
 import {
   defaultState,
@@ -47,8 +49,6 @@ import {
   TodoActions,
   TodoState,
 } from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
-import { createSessionStorageSyncStrategy } from '../../../src/plugins/kibana_utils/public/state_sync/state_sync_strategies';
-import { getStateFromKbnUrl } from '../../../src/plugins/kibana_utils/public/state_management/url';
 
 interface GlobalState {
   text: string;
