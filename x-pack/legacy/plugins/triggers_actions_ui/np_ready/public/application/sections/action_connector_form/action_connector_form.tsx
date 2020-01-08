@@ -162,7 +162,7 @@ export const ActionConnectorForm = ({
               fullWidth
               isInvalid={errors.name.length > 0 && connector.name !== undefined}
               name="name"
-              placeholder="untitled"
+              placeholder="Untitled"
               data-test-subj="nameInput"
               value={connector.name || ''}
               onChange={e => {
@@ -175,7 +175,7 @@ export const ActionConnectorForm = ({
               }}
             />
           </EuiFormRow>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xl" />
           {FieldsComponent !== null ? (
             <FieldsComponent
               action={connector}

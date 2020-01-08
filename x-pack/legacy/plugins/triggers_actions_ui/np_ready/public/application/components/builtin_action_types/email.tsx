@@ -181,34 +181,38 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   return (
     <Fragment>
-      <EuiFormRow
-        id="from"
-        fullWidth
-        error={errors.from}
-        isInvalid={errors.from.length > 0 && from !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
-          {
-            defaultMessage: 'Sender',
-          }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          isInvalid={errors.from.length > 0 && from !== undefined}
-          name="from"
-          value={from || ''}
-          data-test-subj="emailFromInput"
-          onChange={e => {
-            editActionConfig('from', e.target.value);
-          }}
-          onBlur={() => {
-            if (!from) {
-              editActionConfig('from', '');
-            }
-          }}
-        />
-      </EuiFormRow>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="from"
+            fullWidth
+            error={errors.from}
+            isInvalid={errors.from.length > 0 && from !== undefined}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
+              {
+                defaultMessage: 'Sender',
+              }
+            )}
+          >
+            <EuiFieldText
+              fullWidth
+              isInvalid={errors.from.length > 0 && from !== undefined}
+              name="from"
+              value={from || ''}
+              data-test-subj="emailFromInput"
+              onChange={e => {
+                editActionConfig('from', e.target.value);
+              }}
+              onBlur={() => {
+                if (!from) {
+                  editActionConfig('from', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFormRow
@@ -274,18 +278,20 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
-              {
-                defaultMessage: 'Secure',
-              }
-            )}
-            checked={secure || false}
-            onChange={e => {
-              editActionConfig('secure', e.target.checked);
-            }}
-          />
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+                {
+                  defaultMessage: 'Secure',
+                }
+              )}
+              checked={secure || false}
+              onChange={e => {
+                editActionConfig('secure', e.target.checked);
+              }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">

@@ -175,7 +175,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   let headerControl;
   if (hasHeaders) {
     headerControl = (
-      <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="webhookHeaderKey"
@@ -227,16 +227,18 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
-            data-test-subj="webhookAddHeaderButton"
-            onClick={() => addHeader()}
-          >
-            <FormattedMessage
-              defaultMessage="Add"
-              id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
-            />
-          </EuiButtonEmpty>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButtonEmpty
+              isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
+              data-test-subj="webhookAddHeaderButton"
+              onClick={() => addHeader()}
+            >
+              <FormattedMessage
+                defaultMessage="Add"
+                id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
+              />
+            </EuiButtonEmpty>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -255,6 +257,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               }
             )}
             iconType="cross"
+            color="danger"
             onClick={() => removeHeader(key)}
           />
         </EuiFlexItem>
