@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Status should render a flyout when clicking the link 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Monitoring alerts
+      </h2>
+    </EuiTitle>
+    <EuiText>
+      <p>
+        Configure an email server and email address to receive alerts.
+      </p>
+    </EuiText>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <AlertsConfiguration
+      clusterUuid="1adsb23"
+      emailAddress="test@elastic.co"
+      onDone={[Function]}
+    />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`Status should render a success message if all alerts have been migrated and in setup mode 1`] = `
+<EuiCallOut
+  color="success"
+  iconType="flag"
+  title="Kibana alerting is up to date!"
+>
+  <div
+    className="euiCallOut euiCallOut--success"
+  >
+    <div
+      className="euiCallOutHeader"
+    >
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        size="m"
+        type="flag"
+      >
+        <EuiIconFlag
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoaded euiCallOutHeader__icon"
+          focusable="false"
+          style={null}
+        >
+          <svg
+            aria-hidden="true"
+            className="euiIcon euiIcon--medium euiIcon-isLoaded euiCallOutHeader__icon"
+            focusable="false"
+            height={16}
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.686 8.464c1.547-.619 3.08-.619 4.628 0A.5.5 0 0 0 13 8V2a.5.5 0 0 0-.276-.447C11.259.82 9.458.82 7.342 1.526c-1.884.628-3.417.628-4.618.027A.5.5 0 0 0 2 2v12.5a.5.5 0 1 0 1 0V8.553c1.411.627 2.983.592 4.686-.089zM3 2.741c1.322.42 2.878.327 4.658-.267C9.4 1.894 10.843 1.85 12 2.322v4.975c-1.56-.464-3.128-.384-4.686.239-1.54.616-2.892.616-4.09.017A.498.498 0 0 0 3 7.5V2.74z"
+            />
+          </svg>
+        </EuiIconFlag>
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
+      >
+        Kibana alerting is up to date!
+      </span>
+    </div>
+    <EuiText
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <p>
+          <EuiLink
+            onClick={[Function]}
+          >
+            <button
+              className="euiLink euiLink--primary"
+              onClick={[Function]}
+              type="button"
+            >
+              Want to make changes? Click here.
+            </button>
+          </EuiLink>
+        </p>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
+`;
+
+exports[`Status should render without setup mode 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="warning"
+    title="Hey! We made alerting better!"
+  >
+    <p>
+      <EuiLink
+        onClick={[Function]}
+      >
+        Migrate cluster alerts to our new alerting platform.
+      </EuiLink>
+    </p>
+  </EuiCallOut>
+  <EuiSpacer />
+</Fragment>
+`;

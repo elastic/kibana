@@ -6,31 +6,43 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 import { npSetup } from 'ui/new_platform';
+import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 
-function isOnPage(hash) {
+function isOnPage(hash: string) {
   return contains(window.location.hash, hash);
 }
 
-const angularState = {
+interface IAngularState {
+  injector: any;
+  scope: any;
+}
+
+const angularState: IAngularState = {
   injector: null,
   scope: null,
 };
 
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
-    throw 'Unable to interact with setup mode because the angular injector was not previously set.' +
-      ' This needs to be set by calling `initSetupModeState`.';
+    throw new Error(
+      'Unable to interact with setup mode because the angular injector was not previously set.' +
+        ' This needs to be set by calling `initSetupModeState`.'
+    );
   }
 };
 
-const setupModeState = {
+interface ISetupModeState {
+  enabled: boolean;
+  data: any;
+  callbacks: Function[];
+}
+const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
   callbacks: [],
@@ -38,7 +50,7 @@ const setupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
-export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+export const setNewlyDiscoveredClusterUuid = (clusterUuid: string) => {
   const globalState = angularState.injector.get('globalState');
   const executor = angularState.injector.get('$executor');
   angularState.scope.$apply(() => {
@@ -48,7 +60,7 @@ export const setNewlyDiscoveredClusterUuid = clusterUuid => {
   executor.run();
 };
 
-export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
+export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -75,11 +87,11 @@ export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false)
   }
 };
 
-const notifySetupModeDataChange = oldData => {
-  setupModeState.callbacks.forEach(cb => cb(oldData));
+const notifySetupModeDataChange = (oldData?: any) => {
+  setupModeState.callbacks.forEach((cb: Function) => cb(oldData));
 };
 
-export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
+export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
@@ -87,7 +99,7 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const hasPermissions = get(data, '_meta.hasPermissions', false);
   if (isCloudEnabled || !hasPermissions) {
-    let text = null;
+    let text: string = '';
     if (!hasPermissions) {
       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
         defaultMessage: 'You do not have the necessary permissions to do this.',
@@ -113,9 +125,9 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const globalState = angularState.injector.get('globalState');
   const clusterUuid = globalState.cluster_uuid;
   if (!clusterUuid) {
-    const liveClusterUuid = get(data, '_meta.liveClusterUuid');
+    const liveClusterUuid: string = get(data, '_meta.liveClusterUuid');
     const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {})).filter(
-      node => node.isPartiallyMigrated || node.isFullyMigrated
+      (node: any) => node.isPartiallyMigrated || node.isFullyMigrated
     );
     if (liveClusterUuid && migratedEsNodes.length > 0) {
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
@@ -140,7 +152,7 @@ export const disableElasticsearchInternalCollection = async () => {
   }
 };
 
-export const toggleSetupMode = inSetupMode => {
+export const toggleSetupMode = (inSetupMode: boolean) => {
   checkAngularState();
 
   const globalState = angularState.injector.get('globalState');
@@ -174,10 +186,14 @@ export const setSetupModeMenuItem = () => {
   );
 };
 
-export const initSetupModeState = async ($scope, $injector, callback) => {
+export const addSetupModeCallback = (callback: Function) => setupModeState.callbacks.push(callback);
+
+export const initSetupModeState = async ($scope: any, $injector: any, callback?: Function) => {
   angularState.scope = $scope;
   angularState.injector = $injector;
-  callback && setupModeState.callbacks.push(callback);
+  if (callback) {
+    setupModeState.callbacks.push(callback);
+  }
 
   const globalState = $injector.get('globalState');
   if (globalState.inSetupMode) {

@@ -222,3 +222,46 @@ export const REPORTING_SYSTEM_ID = 'reporting';
  * @type {Number}
  */
 export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
+
+/**
+ * We want to slowly rollout the migration from watcher-based cluster alerts to
+ * kibana alerts and we only want to enable the kibana alerts once all
+ * watcher-based cluster alerts have been migrated so this flag will serve
+ * as the only way to see the new UI and actually run Kibana alerts. It will
+ * be false until all alerts have been migrated, then it will be removed
+ */
+export const KIBANA_ALERTING_ENABLED = true;
+
+/**
+ * The prefix for all alert types used by monitoring
+ */
+export const ALERT_TYPE_PREFIX = 'monitoring_';
+
+/**
+ * This is the alert type id for the license expiration alert
+ */
+export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
+
+/**
+ * A listing of all alert types
+ */
+export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION];
+
+/**
+ * Matches the id for the built-in in email action type
+ * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
+ */
+export const ALERT_ACTION_TYPE_EMAIL = '.email';
+
+/**
+ * The number of alerts that have been migrated
+ */
+export const NUMBER_OF_MIGRATED_ALERTS = 1;
+
+/**
+ * We store config data in a single saved object of this id
+ */
+export const MONITORING_CONFIG_SAVED_OBJECT_ID = 'monitoring';
+export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'alertingEmailAddress';
+
+export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];

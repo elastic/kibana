@@ -18,7 +18,7 @@ import { initInfraSource } from './server/lib/logs/init_infra_source';
  */
 export const monitoring = kibana =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting', 'actions'],
     id: 'monitoring',
     configPrefix: 'xpack.monitoring',
     publicDir: resolve(__dirname, 'public'),
@@ -59,6 +59,7 @@ export const monitoring = kibana =>
         }),
         injectUiAppVars: server.injectUiAppVars,
         log: (...args) => server.log(...args),
+        logger: server.newPlatform.coreContext.logger,
         getOSInfo: server.getOSInfo,
         events: {
           on: (...args) => server.events.on(...args),
@@ -73,11 +74,13 @@ export const monitoring = kibana =>
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
+        alerting: server.plugins.alerting,
         usageCollection,
         licensing,
       };
 
-      new Plugin().setup(serverFacade, plugins);
+      const plugin = new Plugin();
+      plugin.setup(serverFacade, plugins);
     },
     config,
     deprecations,
