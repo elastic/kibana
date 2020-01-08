@@ -88,6 +88,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return results;
   },
 
+  // Get The monitor latest state sorted by timestamp with date range
   getLatestMonitorStatus: async ({ callES, dateStart, dateEnd, monitorId }) => {
     // TODO: Write tests for this function
 
@@ -140,6 +141,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     };
   },
 
+  // Get the monitor meta info regardless of timestamp
   getMonitor: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

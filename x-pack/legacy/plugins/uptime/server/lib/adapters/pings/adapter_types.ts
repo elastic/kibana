@@ -61,6 +61,7 @@ export interface GetPingHistogramParams {
 export interface UMPingsAdapter {
   getAll: UMElasticsearchQueryFn<GetAllParams, PingResults>;
 
+  // Get the monitor meta info regardless of timestamp
   getMonitor: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping>;
 
   getLatestMonitorStatus: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping>;

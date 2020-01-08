@@ -1,0 +1,58 @@
+{
+  "@timestamp": "2020-01-08T12:07:22.092Z",
+  "event": { "dataset": "uptime" },
+  "observer": {
+    "hostname": "ElasticacLoaner",
+    "geo": { "name": "Islamabad", "location": "52.487448, 13.394798" }
+  },
+  "http": {
+    "response": {
+      "status_code": 200,
+      "body": {
+        "hash": "f7b32907c24e5d36b4665da9641850934cc611c56cbd4cb929245b4f83dba5a3",
+        "bytes": 372696
+      }
+    },
+    "rtt": {
+      "total": { "us": 8448106 },
+      "write_request": { "us": 43 },
+      "response_header": { "us": 8146261 },
+      "validate": { "us": 8410248 },
+      "content": { "us": 263986 }
+    }
+  },
+  "resolve": { "ip": "104.86.46.103", "rtt": { "us": 72385 } },
+  "summary": { "down": 0, "up": 1 },
+  "url": {
+    "scheme": "https",
+    "domain": "www.washingtonpost.com",
+    "port": 443,
+    "path": "//",
+    "full": "https://www.washingtonpost.com//"
+  },
+  "ecs": { "version": "1.2.0" },
+  "agent": {
+    "id": "7e8db683-64bd-4bcb-babc-4ac17200516d",
+    "version": "8.0.0",
+    "type": "heartbeat",
+    "ephemeral_id": "b2abdbe9-4726-4b0b-847c-4738797f3c46",
+    "hostname": "ElasticacLoaner"
+  },
+  "tcp": { "rtt": { "connect": { "us": 18424 } } },
+  "tls": {
+    "rtt": { "handshake": { "us": 19353 } },
+    "certificate_not_valid_before": "2017-10-16T17:49:33.000Z",
+    "certificate_not_valid_after": "2020-01-15T18:19:31.000Z"
+  },
+  "monitor": {
+    "timespan": { "gte": "2020-01-08T12:07:22.092Z", "lt": "2020-01-08T12:08:22.092Z" },
+    "id": "wapo",
+    "check_group": "4ec0b2e8-320f-11ea-b590-3af9d398f084",
+    "ip": "104.86.46.103",
+    "status": "up",
+    "duration": { "us": 8448171 },
+    "name": "",
+    "type": "http"
+  },
+  "timestamp": "2020-01-08T12:07:22.092Z"
+}

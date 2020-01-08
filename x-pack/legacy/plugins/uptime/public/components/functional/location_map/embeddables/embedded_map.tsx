@@ -66,6 +66,8 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     viewMode: 'view',
     isLayerTOCOpen: false,
     hideFilterActions: true,
+    // Zoom Lat/Lon values are set to make sure map is in center in the panel
+    // It wil also omit Greenland/Antarctica etc
     mapCenter: {
       lon: 11,
       lat: 20,
