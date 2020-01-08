@@ -25,23 +25,20 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function ibmmqLogsSpecProvider(context) {
+export function ibmmqLogsSpecProvider(server, context) {
   const moduleName = 'ibmmq';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'ibmmqLogs',
     name: i18n.translate('kbn.server.tutorials.ibmmqLogs.nameTitle', {
-      defaultMessage: 'IBM MQ',
+      defaultMessage: 'IBM MQ logs',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TUTORIAL_CATEGORY.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.ibmmqLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
+      defaultMessage: 'Collect IBM MQ logs with Filebeat.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.ibmmqLogs.longDescription', {
-      defaultMessage:
-        'The `ibmmq` Filebeat module parses logs created by IBM MQ. \
+      defaultMessage: 'Collect IBM MQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',
@@ -49,14 +46,25 @@ export function ibmmqLogsSpecProvider(context) {
     }),
     euiIconType: '/plugins/kibana/home/tutorial_resources/logos/ibmmq.svg',
     artifacts: {
-      dashboards: [],
+      dashboards: [
+        {
+          id: 'ba1d8830-7c7b-11e9-9645-e37efaf5baff',
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.ibmmqLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'IBM MQ Events',
+            }
+          ),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-ibmmq.html',
       },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/ibmmq_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
