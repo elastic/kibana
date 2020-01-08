@@ -7,7 +7,6 @@
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { idx } from '@kbn/elastic-idx';
 
 import { SimpleSavedObject } from 'src/core/public';
 import { ml } from '../../../../../services/ml_api_service';
@@ -229,9 +228,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
-        const title = idx(obj, _ => _.attributes.title);
+        const title = obj?.attributes?.title;
         if (title !== undefined) {
-          const id = idx(obj, _ => _.id) || '';
+          const id = obj?.id || '';
           indexPatternsMap[title] = { label: title, value: id };
         }
       });

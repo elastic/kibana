@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -27,16 +26,14 @@ export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, i
   return (
     <EuiPage restrictWidth={1000}>
       <EuiPageBody>
-        <EuiPageContent
-          className="file-datavisualizer-about-panel__content"
-        >
+        <EuiPageContent className="file-datavisualizer-about-panel__content">
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={true}>
               <WelcomeContent />
 
               <EuiHorizontalRule margin="l" />
 
-              <div style={{ textAlign: 'center' }} >
+              <div style={{ textAlign: 'center' }}>
                 <EuiFilePicker
                   id="filePicker"
                   initialPromptText={intl.formatMessage({
@@ -60,10 +57,7 @@ export function LoadingPanel() {
   return (
     <EuiPage restrictWidth={400}>
       <EuiPageBody>
-        <EuiPageContent
-          className="file-datavisualizer-about-panel__content"
-          paddingSize="l"
-        >
+        <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
           <div style={{ textAlign: 'center' }}>
             <EuiTitle size="s">
               <h3 role="alert">
@@ -76,7 +70,7 @@ export function LoadingPanel() {
 
             <EuiSpacer size="l" />
 
-            <EuiLoadingSpinner size="xl"/>
+            <EuiLoadingSpinner size="xl" />
           </div>
         </EuiPageContent>
       </EuiPageBody>

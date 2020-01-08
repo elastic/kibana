@@ -9,7 +9,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { useStringifiedValue } from '../hooks';
-import { DEFAULT_QUERY_DELAY } from '../../../../../common/job_creator/util/constants';
+import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 
 export const QueryDelayInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(

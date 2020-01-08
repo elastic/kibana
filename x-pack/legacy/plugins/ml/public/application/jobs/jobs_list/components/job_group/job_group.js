@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 
 import PropTypes from 'prop-types';
 import React from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-
 
 export function JobGroup({ name }) {
   return (
@@ -24,7 +22,7 @@ export function JobGroup({ name }) {
         borderRadius: '2px',
         fontSize: '12px',
         margin: '0px 3px',
-        color: theme.euiColorEmptyShade
+        color: theme.euiColorEmptyShade,
       }}
     >
       {name}

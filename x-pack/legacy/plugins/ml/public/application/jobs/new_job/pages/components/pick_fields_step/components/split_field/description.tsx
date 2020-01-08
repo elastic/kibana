@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 
 interface Props {
   jobType: JOB_TYPE;

@@ -177,11 +177,15 @@ export const getRowItemOverflow = (
   );
 };
 
-export const Popover = React.memo<{
+export const PopoverComponent = ({
+  children,
+  count,
+  idPrefix,
+}: {
   children: React.ReactNode;
   count: number;
   idPrefix: string;
-}>(({ children, count, idPrefix }) => {
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -196,15 +200,23 @@ export const Popover = React.memo<{
       </EuiPopover>
     </Subtext>
   );
-});
+};
+
+PopoverComponent.displayName = 'PopoverComponent';
+
+export const Popover = React.memo(PopoverComponent);
 
 Popover.displayName = 'Popover';
 
-export const OverflowField = React.memo<{
+export const OverflowFieldComponent = ({
+  value,
+  showToolTip = true,
+  overflowLength = 50,
+}: {
   value: string;
   showToolTip?: boolean;
   overflowLength?: number;
-}>(({ value, showToolTip = true, overflowLength = 50 }) => (
+}) => (
   <span>
     {showToolTip ? (
       <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
@@ -219,6 +231,10 @@ export const OverflowField = React.memo<{
       </EuiToolTip>
     )}
   </span>
-));
+);
+
+OverflowFieldComponent.displayName = 'OverflowFieldComponent';
+
+export const OverflowField = React.memo(OverflowFieldComponent);
 
 OverflowField.displayName = 'OverflowField';

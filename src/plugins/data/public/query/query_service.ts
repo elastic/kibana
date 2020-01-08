@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
 import { TimefilterService, TimefilterSetup } from './timefilter';
+import { createSavedQueryService } from './saved_query/saved_query_service';
 
 /**
  * Query Service
@@ -29,9 +30,8 @@ import { TimefilterService, TimefilterSetup } from './timefilter';
 
 export interface QueryServiceDependencies {
   storage: IStorageWrapper;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: CoreStart['uiSettings'];
 }
-
 export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
@@ -51,10 +51,11 @@ export class QueryService {
     };
   }
 
-  public start() {
+  public start(savedObjects: CoreStart['savedObjects']) {
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
+      savedQueries: createSavedQueryService(savedObjects.client),
     };
   }
 

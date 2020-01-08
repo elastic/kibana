@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
@@ -15,11 +14,13 @@ describe('ExplorerChartTooltip', () => {
     const infoTooltip = {
       aggregationInterval: '15m',
       chartFunction: 'avg responsetime',
-      entityFields: [{
-        fieldName: 'airline',
-        fieldValue: 'JAL',
-      }],
-      jobId: 'mock-job-id'
+      entityFields: [
+        {
+          fieldName: 'airline',
+          fieldValue: 'JAL',
+        },
+      ],
+      jobId: 'mock-job-id',
     };
 
     const wrapper = shallowWithIntl(<ExplorerChartInfoTooltip.WrappedComponent {...infoTooltip} />);

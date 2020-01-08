@@ -25,7 +25,7 @@ export default new Chainable('divide', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'divisor',
@@ -34,15 +34,15 @@ export default new Chainable('divide', {
         defaultMessage:
           'Number or series to divide by. SeriesList with multiple series will be applied label-wise.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.divideHelpText', {
     defaultMessage:
       'Divides the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),
   fn: function divideFn(args) {
-    return reduce(args, function (a, b) {
+    return reduce(args, function(a, b) {
       return a / b;
     });
-  }
+  },
 });

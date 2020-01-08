@@ -77,7 +77,8 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'Download and install Heartbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.install.windowsTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Getting Started Guide]({heartbeatLink}).\n\
+        defaultMessage:
+          'First time using Heartbeat? See the [Getting Started Guide]({heartbeatLink}).\n\
  1. Download the Heartbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Heartbeat`.\n\
@@ -91,11 +92,8 @@ export const createHeartbeatInstructions = context => ({
           elasticLink: 'https://www.elastic.co/downloads/beats/heartbeat',
         },
       }),
-      commands: [
-        'cd "C:\\Program Files\\Heartbeat"',
-        '.\\install-service-heartbeat.ps1',
-      ],
-    }
+      commands: ['cd "C:\\Program Files\\Heartbeat"', '.\\install-service-heartbeat.ps1'],
+    },
   },
   START: {
     OSX: {
@@ -105,10 +103,7 @@ export const createHeartbeatInstructions = context => ({
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.osxTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
-      commands: [
-        './heartbeat setup',
-        './heartbeat -e',
-      ]
+      commands: ['./heartbeat setup', './heartbeat -e'],
     },
     DEB: {
       title: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.debTitle', {
@@ -117,10 +112,7 @@ export const createHeartbeatInstructions = context => ({
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.debTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
-      commands: [
-        'sudo heartbeat setup',
-        'sudo service heartbeat-elastic start',
-      ]
+      commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
     },
     RPM: {
       title: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.rpmTitle', {
@@ -129,10 +121,7 @@ export const createHeartbeatInstructions = context => ({
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.rpmTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
-      commands: [
-        'sudo heartbeat setup',
-        'sudo service heartbeat-elastic start',
-      ],
+      commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
     },
     WINDOWS: {
       title: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.windowsTitle', {
@@ -141,10 +130,7 @@ export const createHeartbeatInstructions = context => ({
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.windowsTextPre', {
         defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
-      commands: [
-        '.\\heartbeat.exe setup',
-        'Start-Service heartbeat',
-      ],
+      commands: ['.\\heartbeat.exe setup', 'Start-Service heartbeat'],
     },
   },
   CONFIG: {
@@ -165,10 +151,11 @@ export const createHeartbeatInstructions = context => ({
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.heartbeatInstructions.config.osxTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -194,10 +181,11 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.heartbeatInstructions.config.debTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -223,10 +211,11 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('kbn.common.tutorials.heartbeatInstructions.config.rpmTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+        defaultMessage:
+          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
@@ -252,19 +241,23 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+      textPost: i18n.translate(
+        'kbn.common.tutorials.heartbeatInstructions.config.windowsTextPost',
+        {
+          defaultMessage:
+            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    }
-  }
+          values: {
+            passwordTemplate: '`<password>`',
+            esUrlTemplate: '`<es_url>`',
+            kibanaUrlTemplate: '`<kibana_url>`',
+          },
+        }
+      ),
+    },
+  },
 });
 
 export const createHeartbeatCloudInstructions = () => ({
@@ -279,14 +272,14 @@ export const createHeartbeatCloudInstructions = () => ({
           path: '`heartbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.osxTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.heartbeatCloudInstructions.config.osxTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     DEB: {
       title: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.debTitle', {
@@ -298,14 +291,14 @@ export const createHeartbeatCloudInstructions = () => ({
           path: '`/etc/heartbeat/heartbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.debTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.heartbeatCloudInstructions.config.debTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     RPM: {
       title: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.rpmTitle', {
@@ -317,55 +310,65 @@ export const createHeartbeatCloudInstructions = () => ({
           path: '`/etc/heartbeat/heartbeat.yml`',
         },
       }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.rpmTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.heartbeatCloudInstructions.config.rpmTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
     },
     WINDOWS: {
       title: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
-        },
-      }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatCloudInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
-    }
-  }
+      textPre: i18n.translate(
+        'kbn.common.tutorials.heartbeatCloudInstructions.config.windowsTextPre',
+        {
+          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
+          values: {
+            path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
+          },
+        }
+      ),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.heartbeatCloudInstructions.config.windowsTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
+    },
+  },
 });
 
 export function heartbeatEnableInstructionsOnPrem() {
-  const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTitle', {
-    defaultMessage: 'Edit the configuration - Add monitors',
-  });
+  const defaultTitle = i18n.translate(
+    'kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTitle',
+    {
+      defaultMessage: 'Edit the configuration - Add monitors',
+    }
+  );
   const defaultCommands = [
     'heartbeat.monitors:',
     '- type: http',
     '  urls: ["<http://localhost:9200>"]',
-    '  schedule: "@every 10s"'
+    '  schedule: "@every 10s"',
   ];
-  const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTextPost', {
-    defaultMessage: 'Where {hostTemplate} is your monitored URL, For more details on how to configure Monitors in \
+  const defaultTextPost = i18n.translate(
+    'kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTextPost',
+    {
+      defaultMessage:
+        'Where {hostTemplate} is your monitored URL, For more details on how to configure Monitors in \
       Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
-    values: {
-      configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html',
-      hostTemplate: '`<http://localhost:9200>`'
+      values: {
+        configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html',
+        hostTemplate: '`<http://localhost:9200>`',
+      },
     }
-  });
+  );
   return {
     OSX: {
       title: defaultTitle,
@@ -373,7 +376,7 @@ export function heartbeatEnableInstructionsOnPrem() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     DEB: {
       title: defaultTitle,
@@ -381,7 +384,7 @@ export function heartbeatEnableInstructionsOnPrem() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     RPM: {
       title: defaultTitle,
@@ -389,33 +392,43 @@ export function heartbeatEnableInstructionsOnPrem() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     WINDOWS: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.windowsTextPre', {
-        defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
-      }),
+      textPre: i18n.translate(
+        'kbn.common.tutorials.heartbeatEnableOnPremInstructions.windowsTextPre',
+        {
+          defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
+        }
+      ),
       commands: defaultCommands,
-      textPost: defaultTextPost
-    }
+      textPost: defaultTextPost,
+    },
   };
 }
 
 export function heartbeatEnableInstructionsCloud() {
-  const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTitle', {
-    defaultMessage: 'Edit the configuration - Add monitors',
-  });
+  const defaultTitle = i18n.translate(
+    'kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTitle',
+    {
+      defaultMessage: 'Edit the configuration - Add monitors',
+    }
+  );
   const defaultCommands = [
     'heartbeat.monitors:',
     '- type: http',
     '  urls: ["http://elastic.co"]',
-    '  schedule: "@every 10s"'
+    '  schedule: "@every 10s"',
   ];
-  const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTextPost', {
-    defaultMessage: 'For more details on how to configure Monitors in Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
-    values: { configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html' }
-  });
+  const defaultTextPost = i18n.translate(
+    'kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTextPost',
+    {
+      defaultMessage:
+        'For more details on how to configure Monitors in Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
+      values: { configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html' },
+    }
+  );
   return {
     OSX: {
       title: defaultTitle,
@@ -423,7 +436,7 @@ export function heartbeatEnableInstructionsCloud() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     DEB: {
       title: defaultTitle,
@@ -431,7 +444,7 @@ export function heartbeatEnableInstructionsCloud() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     RPM: {
       title: defaultTitle,
@@ -439,16 +452,19 @@ export function heartbeatEnableInstructionsCloud() {
         defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
-      textPost: defaultTextPost
+      textPost: defaultTextPost,
     },
     WINDOWS: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.windowsTextPre', {
-        defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
-      }),
+      textPre: i18n.translate(
+        'kbn.common.tutorials.heartbeatEnableCloudInstructions.windowsTextPre',
+        {
+          defaultMessage: 'Edit the `heartbeat.monitors` setting in the `heartbeat.yml` file.',
+        }
+      ),
       commands: defaultCommands,
-      textPost: defaultTextPost
-    }
+      textPost: defaultTextPost,
+    },
   };
 }
 
@@ -484,16 +500,19 @@ export function onPremInstructions(platforms, context) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.heartbeat.premInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.heartbeat.premInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.OSX,
               HEARTBEAT_INSTRUCTIONS.CONFIG.OSX,
-      	      heartbeatEnableInstructionsOnPrem().OSX,
+              heartbeatEnableInstructionsOnPrem().OSX,
               HEARTBEAT_INSTRUCTIONS.START.OSX,
             ],
           },
@@ -502,7 +521,7 @@ export function onPremInstructions(platforms, context) {
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.DEB,
               HEARTBEAT_INSTRUCTIONS.CONFIG.DEB,
-	      heartbeatEnableInstructionsOnPrem().DEB,
+              heartbeatEnableInstructionsOnPrem().DEB,
               HEARTBEAT_INSTRUCTIONS.START.DEB,
             ],
           },
@@ -511,7 +530,7 @@ export function onPremInstructions(platforms, context) {
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.RPM,
               HEARTBEAT_INSTRUCTIONS.CONFIG.RPM,
-	      heartbeatEnableInstructionsOnPrem().RPM,
+              heartbeatEnableInstructionsOnPrem().RPM,
               HEARTBEAT_INSTRUCTIONS.START.RPM,
             ],
           },
@@ -520,7 +539,7 @@ export function onPremInstructions(platforms, context) {
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               HEARTBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-	      heartbeatEnableInstructionsOnPrem().WINDOWS,
+              heartbeatEnableInstructionsOnPrem().WINDOWS,
               HEARTBEAT_INSTRUCTIONS.START.WINDOWS,
             ],
           },
@@ -539,9 +558,12 @@ export function onPremCloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.heartbeat.premCloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.heartbeat.premCloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
@@ -601,9 +623,12 @@ export function cloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.heartbeat.cloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.heartbeat.cloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,

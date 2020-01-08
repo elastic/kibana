@@ -33,6 +33,12 @@ module.exports = () => {
     plugins: [
       require.resolve('@babel/plugin-transform-modules-commonjs'),
       require.resolve('@babel/plugin-syntax-dynamic-import'),
-    ]
+      [
+        require.resolve('babel-plugin-styled-components'),
+        {
+          fileName: false,
+        },
+      ],
+    ],
   };
 };

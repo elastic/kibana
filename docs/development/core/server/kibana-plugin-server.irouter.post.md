@@ -9,5 +9,5 @@ Register a route handler for `POST` request.
 <b>Signature:</b>
 
 ```typescript
-post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+post: RouteRegistrar<'post'>;
 ```

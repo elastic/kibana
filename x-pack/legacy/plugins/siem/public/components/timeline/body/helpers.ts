@@ -6,7 +6,7 @@
 import { get, isEmpty, noop } from 'lodash/fp';
 
 import { BrowserFields } from '../../../containers/source';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ColumnHeader } from './column_headers/column_header';
 import * as i18n from './translations';
@@ -18,6 +18,8 @@ export const DEFAULT_ACTIONS_COLUMN_WIDTH = 115; // px;
  * an events viewer, which has fewer actions than a regular events viewer
  */
 export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 32; // px;
+/** Additional column width to include when checkboxes are shown **/
+export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 32; // px;
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */
@@ -93,5 +95,34 @@ export const getColumnHeaders = (
 };
 
 /** Returns the (fixed) width of the Actions column */
-export const getActionsColumnWidth = (isEventViewer: boolean): number =>
-  isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH;
+export const getActionsColumnWidth = (
+  isEventViewer: boolean,
+  showCheckboxes = false,
+  additionalActionWidth = 0
+): number =>
+  (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
+  (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
+  additionalActionWidth;
+
+/**
+ * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
+ * data necessary for custom timeline actions in conjunction with selection state
+ * @param timelineData
+ * @param eventIds
+ * @param fieldsToKeep
+ */
+export const getEventIdToDataMapping = (
+  timelineData: TimelineItem[],
+  eventIds: string[],
+  fieldsToKeep: string[]
+): Record<string, TimelineNonEcsData[]> => {
+  return timelineData.reduce((acc, v) => {
+    const fvm = eventIds.includes(v._id)
+      ? { [v._id]: v.data.filter(ti => fieldsToKeep.includes(ti.field)) }
+      : {};
+    return {
+      ...acc,
+      ...fvm,
+    };
+  }, {});
+};

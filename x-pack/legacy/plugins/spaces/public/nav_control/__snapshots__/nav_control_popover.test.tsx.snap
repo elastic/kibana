@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavControlPopover renders without crashing 1`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiHeaderSectionItemButton
+      aria-controls="headerSpacesMenuList"
+      aria-expanded={false}
+      aria-haspopup="true"
+      aria-label="loading"
+      onClick={[Function]}
+      title="loading"
+    >
+      <EuiLoadingSpinner
+        size="m"
+      />
+    </EuiHeaderSectionItemButton>
+  }
+  closePopover={[Function]}
+  data-test-subj="spacesNavSelector"
+  display="inlineBlock"
+  hasArrow={true}
+  id="spcMenuPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+  repositionOnScroll={true}
+  withTitle={true}
+>
+  <SpacesDescription
+    capabilities={
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
+      }
+    }
+    onManageSpacesClick={[Function]}
+  />
+</EuiPopover>
+`;

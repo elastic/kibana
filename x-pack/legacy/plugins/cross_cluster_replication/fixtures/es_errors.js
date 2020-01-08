@@ -41,5 +41,5 @@ error403.response = `
 
 export const esErrors = {
   400: error400,
-  403: error403
+  403: error403,
 };

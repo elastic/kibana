@@ -20,19 +20,19 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { AggParam, initParams } from './agg_params';
+import { initParams } from './agg_params';
 
 import { AggConfig } from '../vis';
 import { AggConfigs } from './agg_configs';
-import { SearchSource } from '../courier';
+import { ISearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
-
+import { AggParamType } from '../agg_types/param_types/agg';
 import { KBN_FIELD_TYPES, FieldFormat } from '../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParam = AggParam
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
 > {
   name: string;
   title: string;
@@ -46,12 +46,12 @@ export interface AggTypeConfig<
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
-  decorateAggConfig?: () => Record<string, any>;
+  decorateAggConfig?: () => any;
   postFlightRequest?: (
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: ISearchSource,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
@@ -67,7 +67,10 @@ const getFormat = (agg: AggConfig) => {
   return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
 
-export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends AggParam = AggParam> {
+export class AggType<
+  TAggConfig extends AggConfig = AggConfig,
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+> {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
@@ -162,7 +165,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
    */
-  decorateAggConfig: () => Record<string, any>;
+  decorateAggConfig: () => any;
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -177,7 +180,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: ISearchSource,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
@@ -196,7 +199,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 
   paramByName = (name: string) => {
-    return this.params.find((p: AggParam) => p.name === name);
+    return this.params.find((p: TParam) => p.name === name);
   };
 
   /**

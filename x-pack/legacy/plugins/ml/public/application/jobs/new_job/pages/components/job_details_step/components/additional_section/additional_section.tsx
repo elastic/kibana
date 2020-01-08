@@ -5,8 +5,9 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CalendarsSelection } from './components/calendars';
+import { CustomUrlsSelection } from './components/custom_urls';
 
 const ButtonContent = <Fragment>Additional settings</Fragment>;
 
@@ -16,7 +17,6 @@ interface Props {
 }
 
 export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditionalExpanded }) => {
-  return null; // disable this section until custom URLs component is ready
   return (
     <Fragment>
       <EuiSpacer />
@@ -25,14 +25,24 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
         buttonContent={ButtonContent}
         onToggle={setAdditionalExpanded}
         initialIsOpen={additionalExpanded}
+        data-test-subj="mlJobWizardToggleAdditionalSettingsSection"
       >
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
-          <EuiFlexItem>
-            <CalendarsSelection />
-          </EuiFlexItem>
-          <EuiFlexItem />
-        </EuiFlexGroup>
+        <section data-test-subj="mlJobWizardAdditionalSettingsSection">
+          <EuiSpacer />
+
+          <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+            <EuiFlexItem>
+              <CustomUrlsSelection />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+            <EuiFlexItem>
+              <CalendarsSelection />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </section>
       </EuiAccordion>
     </Fragment>
   );

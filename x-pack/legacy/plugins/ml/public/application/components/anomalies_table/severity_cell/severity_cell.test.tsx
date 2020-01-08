@@ -5,12 +5,10 @@
  */
 
 import React from 'react';
-import { cleanup, render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { SeverityCell } from './severity_cell';
 
 describe('SeverityCell', () => {
-  afterEach(cleanup);
-
   test('should render a single-bucket marker with rounded severity score', () => {
     const props = {
       score: 75.2,

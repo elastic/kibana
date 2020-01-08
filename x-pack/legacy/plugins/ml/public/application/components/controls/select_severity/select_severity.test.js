@@ -9,9 +9,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SelectSeverity } from './select_severity';
 
 describe('SelectSeverity', () => {
-
   test('creates correct severity options and initial selected value', () => {
-    const wrapper = shallowWithIntl(<SelectSeverity/>);
+    const wrapper = shallowWithIntl(<SelectSeverity />);
     const select = wrapper.first().shallow();
 
     const options = select.instance().getOptions();
@@ -24,38 +23,38 @@ describe('SelectSeverity', () => {
     expect(options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          value: 'warning'
-        })
+          value: 'warning',
+        }),
       ])
     );
 
     expect(options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          value: 'minor'
-        })
+          value: 'minor',
+        }),
       ])
     );
 
     expect(options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          value: 'major'
-        })
+          value: 'major',
+        }),
       ])
     );
 
     expect(options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          value: 'critical'
-        })
+          value: 'critical',
+        }),
       ])
     );
   });
 
   test('state for currently selected value is updated correctly on click', () => {
-    const wrapper = shallowWithIntl(<SelectSeverity/>);
+    const wrapper = shallowWithIntl(<SelectSeverity />);
     const select = wrapper.first().shallow();
 
     const defaultSelectedValue = wrapper.props().severity.display;
@@ -65,5 +64,4 @@ describe('SelectSeverity', () => {
     const updatedSelectedValue = wrapper.props().severity.display;
     expect(updatedSelectedValue).toBe('critical');
   });
-
 });

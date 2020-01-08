@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { first, skip } from 'rxjs/operators';
+import { first, skip, toArray } from 'rxjs/operators';
 import { fromExpression } from '@kbn/interpreter/common';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
@@ -45,6 +45,13 @@ jest.mock('./services', () => {
     },
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
+    }),
+    getNotifications: jest.fn(() => {
+      return {
+        toasts: {
+          addError: jest.fn(() => {}),
+        },
+      };
     }),
   };
 });
@@ -97,20 +104,14 @@ describe('ExpressionLoader', () => {
     expect(response).toEqual({ type: 'render', as: 'test' });
   });
 
-  it('emits on loading$ when starting to load', async () => {
+  it('emits on loading$ on initial load and on updates', async () => {
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
-    let loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
+    const loadingPromise = expressionLoader.loading$.pipe(toArray()).toPromise();
     expressionLoader.update('test');
-    let response = await loadingPromise;
-    expect(response).toBeUndefined();
-    loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
     expressionLoader.update('');
-    response = await loadingPromise;
-    expect(response).toBeUndefined();
-    loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
     expressionLoader.update();
-    response = await loadingPromise;
-    expect(response).toBeUndefined();
+    expressionLoader.destroy();
+    expect(await loadingPromise).toHaveLength(4);
   });
 
   it('emits on render$ when rendering is done', async () => {

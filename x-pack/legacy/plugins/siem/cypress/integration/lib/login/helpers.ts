@@ -39,7 +39,7 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
 /**
  * The Kibana server endpoint used for authentication
  */
-const LOGIN_API_ENDPOINT = '/api/security/v1/login';
+const LOGIN_API_ENDPOINT = '/internal/security/login';
 
 /**
  * Authenticates with Kibana using, if specified, credentials specified by
@@ -68,7 +68,7 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * Authenticates with Kibana by reading credentials from the
  * `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
  * environment variables, and POSTing the username and password directly to
- * Kibana's `security/v1/login` endpoint, bypassing the login page (for speed).
+ * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaEnvironmentCredentials = () => {
   cy.log(
@@ -90,7 +90,7 @@ const loginViaEnvironmentCredentials = () => {
 /**
  * Authenticates with Kibana by reading credentials from the
  * `kibana.dev.yml` file and POSTing the username and password directly to
- * Kibana's `security/v1/login` endpoint, bypassing the login page (for speed).
+ * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaConfig = () => {
   cy.log(

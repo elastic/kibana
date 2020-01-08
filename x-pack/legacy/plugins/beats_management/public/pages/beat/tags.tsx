@@ -34,7 +34,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     };
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.updateBeatsData();
   }
 

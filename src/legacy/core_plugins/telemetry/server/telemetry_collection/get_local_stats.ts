@@ -55,13 +55,14 @@ export function handleLocalStats(server: any, clusterInfo: any, clusterStats: an
  * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
 export const getLocalStats: StatsGetter = async (clustersDetails, config) => {
-  const { server, callCluster } = config;
+  const { server, callCluster, usageCollection } = config;
+
   return await Promise.all(
     clustersDetails.map(async clustersDetail => {
       const [clusterInfo, clusterStats, kibana] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
-        getKibana(server, callCluster),
+        getKibana(usageCollection, callCluster),
       ]);
       return handleLocalStats(server, clusterInfo, clusterStats, kibana);
     })

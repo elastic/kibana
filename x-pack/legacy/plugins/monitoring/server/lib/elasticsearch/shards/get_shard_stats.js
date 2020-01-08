@@ -35,7 +35,12 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   };
 }
 
-export function getShardStats(req, esIndexPattern, cluster, { includeNodes = false, includeIndices = false } = {}) {
+export function getShardStats(
+  req,
+  esIndexPattern,
+  cluster,
+  { includeNodes = false, includeIndices = false } = {}
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
@@ -50,17 +55,16 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
         metric,
-        filters: [ { term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } } ]
+        filters: [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }],
       }),
       aggs: {
-        ...getShardAggs(config, includeNodes)
-      }
-    }
+        ...getShardAggs(config, includeNodes),
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(resp => {
-      return handleResponse(resp, includeNodes, includeIndices, cluster);
-    });
+  return callWithRequest(req, 'search', params).then(resp => {
+    return handleResponse(resp, includeNodes, includeIndices, cluster);
+  });
 }

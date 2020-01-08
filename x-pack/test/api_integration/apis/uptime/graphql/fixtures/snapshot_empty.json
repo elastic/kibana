@@ -1,10 +1,6 @@
 {
-  "snapshot": {
-    "counts": {
-      "down": 13,
-      "mixed": 0,
-      "up": 0,
-      "total": 13
-    }
-  }
+  "up": 0,
+  "down": 7,
+  "mixed": 0,
+  "total": 7
 }

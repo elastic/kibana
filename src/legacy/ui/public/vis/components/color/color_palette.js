@@ -29,15 +29,10 @@ import { seedColors } from './seed_colors';
 
 const offset = 300; // Hue offset to start at
 
-const fraction = function (goal) {
-  const walkTree = function (numerator, denominator, bytes) {
+const fraction = function(goal) {
+  const walkTree = function(numerator, denominator, bytes) {
     if (bytes.length) {
-      return walkTree(
-        (numerator * 2) + (bytes.pop() ? 1 : -1),
-        denominator * 2,
-        bytes
-      );
-
+      return walkTree(numerator * 2 + (bytes.pop() ? 1 : -1), denominator * 2, bytes);
     } else {
       return numerator / denominator;
     }
@@ -46,13 +41,12 @@ const fraction = function (goal) {
   const b = (goal + 2)
     .toString(2)
     .split('')
-    .map(function (num) {
+    .map(function(num) {
       return parseInt(num, 10);
     });
   b.shift();
 
   return walkTree(1, 2, b);
-
 };
 
 export function createColorPalette(num) {
@@ -64,7 +58,7 @@ export function createColorPalette(num) {
 
   const seedLength = seedColors.length;
 
-  _.times(num - seedLength, function (i) {
+  _.times(num - seedLength, function(i) {
     colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
   });
 

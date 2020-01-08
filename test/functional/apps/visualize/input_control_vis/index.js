@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('input controls', function () {
+export default function({ loadTestFile }) {
+  describe('input controls', function() {
     loadTestFile(require.resolve('./input_control_options'));
     loadTestFile(require.resolve('./dynamic_options'));
     loadTestFile(require.resolve('./chained_controls'));

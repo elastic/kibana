@@ -11,10 +11,7 @@ import { calculateAuto } from '../../../calculate_auto';
 import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
-import {
-  LISTING_METRICS_NAMES,
-  LISTING_METRICS_PATHS
-} from './nodes_listing_metrics';
+import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration
@@ -55,9 +52,9 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
   const filters = [
     {
       terms: {
-        'source_node.uuid': uuidsToInclude
-      }
-    }
+        'source_node.uuid': uuidsToInclude,
+      },
+    },
   ];
 
   const params = {
@@ -71,37 +68,37 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
         end,
         clusterUuid,
         filters,
-        metric: metricFields
+        metric: metricFields,
       }),
       collapse: {
-        field: 'source_node.uuid'
+        field: 'source_node.uuid',
       },
       aggs: {
         nodes: {
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('xpack.monitoring.max_bucket_size')
+            size: config.get('xpack.monitoring.max_bucket_size'),
           },
           aggs: {
             by_date: {
               date_histogram: {
                 field: 'timestamp',
                 min_doc_count: 1,
-                fixed_interval: bucketSize + 's'
+                fixed_interval: bucketSize + 's',
               },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
-            }
-          }
-        }
+              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize),
+            },
+          },
+        },
       },
-      sort: [ { timestamp: { order: 'desc' } } ]
+      sort: [{ timestamp: { order: 'desc' } }],
     },
     filterPath: [
       'hits.hits._source.source_node',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,
-    ]
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

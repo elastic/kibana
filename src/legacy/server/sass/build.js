@@ -30,12 +30,12 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placehold
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
-const exists = promisify(fs.exists);
+const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 const UI_ASSETS_DIR = resolve(__dirname, '../../ui/public/assets');
-const DARK_THEME_IMPORTER = (url) => {
+const DARK_THEME_IMPORTER = url => {
   if (url.includes('eui_colors_light')) {
     return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
   }
@@ -56,7 +56,15 @@ const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
 };
 
 export class Build {
-  constructor({ log, sourcePath, targetPath, urlImports, theme, sourceMap  = true, outputStyle = 'nested' }) {
+  constructor({
+    log,
+    sourcePath,
+    targetPath,
+    urlImports,
+    theme,
+    sourceMap = true,
+    outputStyle = 'nested',
+  }) {
     this.log = log;
     this.sourcePath = sourcePath;
     this.sourceDir = dirname(this.sourcePath);
@@ -92,90 +100,96 @@ export class Build {
       sourceMap: this.sourceMap,
       outputStyle: this.outputStyle,
       sourceMapEmbed: this.sourceMap,
-      includePaths: [
-        resolve(__dirname, '../../../../node_modules'),
-      ],
-      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
+      includePaths: [resolve(__dirname, '../../../../node_modules')],
+      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
     });
 
-    const processor = postcss([ autoprefixer ]);
+    const processor = postcss([autoprefixer]);
 
     const urlAssets = [];
 
     if (this.urlImports) {
-      processor.use(postcssUrl({
-        url: (request) => {
-          if (!request.pathname) {
-            return request.url;
-          }
+      processor.use(
+        postcssUrl({
+          url: request => {
+            if (!request.pathname) {
+              return request.url;
+            }
 
-          const asset = makeAsset(request, (
-            request.pathname.startsWith('ui/assets')
-              ? {
-                path: resolve(UI_ASSETS_DIR, relative('ui/assets', request.pathname)),
-                root: UI_ASSETS_DIR,
-                boundry: UI_ASSETS_DIR,
-                urlRoot: `ui/`,
-              }
-              : {
-                path: resolve(this.sourceDir, request.pathname),
-                root: this.sourceDir,
-                boundry: this.urlImports.publicDir,
-                urlRoot: this.urlImports.urlBase,
-                copyRoot: this.targetDir,
-              }
-          ));
+            const asset = makeAsset(
+              request,
+              request.pathname.startsWith('ui/assets')
+                ? {
+                    path: resolve(UI_ASSETS_DIR, relative('ui/assets', request.pathname)),
+                    root: UI_ASSETS_DIR,
+                    boundry: UI_ASSETS_DIR,
+                    urlRoot: `ui/`,
+                  }
+                : {
+                    path: resolve(this.sourceDir, request.pathname),
+                    root: this.sourceDir,
+                    boundry: this.urlImports.publicDir,
+                    urlRoot: this.urlImports.urlBase,
+                    copyRoot: this.targetDir,
+                  }
+            );
 
-          if (!urlAssets.some(({ path, copyTo }) => path === asset.path && copyTo === asset.copyTo)) {
-            urlAssets.push(asset);
-          }
+            if (
+              !urlAssets.some(({ path, copyTo }) => path === asset.path && copyTo === asset.copyTo)
+            ) {
+              urlAssets.push(asset);
+            }
 
-          return asset.url;
-        }
-      }));
+            return asset.url;
+          },
+        })
+      );
     }
 
     const prefixed = await processor.process(rendered.css, {
-      from: this.sourcePath
+      from: this.sourcePath,
     });
 
-    this.includedFiles = [
-      ...rendered.stats.includedFiles,
-      ...urlAssets.map(({ path }) => path),
-    ];
+    this.includedFiles = [...rendered.stats.includedFiles, ...urlAssets.map(({ path }) => path)];
 
     // verify that asset sources exist and import is valid before writing anything
-    await Promise.all(urlAssets.map(async (asset) => {
-      if (!await exists(asset.path)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
-          `  Make sure that the request is relative to "${asset.root}"`
-        );
-      }
+    await Promise.all(
+      urlAssets.map(async asset => {
+        try {
+          await access(asset.path);
+        } catch (e) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
+              `  Make sure that the request is relative to "${asset.root}"`
+          );
+        }
 
-      if (!isPathInside(asset.path, asset.boundry)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
-          `  which is outside of "${asset.boundry}"`
-        );
-      }
-    }));
+        if (!isPathInside(asset.path, asset.boundry)) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
+              `  which is outside of "${asset.boundry}"`
+          );
+        }
+      })
+    );
 
     // write css
     await mkdirAsync(this.targetDir, { recursive: true });
     await writeFile(this.targetPath, prefixed.css);
 
     // copy non-shared urlAssets
-    await Promise.all(urlAssets.map(async (asset) => {
-      if (!asset.copyTo) {
-        return;
-      }
+    await Promise.all(
+      urlAssets.map(async asset => {
+        if (!asset.copyTo) {
+          return;
+        }
 
-      await mkdirAsync(dirname(asset.copyTo), { recursive: true });
-      await copyFile(asset.path, asset.copyTo);
-    }));
+        await mkdirAsync(dirname(asset.copyTo), { recursive: true });
+        await copyFile(asset.path, asset.copyTo);
+      })
+    );
 
     return this;
   }

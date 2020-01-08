@@ -23,7 +23,7 @@ import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';

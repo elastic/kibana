@@ -1,0 +1,17 @@
+{
+  "rule_id": "402d5f78-82cd-4320-8b69-3185e44daf07",
+  "risk_score": 50,
+  "description": "The originator’s address is seen in the block list error message. This is useful to detect local hosts sending SPAM with a high positive rate.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SMTP::Blocklist_Blocked_Host",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SMTP::Blocklist_Blocked_Host\" or rule.name: \"SMTP::Blocklist_Blocked_Host\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

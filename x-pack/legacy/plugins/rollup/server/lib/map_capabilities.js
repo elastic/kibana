@@ -13,7 +13,7 @@ export function getCapabilitiesForRollupIndices(indices) {
   indexNames.forEach(index => {
     try {
       capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
-    } catch(e) {
+    } catch (e) {
       capabilities[index] = {
         error: e.message,
       };

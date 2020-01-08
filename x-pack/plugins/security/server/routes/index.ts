@@ -8,10 +8,12 @@ import { CoreSetup, IClusterClient, IRouter, Logger } from '../../../../../src/c
 import { Authentication } from '../authentication';
 import { Authorization } from '../authorization';
 import { ConfigType } from '../config';
-import { LegacyAPI } from '../plugin';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
+import { defineApiKeysRoutes } from './api_keys';
+import { defineIndicesRoutes } from './indices';
+import { defineUsersRoutes } from './users';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -19,15 +21,18 @@ import { defineAuthorizationRoutes } from './authorization';
 export interface RouteDefinitionParams {
   router: IRouter;
   basePath: CoreSetup['http']['basePath'];
+  csp: CoreSetup['http']['csp'];
   logger: Logger;
   clusterClient: IClusterClient;
   config: ConfigType;
   authc: Authentication;
   authz: Authorization;
-  getLegacyAPI: () => Pick<LegacyAPI, 'cspRules'>;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineApiKeysRoutes(params);
+  defineIndicesRoutes(params);
+  defineUsersRoutes(params);
 }

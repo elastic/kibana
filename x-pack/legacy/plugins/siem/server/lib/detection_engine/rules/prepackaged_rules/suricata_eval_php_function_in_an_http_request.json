@@ -1,0 +1,17 @@
+{
+  "rule_id": "8c77b4ed-4e98-438b-adb0-d645d4a4ea26",
+  "risk_score": 50,
+  "description": "Suricata eval PHP Function in an HTTP Request",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata eval PHP Function in an HTTP Request",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610088 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

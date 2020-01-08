@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import {
   replaceStringTokens,
@@ -17,31 +15,28 @@ import {
   escapeForElasticsearchQuery,
 } from '../string_utils';
 
-
 describe('ML - string utils', () => {
-
   describe('replaceStringTokens', () => {
-
     const testRecord = {
-      'job_id': 'test_job',
-      'result_type': 'record',
-      'probability': 0.0191711,
-      'record_score': 4.3,
-      'bucket_span': 300,
-      'detector_index': 0,
-      'timestamp': 1454890500000,
-      'function': 'mean',
-      'function_description': 'mean',
-      'field_name': 'responsetime',
-      'user': 'Des O\'Connor',
-      'testfield1': 'test$tring=[+-?]',
-      'testfield2': '{<()>}',
-      'testfield3': 'host=\\\\test@uk.dev'
+      job_id: 'test_job',
+      result_type: 'record',
+      probability: 0.0191711,
+      record_score: 4.3,
+      bucket_span: 300,
+      detector_index: 0,
+      timestamp: 1454890500000,
+      function: 'mean',
+      function_description: 'mean',
+      field_name: 'responsetime',
+      user: "Des O'Connor",
+      testfield1: 'test$tring=[+-?]',
+      testfield2: '{<()>}',
+      testfield3: 'host=\\\\test@uk.dev',
     };
 
     it('returns correct values without URI encoding', () => {
       const result = replaceStringTokens('user=$user$,time=$timestamp$', testRecord, false);
-      expect(result).to.be('user=Des O\'Connor,time=1454890500000');
+      expect(result).to.be("user=Des O'Connor,time=1454890500000");
     });
 
     it('returns correct values for missing token without URI encoding', () => {
@@ -63,7 +58,7 @@ describe('ML - string utils', () => {
       expect(result1).to.be('https://www.google.co.uk/webhp#q=test%24tring%3D%5B%2B-%3F%5D');
       expect(result2).to.be('https://www.google.co.uk/webhp#q=%7B%3C()%3E%7D');
       expect(result3).to.be('https://www.google.co.uk/webhp#q=host%3D%5C%5Ctest%40uk.dev');
-      expect(result4).to.be('https://www.google.co.uk/webhp#q=Des%20O\'Connor');
+      expect(result4).to.be("https://www.google.co.uk/webhp#q=Des%20O'Connor");
     });
 
     it('returns correct values for missing token with URI encoding', () => {
@@ -71,47 +66,45 @@ describe('ML - string utils', () => {
       const result = replaceStringTokens(testString, testRecord, true);
       expect(result).to.be('https://www.google.co.uk/webhp#q=$username$&time=1454890500000');
     });
-
   });
 
   describe('detectorToString', () => {
-
     it('returns the correct descriptions for detectors', () => {
       const detector1 = {
-        'function': 'count',
+        function: 'count',
       };
 
       const detector2 = {
-        'function': 'count',
-        'by_field_name': 'airline',
-        'use_null': false
+        function: 'count',
+        by_field_name: 'airline',
+        use_null: false,
       };
 
       const detector3 = {
-        'function': 'mean',
-        'field_name': 'CPUUtilization',
-        'partition_field_name': 'region',
-        'by_field_name': 'host',
-        'over_field_name': 'user',
-        'exclude_frequent': 'all'
+        function: 'mean',
+        field_name: 'CPUUtilization',
+        partition_field_name: 'region',
+        by_field_name: 'host',
+        over_field_name: 'user',
+        exclude_frequent: 'all',
       };
 
       expect(detectorToString(detector1)).to.be('count');
       expect(detectorToString(detector2)).to.be('count by airline use_null=false');
       expect(detectorToString(detector3)).to.be(
-        'mean(CPUUtilization) by host over user partition_field_name=region exclude_frequent=all');
+        'mean(CPUUtilization) by host over user partition_field_name=region exclude_frequent=all'
+      );
     });
-
   });
 
   describe('sortByKey', () => {
     const obj = {
-      'zebra': 'stripes',
-      'giraffe': 'neck',
-      'elephant': 'trunk'
+      zebra: 'stripes',
+      giraffe: 'neck',
+      elephant: 'trunk',
     };
 
-    const valueComparator = function (value) {
+    const valueComparator = function(value) {
       return value;
     };
 
@@ -146,20 +139,23 @@ describe('ML - string utils', () => {
       expect(keys[1]).to.be('zebra');
       expect(keys[2]).to.be('giraffe');
     });
-
   });
 
   describe('guessTimeFormat', () => {
     it('returns correct format for various dates', () => {
-      expect(guessTimeFormat('2017-03-24T00:00')).to.be('yyyy-MM-dd\'T\'HH:mm');
+      expect(guessTimeFormat('2017-03-24T00:00')).to.be("yyyy-MM-dd'T'HH:mm");
       expect(guessTimeFormat('2017-03-24 00:00')).to.be('yyyy-MM-dd HH:mm');
       expect(guessTimeFormat('2017-03-24 00:00:00')).to.be('yyyy-MM-dd HH:mm:ss');
       expect(guessTimeFormat('2017-03-24 00:00:00Z')).to.be('yyyy-MM-dd HH:mm:ssX');
       expect(guessTimeFormat('2017-03-24 00:00:00.000')).to.be('yyyy-MM-dd HH:mm:ss.SSS');
       expect(guessTimeFormat('2017-03-24 00:00:00:000')).to.be('yyyy-MM-dd HH:mm:ss:SSS');
-      expect(guessTimeFormat('2017-03-24 00:00:00.000+00:00:00')).to.be('yyyy-MM-dd HH:mm:ss.SSSXXXXX');
+      expect(guessTimeFormat('2017-03-24 00:00:00.000+00:00:00')).to.be(
+        'yyyy-MM-dd HH:mm:ss.SSSXXXXX'
+      );
       expect(guessTimeFormat('2017-03-24 00:00:00.000+00:00')).to.be('yyyy-MM-dd HH:mm:ss.SSSXXX');
-      expect(guessTimeFormat('2017-03-24 00:00:00.000+000000')).to.be('yyyy-MM-dd HH:mm:ss.SSSXXXX');
+      expect(guessTimeFormat('2017-03-24 00:00:00.000+000000')).to.be(
+        'yyyy-MM-dd HH:mm:ss.SSSXXXX'
+      );
       expect(guessTimeFormat('2017-03-24 00:00:00.000+0000')).to.be('yyyy-MM-dd HH:mm:ss.SSSZ');
       expect(guessTimeFormat('2017-03-24 00:00:00.000+00')).to.be('yyyy-MM-dd HH:mm:ss.SSSX');
       expect(guessTimeFormat('2017-03-24 00:00:00.000Z')).to.be('yyyy-MM-dd HH:mm:ss.SSSX');
@@ -200,7 +196,7 @@ describe('ML - string utils', () => {
       expect(mlEscape('foo<bar')).to.be('foo&lt;bar');
       expect(mlEscape('foo>bar')).to.be('foo&gt;bar');
       expect(mlEscape('foo"bar')).to.be('foo&quot;bar');
-      expect(mlEscape('foo\'bar')).to.be('foo&#39;bar');
+      expect(mlEscape("foo'bar")).to.be('foo&#39;bar');
       expect(mlEscape('foo/bar')).to.be('foo&#x2F;bar');
     });
   });
@@ -230,5 +226,4 @@ describe('ML - string utils', () => {
       expect(escapeForElasticsearchQuery('foo/bar')).to.be('foo\\/bar');
     });
   });
-
 });

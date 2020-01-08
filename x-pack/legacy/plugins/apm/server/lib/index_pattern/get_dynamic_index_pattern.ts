@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { APICaller } from 'src/core/server';
 import LRU from 'lru-cache';
 import {
@@ -51,7 +50,7 @@ export const getDynamicIndexPattern = async ({
       pattern: patternIndices
     });
 
-    const indexPattern: StaticIndexPattern = {
+    const indexPattern: IIndexPattern = {
       fields,
       title: indexPatternTitle
     };

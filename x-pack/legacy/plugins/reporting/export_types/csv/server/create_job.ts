@@ -5,15 +5,23 @@
  */
 
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { ConditionalHeaders, ServerFacade, RequestFacade } from '../../../types';
+import {
+  CreateJobFactory,
+  ConditionalHeaders,
+  ServerFacade,
+  RequestFacade,
+  ESQueueCreateJobFn,
+} from '../../../types';
 import { JobParamsDiscoverCsv } from '../types';
 
-export const createJobFactory = function createJobFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsDiscoverCsv
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);

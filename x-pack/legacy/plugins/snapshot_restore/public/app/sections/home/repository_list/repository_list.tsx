@@ -40,7 +40,9 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     isLoading,
     data: { repositories, managedRepository } = {
       repositories: undefined,
-      managedRepository: undefined,
+      managedRepository: {
+        name: undefined,
+      },
     },
     sendRequest: reload,
   } = useLoadRepositories();
@@ -133,7 +135,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <RepositoryTable
         repositories={repositories || []}
-        managedRepository={managedRepository}
+        managedRepository={managedRepository?.name}
         reload={reload}
         openRepositoryDetailsUrl={openRepositoryDetailsUrl}
         onRepositoryDeleted={onRepositoryDeleted}

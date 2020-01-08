@@ -19,30 +19,30 @@ describe('get_last_recovery', () => {
               shards: [
                 {
                   start_time_in_millis: 50,
-                  stop_time_in_millis: 300
+                  stop_time_in_millis: 300,
                 },
                 {
                   start_time_in_millis: 10,
-                  stop_time_in_millis: 100
+                  stop_time_in_millis: 100,
                 },
                 {
                   start_time_in_millis: 100,
-                  stop_time_in_millis: 500
+                  stop_time_in_millis: 500,
                 },
                 {
                   start_time_in_millis: 30,
-                  stop_time_in_millis: 300
+                  stop_time_in_millis: 300,
                 },
                 {
                   start_time_in_millis: 0,
-                  stop_time_in_millis: 100
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
+                  stop_time_in_millis: 100,
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
   };
 
   it('No hits results in an empty array', () => {

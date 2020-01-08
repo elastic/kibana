@@ -32,6 +32,7 @@ import { writeEpilogue } from './write_epilogue';
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
+  const failureMetadata = getService('failureMetadata');
   let originalLogWriters;
   let reporterCaptureStartTime;
 
@@ -53,6 +54,7 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
+          getTestMetadata: t => failureMetadata.get(t),
         });
       }
     }

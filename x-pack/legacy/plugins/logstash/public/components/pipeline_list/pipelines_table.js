@@ -14,10 +14,7 @@ function getColumns(openPipeline, clonePipeline) {
   return [
     {
       field: 'id',
-      name: i18n.translate(
-        'xpack.logstash.pipelinesTable.idColumnLabel',
-        { defaultMessage: 'Id' }
-      ),
+      name: i18n.translate('xpack.logstash.pipelinesTable.idColumnLabel', { defaultMessage: 'Id' }),
       sortable: true,
       render: (id, { isCentrallyManaged }) => {
         const openPipelineClicked = () => openPipeline(id);
@@ -38,29 +35,26 @@ function getColumns(openPipeline, clonePipeline) {
     },
     {
       field: 'description',
-      name: i18n.translate(
-        'xpack.logstash.pipelinesTable.descriptionColumnLabel',
-        { defaultMessage: 'Description' }
-      ),
+      name: i18n.translate('xpack.logstash.pipelinesTable.descriptionColumnLabel', {
+        defaultMessage: 'Description',
+      }),
       render: description => <span data-test-subj="cellDescription">{description}</span>,
       sortable: true,
       truncateText: true,
     },
     {
       field: 'lastModifiedHumanized',
-      name: i18n.translate(
-        'xpack.logstash.pipelinesTable.lastModifiedColumnLabel',
-        { defaultMessage: 'Last modified' }
-      ),
+      name: i18n.translate('xpack.logstash.pipelinesTable.lastModifiedColumnLabel', {
+        defaultMessage: 'Last modified',
+      }),
       render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
       sortable: ({ lastModified }) => lastModified.valueOf(),
     },
     {
       field: 'username',
-      name: i18n.translate(
-        'xpack.logstash.pipelinesTable.modifiedByColumnLabel',
-        { defaultMessage: 'Modified by' }
-      ),
+      name: i18n.translate('xpack.logstash.pipelinesTable.modifiedByColumnLabel', {
+        defaultMessage: 'Modified by',
+      }),
       render: username => <span data-test-subj="cellUsername">{username}</span>,
       sortable: true,
     },
@@ -114,20 +108,23 @@ function PipelinesTableUi({
 
   const selectableMessage = (selectable, { id }) =>
     selectable
-      ? intl.formatMessage({
-        id: 'xpack.logstash.pipelinesTable.selectablePipelineMessage',
-        defaultMessage: `Select pipeline "{id}"`
-      }, {
-        id,
-      })
+      ? intl.formatMessage(
+          {
+            id: 'xpack.logstash.pipelinesTable.selectablePipelineMessage',
+            defaultMessage: `Select pipeline "{id}"`,
+          },
+          {
+            id,
+          }
+        )
       : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
 
   const selectionOptions = isSelectable
     ? {
-      selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
-      selectableMessage,
-      onSelectionChange,
-    }
+        selectable: ({ isCentrallyManaged }) => isCentrallyManaged,
+        selectableMessage,
+        onSelectionChange,
+      }
     : null;
 
   // display when > 0 selected and user has write permission
@@ -152,7 +149,9 @@ function PipelinesTableUi({
       {
         type: 'field_value_selection',
         field: 'id',
-        name: i18n.translate('xpack.logstash.pipelinesTable.filterByIdLabel', { defaultMessage: 'Filter by ID' }),
+        name: i18n.translate('xpack.logstash.pipelinesTable.filterByIdLabel', {
+          defaultMessage: 'Filter by ID',
+        }),
         multiSelect: false,
         options: pipelines.map(({ id }) => {
           return {
@@ -195,7 +194,7 @@ function PipelinesTableUi({
       selection={selectionOptions}
       sorting={true}
       rowProps={{
-        'data-test-subj': 'row'
+        'data-test-subj': 'row',
       }}
     />
   );

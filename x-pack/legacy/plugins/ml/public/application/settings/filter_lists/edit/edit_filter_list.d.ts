@@ -7,7 +7,7 @@
 import { FC } from 'react';
 
 declare const EditFilterList: FC<{
-  filterId: string;
+  filterId?: string;
   canCreateFilter: boolean;
   canDeleteFilter: boolean;
 }>;

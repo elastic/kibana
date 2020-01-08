@@ -6,9 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import {
-  getPhase,
-} from '../../../../store/selectors';
+import { getPhase } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
 import { PHASE_WARM, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../constants';
 import { WarmPhase as PresentationComponent } from './warm_phase';

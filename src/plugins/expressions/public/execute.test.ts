@@ -29,6 +29,13 @@ jest.mock('./services', () => ({
       },
     };
   },
+  getNotifications: jest.fn(() => {
+    return {
+      toasts: {
+        addError: jest.fn(() => {}),
+      },
+    };
+  }),
 }));
 
 describe('execute helper function', () => {

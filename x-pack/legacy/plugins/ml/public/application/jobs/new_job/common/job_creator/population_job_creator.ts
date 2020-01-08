@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
   Field,
@@ -15,8 +14,9 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
@@ -25,7 +25,11 @@ export class PopulationJobCreator extends JobCreator {
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
   }

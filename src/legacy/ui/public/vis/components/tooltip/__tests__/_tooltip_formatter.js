@@ -23,17 +23,21 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { PointSeriesTooltipFormatterProvider } from '../_pointseries_tooltip_formatter';
 
-describe('tooltipFormatter', function () {
-
+describe('tooltipFormatter', function() {
   let tooltipFormatter;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    tooltipFormatter = Private(PointSeriesTooltipFormatterProvider)();
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      tooltipFormatter = Private(PointSeriesTooltipFormatterProvider)();
+    })
+  );
 
   function cell($row, i) {
-    return $row.eq(i).text().trim();
+    return $row
+      .eq(i)
+      .text()
+      .trim();
   }
 
   const baseEvent = {
@@ -50,18 +54,20 @@ describe('tooltipFormatter', function () {
           label: 'middle',
           zLabel: 'top',
           yAxisFormatter: _.identity,
-          zAxisFormatter: _.identity
-        }
-      ]
+          zAxisFormatter: _.identity,
+        },
+      ],
     },
     datum: {
-      x: 3, y: 2, z: 1,
+      x: 3,
+      y: 2,
+      z: 1,
       extraMetrics: [],
-      seriesId: '1'
-    }
+      seriesId: '1',
+    },
   };
 
-  it('returns html based on the mouse event', function () {
+  it('returns html based on the mouse event', function() {
     const event = _.cloneDeep(baseEvent);
     const $el = $(tooltipFormatter(event));
     const $rows = $el.find('tr');
@@ -80,7 +86,7 @@ describe('tooltipFormatter', function () {
     expect(cell($row3, 1)).to.be('1');
   });
 
-  it('renders correctly on missing extraMetrics in datum', function () {
+  it('renders correctly on missing extraMetrics in datum', function() {
     const event = _.cloneDeep(baseEvent);
     delete event.datum.extraMetrics;
     const $el = $(tooltipFormatter(event));

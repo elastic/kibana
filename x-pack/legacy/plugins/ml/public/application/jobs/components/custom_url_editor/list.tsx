@@ -25,7 +25,7 @@ import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
+import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../new_job/common/job_creator/configs';
 
 function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
@@ -40,8 +40,8 @@ function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
 
 export interface CustomUrlListProps {
   job: Job;
-  customUrls: KibanaUrlConfig[];
-  setCustomUrls: (customUrls: KibanaUrlConfig[]) => {};
+  customUrls: UrlConfig[];
+  setCustomUrls: (customUrls: UrlConfig[]) => void;
 }
 
 /*
@@ -82,9 +82,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
 
       const timeRange = e.target.value;
       if (timeRange !== undefined && timeRange.length > 0) {
-        customUrls[index].time_range = timeRange;
+        (customUrls[index] as KibanaUrlConfig).time_range = timeRange;
       } else {
-        delete customUrls[index].time_range;
+        delete (customUrls[index] as KibanaUrlConfig).time_range;
       }
       setCustomUrls(customUrls);
     }
@@ -133,7 +133,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
       : [];
 
     // Validate the time range.
-    const timeRange = customUrl.time_range;
+    const timeRange = (customUrl as KibanaUrlConfig).time_range;
     const isInvalidTimeRange = !isValidTimeRange(timeRange);
     const invalidIntervalError = isInvalidTimeRange
       ? [
@@ -144,7 +144,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
       : [];
 
     return (
-      <EuiFlexGroup key={`url_${index}`}>
+      <EuiFlexGroup key={`url_${index}`} data-test-subj={`mlJobEditCustomUrlItem_${index}`}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={
@@ -160,6 +160,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               value={label}
               isInvalid={isInvalidLabel}
               onChange={e => onLabelChange(e, index)}
+              data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -208,7 +209,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
             isInvalid={isInvalidTimeRange}
           >
             <EuiFieldText
-              value={customUrl.time_range || ''}
+              value={(customUrl as KibanaUrlConfig).time_range || ''}
               isInvalid={isInvalidTimeRange}
               placeholder={TIME_RANGE_TYPE.AUTO}
               onChange={e => onTimeRangeChange(e, index)}
@@ -266,5 +267,5 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
     );
   });
 
-  return <>{customUrlRows}</>;
+  return <div data-test-subj="mlJobEditCustomUrlsList">{customUrlRows}</div>;
 };

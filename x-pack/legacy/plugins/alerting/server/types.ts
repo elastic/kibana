@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertInstance } from './lib';
+import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -49,46 +49,60 @@ export type AlertActionParams = SavedObjectAttributes;
 export interface AlertAction {
   group: string;
   id: string;
+  actionTypeId: string;
   params: AlertActionParams;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
   actionRef: string;
+  actionTypeId: string;
   params: AlertActionParams;
 }
 
+export interface IntervalSchedule extends SavedObjectAttributes {
+  interval: string;
+}
+
 export interface Alert {
+  id: string;
   enabled: boolean;
   name: string;
   tags: string[];
   alertTypeId: string;
-  interval: string;
+  consumer: string;
+  schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Record<string, any>;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
   alertTypeId: string;
-  interval: string;
+  consumer: string;
+  schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  createdAt: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];

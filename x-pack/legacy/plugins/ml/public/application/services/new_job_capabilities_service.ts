@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
-import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
-
 import {
   Field,
   Aggregation,
@@ -15,20 +12,22 @@ import {
   NewJobCaps,
   EVENT_RATE_FIELD_ID,
 } from '../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import {
+  ES_FIELD_TYPES,
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
+import { getIndexPatternAndSavedSearch } from '../util/index_utils';
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
 export function loadNewJobCapabilities(
-  indexPatterns: IndexPatterns,
-  savedSearches: SavedSearchLoader,
-  $route: Record<string, any>
+  indexPatternId: string,
+  savedSearchId: string,
+  indexPatterns: IndexPatternsContract
 ) {
   return new Promise(async (resolve, reject) => {
-    // get the index pattern id or saved search id from the url params
-    const { index: indexPatternId, savedSearchId } = $route.current.params;
-
     if (indexPatternId !== undefined) {
       // index pattern is being used
       const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);
@@ -37,8 +36,13 @@ export function loadNewJobCapabilities(
     } else if (savedSearchId !== undefined) {
       // saved search is being used
       // load the index pattern from the saved search
-      const savedSearch = await savedSearches.get(savedSearchId);
-      const indexPattern = savedSearch.searchSource.getField('index');
+      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
+      if (indexPattern === null) {
+        // eslint-disable-next-line no-console
+        console.error('Cannot retrieve index pattern from saved search');
+        reject();
+        return;
+      }
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       resolve(newJobCapsService.newJobCaps);
     } else {

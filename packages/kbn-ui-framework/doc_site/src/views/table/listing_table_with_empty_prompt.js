@@ -26,7 +26,7 @@ import {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptPanel,
   KuiListingTable,
-  KuiTableHeaderCell
+  KuiTableHeaderCell,
 } from '../../../../components';
 
 function renderEmptyTablePrompt() {
@@ -42,25 +42,21 @@ function renderEmptyTablePrompt() {
 
 function renderToolBarActions() {
   return [
-    <KuiButton
-      key="add"
-      buttonType="primary"
-      aria-label="Add"
-    >
+    <KuiButton key="add" buttonType="primary" aria-label="Add">
       Add
     </KuiButton>,
     <KuiButton
       key="settings"
       aria-label="Settings"
       buttonType="basic"
-      icon={<KuiButtonIcon type="settings"/>}
+      icon={<KuiButtonIcon type="settings" />}
     />,
     <KuiButton
       key="menu"
       aria-label="Menu"
       buttonType="basic"
-      icon={<KuiButtonIcon type="menu"/>}
-    />
+      icon={<KuiButtonIcon type="menu" />}
+    />,
   ];
 }
 
@@ -72,31 +68,20 @@ function renderPager() {
       hasPreviousPage={false}
       endNumber={10}
       totalItems={100}
-      onNextPage={() => {
-      }}
-      onPreviousPage={() => {
-      }}
+      onNextPage={() => {}}
+      onPreviousPage={() => {}}
     />
   );
 }
 
 function renderHeader() {
   return [
-    <KuiTableHeaderCell key="title">
-      Title
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="status">
-      Status
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="created">
-      Date created
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell
-      key="order"
-      className="kuiTableHeaderCell--alignRight"
-    >
+    <KuiTableHeaderCell key="title">Title</KuiTableHeaderCell>,
+    <KuiTableHeaderCell key="status">Status</KuiTableHeaderCell>,
+    <KuiTableHeaderCell key="created">Date created</KuiTableHeaderCell>,
+    <KuiTableHeaderCell key="order" className="kuiTableHeaderCell--alignRight">
       Orders of magnitude
-    </KuiTableHeaderCell>
+    </KuiTableHeaderCell>,
   ];
 }
 

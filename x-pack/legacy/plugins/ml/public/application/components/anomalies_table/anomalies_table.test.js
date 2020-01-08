@@ -4,28 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
 import mockAnomaliesTableData from '../../explorer/__mocks__/mock_anomalies_table_data.json';
 import { getColumns } from './anomalies_table_columns';
 
 jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: () => false
+  checkPermission: () => false,
 }));
 jest.mock('../../license/check_license', () => ({
-  hasLicenseExpired: () => false
+  hasLicenseExpired: () => false,
 }));
 jest.mock('../../privilege/get_privileges', () => ({
-  getPrivileges: () => { }
+  getPrivileges: () => {},
 }));
 jest.mock('../../services/field_format_service', () => ({
-  getFieldFormat: () => { }
+  getFieldFormat: () => {},
 }));
 jest.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
-jest.mock('./description_cell', () => () => <div id="mockDescriptorCom">mocked description component</div>);
+jest.mock('./description_cell', () => () => (
+  <div id="mockDescriptorCom">mocked description component</div>
+));
 jest.mock('./detector_cell', () => () => <div id="mocDetectorCom">mocked detector component</div>);
 jest.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
-jest.mock('./influencers_cell', () => () => <div id="mocInfluencerCom">mocked influencer component</div>);
+jest.mock('./influencers_cell', () => () => (
+  <div id="mocInfluencerCom">mocked influencer component</div>
+));
 
 const columnData = {
   items: mockAnomaliesTableData.default.anomalies,
@@ -38,11 +41,10 @@ const columnData = {
   showRuleEditorFlyout: false,
   itemIdToExpandedRowMap: false,
   toggleRow: jest.fn(),
-  filter: undefined
+  filter: undefined,
 };
 
 describe('AnomaliesTable', () => {
-
   test('all columns created', () => {
     const columns = getColumns(
       columnData.items,
@@ -62,36 +64,36 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: ''
+          name: '',
         }),
         expect.objectContaining({
-          name: 'time'
+          name: 'time',
         }),
         expect.objectContaining({
-          name: 'severity'
+          name: 'severity',
         }),
         expect.objectContaining({
-          name: 'detector'
+          name: 'detector',
         }),
         expect.objectContaining({
           field: 'entityValue',
-          name: 'found for'
+          name: 'found for',
         }),
         expect.objectContaining({
-          name: 'influenced by'
+          name: 'influenced by',
         }),
         expect.objectContaining({
-          name: 'actual'
+          name: 'actual',
         }),
         expect.objectContaining({
-          name: 'typical'
+          name: 'typical',
         }),
         expect.objectContaining({
-          name: 'description'
+          name: 'description',
         }),
         expect.objectContaining({
-          name: 'category examples'
-        })
+          name: 'category examples',
+        }),
       ])
     );
   });
@@ -99,7 +101,7 @@ describe('AnomaliesTable', () => {
   test('no "found for" column if entityValue missing from items', () => {
     const noEntityValueColumnData = {
       ...columnData,
-      items: mockAnomaliesTableData.noEntityValue.anomalies
+      items: mockAnomaliesTableData.noEntityValue.anomalies,
     };
 
     const columns = getColumns(
@@ -120,7 +122,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'found for'
+          name: 'found for',
         }),
       ])
     );
@@ -129,7 +131,7 @@ describe('AnomaliesTable', () => {
   test('no "influenced by" column if influencers missing from items', () => {
     const noInfluencersColumnData = {
       ...columnData,
-      items: mockAnomaliesTableData.noInfluencers.anomalies
+      items: mockAnomaliesTableData.noInfluencers.anomalies,
     };
 
     const columns = getColumns(
@@ -150,7 +152,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'influenced by'
+          name: 'influenced by',
         }),
       ])
     );
@@ -159,7 +161,7 @@ describe('AnomaliesTable', () => {
   test('no "actual" column if actual missing from items', () => {
     const noActualColumnData = {
       ...columnData,
-      items: mockAnomaliesTableData.noActual.anomalies
+      items: mockAnomaliesTableData.noActual.anomalies,
     };
 
     const columns = getColumns(
@@ -180,7 +182,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'actual'
+          name: 'actual',
         }),
       ])
     );
@@ -189,7 +191,7 @@ describe('AnomaliesTable', () => {
   test('no "typical" column if typical missing from items', () => {
     const noTypicalColumnData = {
       ...columnData,
-      items: mockAnomaliesTableData.noTypical.anomalies
+      items: mockAnomaliesTableData.noTypical.anomalies,
     };
 
     const columns = getColumns(
@@ -210,7 +212,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'typical'
+          name: 'typical',
         }),
       ])
     );
@@ -219,7 +221,7 @@ describe('AnomaliesTable', () => {
   test('"job ID" column shown if multiple jobs selected', () => {
     const multipleJobIdsData = {
       ...columnData,
-      jobIds: mockAnomaliesTableData.multipleJobIds.jobIds
+      jobIds: mockAnomaliesTableData.multipleJobIds.jobIds,
     };
 
     const columns = getColumns(
@@ -240,10 +242,9 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'job ID'
+          name: 'job ID',
         }),
       ])
     );
   });
-
 });

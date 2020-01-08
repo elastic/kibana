@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { timelineDefaults } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -315,7 +316,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1');
+    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
 
     return {
       timeline,

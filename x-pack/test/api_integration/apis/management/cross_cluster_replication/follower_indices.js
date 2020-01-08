@@ -12,7 +12,7 @@ import { registerHelpers as registerElasticSearchHelpers, getRandomString } from
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -26,15 +26,12 @@ export default function ({ getService }) {
 
   const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(es);
 
-  describe('follower indices', function () {
+  describe('follower indices', function() {
     this.tags(['skipCloud']);
 
     before(() => addCluster());
 
-    after(() => Promise.all([
-      deleteAllIndices(),
-      unfollowAll().then(deleteAllClusters)
-    ]));
+    after(() => Promise.all([deleteAllIndices(), unfollowAll().then(deleteAllClusters)]));
 
     describe('list()', () => {
       it('should return an empty array when there are no follower indices', async () => {

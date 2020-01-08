@@ -5,7 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { updateIndexSettings as request } from '../../services';
 import { reloadIndices } from './reload_indices';
 import { notificationService } from '../../services/notification';
@@ -17,10 +17,7 @@ export const updateIndexSettingsError = createAction(
   'INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_ERROR'
 );
 
-export const updateIndexSettings = ({
-  indexName,
-  settings
-}) => async (dispatch)  => {
+export const updateIndexSettings = ({ indexName, settings }) => async dispatch => {
   if (Object.keys(settings).length !== 0) {
     try {
       const { error, message } = await request(indexName, settings);
@@ -33,11 +30,11 @@ export const updateIndexSettings = ({
     }
   }
   dispatch(updateIndexSettingsSuccess());
-  dispatch(reloadIndices([ indexName ]));
+  dispatch(reloadIndices([indexName]));
   notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.updateIndexSettingsAction.settingsSuccessUpdateMessage', {
       defaultMessage: 'Successfully updated settings for index {indexName}',
-      values: { indexName }
+      values: { indexName },
     })
   );
 };

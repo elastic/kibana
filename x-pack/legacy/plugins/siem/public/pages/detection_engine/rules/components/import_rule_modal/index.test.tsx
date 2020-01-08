@@ -5,26 +5,20 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { ImportRuleModal } from './index';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
-import { getMockKibanaUiSetting, MockFrameworks } from '../../../../../mock';
-import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
+import React from 'react';
+import { ImportRuleModalComponent } from './index';
 
-const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
-jest.mock('../../../../../lib/settings/use_kibana_ui_setting', () => ({
-  useKibanaUiSetting: jest.fn(),
-}));
+jest.mock('../../../../../lib/kibana');
 
 describe('ImportRuleModal', () => {
   test('renders correctly against snapshot', () => {
-    mockUseKibanaUiSetting.mockImplementation(
-      getMockKibanaUiSetting((DEFAULT_KBN_VERSION as unknown) as MockFrameworks)
-    );
     const wrapper = shallow(
-      <ImportRuleModal showModal={true} closeModal={jest.fn()} importComplete={jest.fn()} />
+      <ImportRuleModalComponent
+        showModal={true}
+        closeModal={jest.fn()}
+        importComplete={jest.fn()}
+      />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

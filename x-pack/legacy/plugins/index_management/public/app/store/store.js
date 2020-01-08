@@ -13,16 +13,12 @@ import { indexManagement } from './reducers/';
 
 export function indexManagementStore() {
   const toggleNameToVisibleMap = {};
-  getToggleExtensions().forEach((toggleExtension) => {
+  getToggleExtensions().forEach(toggleExtension => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };
-  const enhancers = [ applyMiddleware(thunk) ];
+  const enhancers = [applyMiddleware(thunk)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
-  return createStore(
-    indexManagement,
-    initialState,
-    compose(...enhancers)
-  );
+  return createStore(indexManagement, initialState, compose(...enhancers));
 }

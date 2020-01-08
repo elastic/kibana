@@ -33,7 +33,7 @@ import {
 
 export const ConfirmationButtonTypes = {
   CONFIRM: CONFIRM_BUTTON,
-  CANCEL: CANCEL_BUTTON
+  CANCEL: CANCEL_BUTTON,
 };
 
 export function confirmModalFactory($rootScope, $compile) {
@@ -48,9 +48,9 @@ export function confirmModalFactory($rootScope, $compile) {
     const defaultOptions = {
       onCancel: noop,
       cancelButtonText: i18n.translate('common.ui.modals.cancelButtonLabel', {
-        defaultMessage: 'Cancel'
+        defaultMessage: 'Cancel',
       }),
-      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM
+      defaultFocusedButton: ConfirmationButtonTypes.CONFIRM,
     };
 
     if (!customOptions.confirmButtonText || !customOptions.onConfirm) {

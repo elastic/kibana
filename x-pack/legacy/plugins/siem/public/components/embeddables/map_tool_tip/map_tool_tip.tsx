@@ -19,131 +19,133 @@ import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../loader';
 import * as i18n from '../translations';
 
-export const MapToolTip = React.memo<MapToolTipProps>(
-  ({
-    addFilters,
-    closeTooltip,
-    features = [],
-    isLocked,
-    getLayerName,
-    loadFeatureProperties,
-    loadFeatureGeometry,
-  }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isLoadingNextFeature, setIsLoadingNextFeature] = useState<boolean>(false);
-    const [isError, setIsError] = useState<boolean>(false);
-    const [featureIndex, setFeatureIndex] = useState<number>(0);
-    const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
-    const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
-    const [, setLayerName] = useState<string>('');
+export const MapToolTipComponent = ({
+  addFilters,
+  closeTooltip,
+  features = [],
+  isLocked,
+  getLayerName,
+  loadFeatureProperties,
+  loadFeatureGeometry,
+}: MapToolTipProps) => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingNextFeature, setIsLoadingNextFeature] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [featureIndex, setFeatureIndex] = useState<number>(0);
+  const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
+  const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
+  const [, setLayerName] = useState<string>('');
 
-    useEffect(() => {
-      // Early return if component doesn't yet have props -- result of mounting in portal before actual rendering
-      if (
-        features.length === 0 ||
-        getLayerName == null ||
-        loadFeatureProperties == null ||
-        loadFeatureGeometry == null
-      ) {
-        return;
-      }
-
-      // Separate loaders for initial load vs loading next feature to keep tooltip from drastically resizing
-      if (!isLoadingNextFeature) {
-        setIsLoading(true);
-      }
-      setIsError(false);
-
-      const fetchFeatureProps = async () => {
-        if (features[featureIndex] != null) {
-          const layerId = features[featureIndex].layerId;
-          const featureId = features[featureIndex].id;
-
-          try {
-            const featureGeo = loadFeatureGeometry({ layerId, featureId });
-            const [featureProperties, layerNameString] = await Promise.all([
-              loadFeatureProperties({ layerId, featureId }),
-              getLayerName(layerId),
-            ]);
-
-            setFeatureProps(featureProperties);
-            setFeatureGeometry(featureGeo);
-            setLayerName(layerNameString);
-          } catch (e) {
-            setIsError(true);
-          } finally {
-            setIsLoading(false);
-            setIsLoadingNextFeature(false);
-          }
-        }
-      };
-
-      fetchFeatureProps();
-    }, [
-      featureIndex,
-      features
-        .map(f => `${f.id}-${f.layerId}`)
-        .sort()
-        .join(),
-    ]);
-
-    if (isError) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>{i18n.MAP_TOOL_TIP_ERROR}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
+  useEffect(() => {
+    // Early return if component doesn't yet have props -- result of mounting in portal before actual rendering
+    if (
+      features.length === 0 ||
+      getLayerName == null ||
+      loadFeatureProperties == null ||
+      loadFeatureGeometry == null
+    ) {
+      return;
     }
 
-    return isLoading && !isLoadingNextFeature ? (
+    // Separate loaders for initial load vs loading next feature to keep tooltip from drastically resizing
+    if (!isLoadingNextFeature) {
+      setIsLoading(true);
+    }
+    setIsError(false);
+
+    const fetchFeatureProps = async () => {
+      if (features[featureIndex] != null) {
+        const layerId = features[featureIndex].layerId;
+        const featureId = features[featureIndex].id;
+
+        try {
+          const featureGeo = loadFeatureGeometry({ layerId, featureId });
+          const [featureProperties, layerNameString] = await Promise.all([
+            loadFeatureProperties({ layerId, featureId }),
+            getLayerName(layerId),
+          ]);
+
+          setFeatureProps(featureProperties);
+          setFeatureGeometry(featureGeo);
+          setLayerName(layerNameString);
+        } catch (e) {
+          setIsError(true);
+        } finally {
+          setIsLoading(false);
+          setIsLoadingNextFeature(false);
+        }
+      }
+    };
+
+    fetchFeatureProps();
+  }, [
+    featureIndex,
+    features
+      .map(f => `${f.id}-${f.layerId}`)
+      .sort()
+      .join(),
+  ]);
+
+  if (isError) {
+    return (
       <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.MAP_TOOL_TIP_ERROR}</EuiFlexItem>
       </EuiFlexGroup>
-    ) : (
-      <DraggablePortalContext.Provider value={true}>
-        <EuiOutsideClickDetector
-          onOutsideClick={() => {
-            if (closeTooltip != null) {
-              closeTooltip();
-              setFeatureIndex(0);
-            }
-          }}
-        >
-          <div>
-            {featureGeometry != null && featureGeometry.type === 'LineString' ? (
-              <LineToolTipContent
-                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-                featureProps={featureProps}
-              />
-            ) : (
-              <PointToolTipContent
-                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-                featureProps={featureProps}
-                closeTooltip={closeTooltip}
-              />
-            )}
-            {features.length > 1 && (
-              <ToolTipFooter
-                featureIndex={featureIndex}
-                totalFeatures={features.length}
-                previousFeature={() => {
-                  setFeatureIndex(featureIndex - 1);
-                  setIsLoadingNextFeature(true);
-                }}
-                nextFeature={() => {
-                  setFeatureIndex(featureIndex + 1);
-                  setIsLoadingNextFeature(true);
-                }}
-              />
-            )}
-            {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
-          </div>
-        </EuiOutsideClickDetector>
-      </DraggablePortalContext.Provider>
     );
   }
-);
+
+  return isLoading && !isLoadingNextFeature ? (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="m" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <DraggablePortalContext.Provider value={true}>
+      <EuiOutsideClickDetector
+        onOutsideClick={() => {
+          if (closeTooltip != null) {
+            closeTooltip();
+            setFeatureIndex(0);
+          }
+        }}
+      >
+        <div>
+          {featureGeometry != null && featureGeometry.type === 'LineString' ? (
+            <LineToolTipContent
+              contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+              featureProps={featureProps}
+            />
+          ) : (
+            <PointToolTipContent
+              contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+              featureProps={featureProps}
+              closeTooltip={closeTooltip}
+            />
+          )}
+          {features.length > 1 && (
+            <ToolTipFooter
+              featureIndex={featureIndex}
+              totalFeatures={features.length}
+              previousFeature={() => {
+                setFeatureIndex(featureIndex - 1);
+                setIsLoadingNextFeature(true);
+              }}
+              nextFeature={() => {
+                setFeatureIndex(featureIndex + 1);
+                setIsLoadingNextFeature(true);
+              }}
+            />
+          )}
+          {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
+        </div>
+      </EuiOutsideClickDetector>
+    </DraggablePortalContext.Provider>
+  );
+};
+
+MapToolTipComponent.displayName = 'MapToolTipComponent';
+
+export const MapToolTip = React.memo(MapToolTipComponent);
 
 MapToolTip.displayName = 'MapToolTip';

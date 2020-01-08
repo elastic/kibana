@@ -20,15 +20,17 @@
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-describe('SavedDashboards Service', function () {
+describe('SavedDashboards Service', function() {
   let savedDashboardLoader;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (savedDashboards) {
-    savedDashboardLoader = savedDashboards;
-  }));
+  beforeEach(
+    ngMock.inject(function(savedDashboards) {
+      savedDashboardLoader = savedDashboards;
+    })
+  );
 
-  it('delete returns a native promise', function () {
+  it('delete returns a native promise', function() {
     expect(savedDashboardLoader.delete(['1', '2'])).to.be.a(Promise);
   });
 });

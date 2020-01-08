@@ -59,7 +59,7 @@ export interface Datatable {
   rows: DatatableRow[];
 }
 
-interface SerializedDatatable extends Datatable {
+export interface SerializedDatatable extends Datatable {
   rows: string[][];
 }
 

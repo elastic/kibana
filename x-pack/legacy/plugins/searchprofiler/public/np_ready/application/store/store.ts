@@ -18,7 +18,7 @@ export interface State {
 
 export const initialState: State = {
   profiling: false,
-  pristine: false,
+  pristine: true,
   highlightDetails: null,
   activeTab: null,
   currentResponse: null,

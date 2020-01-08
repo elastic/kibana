@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
 
@@ -68,24 +63,27 @@ export class FileDataVisualizerView extends Component {
     this.setState({ hasPermissionToImport });
   }
 
-  onFilePickerChange = (files) => {
+  onFilePickerChange = files => {
     this.overrides = {};
 
-    this.setState({
-      loading: (files.length > 0),
-      bottomBarVisible: (files.length > 0),
-      loaded: false,
-      fileContents: '',
-      fileSize: 0,
-      fileTooLarge: false,
-      fileCouldNotBeRead: false,
-      serverErrorMessage: '',
-      results: undefined,
-    }, () => {
-      if (files.length) {
-        this.loadFile(files[0]);
+    this.setState(
+      {
+        loading: files.length > 0,
+        bottomBarVisible: files.length > 0,
+        loaded: false,
+        fileContents: '',
+        fileSize: 0,
+        fileTooLarge: false,
+        fileCouldNotBeRead: false,
+        serverErrorMessage: '',
+        results: undefined,
+      },
+      () => {
+        if (files.length) {
+          this.loadFile(files[0]);
+        }
       }
-    });
+    );
   };
 
   async loadFile(file) {
@@ -99,7 +97,6 @@ export class FileDataVisualizerView extends Component {
         });
 
         await this.loadSettings(data);
-
       } catch (error) {
         console.error(error);
         this.setState({
@@ -108,8 +105,6 @@ export class FileDataVisualizerView extends Component {
           fileCouldNotBeRead: true,
         });
       }
-
-
     } else {
       this.setState({
         loaded: false,
@@ -149,7 +144,7 @@ export class FileDataVisualizerView extends Component {
         // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
-        Object.keys(serverOverrides).forEach((o) => {
+        Object.keys(serverOverrides).forEach(o => {
           const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
           this.overrides[camelCaseO] = serverOverrides[o];
         });
@@ -158,12 +153,12 @@ export class FileDataVisualizerView extends Component {
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
         // if any have changed, update the originalSettings value
-        Object.keys(serverSettings).forEach((o) => {
+        Object.keys(serverSettings).forEach(o => {
           const value = serverSettings[o];
           if (
-            (this.overrides[o] === undefined) &&
-            (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
-            (value !== this.originalSettings[o]))
+            this.overrides[o] === undefined &&
+            ((Array.isArray(value) && isEqual(value, this.originalSettings[o]) === false) ||
+              value !== this.originalSettings[o])
           ) {
             this.originalSettings[o] = value;
           }
@@ -201,40 +196,43 @@ export class FileDataVisualizerView extends Component {
   closeEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: false });
     this.showBottomBar();
-  }
+  };
 
   showEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: true });
     this.hideBottomBar();
-  }
+  };
 
   showBottomBar = () => {
     this.setState({ bottomBarVisible: true });
-  }
+  };
 
   hideBottomBar = () => {
     this.setState({ bottomBarVisible: false });
-  }
+  };
 
-  setOverrides = (overrides) => {
+  setOverrides = overrides => {
     console.log('setOverrides', overrides);
-    this.setState({
-      loading: true,
-      loaded: false,
-    }, () => {
-      const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
-      this.loadSettings(this.state.fileContents, formattedOverrides);
-    });
-  }
+    this.setState(
+      {
+        loading: true,
+        loaded: false,
+      },
+      () => {
+        const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
+        this.loadSettings(this.state.fileContents, formattedOverrides);
+      }
+    );
+  };
 
-  changeMode = (mode) => {
+  changeMode = mode => {
     this.setState({ mode });
-  }
+  };
 
   onCancel = () => {
     this.changeMode(MODE.READ);
     this.onFilePickerChange([]);
-  }
+  };
 
   render() {
     const {
@@ -252,47 +250,35 @@ export class FileDataVisualizerView extends Component {
       hasPermissionToImport,
     } = this.state;
 
-    const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
+    const fields =
+      results !== undefined && results.field_stats !== undefined
+        ? Object.keys(results.field_stats)
+        : [];
 
     return (
       <div className="file-datavisualizer__content">
-        {(mode === MODE.READ) &&
+        {mode === MODE.READ && (
           <React.Fragment>
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
-            {(!loading && !loaded) &&
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-              />
-            }
+            {loading && <LoadingPanel />}
 
-            {(loading) &&
-              <LoadingPanel />
-            }
+            {fileTooLarge && <FileTooLarge fileSize={fileSize} maxFileSize={MAX_BYTES} />}
 
-            {(fileTooLarge) &&
-              <FileTooLarge
-                fileSize={fileSize}
-                maxFileSize={MAX_BYTES}
-              />
-            }
-
-            {(fileCouldNotBeRead && loading === false) &&
+            {fileCouldNotBeRead && loading === false && (
               <React.Fragment>
-                <FileCouldNotBeRead
-                  error={serverErrorMessage}
-                  loaded={loaded}
-                />
+                <FileCouldNotBeRead error={serverErrorMessage} loaded={loaded} />
                 <EuiSpacer size="l" />
               </React.Fragment>
-            }
+            )}
 
-            {(loaded) &&
+            {loaded && (
               <ResultsView
                 results={results}
                 data={fileContents}
                 showEditFlyout={() => this.showEditFlyout()}
               />
-            }
+            )}
             <EditFlyout
               setOverrides={this.setOverrides}
               closeEditFlyout={this.closeEditFlyout}
@@ -302,17 +288,19 @@ export class FileDataVisualizerView extends Component {
               fields={fields}
             />
 
-            {(bottomBarVisible && loaded) && <BottomBar
-              mode={MODE.READ}
-              onChangeMode={this.changeMode}
-              onCancel={this.onCancel}
-              disableImport={(hasPermissionToImport === false)}
-            />}
+            {bottomBarVisible && loaded && (
+              <BottomBar
+                mode={MODE.READ}
+                onChangeMode={this.changeMode}
+                onCancel={this.onCancel}
+                disableImport={hasPermissionToImport === false}
+              />
+            )}
 
             <BottomPadding />
           </React.Fragment>
-        }
-        {(mode === MODE.IMPORT) &&
+        )}
+        {mode === MODE.IMPORT && (
           <React.Fragment>
             <ImportView
               results={results}
@@ -324,15 +312,17 @@ export class FileDataVisualizerView extends Component {
               hideBottomBar={this.hideBottomBar}
             />
 
-            {bottomBarVisible && <BottomBar
-              mode={MODE.IMPORT}
-              onChangeMode={this.changeMode}
-              onCancel={this.onCancel}
-            />}
+            {bottomBarVisible && (
+              <BottomBar
+                mode={MODE.IMPORT}
+                onChangeMode={this.changeMode}
+                onCancel={this.onCancel}
+              />
+            )}
 
             <BottomPadding />
           </React.Fragment>
-        }
+        )}
       </div>
     );
   }

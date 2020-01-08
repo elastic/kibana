@@ -49,13 +49,7 @@ export interface Route<
   }) => Promise<TReturn>;
 }
 
-export type APMLegacyServer = Pick<Server, 'usage' | 'savedObjects' | 'log'> & {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: (options: unknown) => unknown;
-      register: (options: unknown) => unknown;
-    };
-  };
+export type APMLegacyServer = Pick<Server, 'savedObjects' | 'log'> & {
   plugins: {
     elasticsearch: Server['plugins']['elasticsearch'];
   };

@@ -12,7 +12,7 @@ import {
   IClusterClient,
 } from '../../../../../src/core/server';
 
-import { FeaturesService, LegacyAPI, SpacesService } from '../plugin';
+import { FeaturesService, SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
 import {
@@ -31,7 +31,7 @@ import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
@@ -43,7 +43,7 @@ interface SetupAuthorizationParams {
   license: SecurityLicense;
   loggers: LoggerFactory;
   featuresService: FeaturesService;
-  getLegacyAPI(): Pick<LegacyAPI, 'kibanaIndexName'>;
+  kibanaIndexName: string;
   getSpacesService(): SpacesService | undefined;
 }
 
@@ -52,7 +52,7 @@ export interface Authorization {
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
-  getApplicationName: () => string;
+  applicationName: string;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
   disableUnauthorizedCapabilities: (
@@ -69,23 +69,23 @@ export function setupAuthorization({
   license,
   loggers,
   featuresService,
-  getLegacyAPI,
+  kibanaIndexName,
   getSpacesService,
 }: SetupAuthorizationParams): Authorization {
   const actions = new Actions(packageVersion);
   const mode = authorizationModeFactory(license);
-  const getApplicationName = () => `${APPLICATION_PREFIX}${getLegacyAPI().kibanaIndexName}`;
+  const applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
     actions,
     clusterClient,
-    getApplicationName
+    applicationName
   );
   const privileges = privilegesFactory(actions, featuresService);
   const logger = loggers.get('authorization');
 
   const authz = {
     actions,
-    getApplicationName,
+    applicationName,
     checkPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest: checkPrivilegesDynamicallyWithRequestFactory(
       checkPrivilegesWithRequest,
@@ -123,7 +123,7 @@ export function setupAuthorization({
     registerPrivilegesWithCluster: async () => {
       validateFeaturePrivileges(actions, featuresService.getFeatures());
 
-      await registerPrivilegesWithCluster(logger, privileges, getApplicationName(), clusterClient);
+      await registerPrivilegesWithCluster(logger, privileges, applicationName, clusterClient);
     },
   };
 

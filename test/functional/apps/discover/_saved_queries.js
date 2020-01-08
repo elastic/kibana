@@ -19,11 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const browser = getService('browser');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -34,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   describe('saved queries saved objects', function describeIndexTests() {
-
-    before(async function () {
+    before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -47,8 +47,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function () {
-      before(async function () {
+    describe('saved query management component functionality', function() {
+      before(async function() {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');
         await queryBar.setQuery('response:200');
@@ -84,6 +84,16 @@ export default function ({ getService, getPageObjects }) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+      });
+
+      it('preserves the currently loaded query when the page is reloaded', async () => {
+        await browser.refresh();
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(await PageObjects.discover.getHitCount()).to.be('2,792');
+        expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
@@ -132,12 +142,11 @@ export default function ({ getService, getPageObjects }) {
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
-      it('allows clearing the currently loaded saved query', async () =>   {
+      it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
       });
-
     });
   });
 }

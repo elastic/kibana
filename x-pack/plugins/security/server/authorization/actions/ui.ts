@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isString } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../../../src/core/server';
 import { uiCapabilitiesRegex } from '../../../../features/server';
 
 export class UIActions {

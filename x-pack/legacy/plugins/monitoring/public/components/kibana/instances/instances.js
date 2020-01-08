@@ -12,7 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiLink,
-  EuiCallOut
+  EuiCallOut,
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
@@ -30,7 +30,7 @@ const getColumns = (kbnUrl, scope, setupMode) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
-        defaultMessage: 'Name'
+        defaultMessage: 'Name',
       }),
       field: 'name',
       render: (name, kibana) => {
@@ -41,7 +41,7 @@ const getColumns = (kbnUrl, scope, setupMode) => {
           const status = list[uuid] || {};
           const instance = {
             uuid,
-            name: kibana.name
+            name: kibana.name,
           };
 
           setupModeStatus = (
@@ -74,76 +74,65 @@ const getColumns = (kbnUrl, scope, setupMode) => {
               }}
               data-test-subj={`kibanaLink-${name}`}
             >
-              { name }
+              {name}
             </EuiLink>
             {setupModeStatus}
           </div>
         );
-      }
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
-        defaultMessage: 'Status'
+        defaultMessage: 'Status',
       }),
       field: 'status',
       render: (status, kibana) => (
         <div
-          title={
-            i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
-              defaultMessage: 'Instance status: {kibanaStatus}',
-              values: {
-                kibanaStatus: status
-              }
-            })
-          }
+          title={i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
+            defaultMessage: 'Instance status: {kibanaStatus}',
+            values: {
+              kibanaStatus: status,
+            },
+          })}
           className="monTableCell__status"
         >
-          <KibanaStatusIcon status={status} availability={kibana.availability} />&nbsp;
-          { !kibana.availability ? (
+          <KibanaStatusIcon status={status} availability={kibana.availability} />
+          &nbsp;
+          {!kibana.availability ? (
             <FormattedMessage
               id="xpack.monitoring.kibana.listing.instanceStatus.offlineLabel"
               defaultMessage="Offline"
             />
-          ) : capitalize(status) }
+          ) : (
+            capitalize(status)
+          )}
         </div>
-      )
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {
-        defaultMessage: 'Load Average'
+        defaultMessage: 'Load Average',
       }),
       field: 'os.load.1m',
-      render: value => (
-        <span>
-          {formatMetric(value, '0.00')}
-        </span>
-      )
+      render: value => <span>{formatMetric(value, '0.00')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.memorySizeColumnTitle', {
-        defaultMessage: 'Memory Size'
+        defaultMessage: 'Memory Size',
       }),
       field: 'process.memory.resident_set_size_in_bytes',
-      render: value => (
-        <span>
-          {formatNumber(value, 'byte')}
-        </span>
-      )
+      render: value => <span>{formatNumber(value, 'byte')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.requestsColumnTitle', {
-        defaultMessage: 'Requests'
+        defaultMessage: 'Requests',
       }),
       field: 'requests.total',
-      render: value => (
-        <span>
-          {formatNumber(value, 'int_commas')}
-        </span>
-      )
+      render: value => <span>{formatNumber(value, 'int_commas')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.responseTimeColumnTitle', {
-        defaultMessage: 'Response Times'
+        defaultMessage: 'Response Times',
       }),
       // It is possible this does not exist through MB collection
       field: 'response_times.average',
@@ -155,15 +144,15 @@ const getColumns = (kbnUrl, scope, setupMode) => {
         return (
           <div>
             <div className="monTableCell__splitNumber">
-              { (formatNumber(value, 'int_commas') + ' ms avg') }
+              {formatNumber(value, 'int_commas') + ' ms avg'}
             </div>
             <div className="monTableCell__splitNumber">
-              { formatNumber(kibana.response_times.max, 'int_commas') } ms max
+              {formatNumber(kibana.response_times.max, 'int_commas')} ms max
             </div>
           </div>
         );
-      }
-    }
+      },
+    },
   ];
 
   return columns;
@@ -171,14 +160,7 @@ const getColumns = (kbnUrl, scope, setupMode) => {
 
 export class KibanaInstances extends PureComponent {
   render() {
-    const {
-      clusterStatus,
-      angular,
-      setupMode,
-      sorting,
-      pagination,
-      onTableChange
-    } = this.props;
+    const { clusterStatus, angular, setupMode, sorting, pagination, onTableChange } = this.props;
 
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
@@ -187,23 +169,27 @@ export class KibanaInstances extends PureComponent {
       // We want to create a seamless experience for the user by merging in the setup data
       // and the node data from monitoring indices in the likely scenario where some instances
       // are using MB collection and some are using no collection
-      const instancesByUuid = instances.reduce((byUuid, instance) => ({
-        ...byUuid,
-        [get(instance, 'kibana.uuid')]: instance
-      }), {});
+      const instancesByUuid = instances.reduce(
+        (byUuid, instance) => ({
+          ...byUuid,
+          [get(instance, 'kibana.uuid')]: instance,
+        }),
+        {}
+      );
 
-      instances.push(...Object.entries(setupMode.data.byUuid)
-        .reduce((instances, [nodeUuid, instance]) => {
+      instances.push(
+        ...Object.entries(setupMode.data.byUuid).reduce((instances, [nodeUuid, instance]) => {
           if (!instancesByUuid[nodeUuid]) {
             instances.push({
               kibana: {
                 ...instance.instance.kibana,
-                status: StatusIcon.TYPES.GRAY
-              }
+                status: StatusIcon.TYPES.GRAY,
+              },
             });
           }
           return instances;
-        }, []));
+        }, [])
+      );
 
       setupModeCallOut = (
         <ListingCallOut
@@ -213,7 +199,7 @@ export class KibanaInstances extends PureComponent {
           customRenderer={() => {
             const customRenderResponse = {
               shouldRender: false,
-              componentToRender: null
+              componentToRender: null,
             };
 
             const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
@@ -222,20 +208,26 @@ export class KibanaInstances extends PureComponent {
               customRenderResponse.componentToRender = (
                 <Fragment>
                   <EuiCallOut
-                    title={i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle', {
-                      defaultMessage: 'Kibana instance detected',
-                    })}
+                    title={i18n.translate(
+                      'xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle',
+                      {
+                        defaultMessage: 'Kibana instance detected',
+                      }
+                    )}
                     color="warning"
                     iconType="flag"
                   >
                     <p>
-                      {i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeDescription', {
-                        defaultMessage: `The following instances are not monitored.
+                      {i18n.translate(
+                        'xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeDescription',
+                        {
+                          defaultMessage: `The following instances are not monitored.
                         Click 'Monitor with Metricbeat' below to start monitoring.`,
-                      })}
+                        }
+                      )}
                     </p>
                   </EuiCallOut>
-                  <EuiSpacer size="m"/>
+                  <EuiSpacer size="m" />
                 </Fragment>
               );
             }
@@ -251,7 +243,6 @@ export class KibanaInstances extends PureComponent {
       name: item.kibana.name,
       status: item.kibana.status,
     }));
-
 
     return (
       <EuiPage>
@@ -273,14 +264,17 @@ export class KibanaInstances extends PureComponent {
               search={{
                 box: {
                   incremental: true,
-                  placeholder: i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
-                    defaultMessage: 'Filter Instances…'
-                  })
+                  placeholder: i18n.translate(
+                    'xpack.monitoring.kibana.listing.filterInstancesPlaceholder',
+                    {
+                      defaultMessage: 'Filter Instances…',
+                    }
+                  ),
                 },
               }}
               onTableChange={onTableChange}
               executeQueryOptions={{
-                defaultFields: ['name']
+                defaultFields: ['name'],
               }}
             />
           </EuiPageContent>

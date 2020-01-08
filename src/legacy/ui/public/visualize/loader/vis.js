@@ -72,7 +72,8 @@ export class Vis extends EventEmitter {
       this.type = type;
     }
 
-    this.params = _.defaultsDeep({},
+    this.params = _.defaultsDeep(
+      {},
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.visConfig.defaults || {})
     );

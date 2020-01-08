@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  REMOVE_CLUSTERS_START,
-  REMOVE_CLUSTERS_FINISH,
-} from '../action_types';
+import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
 
 const initialState = {
   isRemoving: false,

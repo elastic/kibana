@@ -117,9 +117,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
       }
     }
   >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+    <EuiPageContent>
       <EuiPanel
         className="euiPageContent"
         paddingSize="l"
@@ -181,14 +179,18 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                 type="alert"
                               >
                                 <EuiIconEmpty
+                                  aria-hidden={true}
                                   className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                   focusable="false"
+                                  role="img"
                                   style={null}
                                 >
                                   <svg
+                                    aria-hidden={true}
                                     className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                     focusable="false"
                                     height={16}
+                                    role="img"
                                     style={null}
                                     viewBox="0 0 16 16"
                                     width={16}
@@ -457,9 +459,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
       }
     }
   >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+    <EuiPageContent>
       <EuiPanel
         className="euiPageContent"
         paddingSize="l"
@@ -521,14 +521,18 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                 type="alert"
                               >
                                 <EuiIconEmpty
+                                  aria-hidden={true}
                                   className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                   focusable="false"
+                                  role="img"
                                   style={null}
                                 >
                                   <svg
+                                    aria-hidden={true}
                                     className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                     focusable="false"
                                     height={16}
+                                    role="img"
                                     style={null}
                                     viewBox="0 0 16 16"
                                     width={16}
@@ -797,9 +801,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
       }
     }
   >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+    <EuiPageContent>
       <EuiPanel
         className="euiPageContent"
         paddingSize="l"
@@ -861,14 +863,18 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                 type="alert"
                               >
                                 <EuiIconEmpty
+                                  aria-hidden={true}
                                   className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                   focusable="false"
+                                  role="img"
                                   style={null}
                                 >
                                   <svg
+                                    aria-hidden={true}
                                     className="euiIcon euiIcon--xLarge euiIcon-isLoading"
                                     focusable="false"
                                     height={16}
+                                    role="img"
                                     style={null}
                                     viewBox="0 0 16 16"
                                     width={16}
@@ -1029,9 +1035,7 @@ exports[`UpgradeFailure component renders component as expected 1`] = `
     }
   }
 >
-  <EuiPageContent
-    panelPaddingSize="l"
-  >
+  <EuiPageContent>
     <EuiEmptyPrompt
       actions={
         <UpgradeFailureActions

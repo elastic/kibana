@@ -73,7 +73,7 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
   }
 
   return (
-    <div data-test-subj={`mlFieldDataCard_${fieldName}`}>
+    <div data-test-subj={`mlFieldDataCard ${fieldName} ${type}`}>
       <div className="mlFieldDataCard">
         <FieldTitleBar card={config} />
         <div className="mlFieldDataCard__content">

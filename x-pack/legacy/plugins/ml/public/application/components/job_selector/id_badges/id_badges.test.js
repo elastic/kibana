@@ -4,37 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
-import { cleanup, render } from 'react-testing-library';
+import { render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { IdBadges } from './id_badges';
-
-
 
 const props = {
   limit: 2,
   maps: {
     groupsMap: {
-      'group1': ['job1', 'job2'],
-      'group2': ['job3']
+      group1: ['job1', 'job2'],
+      group2: ['job3'],
     },
     jobsMap: {
-      'job1': ['group1'],
-      'job2': ['group1'],
-      'job3': ['group2'],
-      'job4': []
-    }
+      job1: ['group1'],
+      job2: ['group1'],
+      job3: ['group2'],
+      job4: [],
+    },
   },
   onLinkClick: jest.fn(),
   selectedIds: ['group1', 'job1', 'job3'],
-  showAllBarBadges: false
+  showAllBarBadges: false,
 };
 
-const overLimitProps = { ...props, selectedIds: ['group1', 'job1', 'job3', 'job4'], };
+const overLimitProps = { ...props, selectedIds: ['group1', 'job1', 'job3', 'job4'] };
 
 describe('IdBadges', () => {
-  afterEach(cleanup);
-
   test('When group selected renders groupId and not corresponding jobIds', () => {
     const { getByText, queryByText } = render(<IdBadges {...props} />);
     // group1 badge should be present
@@ -46,7 +41,6 @@ describe('IdBadges', () => {
   });
 
   describe('showAllBarBadges is false', () => {
-
     test('shows link to show more badges if selection is over limit', () => {
       const { getByText } = render(<IdBadges {...overLimitProps} />);
       const showMoreLink = getByText('And 1 more');
@@ -58,14 +52,13 @@ describe('IdBadges', () => {
       const showMoreLink = queryByText(/ more/);
       expect(showMoreLink).toBeNull();
     });
-
   });
 
   describe('showAllBarBadges is true', () => {
     const overLimitShowAllProps = {
       ...props,
       showAllBarBadges: true,
-      selectedIds: ['group1', 'job1', 'job3', 'job4']
+      selectedIds: ['group1', 'job1', 'job3', 'job4'],
     };
 
     test('shows all badges when selection is over limit', () => {
@@ -86,7 +79,5 @@ describe('IdBadges', () => {
       const hideLink = getByText('Hide');
       expect(hideLink).toBeDefined();
     });
-
   });
-
 });

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const overview = getService('monitoringBeatsOverview');
   const beatsSummaryStatus = getService('monitoringBeatsSummaryStatus');
@@ -47,6 +47,5 @@ export default function ({ getService, getPageObjects }) {
         bytesSent: 'Bytes Sent\n427.9 MB',
       });
     });
-
   });
 }

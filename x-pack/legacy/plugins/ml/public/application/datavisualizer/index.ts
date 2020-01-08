@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './directive';
-import './file_based';
-import './index_based';
+export { DatavisualizerSelector } from './datavisualizer_selector';

@@ -30,7 +30,7 @@ export default function stubSearchSource(Private, $q, Promise) {
     setField: sinon.spy(),
     fetch: sinon.spy(),
     destroy: sinon.spy(),
-    getField: function (param) {
+    getField: function(param) {
       switch (param) {
         case 'index':
           return indexPattern;
@@ -38,11 +38,11 @@ export default function stubSearchSource(Private, $q, Promise) {
           throw new Error(`Param "${param}" is not implemented in the stubbed search source`);
       }
     },
-    crankResults: function () {
+    crankResults: function() {
       deferedResult.resolve(searchResponse);
       deferedResult = $q.defer();
     },
-    onResults: function () {
+    onResults: function() {
       onResultsCount++;
 
       // Up to the test to resolve this manually
@@ -50,20 +50,16 @@ export default function stubSearchSource(Private, $q, Promise) {
       // someHandler.resolve(require('fixtures/search_response'))
       return deferedResult.promise;
     },
-    getOnResultsCount: function () {
+    getOnResultsCount: function() {
       return onResultsCount;
     },
-    _flatten: function () {
+    _flatten: function() {
       return Promise.resolve({ index: indexPattern, body: {} });
     },
     _requestStartHandlers: [],
     onRequestStart(fn) {
       this._requestStartHandlers.push(fn);
     },
-    requestIsStarting(req) {
-      return Promise.map(this._requestStartHandlers, fn => fn(req));
-    },
-    requestIsStopped() {}
+    requestIsStopped() {},
   };
-
 }

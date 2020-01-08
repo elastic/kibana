@@ -4,7 +4,6 @@ exports[`MonitorPageLink component renders a help link when link parameters pres
 <EuiLink>
   <Link
     data-test-subj="monitor-page-link-bad-ssl"
-    replace={false}
     to="/monitor/YmFkLXNzbA==/selectedPingStatus=down"
   />
 </EuiLink>
@@ -14,7 +13,6 @@ exports[`MonitorPageLink component renders the link properly 1`] = `
 <EuiLink>
   <Link
     data-test-subj="monitor-page-link-bad-ssl"
-    replace={false}
     to="/monitor/YmFkLXNzbA=="
   />
 </EuiLink>

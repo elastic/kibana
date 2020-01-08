@@ -4,13 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { searchSourceMock } from '../../../../../../../../../src/legacy/ui/public/courier/search_source/mocks';
-
-export const savedSearchMock = {
+export const savedSearchMock: any = {
   id: 'the-saved-search-id',
-  title: 'the-saved-search-title',
-  searchSource: searchSourceMock,
-  columns: [],
-  sort: [],
-  destroy: () => {},
+  type: 'search',
+  attributes: {
+    title: 'the-saved-search-title',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"highlightAll":true,"version":true,"query":{"query":"foo : \\"bar\\" ","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+    },
+  },
+  references: [
+    {
+      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      type: 'index-pattern',
+      id: 'the-index-pattern-id',
+    },
+  ],
+  migrationVersion: { search: '7.5.0' },
+  error: undefined,
 };

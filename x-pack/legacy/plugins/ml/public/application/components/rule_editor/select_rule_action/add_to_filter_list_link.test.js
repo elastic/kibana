@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';
 
 describe('AddToFilterListLink', () => {
-
   test(`renders the add to filter list link for a value`, () => {
     const addItemToFilterList = jest.fn(() => {});
 
@@ -29,5 +27,4 @@ describe('AddToFilterListLink', () => {
     wrapper.update();
     expect(addItemToFilterList).toHaveBeenCalled();
   });
-
 });

@@ -144,5 +144,30 @@ describe('build query', () => {
 
       expect(result.filter).toEqual(expectedESQueries);
     });
+
+    test('should wrap filters targeting nested fields in a nested query', () => {
+      const filters = [
+        {
+          exists: { field: 'nestedField.child' },
+          meta: { type: 'exists', alias: '', disabled: false, negate: false },
+        },
+      ];
+
+      const expectedESQueries = [
+        {
+          nested: {
+            path: 'nestedField',
+            query: {
+              exists: {
+                field: 'nestedField.child',
+              },
+            },
+          },
+        },
+      ];
+
+      const result = buildQueryFromFilters(filters, indexPattern);
+      expect(result.filter).toEqual(expectedESQueries);
+    });
   });
 });

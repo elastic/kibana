@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Response as SupertestResponse } from 'supertest';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -14,6 +15,7 @@ import {
   getTestAlertData,
   ObjectRemover,
   AlertUtils,
+  ensureDatetimeIsWithinRange,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -22,6 +24,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+
+  function getAlertingTaskById(taskId: string) {
+    return supertestWithoutAuth
+      .get(`/api/alerting_tasks/${taskId}`)
+      .expect(200)
+      .then((response: SupertestResponse) => response.body);
+  }
 
   describe('alerts', () => {
     let alertUtils: AlertUtils;
@@ -37,7 +46,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -100,6 +109,37 @@ export default function alertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {
+      /*
+        Alerting does not use the Task Manager schedule and instead implements its own due to a current limitation
+        in TaskManager's ability to update an existing Task.
+        For this reason we need to handle the retry when Alert executors fail, as TaskManager doesn't understand that
+        alerting tasks are recurring tasks.
+      */
+      const alertIntervalInSeconds = 30;
+      const reference = alertUtils.generateReference();
+      const response = await alertUtils.createAlwaysFailingAction({
+        reference,
+        overwrites: { schedule: { interval: `${alertIntervalInSeconds}s` } },
+      });
+
+      expect(response.statusCode).to.eql(200);
+
+      // wait for executor Alert Executor to be run, which means the underlying task is running
+      await esTestIndexTool.waitForDocs('alert:test.failing', reference);
+
+      await retry.try(async () => {
+        const alertTask = (await getAlertingTaskById(response.body.scheduledTaskId)).docs[0];
+        expect(alertTask.status).to.eql('idle');
+        // ensure the alert is rescheduled to a minute from now
+        ensureDatetimeIsWithinRange(
+          Date.parse(alertTask.runAt),
+          alertIntervalInSeconds * 1000,
+          5000
+        );
+      });
+    });
+
     it('should handle custom retry logic', async () => {
       // We'll use this start time to query tasks created after this point
       const testStart = new Date();
@@ -110,7 +150,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'Test rate limit',
+          name: 'Test rate limit',
           actionTypeId: 'test.rate-limit',
           config: {},
         })
@@ -123,7 +163,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            interval: '1m',
+            schedule: { interval: '1m' },
             alertTypeId: 'test.always-firing',
             params: {
               index: ES_TEST_INDEX_NAME,
@@ -227,7 +267,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);

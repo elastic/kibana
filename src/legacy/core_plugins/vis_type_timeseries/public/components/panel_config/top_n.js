@@ -51,7 +51,7 @@ export class TopNPanelConfig extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {

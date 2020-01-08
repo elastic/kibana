@@ -29,15 +29,15 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
 
   $compile($tooltip)($tooltipScope);
 
-  return function (metricFieldFormatter) {
-    return function (event) {
+  return function(metricFieldFormatter) {
+    return function(event) {
       const datum = event.datum;
 
       // Collect the current leaf and parents into an array of values
       $tooltipScope.rows = collectBranch(datum);
 
       // Map those values to what the tooltipSource.rows format.
-      _.forEachRight($tooltipScope.rows, function (row) {
+      _.forEachRight($tooltipScope.rows, function(row) {
         row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
         let percent;
@@ -57,9 +57,7 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
       $tooltipScope.$apply();
       return $tooltip[0].outerHTML;
     };
-
   };
-
 }
 
 let _tooltipFormatter;

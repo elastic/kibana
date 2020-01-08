@@ -16,8 +16,11 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [capabilities](./kibana-plugin-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
+|  [savedObjects](./kibana-plugin-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) |
 |  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
+|  [uuid](./kibana-plugin-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) |
 

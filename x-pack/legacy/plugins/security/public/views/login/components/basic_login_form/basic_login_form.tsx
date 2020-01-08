@@ -7,6 +7,8 @@
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { EuiText } from '@elastic/eui';
 import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
   loginState: LoginState;
   next: string;
   intl: InjectedIntl;
+  loginAssistanceMessage: string;
 }
 
 interface State {
@@ -38,6 +41,7 @@ class BasicLoginFormUI extends Component<Props, State> {
   public render() {
     return (
       <Fragment>
+        {this.renderLoginAssistanceMessage()}
         {this.renderMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
@@ -102,6 +106,16 @@ class BasicLoginFormUI extends Component<Props, State> {
     );
   }
 
+  private renderLoginAssistanceMessage = () => {
+    return (
+      <Fragment>
+        <EuiText size="s">
+          <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
+        </EuiText>
+      </Fragment>
+    );
+  };
+
   private renderMessage = () => {
     if (this.state.message) {
       return (
@@ -132,6 +146,7 @@ class BasicLoginFormUI extends Component<Props, State> {
         </Fragment>
       );
     }
+
     return null;
   };
 
@@ -175,7 +190,7 @@ class BasicLoginFormUI extends Component<Props, State> {
 
     const { username, password } = this.state;
 
-    http.post('./api/security/v1/login', { username, password }).then(
+    http.post('./internal/security/login', { username, password }).then(
       () => (window.location.href = next),
       (error: any) => {
         const { statusCode = 500 } = error.data || {};

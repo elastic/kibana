@@ -11,19 +11,22 @@ import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
+import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
+const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
+
 export const LinkToPage: React.FC<LinkToPageProps> = props => (
   <Switch>
     <Route
-      path={`${props.match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}
+      path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
       component={RedirectToNodeLogs}
     />
     <Route
-      path={`${props.match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
+      path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
       component={RedirectToNodeDetail}
     />
     <Route

@@ -29,25 +29,31 @@ import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
 import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
-import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiPageContent,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
 
-uiRoutes
-  .when('/management', {
-    template: landingTemplate,
-    k7Breadcrumbs: () => [
-      MANAGEMENT_BREADCRUMB
-    ]
-  });
+uiRoutes.when('/management', {
+  template: landingTemplate,
+  k7Breadcrumbs: () => [MANAGEMENT_BREADCRUMB],
+});
 
-uiRoutes
-  .when('/management/:section', {
-    redirectTo: '/management'
-  });
+uiRoutes.when('/management/:section', {
+  redirectTo: '/management',
+});
 
 export function updateLandingPage(version) {
   const node = document.getElementById(LANDING_ID);
@@ -92,13 +98,11 @@ export function updateLandingPage(version) {
         </div>
       </I18nContext>
     </EuiPageContent>,
-    node,
+    node
   );
 }
 
-export function updateSidebar(
-  items, id
-) {
+export function updateSidebar(items, id) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
     return;
@@ -106,13 +110,9 @@ export function updateSidebar(
 
   render(
     <I18nContext>
-      <SidebarNav
-        sections={items}
-        selectedId={id}
-        className="mgtSideNav"
-      />
+      <SidebarNav sections={items} selectedId={id} className="mgtSideNav" />
     </I18nContext>,
-    node,
+    node
   );
 }
 
@@ -121,52 +121,48 @@ export const destroyReact = id => {
   node && unmountComponentAtNode(node);
 };
 
-uiModules
-  .get('apps/management')
-  .directive('kbnManagementApp', function ($location) {
-    return {
-      restrict: 'E',
-      template: appTemplate,
-      transclude: true,
-      scope: {
-        sectionName: '@section',
-        omitPages: '@omitBreadcrumbPages',
-        pageTitle: '='
-      },
+uiModules.get('apps/management').directive('kbnManagementApp', function($location) {
+  return {
+    restrict: 'E',
+    template: appTemplate,
+    transclude: true,
+    scope: {
+      sectionName: '@section',
+      omitPages: '@omitBreadcrumbPages',
+      pageTitle: '=',
+    },
 
-      link: function ($scope) {
-        timefilter.disableAutoRefreshSelector();
-        timefilter.disableTimeRangeSelector();
-        $scope.sections = management.visibleItems;
-        $scope.section = management.getSection($scope.sectionName) || management;
+    link: function($scope) {
+      timefilter.disableAutoRefreshSelector();
+      timefilter.disableTimeRangeSelector();
+      $scope.sections = management.visibleItems;
+      $scope.section = management.getSection($scope.sectionName) || management;
 
-        if ($scope.section) {
-          $scope.section.items.forEach(item => {
-            item.active = `#${$location.path()}`.indexOf(item.url) > -1;
-          });
-        }
-
-        updateSidebar($scope.sections, $scope.section.id);
-        $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
-        management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
-
-        updateLandingPage($scope.$root.chrome.getKibanaVersion());
-        $scope.$on('$destroy', () => destroyReact(LANDING_ID));
+      if ($scope.section) {
+        $scope.section.items.forEach(item => {
+          item.active = `#${$location.path()}`.indexOf(item.url) > -1;
+        });
       }
-    };
-  });
 
-uiModules
-  .get('apps/management')
-  .directive('kbnManagementLanding', function (kbnVersion) {
-    return {
-      restrict: 'E',
-      link: function ($scope) {
-        $scope.sections = management.visibleItems;
-        $scope.kbnVersion = kbnVersion;
-      }
-    };
-  });
+      updateSidebar($scope.sections, $scope.section.id);
+      $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
+      management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
+
+      updateLandingPage($scope.$root.chrome.getKibanaVersion());
+      $scope.$on('$destroy', () => destroyReact(LANDING_ID));
+    },
+  };
+});
+
+uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnVersion) {
+  return {
+    restrict: 'E',
+    link: function($scope) {
+      $scope.sections = management.visibleItems;
+      $scope.kbnVersion = kbnVersion;
+    },
+  };
+});
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
@@ -180,6 +176,6 @@ FeatureCatalogueRegistryProvider.register(() => {
     icon: 'managementApp',
     path: '/app/kibana#/management',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

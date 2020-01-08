@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditFilterListHeader } from './header';
 
 describe('EditFilterListHeader', () => {
-
   const updateNewFilterId = jest.fn(() => {});
   const updateDescription = jest.fn(() => {});
 
@@ -30,12 +28,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListHeader.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the header when creating a new filter list with ID, description and items set', () => {
@@ -47,12 +42,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListHeader.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the header when editing an existing unused filter list with no description or items', () => {
@@ -62,12 +54,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListHeader.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the header when editing an existing used filter list with description and items set', () => {
@@ -78,17 +67,12 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
       usedBy: {
         jobs: ['cloudwatch'],
-        detectors: ['mean CPUUtilization']
-      }
+        detectors: ['mean CPUUtilization'],
+      },
     };
 
-    const component = shallowWithIntl(
-      <EditFilterListHeader.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<EditFilterListHeader.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
-
-
 });

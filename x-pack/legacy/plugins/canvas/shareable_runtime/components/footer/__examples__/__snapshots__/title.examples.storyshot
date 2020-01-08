@@ -32,9 +32,11 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         title="Powered by Elastic.co"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--large euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -101,9 +103,11 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         title="Powered by Elastic.co"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--large euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -170,9 +174,11 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         title="Powered by Elastic.co"
       >
         <svg
+          aria-hidden={true}
           className="euiIcon euiIcon--large euiIcon-isLoading"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}

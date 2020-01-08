@@ -14,7 +14,7 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
@@ -315,7 +315,7 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,

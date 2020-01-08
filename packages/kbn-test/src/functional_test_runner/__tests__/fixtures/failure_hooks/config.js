@@ -29,18 +29,19 @@ export default function () {
     services: {
       hookIntoLIfecycle({ getService }) {
         const log = getService('log');
+        const lifecycle = getService('lifecycle')
 
-        getService('lifecycle')
-          .on('testFailure', async (err, test) => {
-            log.info('testFailure %s %s', err.message, test.fullTitle());
-            await delay(10);
-            log.info('testFailureAfterDelay %s %s', err.message, test.fullTitle());
-          })
-          .on('testHookFailure', async (err, test) => {
-            log.info('testHookFailure %s %s', err.message, test.fullTitle());
-            await delay(10);
-            log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
-          });
+        lifecycle.testFailure.add(async (err, test) => {
+          log.info('testFailure %s %s', err.message, test.fullTitle());
+          await delay(10);
+          log.info('testFailureAfterDelay %s %s', err.message, test.fullTitle());
+        });
+
+        lifecycle.testHookFailure.add(async (err, test) => {
+          log.info('testHookFailure %s %s', err.message, test.fullTitle());
+          await delay(10);
+          log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
+        });
       }
     },
     mochaReporter: {

@@ -44,7 +44,7 @@ import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 class TableSeriesConfigUI extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({
@@ -63,19 +63,31 @@ class TableSeriesConfigUI extends Component {
 
     const functionOptions = [
       {
-        label: intl.formatMessage({ id: 'visTypeTimeseries.table.sumLabel', defaultMessage: 'Sum' }),
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.table.sumLabel',
+          defaultMessage: 'Sum',
+        }),
         value: 'sum',
       },
       {
-        label: intl.formatMessage({ id: 'visTypeTimeseries.table.maxLabel', defaultMessage: 'Max' }),
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.table.maxLabel',
+          defaultMessage: 'Max',
+        }),
         value: 'max',
       },
       {
-        label: intl.formatMessage({ id: 'visTypeTimeseries.table.minLabel', defaultMessage: 'Min' }),
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.table.minLabel',
+          defaultMessage: 'Min',
+        }),
         value: 'min',
       },
       {
-        label: intl.formatMessage({ id: 'visTypeTimeseries.table.avgLabel', defaultMessage: 'Avg' }),
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.table.avgLabel',
+          defaultMessage: 'Avg',
+        }),
         value: 'mean',
       },
       {
@@ -127,7 +139,12 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('template')}
-              label={<FormattedMessage id="visTypeTimeseries.table.templateLabel" defaultMessage="Template" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.table.templateLabel"
+                  defaultMessage="Template"
+                />
+              }
               helpText={
                 <span>
                   <FormattedMessage
@@ -154,7 +171,12 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('filterInput')}
-              label={<FormattedMessage id="visTypeTimeseries.table.filterLabel" defaultMessage="Filter" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.table.filterLabel"
+                  defaultMessage="Filter"
+                />
+              }
               fullWidth
             >
               <QueryBarWrapper
@@ -188,7 +210,9 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('field')}
-              label={<FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />}
+              label={
+                <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
+              }
             >
               <FieldSelect
                 fields={this.props.fields}
@@ -225,7 +249,10 @@ class TableSeriesConfigUI extends Component {
 
         <EuiTitle size="xxs">
           <span>
-            <FormattedMessage id="visTypeTimeseries.table.colorRulesLabel" defaultMessage="Color rules" />
+            <FormattedMessage
+              id="visTypeTimeseries.table.colorRulesLabel"
+              defaultMessage="Color rules"
+            />
           </span>
         </EuiTitle>
         <EuiSpacer size="s" />

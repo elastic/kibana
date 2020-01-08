@@ -36,8 +36,6 @@ import {
 
 import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
 
-jest.mock('ui/new_platform');
-
 describe('Filter editor utils', () => {
   describe('getFieldFromFilter', () => {
     it('should return the field from the filter', () => {

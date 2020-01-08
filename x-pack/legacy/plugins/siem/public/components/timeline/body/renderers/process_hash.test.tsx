@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ProcessHash } from './process_hash';
 
 describe('ProcessHash', () => {
+  const mount = useMountAppended();
+
   test('displays the processHashMd5, processHashSha1, and processHashSha256 when they are all provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -28,7 +30,7 @@ describe('ProcessHash', () => {
   });
 
   test('displays nothing when processHashMd5, processHashSha1, and processHashSha256 are all undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -43,7 +45,7 @@ describe('ProcessHash', () => {
   });
 
   test('displays just processHashMd5 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -58,7 +60,7 @@ describe('ProcessHash', () => {
   });
 
   test('displays just processHashSha1 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -73,7 +75,7 @@ describe('ProcessHash', () => {
   });
 
   test('displays just processHashSha256 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"

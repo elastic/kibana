@@ -5,7 +5,7 @@ exports[`MonitorStatusList component renders checks 1`] = `
   <MonitorStatusRow
     locationNames={
       Set {
-        "unnamed-location",
+        "Unnamed-location",
       }
     }
     status="down"
@@ -14,19 +14,6 @@ exports[`MonitorStatusList component renders checks 1`] = `
     locationNames={Set {}}
     status="up"
   />
-  <EuiCallOut
-    color="warning"
-  >
-    <FormattedMessage
-      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
-      id="xpack.uptime.monitorList.drawer.missingLocation"
-      values={
-        Object {
-          "link": <LocationLink />,
-        }
-      }
-    />
-  </EuiCallOut>
 </Fragment>
 `;
 
@@ -35,7 +22,7 @@ exports[`MonitorStatusList component renders null in place of child status with 
   <MonitorStatusRow
     locationNames={
       Set {
-        "unnamed-location",
+        "Unnamed-location",
       }
     }
     status="down"
@@ -44,18 +31,5 @@ exports[`MonitorStatusList component renders null in place of child status with 
     locationNames={Set {}}
     status="up"
   />
-  <EuiCallOut
-    color="warning"
-  >
-    <FormattedMessage
-      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
-      id="xpack.uptime.monitorList.drawer.missingLocation"
-      values={
-        Object {
-          "link": <LocationLink />,
-        }
-      }
-    />
-  </EuiCallOut>
 </Fragment>
 `;

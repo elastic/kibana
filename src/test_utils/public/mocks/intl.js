@@ -27,5 +27,5 @@ export const intl = {
   formatPlural: jest.fn().mockImplementation(value => value),
   formatHTMLMessage: jest.fn().mockImplementation(({ defaultMessage }) => defaultMessage),
   now: jest.fn().mockImplementation(() => new Date(1531834573179)),
-  textComponent: 'span'
+  textComponent: 'span',
 };

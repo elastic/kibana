@@ -14,13 +14,6 @@ import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {});
-
 const { setup } = pageHelpers.watchStatus;
 
 const watchHistory1 = getWatchHistory({ startTime: '2019-06-04T01:11:11.294' });
@@ -45,7 +38,7 @@ const watch = {
   },
 };
 
-describe.skip('<WatchStatus />', () => {
+describe('<WatchStatus />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchStatusTestBed;
 
@@ -60,7 +53,6 @@ describe.skip('<WatchStatus />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();
@@ -180,7 +172,6 @@ describe.skip('<WatchStatus />', () => {
           },
         });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           confirmButton!.click();
           await nextTick();

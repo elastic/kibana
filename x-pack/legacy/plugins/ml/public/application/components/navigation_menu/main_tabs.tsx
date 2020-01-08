@@ -7,7 +7,6 @@
 import React, { FC, useState } from 'react';
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { TabId } from './navigation_menu';
 
 export interface Tab {
@@ -82,7 +81,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         return (
           <EuiLink
             data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-            href={`${chrome.getBasePath()}/app/ml#/${defaultPathId}`}
+            href={`#/${defaultPathId}`}
             key={`${id}-key`}
             color="text"
           >

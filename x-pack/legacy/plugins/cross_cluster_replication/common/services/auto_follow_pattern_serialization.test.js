@@ -21,7 +21,7 @@ describe('[CCR] auto-follow_serialization', () => {
         name: 'some-name',
         remoteCluster: 'foo',
         leaderIndexPatterns: ['foo-*'],
-        followIndexPattern: 'bar'
+        followIndexPattern: 'bar',
       };
 
       const esObject = {
@@ -29,8 +29,8 @@ describe('[CCR] auto-follow_serialization', () => {
         pattern: {
           remote_cluster: expected.remoteCluster,
           leader_index_patterns: expected.leaderIndexPatterns,
-          follow_index_pattern: expected.followIndexPattern
-        }
+          follow_index_pattern: expected.followIndexPattern,
+        },
       };
 
       expect(deserializeAutoFollowPattern(esObject)).toEqual(expected);
@@ -47,14 +47,14 @@ describe('[CCR] auto-follow_serialization', () => {
           name: name1,
           remoteCluster: 'foo1',
           leaderIndexPatterns: ['foo1-*'],
-          followIndexPattern: 'bar2'
+          followIndexPattern: 'bar2',
         },
         {
           name: name2,
           remoteCluster: 'foo2',
           leaderIndexPatterns: ['foo2-*'],
-          followIndexPattern: 'bar2'
-        }
+          followIndexPattern: 'bar2',
+        },
       ];
 
       const esObjects = {
@@ -64,18 +64,18 @@ describe('[CCR] auto-follow_serialization', () => {
             pattern: {
               remote_cluster: expected[0].remoteCluster,
               leader_index_patterns: expected[0].leaderIndexPatterns,
-              follow_index_pattern: expected[0].followIndexPattern
-            }
+              follow_index_pattern: expected[0].followIndexPattern,
+            },
           },
           {
             name: name2,
             pattern: {
               remote_cluster: expected[1].remoteCluster,
               leader_index_patterns: expected[1].leaderIndexPatterns,
-              follow_index_pattern: expected[1].followIndexPattern
-            }
-          }
-        ]
+              follow_index_pattern: expected[1].followIndexPattern,
+            },
+          },
+        ],
       };
 
       expect(deserializeListAutoFollowPatterns(esObjects.patterns)).toEqual(expected);
@@ -87,13 +87,13 @@ describe('[CCR] auto-follow_serialization', () => {
       const expected = {
         remote_cluster: 'foo',
         leader_index_patterns: ['bar-*'],
-        follow_index_pattern: 'faz'
+        follow_index_pattern: 'faz',
       };
 
       const object = {
         remoteCluster: expected.remote_cluster,
         leaderIndexPatterns: expected.leader_index_patterns,
-        followIndexPattern: expected.follow_index_pattern
+        followIndexPattern: expected.follow_index_pattern,
       };
 
       expect(serializeAutoFollowPattern(object)).toEqual(expected);

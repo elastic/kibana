@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { getNewJobLimits } from '../../../services/ml_server_info';
 import { populateValidationMessages } from '../../new_job/common/job_validator/util';
 
@@ -19,14 +18,14 @@ export function validateModelMemoryLimit(mml) {
   const limits = getNewJobLimits();
   const tempJob = {
     analysis_limits: {
-      model_memory_limit: mml
-    }
+      model_memory_limit: mml,
+    },
   };
 
   let validationResults = validateModelMemoryLimitUnitsUtils(mml);
   let { valid } = validationResults;
 
-  if(valid) {
+  if (valid) {
     validationResults = validateModelMemoryLimitUtils(tempJob, limits);
     valid = validationResults.valid;
   }
@@ -43,7 +42,7 @@ export function validateModelMemoryLimit(mml) {
 
 export function validateGroupNames(groups) {
   const tempJob = {
-    groups
+    groups,
   };
 
   const validationResults = validateGroupNamesUtils(tempJob);
@@ -66,11 +65,10 @@ export function isValidCustomUrls(customUrls) {
 
   // Check all the custom URLs have unique labels and the time range is valid.
   const isInvalidItem = customUrls.some((customUrl, index) => {
-
     // Validate the label.
     const label = customUrl.url_name;
     const otherUrls = [...customUrls];
-    otherUrls.splice(index, 1);   // Don't compare label with itself.
+    otherUrls.splice(index, 1); // Don't compare label with itself.
     let itemValid = isValidLabel(label, otherUrls);
     if (itemValid === true) {
       // Validate the time range.

@@ -15,11 +15,13 @@ import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_FIELDS_COUNT,
+  FIELDS_BROWSER_FILTER_INPUT,
+  FIELDS_BROWSER_HOST_CATEGORIES_COUNT,
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
@@ -34,13 +36,9 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe.skip('Fields Browser', () => {
+describe('Fields Browser', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('renders the fields browser with the expected title when the Fields button is clicked', () => {
@@ -104,9 +102,9 @@ describe.skip('Fields Browser', () => {
 
     openTimelineFieldsBrowser();
 
-    cy.get(
-      `[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`
-    ).uncheck();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).uncheck({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -138,9 +136,22 @@ describe.skip('Fields Browser', () => {
 
     filterFieldsBrowser(filterInput);
 
-    cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+    cy.get(FIELDS_BROWSER_FILTER_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
+      'not.have.class',
+      'euiFieldSearch-isLoading'
+    );
+
+    cy.get(FIELDS_BROWSER_HOST_CATEGORIES_COUNT)
       .invoke('text')
-      .should('eq', '2 fields');
+      .then(hostCategoriesCount => {
+        cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
+          .invoke('text')
+          .then(systemCategoriesCount => {
+            cy.get(FIELDS_BROWSER_FIELDS_COUNT)
+              .invoke('text')
+              .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
+          });
+      });
   });
 
   it('selects a search results label with the expected count of categories matching the filter input', () => {
@@ -185,7 +196,9 @@ describe.skip('Fields Browser', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -235,7 +248,9 @@ describe.skip('Fields Browser', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -245,7 +260,7 @@ describe.skip('Fields Browser', () => {
 
     openTimelineFieldsBrowser();
 
-    cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click();
+    cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click({ force: true });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
       'not.exist'

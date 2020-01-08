@@ -24,3 +24,6 @@ export const eventsSelector = () => createSelector(selectHosts, hosts => hosts.q
 
 export const uncommonProcessesSelector = () =>
   createSelector(selectHosts, hosts => hosts.queries.uncommonProcesses);
+
+export const alertsSelector = () =>
+  createSelector(selectHosts, hosts => hosts.queries[HostsTableType.alerts]);

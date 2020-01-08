@@ -5,8 +5,7 @@
  */
 
 import { EuiSuperSelect } from '@elastic/eui';
-import React from 'react';
-import { pure } from 'recompose';
+import React, { useCallback } from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowDirection, FlowTarget } from '../../graphql/types';
@@ -58,7 +57,7 @@ const onChangeTarget = (
 
 export type FlowTargetSelectProps = OwnProps;
 
-export const FlowTargetSelect = pure<FlowTargetSelectProps>(
+export const FlowTargetSelect = React.memo<FlowTargetSelectProps>(
   ({
     id,
     isLoading = false,
@@ -66,22 +65,27 @@ export const FlowTargetSelect = pure<FlowTargetSelectProps>(
     selectedTarget,
     displayTextOverride = [],
     updateFlowTargetAction,
-  }) => (
-    <EuiSuperSelect
-      options={
-        selectedDirection
-          ? toggleTargetOptions(id, displayTextOverride).filter(option =>
-              option.directions.includes(selectedDirection)
-            )
-          : toggleTargetOptions(id, displayTextOverride)
-      }
-      valueOfSelected={selectedTarget}
-      onChange={(newFlowTarget: FlowTarget) =>
-        onChangeTarget(newFlowTarget, updateFlowTargetAction)
-      }
-      isLoading={isLoading}
-    />
-  )
+  }) => {
+    const handleChange = useCallback(
+      (newFlowTarget: FlowTarget) => onChangeTarget(newFlowTarget, updateFlowTargetAction),
+      [updateFlowTargetAction]
+    );
+
+    return (
+      <EuiSuperSelect
+        options={
+          selectedDirection
+            ? toggleTargetOptions(id, displayTextOverride).filter(option =>
+                option.directions.includes(selectedDirection)
+              )
+            : toggleTargetOptions(id, displayTextOverride)
+        }
+        valueOfSelected={selectedTarget}
+        onChange={handleChange}
+        isLoading={isLoading}
+      />
+    );
+  }
 );
 
 FlowTargetSelect.displayName = 'FlowTargetSelect';

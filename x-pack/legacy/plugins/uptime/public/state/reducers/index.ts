@@ -5,10 +5,13 @@
  */
 
 import { combineReducers } from 'redux';
-import { uiReducer } from './ui';
 import { monitorReducer } from './monitor';
+import { snapshotReducer } from './snapshot';
+import { uiReducer } from './ui';
 
 export const rootReducer = combineReducers({
-  ui: uiReducer,
   monitor: monitorReducer,
+  snapshot: snapshotReducer,
+  // @ts-ignore for now TODO: refactor to use redux-action
+  ui: uiReducer,
 });

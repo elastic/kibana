@@ -28,21 +28,21 @@ export const QueryString = {};
 function tryDecodeURIComponent(value) {
   try {
     return decodeURIComponent(value);
-  }
-  // Ignore any invalid uri component
-  catch (e) {} // eslint-disable-line no-empty
+  } catch (e) {
+    // Ignore any invalid uri component
+  } // eslint-disable-line no-empty
 }
 
 /**
  * Parses an escaped url query string into key-value pairs.
  * @returns {Object.<string,boolean|Array>}
  */
-QueryString.decode = function (keyValue) {
+QueryString.decode = function(keyValue) {
   const obj = {};
   let keyValueParts;
   let key;
 
-  (keyValue || '').split('&').forEach(function (keyValue) {
+  (keyValue || '').split('&').forEach(function(keyValue) {
     if (keyValue) {
       keyValueParts = keyValue.split('=');
       key = tryDecodeURIComponent(keyValueParts[0]);
@@ -66,13 +66,13 @@ QueryString.decode = function (keyValue) {
  * @param  {Object} obj
  * @return {String}
  */
-QueryString.encode = function (obj) {
+QueryString.encode = function(obj) {
   const parts = [];
   const keys = Object.keys(obj).sort();
-  keys.forEach(function (key) {
+  keys.forEach(function(key) {
     const value = obj[key];
     if (Array.isArray(value)) {
-      value.forEach(function (arrayValue) {
+      value.forEach(function(arrayValue) {
         parts.push(QueryString.param(key, arrayValue));
       });
     } else {
@@ -82,8 +82,10 @@ QueryString.encode = function (obj) {
   return parts.length ? parts.join('&') : '';
 };
 
-QueryString.param = function (key, val) {
-  return encodeQueryComponent(key, true) + (val === true ? '' : '=' + encodeQueryComponent(val, true));
+QueryString.param = function(key, val) {
+  return (
+    encodeQueryComponent(key, true) + (val === true ? '' : '=' + encodeQueryComponent(val, true))
+  );
 };
 
 /**
@@ -92,7 +94,7 @@ QueryString.param = function (key, val) {
  * @return {Object} - returns an object describing the start/end index of the url in the string. The indices will be
  *                    the same if the url does not have a query string
  */
-QueryString.findInUrl = function (url) {
+QueryString.findInUrl = function(url) {
   let qsStart = url.indexOf('?');
   let hashStart = url.lastIndexOf('#');
 
@@ -107,11 +109,11 @@ QueryString.findInUrl = function (url) {
 
   return {
     start: qsStart,
-    end: hashStart
+    end: hashStart,
   };
 };
 
-QueryString.replaceParamInUrl = function (url, param, newVal) {
+QueryString.replaceParamInUrl = function(url, param, newVal) {
   const loc = QueryString.findInUrl(url);
   const parsed = QueryString.decode(url.substring(loc.start + 1, loc.end));
 

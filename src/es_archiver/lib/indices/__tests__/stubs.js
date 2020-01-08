@@ -38,25 +38,25 @@ export const createStubStats = () => ({
 
 export const createStubIndexRecord = (index, aliases = {}) => ({
   type: 'index',
-  value: { index, aliases }
+  value: { index, aliases },
 });
 
 export const createStubDocRecord = (index, id) => ({
   type: 'doc',
-  value: { index, id }
+  value: { index, id },
 });
 
-const createEsClientError = (errorType) => {
+const createEsClientError = errorType => {
   const err = new Error(`ES Client Error Stub "${errorType}"`);
   err.body = {
     error: {
-      type: errorType
-    }
+      type: errorType,
+    },
   };
   return err;
 };
 
-const indexAlias = (aliases, index) => Object.keys(aliases).find((k) => aliases[k] === index);
+const indexAlias = (aliases, index) => Object.keys(aliases).find(k => aliases[k] === index);
 
 export const createStubClient = (existingIndices = [], aliases = {}) => ({
   indices: {
@@ -69,7 +69,7 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
         [index]: {
           mappings: {},
           settings: {},
-        }
+        },
       };
     }),
     existsAlias: sinon.spy(({ name }) => {
@@ -123,6 +123,6 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
     }),
     exists: sinon.spy(async () => {
       throw new Error('Do not use indices.exists(). React to errors instead.');
-    })
-  }
+    }),
+  },
 });

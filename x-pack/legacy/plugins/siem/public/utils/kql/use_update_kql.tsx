@@ -6,7 +6,7 @@
 
 import { isEqual } from 'lodash/fp';
 import { Dispatch } from 'redux';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../store/timeline/actions';
@@ -14,7 +14,7 @@ import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { RefetchKql } from '../../store/inputs/model';
 
 interface UseUpdateKqlProps {
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   kueryFilterQuery: KueryFilterQuery | null;
   kueryFilterQueryDraft: KueryFilterQuery | null;
   storeType: 'timelineType';

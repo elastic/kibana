@@ -17,13 +17,11 @@
  * under the License.
  */
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
 
   return {
-    testFiles: [
-      require.resolve('./'),
-    ],
+    testFiles: [require.resolve('./')],
     services: httpConfig.get('services'),
     servers: {
       ...httpConfig.get('servers'),

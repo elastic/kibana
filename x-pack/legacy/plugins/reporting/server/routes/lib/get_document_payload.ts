@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import contentDisposition from 'content-disposition';
 import {
   ServerFacade,
+  ExportTypesRegistry,
   ExportTypeDefinition,
   JobDocExecuted,
   JobDocOutputExecuted,
@@ -21,10 +22,12 @@ interface ICustomHeaders {
 
 const DEFAULT_TITLE = 'report';
 
-const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
+type ExportTypeType = ExportTypeDefinition<any, any, any, any>;
+
+const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeDefinition) => {
+const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeType) => {
   const metaDataHeaders: ICustomHeaders = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
@@ -38,10 +41,11 @@ const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTyp
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(server: ServerFacade) {
-  const exportTypesRegistry = server.plugins.reporting!.exportTypesRegistry;
-
-  function encodeContent(content: string | null, exportType: ExportTypeDefinition) {
+export function getDocumentPayloadFactory(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry
+) {
+  function encodeContent(content: string | null, exportType: ExportTypeType) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
         return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
@@ -51,9 +55,7 @@ export function getDocumentPayloadFactory(server: ServerFacade) {
   }
 
   function getCompleted(output: JobDocOutputExecuted, jobType: string, title: string) {
-    const exportType = exportTypesRegistry.get(
-      (item: ExportTypeDefinition) => item.jobType === jobType
-    );
+    const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
 
@@ -88,9 +90,11 @@ export function getDocumentPayloadFactory(server: ServerFacade) {
     };
   }
 
-  return function getDocumentPayload(doc: { _source: JobDocExecuted }) {
+  return function getDocumentPayload(doc: {
+    _source: JobDocExecuted<{ output: JobDocOutputExecuted }>;
+  }) {
     const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
-    const { output } = doc._source as { output: JobDocOutputExecuted };
+    const { output } = doc._source;
 
     if (status === 'completed') {
       return getCompleted(output, jobType, title);

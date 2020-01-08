@@ -1,9 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Subtitle it renders 1`] = `
-<Component>
-  <Subtitle
-    items="Test subtitle"
-  />
-</Component>
+<Wrapper
+  className="siemSubtitle"
+>
+  <SubtitleItem>
+    Test subtitle
+  </SubtitleItem>
+</Wrapper>
 `;

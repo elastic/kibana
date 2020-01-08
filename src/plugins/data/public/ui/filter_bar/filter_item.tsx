@@ -20,11 +20,11 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'src/core/public';
+import React, { Component, MouseEvent } from 'react';
+import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { esFilters, utils, IIndexPattern } from '../..';
+import { esFilters, IIndexPattern } from '../..';
 
 interface Props {
   id: string;
@@ -34,7 +34,7 @@ interface Props {
   onUpdate: (filter: esFilters.Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 interface State {
@@ -46,6 +46,13 @@ class FilterItemUI extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
+  private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
+    if (e.shiftKey) {
+      this.onToggleDisabled();
+    } else {
+      this.togglePopover();
+    }
+  };
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
@@ -60,7 +67,7 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
@@ -73,7 +80,7 @@ class FilterItemUI extends Component<Props, State> {
         valueLabel={valueLabel}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
-        onClick={this.togglePopover}
+        onClick={this.handleBadgeClick}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
       />
     );

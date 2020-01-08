@@ -28,7 +28,7 @@ describe('get_index_summary handleResponse', () => {
 
   describe('With index_stats hits', () => {
     it('incomplete shardStats data', () => {
-      const shardStats = { indices: { 'mycoolindex': {} } };
+      const shardStats = { indices: { mycoolindex: {} } };
       const indexUuid = 'mycoolindex';
 
       const handleFn = handleResponse(shardStats, indexUuid);
@@ -40,47 +40,47 @@ describe('get_index_summary handleResponse', () => {
                 index_stats: {
                   total: {
                     store: {
-                      size_in_bytes: 250000
-                    }
+                      size_in_bytes: 250000,
+                    },
                   },
                   primaries: {
                     docs: {
-                      count: 250
+                      count: 250,
                     },
                     store: {
-                      size_in_bytes: 122500
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
+                      size_in_bytes: 122500,
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
       });
 
       expect(result).to.be.eql({
         documents: 250,
         dataSize: {
           primaries: 122500,
-          total: 250000
+          total: 250000,
         },
         status: 'Unknown',
         totalShards: 0,
-        unassignedShards: 0
+        unassignedShards: 0,
       });
     });
 
     it('complete shardStats data', () => {
       const shardStats = {
         indices: {
-          'mycoolindex': {
+          mycoolindex: {
             unassigned: {
               primary: 0,
-              replica: 5
+              replica: 5,
             },
-            status: 'Golden'
-          }
-        }
+            status: 'Golden',
+          },
+        },
       };
       const indexUuid = 'mycoolindex';
 
@@ -93,33 +93,33 @@ describe('get_index_summary handleResponse', () => {
                 index_stats: {
                   total: {
                     store: {
-                      size_in_bytes: 250000
-                    }
+                      size_in_bytes: 250000,
+                    },
                   },
                   primaries: {
                     docs: {
-                      count: 250
+                      count: 250,
                     },
                     store: {
-                      size_in_bytes: 122500
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
+                      size_in_bytes: 122500,
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
       });
 
       expect(result).to.be.eql({
         documents: 250,
         dataSize: {
           primaries: 122500,
-          total: 250000
+          total: 250000,
         },
         status: 'Golden',
         totalShards: 5,
-        unassignedShards: 5
+        unassignedShards: 5,
       });
     });
   });

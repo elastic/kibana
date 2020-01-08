@@ -26,6 +26,8 @@ import {
 import { AnalyticsViewAction } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
+const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
+
 interface Props {
   items: DataFrameAnalyticsListRow[];
 }
@@ -112,8 +114,6 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       direction: sortDirection,
     },
   };
-
-  const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
   return (
     <MlInMemoryTable

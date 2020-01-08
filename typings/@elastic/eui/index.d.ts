@@ -25,17 +25,4 @@ declare module '@elastic/eui' {
   export const EuiDescribedFormGroup: React.FC<any>;
   export const EuiCodeEditor: React.FC<any>;
   export const Query: any;
-
-  export interface EuiTableCriteria {
-    page: { index: number; size: number };
-    sort?: {
-      field?: string;
-      direction?: Direction;
-    };
-  }
-  export const EuiBasicTable: React.ComponentClass<{
-    onTableChange?: (criteria: EuiTableCriteria) => void;
-    sorting: { sort?: EuiTableCriteria['sort'] };
-    [key: string]: any;
-  }>;
 }

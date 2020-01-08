@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getKibanaUsageCollector } from './get_kibana_usage_collector';
-export { getOpsStatsCollector } from './get_ops_stats_collector';
-export { getSettingsCollector } from './get_settings_collector';
+import { getKibanaUsageCollector } from './get_kibana_usage_collector';
+import { getOpsStatsCollector } from './get_ops_stats_collector';
+import { getSettingsCollector } from './get_settings_collector';
+
+export function registerCollectors(usageCollection, collectorsConfigs) {
+  const { config } = collectorsConfigs;
+
+  usageCollection.registerCollector(getOpsStatsCollector(usageCollection, collectorsConfigs));
+  usageCollection.registerCollector(getKibanaUsageCollector(usageCollection, config));
+  usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
+}

@@ -39,7 +39,7 @@ describe('http service', () => {
       const cookieOptions = {
         name: 'sid',
         encryptionKey: 'something_at_least_32_characters',
-        validate: (session: StorageData) => true,
+        validate: () => ({ isValid: true }),
         isSecure: false,
         path: '/',
       };

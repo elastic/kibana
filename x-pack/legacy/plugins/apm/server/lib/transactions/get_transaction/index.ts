@@ -16,6 +16,7 @@ import {
   SetupTimeRange,
   SetupUIFilters
 } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransaction(
   transactionId: string,
@@ -31,7 +32,7 @@ export async function getTransaction(
       query: {
         bool: {
           filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
             { range: rangeFilter(start, end) },

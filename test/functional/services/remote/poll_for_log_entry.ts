@@ -29,7 +29,7 @@ export function pollForLogEntry$(
   driver: WebDriver,
   type: string,
   ms: number,
-  stop$: Rx.Observable<undefined>
+  stop$: Rx.Observable<void>
 ) {
   const logCtrl = driver.manage().logs();
   const poll$ = new Rx.BehaviorSubject(undefined);

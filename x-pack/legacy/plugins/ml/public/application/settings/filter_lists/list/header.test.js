@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FilterListsHeader } from './header';
 
 describe('Filter Lists Header', () => {
-
   const refreshFilterLists = jest.fn(() => {});
 
   const requiredProps = {
@@ -24,12 +22,8 @@ describe('Filter Lists Header', () => {
       ...requiredProps,
     };
 
-    const component = shallowWithIntl(
-      <FilterListsHeader {...props} />
-    );
+    const component = shallowWithIntl(<FilterListsHeader {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
-
 });

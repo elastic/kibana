@@ -56,16 +56,33 @@ xpack.security.encryptionKey: "something_at_least_32_characters"
 For more information, see <<security-settings-kb,Security Settings in {kib}>>.
 --
 
-. Optional: Change the default session duration. By default, sessions stay
-active until the browser is closed. To change the duration, set the
-`xpack.security.sessionTimeout` property in the `kibana.yml` configuration file.
-The timeout is specified in milliseconds. For example, set the timeout to 600000
-to expire sessions after 10 minutes:
+. Optional: Set a timeout to expire idle sessions. By default, a session stays
+active until the browser is closed. To define a sliding session expiration, set
+the `xpack.security.session.idleTimeout` property in the `kibana.yml`
+configuration file. The idle timeout is formatted as a duration of
+`<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y'). For example, set
+the idle timeout to expire idle sessions after 10 minutes:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.sessionTimeout: 600000
+xpack.security.session.idleTimeout: "10m"
+--------------------------------------------------------------------------------
+--
+
+. Optional: Change the maximum session duration or "lifespan" -- also known as
+the "absolute timeout". By default, a session stays active until the browser is
+closed. If an idle timeout is defined, a session can still be extended
+indefinitely. To define a maximum session lifespan, set the
+`xpack.security.session.lifespan` property in the `kibana.yml` configuration
+file. The lifespan is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]`
+(e.g. '70ms', '5s', '3d', '1Y'). For example, set the lifespan to expire
+sessions after 8 hours:
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.lifespan: "8h"
 --------------------------------------------------------------------------------
 --
 
@@ -106,7 +123,7 @@ TIP: You can define as many different roles for your {kib} users as you need.
 
 For example, create roles that have `read` and `view_index_metadata` privileges
 on specific index patterns. For more information, see
-{xpack-ref}/authorization.html[Configuring Role-based Access Control].
+{ref}/authorization.html[User authorization].
 
 --
 

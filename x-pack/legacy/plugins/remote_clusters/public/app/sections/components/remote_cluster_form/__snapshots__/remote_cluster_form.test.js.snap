@@ -40,6 +40,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormNameFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -117,6 +118,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormSeedNodesFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -240,6 +242,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
             data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__fieldWrapper"
@@ -266,17 +269,21 @@ Array [
                       class="euiSwitch__track"
                     >
                       <svg
+                        aria-hidden="true"
                         class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                         focusable="false"
                         height="16"
+                        role="img"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       />
                       <svg
+                        aria-hidden="true"
                         class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                         focusable="false"
                         height="16"
+                        role="img"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
@@ -284,12 +291,12 @@ Array [
                     </span>
                   </span>
                 </button>
-                <p
+                <span
                   class="euiSwitch__label"
                   id="mockId"
                 >
                   Skip if unavailable
-                </p>
+                </span>
               </div>
             </div>
           </div>
@@ -326,6 +333,7 @@ Array [
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
@@ -367,6 +375,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormNameFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -416,6 +425,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormSeedNodesFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -499,6 +509,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
     data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__fieldWrapper"
@@ -525,17 +536,21 @@ Array [
               class="euiSwitch__track"
             >
               <svg
+                aria-hidden="true"
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
               />
               <svg
+                aria-hidden="true"
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
@@ -543,12 +558,12 @@ Array [
             </span>
           </span>
         </button>
-        <p
+        <span
           class="euiSwitch__label"
           id="mockId"
         >
           Skip if unavailable
-        </p>
+        </span>
       </div>
     </div>
   </div>,

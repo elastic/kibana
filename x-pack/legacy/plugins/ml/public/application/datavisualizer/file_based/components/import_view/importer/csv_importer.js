@@ -18,13 +18,13 @@ export class CsvImporter extends Importer {
     this.quote = results.quote;
     this.hasHeaderRow = results.has_header_row;
     this.columnNames = results.column_names;
-    this.shouldTrimFields = (results.should_trim_fields || false);
+    this.shouldTrimFields = results.should_trim_fields || false;
   }
 
   async read(csv) {
     try {
-      const transform = this.shouldTrimFields ? (f => f.trim()) : (f => f);
-      const dynamicTyping = (c => shouldUseDynamicType(this.columnNames, this.mappings, c));
+      const transform = this.shouldTrimFields ? f => f.trim() : f => f;
+      const dynamicTyping = c => shouldUseDynamicType(this.columnNames, this.mappings, c);
       const config = {
         header: false,
         skipEmptyLines: 'greedy',

@@ -78,7 +78,7 @@ export const FieldsPanel: FC<Props> = ({
   }
 
   return (
-    <EuiPanel data-test-subj="mlDataVisualizerFieldsPanel">
+    <EuiPanel data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
       <EuiTitle>
         <h2>{title}</h2>
       </EuiTitle>

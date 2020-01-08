@@ -6,29 +6,25 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-interface LayoutProps {
+interface LayoutProps extends RouteComponentProps {
+  children: React.ReactNode;
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;
-  modalClosePath?: string;
 }
 
-export const NoDataLayout: React.FC<LayoutProps> = withRouter<any>(
-  ({ actionSection, title, modalClosePath, children, history }) => {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiPageContent>
-            <EuiEmptyPrompt
-              iconType="logoBeats"
-              title={<h2>{title}</h2>}
-              body={children}
-              actions={actionSection}
-            />
-          </EuiPageContent>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-) as any;
+export const NoDataLayout = withRouter(({ actionSection, title, children }: LayoutProps) => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiPageContent>
+        <EuiEmptyPrompt
+          iconType="logoBeats"
+          title={<h2>{title}</h2>}
+          body={children}
+          actions={actionSection}
+        />
+      </EuiPageContent>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));

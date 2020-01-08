@@ -29,20 +29,15 @@ import { generateNoticeFromSource } from './generate_notice_from_source';
 
 const unknownFlags = [];
 const opts = getopts(process.argv.slice(2), {
-  boolean: [
-    'help',
-    'validate',
-    'verbose',
-    'debug',
-  ],
+  boolean: ['help', 'validate', 'verbose', 'debug'],
   unknown(flag) {
     unknownFlags.push(flag);
-  }
+  },
 });
 
 const log = new ToolingLog({
   level: pickLevelFromFlags(opts),
-  writeTo: process.stdout
+  writeTo: process.stdout,
 });
 
 if (unknownFlags.length) {
@@ -52,7 +47,9 @@ if (unknownFlags.length) {
 }
 
 if (opts.help) {
-  process.stdout.write('\n' + dedent`
+  process.stdout.write(
+    '\n' +
+      dedent`
     Generate or validate NOTICE.txt.
 
       Entries are collected by finding all multi-line comments that start
@@ -63,7 +60,9 @@ if (opts.help) {
       --validate  Don't write the NOTICE.txt, just fail if updates would have been made
       --verbose   Set logging level to verbose
       --debug     Set logging level to debug
-  ` + '\n\n');
+  ` +
+      '\n\n'
+  );
   process.exit();
 }
 
@@ -87,9 +86,11 @@ if (opts.help) {
     return;
   }
 
-  log.error('NOTICE.txt is out of date, run `node scripts/notice` to update and commit the results.');
+  log.error(
+    'NOTICE.txt is out of date, run `node scripts/notice` to update and commit the results.'
+  );
   process.exit(1);
-}()).catch(error => {
+})().catch(error => {
   log.error(error);
   process.exit(1);
 });

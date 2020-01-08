@@ -20,6 +20,8 @@
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
+
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
   usage_fetcher?: 'browser' | 'server';
@@ -61,15 +63,15 @@ export function createCollectorFetch(server: any) {
   };
 }
 
-/*
- * @param {Object} server
- * @return {Object} kibana usage stats type collection object
- */
-export function createTelemetryPluginUsageCollector(server: any) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function registerTelemetryPluginUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: any
+) {
+  const collector = usageCollection.makeUsageCollector({
     type: TELEMETRY_STATS_TYPE,
     isReady: () => true,
     fetch: createCollectorFetch(server),
   });
+
+  usageCollection.registerCollector(collector);
 }

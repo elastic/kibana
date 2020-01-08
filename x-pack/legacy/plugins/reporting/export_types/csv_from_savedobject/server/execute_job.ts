@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import {
+  ExecuteJobFactory,
   ImmediateExecuteFn,
   JobDocOutputExecuted,
   ServerFacade,
@@ -26,7 +27,9 @@ import {
 } from '../types';
 import { createGenerateCsv } from './lib';
 
-export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -118,4 +121,4 @@ export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
       size,
     };
   };
-}
+};

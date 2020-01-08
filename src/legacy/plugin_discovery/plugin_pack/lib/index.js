@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export {
-  isDirectory,
-  createChildDirectory$,
-} from './fs';
+export { isDirectory, createChildDirectory$ } from './fs';

@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { MLJobEditor, EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 
@@ -58,5 +54,8 @@ export function FileContents({ data, format, numberOfLines }) {
 }
 
 function limitByNumberOfLines(data, numberOfLines) {
-  return data.split('\n').slice(0, numberOfLines).join('\n');
+  return data
+    .split('\n')
+    .slice(0, numberOfLines)
+    .join('\n');
 }

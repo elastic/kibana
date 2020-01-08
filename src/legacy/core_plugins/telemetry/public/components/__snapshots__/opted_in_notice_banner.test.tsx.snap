@@ -10,7 +10,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     values={
       Object {
         "disableLink": <ForwardRef
-          href="#/management/kibana/settings"
+          href="kibana#/management/kibana/settings"
           onClick={[Function]}
         >
           <FormattedMessage

@@ -50,6 +50,11 @@ function getMockRequest() {
         client: {
           get: jest.fn().mockResolvedValue(false)
         }
+      },
+      savedObjects: {
+        client: {
+          get: jest.fn()
+        }
       }
     }
   } as unknown) as APMRequestHandlerContext & {
@@ -61,6 +66,11 @@ function getMockRequest() {
         };
       };
       uiSettings: {
+        client: {
+          get: jest.Mock<any, any>;
+        };
+      };
+      savedObjects: {
         client: {
           get: jest.Mock<any, any>;
         };

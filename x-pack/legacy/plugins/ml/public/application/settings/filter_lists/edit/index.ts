@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './directive';
+export { EditFilterList } from './edit_filter_list';

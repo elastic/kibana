@@ -23,7 +23,7 @@ const flotOptions = {
   },
 
   // Set series line color
-  colors: [ '#3b73ac' ], // Cribbed from components/chart/get_color.js
+  colors: ['#3b73ac'], // Cribbed from components/chart/get_color.js
 
   series: {
     // No shadow on series lines
@@ -31,15 +31,15 @@ const flotOptions = {
 
     lines: {
       // Set series line width
-      lineWidth: 2 // Cribbed from components/chart/get_options.js
+      lineWidth: 2, // Cribbed from components/chart/get_options.js
     },
 
     highlightColor: '#3b73ac',
 
     points: {
-      radius: 2
-    }
-  }
+      radius: 2,
+    },
+  },
 };
 
 function makeData(series = []) {
@@ -51,13 +51,13 @@ function makeData(series = []) {
   // A fake series, containing only the last point from the actual series, to trick flot
   // into showing the "spark" point of the sparkline.
   data.push({
-    data: [ last(series) ],
+    data: [last(series)],
     points: {
       show: true,
       radius: 2,
       fill: 1,
-      fillColor: false
-    }
+      fillColor: false,
+    },
   });
 
   return data;
@@ -83,7 +83,7 @@ export class SparklineFlotChart {
 
   render = () => {
     this.flotChart = $.plot(this.containerElem, this.data, this.options);
-  }
+  };
 
   update(series) {
     this.flotChart.setData(makeData(series));
@@ -91,41 +91,45 @@ export class SparklineFlotChart {
     this.flotChart.draw();
   }
 
-  setupBrushHandling = (onBrush) => {
+  setupBrushHandling = onBrush => {
     // Requires `selection` flot plugin
     this.options.selection = {
       mode: 'x',
-      color: '#9c9c9c'
+      color: '#9c9c9c',
     };
     $(this.containerElem).off('plotselected');
     $(this.containerElem).on('plotselected', (_event, range) => {
       onBrush(range);
       this.flotChart.clearSelection();
     });
-  }
+  };
 
-  setupHoverHandling = (onHover) => {
+  setupHoverHandling = onHover => {
     const container = $(this.containerElem);
-    const debouncedOnHover = debounce((_event, _range, item) => {
-      if (item === null) {
-        return onHover();
-      }
+    const debouncedOnHover = debounce(
+      (_event, _range, item) => {
+        if (item === null) {
+          return onHover();
+        }
 
-      onHover({
-        xValue: item.datapoint[0],
-        yValue: item.datapoint[1],
-        xPosition: item.pageX - window.pageXOffset,
-        yPosition: item.pageY - window.pageYOffset,
-        plotTop: container.offset().top,
-        plotLeft: container.offset().left,
-        plotHeight: container.height(),
-        plotWidth: container.width()
-      });
-    }, DEBOUNCE_FAST_MS, { leading: true });
+        onHover({
+          xValue: item.datapoint[0],
+          yValue: item.datapoint[1],
+          xPosition: item.pageX - window.pageXOffset,
+          yPosition: item.pageY - window.pageYOffset,
+          plotTop: container.offset().top,
+          plotLeft: container.offset().left,
+          plotHeight: container.height(),
+          plotWidth: container.width(),
+        });
+      },
+      DEBOUNCE_FAST_MS,
+      { leading: true }
+    );
 
     container.off('plothover');
     container.on('plothover', debouncedOnHover);
-  }
+  };
 
   /**
    * Necessary to prevent a memory leak. Should be called any time

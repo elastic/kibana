@@ -6,19 +6,22 @@
 
 import { Moment } from 'moment';
 
-declare interface TimeFilterBounds {
-  min: Moment;
-  max: Moment;
+declare interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
+}
+
+export declare interface TimeBucketsInterval {
+  asMilliseconds: () => number;
+  asSeconds: () => number;
+  expression: string;
 }
 
 export class TimeBuckets {
   setBarTarget: (barTarget: number) => void;
   setMaxBars: (maxBars: number) => void;
   setInterval: (interval: string) => void;
-  setBounds: (bounds: TimeFilterBounds) => void;
+  setBounds: (bounds: TimeRangeBounds) => void;
   getBounds: () => { min: any; max: any };
-  getInterval: () => {
-    asMilliseconds: () => number;
-    expression: string;
-  };
+  getInterval: () => TimeBucketsInterval;
 }

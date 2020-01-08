@@ -8,17 +8,16 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-export function StepError({ title = (
-  <FormattedMessage
-    id="xpack.rollupJobs.create.stepErrorTitle"
-    defaultMessage="Fix errors before continuing."
-  />
-) }) {
+export function StepError({
+  title = (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.stepErrorTitle"
+      defaultMessage="Fix errors before continuing."
+    />
+  ),
+}) {
   return (
     <Fragment>
       <EuiSpacer size="m" />

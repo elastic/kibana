@@ -75,7 +75,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(
+        `advancedSetting-editField-${propertyName}`,
+        'checked'
+      );
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -188,8 +191,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       // passing in zero-based index, but adding 1 for css 1-based indexes
       return await find.byCssSelector(
         'table.euiTable tbody tr:nth-child(' +
-        (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-        (colNumber + 1) + ')'
+          (rowNumber + 1) +
+          ') td.euiTableRowCell:nth-child(' +
+          (colNumber + 1) +
+          ')'
       );
     }
 
@@ -203,8 +208,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getScriptedFieldsTabCount() {
       const selector = '[data-test-subj="tab-count-scriptedFields"]';
       return await retry.try(async () => {
-        const theText = await (await find.byCssSelector(selector))
-          .getVisibleText();
+        const theText = await (await find.byCssSelector(selector)).getVisibleText();
         return theText.replace(/\((.*)\)/, '$1');
       });
     }
@@ -239,8 +243,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
-        language +
-        '"]'
+          language +
+          '"]'
       );
     }
 
@@ -252,9 +256,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async openControlsByName(name) {
       await this.filterField(name);
-      const tableFields = await (await find.byCssSelector(
-        'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child'
-      )).getVisibleText();
+      const tableFields = await (
+        await find.byCssSelector(
+          'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child'
+        )
+      ).getVisibleText();
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
@@ -305,7 +311,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async createIndexPattern(indexPatternName, timefield = '@timestamp', isStandardIndexPattern = true) {
+    async createIndexPattern(
+      indexPatternName,
+      timefield = '@timestamp',
+      isStandardIndexPattern = true
+    ) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -537,7 +547,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
       await find.clickByCssSelector(aceEditorCssSelector);
       for (let i = 0; i < 1000; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
@@ -678,7 +688,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       for (const row of rows) {
         const titleCell = await row.findByCssSelector('td:nth-child(3)');
         const title = await titleCell.getVisibleText();
-
 
         const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);

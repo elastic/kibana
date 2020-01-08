@@ -22,10 +22,12 @@ import { flattenSeries } from './flatten_series';
 
 /*
  * Accepts a Kibana data object and returns an array of values objects.
-*/
+ */
 export function dataArray(obj) {
-  if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
-    throw new TypeError('GetArrayUtilService expects an object with a series, rows, or columns key');
+  if (!_.isObject(obj) || (!obj.rows && !obj.columns && !obj.series)) {
+    throw new TypeError(
+      'GetArrayUtilService expects an object with a series, rows, or columns key'
+    );
   }
 
   if (!obj.series) return flattenSeries(obj);

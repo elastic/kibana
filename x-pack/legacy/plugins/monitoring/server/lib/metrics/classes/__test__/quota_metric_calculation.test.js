@@ -15,7 +15,7 @@ describe('Quota Metric Calculation', () => {
       type: 'node',
       app: 'elasticsearch',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
     expect(myQuotaMetric.calculation()).toBe(null);
   });
@@ -28,14 +28,16 @@ describe('Quota Metric Calculation', () => {
       type: 'node',
       app: 'elasticsearch',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
-    expect(myQuotaMetric.calculation({
-      quota: { value: 10 },
-      usage_deriv: { normalized_value: 1000 },
-      periods_deriv: { normalized_value: 10 },
-      metric: { value: Infinity } // is the val for normal CPU usage, won't be used
-    })).toBe(1);
+    expect(
+      myQuotaMetric.calculation({
+        quota: { value: 10 },
+        usage_deriv: { normalized_value: 1000 },
+        periods_deriv: { normalized_value: 10 },
+        metric: { value: Infinity }, // is the val for normal CPU usage, won't be used
+      })
+    ).toBe(1);
   });
 
   it('When bucket has not valid Δusage, Δperiods, and quota', () => {
@@ -46,13 +48,15 @@ describe('Quota Metric Calculation', () => {
       type: 'node',
       app: 'elasticsearch',
       uuidField: 'cluster_uuid',
-      timestampField: 'timestamp'
+      timestampField: 'timestamp',
     });
-    expect(myQuotaMetric.calculation({
-      quota: { value: null },
-      usage_deriv: { normalized_value: null },
-      periods_deriv: { normalized_value: null },
-      metric: { value: Infinity } // is the val for normal CPU usage, will be taken as return value
-    })).toBe(null);
+    expect(
+      myQuotaMetric.calculation({
+        quota: { value: null },
+        usage_deriv: { normalized_value: null },
+        periods_deriv: { normalized_value: null },
+        metric: { value: Infinity }, // is the val for normal CPU usage, will be taken as return value
+      })
+    ).toBe(null);
   });
 });

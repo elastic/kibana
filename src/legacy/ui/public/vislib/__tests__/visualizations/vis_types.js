@@ -22,19 +22,21 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import { visTypes } from '../../visualizations/vis_types';
 
-describe('Vislib Vis Types Test Suite', function () {
+describe('Vislib Vis Types Test Suite', function() {
   let visFunc;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function () {
-    visFunc = visTypes.point_series;
-  }));
+  beforeEach(
+    ngMock.inject(function() {
+      visFunc = visTypes.point_series;
+    })
+  );
 
-  it('should be an object', function () {
+  it('should be an object', function() {
     expect(_.isObject(visTypes)).to.be(true);
   });
 
-  it('should return a function', function () {
+  it('should return a function', function() {
     expect(typeof visFunc).to.be('function');
   });
 });

@@ -7,9 +7,7 @@
 import { i18n } from '@kbn/i18n';
 const oboe = require('oboe');
 
-
 export class PatternReader {
-
   constructor({ onFeatureDetect, onStreamComplete }) {
     this._oboeStream = oboe();
     this._registerFeaturePatternHandler(onFeatureDetect);
@@ -45,7 +43,7 @@ export class PatternReader {
         const feature = ancestors[0];
         const { geometry } = featurePatternCallback(feature);
         return geometry;
-      }
+      },
     });
   }
 
@@ -62,5 +60,4 @@ export class PatternReader {
   abortStream() {
     this._oboeStream.abort();
   }
-
 }

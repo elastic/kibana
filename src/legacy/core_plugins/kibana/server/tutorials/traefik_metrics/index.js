@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function traefikMetricsSpecProvider(server, context) {
   const moduleName = 'traefik';
@@ -33,7 +37,8 @@ export function traefikMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from Traefik.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.traefikMetrics.longDescription', {
-      defaultMessage: 'The `traefik` Metricbeat module fetches monitoring metrics from Traefik. \
+      defaultMessage:
+        'The `traefik` Metricbeat module fetches monitoring metrics from Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-traefik.html',
@@ -43,13 +48,13 @@ export function traefikMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-traefik.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-traefik.html',
+      },
     },
     completionTimeMinutes: 10,
     // previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

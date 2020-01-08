@@ -19,18 +19,11 @@
 
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({
-  indexPattern,
-  indexPatternName,
-}) => (
+export const Header = ({ indexPattern, indexPatternName }) => (
   <div>
     <EuiTitle size="s">
       <h2>
@@ -40,7 +33,7 @@ export const Header = ({
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer size="m"/>
+    <EuiSpacer size="m" />
     <EuiText color="subdued">
       <FormattedMessage
         id="kbn.management.createIndexPattern.stepTimeLabel"

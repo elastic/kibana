@@ -5,7 +5,7 @@
  */
 
 export const PLUGIN_ID = 'lens';
-
+export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_APP_URL = '/app/kibana';
 export const BASE_API_URL = '/api/lens';
 

@@ -1,17 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Resizeable it renders 1`] = `
-<Component>
-  <Resizeable
-    handle={
-      <ForwardRef(styled.div)
-        data-test-subj="test-resize-handle"
-      />
-    }
+<Fragment>
+  <ResizeHandleContainer
+    data-test-subj="resize-handle-container"
     height="100%"
-    id="test"
-    onResize={[MockFunction]}
-    render={[Function]}
-  />
-</Component>
+  >
+    <CommonResizeHandle
+      data-test-subj="test-resize-handle"
+    />
+  </ResizeHandleContainer>
+</Fragment>
 `;

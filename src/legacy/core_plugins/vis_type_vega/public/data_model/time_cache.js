@@ -27,7 +27,6 @@ const AlwaysCacheMaxAge = 40;
  * This class caches timefilter's bounds to minimize number of server requests
  */
 export class TimeCache {
-
   constructor(timefilter, maxAge) {
     this._timefilter = timefilter;
     this._maxAge = maxAge;
@@ -63,8 +62,8 @@ export class TimeCache {
       if (diff < this._maxAge) {
         bounds = this._getBounds();
         if (
-          (Math.abs(bounds.min - this._cachedBounds.min) < this._maxAge) &&
-          (Math.abs(bounds.max - this._cachedBounds.max) < this._maxAge)
+          Math.abs(bounds.min - this._cachedBounds.min) < this._maxAge &&
+          Math.abs(bounds.max - this._cachedBounds.max) < this._maxAge
         ) {
           return this._cachedBounds;
         }
@@ -90,7 +89,7 @@ export class TimeCache {
     const bounds = this._timefilter.calculateBounds(this._timeRange);
     return {
       min: bounds.min.valueOf(),
-      max: bounds.max.valueOf()
+      max: bounds.max.valueOf(),
     };
   }
 }

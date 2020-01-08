@@ -26,7 +26,6 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
-import { Capabilities } from '..';
 
 /** @public */
 export interface LegacyNavLink {
@@ -64,7 +63,6 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    capabilities: Capabilities;
     legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
@@ -114,10 +112,6 @@ export class InjectedMetadataService {
         return this.state.version;
       },
 
-      getCapabilities: () => {
-        return this.state.capabilities;
-      },
-
       getCspConfig: () => {
         return this.state.csp;
       },
@@ -163,7 +157,6 @@ export interface InjectedMetadataSetup {
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
-  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };

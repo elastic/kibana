@@ -13,3 +13,5 @@ export const selectNodeType = (state: WaffleOptionsState) => state.nodeType;
 export const selectView = (state: WaffleOptionsState) => state.view;
 export const selectBoundsOverride = (state: WaffleOptionsState) => state.boundsOverride;
 export const selectAutoBounds = (state: WaffleOptionsState) => state.autoBounds;
+export const selectAccountId = (state: WaffleOptionsState) => state.accountId;
+export const selectRegion = (state: WaffleOptionsState) => state.region;

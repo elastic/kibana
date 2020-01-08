@@ -22,10 +22,7 @@ import { resolve } from 'path';
 import { getInstalledPackages } from '../src/dev/npm';
 import { LICENSE_OVERRIDES } from '../src/dev/license_checker';
 
-import {
-  isNull,
-  isUndefined
-} from 'lodash';
+import { isNull, isUndefined } from 'lodash';
 
 const allDoubleQuoteRE = /"/g;
 
@@ -38,21 +35,22 @@ function escapeValue(value) {
 }
 
 function formatCsvValues(fields, values) {
-  return fields.map((field) => {
-    const value = values[field];
+  return fields
+    .map(field => {
+      const value = values[field];
 
-    if (isNull(value) || isUndefined(value)) {
-      return null;
-    }
+      if (isNull(value) || isUndefined(value)) {
+        return null;
+      }
 
-    return value.toString();
-  })
+      return value.toString();
+    })
     .map(escapeValue)
     .join(',');
 }
 
 export default function licensesCSVReport(grunt) {
-  grunt.registerTask('licenses:csv_report', 'Report of 3rd party dependencies', async function () {
+  grunt.registerTask('licenses:csv_report', 'Report of 3rd party dependencies', async function() {
     const fields = ['name', 'version', 'url', 'license'];
     const done = this.async();
 
@@ -64,19 +62,21 @@ export default function licensesCSVReport(grunt) {
       const packages = await getInstalledPackages({
         directory: directory ? resolve(directory) : grunt.config.get('root'),
         licenseOverrides: LICENSE_OVERRIDES,
-        dev
+        dev,
       });
 
-      const csv = packages.map(pkg => {
-        const data = {
-          name: pkg.name,
-          version: pkg.version,
-          url: pkg.repository || `https://www.npmjs.com/package/${pkg.name}`,
-          license: pkg.licenses.join(',')
-        };
+      const csv = packages
+        .map(pkg => {
+          const data = {
+            name: pkg.name,
+            version: pkg.version,
+            url: pkg.repository || `https://www.npmjs.com/package/${pkg.name}`,
+            license: pkg.licenses.join(','),
+          };
 
-        return formatCsvValues(fields, data);
-      }).join('\n');
+          return formatCsvValues(fields, data);
+        })
+        .join('\n');
 
       if (file) {
         writeFileSync(file, `${fields.join(',')}\n${csv}`);

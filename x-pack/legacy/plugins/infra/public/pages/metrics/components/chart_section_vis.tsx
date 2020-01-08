@@ -3,18 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
 import { getChartTheme } from '../../../components/metrics_explorer/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
@@ -28,6 +20,7 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({
@@ -42,15 +35,16 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  if (!metric || !id) {
-    return null;
-  }
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
     formatter,
     formatterTemplate,
   ]);
-  const dateFormatter = useCallback(niceTimeFormatter(getMaxMinTimestamp(metric)), [metric]);
+  const dateFormatter = useMemo(
+    () => (metric != null ? niceTimeFormatter(getMaxMinTimestamp(metric)) : undefined),
+    [metric]
+  );
   const handleTimeChange = useCallback(
     (from: number, to: number) => {
       if (onChangeRangeTime) {
@@ -73,7 +67,9 @@ export const ChartSectionVis = ({
     ),
   };
 
-  if (!metric) {
+  if (!id) {
+    return null;
+  } else if (!metric) {
     return (
       <ErrorMessage
         title={i18n.translate('xpack.infra.chartSection.missingMetricDataText', {
@@ -84,9 +80,7 @@ export const ChartSectionVis = ({
         })}
       />
     );
-  }
-
-  if (metric.series.some(seriesHasLessThen2DataPoints)) {
+  } else if (metric.series.some(seriesHasLessThen2DataPoints)) {
     return (
       <ErrorMessage
         title={i18n.translate('xpack.infra.chartSection.notEnoughDataPointsToRenderTitle', {
@@ -104,12 +98,12 @@ export const ChartSectionVis = ({
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
-            id={getAxisId('timestamp')}
+            id="timestamp"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={getAxisId('values')} position={Position.Left} tickFormat={valueFormatter} />
+          <Axis id="values" position={Position.Left} tickFormat={valueFormatter} />
           {metric &&
             metric.series.map(series => (
               <SeriesChart
@@ -125,7 +119,7 @@ export const ChartSectionVis = ({
           <Settings
             tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme()}
+            theme={getChartTheme(isDarkMode)}
             showLegend={true}
             legendPosition="right"
           />

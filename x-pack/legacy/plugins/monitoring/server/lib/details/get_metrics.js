@@ -12,7 +12,15 @@ import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 
-export async function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0, groupBy = null) {
+export async function getMetrics(
+  req,
+  indexPattern,
+  metricSet = [],
+  filters = [],
+  metricOptions = {},
+  numOfBuckets = 0,
+  groupBy = null
+) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -26,7 +34,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
 
   // If specified, adjust the time period to ensure we only return this many buckets
   if (numOfBuckets > 0) {
-    min = max - (numOfBuckets * bucketSize * 1000);
+    min = max - numOfBuckets * bucketSize * 1000;
   }
 
   return Bluebird.map(metricSet, metric => {
@@ -36,21 +44,25 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     if (isPlainObject(metric)) {
       metricNames = metric.keys;
     } else {
-      metricNames = [ metric ];
+      metricNames = [metric];
     }
 
     return Bluebird.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, { min, max, bucketSize, timezone });
-    });
-  })
-    .then(rows => {
-      const data = {};
-      metricSet.forEach((key, index) => {
-      // keyName must match the value stored in the html template
-        const keyName = isPlainObject(key) ? key.name : key;
-        data[keyName] = rows[index];
+      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
+        min,
+        max,
+        bucketSize,
+        timezone,
       });
-
-      return data;
     });
+  }).then(rows => {
+    const data = {};
+    metricSet.forEach((key, index) => {
+      // keyName must match the value stored in the html template
+      const keyName = isPlainObject(key) ? key.name : key;
+      data[keyName] = rows[index];
+    });
+
+    return data;
+  });
 }

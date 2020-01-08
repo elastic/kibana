@@ -59,18 +59,23 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                interval: '1m',
+                consumer: 'bar',
+                schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
                 params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: match.scheduledTaskId,
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -78,10 +83,32 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle find alert request with filter appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(
+              getTestAlertData({
+                enabled: false,
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            )
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
@@ -89,7 +116,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alert/_find?filter=alert.attributes.alertTypeId:test.noop`
+              )}/api/alert/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -116,18 +143,29 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                interval: '1m',
-                enabled: true,
-                actions: [],
+                consumer: 'bar',
+                schedule: { interval: '1m' },
+                enabled: false,
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    actionTypeId: 'test.noop',
+                    params: {},
+                  },
+                ],
                 params: {},
                 createdBy: 'elastic',
-                scheduledTaskId: match.scheduledTaskId,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

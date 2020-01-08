@@ -2,6 +2,20 @@
 
 exports[`BasicLoginForm renders as expected 1`] = `
 <Fragment>
+  <EuiText
+    size="s"
+  >
+    <ReactMarkdown
+      astPlugins={Array []}
+      escapeHtml={true}
+      plugins={Array []}
+      rawSourcePos={false}
+      renderers={Object {}}
+      skipHtml={false}
+      sourcePos={false}
+      transformLinkUri={[Function]}
+    />
+  </EuiText>
   <EuiPanel>
     <form
       onSubmit={[Function]}

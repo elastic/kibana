@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
@@ -36,6 +35,7 @@ import {
   mockEndgameUserLogoff,
   mockEndgameUserLogon,
 } from '../../../../../mock/mock_endgame_ecs_data';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
 import {
   createDnsRowRenderer,
@@ -48,9 +48,9 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
-jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
-
 describe('GenericRowRenderer', () => {
+  const mount = useMountAppended();
+
   describe('#createGenericSystemRowRenderer', () => {
     let nonSystem: Ecs;
     let system: Ecs;
@@ -74,7 +74,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a system datum', () => {
@@ -138,7 +138,7 @@ describe('GenericRowRenderer', () => {
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {

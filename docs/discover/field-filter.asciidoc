@@ -1,127 +1,132 @@
 [[field-filter]]
-== Filtering by Field
-You can filter the search results to display only those documents that contain
-a particular value in a field. You can also create negative filters that
-exclude documents that contain the specified field value.
+== Filtering by field
 
-You add field filters from the Fields list, the Documents table, or by manually
-adding a filter. In addition to creating positive and negative filters, the
-Documents table enables you to filter on whether or not a field is present. The
-applied filters are shown below the Query bar. Negative filters are shown in red.
+*Discover* offers
+various types of filters, so you can restrict your documents to the exact data you want.
+For example, you might look at the results for a
+particular period of time. Or, you might include&mdash;or exclude&mdash;
+all HTTP redirects that come from a specific IP and port.
 
-To add a filter from the Fields list:
+[float]
+=== Add a filter
 
-. Click the name of the field you want to filter on. This displays the top
-five values for that field.
+A quick way to add a filter is from the fields list.
+
+. Click the field to filter on.
++
+You'll see the number of documents that contain
+the field, the top 5 values for the field, and the percentage of documents
+that contain each value.
 +
 [role="screenshot"]
 image::images/filter-field.png[height=317]
-. To add a positive filter, click the *Positive Filter* button
-image:images/PositiveFilter.jpg[Positive Filter].
-This includes only those documents that contain that value in the field.
-. To add a negative filter, click the *Negative Filter* button
-image:images/NegativeFilter.jpg[Negative Filter].
-This excludes documents that contain that value in the field.
 
-To add a filter from the Documents table:
-
-. Expand a document in the Documents table by clicking the *Expand* button
-image:images/ExpandButton.jpg[Expand Button] to the left of the document's
-table entry.
+. Use the image:images/PositiveFilter.jpg[Positive Filter] icon to
+show only documents that contain that value,
+or image:images/NegativeFilter.jpg[Negative Filter] to exclude all documents with that value.
 +
-image::images/Expanded-Document.png[]
-. To add a positive filter, click the *Positive Filter* button
-image:images/PositiveFilter.jpg[Positive Filter Button] to the right of the
-field name. This includes only those documents that contain that value in the
-field.
-. To add a negative filter, click the *Negative Filter* button
-image:images/NegativeFilter.jpg[Negative Filter Button] to the right of the
-field name. This excludes documents that contain that value in the field.
-. To filter on whether or not documents contain the field, click the
-*Exists* button image:images/ExistsButton.jpg[Exists Button] to the right of the
-field name. This includes only those documents that contain the field.
+If there is no data to display, you might need to set a <<set-time-filter, date time filter>>.
+You can choose a time from the quick filter or choose your
+own using absolute or relative times.
 
-To manually add a filter:
-
-. Click *Add Filter*. A popup will be displayed for you to create the filter.
-
-. Choose a field to filter by. This list of fields will include fields from the
-index pattern you are currently querying against.
+. Try also these filtering options:
 +
-image::images/add_filter_field.png[]
-. Choose an operation for your filter.
+*  To limit the field
+list to a particular data type, click *Filter by type*.
+You can also filter for whether that type is
+aggregatable or searchable.
 +
-image::images/add_filter_operator.png[]
-The following operators can be selected:
+* To filter for whether a field is present, expand the document in
+the document table, hover over the field, and click the *Filter for field present* icon.
+
+[float]
+=== Filter by condition
+
+You can filter using advanced criteria,
+such as if a value is equal to or in between certain values.
+
+. Click *Add Filter*.
+
+. Select a field.
+
+. Select an operation for your filter:
++
 [horizontal]
-`is`:: Filter where the value for the field matches the given value.
-`is not`:: Filter where the value for the field does not match the given value.
-`is one of`:: Filter where the value for the field matches one of the specified values.
-`is not one of`:: Filter where the value for the field does not match any of the specified values.
-`is between`:: Filter where the value for the field is in the given range.
-`is not between`:: Filter where the value for the field is not in the given range.
-`exists`:: Filter where any value is present for the field.
-`does not exist`:: Filter where no value is present for the field.
-. Choose the value(s) for your filter. Values from your indices may be suggested
-as selections if you are filtering against an aggregatable field.
+`is`:: The value for the field matches the given value.
+`is not`:: The value for the field does not match the given value.
+`is one of`:: The field matches one of the specified values.
+`is not one of`:: The value for the field does not match any of the specified values.
+`is between`:: The value for the field is in the given range.
+`is not between`:: The value for the field is not in the given range.
+`exists`:: Any value is present for the field.
+`does not exist`:: No value is present for the field.
+. Choose values for your filter.
 +
-image::images/add_filter_value.png[]
-. (Optional) Specify a label for the filter. If you specify a label, it will be
-displayed below the query bar instead of the filter definition.
-. Click *Save*. The filter will be applied to your search and be displayed below
-the query bar.
+Values from your indices may be suggested
+as selections if you are filtering against an aggregatable field.
 
+. (Optional) Specify a label for the filter.
+
+. Click *Save* to apply the filter to your search.
++
 NOTE: If you are experiencing long-running queries as a result of the value suggestions, you can
-turn off the suggestions by setting the advanced setting, `filterEditor:suggestValues`, to `false`.
+turn off the suggestions by setting `filterEditor:suggestValues` to `false`
+in <<advanced-options,
+Advanced Settings>>.
 
 [float]
 [[filter-pinning]]
-=== Managing Filters
+=== Edit, disable, and delete filters
 
-To modify a filter, click on it and click one of the action buttons.
+To modify a filter, click its tag, and then select one of the following actions.
 
-image::images/filter-allbuttons.png[]
+*Pin across all apps*::
+Persist the filter
+when you switch contexts in Kibana. For example, you can pin a filter
+in *Discover* and it remains in place when you switch to *Visualize*.
+A filter is based on a particular index field&mdash;if the indices being
+searched do not contain the field in a pinned filter, it has no effect.
 
-&nbsp;
+*Edit filter*::
+Edit the
+filter definition and label.
 
-Pin across all apps :: Pinned filters
-persist when you switch contexts in Kibana. For example, you can pin a filter
-in Discover and it remains in place when you switch to Visualize.
-Note that a filter is based on a particular index field--if the indices being
-searched don't contain the field in a pinned filter, it has no effect.
-Edit Filter :: <<filter-edit, Edit the
-filter>> definition.  Enables you to manually update the filter and
-specify a label for the filter.
-Exclude results :: Switch from a positive
-filter to a negative filter and vice-versa.
-Temporarily disable :: Disable the filter without
-removing it. Click again to reenable the filter. Diagonal stripes indicate
-that a filter is disabled.
-Remove Filter :: Remove the filter.
+*Exclude results*::
+Switch from a positive
+filter to a negative filter, and vice versa.
 
-To apply a filter action to all of the applied filters,
-click *Actions* and select the action.
+*Temporarily disable*::
+Disable the filter without
+removing it. Click again to reenable the filter.
+
+*Delete*::
+Delete the filter.
+
+To apply an action to all filters,
+click the *Actions* icon, and then select the action.
+
+
 
 [float]
 [[filter-edit]]
-=== Editing a Filter
-You can edit a filter by changing the field, operator, or value associated
-with the filter (see the Add Filter section above), or by directly modifying
-the filter query that is performed to filter your search results. This
-enables you to create more complex filters that are based on multiple fields.
+=== Modify the filter query
 
-. To edit the filter query, first click the edit button for the filter, then
-click *Edit Query DSL*.
+You can directly modify
+the query that filters your search results.  This enables you
+to create more complex filters using multiple fields.
+
+. Click the filter tag, and then select *Edit > Edit Query DSL*.
+
+. Edit the query for the filter.
 +
-image::images/edit_filter_query.png[]
-. You can then edit the query for the filter.
-+
+////
 image::images/edit_filter_query_json.png[]
-
-For example, you could use a
-{ref}/query-dsl-bool-query.html[bool query] to create a filter for the
-sample log data that displays the hits that originated from Canada or China that resulted in a 404 error:
-
++
+////
+For example, if you are using the sample log data, you can use the
+{ref}/query-dsl-bool-query.html[bool query] to create a filter
+that displays the hits that originated from Canada or China that resulted in a 404 error:
++
 ==========
 [source,json]
 {

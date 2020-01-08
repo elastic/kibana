@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { validateJobObject } from './validate_job_object';
 
 const INFLUENCER_LOW_THRESHOLD = 0;
@@ -19,7 +17,7 @@ export async function validateInfluencers(callWithRequest, job) {
   const influencers = job.analysis_config.influencers;
 
   const detectorFieldNames = [];
-  job.analysis_config.detectors.forEach((d) => {
+  job.analysis_config.detectors.forEach(d => {
     if (d.by_field_name) {
       detectorFieldNames.push(d.by_field_name);
     }

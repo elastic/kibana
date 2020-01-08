@@ -36,21 +36,24 @@
  * under the License.
  */
 
-export const searchSourceMock = {
+// This mock is here for BWC, but will be left behind and replaced by
+// the data service mock in the new platform.
+import { ISearchSource } from '../index';
+
+export const searchSourceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
-  getPreferredSearchStrategyId: jest.fn(),
-  setFields: jest.fn(),
-  setField: jest.fn(),
+  setFields: jest.fn().mockReturnThis(),
+  setField: jest.fn().mockReturnThis(),
   getId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),
   getOwnField: jest.fn(),
-  create: jest.fn(),
-  createCopy: jest.fn(),
-  createChild: jest.fn(),
+  create: jest.fn().mockReturnThis(),
+  createCopy: jest.fn().mockReturnThis(),
+  createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
-  getParent: jest.fn(),
-  fetch: jest.fn(),
+  getParent: jest.fn().mockReturnThis(),
+  fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
   destroy: jest.fn(),

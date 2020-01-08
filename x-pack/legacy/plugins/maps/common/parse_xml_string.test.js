@@ -10,7 +10,7 @@ describe('parseXmlString', () => {
   it('Should parse xml string into JS object', async () => {
     const xmlAsObject = await parseXmlString('<foo>bar</foo>');
     expect(xmlAsObject).toEqual({
-      foo: 'bar'
+      foo: 'bar',
     });
   });
 });

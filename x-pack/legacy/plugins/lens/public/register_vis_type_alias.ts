@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
+import { setup as visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { getBasePath, getEditPath } from '../common';
 
 visualizations.types.registerAlias({

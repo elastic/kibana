@@ -35,7 +35,7 @@ export class SetupModeRenderer extends React.Component {
     isSettingUpNew: false,
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { scope, injector } = this.props;
     initSetupModeState(scope, injector, _oldData => {
       const newState = { renderState: true };

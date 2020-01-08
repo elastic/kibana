@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
+import { IndexPatternsContract } from '../../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../common/job_creator/configs';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../common/job_creator/util/constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
-export async function preConfiguredJobRedirect() {
+export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {
   const { job } = mlJobService.tempJobCloningObjects;
   if (job) {
     try {
-      await loadIndexPatterns();
+      await loadIndexPatterns(indexPatterns);
       const redirectUrl = getWizardUrlFromCloningJob(job);
       window.location.href = `#/${redirectUrl}`;
       return Promise.reject();
@@ -29,7 +29,7 @@ export async function preConfiguredJobRedirect() {
 }
 
 function getWizardUrlFromCloningJob(job: CombinedJob) {
-  const created = idx(job, _ => _.custom_settings.created_by);
+  const created = job?.custom_settings?.created_by;
   let page = '';
 
   if (created === CREATED_BY_LABEL.SINGLE_METRIC) {

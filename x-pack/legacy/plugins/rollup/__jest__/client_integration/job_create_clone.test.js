@@ -8,7 +8,6 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -148,9 +147,7 @@ describe('Cloning a rollup job through create job wizard', () => {
     await nextTick();
 
     const {
-      groups: {
-        date_histogram: dateHistogram
-      },
+      groups: { date_histogram: dateHistogram },
     } = jobConfig;
 
     await actions.clickNextStep();

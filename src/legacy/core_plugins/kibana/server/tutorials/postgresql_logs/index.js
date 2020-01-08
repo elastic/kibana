@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function postgresqlLogsSpecProvider(context) {
   const moduleName = 'postgresql';
@@ -34,7 +38,8 @@ export function postgresqlLogsSpecProvider(context) {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.longDescription', {
-      defaultMessage: 'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL. \
+      defaultMessage:
+        'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-postgresql.html',
@@ -45,20 +50,23 @@ export function postgresqlLogsSpecProvider(context) {
       dashboards: [
         {
           id: '158be870-87f4-11e7-ad9c-db80de0bf8d3-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'PostgreSQL logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'PostgreSQL logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-postgresql.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-postgresql.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

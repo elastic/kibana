@@ -7,8 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -21,19 +19,18 @@ import { Source, useSource } from '../../containers/source';
 import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
-import { AnalysisPage } from './analysis';
 import {
   useLogAnalysisCapabilities,
   LogAnalysisCapabilities,
 } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
+import { useKibana } from '../../../../../../..//src/plugins/kibana_react/public';
+import { LogEntryCategoriesPage } from './log_entry_categories';
+import { LogEntryRatePage } from './log_entry_rate';
 
-interface LogsPageProps extends RouteComponentProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPageProps) => {
+export const LogsPage = ({ match }: RouteComponentProps) => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
   const [sourceId] = useSourceId();
   const source = useSource({ sourceId });
   const logAnalysisCapabilities = useLogAnalysisCapabilities();
@@ -51,6 +48,16 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
       </>
     ),
     path: `${match.path}/log-rate`,
+  };
+
+  const logCategoriesTab = {
+    title: (
+      <>
+        {logCategoriesTabTitle}
+        <TabBetaBadge title={logCategoriesTabTitle} />
+      </>
+    ),
+    path: `${match.path}/log-categories`,
   };
 
   const settingsTab = {
@@ -72,7 +79,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 text: pageTitle,
               },
             ]}
-            readOnlyBadge={!uiCapabilities.logs.save}
+            readOnlyBadge={!uiCapabilities?.logs?.save}
           />
           {source.isLoadingSource ||
           (!source.isLoadingSource &&
@@ -90,7 +97,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites
-                      ? [streamTab, logRateTab, settingsTab]
+                      ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
                       : [streamTab, settingsTab]
                   }
                 />
@@ -98,7 +105,8 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
 
               <Switch>
                 <Route path={streamTab.path} component={StreamPage} />
-                <Route path={logRateTab.path} component={AnalysisPage} />
+                <Route path={logRateTab.path} component={LogEntryRatePage} />
+                <Route path={logCategoriesTab.path} component={LogEntryCategoriesPage} />
                 <Route path={settingsTab.path} component={SettingsPage} />
                 <RedirectWithQueryParams
                   from={`${match.path}/analysis`}
@@ -112,7 +120,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
       </LogAnalysisCapabilities.Context.Provider>
     </Source.Context.Provider>
   );
-});
+};
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
@@ -122,8 +130,12 @@ const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
   defaultMessage: 'Stream',
 });
 
-const logRateTabTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeTitle', {
+const logRateTabTitle = i18n.translate('xpack.infra.logs.index.logRateBetaBadgeTitle', {
   defaultMessage: 'Log Rate',
+});
+
+const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+  defaultMessage: 'Categories',
 });
 
 const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {

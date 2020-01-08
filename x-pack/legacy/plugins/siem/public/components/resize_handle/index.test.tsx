@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
 
@@ -98,18 +97,16 @@ describe('Resizeable', () => {
 
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <Resizeable
-          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
-          height="100%"
-          id="test"
-          onResize={jest.fn()}
-          render={() => <></>}
-        />
-      </TestProviders>
+      <Resizeable
+        handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+        height="100%"
+        id="test"
+        onResize={jest.fn()}
+        render={() => <></>}
+      />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('resize cursor styling', () => {

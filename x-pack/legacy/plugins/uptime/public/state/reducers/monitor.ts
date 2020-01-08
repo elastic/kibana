@@ -10,16 +10,24 @@ import {
   FETCH_MONITOR_DETAILS,
   FETCH_MONITOR_DETAILS_SUCCESS,
   FETCH_MONITOR_DETAILS_FAIL,
+  FETCH_MONITOR_LOCATIONS,
+  FETCH_MONITOR_LOCATIONS_SUCCESS,
+  FETCH_MONITOR_LOCATIONS_FAIL,
 } from '../actions/monitor';
+import { MonitorLocations } from '../../../common/runtime_types';
+
+type MonitorLocationsList = Map<string, MonitorLocations>;
 
 export interface MonitorState {
   monitorDetailsList: MonitorDetailsState[];
+  monitorLocationsList: MonitorLocationsList;
   loading: boolean;
   errors: any[];
 }
 
 const initialState: MonitorState = {
   monitorDetailsList: [],
+  monitorLocationsList: new Map(),
   loading: false,
   errors: [],
 };
@@ -42,10 +50,27 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         loading: false,
       };
     case FETCH_MONITOR_DETAILS_FAIL:
-      const error = action.payload;
       return {
         ...state,
-        errors: [...state.errors, error],
+        errors: [...state.errors, action.payload],
+      };
+    case FETCH_MONITOR_LOCATIONS:
+      return {
+        ...state,
+        loading: true,
+      };
+    case FETCH_MONITOR_LOCATIONS_SUCCESS:
+      const monLocations = state.monitorLocationsList;
+      monLocations.set(action.payload.monitorId, action.payload);
+      return {
+        ...state,
+        monitorLocationsList: monLocations,
+        loading: false,
+      };
+    case FETCH_MONITOR_LOCATIONS_FAIL:
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
       };
     default:
       return state;

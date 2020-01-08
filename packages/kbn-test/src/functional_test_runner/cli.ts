@@ -57,6 +57,14 @@ export function runFtrCli() {
         }
       );
 
+      if (flags.throttle) {
+        process.env.TEST_THROTTLE_NETWORK = '1';
+      }
+
+      if (flags.headless) {
+        process.env.TEST_BROWSER_HEADLESS = '1';
+      }
+
       let teardownRun = false;
       const teardown = async (err?: Error) => {
         if (teardownRun) return;
@@ -97,7 +105,7 @@ export function runFtrCli() {
     {
       flags: {
         string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag', 'kibana-install-dir'],
-        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
+        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
         default: {
           config: 'test/functional/config.js',
           debug: true,
@@ -113,6 +121,8 @@ export function runFtrCli() {
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
         --kibana-install-dir  directory where the Kibana install being tested resides
+        --throttle         enable network throttling in Chrome browser
+        --headless         run browser in headless mode
       `,
       },
     }

@@ -94,6 +94,9 @@ describe('stdMetric(resp, panel, series)', () => {
     expect(results[0]).to.have.property('stack');
     expect(results[0]).to.have.property('bars');
     expect(results[0]).to.have.property('points');
-    expect(results[0].data).to.eql([[1, 1], [2, 2]]);
+    expect(results[0].data).to.eql([
+      [1, 1],
+      [2, 2],
+    ]);
   });
 });

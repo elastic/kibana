@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -56,6 +56,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -86,6 +87,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -153,10 +155,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
       },
       rollupJob: {
         pathname: '/app/kibana',
@@ -195,8 +197,11 @@ export default async function ({ readConfigFile }) {
       },
       transform: {
         pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform'
-      }
+        hash: '/management/elasticsearch/transform',
+      },
+      endpoint: {
+        pathname: '/app/endpoint',
+      },
     },
 
     // choose where esArchiver should load archives from

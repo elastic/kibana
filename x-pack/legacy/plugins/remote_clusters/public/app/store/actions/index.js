@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  addCluster,
-  clearAddClusterErrors,
-} from './add_cluster';
+export { addCluster, clearAddClusterErrors } from './add_cluster';
 
-export {
-  openDetailPanel,
-  closeDetailPanel,
-} from './detail_panel';
+export { openDetailPanel, closeDetailPanel } from './detail_panel';
 
-export {
-  removeClusters,
-} from './remove_clusters';
+export { removeClusters } from './remove_clusters';
 
 export {
   editCluster,
@@ -25,10 +17,6 @@ export {
   clearEditClusterErrors,
 } from './edit_cluster';
 
-export {
-  loadClusters,
-} from './load_clusters';
+export { loadClusters } from './load_clusters';
 
-export {
-  refreshClusters,
-} from './refresh_clusters';
+export { refreshClusters } from './refresh_clusters';

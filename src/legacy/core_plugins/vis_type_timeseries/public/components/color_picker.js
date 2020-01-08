@@ -70,10 +70,13 @@ export class ColorPicker extends Component {
     }
     return (
       <button
-        aria-label={i18n.translate('visTypeTimeseries.colorPicker.notAccessibleWithValueAriaLabel', {
-          defaultMessage: 'Color picker ({value}), not accessible',
-          values: { value: this.props.value },
-        })}
+        aria-label={i18n.translate(
+          'visTypeTimeseries.colorPicker.notAccessibleWithValueAriaLabel',
+          {
+            defaultMessage: 'Color picker ({value}), not accessible',
+            values: { value: this.props.value },
+          }
+        )}
         style={{ backgroundColor: this.props.value }}
         className="tvbColorPicker__swatch"
         onClick={this.handleClick}

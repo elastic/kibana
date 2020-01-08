@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  cleanVersion,
-  versionSatisfies
-} from '../../utils/version';
+import { cleanVersion, versionSatisfies } from '../../utils/version';
 
 export function isVersionCompatible(version, compatibleWith) {
   // the special "kibana" version can be used to always be compatible,
@@ -29,8 +26,5 @@ export function isVersionCompatible(version, compatibleWith) {
     return true;
   }
 
-  return versionSatisfies(
-    cleanVersion(version),
-    cleanVersion(compatibleWith)
-  );
+  return versionSatisfies(cleanVersion(version), cleanVersion(compatibleWith));
 }

@@ -27,14 +27,14 @@ import { move } from '../../../utils/collection';
 import { AggGroupNames } from './agg_groups';
 import { getEnabledMetricAggsCount } from './components/agg_group_helper';
 
-uiModules.get('app/visualize').directive('visEditorSidebar', function () {
+uiModules.get('app/visualize').directive('visEditorSidebar', function() {
   return {
     restrict: 'E',
     template: sidebarTemplate,
     scope: true,
     require: '?^ngModel',
     controllerAs: 'sidebar',
-    controller: function ($scope) {
+    controller: function($scope) {
       $scope.$watch('vis.type', visType => {
         if (visType) {
           this.showData = visType.schemas.buckets || visType.schemas.metrics;
@@ -64,12 +64,12 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
         }
       };
 
-      $scope.addSchema = function (schema) {
+      $scope.addSchema = function(schema) {
         const aggConfig = $scope.state.aggs.createAggConfig({ schema });
         aggConfig.brandNew = true;
       };
 
-      $scope.removeAgg = function (agg) {
+      $scope.removeAgg = function(agg) {
         const aggs = $scope.state.aggs.aggs;
         const index = aggs.indexOf(agg);
 
@@ -92,7 +92,7 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
         agg.enabled = isEnable;
       };
 
-      $scope.reorderAggs = (group) => {
+      $scope.reorderAggs = group => {
         //the aggs have been reordered in [group] and we need
         //to apply that ordering to [vis.aggs]
         const indexOffset = $scope.state.aggs.aggs.indexOf(group[0]);

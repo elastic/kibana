@@ -6,21 +6,32 @@
 
 import {
   MonitorSummary,
-  StatesIndexStatus,
   CursorDirection,
   SortOrder,
+  StatesIndexStatus,
 } from '../../../../common/graphql/types';
+import { UMElasticsearchQueryFn } from '../framework';
+import { Snapshot } from '../../../../common/runtime_types';
+
+export interface MonitorStatesParams {
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  pagination?: CursorPagination;
+  filters?: string | null;
+  statusFilter?: string;
+}
+
+export interface GetSnapshotCountParams {
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filters?: string | null;
+  statusFilter?: string;
+}
 
 export interface UMMonitorStatesAdapter {
-  getMonitorStates(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    pagination?: CursorPagination,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<GetMonitorStatesResult>;
-  statesIndexExists(request: any): Promise<StatesIndexStatus>;
+  getMonitorStates: UMElasticsearchQueryFn<MonitorStatesParams, GetMonitorStatesResult>;
+  getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot>;
+  statesIndexExists: UMElasticsearchQueryFn<{}, StatesIndexStatus>;
 }
 
 export interface CursorPagination {

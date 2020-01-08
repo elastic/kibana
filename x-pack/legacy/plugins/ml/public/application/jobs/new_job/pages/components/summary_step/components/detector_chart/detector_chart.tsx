@@ -6,7 +6,7 @@
 
 import React, { Fragment, FC, useContext } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SingleMetricView } from '../../../pick_fields_step/components/single_metric_view';
 import { MultiMetricView } from '../../../pick_fields_step/components/multi_metric_view';
 import { PopulationView } from '../../../pick_fields_step/components/population_view';

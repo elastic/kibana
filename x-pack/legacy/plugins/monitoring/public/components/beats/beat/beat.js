@@ -7,12 +7,19 @@
 import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { formatMetric } from '../../../lib/format_number';
-import { EuiFlexItem, EuiPage, EuiPageBody, EuiFlexGrid, EuiSpacer, EuiPageContent, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiPageContent,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
 
 export function Beat({ summary, metrics, ...props }) {
-
   const metricsToShow = [
     metrics.beat_event_rates,
     metrics.beat_fail_rates,
@@ -27,97 +34,97 @@ export function Beat({ summary, metrics, ...props }) {
   const summarytStatsTop = [
     {
       label: i18n.translate('xpack.monitoring.beats.instance.nameLabel', {
-        defaultMessage: 'Name'
+        defaultMessage: 'Name',
       }),
       value: summary.name,
-      'data-test-subj': 'name'
+      'data-test-subj': 'name',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.hostLabel', {
-        defaultMessage: 'Host'
+        defaultMessage: 'Host',
       }),
       value: summary.transportAddress,
-      'data-test-subj': 'host'
+      'data-test-subj': 'host',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.versionLabel', {
-        defaultMessage: 'Version'
+        defaultMessage: 'Version',
       }),
       value: summary.version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.typeLabel', {
-        defaultMessage: 'Type'
+        defaultMessage: 'Type',
       }),
       value: summary.type,
-      'data-test-subj': 'type'
+      'data-test-subj': 'type',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.outputLabel', {
-        defaultMessage: 'Output'
+        defaultMessage: 'Output',
       }),
       value: summary.output,
-      'data-test-subj': 'output'
+      'data-test-subj': 'output',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.configReloadsLabel', {
-        defaultMessage: 'Config reloads'
+        defaultMessage: 'Config reloads',
       }),
       value: formatMetric(summary.configReloads, 'int_commas'),
-      'data-test-subj': 'configReloads'
+      'data-test-subj': 'configReloads',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.uptimeLabel', {
-        defaultMessage: 'Uptime'
+        defaultMessage: 'Uptime',
       }),
       value: formatMetric(summary.uptime, 'time_since'),
-      'data-test-subj': 'uptime'
+      'data-test-subj': 'uptime',
     },
   ];
 
   const summarytStatsBot = [
     {
       label: i18n.translate('xpack.monitoring.beats.instance.eventsTotalLabel', {
-        defaultMessage: 'Events total'
+        defaultMessage: 'Events total',
       }),
       value: formatMetric(summary.eventsTotal, 'int_commas'),
-      'data-test-subj': 'eventsTotal'
+      'data-test-subj': 'eventsTotal',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.eventsEmittedLabel', {
-        defaultMessage: 'Events emitted'
+        defaultMessage: 'Events emitted',
       }),
       value: formatMetric(summary.eventsEmitted, 'int_commas'),
-      'data-test-subj': 'eventsEmitted'
+      'data-test-subj': 'eventsEmitted',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.eventsDroppedLabel', {
-        defaultMessage: 'Events dropped'
+        defaultMessage: 'Events dropped',
       }),
       value: formatMetric(summary.eventsDropped, 'int_commas'),
-      'data-test-subj': 'eventsDropped'
+      'data-test-subj': 'eventsDropped',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.bytesSentLabel', {
-        defaultMessage: 'Bytes sent'
+        defaultMessage: 'Bytes sent',
       }),
       value: formatMetric(summary.bytesWritten, 'byte'),
-      'data-test-subj': 'bytesWritten'
+      'data-test-subj': 'bytesWritten',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitSoftLabel', {
-        defaultMessage: 'Handles limit (soft)'
+        defaultMessage: 'Handles limit (soft)',
       }),
       value: formatMetric(summary.handlesSoftLimit, 'int_commas'),
-      'data-test-subj': 'handlesLimitSoft'
+      'data-test-subj': 'handlesLimitSoft',
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitHardLabel', {
-        defaultMessage: 'Handles limit (hard)'
+        defaultMessage: 'Handles limit (hard)',
       }),
       value: formatMetric(summary.handlesHardLimit, 'int_commas'),
-      'data-test-subj': 'handlesLimitHard'
+      'data-test-subj': 'handlesLimitHard',
     },
   ];
 
@@ -125,24 +132,15 @@ export function Beat({ summary, metrics, ...props }) {
     <EuiPage>
       <EuiPageBody>
         <EuiPanel>
-          <SummaryStatus
-            metrics={summarytStatsTop}
-            data-test-subj="beatSummaryStatus01"
-          />
-          <SummaryStatus
-            metrics={summarytStatsBot}
-            data-test-subj="beatSummaryStatus02"
-          />
+          <SummaryStatus metrics={summarytStatsTop} data-test-subj="beatSummaryStatus01" />
+          <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}

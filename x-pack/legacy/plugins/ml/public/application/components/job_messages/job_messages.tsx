@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
@@ -35,11 +35,13 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
       width: `${theme.euiSizeL}`,
     },
     {
+      field: 'timestamp',
       name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
         defaultMessage: 'Time',
       }),
-      render: (message: any) => formatDate(message.timestamp, TIME_FORMAT),
+      render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
       width: '120px',
+      sortable: true,
     },
     {
       field: 'node_name',
@@ -57,13 +59,21 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
     },
   ];
 
+  const defaultSorting = {
+    sort: {
+      field: 'timestamp' as const,
+      direction: 'asc' as const,
+    },
+  };
+
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiBasicTable
+      <EuiInMemoryTable
         className="job-messages-table"
         items={messages}
         columns={columns}
+        sorting={defaultSorting}
         compressed={true}
         loading={loading}
         error={error}

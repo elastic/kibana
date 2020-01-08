@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React table for displaying a list of anomalies.
  */
@@ -12,16 +11,9 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import React, {
-  Component
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -32,11 +24,7 @@ import { AnomalyDetails } from './anomaly_details';
 import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
-import {
-  INFLUENCERS_LIMIT,
-  ANOMALIES_TABLE_TABS,
-  MAX_CHARS
-} from './anomalies_table_constants';
+import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
 
 class AnomaliesTable extends Component {
   constructor(props) {
@@ -44,30 +32,30 @@ class AnomaliesTable extends Component {
 
     this.state = {
       itemIdToExpandedRowMap: {},
-      showRuleEditorFlyout: () => {}
+      showRuleEditorFlyout: () => {},
     };
   }
 
   isShowingAggregatedData = () => {
-    return (this.props.tableData.interval !== 'second');
+    return this.props.tableData.interval !== 'second';
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
     // Update the itemIdToExpandedRowMap state if a change to the table data has resulted
     // in an anomaly that was previously expanded no longer being in the data.
     const itemIdToExpandedRowMap = prevState.itemIdToExpandedRowMap;
-    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find((rowId) => {
-      const matching = nextProps.tableData.anomalies.find((anomaly) => {
+    const prevExpandedNotInData = Object.keys(itemIdToExpandedRowMap).find(rowId => {
+      const matching = nextProps.tableData.anomalies.find(anomaly => {
         return anomaly.rowId === rowId;
       });
 
-      return (matching === undefined);
+      return matching === undefined;
     });
 
     if (prevExpandedNotInData !== undefined) {
       // Anomaly data has changed and an anomaly that was previously expanded is no longer in the data.
       return {
-        itemIdToExpandedRowMap: {}
+        itemIdToExpandedRowMap: {},
       };
     }
 
@@ -80,13 +68,18 @@ class AnomaliesTable extends Component {
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
     } else {
-      const examples = (item.entityName === 'mlcategory') ?
-        _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue]) : undefined;
+      const examples =
+        item.entityName === 'mlcategory'
+          ? _.get(this.props.tableData, ['examplesByJobId', item.jobId, item.entityValue])
+          : undefined;
       let definition = undefined;
 
       if (examples !== undefined) {
         try {
-          definition = await ml.results.getCategoryDefinition(item.jobId, item.source.mlcategory[0]);
+          definition = await ml.results.getCategoryDefinition(
+            item.jobId,
+            item.source.mlcategory[0]
+          );
 
           if (definition.terms && definition.terms.length > MAX_CHARS) {
             definition.terms = `${definition.terms.substring(0, MAX_CHARS)}...`;
@@ -94,7 +87,7 @@ class AnomaliesTable extends Component {
           if (definition.regex && definition.regex.length > MAX_CHARS) {
             definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
           }
-        } catch(error) {
+        } catch (error) {
           console.log('Error fetching category definition for row item.', error);
         }
       }
@@ -115,7 +108,7 @@ class AnomaliesTable extends Component {
     this.setState({ itemIdToExpandedRowMap });
   };
 
-  onMouseOverRow = (record) => {
+  onMouseOverRow = record => {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
@@ -130,7 +123,7 @@ class AnomaliesTable extends Component {
     }
 
     this.mouseOverRecord = record;
-  }
+  };
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
@@ -139,24 +132,27 @@ class AnomaliesTable extends Component {
     }
   };
 
-  setShowRuleEditorFlyoutFunction = (func) => {
+  setShowRuleEditorFlyoutFunction = func => {
     this.setState({
-      showRuleEditorFlyout: func
+      showRuleEditorFlyout: func,
     });
-  }
+  };
 
   unsetShowRuleEditorFlyoutFunction = () => {
     const showRuleEditorFlyout = () => {};
     this.setState({
-      showRuleEditorFlyout
+      showRuleEditorFlyout,
     });
-  }
+  };
 
   render() {
     const { timefilter, tableData, filter, influencerFilter } = this.props;
 
-    if (tableData === undefined ||
-      tableData.anomalies === undefined || tableData.anomalies.length === 0) {
+    if (
+      tableData === undefined ||
+      tableData.anomalies === undefined ||
+      tableData.anomalies.length === 0
+    ) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -185,19 +181,20 @@ class AnomaliesTable extends Component {
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter,
-      influencerFilter);
+      influencerFilter
+    );
 
     const sorting = {
       sort: {
         field: 'severity',
         direction: 'desc',
-      }
+      },
     };
 
-    const getRowProps = (item) => {
+    const getRowProps = item => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
-        onMouseLeave: () => this.onMouseLeaveRow()
+        onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
 
@@ -213,7 +210,7 @@ class AnomaliesTable extends Component {
           columns={columns}
           pagination={{
             pageSizeOptions: [10, 25, 100],
-            initialPageSize: 25
+            initialPageSize: 25,
           }}
           sorting={sorting}
           itemId="rowId"
@@ -230,7 +227,7 @@ AnomaliesTable.propTypes = {
   timefilter: PropTypes.object.isRequired,
   tableData: PropTypes.object,
   filter: PropTypes.func,
-  influencerFilter: PropTypes.func
+  influencerFilter: PropTypes.func,
 };
 
 export { AnomaliesTable };

@@ -6,7 +6,6 @@
 
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import { populateTimeline } from '../../lib/fields_browser/helpers';
-import { logout } from '../../lib/logout';
 import { toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
@@ -14,10 +13,6 @@ import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 describe('toggle column in timeline', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   const timestampField = '@timestamp';
@@ -73,7 +68,7 @@ describe('toggle column in timeline', () => {
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });
 
-  it.skip('adds the _id field to the timeline via drag and drop', () => {
+  it('adds the _id field to the timeline via drag and drop', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();

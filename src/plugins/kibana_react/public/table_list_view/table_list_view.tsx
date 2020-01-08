@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { debounce, indexBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -36,8 +35,9 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ToastsStart, UiSettingsClientContract } from 'kibana/public';
+import { ToastsStart, IUiSettingsClient } from 'kibana/public';
 import { toMountPoint } from '../util';
 
 export const EMPTY_FILTER = '';
@@ -66,7 +66,7 @@ export interface TableListViewProps {
   tableColumns: Column[];
   tableListTitle: string;
   toastNotifications: ToastsStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface TableListViewState {
@@ -112,7 +112,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 
@@ -366,7 +366,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             });
           },
         }
-      : null;
+      : undefined;
 
     const actions = [
       {
@@ -416,7 +416,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={columns}
+        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}

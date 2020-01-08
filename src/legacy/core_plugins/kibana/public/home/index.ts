@@ -23,7 +23,6 @@ import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { start as data } from '../../../data/public/legacy';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
 
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
@@ -74,6 +73,6 @@ let copiedLegacyCatalogue = false;
     },
   });
   instance.start(npStart.core, {
-    data,
+    data: npStart.plugins.data,
   });
 })();

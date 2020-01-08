@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './directive';
-import './route';
+export { Page } from './page';

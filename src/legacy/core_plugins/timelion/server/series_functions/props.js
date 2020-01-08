@@ -27,12 +27,12 @@ function unflatten(data) {
 
   const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
   const result = {};
-  _.each(data, function (val, p) {
+  _.each(data, function(val, p) {
     let cur = result;
     let prop = '';
     let m;
-    while (m = regex.exec(p)) {
-      cur = (cur.hasOwnProperty(prop) && cur[prop]) || (cur[prop] = (m[2] ? [] : {}));
+    while ((m = regex.exec(p))) {
+      cur = (cur.hasOwnProperty(prop) && cur[prop]) || (cur[prop] = m[2] ? [] : {});
       prop = m[2] || m[1];
     }
     cur[prop] = data[p];
@@ -45,7 +45,7 @@ export default new Chainable('props', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'global',
@@ -53,13 +53,13 @@ export default new Chainable('props', {
       help: i18n.translate('timelion.help.functions.props.args.globalHelpText', {
         defaultMessage: 'Set props on the seriesList vs on each series',
       }),
-    }
+    },
   ],
   extended: {
     types: ['seriesList', 'number', 'string', 'boolean', 'null'],
     // Extended args can not currently be multivalued,
     // multi: false is not required and is shown here for demonstration purposes
-    multi: false
+    multi: false,
   },
   // extended means you can pass arguments that aren't listed. They just won't be in the ordered array
   // They will be passed as args._extended:{}
@@ -77,10 +77,10 @@ export default new Chainable('props', {
       _.assign(args.byName.inputSeries, properties);
       return args.byName.inputSeries;
     } else {
-      return alter(args, function (eachSeries) {
+      return alter(args, function(eachSeries) {
         _.assign(eachSeries, properties);
         return eachSeries;
       });
     }
-  }
+  },
 });

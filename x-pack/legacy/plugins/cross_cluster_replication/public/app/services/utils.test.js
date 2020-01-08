@@ -11,7 +11,10 @@ describe('utils', () => {
     it('should convert object to an array', () => {
       const item1 = { name: 'foo' };
       const item2 = { name: 'bar' };
-      const expected = [{ ...item1, __id__: 'item1' }, { ...item2, __id__: 'item2' }];
+      const expected = [
+        { ...item1, __id__: 'item1' },
+        { ...item2, __id__: 'item2' },
+      ];
       const output = objectToArray({ item1, item2 });
 
       expect(output).toEqual(expected);

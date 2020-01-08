@@ -278,6 +278,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
+      await ml.api.createCalendar('wizard-test-calendar');
     });
 
     after(async () => {
@@ -297,7 +298,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation loads the job type selection page', async () => {
-          await ml.jobSourceSelection.selectSource(testData.jobSource);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
         });
 
         it('job creation loads the advanced job wizard page', async () => {
@@ -462,6 +463,18 @@ export default function({ getService }: FtrProviderContext) {
             await ml.jobWizardCommon.addJobGroup(jobGroup);
           }
           await ml.jobWizardCommon.assertJobGroupSelection(testData.jobGroups);
+        });
+
+        it('job creation opens the additional settings section', async () => {
+          await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+        });
+
+        it('job creation adds a new custom url', async () => {
+          await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+        });
+
+        it('job creation assigns calendars', async () => {
+          await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
         });
 
         it('job creation displays the model plot switch', async () => {
@@ -707,6 +720,18 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertJobGroupInputExists();
           await ml.jobWizardCommon.addJobGroup('clone');
           await ml.jobWizardCommon.assertJobGroupSelection(testData.jobGroupsClone);
+        });
+
+        it('job cloning opens the additional settings section', async () => {
+          await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+        });
+
+        it('job cloning persists custom urls', async () => {
+          await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+        });
+
+        it('job cloning persists assigned calendars', async () => {
+          await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
         });
 
         it('job cloning pre-fills the model plot switch', async () => {

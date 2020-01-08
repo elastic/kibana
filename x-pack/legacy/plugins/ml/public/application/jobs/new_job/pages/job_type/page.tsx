@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibanaContext } from '../../../../contexts/kibana';
+import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
@@ -32,32 +33,32 @@ export const Page: FC = () => {
 
   const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
   const indexWarningTitle =
-    !isTimeBasedIndex && currentSavedSearch.id === undefined
-      ? i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
-          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
-          values: { indexPatternTitle: currentIndexPattern.title },
-        })
-      : i18n.translate(
+    !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
+      ? i18n.translate(
           'xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage',
           {
             defaultMessage:
               '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
             values: {
-              savedSearchTitle: currentSavedSearch.title,
+              savedSearchTitle: currentSavedSearch.attributes.title as string,
               indexPatternTitle: currentIndexPattern.title,
             },
           }
-        );
-  const pageTitleLabel =
-    currentSavedSearch.id !== undefined
-      ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
-          defaultMessage: 'saved search {savedSearchTitle}',
-          values: { savedSearchTitle: currentSavedSearch.title },
-        })
-      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
+        )
+      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
+          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
           values: { indexPatternTitle: currentIndexPattern.title },
         });
+
+  const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
+    ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: currentSavedSearch.attributes.title as string },
+      })
+    : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: currentIndexPattern.title },
+      });
 
   const recognizerResults = {
     count: 0,
@@ -67,14 +68,15 @@ export const Page: FC = () => {
   };
 
   const getUrl = (basePath: string) => {
-    return currentSavedSearch.id === undefined
+    return !isSavedSearchSavedObject(currentSavedSearch)
       ? `${basePath}?index=${currentIndexPattern.id}`
       : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = () => {
-    const title =
-      currentSavedSearch.id === undefined ? currentIndexPattern.title : currentSavedSearch.title;
+    const title = !isSavedSearchSavedObject(currentSavedSearch)
+      ? currentIndexPattern.title
+      : (currentSavedSearch.attributes.title as string);
     const url = getUrl('');
     addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
 

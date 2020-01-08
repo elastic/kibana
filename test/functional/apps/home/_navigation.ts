@@ -105,7 +105,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${basePath}/app/kibana#/home`, false);
       await retry.waitFor(
         'navigation to home app',
-        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()`
+        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home`
       );
 
       await browser.get(`${basePath}/app/kibana#/home?_g=()&a=b/c`, false);

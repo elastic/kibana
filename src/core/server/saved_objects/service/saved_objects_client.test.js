@@ -142,6 +142,8 @@ test(`#bulkUpdate`, async () => {
   const namespace = Symbol();
   const result = await client.bulkUpdate([{ type, id, attributes, version }], { namespace });
 
-  expect(mockRepository.bulkUpdate).toHaveBeenCalledWith([{ type, id, attributes, version }], { namespace });
+  expect(mockRepository.bulkUpdate).toHaveBeenCalledWith([{ type, id, attributes, version }], {
+    namespace,
+  });
   expect(result).toBe(returnValue);
 });

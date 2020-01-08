@@ -20,10 +20,10 @@
 import _ from 'lodash';
 
 /*
-  * Accepts an array of zero-filled y value objects (arr1)
-  * and a kibana data.series[i].values array of objects (arr2).
-  * Return a zero-filled array of objects (arr1).
-  */
+ * Accepts an array of zero-filled y value objects (arr1)
+ * and a kibana data.series[i].values array of objects (arr2).
+ * Return a zero-filled array of objects (arr1).
+ */
 
 export function zeroFillDataArray(arr1, arr2) {
   if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
@@ -35,7 +35,7 @@ export function zeroFillDataArray(arr1, arr2) {
   let index;
   const max = arr2.length;
 
-  const getX = function (d) {
+  const getX = function(d) {
     return d.x === val.x;
   };
 

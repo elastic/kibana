@@ -24,7 +24,7 @@ import * as constants from '../common/constants';
 export { FetcherTask } from './fetcher';
 export { replaceTelemetryInjectedVars } from './telemetry_config';
 export { telemetryCollectionManager } from './collection_manager';
-
+export { PluginsSetup } from './plugin';
 export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
   new TelemetryPlugin(initializerContext);
 export { constants };

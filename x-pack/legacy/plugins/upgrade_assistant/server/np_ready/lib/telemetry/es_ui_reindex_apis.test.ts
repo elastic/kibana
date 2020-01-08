@@ -15,12 +15,6 @@ import { upsertUIReindexOption } from './es_ui_reindex_apis';
 describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
   const mockIncrementCounter = jest.fn();
   const server = jest.fn().mockReturnValue({
-    usage: {
-      collectorSet: {
-        makeUsageCollector: {},
-        register: {},
-      },
-    },
     savedObjects: {
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {

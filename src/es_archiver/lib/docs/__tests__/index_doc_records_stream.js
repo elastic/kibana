@@ -20,28 +20,17 @@
 import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-} from '../../../../legacy/utils';
+import { createListStream, createPromiseFromStreams } from '../../../../legacy/utils';
 
 import { Progress } from '../../progress';
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';
-import {
-  createStubStats,
-  createStubClient,
-  createPersonDocRecords,
-} from './stubs';
+import { createStubStats, createStubClient, createPersonDocRecords } from './stubs';
 
 const recordsToBulkBody = records => {
   return records.reduce((acc, record) => {
     const { index, id, source } = record.value;
 
-    return [
-      ...acc,
-      { index: { _index: index, _id: id } },
-      source
-    ];
+    return [...acc, { index: { _index: index, _id: id } }, source];
   }, []);
 };
 
@@ -52,10 +41,10 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
-          body: recordsToBulkBody(records)
+          body: recordsToBulkBody(records),
         });
         return { ok: true };
-      }
+      },
     ]);
     const stats = createStubStats();
     const progress = new Progress();
@@ -76,17 +65,17 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(0, 1))
+          body: recordsToBulkBody(records.slice(0, 1)),
         });
         return { ok: true };
       },
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(1))
+          body: recordsToBulkBody(records.slice(1)),
         });
         return { ok: true };
-      }
+      },
     ]);
     const stats = createStubStats();
     const progress = new Progress();
@@ -110,7 +99,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(0, 1))
+          body: recordsToBulkBody(records.slice(0, 1)),
         });
         await delay(delayMs);
         return { ok: true };
@@ -118,17 +107,17 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(1))
+          body: recordsToBulkBody(records.slice(1)),
         });
         expect(Date.now() - start).to.not.be.lessThan(delayMs);
         return { ok: true };
-      }
+      },
     ]);
     const progress = new Progress();
 
     await createPromiseFromStreams([
       createListStream(records),
-      createIndexDocRecordsStream(client, stats, progress)
+      createIndexDocRecordsStream(client, stats, progress),
     ]);
 
     client.assertNoPendingResponses();
@@ -173,7 +162,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
     const stats = createStubStats();
     const client = createStubClient([
       async () => ({ ok: true }),
-      async () => ({ errors: true, forcedError: true })
+      async () => ({ errors: true, forcedError: true }),
     ]);
     const progress = new Progress();
 

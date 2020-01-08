@@ -19,6 +19,7 @@ import chrome from 'ui/chrome';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { plugin } from './np_ready';
+import { CloudSetup } from '../../../../plugins/cloud/public';
 
 const BASE_PATH = `/management/elasticsearch/upgrade_assistant`;
 
@@ -42,10 +43,10 @@ export interface LegacyManagementPlugin {
 
 // Based on /rfcs/text/0006_management_section_service.md
 export interface LegacyPlugins {
+  cloud?: CloudSetup;
   management: LegacyManagementPlugin;
   __LEGACY: {
     XSRF: string;
-    isCloudEnabled: boolean;
   };
 }
 
@@ -54,11 +55,11 @@ function startApp() {
     template:
       '<kbn-management-app section="elasticsearch/upgrade_assistant"><upgrade-assistant /></kbn-management-app>',
   });
-
+  const { cloud } = npSetup.plugins as any;
   const legacyPluginsShim: LegacyPlugins = {
+    cloud: cloud as CloudSetup,
     __LEGACY: {
       XSRF: chrome.getXsrfToken(),
-      isCloudEnabled: chrome.getInjected('isCloudEnabled', false),
     },
     management: {
       sections: {

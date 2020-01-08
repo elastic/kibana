@@ -42,7 +42,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class MathAgg extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!this.props.model.variables) {
       this.props.onChange(
         _.assign({}, this.props.model, {

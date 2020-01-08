@@ -42,9 +42,12 @@ describe('BulkUploader', () => {
     let server;
     beforeEach(() => {
       const cluster = {
-        callWithInternalUser: sinon.stub().withArgs('monitoring.bulk').callsFake(() => {
-          return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
-        }),
+        callWithInternalUser: sinon
+          .stub()
+          .withArgs('monitoring.bulk')
+          .callsFake(() => {
+            return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+          }),
       };
 
       server = {
@@ -64,12 +67,12 @@ describe('BulkUploader', () => {
           fetch: noop, // empty payloads,
           isReady: () => true,
           formatForBulkUpload: result => result,
-        }
+        },
       ]);
 
       const uploader = new BulkUploader({
         ...server,
-        interval: FETCH_INTERVAL
+        interval: FETCH_INTERVAL,
       });
 
       uploader.start(collectors);
@@ -110,7 +113,7 @@ describe('BulkUploader', () => {
           fetch: noop, // empty payloads,
           isReady: () => true,
           formatForBulkUpload: result => result,
-        }
+        },
       ]);
 
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
@@ -145,8 +148,8 @@ describe('BulkUploader', () => {
         {
           fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
           isReady: () => true,
-          formatForBulkUpload: result => result
-        }
+          formatForBulkUpload: result => result,
+        },
       ]);
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
@@ -175,7 +178,9 @@ describe('BulkUploader', () => {
 
     it('does not call UsageCollectors if last reported is within the usageInterval', done => {
       const usageCollectorFetch = sinon.stub();
-      const collectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+      const collectorFetch = sinon
+        .stub()
+        .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
       const collectors = new MockCollectorSet(server, [
         {
@@ -189,7 +194,7 @@ describe('BulkUploader', () => {
           isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: false,
-        }
+        },
       ]);
 
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
@@ -204,9 +209,10 @@ describe('BulkUploader', () => {
       }, CHECK_DELAY);
     });
 
-
     it('refetches UsageCollectors if uploading to local cluster was not successful', done => {
-      const usageCollectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+      const usageCollectorFetch = sinon
+        .stub()
+        .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
       const collectors = new MockCollectorSet(server, [
         {
@@ -214,7 +220,7 @@ describe('BulkUploader', () => {
           isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: true,
-        }
+        },
       ]);
 
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
@@ -231,7 +237,9 @@ describe('BulkUploader', () => {
 
     it('calls UsageCollectors if last reported exceeds during a _usageInterval', done => {
       const usageCollectorFetch = sinon.stub();
-      const collectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+      const collectorFetch = sinon
+        .stub()
+        .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
       const collectors = new MockCollectorSet(server, [
         {
@@ -245,7 +253,7 @@ describe('BulkUploader', () => {
           isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: false,
-        }
+        },
       ]);
 
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });

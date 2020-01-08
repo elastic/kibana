@@ -1,0 +1,17 @@
+{
+  "rule_id": "b5ea4bfe-a1b2-421f-9d47-22a75a6f2921",
+  "risk_score": 50,
+  "description": "EQL - Volume Shadow Copy Deletion via VssAdmin",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Volume Shadow Copy Deletion via VssAdmin",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "  event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -35,7 +35,7 @@ export const InstallDependenciesTask = {
         // We're using --no-bin-links to support systems that don't have symlinks.
         // This is commonly seen in shared folders on virtual machines
         '--no-bin-links',
-      ]
+      ],
     });
   },
 };

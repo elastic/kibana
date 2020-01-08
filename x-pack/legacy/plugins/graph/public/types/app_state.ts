@@ -5,9 +5,9 @@
  */
 
 import { SimpleSavedObject } from 'src/core/public';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 export interface UrlTemplate {
   url: string;

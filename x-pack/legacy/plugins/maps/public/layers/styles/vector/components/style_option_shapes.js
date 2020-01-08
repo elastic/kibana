@@ -35,8 +35,3 @@ export const dynamicSizeShape = PropTypes.shape({
   maxSize: PropTypes.number.isRequired,
   field: fieldShape,
 });
-
-export const rangeShape = PropTypes.shape({
-  min: PropTypes.number.isRequired,
-  max: PropTypes.number.isRequired,
-});

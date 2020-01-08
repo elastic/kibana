@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { TemplateListItem, Template } from '../../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
@@ -31,7 +31,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.idxMgmt.templateList.table.nameColumnTitle', {
@@ -138,6 +138,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           enabled: ({ isManaged }: Template) => !isManaged,
         },
         {
+          type: 'icon',
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
             defaultMessage: 'Clone',
           }),
@@ -179,7 +180,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       field: 'name',
       direction: 'asc',
     },
-  };
+  } as const;
 
   const selectionConfig = {
     onSelectionChange: setSelection,
@@ -190,6 +191,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           defaultMessage: 'You cannot delete a managed template.',
         });
       }
+      return '';
     },
   };
 

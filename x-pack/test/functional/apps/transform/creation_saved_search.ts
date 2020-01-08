@@ -23,10 +23,10 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.load('ml/farequote');
     });
 
-    // after(async () => {
-    //   await esArchiver.unload('ml/farequote');
-    //   await transform.api.cleanTransformIndices();
-    // });
+    after(async () => {
+      await esArchiver.unload('ml/farequote');
+      await transform.api.cleanTransformIndices();
+    });
 
     const testDataList = [
       {

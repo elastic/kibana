@@ -43,12 +43,12 @@ uiModules
       'currentTab',
     ])
   )
-  .directive('visEditorAggGroup', function () {
+  .directive('visEditorAggGroup', function() {
     return {
       restrict: 'E',
       scope: true,
       require: '?^ngModel',
-      template: function () {
+      template: function() {
         return `<vis-editor-agg-group-wrapper	
             ng-if="setValidity"	
             current-tab="sidebar.section"
@@ -68,7 +68,7 @@ uiModules
             set-touched="setTouched"	
           ></vis-editor-agg-group-wrapper>`;
       },
-      link: function ($scope, $el, attr, ngModelCtrl) {
+      link: function($scope, $el, attr, ngModelCtrl) {
         $scope.groupName = attr.groupName;
         $scope.$bind('schemas', attr.schemas);
         // The model can become touched either onBlur event or when the form is submitted.

@@ -13,6 +13,7 @@ import {
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
 } from '../../../common/apm_saved_object_constants';
 import { APMLegacyServer } from '../../routes/typings';
+import { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/server';
 
 export function createApmTelementry(
   agentNames: string[] = []
@@ -43,8 +44,11 @@ export async function storeApmServicesTelemetry(
   }
 }
 
-export function makeApmUsageCollector(server: APMLegacyServer) {
-  const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
+export function makeApmUsageCollector(
+  usageCollector: UsageCollectionSetup,
+  server: APMLegacyServer
+) {
+  const apmUsageCollector = usageCollector.makeUsageCollector({
     type: 'apm',
     fetch: async () => {
       const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
@@ -60,5 +64,6 @@ export function makeApmUsageCollector(server: APMLegacyServer) {
     },
     isReady: () => true
   });
-  server.usage.collectorSet.register(apmUsageCollector);
+
+  usageCollector.registerCollector(apmUsageCollector);
 }

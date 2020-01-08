@@ -7,13 +7,13 @@
 import ace from 'ace';
 import 'brace/ext/language_tools';
 
-const splitTokens = (line) => {
+const splitTokens = line => {
   return line.split(/\s+/);
 };
 const wordCompleter = words => {
   return {
     identifierRegexps: [
-      /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/ // adds support for dot character
+      /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
     ],
     getCompletions: (editor, session, pos, prefix, callback) => {
       const document = session.getDocument();
@@ -22,8 +22,8 @@ const wordCompleter = words => {
       const currentTokens = splitTokens(currentLine.slice(0, pos.column));
       const fullLineTokens = splitTokens(currentLine);
       const isInArray = previousLine && splitTokens(previousLine).slice(-1)[0] === '[';
-      const [ , secondToken = null ] = currentTokens;
-      const [ , secondFullToken = null ] = fullLineTokens;
+      const [, secondToken = null] = currentTokens;
+      const [, secondFullToken = null] = fullLineTokens;
       if (isInArray || currentTokens.length > 2) {
         return callback(null, []);
       }
@@ -34,20 +34,15 @@ const wordCompleter = words => {
         words.map(word => {
           return {
             caption: ` ${word}`,
-            value: `${startQuote}${word}${endQuote}`
+            value: `${startQuote}${word}${endQuote}`,
           };
         })
       );
-    }
+    },
   };
 };
 
-export const createAceEditor = (
-  div,
-  value,
-  readOnly = true,
-  autocompleteArray
-) => {
+export const createAceEditor = (div, value, readOnly = true, autocompleteArray) => {
   const editor = ace.edit(div);
   editor.$blockScrolling = Infinity;
   editor.setValue(value, -1);
@@ -64,13 +59,15 @@ export const createAceEditor = (
     highlightActiveLine: false,
     highlightGutterLine: false,
     minLines: 20,
-    maxLines: 30
+    maxLines: 30,
   };
   //done this way to avoid warnings about unrecognized options
-  const autocompleteOptions = (readOnly) ? {} : {
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true
-  };
+  const autocompleteOptions = readOnly
+    ? {}
+    : {
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+      };
   editor.setOptions({ ...options, ...autocompleteOptions });
   editor.setBehavioursEnabled(!readOnly);
   return editor;

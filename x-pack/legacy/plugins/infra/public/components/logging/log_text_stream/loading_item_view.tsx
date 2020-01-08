@@ -18,7 +18,7 @@ interface LogTextStreamLoadingItemViewProps {
   hasMore: boolean;
   isLoading: boolean;
   isStreaming: boolean;
-  lastStreamingUpdate: number | null;
+  lastStreamingUpdate: Date | null;
   onLoadMore?: () => void;
 }
 

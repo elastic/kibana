@@ -7,20 +7,19 @@ levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations.
 
 The most frequently used visualizations include:
 
-* Line, Area and Bar charts
+* Line, area, and bar charts
 * Pie charts
-* Data table
-* Metric visualization
-* Goal and Gauge visualization
+* Data tables
+* Metric, goals, and gauges
 * Heat maps
-* Tag cloud
+* Tag clouds
 
 [float]
 === Configure your visualization
 
-You configure visualizations using the default editor, which is broken into *Metrics* and *Buckets*, and includes a default count
+You configure visualizations using the default editor, which is broken into metrics and buckets, and includes a default count
 metric. Each visualization supports different configurations for what the metrics and buckets
-represent. For example, a Bar chart allows you to add an X-axis:
+represent. For example, a bar chart allows you to add an X-axis:
 
 [role="screenshot"]
 image::images/add-bucket.png["",height=478]

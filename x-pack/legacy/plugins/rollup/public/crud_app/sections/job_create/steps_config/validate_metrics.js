@@ -19,14 +19,14 @@ export function validateMetrics(metrics) {
   if (missingTypes.length) {
     const allMissingTypes = missingTypes.join(', ');
 
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.metricsTypesMissing"
         key="xpack.rollupJobs.create.errors.metricsTypesMissing"
         defaultMessage="Select metrics types for these fields or remove them: {allMissingTypes}."
         values={{ allMissingTypes }}
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

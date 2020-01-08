@@ -98,6 +98,7 @@ describe('PluginsService', () => {
     mockSetupContext = {
       ...mockSetupDeps,
       application: expect.any(Object),
+      getStartServices: expect.any(Function),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),

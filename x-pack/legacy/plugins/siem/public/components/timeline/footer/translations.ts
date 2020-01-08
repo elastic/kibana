@@ -6,10 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING_EVENTS = i18n.translate('xpack.siem.footer.loadingEventsData', {
-  defaultMessage: 'Loading Events',
-});
-
 export const LOADING_TIMELINE_DATA = i18n.translate('xpack.siem.footer.loadingTimelineData', {
   defaultMessage: 'Loading Timeline data',
 });

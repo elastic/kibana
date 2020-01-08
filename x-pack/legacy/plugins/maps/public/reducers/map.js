@@ -44,6 +44,8 @@ import {
   SET_INTERACTIVE,
   DISABLE_TOOLTIP_CONTROL,
   HIDE_TOOLBAR_OVERLAY,
+  HIDE_LAYER_CONTROL,
+  HIDE_VIEW_CONTROL,
 } from '../actions/map_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -112,7 +114,9 @@ const INITIAL_STATE = {
     drawState: null,
     disableInteractive: false,
     disableTooltipControl: false,
-    hideToolbarOverlay: false
+    hideToolbarOverlay: false,
+    hideLayerControl: false,
+    hideViewControl: false,
   },
   selectedLayerId: null,
   __transientLayerId: null,
@@ -354,6 +358,22 @@ export function map(state = INITIAL_STATE, action) {
         mapState: {
           ...state.mapState,
           hideToolbarOverlay: action.hideToolbarOverlay,
+        },
+      };
+    case HIDE_LAYER_CONTROL:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          hideLayerControl: action.hideLayerControl,
+        },
+      };
+    case HIDE_VIEW_CONTROL:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          hideViewControl: action.hideViewControl,
         },
       };
     default:

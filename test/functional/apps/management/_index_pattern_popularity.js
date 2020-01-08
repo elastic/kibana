@@ -19,18 +19,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result popularity', function describeIndexTests() {
     const fieldName = 'geo.coordinates';
-    before(async function () {
+    before(async function() {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-
     });
 
     beforeEach(async () => {
@@ -42,19 +41,19 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.increasePopularity();
     });
 
-    afterEach(async () =>  {
+    afterEach(async () => {
       await PageObjects.settings.controlChangeCancel();
       await PageObjects.settings.removeIndexPattern();
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
     });
 
-    it('should update the popularity input', async function () {
+    it('should update the popularity input', async function() {
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
       expect(popularity).to.be('1');
     });
 
-    it('should be reset on cancel', async function () {
+    it('should be reset on cancel', async function() {
       // Cancel saving the popularity change
       await PageObjects.settings.controlChangeCancel();
       await PageObjects.settings.openControlsByName(fieldName);
@@ -64,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
       expect(popularity).to.be('0');
     });
 
-    it('can be saved', async function () {
+    it('can be saved', async function() {
       // Saving the popularity change
       await PageObjects.settings.controlChangeSave();
       await PageObjects.settings.openControlsByName(fieldName);

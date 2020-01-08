@@ -76,7 +76,7 @@ function downloadResponse({ resp, targetPath, progress }) {
     writeStream.on('error', reject);
 
     // report progress as we download
-    resp.on('data', (chunk) => {
+    resp.on('data', chunk => {
       progress.progress(chunk.length);
     });
 

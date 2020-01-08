@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiCallOut,
-  EuiAccordion,
-} from '@elastic/eui';
+import { EuiSpacer, EuiDescriptionList, EuiCallOut, EuiAccordion } from '@elastic/eui';
 
 export function ImportSummary({
   index,
@@ -46,14 +40,10 @@ export function ImportSummary({
         color="success"
         iconType="check"
       >
-        <EuiDescriptionList
-          type="column"
-          listItems={items}
-          className="import-summary-list"
-        />
+        <EuiDescriptionList type="column" listItems={items} className="import-summary-list" />
       </EuiCallOut>
 
-      {(importFailures && importFailures.length > 0) &&
+      {importFailures && importFailures.length > 0 && (
         <React.Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -76,13 +66,12 @@ export function ImportSummary({
                   docCount,
                 }}
               />
-
             </p>
 
             <Failures failedDocs={importFailures} />
           </EuiCallOut>
         </React.Fragment>
-      }
+      )}
     </React.Fragment>
   );
 }
@@ -100,14 +89,14 @@ function Failures({ failedDocs }) {
       paddingSize="m"
     >
       <div className="failure-list">
-        {
-          failedDocs.map(({ item, reason, doc }) => (
-            <div key={item}>
-              <div className="error-message">{item}: {reason}</div>
-              <div>{JSON.stringify(doc)}</div>
+        {failedDocs.map(({ item, reason, doc }) => (
+          <div key={item}>
+            <div className="error-message">
+              {item}: {reason}
             </div>
-          ))
-        }
+            <div>{JSON.stringify(doc)}</div>
+          </div>
+        ))}
       </div>
     </EuiAccordion>
   );
@@ -140,7 +129,7 @@ function createDisplayItems(
         />
       ),
       description: docCount - ((importFailures && importFailures.length) || 0),
-    }
+    },
   ];
 
   if (createPipeline) {

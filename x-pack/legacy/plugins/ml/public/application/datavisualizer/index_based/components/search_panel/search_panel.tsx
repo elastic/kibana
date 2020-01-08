@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
 import { SavedSearchQuery } from '../../../../contexts/kibana';
@@ -122,7 +122,9 @@ export const SearchPanel: FC<Props> = ({
               id="xpack.ml.datavisualizer.searchPanel.documentsPerShardLabel"
               defaultMessage="documents per shard from a total of {wrappedTotalCount} {totalCount, plural, one {document} other {documents}}"
               values={{
-                wrappedTotalCount: <b>{totalCount}</b>,
+                wrappedTotalCount: (
+                  <b data-test-subj="mlDataVisualizerTotalDocCount">{totalCount}</b>
+                ),
                 totalCount,
               }}
             />

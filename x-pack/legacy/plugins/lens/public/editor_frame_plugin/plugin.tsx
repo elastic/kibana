@@ -15,13 +15,13 @@ import {
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
 import {
-  Setup as EmbeddableSetup,
-  Start as EmbeddableStart,
+  IEmbeddableSetup,
+  IEmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
-  setup as dataSetup,
-  start as dataStart,
-} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../../src/plugins/data/public';
 import {
   Datasource,
   Visualization,
@@ -35,14 +35,14 @@ import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
-  data: typeof dataSetup;
-  embeddable: EmbeddableSetup;
+  data: DataPublicPluginSetup;
+  embeddable: IEmbeddableSetup;
   expressions: ExpressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
-  data: typeof dataStart;
-  embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  embeddable: IEmbeddableStart;
   expressions: ExpressionsStart;
   chrome: Chrome;
 }
@@ -57,8 +57,8 @@ export class EditorFramePlugin {
     plugins.expressions.registerFunction(() => mergeTables);
 
     return {
-      registerDatasource: (name, datasource) => {
-        this.datasources[name] = datasource as Datasource<unknown, unknown>;
+      registerDatasource: datasource => {
+        this.datasources[datasource.id] = datasource as Datasource<unknown, unknown>;
       },
       registerVisualization: visualization => {
         this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
@@ -72,7 +72,7 @@ export class EditorFramePlugin {
       new EmbeddableFactory(
         plugins.chrome,
         plugins.expressions.ExpressionRenderer,
-        plugins.data.indexPatterns.indexPatterns
+        plugins.data.indexPatterns
       )
     );
 
@@ -130,14 +130,14 @@ const editorFrame = new EditorFramePlugin();
 
 export const editorFrameSetup = () =>
   editorFrame.setup(npSetup.core, {
-    data: dataSetup,
+    data: npSetup.plugins.data,
     embeddable: npSetup.plugins.embeddable,
     expressions: npSetup.plugins.expressions,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(npStart.core, {
-    data: dataStart,
+    data: npStart.plugins.data,
     embeddable: npStart.plugins.embeddable,
     expressions: npStart.plugins.expressions,
     chrome,

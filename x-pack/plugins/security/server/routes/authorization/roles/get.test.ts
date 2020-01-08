@@ -36,7 +36,7 @@ describe('GET role', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+      mockRouteDefinitionParams.authz.applicationName = application;
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
@@ -75,15 +75,17 @@ describe('GET role', () => {
   };
 
   describe('failure', () => {
-    getRoleTest(`returns result of license check`, {
+    getRoleTest('returns result of license checker', {
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
-    getRoleTest(`returns error from cluster client`, {
+    getRoleTest('returns error from cluster client', {
       name: 'first_role',
-      apiResponse: () => Promise.reject(error),
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: { statusCode: 406, result: error },
     });
 

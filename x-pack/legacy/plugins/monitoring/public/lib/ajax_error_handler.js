@@ -8,11 +8,7 @@ import React from 'react';
 import { contains } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib';
-import {
-  EuiButton,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -22,9 +18,7 @@ export function formatMonitoringError(err) {
   if (err.status && err.status !== -1 && err.data) {
     return (
       <EuiText>
-        <p>
-          { err.data.message }
-        </p>
+        <p>{err.data.message}</p>
         <EuiText size="xs">
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
@@ -42,33 +36,31 @@ export function formatMonitoringError(err) {
 export function ajaxErrorHandlersProvider($injector) {
   const kbnUrl = $injector.get('kbnUrl');
 
-  return (err) => {
+  return err => {
     if (err.status === 403) {
       // redirect to error message view
       kbnUrl.redirect('access-denied');
-    } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) { // pass through if this is a 404 and we're already on the no-data page
+    } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) {
+      // pass through if this is a 404 and we're already on the no-data page
       toastNotifications.addDanger({
         title: toMountPoint(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
             defaultMessage="Monitoring Request Failed"
-          />),
+          />
+        ),
         text: toMountPoint(
           <div>
-            { formatMonitoringError(err) }
+            {formatMonitoringError(err)}
             <EuiSpacer />
-            <EuiButton
-              size="s"
-              color="danger"
-              onClick={() => window.location.reload()}
-            >
+            <EuiButton size="s" color="danger" onClick={() => window.location.reload()}>
               <FormattedMessage
                 id="xpack.monitoring.ajaxErrorHandler.requestFailedNotification.retryButtonLabel"
                 defaultMessage="Retry"
               />
             </EuiButton>
           </div>
-        )
+        ),
       });
     } else {
       toastNotifications.addDanger({
@@ -76,8 +68,9 @@ export function ajaxErrorHandlersProvider($injector) {
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
             defaultMessage="Monitoring Request Error"
-          />),
-        text: toMountPoint(formatMonitoringError(err))
+          />
+        ),
+        text: toMountPoint(formatMonitoringError(err)),
       });
     }
 

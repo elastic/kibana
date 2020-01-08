@@ -8,12 +8,20 @@ import _ from 'lodash';
 import { ServerShimWithRouter } from '../types';
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-
+import { CloudSetup } from '../../../../../../plugins/cloud/server';
 import { createRequestShim } from './create_request_shim';
 
-export function registerClusterCheckupRoutes(server: ServerShimWithRouter) {
+interface PluginsSetup {
+  cloud?: CloudSetup;
+}
+
+export function registerClusterCheckupRoutes(
+  server: ServerShimWithRouter,
+  pluginsSetup: PluginsSetup
+) {
+  const { cloud } = pluginsSetup;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const isCloudEnabled = _.get(server.plugins, 'cloud.config.isCloudEnabled', false);
 
   server.router.get(
     {

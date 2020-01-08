@@ -36,10 +36,7 @@ describe('CallOuts', () => {
 
   it('should render without any call outs', async () => {
     const component = shallow(
-      <CallOuts
-        deprecatedLangsInUse={[]}
-        painlessDocLink="http://www.elastic.co/painlessDocs"
-      />
+      <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.elastic.co/painlessDocs" />
     );
 
     expect(component).toMatchSnapshot();

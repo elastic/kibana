@@ -8,7 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { ApiKeyToInvalidate } from '../../../../../../common/model/api_key';
+import { ApiKeyToInvalidate } from '../../../../../../common/model';
 import { ApiKeysApi } from '../../../../../lib/api_keys_api';
 
 interface Props {

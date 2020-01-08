@@ -17,95 +17,60 @@
  * under the License.
  */
 
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Subject } from 'rxjs';
+import React, {
+  Fragment,
+  FunctionComponent,
+  useLayoutEffect,
+  useRef,
+  useState,
+  MutableRefObject,
+} from 'react';
 
-import { LegacyApp, AppMounter, AppUnmount } from '../types';
-import { HttpStart } from '../../http';
+import { AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
-interface Props extends RouteComponentProps<{ appId: string }> {
-  apps: ReadonlyMap<string, AppMounter>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
-  basePath: HttpStart['basePath'];
-  currentAppId$: Subject<string | undefined>;
-  /**
-   * Only necessary for redirecting to legacy apps
-   * @deprecated
-   */
-  redirectTo: (path: string) => void;
+interface Props {
+  appId: string;
+  mounter?: Mounter;
 }
 
-interface State {
-  appNotFound: boolean;
-}
+export const AppContainer: FunctionComponent<Props> = ({ mounter, appId }: Props) => {
+  const [appNotFound, setAppNotFound] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
 
-export class AppContainer extends React.Component<Props, State> {
-  private readonly containerDiv = React.createRef<HTMLDivElement>();
-  private unmountFunc?: AppUnmount;
+  useLayoutEffect(() => {
+    const unmount = () => {
+      if (unmountRef.current) {
+        unmountRef.current();
+        unmountRef.current = null;
+      }
+    };
+    const mount = async () => {
+      if (!mounter) {
+        return setAppNotFound(true);
+      }
 
-  state: State = { appNotFound: false };
+      if (mounter.unmountBeforeMounting) {
+        unmount();
+      }
 
-  componentDidMount() {
-    this.mountApp();
-  }
+      unmountRef.current =
+        (await mounter.mount({
+          appBasePath: mounter.appBasePath,
+          element: elementRef.current!,
+        })) || null;
+      setAppNotFound(false);
+    };
 
-  componentWillUnmount() {
-    this.unmountApp();
-  }
+    mount();
+    return unmount;
+  }, [mounter]);
 
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.match.params.appId !== this.props.match.params.appId) {
-      this.unmountApp();
-      this.mountApp();
-    }
-  }
-
-  async mountApp() {
-    const { apps, legacyApps, match, basePath, currentAppId$, redirectTo } = this.props;
-    const { appId } = match.params;
-
-    const mount = apps.get(appId);
-    if (mount) {
-      this.unmountFunc = await mount({
-        appBasePath: basePath.prepend(`/app/${appId}`),
-        element: this.containerDiv.current!,
-      });
-      currentAppId$.next(appId);
-      this.setState({ appNotFound: false });
-      return;
-    }
-
-    const legacyApp = findLegacyApp(appId, legacyApps);
-    if (legacyApp) {
-      this.unmountApp();
-      redirectTo(basePath.prepend(`/app/${appId}`));
-      this.setState({ appNotFound: false });
-      return;
-    }
-
-    this.setState({ appNotFound: true });
-  }
-
-  async unmountApp() {
-    if (this.unmountFunc) {
-      this.unmountFunc();
-      this.unmountFunc = undefined;
-    }
-  }
-
-  render() {
-    return (
-      <React.Fragment>
-        {this.state.appNotFound && <AppNotFound />}
-        <div key={this.props.match.params.appId} ref={this.containerDiv} />
-      </React.Fragment>
-    );
-  }
-}
-
-function findLegacyApp(appId: string, apps: ReadonlyMap<string, LegacyApp>) {
-  const matchingApps = [...apps.entries()].filter(([id]) => id.split(':')[0] === appId);
-  return matchingApps.length ? matchingApps[0][1] : null;
-}
+  return (
+    <Fragment>
+      {appNotFound && <AppNotFound />}
+      <div key={appId} ref={elementRef} />
+    </Fragment>
+  );
+};

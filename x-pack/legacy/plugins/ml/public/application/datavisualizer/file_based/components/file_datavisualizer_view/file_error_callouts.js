@@ -7,9 +7,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
 
@@ -82,19 +80,15 @@ export function FileCouldNotBeRead({ error, loaded }) {
       color="danger"
       iconType="cross"
     >
-      {
-        (error !== undefined) &&
-        <p>{error}</p>
-      }
-      {
-        loaded &&
+      {error !== undefined && <p>{error}</p>}
+      {loaded && (
         <p>
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
             defaultMessage="Reverting to previous settings"
           />
         </p>
-      }
+      )}
     </EuiCallOut>
   );
 }

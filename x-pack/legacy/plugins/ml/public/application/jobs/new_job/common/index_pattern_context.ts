@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
-export type IndexPatternContextValue = StaticIndexPattern | null;
+export type IndexPatternContextValue = IIndexPattern | null;
 export const IndexPatternContext = React.createContext<IndexPatternContextValue>(null);
