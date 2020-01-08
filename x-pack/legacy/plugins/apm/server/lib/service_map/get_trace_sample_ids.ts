@@ -136,7 +136,7 @@ export async function getTraceSampleIds({
               },
               {
                 [DESTINATION_ADDRESS]: {
-                  terms: { field: DESTINATION_ADDRESS, missing_bucket: true }
+                  terms: { field: DESTINATION_ADDRESS, missing_bucket: false }
                 }
               }
             ]
