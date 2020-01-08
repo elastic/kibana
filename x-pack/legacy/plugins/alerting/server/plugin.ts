@@ -9,7 +9,8 @@ import { first } from 'rxjs/operators';
 import { Services } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertsClientFactory, TaskRunnerFactory } from './lib';
+import { TaskRunnerFactory } from './task_runner';
+import { AlertsClientFactory } from './alerts_client_factory';
 import { LicenseState } from './lib/license_state';
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {

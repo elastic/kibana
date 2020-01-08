@@ -20,6 +20,7 @@ const mockedAlert = {
   params: {
     bar: true,
   },
+  throttle: '30s',
   actions: [
     {
       group: 'default',
@@ -44,6 +45,13 @@ test('creates an alert with proper parameters', async () => {
   const updatedAt = new Date();
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
+    enabled: true,
+    muteAll: false,
+    createdBy: '',
+    updatedBy: '',
+    apiKey: '',
+    apiKeyOwner: '',
+    mutedInstanceIds: [],
     createdAt,
     updatedAt,
     id: '123',
@@ -71,8 +79,14 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
+      "apiKey": "",
+      "apiKeyOwner": "",
       "consumer": "bar",
+      "createdBy": "",
+      "enabled": true,
       "id": "123",
+      "muteAll": false,
+      "mutedInstanceIds": Array [],
       "name": "abc",
       "params": Object {
         "bar": true,
@@ -83,6 +97,8 @@ test('creates an alert with proper parameters', async () => {
       "tags": Array [
         "foo",
       ],
+      "throttle": "30s",
+      "updatedBy": "",
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
@@ -112,7 +128,7 @@ test('creates an alert with proper parameters', async () => {
           "tags": Array [
             "foo",
           ],
-          "throttle": null,
+          "throttle": "30s",
         },
       },
     ]
