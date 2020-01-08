@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { Direction } from '../../../../../graphql/types';
@@ -38,7 +37,7 @@ describe('Header', () => {
         timelineId={timelineId}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('rendering', () => {

@@ -17,13 +17,8 @@
  * under the License.
  */
 
-export class StringUtils {
-  /**
-   * Returns a version of the string with the first letter capitalized.
-   * @param str {string}
-   * @returns {string}
-   */
-  public static upperFirst(str: string): string {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-  }
+import { mapKeys, camelCase } from 'lodash';
+
+export function keysToCamelCaseShallow(object: Record<string, any>) {
+  return mapKeys(object, (value, key) => camelCase(key));
 }
