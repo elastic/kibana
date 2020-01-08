@@ -68,22 +68,11 @@ export function DocViewTable({
             const displayNoMappingWarning =
               !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
-            // Nested fields are not a part of the index pattern but their children are.
-            // Nested children are not a part of the flattened document but their nested parent is.
-            // So to detect nested fields we look through the index pattern for nested children
-            // that have the current field in their path. Knowing which fields are nested allows us
-            // to label them and apply the correct icon in the table row.
-            const isNestedField = !!indexPattern.fields.find(patternField =>
-              patternField.subType?.nested?.path.includes(field)
-            );
-            const fieldType = isNestedField ? 'nested' : undefined;
-
             return (
               <DocViewTableRow
                 key={field}
                 field={field}
                 fieldMapping={mapping(field)}
-                fieldType={fieldType}
                 displayUnderscoreWarning={displayUnderscoreWarning}
                 displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}

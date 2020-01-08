@@ -31,7 +31,6 @@ import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
-  fieldType?: string;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -47,7 +46,6 @@ export interface Props {
 export function DocViewTableRow({
   field,
   fieldMapping,
-  fieldType,
   displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
@@ -87,7 +85,7 @@ export function DocViewTableRow({
         </td>
       )}
       <td className="kbnDocViewer__field">
-        <FieldName field={fieldMapping} fieldName={field} fieldType={fieldType} />
+        <FieldName field={fieldMapping} fieldName={field} />
       </td>
       <td>
         {isCollapsible && (
