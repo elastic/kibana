@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * Sequences a tree, yielding children returned by the `children` function. Sequencing is done in 'depth first preorder' fashion. See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order_(NLR)
+ */
 export function* depthFirstPreorder<T>(root: T, children: (parent: T) => T[]): Iterable<T> {
   const nodesToVisit = [root];
   while (nodesToVisit.length !== 0) {
@@ -15,6 +18,9 @@ export function* depthFirstPreorder<T>(root: T, children: (parent: T) => T[]): I
   }
 }
 
+/**
+ * Sequences a tree, yielding children returned by the `children` function. Sequencing is done in 'level order' fashion.
+ */
 export function* levelOrder<T>(root: T, children: (parent: T) => T[]): Iterable<T> {
   let level = [root];
   while (level.length !== 0) {

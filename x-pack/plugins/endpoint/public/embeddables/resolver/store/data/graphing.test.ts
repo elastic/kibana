@@ -16,96 +16,107 @@ import {
 } from './selectors';
 
 describe('resolver graph layout', () => {
-  let store: Store<DataState, AnyAction>;
+  let store: Store<DataState, DataAction>;
 
   beforeEach(() => {
     store = createStore(dataReducer, undefined);
   });
   describe('resolver data is received', () => {
-    /*
-     *          A
-     *      ____|____
-     *     |         |
-     *     B         C
-     *  ___|___   ___|___
-     * |       | |       |
-     * D       E F       G
-     *                   |
-     *                   H
-     *
-     */
-    const processA = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 0,
-      },
-    };
-    const processB = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'already_running',
-        node_id: 1,
-        source_id: 0,
-      },
-    };
-    const processC = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 2,
-        source_id: 0,
-      },
-    };
-    const processD = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 3,
-        source_id: 1,
-      },
-    };
-    const processE = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 4,
-        source_id: 1,
-      },
-    };
-    const processF = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 5,
-        source_id: 2,
-      },
-    };
-    const processG = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 6,
-        source_id: 2,
-      },
-    };
-    const processH = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        node_id: 7,
-        source_id: 6,
-      },
-    };
-    const processI = {
-      data_buffer: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'termination_event',
-        node_id: 8,
-        source_id: 0,
-      },
-    };
+    let processA;
+    let processB;
+    let processC;
+    let processD;
+    let processE;
+    let processF;
+    let processG;
+    let processH;
+    let processI;
+
     beforeEach(() => {
+      /*
+       *          A
+       *      ____|____
+       *     |         |
+       *     B         C
+       *  ___|___   ___|___
+       * |       | |       |
+       * D       E F       G
+       *                   |
+       *                   H
+       *
+       */
+      processA = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 0,
+        },
+      };
+      processB = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'already_running',
+          node_id: 1,
+          source_id: 0,
+        },
+      };
+      processC = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 2,
+          source_id: 0,
+        },
+      };
+      processD = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 3,
+          source_id: 1,
+        },
+      };
+      processE = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 4,
+          source_id: 1,
+        },
+      };
+      processF = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 5,
+          source_id: 2,
+        },
+      };
+      processG = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 6,
+          source_id: 2,
+        },
+      };
+      processH = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'creation_event',
+          node_id: 7,
+          source_id: 6,
+        },
+      };
+      processI = {
+        data_buffer: {
+          event_type_full: 'process_event',
+          event_subtype_full: 'termination_event',
+          node_id: 8,
+          source_id: 0,
+        },
+      };
+
       const payload = {
         data: {
           result: {
