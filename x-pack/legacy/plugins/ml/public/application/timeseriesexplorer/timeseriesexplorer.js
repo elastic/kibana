@@ -344,7 +344,8 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   entityFieldSearchChanged = debounce((entity, queryTerm) => {
-    this.loadEntityValues({
+    const entityControls = this.getControlsForDetector();
+    this.loadEntityValues(entityControls, {
       [entity.fieldType]: queryTerm,
     });
   }, 500);
