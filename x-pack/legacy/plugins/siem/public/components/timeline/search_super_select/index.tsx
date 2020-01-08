@@ -59,195 +59,199 @@ const basicSelectableOptions = [
   } as Option,
 ];
 
-const OriginalPageSize = 50;
-const PopoverHeight = 260;
+const OriginalPageSize = 3;
+const PopoverHeight = 90;
 const TimelineItemHeight = 50;
+const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProps> = ({
+  isDisabled,
+  timelineId,
+  timelineTitle,
+  onTimelineChange,
+}) => {
+  const [pageSize, setPageSize] = useState(OriginalPageSize);
+  const [heightTrigger, setHeightTrigger] = useState(0);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [searchTimelineValue, setSearchTimelineValue] = useState('');
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-export const SearchTimelineSuperSelect = memo<SearchTimelineSuperSelectProps>(
-  ({ isDisabled, timelineId, timelineTitle, onTimelineChange }) => {
-    const [pageSize, setPageSize] = useState(OriginalPageSize);
-    const [heightTrigger, setHeightTrigger] = useState(0);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [searchTimelineValue, setSearchTimelineValue] = useState('');
-    const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const onSearchTimeline = useCallback(val => {
+    setSearchTimelineValue(val);
+  }, []);
 
-    const onSearchTimeline = useCallback(val => {
-      setSearchTimelineValue(val);
-    }, []);
+  const handleClosePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
 
-    const handleClosePopover = useCallback(() => {
-      setIsPopoverOpen(false);
-    }, []);
+  const handleOpenPopover = useCallback(() => {
+    setIsPopoverOpen(true);
+  }, []);
 
-    const handleOpenPopover = useCallback(() => {
-      setIsPopoverOpen(true);
-    }, []);
+  const handleOnToggleOnlyFavorites = useCallback(() => {
+    setOnlyFavorites(!onlyFavorites);
+  }, [onlyFavorites]);
 
-    const handleOnToggleOnlyFavorites = useCallback(() => {
-      setOnlyFavorites(!onlyFavorites);
-    }, [onlyFavorites]);
-
-    const renderTimelineOption = useCallback((option, searchValue) => {
-      return (
-        <>
-          <EuiHighlight search={searchValue}>
-            {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-          </EuiHighlight>
-          <br />
-          <EuiTextColor color="subdued">
-            <small>
-              {option.description != null && option.description.trim().length > 0
-                ? option.description
-                : getEmptyTagValue()}
-            </small>
-          </EuiTextColor>
-        </>
-      );
-    }, []);
-
-    const handleTimelineChange = useCallback(options => {
-      const selectedTimeline = options.filter(
-        (option: { checked: string }) => option.checked === 'on'
-      );
-      if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
-        onTimelineChange(selectedTimeline[0].title, selectedTimeline[0].id);
-      }
-      setIsPopoverOpen(false);
-    }, []);
-
-    const handleOnScroll = useCallback(
-      (
-        totalTimelines: number,
-        totalCount: number,
-        {
-          clientHeight,
-          scrollHeight,
-          scrollTop,
-        }: {
-          clientHeight: number;
-          scrollHeight: number;
-          scrollTop: number;
-        }
-      ) => {
-        if (totalTimelines < totalCount) {
-          const clientHeightTrigger = clientHeight * 1.2;
-          if (
-            scrollTop > 10 &&
-            scrollHeight - scrollTop < clientHeightTrigger &&
-            scrollHeight > heightTrigger
-          ) {
-            setHeightTrigger(scrollHeight);
-            setPageSize(pageSize + OriginalPageSize);
-          }
-        }
-      },
-      [heightTrigger, pageSize]
-    );
-
-    const superSelect = useMemo(
-      () => (
-        <EuiSuperSelect
-          disabled={isDisabled}
-          onFocus={handleOpenPopover}
-          options={
-            timelineId == null
-              ? basicSuperSelectOptions
-              : [
-                  {
-                    value: timelineId,
-                    inputDisplay: timelineTitle,
-                  },
-                ]
-          }
-          valueOfSelected={timelineId == null ? '-1' : timelineId}
-          itemLayoutAlign="top"
-          hasDividers={false}
-          popoverClassName="timeline-search-super-select-popover"
-        />
-      ),
-      [handleOpenPopover, timelineId, timelineTitle]
-    );
-
+  const renderTimelineOption = useCallback((option, searchValue) => {
     return (
-      <EuiInputPopover
-        id="searchTimelinePopover"
-        input={superSelect}
-        isOpen={isPopoverOpen}
-        closePopover={handleClosePopover}
-      >
-        <AllTimelinesQuery
-          pageInfo={{
-            pageIndex: 1,
-            pageSize,
-          }}
-          search={searchTimelineValue}
-          sort={{ sortField: SortFieldTimeline.updated, sortOrder: Direction.desc }}
-          onlyUserFavorite={onlyFavorites}
-        >
-          {({ timelines, loading, totalCount }) => (
-            <>
-              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiFilterGroup>
-                    <EuiFilterButton
-                      size="xs"
-                      data-test-subj="only-favorites-toggle"
-                      hasActiveFilters={onlyFavorites}
-                      onClick={handleOnToggleOnlyFavorites}
-                    >
-                      {i18nTimeline.ONLY_FAVORITES}
-                    </EuiFilterButton>
-                  </EuiFilterGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-              <EuiSelectable
-                height={PopoverHeight}
-                isLoading={loading && timelines.length === 0}
-                listProps={{
-                  rowHeight: TimelineItemHeight,
-                  showIcons: false,
-                  virtualizedProps: ({
-                    onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
-                  } as unknown) as ListProps,
-                }}
-                renderOption={renderTimelineOption}
-                onChange={handleTimelineChange}
-                searchable
-                searchProps={{
-                  'data-test-subj': 'timeline-super-select-search-box',
-                  isLoading: loading,
-                  placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
-                  onSearch: onSearchTimeline,
-                  incremental: false,
-                }}
-                singleSelection={true}
-                options={[
-                  ...(!onlyFavorites && searchTimelineValue === '' ? basicSelectableOptions : []),
-                  ...timelines.map(
-                    (t, index) =>
-                      ({
-                        description: t.description,
-                        label: t.title,
-                        id: t.savedObjectId,
-                        key: `${t.title}-${index}`,
-                        title: t.title,
-                      } as Option)
-                  ),
-                ]}
-              >
-                {(list, search) => (
-                  <>
-                    {search}
-                    {list}
-                  </>
-                )}
-              </EuiSelectable>
-            </>
-          )}
-        </AllTimelinesQuery>
-        <SearchTimelineSuperSelectGlobalStyle />
-      </EuiInputPopover>
+      <>
+        <EuiHighlight search={searchValue}>
+          {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
+        </EuiHighlight>
+        <br />
+        <EuiTextColor color="subdued">
+          <small>
+            {option.description != null && option.description.trim().length > 0
+              ? option.description
+              : getEmptyTagValue()}
+          </small>
+        </EuiTextColor>
+      </>
     );
-  }
-);
+  }, []);
+
+  const handleTimelineChange = useCallback(options => {
+    const selectedTimeline = options.filter(
+      (option: { checked: string }) => option.checked === 'on'
+    );
+    if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
+      onTimelineChange(selectedTimeline[0].title, selectedTimeline[0].id);
+    }
+    setIsPopoverOpen(false);
+  }, []);
+
+  const handleOnScroll = useCallback(
+    (
+      totalTimelines: number,
+      totalCount: number,
+      {
+        clientHeight,
+        scrollHeight,
+        scrollTop,
+      }: {
+        clientHeight: number;
+        scrollHeight: number;
+        scrollTop: number;
+      }
+    ) => {
+      if (totalTimelines < totalCount) {
+        const clientHeightTrigger = clientHeight * 1.2;
+        if (
+          scrollTop > 10 &&
+          scrollHeight - scrollTop < clientHeightTrigger &&
+          scrollHeight > heightTrigger
+        ) {
+          setHeightTrigger(scrollHeight);
+          setPageSize(pageSize + OriginalPageSize);
+        }
+      }
+    },
+    [heightTrigger, pageSize]
+  );
+
+  const superSelect = useMemo(
+    () => (
+      <EuiSuperSelect
+        disabled={isDisabled}
+        onFocus={handleOpenPopover}
+        options={
+          timelineId == null
+            ? basicSuperSelectOptions
+            : [
+                {
+                  value: timelineId,
+                  inputDisplay: timelineTitle,
+                },
+              ]
+        }
+        valueOfSelected={timelineId == null ? '-1' : timelineId}
+        itemLayoutAlign="top"
+        hasDividers={false}
+        popoverClassName="timeline-search-super-select-popover"
+      />
+    ),
+    [handleOpenPopover, timelineId, timelineTitle]
+  );
+
+  return (
+    <EuiInputPopover
+      id="searchTimelinePopover"
+      input={superSelect}
+      isOpen={isPopoverOpen}
+      closePopover={handleClosePopover}
+    >
+      <AllTimelinesQuery
+        pageInfo={{
+          pageIndex: 1,
+          pageSize,
+        }}
+        search={searchTimelineValue}
+        sort={{ sortField: SortFieldTimeline.updated, sortOrder: Direction.desc }}
+        onlyUserFavorite={onlyFavorites}
+      >
+        {({ timelines, loading, totalCount }) => (
+          <>
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <EuiFilterButton
+                    size="xs"
+                    data-test-subj="only-favorites-toggle"
+                    hasActiveFilters={onlyFavorites}
+                    onClick={handleOnToggleOnlyFavorites}
+                  >
+                    {i18nTimeline.ONLY_FAVORITES}
+                  </EuiFilterButton>
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiSelectable
+              height={PopoverHeight}
+              isLoading={loading && timelines.length === 0}
+              listProps={{
+                rowHeight: TimelineItemHeight,
+                showIcons: false,
+                virtualizedProps: ({
+                  onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
+                } as unknown) as ListProps,
+              }}
+              renderOption={renderTimelineOption}
+              onChange={handleTimelineChange}
+              searchable
+              searchProps={{
+                'data-test-subj': 'timeline-super-select-search-box',
+                isLoading: loading,
+                placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
+                onSearch: onSearchTimeline,
+                incremental: false,
+              }}
+              singleSelection={true}
+              options={[
+                ...(!onlyFavorites && searchTimelineValue === '' ? basicSelectableOptions : []),
+                ...timelines.map(
+                  (t, index) =>
+                    ({
+                      description: t.description,
+                      label: t.title,
+                      id: t.savedObjectId,
+                      key: `${t.title}-${index}`,
+                      title: t.title,
+                    } as Option)
+                ),
+              ]}
+            >
+              {(list, search) => (
+                <>
+                  {search}
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          </>
+        )}
+      </AllTimelinesQuery>
+      <SearchTimelineSuperSelectGlobalStyle />
+    </EuiInputPopover>
+  );
+};
+
+export const SearchTimelineSuperSelect = memo(SearchTimelineSuperSelectComponent);
