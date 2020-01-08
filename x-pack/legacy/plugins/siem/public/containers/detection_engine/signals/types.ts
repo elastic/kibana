@@ -7,7 +7,6 @@
 export * from './errors_types';
 
 export interface BasicSignals {
-  kbnVersion: string;
   signal: AbortSignal;
 }
 export interface QuerySignals extends BasicSignals {
@@ -39,7 +38,6 @@ export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extend
 export interface UpdateSignalStatusProps {
   query: object;
   status: 'open' | 'closed';
-  kbnVersion: string;
   signal?: AbortSignal; // TODO: implement cancelling
 }
 
