@@ -22,7 +22,6 @@ import {
 
 export interface ExplorerState {
   annotationsData: any[];
-  anomalyChartRecords: any[];
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -59,7 +58,6 @@ function getDefaultIndexPattern() {
 export function getExplorerDefaultState(): ExplorerState {
   return {
     annotationsData: [],
-    anomalyChartRecords: [],
     bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,

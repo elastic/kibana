@@ -53,7 +53,6 @@ export function createJobs(jobs) {
 
 export function getClearedSelectedAnomaliesState() {
   return {
-    anomalyChartRecords: [],
     selectedCells: undefined,
     viewByLoadedForTimeFormatted: null,
   };

@@ -11,7 +11,6 @@ import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 import { TimeBucketsInterval } from '../util/time_buckets';
 
 interface ClearedSelectedAnomaliesState {
-  anomalyChartRecords: [];
   selectedCells: undefined;
   viewByLoadedForTimeFormatted: null;
 }

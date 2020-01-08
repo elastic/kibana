@@ -24,7 +24,7 @@ export const useShowCharts = () => {
   const [appState, setAppState] = useUrlState('_a');
 
   return [
-    appState?.mlShowCharts || SHOW_CHARTS_DEFAULT,
+    appState?.mlShowCharts !== undefined ? appState?.mlShowCharts : SHOW_CHARTS_DEFAULT,
     (d: boolean) => setAppState(SHOW_CHARTS_APP_STATE_NAME, d),
   ];
 };

@@ -11,7 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { explorerChartsContainerServiceFactory } from '../explorer_charts/explorer_charts_container_service';
+import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
 import { explorerService } from '../explorer_dashboard_service';
 import {
@@ -48,6 +48,7 @@ const memoize = <T extends (...a: any[]) => any>(func: T) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func), memoizeIsEqual);
 };
 
+const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
 );
@@ -111,9 +112,6 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
     tableSeverity,
     viewBySwimlaneFieldName,
   } = config;
-
-  // TODO This factory should be refactored so we can load the charts using memoization.
-  const updateCharts = explorerChartsContainerServiceFactory(explorerService.setCharts);
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
 
@@ -196,9 +194,21 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
     // Trigger a side-effect to update the charts.
     tap(({ anomalyChartRecords }) => {
       if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
-        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs, tableSeverity);
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          anomalyChartRecords,
+          timerange.earliestMs,
+          timerange.latestMs,
+          tableSeverity
+        );
       } else {
-        updateCharts([], timerange.earliestMs, timerange.latestMs, tableSeverity);
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          [],
+          timerange.earliestMs,
+          timerange.latestMs,
+          tableSeverity
+        );
       }
     }),
     // Load view-by swimlane data and filtered top influencers.
