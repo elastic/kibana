@@ -28,7 +28,7 @@ import { createTileMapVisualization } from './tile_map_visualization';
 import { Status } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
-import { cssFilters } from './css_filters';
+import { supportsCssFilters } from './css_filters';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -44,7 +44,7 @@ export function createTileMapTypeDefinition(dependencies) {
       defaultMessage: 'Plot latitude and longitude coordinates on a map',
     }),
     visConfig: {
-      canDesaturate: Boolean(cssFilters),
+      canDesaturate: Boolean(supportsCssFilters),
       defaults: {
         colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
