@@ -11867,7 +11867,6 @@
     "xpack.uptime.monitorList.statusColumn.upLabel": "运行",
     "xpack.uptime.monitorList.statusColumnLabel": "状态",
     "xpack.uptime.monitorStatusBar.durationTextAriaLabel": "监测持续时间（毫秒）",
-    "xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage": "{duration}ms",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel": "关闭",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel": "运行",
     "xpack.uptime.monitorStatusBar.healthStatusMessageAriaLabel": "检测状态",

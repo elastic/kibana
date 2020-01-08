@@ -11778,7 +11778,6 @@
     "xpack.uptime.monitorList.statusColumn.upLabel": "アップ",
     "xpack.uptime.monitorList.statusColumnLabel": "ステータス",
     "xpack.uptime.monitorStatusBar.durationTextAriaLabel": "ミリ秒単位の監視時間",
-    "xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage": "{duration}ms",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel": "ダウン",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel": "アップ",
     "xpack.uptime.monitorStatusBar.healthStatusMessageAriaLabel": "監視ステータス",
