@@ -18,7 +18,7 @@ import {
   CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../../../../../common/constants/new_job';
 
-type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
+type CategorizationAnalyzerType = CategorizationAnalyzer | null;
 
 interface Props {
   examplesValid: number;

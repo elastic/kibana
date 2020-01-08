@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
@@ -19,9 +20,9 @@ import {
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
-import { CategorizationAnalyzer } from '../../../../services/ml_server_info';
+import { CategorizationAnalyzer, getNewJobDefaults } from '../../../../services/ml_server_info';
 
-type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
+type CategorizationAnalyzerType = CategorizationAnalyzer | null;
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
@@ -32,7 +33,8 @@ export class CategorizationJobCreator extends JobCreator {
   private _categoryFieldValid: number = 0;
   private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
     ML_JOB_AGGREGATION.COUNT;
-  private _categorization_analyzer: CategorizationAnalyzerType = null;
+  private _categorizationAnalyzer: CategorizationAnalyzerType = null;
+  private _defaultCategorizationAnalyzer: CategorizationAnalyzerType;
 
   constructor(
     indexPattern: IndexPattern,
@@ -42,6 +44,9 @@ export class CategorizationJobCreator extends JobCreator {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
+
+    const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
+    this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || null;
   }
 
   public setDefaultDetectorProperties(
@@ -115,16 +120,20 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public set categorizationAnalyzer(analyzer: CategorizationAnalyzerType) {
-    this._categorization_analyzer = analyzer;
-    if (analyzer !== null) {
-      this._job_config.analysis_config.categorization_analyzer = analyzer;
-    } else {
+    this._categorizationAnalyzer = analyzer;
+
+    if (
+      analyzer === null ||
+      isEqual(this._categorizationAnalyzer, this._defaultCategorizationAnalyzer)
+    ) {
       delete this._job_config.analysis_config.categorization_analyzer;
+    } else {
+      this._job_config.analysis_config.categorization_analyzer = analyzer;
     }
   }
 
   public get categorizationAnalyzer() {
-    return this._categorization_analyzer;
+    return this._categorizationAnalyzer;
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
