@@ -18,7 +18,7 @@
  */
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
-import { DataPluginSetup } from 'src/plugins/data/server/plugin';
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { demoSearchStrategyProvider } from './demo_search_strategy';
 import { DEMO_SEARCH_STRATEGY, IDemoRequest, IDemoResponse } from '../common';
 

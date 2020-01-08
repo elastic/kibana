@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { useDateFormat, useTimeZone } from '../../hooks';
@@ -34,7 +33,7 @@ describe('formatted_date', () => {
       mockUseDateFormat.mockImplementation(() => '');
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the date with the default configuration', () => {
