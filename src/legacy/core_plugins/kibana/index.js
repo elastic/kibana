@@ -64,6 +64,7 @@ export default function(kibana) {
         'plugins/kibana/discover/legacy',
         'plugins/kibana/dev_tools',
         'plugins/kibana/visualize/legacy',
+        'plugins/kibana/dashboard/legacy',
       ],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',

@@ -472,7 +472,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
         <EuiSpacer size="m" />
 
-
+        {this.renderListingLimitWarning()}
 
         {this.renderTable()}
       </div>
