@@ -15,7 +15,7 @@ import {
   Dispatch,
 } from './reducer';
 import { Field, FieldsEditor } from './types';
-import { normalize, deNormalize, canUseMappingsEditor } from './lib';
+import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
