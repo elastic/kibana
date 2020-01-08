@@ -11,10 +11,13 @@ import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
+import { TestProviders, mockGlobalState, apolloClientObservable } from '../../mock';
+import { State, createStore } from '../../store';
+import { inputsActions } from '../../store/inputs';
 import { Network } from './network';
+import { NetworkRoutes } from './navigation';
 
 jest.mock('../../lib/kibana');
 
@@ -112,5 +115,59 @@ describe('rendering - rendering', () => {
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+  });
+
+  test('it should add the new filters after init', async () => {
+    const newFilters: esFilters.Filter[] = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'host.name': 'ItRocks',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"query": {"bool": {"filter": [{"bool": {"should": [{"match_phrase": {"host.name": "ItRocks"}}],"minimum_should_match": 1}}]}}}',
+        },
+      },
+    ];
+    localSource[0].result.data.source.status.indicesExist = true;
+    const myState: State = mockGlobalState;
+    const myStore = createStore(myState, apolloClientObservable);
+    const wrapper = mount(
+      <TestProviders store={myStore}>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Network {...getMockProps()} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+
+    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    wrapper.update();
+    expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
+      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    );
   });
 });
