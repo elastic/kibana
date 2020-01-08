@@ -4,12 +4,12 @@
 
 ## AppLeaveHandler type
 
-A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return a message to prompt to the user before leaving the page, or undefined to not show any message.
+A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return `confirm` to to prompt a message to the user before leaving the page, or `default` to keep the default behavior (doing nothing).
 
 See [AppMountParameters](./kibana-plugin-public.appmountparameters.md) for detailed usage examples.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type AppLeaveHandler = () => string | undefined;
+export declare type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
 ```

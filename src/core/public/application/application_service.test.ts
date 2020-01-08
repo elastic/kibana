@@ -146,18 +146,14 @@ describe('#setup()', () => {
 });
 
 describe('#start()', () => {
-  const showConfirmMock = jest.fn();
-
   beforeEach(() => {
     MockHistory.push.mockReset();
-    showConfirmMock.mockReset();
 
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-      showConfirmation: showConfirmMock,
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http };

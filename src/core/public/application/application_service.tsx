@@ -39,6 +39,7 @@ import {
   InternalApplicationSetup,
   InternalApplicationStart,
 } from './types';
+import { getLeaveAction, isConfirmAction } from './application_leave';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -88,7 +89,6 @@ export class ApplicationService {
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: any) => void;
-  private showConfirmation?: (msg: string | undefined) => boolean;
 
   public setup({
     context,
@@ -102,8 +102,6 @@ export class ApplicationService {
     if (!injectedMetadata.getLegacyMode()) {
       this.history = createBrowserHistory({ basename });
     }
-
-    this.showConfirmation = showConfirmation;
 
     // If we do not have history available, use redirectTo to do a full page refresh.
     this.navigate = (url, state) =>
@@ -228,10 +226,12 @@ export class ApplicationService {
 
   private async shouldNavigateTo(_appId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
-    const appLeaveHandler = currentAppId ? this.appLeaveHandlers.get(currentAppId) : undefined;
-
-    if (appLeaveHandler && appLeaveHandler()) {
-      const confirmed = this.showConfirmation!(appLeaveHandler());
+    if (currentAppId === undefined) {
+      return true;
+    }
+    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    if (isConfirmAction(action)) {
+      const confirmed = window.confirm(action.text);
       if (!confirmed) {
         return false;
       }
@@ -241,11 +241,14 @@ export class ApplicationService {
 
   private onBeforeUnload = (event: Event) => {
     const currentAppId = this.currentAppId$.value;
-    const appLeaveHandler = currentAppId ? this.appLeaveHandlers.get(currentAppId) : undefined;
-    const appLeaveMessage = appLeaveHandler && appLeaveHandler();
-    if (appLeaveMessage) {
+    if (currentAppId === undefined) {
+      return;
+    }
+    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    if (isConfirmAction(action)) {
       event.preventDefault();
-      event.returnValue = 'appLeaveMessage' as any;
+      // some browsers accept a string return value being the message displayed
+      event.returnValue = action.text as any;
     }
   };
 

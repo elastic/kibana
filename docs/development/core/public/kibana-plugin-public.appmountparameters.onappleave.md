@@ -28,10 +28,11 @@ import { MyPluginDepsStart } from './plugin';
 
 export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
    const { renderApp, hasUnsavedChanges } = await import('./application');
-   onAppLeave(() => {
+   onAppLeave(actions => {
      if(hasUnsavedChanges()) {
-       return 'Some changes were not saved. Are you sure you want to leave?';
+       return actions.confirm('Some changes were not saved. Are you sure you want to leave?');
      }
+     return actions.default();
    });
    return renderApp(params);
 }

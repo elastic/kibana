@@ -17,24 +17,30 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
+import {
+  AppLeaveActionFactory,
   AppLeaveActionType,
   AppLeaveAction,
-  AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
-  LegacyApp,
+  AppLeaveHandler,
 } from './types';
+
+const appLeaveActionFactory: AppLeaveActionFactory = {
+  confirm(text: string, title?: string) {
+    return { type: AppLeaveActionType.confirm, text, title };
+  },
+  default() {
+    return { type: AppLeaveActionType.default };
+  },
+};
+
+export function isConfirmAction(action: AppLeaveAction): action is AppLeaveConfirmAction {
+  return action.type === AppLeaveActionType.confirm;
+}
+
+export function getLeaveAction(handler?: AppLeaveHandler): AppLeaveAction {
+  if (!handler) {
+    return appLeaveActionFactory.default();
+  }
+  return handler(appLeaveActionFactory);
+}

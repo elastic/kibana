@@ -90,6 +90,10 @@ export {
   AppMountContext,
   AppMountParameters,
   AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
 } from './application';
 
 export {
