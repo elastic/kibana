@@ -12,5 +12,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     before('load heartbeat data', () => esArchiver.load('uptime/full_heartbeat'));
     after('unload', () => esArchiver.unload('uptime/full_heartbeat'));
     loadTestFile(require.resolve('./snapshot'));
+    loadTestFile(require.resolve('./monitor_latest_status'));
+    loadTestFile(require.resolve('./selected_monitor'));
   });
 }
