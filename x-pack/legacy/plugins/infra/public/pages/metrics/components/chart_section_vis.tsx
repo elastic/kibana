@@ -6,15 +6,7 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
 import { getChartTheme } from '../../../components/metrics_explorer/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
@@ -106,12 +98,12 @@ export const ChartSectionVis = ({
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
-            id={getAxisId('timestamp')}
+            id="timestamp"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={getAxisId('values')} position={Position.Left} tickFormat={valueFormatter} />
+          <Axis id="values" position={Position.Left} tickFormat={valueFormatter} />
           {metric &&
             metric.series.map(series => (
               <SeriesChart

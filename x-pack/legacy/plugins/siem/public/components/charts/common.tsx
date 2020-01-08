@@ -5,17 +5,14 @@
  */
 
 import {
-  CustomSeriesColorsMap,
   DARK_THEME,
-  DataSeriesColorsValues,
-  getSpecId,
   LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
   Rendering,
   Rotation,
   ScaleType,
-  SettingSpecProps,
+  SettingsSpecProps,
   TickFormatter,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
@@ -47,7 +44,7 @@ export interface ChartSeriesConfigs {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
   };
-  settings?: Partial<SettingSpecProps>;
+  settings?: Partial<SettingsSpecProps>;
 }
 
 export interface ChartSeriesData {
@@ -75,24 +72,6 @@ export enum SeriesType {
   AREA = 'area',
   LINE = 'line',
 }
-
-// Customize colors: https://ela.st/custom-colors
-export const getSeriesStyle = (
-  seriesKey: string,
-  color: string | undefined,
-  seriesType?: SeriesType
-) => {
-  if (!color) return undefined;
-  const customSeriesColors: CustomSeriesColorsMap = new Map();
-  const dataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: seriesType === SeriesType.BAR ? [seriesKey] : [],
-    specId: getSpecId(seriesKey),
-  };
-
-  customSeriesColors.set(dataSeriesColorValues, color);
-
-  return customSeriesColors;
-};
 
 // Apply margins and paddings: https://ela.st/charts-spacing
 const theme: PartialTheme = {

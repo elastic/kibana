@@ -12,6 +12,10 @@ Access or manipulate the Kibana base path
 export declare class BasePath 
 ```
 
+## Remarks
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `BasePath` class.
+
 ## Properties
 
 |  Property | Modifiers | Type | Description |
@@ -21,8 +25,4 @@ export declare class BasePath
 |  [remove](./kibana-plugin-server.basepath.remove.md) |  | <code>(path: string) =&gt; string</code> | Removes the prepended basePath from the <code>path</code>. |
 |  [serverBasePath](./kibana-plugin-server.basepath.serverbasepath.md) |  | <code>string</code> | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-server.basepath.get.md) for getting the basePath value for a specific request |
 |  [set](./kibana-plugin-server.basepath.set.md) |  | <code>(request: KibanaRequest&lt;unknown, unknown, unknown, any&gt; &#124; LegacyRequest, requestSpecificBasePath: string) =&gt; void</code> | sets <code>basePath</code> value, specific for an incoming request. |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `BasePath` class.
 

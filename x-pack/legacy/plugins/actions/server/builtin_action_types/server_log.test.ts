@@ -98,6 +98,6 @@ describe('execute()', () => {
       config: {},
       secrets: {},
     });
-    expect(mockedLogger.info).toHaveBeenCalledWith('message text here');
+    expect(mockedLogger.info).toHaveBeenCalledWith('server-log: message text here');
   });
 });

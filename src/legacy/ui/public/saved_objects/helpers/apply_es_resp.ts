@@ -20,7 +20,7 @@ import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source';
 import { expandShorthand, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IndexPattern } from '../../../../../plugins/data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given

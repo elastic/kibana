@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
-import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  esQuery,
+  Query,
+  esKuery,
+} from '../../../../../../../../../src/plugins/data/public';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';

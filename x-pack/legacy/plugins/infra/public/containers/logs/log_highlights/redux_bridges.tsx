@@ -7,7 +7,6 @@
 import React, { useEffect, useContext } from 'react';
 
 import { TimeKey } from '../../../../common/time';
-import { withLogFilter } from '../with_log_filter';
 import { withLogPosition } from '../with_log_position';
 import { LogHighlightsState } from './log_highlights';
 
@@ -35,21 +34,8 @@ export const LogHighlightsPositionBridge = withLogPosition(
   }
 );
 
-export const LogHighlightsFilterQueryBridge = withLogFilter(
-  ({ serializedFilterQuery }: { serializedFilterQuery: string | null }) => {
-    const { setFilterQuery } = useContext(LogHighlightsState.Context);
-
-    useEffect(() => {
-      setFilterQuery(serializedFilterQuery);
-    }, [serializedFilterQuery, setFilterQuery]);
-
-    return null;
-  }
-);
-
-export const LogHighlightsBridge = ({ indexPattern }: { indexPattern: any }) => (
+export const LogHighlightsBridge = () => (
   <>
     <LogHighlightsPositionBridge />
-    <LogHighlightsFilterQueryBridge indexPattern={indexPattern} />
   </>
 );

@@ -21,7 +21,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
-import { Field } from '../../../../index_patterns';
+import { Field } from '../../../../../../../plugins/data/public';
 import { ComboBoxGroupedOptions, SubAggParamsProp } from '..';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { AggConfig, VisState } from '../../..';
