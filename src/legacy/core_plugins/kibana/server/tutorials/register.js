@@ -80,6 +80,7 @@ import { traefikMetricsSpecProvider } from './traefik_metrics';
 import { awsLogsSpecProvider } from './aws_logs';
 import { activemqLogsSpecProvider } from './activemq_logs';
 import { activemqMetricsSpecProvider } from './activemq_metrics';
+import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -148,4 +149,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(envoyproxyMetricsSpecProvider);
 }

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode } from 'react';
-import { FieldName } from 'ui/directives/field_name/field_name';
-import { FieldMapping, DocViewFilterFn } from 'ui/registry/doc_views_types';
 import classNames from 'classnames';
+import React, { ReactNode } from 'react';
+import { FieldName } from '../../../kibana_services';
+import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';

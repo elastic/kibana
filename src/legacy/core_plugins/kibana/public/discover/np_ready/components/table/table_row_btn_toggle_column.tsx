@@ -22,46 +22,50 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
-  onClick: () => void;
+  active: boolean;
   disabled?: boolean;
-  scripted?: boolean;
+  onClick: () => void;
 }
 
-export function DocViewTableRowBtnFilterExists({
-  onClick,
-  disabled = false,
-  scripted = false,
-}: Props) {
-  const tooltipContent = disabled ? (
-    scripted ? (
-      <FormattedMessage
-        id="kbnDocViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
-        defaultMessage="Unable to filter for presence of scripted fields"
-      />
-    ) : (
-      <FormattedMessage
-        id="kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
-        defaultMessage="Unable to filter for presence of meta fields"
-      />
-    )
-  ) : (
-    <FormattedMessage
-      id="kbnDocViews.table.filterForFieldPresentButtonTooltip"
-      defaultMessage="Filter for field present"
-    />
-  );
-
-  return (
-    <EuiToolTip content={tooltipContent}>
+export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
+  if (disabled) {
+    return (
       <EuiButtonIcon
-        aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
-          defaultMessage: 'Filter for field present',
-        })}
+        aria-label={i18n.translate(
+          'kbn.discover.docViews.table.toggleColumnInTableButtonAriaLabel',
+          {
+            defaultMessage: 'Toggle column in table',
+          }
+        )}
+        className="kbnDocViewer__actionButton"
+        data-test-subj="toggleColumnButton"
+        disabled
+        iconType={'tableOfContents'}
+        iconSize={'s'}
+      />
+    );
+  }
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="kbn.discover.docViews.table.toggleColumnInTableButtonTooltip"
+          defaultMessage="Toggle column in table"
+        />
+      }
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate(
+          'kbn.discover.docViews.table.toggleColumnInTableButtonAriaLabel',
+          {
+            defaultMessage: 'Toggle column in table',
+          }
+        )}
+        aria-pressed={active}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj="addExistsFilterButton"
-        disabled={disabled}
-        iconType={'indexOpen'}
+        data-test-subj="toggleColumnButton"
+        iconType={'tableOfContents'}
         iconSize={'s'}
       />
     </EuiToolTip>
