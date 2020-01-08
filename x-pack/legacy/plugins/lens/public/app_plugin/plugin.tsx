@@ -19,6 +19,8 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import rison, { RisonObject, RisonValue } from 'rison-node';
+import { isObject } from 'lodash';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
@@ -44,7 +46,8 @@ import { EditorFrameStart } from '../types';
 import {
   getKibanaBasePathFromDashboardUrl,
   addEmbeddableToDashboardUrl,
-  getDashboardUrlWithoutTime,
+  getDashboardUrlWithQueryParams,
+  getUrlVars,
 } from './url_helper';
 
 export interface LensPluginSetupDependencies {
@@ -56,6 +59,9 @@ export interface LensPluginStartDependencies {
   dataShim: DataStart;
 }
 
+export const isRisonObject = (value: RisonValue): value is RisonObject => {
+  return isObject(value);
+};
 export class AppPlugin {
   private startDependencies: {
     data: DataPublicPluginStart;
@@ -98,7 +104,15 @@ export class AppPlugin {
             http: core.http,
           })
         );
-
+        const updateUrlTime = (urlVars: Record<string, string>): void => {
+          const decoded: RisonObject = rison.decode(urlVars._g) as RisonObject;
+          if (!decoded) {
+            return;
+          }
+          // @ts-ignore
+          decoded.time = data.query.timefilter.timefilter.getTime();
+          urlVars._g = rison.encode((decoded as unknown) as RisonObject);
+        };
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
           addToDashboardMode: boolean,
@@ -118,14 +132,15 @@ export class AppPlugin {
             const lensUrl = `${getKibanaBasePathFromDashboardUrl(
               lastDashboardAbsoluteUrl
             )}/lens/edit/${id}`;
-            const dashboardUrlWithoutTime = getDashboardUrlWithoutTime(lastDashboardAbsoluteUrl);
-            if (lensUrl && dashboardUrlWithoutTime) {
+            if (lastDashboardAbsoluteUrl && lensUrl) {
+              const urlVars = getUrlVars(lastDashboardAbsoluteUrl);
+              updateUrlTime(urlVars);
               window.history.pushState({}, '', lensUrl);
-              const dashboardParsedUrl = addEmbeddableToDashboardUrl(
-                dashboardUrlWithoutTime,
-                id,
-                'lens'
+              const dashboardUrl = getDashboardUrlWithQueryParams(
+                lastDashboardAbsoluteUrl,
+                urlVars
               );
+              const dashboardParsedUrl = addEmbeddableToDashboardUrl(dashboardUrl, id, 'lens');
               if (dashboardParsedUrl) {
                 window.history.pushState({}, '', dashboardParsedUrl);
               }

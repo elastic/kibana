@@ -14,7 +14,8 @@ jest.mock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', (
 import {
   addEmbeddableToDashboardUrl,
   getKibanaBasePathFromDashboardUrl,
-  getDashboardUrlWithoutTime,
+  getUrlVars,
+  getDashboardUrlWithQueryParams,
 } from './url_helper';
 
 describe('Lens URL Helper', () => {
@@ -58,28 +59,44 @@ describe('Lens URL Helper', () => {
     );
   });
 
-  it('getDashboardUrlWithoutTime', () => {
+  it('getUrlVars', () => {
     let url =
       "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
-    expect(getDashboardUrlWithoutTime(url)).toEqual(
-      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()"
+    expect(getUrlVars(url)).toEqual({
+      _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))',
+      _a: "(description:'',filters:!()",
+    });
+    url = 'http://mybusiness.mydomain.com/app/kibana#/dashboard?x=y&y=z';
+    expect(getUrlVars(url)).toEqual({
+      x: 'y',
+      y: 'z',
+    });
+    url = 'http://notDashboardUrl';
+    expect(getUrlVars(url)).toEqual({});
+    url = 'http://localhost:5601/app/kibana#/dashboard/777182';
+    expect(getUrlVars(url)).toEqual({});
+  });
+
+  it('getDashboardUrlWithQueryParams', () => {
+    const queryParams = {
+      _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-45m,to:now))',
+      _a: "(description:'',filters:!()",
+    };
+    let url =
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(getDashboardUrlWithQueryParams(url, queryParams)).toEqual(
+      "http://localhost:5601/app/kibana#/dashboard?_a=(description:'',filters:!()&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-45m,to:now))"
     );
+
     url =
-      "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()";
-    expect(getDashboardUrlWithoutTime(url)).toEqual(
-      `http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:\'\',filters:!()`
+      "http://localhost:5601/app/kibana#/dashboard/625357282?_a=(description:'',filters:!()&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))";
+    expect(getDashboardUrlWithQueryParams(url, queryParams)).toEqual(
+      "http://localhost:5601/app/kibana#/dashboard/625357282?_a=(description:'',filters:!()&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-45m,to:now))"
     );
-    url =
-      "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(time:(from:now-15m,to:now),refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()";
-    expect(getDashboardUrlWithoutTime(url)).toEqual(
-      `http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:\'\',filters:!()`
-    );
-    url = 'http://notDashboarUrl';
-    expect(getDashboardUrlWithoutTime(url)).toBe('http://notDashboarUrl');
-    url =
-      "http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()";
-    expect(getDashboardUrlWithoutTime(url)).toBe(
-      `http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0))&_a=(description:'',filters:!()`
+
+    url = 'http://localhost:5601/app/kibana#/dashboard/777182';
+    expect(getDashboardUrlWithQueryParams(url, queryParams)).toEqual(
+      "http://localhost:5601/app/kibana#/dashboard/777182?_a=(description:'',filters:!()&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-45m,to:now))"
     );
   });
 });

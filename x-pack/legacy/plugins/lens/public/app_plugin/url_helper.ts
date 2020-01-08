@@ -7,8 +7,6 @@ import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/ki
 
 const EMPTY_DASHBOARD_PATTERN = /(.*#\/dashboard\?)(.*)/;
 const DASHBOARD_WITH_ID_PATTERN = /(.*#\/dashboard\/.*\?)(.*)/;
-const TIME_PATTERN_1 = /(.*)(,time:[^)]+\))(.*)/;
-const TIME_PATTERN_2 = /(.*)(time:[^)]+\),)(.*)/; // same as TIME_PATTERN_1, but comma follows, not preceeds
 
 /** *
  * Returns base path from dashboard url
@@ -30,6 +28,42 @@ export function getKibanaBasePathFromDashboardUrl(url: string | undefined): stri
     return regex[1];
   }
   return null;
+}
+
+/**
+ * Returns dashboard url with given query params. If query params already exist in the url, they will be replaced
+ * eg.
+ * input: http://localhost:5601/lib/app/kibana#/dashboard, {_a: {...}, _g: {...}}
+ * output: http://localhost:5601/lib/app/kibana#/dashboard??_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!(),query:(language:kuery,query:''),timeRestore:!f,title:'',viewMode:edit)
+ * @param absoluteUrl dashboard absolute url
+ * @param urlParams query params to append to the url
+ */
+export function getDashboardUrlWithQueryParams(
+  absoluteUrl: string,
+  urlParams: Record<string, string>
+): string {
+  let dashboardUrl = getUrlWithoutQueryParams(absoluteUrl);
+  if (!dashboardUrl) {
+    return absoluteUrl;
+  }
+  dashboardUrl += '?';
+  const keys = Object.keys(urlParams).sort();
+  keys.forEach((key, index) => {
+    dashboardUrl += `${key}=${urlParams[key]}`;
+    if (index !== keys.length - 1) {
+      dashboardUrl += '&';
+    }
+  });
+  return dashboardUrl;
+}
+
+export function getUrlVars(url: string): Record<string, string> {
+  const vars: Record<string, string> = {};
+  // @ts-ignore
+  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
+    vars[key] = value;
+  });
+  return vars;
 }
 
 /** *
@@ -60,20 +94,17 @@ export function addEmbeddableToDashboardUrl(
 }
 
 /**
- * Returns dashboard URL without time parameter
+ * Returns the portion of the URL without query params
  * eg.
- * input: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
- * output: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0))
+ * input: http://localhost:5601/lib/app/kibana#/dashboard?param1=x&param2=y&param3=z
+ * output:http://localhost:5601/lib/app/kibana#/dashboard
+ * input: http://localhost:5601/lib/app/kibana#/dashboard/39292992?param1=x&param2=y&param3=z
+ * output: http://localhost:5601/lib/app/kibana#/dashboard/39292992
  * @param url dashboard absolute url
  */
-export function getDashboardUrlWithoutTime(url: string | undefined): string | null {
+function getUrlWithoutQueryParams(url: string | undefined): string | null {
   if (!url) {
     return null;
   }
-  let regex = RegExp(TIME_PATTERN_1).exec(url);
-  regex = regex || RegExp(TIME_PATTERN_2).exec(url);
-  if (regex) {
-    return `${regex[1]}${regex[3]}`;
-  }
-  return url;
+  return url.split('?')[0];
 }
