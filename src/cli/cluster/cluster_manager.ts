@@ -26,7 +26,7 @@ import { first, mapTo, filter, map, take } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { FSWatcher } from 'chokidar';
 
-import { LegacyConfig } from '../../core/server/legacy/config';
+import { LegacyConfig } from '../../core/server/legacy';
 import { BasePathProxyServer } from '../../core/server/http';
 
 // @ts-ignore

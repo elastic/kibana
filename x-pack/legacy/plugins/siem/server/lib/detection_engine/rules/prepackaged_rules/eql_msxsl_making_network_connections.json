@@ -1,0 +1,17 @@
+{
+  "rule_id": "d7351b03-135d-43ba-8b36-cc9b07854525",
+  "risk_score": 50,
+  "description": "EQL - MsXsl Making Network Connections",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - MsXsl Making Network Connections",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:msxml.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

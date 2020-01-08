@@ -1,0 +1,17 @@
+{
+  "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf",
+  "risk_score": 50,
+  "description": "EQL - Encoding or Decoding Files via CertUtil",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Encoding or Decoding Files via CertUtil",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and    process.name:\"certutil.exe\" and    process.args:(\"-encode\" or \"/encode\" or \"-decode\" or \"/decode\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -27,7 +27,7 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { fieldWildcardMatcher } from 'ui/field_wildcard';
+import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';

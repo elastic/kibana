@@ -114,8 +114,9 @@ const sampleIndexPatterns = {
       {
         name: 'source',
         type: 'string',
-        aggregatable: true,
-        searchable: true,
+        aggregatable: false,
+        searchable: false,
+        scripted: true,
         aggregationRestrictions: {
           terms: {
             agg: 'terms',
@@ -196,7 +197,7 @@ describe('loader', () => {
       expect(cache).toMatchObject(sampleIndexPatterns);
     });
 
-    it('should not allow full text fields', async () => {
+    it('should allow scripted, but not full text fields', async () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['a', 'b'],
@@ -280,6 +281,26 @@ describe('loader', () => {
         ],
         indexPatterns: {
           a: sampleIndexPatterns.a,
+        },
+        layers: {},
+        showEmptyFields: false,
+      });
+    });
+
+    it('should use the default index pattern id, if provided', async () => {
+      const state = await loadInitialState({
+        defaultIndexPatternId: 'b',
+        savedObjectsClient: mockClient(),
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: 'b',
+        indexPatternRefs: [
+          { id: 'a', title: sampleIndexPatterns.a.title },
+          { id: 'b', title: sampleIndexPatterns.b.title },
+        ],
+        indexPatterns: {
+          b: sampleIndexPatterns.b,
         },
         layers: {},
         showEmptyFields: false,

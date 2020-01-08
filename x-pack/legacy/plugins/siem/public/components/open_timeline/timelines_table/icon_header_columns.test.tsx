@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
@@ -16,7 +16,7 @@ import { TimelinesTable } from '.';
 import { OpenTimelineResult } from '../types';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/kibana');
 
 describe('#getActionsColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

@@ -45,11 +45,18 @@ export const mockUiSettings = {
   'format:defaultTypeMap': {},
 };
 
-export const npSetup = {
-  core: {
-    chrome: {},
-    uiSettings: mockUiSettings,
+const mockCore = {
+  chrome: {},
+  uiSettings: mockUiSettings,
+  http: {
+    basePath: {
+      get: sinon.fake.returns(''),
+    },
   },
+};
+
+export const npSetup = {
+  core: mockCore,
   plugins: {
     usageCollection: {
       allowTrackUserAgent: sinon.fake(),
@@ -95,7 +102,7 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       register: () => {},
@@ -141,6 +148,8 @@ export const npStart = {
       legacy: {
         getSection: () => ({
           register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
         }),
       },
     },
@@ -224,7 +233,7 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+      fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       toggleShareContextMenu: () => {},

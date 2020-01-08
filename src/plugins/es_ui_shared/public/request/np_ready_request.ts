@@ -19,7 +19,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { HttpServiceBase, HttpFetchQuery } from '../../../../../src/core/public';
+import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
 export interface SendRequestConfig {
   path: string;
@@ -48,7 +48,7 @@ export interface UseRequestResponse {
 }
 
 export const sendRequest = async (
-  httpClient: HttpServiceBase,
+  httpClient: HttpSetup,
   { path, method, body, query }: SendRequestConfig
 ): Promise<SendRequestResponse> => {
   try {
@@ -67,7 +67,7 @@ export const sendRequest = async (
 };
 
 export const useRequest = (
-  httpClient: HttpServiceBase,
+  httpClient: HttpSetup,
   {
     path,
     method,

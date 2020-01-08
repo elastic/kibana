@@ -64,7 +64,7 @@ export class VegaBaseView {
     this._$parentEl = $(opts.parentEl);
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
-    this._queryfilter = opts.queryfilter;
+    this._filterManager = opts.filterManager;
     this._timefilter = opts.timefilter;
     this._findIndex = opts.findIndex;
     this._view = null;
@@ -271,7 +271,7 @@ export class VegaBaseView {
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
-    this._queryfilter.addFilters(filter);
+    this._filterManager.addFilters(filter);
   }
 
   /**
@@ -288,7 +288,7 @@ export class VegaBaseView {
     //  this._queryfilter.removeFilter(filter);
     $injector.get('$rootScope').$evalAsync(() => {
       try {
-        this._queryfilter.removeFilter(filter);
+        this._filterManager.removeFilter(filter);
       } catch (err) {
         this.onError(err);
       }
@@ -296,7 +296,7 @@ export class VegaBaseView {
   }
 
   removeAllFiltersHandler() {
-    this._queryfilter.removeAll();
+    this._filterManager.removeAll();
   }
 
   /**

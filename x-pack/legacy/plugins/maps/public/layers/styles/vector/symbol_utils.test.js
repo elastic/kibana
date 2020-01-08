@@ -27,7 +27,6 @@ describe('styleSvg', () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
     const styledSvg = await styleSvg(unstyledSvgString, 'red');
-
     expect(styledSvg.split('\n')[1]).toBe(
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;">'
     );
@@ -37,7 +36,6 @@ describe('styleSvg', () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
     const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white');
-
     expect(styledSvg.split('\n')[1]).toBe(
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;">'
     );
@@ -47,7 +45,6 @@ describe('styleSvg', () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
     const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white', '2px');
-
     expect(styledSvg.split('\n')[1]).toBe(
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;stroke-width:2px;">'
     );

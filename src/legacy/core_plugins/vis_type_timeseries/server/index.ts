@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { MetricsServerPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export { init } from './init';
+export { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';

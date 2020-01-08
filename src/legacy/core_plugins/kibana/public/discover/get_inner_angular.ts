@@ -69,24 +69,24 @@ import { configureAppAngularModule } from 'ui/legacy_compat';
 import { IndexPatterns } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { createDocTableDirective } from './angular/doc_table/doc_table';
-import { createTableHeaderDirective } from './angular/doc_table/components/table_header';
+import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
+import { createTableHeaderDirective } from './np_ready/angular/doc_table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
-} from './angular/doc_table/components/pager';
-import { createTableRowDirective } from './angular/doc_table/components/table_row';
-import { createPagerFactory } from './angular/doc_table/lib/pager/pager_factory';
-import { createInfiniteScrollDirective } from './angular/doc_table/infinite_scroll';
-import { createDocViewerDirective } from './angular/doc_viewer';
-import { createFieldSearchDirective } from './components/field_chooser/discover_field_search_directive';
-import { createIndexPatternSelectDirective } from './components/field_chooser/discover_index_pattern_directive';
-import { createStringFieldProgressBarDirective } from './components/field_chooser/string_progress_bar';
+} from './np_ready/angular/doc_table/components/pager';
+import { createTableRowDirective } from './np_ready/angular/doc_table/components/table_row';
+import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
+import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
+import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
+import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
+import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
+import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
-import { createFieldChooserDirective } from './components/field_chooser/field_chooser';
+import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 
 // @ts-ignore
-import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
+import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
 
 /**

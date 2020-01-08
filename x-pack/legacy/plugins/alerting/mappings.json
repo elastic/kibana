@@ -20,6 +20,9 @@
           }
         }
       },
+      "consumer": {
+        "type": "keyword"
+      },
       "actions": {
         "type": "nested",
         "properties": {
@@ -50,6 +53,9 @@
       },
       "updatedBy": {
         "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
       },
       "apiKey": {
         "type": "binary"

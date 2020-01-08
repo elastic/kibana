@@ -141,7 +141,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
             lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
           const newTopCountriesSort: NetworkTopTablesSortField = {
             field: lastField as NetworkTopTablesFields,
-            direction: newSortDirection,
+            direction: newSortDirection as Direction,
           };
           if (!isEqual(newTopCountriesSort, sort)) {
             updateNetworkTable({

@@ -7,7 +7,7 @@ import { unmountComponentAtNode } from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH } from './app/constants';

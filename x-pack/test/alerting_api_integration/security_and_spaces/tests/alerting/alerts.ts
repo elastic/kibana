@@ -467,6 +467,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
               await alertUtils.disable(response.body.id);
@@ -582,6 +583,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Actions should execute twice before widning things down
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
@@ -599,7 +601,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't schedule actions when alert is muted`, async () => {
+        /**
+         * Skipping due to an issue we've discovered in the `muteAll` api
+         * which corrupts the apiKey and causes this test to exhibit flaky behaviour.
+         * Failed CIs for example:
+         * 1. https://github.com/elastic/kibana/issues/53690
+         * 2. https://github.com/elastic/kibana/issues/53683
+         *
+         * This will be fixed and reverted in PR: https://github.com/elastic/kibana/pull/53333
+         */
+        it.skip(`shouldn't schedule actions when alert is muted`, async () => {
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({

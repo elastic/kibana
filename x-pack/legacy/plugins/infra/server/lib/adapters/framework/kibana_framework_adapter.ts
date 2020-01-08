@@ -10,7 +10,7 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
@@ -36,21 +36,14 @@ import { InfraConfig } from '../../../../../../../plugins/infra/server';
 
 export class KibanaFramework {
   public router: IRouter;
-  private core: CoreSetup;
   public plugins: InfraServerPluginDeps;
 
   constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
     this.router = core.http.createRouter();
-    this.core = core;
     this.plugins = plugins;
   }
 
-  public registerRoute<
-    params extends ObjectType = any,
-    query extends ObjectType = any,
-    body extends ObjectType = any,
-    method extends RouteMethod = any
-  >(
+  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
     config: InfraRouteConfig<params, query, body, method>,
     handler: RequestHandler<params, query, body>
   ) {
@@ -246,45 +239,21 @@ export class KibanaFramework {
     }
   }
 
-  // NP_TODO: [TSVB_GROUP] This method needs fixing when the metrics plugin has migrated to the New Platform
   public async makeTSVBRequest(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: any[],
-    requestContext: RequestHandlerContext
+    filters: any[]
   ): Promise<InfraTSVBResponse> {
     const { getVisData } = this.plugins.metrics;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }
-    const url = this.core.http.basePath.prepend('/api/metrics/vis/data');
-    // For the following request we need a copy of the instnace of the internal request
-    // but modified for our TSVB request. This will ensure all the instance methods
-    // are available along with our overriden values
-    const requestCopy = Object.assign({}, request, {
-      url,
-      method: 'POST',
-      payload: {
-        timerange,
-        panels: [model],
-        filters,
-      },
-      // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
-      // originate from the New Platform router (and are very different to the old request object).
-      // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just
-      // the requestContext, this can be removed.
-      server: {
-        plugins: {
-          elasticsearch: this.plugins.___legacy.tsvb.elasticsearch,
-        },
-        newPlatform: {
-          __internals: this.plugins.___legacy.tsvb.__internals,
-        },
-      },
-      getUiSettingsService: () => requestContext.core.uiSettings.client,
-      getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    });
-    return getVisData(requestCopy);
+    const options = {
+      timerange,
+      panels: [model],
+      filters,
+    };
+    return getVisData(requestContext, options);
   }
 }

@@ -8,9 +8,9 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-
-import chrome from 'ui/chrome';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
@@ -20,6 +20,7 @@ import {
   TimelineItem,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
@@ -50,7 +51,7 @@ export interface OwnProps extends QueryTemplateProps {
   sortField: SortField;
   fields: string[];
 }
-type TimelineQueryProps = OwnProps & TimelineQueryReduxProps;
+type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & WithKibanaProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -71,6 +72,7 @@ class TimelineQueryComponent extends QueryTemplate<
       id,
       indexPattern,
       isInspected,
+      kibana,
       limit,
       fields,
       filterQuery,
@@ -84,7 +86,8 @@ class TimelineQueryComponent extends QueryTemplate<
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex:
-        indexPattern?.title.split(',') ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        indexPattern?.title.split(',') ??
+        kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (
@@ -158,4 +161,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const TimelineQuery = connect(makeMapStateToProps)(TimelineQueryComponent);
+export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(TimelineQueryComponent);

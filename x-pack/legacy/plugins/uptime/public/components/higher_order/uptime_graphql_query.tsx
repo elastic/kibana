@@ -75,6 +75,9 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
        * reassign the update function to do nothing with the returned values.
        */
       return () => {
+        // this component is planned to be deprecated, for the time being
+        // we will want to preserve this for the reason above.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         updateState = () => {};
       };
     }, [variables, lastRefresh]);

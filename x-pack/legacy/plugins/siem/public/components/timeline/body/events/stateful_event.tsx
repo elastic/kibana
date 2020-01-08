@@ -9,13 +9,19 @@ import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields } from '../../../../containers/source';
-import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
-import { TimelineItem, DetailItem } from '../../../../graphql/types';
+import { TimelineDetailsQuery } from '../../../../containers/timeline/details';
+import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import {
+  OnColumnResized,
+  OnPinEvent,
+  OnRowSelected,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
@@ -36,13 +42,17 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
+  loadingEventIds: Readonly<string[]>;
   maxDelay?: number;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
@@ -81,7 +91,7 @@ interface AttributesProps {
   children: React.ReactNode;
 }
 
-const Attributes = React.memo<AttributesProps>(({ children }) => {
+const AttributesComponent: React.FC<AttributesProps> = ({ children }) => {
   const width = useTimelineWidthContext();
 
   // Passing the styles directly to the component because the width is
@@ -96,179 +106,187 @@ const Attributes = React.memo<AttributesProps>(({ children }) => {
       {children}
     </EventsTrSupplement>
   );
-});
+};
 
-export const StatefulEvent = React.memo<Props>(
-  ({
-    actionsColumnWidth,
-    addNoteToEvent,
-    browserFields,
-    columnHeaders,
-    columnRenderers,
-    event,
-    eventIdToNoteIds,
-    getNotesByIds,
-    isEventViewer = false,
-    isEventPinned = false,
-    maxDelay = 0,
-    onColumnResized,
-    onPinEvent,
-    onUnPinEvent,
-    onUpdateColumns,
-    rowRenderers,
-    timelineId,
-    toggleColumn,
-    updateNote,
-  }) => {
-    const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
-    const [initialRender, setInitialRender] = useState(false);
-    const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
+const Attributes = React.memo(AttributesComponent);
 
-    const divElement = useRef<HTMLDivElement | null>(null);
+const StatefulEventComponent: React.FC<Props> = ({
+  actionsColumnWidth,
+  addNoteToEvent,
+  browserFields,
+  columnHeaders,
+  columnRenderers,
+  event,
+  eventIdToNoteIds,
+  getNotesByIds,
+  isEventViewer = false,
+  isEventPinned = false,
+  loadingEventIds,
+  maxDelay = 0,
+  onColumnResized,
+  onPinEvent,
+  onRowSelected,
+  onUnPinEvent,
+  onUpdateColumns,
+  rowRenderers,
+  selectedEventIds,
+  showCheckboxes,
+  timelineId,
+  toggleColumn,
+  updateNote,
+}) => {
+  const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
+  const [initialRender, setInitialRender] = useState(false);
+  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
 
-    const onToggleShowNotes = useCallback(() => {
-      const eventId = event._id;
-      setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
-    }, [event, showNotes]);
+  const divElement = useRef<HTMLDivElement | null>(null);
 
-    const onToggleExpanded = useCallback(() => {
-      const eventId = event._id;
-      setExpanded({
-        ...expanded,
-        [eventId]: !expanded[eventId],
-      });
-    }, [event, expanded]);
+  const onToggleShowNotes = useCallback(() => {
+    const eventId = event._id;
+    setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
+  }, [event, showNotes]);
 
-    const associateNote = useCallback(
-      (noteId: string) => {
-        addNoteToEvent({ eventId: event._id, noteId });
-        if (!isEventPinned) {
-          onPinEvent(event._id); // pin the event, because it has notes
+  const onToggleExpanded = useCallback(() => {
+    const eventId = event._id;
+    setExpanded({
+      ...expanded,
+      [eventId]: !expanded[eventId],
+    });
+  }, [event, expanded]);
+
+  const associateNote = useCallback(
+    (noteId: string) => {
+      addNoteToEvent({ eventId: event._id, noteId });
+      if (!isEventPinned) {
+        onPinEvent(event._id); // pin the event, because it has notes
+      }
+    },
+    [addNoteToEvent, event, isEventPinned, onPinEvent]
+  );
+
+  /**
+   * Incrementally loads the events when it mounts by trying to
+   * see if it resides within a window frame and if it is it will
+   * indicate to React that it should render its self by setting
+   * its initialRender to true.
+   */
+  useEffect(() => {
+    let _isMounted = true;
+
+    requestIdleCallbackViaScheduler(
+      () => {
+        if (!initialRender && _isMounted) {
+          setInitialRender(true);
         }
       },
-      [addNoteToEvent, event, isEventPinned, onPinEvent]
+      { timeout: maxDelay }
     );
+    return () => {
+      _isMounted = false;
+    };
+  }, []);
 
-    /**
-     * Incrementally loads the events when it mounts by trying to
-     * see if it resides within a window frame and if it is it will
-     * indicate to React that it should render its self by setting
-     * its initialRender to true.
-     */
-    useEffect(() => {
-      let _isMounted = true;
+  // Number of current columns plus one for actions.
+  const columnCount = columnHeaders.length + 1;
 
-      requestIdleCallbackViaScheduler(
-        () => {
-          if (!initialRender && _isMounted) {
-            setInitialRender(true);
-          }
-        },
-        { timeout: maxDelay }
-      );
-      return () => {
-        _isMounted = false;
-      };
-    }, []);
-
-    // Number of current columns plus one for actions.
-    const columnCount = columnHeaders.length + 1;
-
-    // If we are not ready to render yet, just return null
-    // see useEffect() for when it schedules the first
-    // time this stateful component should be rendered.
-    if (!initialRender) {
-      return <SkeletonRow cellCount={columnCount} />;
-    }
-
-    return (
-      <VisibilitySensor
-        partialVisibility={true}
-        scrollCheck={true}
-        offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
-      >
-        {({ isVisible }) => {
-          if (isVisible) {
-            return (
-              <TimelineDetailsComponentQuery
-                sourceId="default"
-                indexName={event._index!}
-                eventId={event._id}
-                executeQuery={!!expanded[event._id]}
-              >
-                {({ detailsData, loading }) => (
-                  <EventsTrGroup
-                    className={STATEFUL_EVENT_CSS_CLASS_NAME}
-                    data-test-subj="event"
-                    ref={c => {
-                      if (c != null) {
-                        divElement.current = c;
-                      }
-                    }}
-                  >
-                    {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                      browserFields,
-                      data: event.ecs,
-                      children: (
-                        <StatefulEventChild
-                          actionsColumnWidth={actionsColumnWidth}
-                          addNoteToEvent={addNoteToEvent}
-                          associateNote={associateNote}
-                          columnHeaders={columnHeaders}
-                          columnRenderers={columnRenderers}
-                          data={event.data}
-                          eventIdToNoteIds={eventIdToNoteIds}
-                          expanded={!!expanded[event._id]}
-                          getNotesByIds={getNotesByIds}
-                          id={event._id}
-                          isEventPinned={isEventPinned}
-                          isEventViewer={isEventViewer}
-                          loading={loading}
-                          onColumnResized={onColumnResized}
-                          onPinEvent={onPinEvent}
-                          onToggleExpanded={onToggleExpanded}
-                          onToggleShowNotes={onToggleShowNotes}
-                          onUnPinEvent={onUnPinEvent}
-                          showNotes={!!showNotes[event._id]}
-                          timelineId={timelineId}
-                          updateNote={updateNote}
-                        />
-                      ),
-                      timelineId,
-                    })}
-
-                    <Attributes>
-                      <ExpandableEvent
-                        browserFields={browserFields}
-                        columnHeaders={columnHeaders}
-                        event={detailsData || emptyDetails}
-                        forceExpand={!!expanded[event._id] && !loading}
-                        id={event._id}
-                        onUpdateColumns={onUpdateColumns}
-                        timelineId={timelineId}
-                        toggleColumn={toggleColumn}
-                      />
-                    </Attributes>
-                  </EventsTrGroup>
-                )}
-              </TimelineDetailsComponentQuery>
-            );
-          } else {
-            // Height place holder for visibility detection as well as re-rendering sections.
-            const height =
-              divElement.current != null
-                ? `${divElement.current.clientHeight}px`
-                : DEFAULT_ROW_HEIGHT;
-
-            // height is being inlined directly in here because of performance with StyledComponents
-            // involving quick and constant changes to the DOM.
-            // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return <SkeletonRow cellCount={columnCount} style={{ height }} />;
-          }
-        }}
-      </VisibilitySensor>
-    );
+  // If we are not ready to render yet, just return null
+  // see useEffect() for when it schedules the first
+  // time this stateful component should be rendered.
+  if (!initialRender) {
+    return <SkeletonRow cellCount={columnCount} />;
   }
-);
 
-StatefulEvent.displayName = 'StatefulEvent';
+  return (
+    <VisibilitySensor
+      partialVisibility={true}
+      scrollCheck={true}
+      offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
+    >
+      {({ isVisible }) => {
+        if (isVisible) {
+          return (
+            <TimelineDetailsQuery
+              sourceId="default"
+              indexName={event._index!}
+              eventId={event._id}
+              executeQuery={!!expanded[event._id]}
+            >
+              {({ detailsData, loading }) => (
+                <EventsTrGroup
+                  className={STATEFUL_EVENT_CSS_CLASS_NAME}
+                  data-test-subj="event"
+                  ref={c => {
+                    if (c != null) {
+                      divElement.current = c;
+                    }
+                  }}
+                >
+                  {getRowRenderer(event.ecs, rowRenderers).renderRow({
+                    browserFields,
+                    data: event.ecs,
+                    children: (
+                      <StatefulEventChild
+                        actionsColumnWidth={actionsColumnWidth}
+                        addNoteToEvent={addNoteToEvent}
+                        associateNote={associateNote}
+                        columnHeaders={columnHeaders}
+                        columnRenderers={columnRenderers}
+                        data={event.data}
+                        eventIdToNoteIds={eventIdToNoteIds}
+                        expanded={!!expanded[event._id]}
+                        getNotesByIds={getNotesByIds}
+                        id={event._id}
+                        isEventPinned={isEventPinned}
+                        isEventViewer={isEventViewer}
+                        loading={loading}
+                        loadingEventIds={loadingEventIds}
+                        onColumnResized={onColumnResized}
+                        onPinEvent={onPinEvent}
+                        onRowSelected={onRowSelected}
+                        onToggleExpanded={onToggleExpanded}
+                        onToggleShowNotes={onToggleShowNotes}
+                        onUnPinEvent={onUnPinEvent}
+                        selectedEventIds={selectedEventIds}
+                        showCheckboxes={showCheckboxes}
+                        showNotes={!!showNotes[event._id]}
+                        timelineId={timelineId}
+                        updateNote={updateNote}
+                      />
+                    ),
+                    timelineId,
+                  })}
+
+                  <Attributes>
+                    <ExpandableEvent
+                      browserFields={browserFields}
+                      columnHeaders={columnHeaders}
+                      event={detailsData || emptyDetails}
+                      forceExpand={!!expanded[event._id] && !loading}
+                      id={event._id}
+                      onUpdateColumns={onUpdateColumns}
+                      timelineId={timelineId}
+                      toggleColumn={toggleColumn}
+                    />
+                  </Attributes>
+                </EventsTrGroup>
+              )}
+            </TimelineDetailsQuery>
+          );
+        } else {
+          // Height place holder for visibility detection as well as re-rendering sections.
+          const height =
+            divElement.current != null
+              ? `${divElement.current.clientHeight}px`
+              : DEFAULT_ROW_HEIGHT;
+
+          // height is being inlined directly in here because of performance with StyledComponents
+          // involving quick and constant changes to the DOM.
+          // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+          return <SkeletonRow cellCount={columnCount} style={{ height }} />;
+        }
+      }}
+    </VisibilitySensor>
+  );
+};
+
+export const StatefulEvent = React.memo(StatefulEventComponent);

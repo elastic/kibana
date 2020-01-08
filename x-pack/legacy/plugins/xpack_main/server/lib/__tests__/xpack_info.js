@@ -312,6 +312,54 @@ describe('XPackInfo', () => {
     });
   });
 
+  it('onLicenseInfoChange() allows to subscribe to license update', async () => {
+    const license$ = new BehaviorSubject(createLicense());
+
+    const xPackInfo = new XPackInfo(mockServer, {
+      licensing: {
+        license$,
+        refresh: () => null,
+      },
+    });
+
+    const watcherFeature = xPackInfo.feature('watcher');
+    watcherFeature.registerLicenseCheckResultsGenerator(info => ({
+      type: info.license.getType(),
+    }));
+
+    const statuses = [];
+    xPackInfo.onLicenseInfoChange(() => statuses.push(watcherFeature.getLicenseCheckResults()));
+
+    license$.next(createLicense({ type: 'basic' }));
+    expect(statuses).to.eql([{ type: 'basic' }]);
+
+    license$.next(createLicense({ type: 'trial' }));
+    expect(statuses).to.eql([{ type: 'basic' }, { type: 'trial' }]);
+  });
+
+  it('refreshNow() leads to onLicenseInfoChange()', async () => {
+    const license$ = new BehaviorSubject(createLicense());
+
+    const xPackInfo = new XPackInfo(mockServer, {
+      licensing: {
+        license$,
+        refresh: () => license$.next({ type: 'basic' }),
+      },
+    });
+
+    const watcherFeature = xPackInfo.feature('watcher');
+
+    watcherFeature.registerLicenseCheckResultsGenerator(info => ({
+      type: info.license.getType(),
+    }));
+
+    const statuses = [];
+    xPackInfo.onLicenseInfoChange(() => statuses.push(watcherFeature.getLicenseCheckResults()));
+
+    await xPackInfo.refreshNow();
+    expect(statuses).to.eql([{ type: 'basic' }]);
+  });
+
   it('getSignature() returns correct signature.', async () => {
     const license$ = new BehaviorSubject(createLicense());
     const xPackInfo = new XPackInfo(mockServer, {

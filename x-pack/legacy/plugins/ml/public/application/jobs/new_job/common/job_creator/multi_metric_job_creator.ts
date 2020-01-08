@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
@@ -22,6 +21,7 @@ import {
 } from '../../../../../../common/constants/new_job';
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field

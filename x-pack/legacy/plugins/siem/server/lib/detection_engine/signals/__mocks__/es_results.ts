@@ -144,6 +144,28 @@ export const sampleBulkCreateDuplicateResult = {
   ],
 };
 
+export const sampleBulkCreateErrorResult = {
+  ...sampleBulkCreateDuplicateResult,
+  items: [
+    ...sampleBulkCreateDuplicateResult.items,
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '5',
+        status: 500,
+        error: {
+          type: 'internal_server_error',
+          reason: '[4]: internal server error',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+  ],
+};
+
 export const sampleDocSearchResultsNoSortId = (
   someUuid: string = sampleIdGuid
 ): SignalSearchResponse => ({

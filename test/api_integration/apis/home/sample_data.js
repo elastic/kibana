@@ -96,7 +96,7 @@ export default function({ getService }) {
         await supertest
           .delete(`/api/sample_data/flights`)
           .set('kbn-xsrf', 'kibana')
-          .expect(200);
+          .expect(204);
       });
 
       it('should remove elasticsearch index containing sample data', async () => {

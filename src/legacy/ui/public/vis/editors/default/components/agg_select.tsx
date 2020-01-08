@@ -23,9 +23,9 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } fro
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
-import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
 import { ComboBoxGroupedOptions } from '../utils';
+import { IndexPattern } from '../../../../../../../plugins/data/public';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;

@@ -126,4 +126,31 @@ describe('DetailView', () => {
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('should render without http request info', () => {
+    const errorGroup = {
+      occurrencesCount: 10,
+      transaction: undefined,
+      error: {
+        timestamp: {
+          us: 0
+        },
+        http: { response: { status_code: 404 } },
+        url: { full: 'myUrl' },
+        service: { name: 'myService' },
+        user: { id: 'myUserId' },
+        error: { exception: { handled: true } },
+        transaction: { id: 'myTransactionId', sampled: true }
+      } as any
+    };
+    expect(() =>
+      shallow(
+        <DetailView
+          errorGroup={errorGroup}
+          urlParams={{}}
+          location={{} as Location}
+        />
+      )
+    ).not.toThrowError();
+  });
 });

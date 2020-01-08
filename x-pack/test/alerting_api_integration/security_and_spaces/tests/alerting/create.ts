@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -87,10 +87,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 alertTypeId: 'test.noop',
+                consumer: 'bar',
                 params: {},
                 createdBy: user.username,
                 schedule: { interval: '1m' },
                 scheduledTaskId: response.body.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
                 throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
@@ -98,12 +101,22 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: response.body.id,
                 spaceId: space.id,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: response.body.id,
               });
               break;
             default:
@@ -201,10 +214,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
+                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "consumer" fails because ["consumer" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['name', 'alertTypeId', 'schedule', 'params', 'actions'],
+                  keys: ['name', 'alertTypeId', 'consumer', 'schedule', 'params', 'actions'],
                 },
               });
               break;

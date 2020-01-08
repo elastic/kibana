@@ -15,6 +15,7 @@ interface ScheduleRequest extends Hapi.Request {
     name: string;
     tags: string[];
     alertTypeId: string;
+    consumer: string;
     schedule: IntervalSchedule;
     actions: Array<{
       group: string;
@@ -43,6 +44,7 @@ export const createAlertRoute = {
             .items(Joi.string())
             .default([]),
           alertTypeId: Joi.string().required(),
+          consumer: Joi.string().required(),
           throttle: getDurationSchema().default(null),
           schedule: Joi.object()
             .keys({
