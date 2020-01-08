@@ -114,12 +114,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/vis_type_vega/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
