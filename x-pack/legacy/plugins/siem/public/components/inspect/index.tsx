@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
 
