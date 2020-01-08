@@ -35,6 +35,7 @@ import {
 } from './routes';
 import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 import { LicenseState } from './lib/license_state';
+import { registerActionsUsageCollector } from './usage';
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -73,6 +74,10 @@ export class Plugin {
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
     this.licenseState = new LicenseState(plugins.licensing.license$);
+
+    registerActionsUsageCollector(plugins.usageCollection, plugins.savedObjects, {
+      isActionsEnabled: config.enabled,
+    });
 
     // Encrypted attributes
     // - `secrets` properties will be encrypted

@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -77,7 +78,9 @@ export interface ActionsPluginsSetup {
   task_manager: TaskManagerSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  savedObjects: SavedObjectsLegacyService;
   licensing: LicensingPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
@@ -137,6 +140,8 @@ export function shim(
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
     licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
+    usageCollection: newPlatform.setup.plugins.usageCollection,
+    savedObjects: server.savedObjects,
   };
 
   const pluginsStart: ActionsPluginsStart = {
