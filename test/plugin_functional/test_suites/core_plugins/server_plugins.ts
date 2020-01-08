@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,6 +53,16 @@ export default function({ getService }: PluginFunctionalProviderContext) {
           message: '[request body]: bar: hi! !== baz: 1234 or they are not string',
           statusCode: 400,
         });
+    });
+
+    it('renders core application explicitly', async () => {
+      await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
+    });
+
+    it('renders legacy application', async () => {
+      await supertest
+        .get('/requestcontext/render/core_plugin_legacy')
+        .expect(200, /app:core_plugin_legacy/);
     });
   });
 }

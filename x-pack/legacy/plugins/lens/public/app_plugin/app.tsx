@@ -152,6 +152,7 @@ export function App({
 
   const isSaveable =
     lastKnownDoc &&
+    lastKnownDoc.expression &&
     lastKnownDoc.expression.length > 0 &&
     core.application.capabilities.visualize.save;
 

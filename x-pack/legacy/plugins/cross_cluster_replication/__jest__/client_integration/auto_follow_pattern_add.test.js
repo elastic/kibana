@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -203,7 +203,7 @@ describe('Create Auto-follow pattern', () => {
           );
         };
 
-        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });

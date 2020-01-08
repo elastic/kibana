@@ -78,6 +78,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

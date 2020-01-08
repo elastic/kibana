@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../../mock';
@@ -19,6 +18,6 @@ describe('UtilityBarText', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('UtilityBarText'))).toMatchSnapshot();
+    expect(wrapper.find('UtilityBarText')).toMatchSnapshot();
   });
 });

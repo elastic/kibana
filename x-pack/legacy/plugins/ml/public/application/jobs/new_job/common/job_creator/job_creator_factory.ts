@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
