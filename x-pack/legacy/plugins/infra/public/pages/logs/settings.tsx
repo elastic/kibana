@@ -5,14 +5,15 @@
  */
 
 import React from 'react';
-import { SourceConfigurationSettings } from '../../../components/source_configuration/source_configuration_settings';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { SourceConfigurationSettings } from '../../components/source_configuration/source_configuration_settings';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-export const SettingsPage = () => {
+export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   return (
     <SourceConfigurationSettings
       shouldAllowEdit={uiCapabilities?.logs?.configureSource as boolean}
+      displaySettings="logs"
     />
   );
 };

@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { inFlightComplete } from '../actions/resolved_args';
+import { Middleware } from 'redux';
+import { State } from '../../../types';
 import { getFullscreen } from '../selectors/app';
 import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
+// @ts-ignore untyped local
 import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';
 
-export const workpadAutoplay = ({ getState }) => next => {
-  let playTimeout;
+export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => next => {
+  let playTimeout: number | undefined;
   let displayInterval = 0;
 
   const router = routerProvider();
@@ -42,18 +44,22 @@ export const workpadAutoplay = ({ getState }) => next => {
       }
     }
 
+    stopAutoUpdate();
     startDelayedUpdate();
   }
 
   function stopAutoUpdate() {
     clearTimeout(playTimeout); // cancel any pending update requests
+    playTimeout = undefined;
   }
 
   function startDelayedUpdate() {
-    stopAutoUpdate();
-    playTimeout = setTimeout(() => {
-      updateWorkpad();
-    }, displayInterval);
+    if (!playTimeout) {
+      stopAutoUpdate();
+      playTimeout = window.setTimeout(() => {
+        updateWorkpad();
+      }, displayInterval);
+    }
   }
 
   return action => {
@@ -68,21 +74,14 @@ export const workpadAutoplay = ({ getState }) => next => {
     if (autoplay.enabled) {
       setAutoplayInterval(createTimeInterval(autoplay.interval));
     } else {
-      setAutoplayInterval(0);
+      setAutoplayInterval(null);
     }
-
-    // when in-flight requests are finished, update the workpad after a given delay
-    if (action.type === inFlightComplete.toString() && shouldPlay) {
-      startDelayedUpdate();
-    } // create new update request
-
-    // This middleware creates or destroys an interval that will cause workpad elements to update
-    // clear any pending timeout
-    stopAutoUpdate();
 
     // if interval is larger than 0, start the delayed update
     if (shouldPlay) {
       startDelayedUpdate();
+    } else {
+      stopAutoUpdate();
     }
   };
 };
