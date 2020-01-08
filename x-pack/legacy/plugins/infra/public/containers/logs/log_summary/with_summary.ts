@@ -7,19 +7,18 @@
 import { useContext } from 'react';
 import { connect } from 'react-redux';
 
-import { logFilterSelectors, logPositionSelectors, State } from '../../../store';
+import { logPositionSelectors, State } from '../../../store';
 import { RendererFunction } from '../../../utils/typed_react';
 import { Source } from '../../source';
 import { LogViewConfiguration } from '../log_view_configuration';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
+import { LogFilterState } from '../log_filter';
 
 export const WithSummary = connect((state: State) => ({
   visibleMidpointTime: logPositionSelectors.selectVisibleMidpointOrTargetTime(state),
-  filterQuery: logFilterSelectors.selectLogFilterQueryAsJson(state),
 }))(
   ({
     children,
-    filterQuery,
     visibleMidpointTime,
   }: {
     children: RendererFunction<{
@@ -27,11 +26,11 @@ export const WithSummary = connect((state: State) => ({
       start: number | null;
       end: number | null;
     }>;
-    filterQuery: string | null;
     visibleMidpointTime: number | null;
   }) => {
     const { intervalSize } = useContext(LogViewConfiguration.Context);
     const { sourceId } = useContext(Source.Context);
+    const { filterQuery } = useContext(LogFilterState.Context);
 
     const { buckets, start, end } = useLogSummary(
       sourceId,

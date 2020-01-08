@@ -31,32 +31,58 @@ export class VectorTileLayer extends TileLayer {
     return tileLayerDescriptor;
   }
 
+  _canSkipSync({ prevDataRequest, nextMeta }) {
+    if (!prevDataRequest) {
+      return false;
+    }
+    const prevMeta = prevDataRequest.getMeta();
+    if (!prevMeta) {
+      return false;
+    }
+
+    return prevMeta.tileLayerId === nextMeta.tileLayerId;
+  }
+
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      //data is immmutable
+
+    const nextMeta = { tileLayerId: this._source.getTileLayerId() };
+    const canSkipSync = this._canSkipSync({
+      prevDataRequest: this.getSourceDataRequest(),
+      nextMeta,
+    });
+    if (canSkipSync) {
       return;
     }
+
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
       const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, {});
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, nextMeta);
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
 
   _generateMbId(name) {
-    return this.getId() + '_' + name;
+    return `${this.getId()}_${name}`;
+  }
+
+  _generateMbSourceIdPrefix() {
+    const DELIMITTER = '___';
+    return `${this.getId()}${DELIMITTER}${this._source.getTileLayerId()}${DELIMITTER}`;
+  }
+
+  _generateMbSourceId(name) {
+    return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
   _getVectorStyle() {
@@ -103,24 +129,30 @@ export class VectorTileLayer extends TileLayer {
       return [];
     }
     const sourceIds = Object.keys(vectorStyle.sources);
-    return sourceIds.map(sourceId => this._generateMbId(sourceId));
+    return sourceIds.map(sourceId => this._generateMbSourceId(sourceId));
   }
 
   ownsMbLayerId(mbLayerId) {
-    //todo optimize: do not create temp array
-    const mbLayerIds = this.getMbLayerIds();
-    return mbLayerIds.indexOf(mbLayerId) >= 0;
+    return mbLayerId.startsWith(this.getId());
   }
 
   ownsMbSourceId(mbSourceId) {
-    //todo optimize: do not create temp array
-    const mbSourceIds = this.getMbSourceIds();
-    return mbSourceIds.indexOf(mbSourceId) >= 0;
+    return mbSourceId.startsWith(this.getId());
   }
 
   _makeNamespacedImageId(imageId) {
     const prefix = this._source.getSpriteNamespacePrefix() + '/';
     return prefix + imageId;
+  }
+
+  _requiresPrevSourceCleanup(mbMap) {
+    const sourceIdPrefix = this._generateMbSourceIdPrefix();
+    const mbStyle = mbMap.getStyle();
+    return Object.keys(mbStyle.sources).some(mbSourceId => {
+      const doesMbSourceBelongToLayer = this.ownsMbSourceId(mbSourceId);
+      const doesMbSourceBelongToSource = mbSourceId.startsWith(sourceIdPrefix);
+      return doesMbSourceBelongToLayer && !doesMbSourceBelongToSource;
+    });
   }
 
   syncLayerWithMB(mbMap) {
@@ -129,13 +161,27 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
+    if (this._requiresPrevSourceCleanup(mbMap)) {
+      const mbStyle = mbMap.getStyle();
+      mbStyle.layers.forEach(mbLayer => {
+        if (this.ownsMbLayerId(mbLayer.id)) {
+          mbMap.removeLayer(mbLayer.id);
+        }
+      });
+      Object.keys(mbStyle.sources).some(mbSourceId => {
+        if (this.ownsMbSourceId(mbSourceId)) {
+          mbMap.removeSource(mbSourceId);
+        }
+      });
+    }
+
     let initialBootstrapCompleted = false;
     const sourceIds = Object.keys(vectorStyle.sources);
     sourceIds.forEach(sourceId => {
       if (initialBootstrapCompleted) {
         return;
       }
-      const mbSourceId = this._generateMbId(sourceId);
+      const mbSourceId = this._generateMbSourceId(sourceId);
       const mbSource = mbMap.getSource(mbSourceId);
       if (mbSource) {
         //if a single source is present, the layer already has bootstrapped with the mbMap
@@ -174,7 +220,7 @@ export class VectorTileLayer extends TileLayer {
         }
         const newLayerObject = {
           ...layer,
-          source: this._generateMbId(layer.source),
+          source: this._generateMbSourceId(layer.source),
           id: mbLayerId,
         };
 

@@ -115,8 +115,12 @@ export function getIndexPatternDatasource({
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: 'indexpattern',
 
-    initialize(state?: IndexPatternPersistedState) {
-      return loadInitialState({ state, savedObjectsClient });
+    async initialize(state?: IndexPatternPersistedState) {
+      return loadInitialState({
+        state,
+        savedObjectsClient,
+        defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+      });
     },
 
     getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {

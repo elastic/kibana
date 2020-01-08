@@ -8,9 +8,16 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
-import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
+import {
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  IRouter,
+  IScopedClusterClient,
+} from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
@@ -56,6 +63,10 @@ import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
 import { initMlServerLog, LogInitialization } from '../client/log';
 import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server';
+// @ts-ignore: could not find declaration file for module
+import { elasticsearchJsPlugin } from '../client/elasticsearch_ml';
+
+export const PLUGIN_ID = 'ml';
 
 type CoreHttpSetup = CoreSetup['http'];
 export interface MlHttpServiceSetup extends CoreHttpSetup {
@@ -70,6 +81,7 @@ export interface MlCoreSetup {
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsLegacyService;
+  elasticsearch: ElasticsearchServiceSetup;
 }
 export interface MlInitializerContext extends PluginInitializerContext {
   legacyConfig: KibanaConfig;
@@ -86,12 +98,15 @@ export interface PluginsSetup {
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
+
 export interface RouteInitialization {
   commonRouteConfig: any;
   config?: any;
   elasticsearchPlugin: ElasticsearchPlugin;
+  elasticsearchService: ElasticsearchServiceSetup;
   route(route: ServerRoute | ServerRoute[]): void;
-  xpackMainPlugin?: MlXpackMainPlugin;
+  router: IRouter;
+  xpackMainPlugin: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
   cloud?: CloudSetup;
@@ -101,8 +116,16 @@ export interface UsageInitialization {
   savedObjects: SavedObjectsLegacyService;
 }
 
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    ml?: {
+      mlClient: IScopedClusterClient;
+    };
+  }
+}
+
 export class Plugin {
-  private readonly pluginId: string = 'ml';
+  private readonly pluginId: string = PLUGIN_ID;
   private config: any;
   private log: Logger;
 
@@ -183,17 +206,27 @@ export class Plugin {
       };
     });
 
+    // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
+    const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
+    http.registerRouteHandlerContext('ml', (context, request) => {
+      return {
+        mlClient: mlClient.asScoped(request),
+      };
+    });
+
     const routeInitializationDeps: RouteInitialization = {
       commonRouteConfig,
       route: http.route,
+      router: http.createRouter(),
       elasticsearchPlugin: plugins.elasticsearch,
+      elasticsearchService: core.elasticsearch,
+      xpackMainPlugin: plugins.xpackMain,
       spacesPlugin: plugins.spaces,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
       ...routeInitializationDeps,
       config: this.config,
-      xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
       cloud: plugins.cloud,

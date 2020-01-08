@@ -13,8 +13,6 @@ import {
   Axis,
   Chart,
   CurveType,
-  getAxisId,
-  getSpecId,
   Position,
   ScaleType,
   Settings,
@@ -99,18 +97,13 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
           tooltip={{ headerFormatter }}
         />
         <Axis
-          id={getAxisId('bottom')}
+          id="bottom"
           position={Position.Bottom}
           tickFormat={d => kibanaFieldFormat(d, fieldFormat)}
         />
-        <Axis
-          id={getAxisId('left')}
-          position={Position.Left}
-          tickFormat={d => d.toFixed(3)}
-          hide={true}
-        />
+        <Axis id="left" position={Position.Left} tickFormat={d => d.toFixed(3)} hide={true} />
         <AreaSeries
-          id={getSpecId(SPEC_ID)}
+          id={SPEC_ID}
           name={seriesName}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}

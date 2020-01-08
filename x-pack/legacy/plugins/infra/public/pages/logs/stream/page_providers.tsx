@@ -10,10 +10,21 @@ import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogEntriesState } from '../../../containers/logs/log_entries';
 
 import { Source } from '../../../containers/source';
+
+const LogFilterStateProvider: React.FC = ({ children }) => {
+  const { createDerivedIndexPattern } = useContext(Source.Context);
+  const derivedIndexPattern = createDerivedIndexPattern('logs');
+  return (
+    <LogFilterState.Provider indexPattern={derivedIndexPattern}>
+      <WithLogFilterUrlState />
+      {children}
+    </LogFilterState.Provider>
+  );
+};
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
@@ -51,11 +62,11 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
     <LogViewConfiguration.Provider>
       <LogFlyout.Provider>
         <LogPositionState.Provider>
-          <LogFilterState.Provider>
+          <LogFilterStateProvider>
             <LogEntriesStateProvider>
               <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>
             </LogEntriesStateProvider>
-          </LogFilterState.Provider>
+          </LogFilterStateProvider>
         </LogPositionState.Provider>
       </LogFlyout.Provider>
     </LogViewConfiguration.Provider>

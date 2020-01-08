@@ -5,7 +5,6 @@
  */
 
 export {
-  logFilterActions,
   logPositionActions,
   waffleFilterActions,
   waffleTimeActions,

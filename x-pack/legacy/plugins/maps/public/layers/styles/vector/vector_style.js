@@ -38,6 +38,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -386,18 +387,37 @@ export class VectorStyle extends AbstractStyle {
     return _.get(this._descriptor, '__styleMeta', {});
   };
 
-  getIcon = () => {
-    const styles = this.getRawProperties();
-    const symbolId = this.arePointsSymbolizedAsCircles()
+  _getSymbolId() {
+    return this.arePointsSymbolizedAsCircles()
       ? undefined
       : this._descriptor.properties.symbol.options.symbolId;
+  }
+
+  _getColorForProperty = (styleProperty, isLinesOnly) => {
+    const styles = this.getRawProperties();
+    if (isLinesOnly) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
+    }
+
+    if (styleProperty === VECTOR_STYLES.LINE_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'none');
+    } else if (styleProperty === VECTOR_STYLES.FILL_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.FILL_COLOR], 'grey');
+    } else {
+      //unexpected
+      console.error('Cannot return color for properties other then line or fill color');
+    }
+  };
+
+  getIcon = () => {
+    const symbolId = this._getSymbolId();
+
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
-        fillColor={styles[VECTOR_STYLES.FILL_COLOR]}
-        lineColor={styles[VECTOR_STYLES.LINE_COLOR]}
         symbolId={symbolId}
+        getColorForProperty={this._getColorForProperty}
       />
     );
   };
@@ -431,7 +451,12 @@ export class VectorStyle extends AbstractStyle {
 
   renderLegendDetails() {
     return (
-      <VectorStyleLegend getLegendDetailStyleProperties={this._getLegendDetailStyleProperties} />
+      <VectorStyleLegend
+        getLegendDetailStyleProperties={this._getLegendDetailStyleProperties}
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
+        symbolId={this._getSymbolId()}
+      />
     );
   }
 
@@ -613,7 +638,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT, field);
+      return new DynamicTextProperty(
+        descriptor.options,
+        VECTOR_STYLES.LABEL_TEXT,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
