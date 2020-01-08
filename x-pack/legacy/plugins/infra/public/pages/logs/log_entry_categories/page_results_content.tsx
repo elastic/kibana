@@ -6,7 +6,6 @@
 
 import datemath from '@elastic/datemath';
 import {
-  // EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -21,9 +20,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import {
+  LogAnalysisJobProblemIndicator,
+  jobHasProblem,
+} from '../../../components/logging/log_analysis_job_status';
+import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-// import { FirstUseCallout } from './first_use';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
@@ -40,10 +43,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const {
     fetchJobStatus,
-    // jobStatus,
+    jobStatus,
     setupStatus,
     viewSetupForReconfiguration,
-    // viewSetupForUpdate,
+    viewSetupForUpdate,
     jobIds,
     sourceConfiguration: { sourceId },
   } = useLogEntryCategoriesModuleContext();
@@ -130,6 +133,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
+  const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
+    topLogEntryCategories.length,
+  ]);
+
   useEffect(() => {
     getTopLogEntryCategories();
   }, [getTopLogEntryCategories, categoryQueryDatasets, categoryQueryTimeRange.lastChangedTime]);
@@ -173,11 +180,25 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
+          {jobHasProblem(jobStatus['log-entry-categories-count'], setupStatus) ? (
+            <EuiFlexItem grow={false}>
+              <LogAnalysisJobProblemIndicator
+                jobStatus={jobStatus['log-entry-categories-count']}
+                onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+                onRecreateMlJobForUpdate={viewSetupForUpdate}
+                setupStatus={setupStatus}
+              />
+            </EuiFlexItem>
+          ) : null}
+          {isFirstUse && !hasResults ? (
+            <EuiFlexItem grow={false}>
+              <FirstUseCallout />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="l">
               <TopCategoriesSection
                 availableDatasets={logEntryCategoryDatasets}
-                isFirstUse={isFirstUse}
                 isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
                 isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}

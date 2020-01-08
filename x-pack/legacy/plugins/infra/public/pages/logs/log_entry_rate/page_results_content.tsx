@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPanel,
+  EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
@@ -196,7 +197,12 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="l">
-            {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
+            {isFirstUse && !hasResults ? (
+              <>
+                <FirstUseCallout />
+                <EuiSpacer />
+              </>
+            ) : null}
             <LogRateResults
               isLoading={isLoading}
               results={logEntryRate}
