@@ -211,24 +211,11 @@ export const ResultsTable: FC<Props> = React.memo(
     }
 
     useEffect(() => {
-      if (jobConfig !== undefined) {
-        const predictedFieldName = getPredictedFieldName(
-          jobConfig.dest.results_field,
-          jobConfig.analysis
-        );
-        const predictedFieldSelected = selectedFields.includes(predictedFieldName);
-
-        const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
-        const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-        loadExploreData({ field, direction, searchQuery });
-      }
-    }, [JSON.stringify(searchQuery)]);
-
-    useEffect(() => {
       // by default set the sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
       // if that's not available sort ascending on the first column.
       // also check if the current sorting field is still available.
-      if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
+      if (jobConfig !== undefined && columns.length > 0) {
+        //  && !selectedFields.includes(sortField)
         const predictedFieldName = getPredictedFieldName(
           jobConfig.dest.results_field,
           jobConfig.analysis
@@ -239,7 +226,14 @@ export const ResultsTable: FC<Props> = React.memo(
         const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
         loadExploreData({ field, direction, searchQuery });
       }
-    }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
+    }, [
+      jobConfig,
+      columns.length,
+      sortField,
+      sortDirection,
+      tableItems.length,
+      JSON.stringify(searchQuery),
+    ]);
 
     let sorting: SortingPropType = false;
     let onTableChange;

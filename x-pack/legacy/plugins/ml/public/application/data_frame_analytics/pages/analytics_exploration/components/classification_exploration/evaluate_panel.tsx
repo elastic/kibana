@@ -37,13 +37,10 @@ import {
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { LoadingPanel } from '../loading_panel';
 import { getColumnData } from './column_data';
-import { useKibanaContext } from '../../../../../contexts/kibana';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 
 const defaultPanelWidth = 500;
 
@@ -66,10 +63,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [visibleColumns, setVisibleColumns] = useState(() =>
     columns.map(({ id }: { id: string }) => id)
   );
-  const kibanaContext = useKibanaContext();
 
   const index = jobConfig.dest.index;
-  const sourceIndex = jobConfig.source.index[0];
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
@@ -86,24 +81,17 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoading(true);
 
     try {
-      const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      const { fields } = newJobCapsService;
+      const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
 
-      if (indexPattern !== undefined) {
-        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
-        // If dependent_variable is of type keyword and text .keyword suffix is required for evaluate endpoint
-        const { fields } = newJobCapsService;
-        const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
-
-        // If it's a keyword type - check if it has a corresponding text type
-        if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.KEYWORD) {
-          const field = newJobCapsService.getFieldById(dependentVariable.replace(/\.keyword$/, ''));
-          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.TEXT;
-        } else if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.TEXT) {
-          // If text, check if has corresponding keyword type
-          const field = newJobCapsService.getFieldById(`${dependentVariable}.keyword`);
-          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
-        }
+      // If it's a keyword type - check if it has a corresponding text type
+      if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.KEYWORD) {
+        const field = newJobCapsService.getFieldById(dependentVariable.replace(/\.keyword$/, ''));
+        requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+      } else if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.TEXT) {
+        // If text, check if has corresponding keyword type
+        const field = newJobCapsService.getFieldById(`${dependentVariable}.keyword`);
+        requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
       }
     } catch (e) {
       // Additional error handling due to missing field type is handled by loadEvalData
