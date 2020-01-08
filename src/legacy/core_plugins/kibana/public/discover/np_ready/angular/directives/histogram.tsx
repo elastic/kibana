@@ -30,9 +30,6 @@ import {
   Chart,
   HistogramBarSeries,
   GeometryValue,
-  getAnnotationId,
-  getAxisId,
-  getSpecId,
   LineAnnotation,
   Position,
   ScaleType,
@@ -237,20 +234,20 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           theme={chartsTheme}
         />
         <Axis
-          id={getAxisId('discover-histogram-left-axis')}
+          id="discover-histogram-left-axis"
           position={Position.Left}
           ticks={5}
           title={chartData.yAxisLabel}
         />
         <Axis
-          id={getAxisId('discover-histogram-bottom-axis')}
+          id="discover-histogram-bottom-axis"
           position={Position.Bottom}
           title={chartData.xAxisLabel}
           tickFormat={this.formatXValue}
           ticks={10}
         />
         <LineAnnotation
-          annotationId={getAnnotationId('line-annotation')}
+          id="line-annotation"
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={lineAnnotationData}
           hideTooltips={true}
@@ -258,13 +255,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         />
         <RectAnnotation
           dataValues={rectAnnotations}
-          annotationId={getAnnotationId('rect-annotation')}
+          id="rect-annotation"
           zIndex={2}
           style={rectAnnotationStyle}
           hideTooltips={true}
         />
         <HistogramBarSeries
-          id={getSpecId('discover-histogram')}
+          id="discover-histogram"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

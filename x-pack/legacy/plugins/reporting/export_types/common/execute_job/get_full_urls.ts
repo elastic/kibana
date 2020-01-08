@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ServerFacade, ConditionalHeaders } from '../../../types';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -20,18 +20,15 @@ function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloa
   return (job as JobDocPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
-  return (job as JobDocPayloadPDF).objects !== undefined;
+  return (job as JobDocPayloadPDF).relativeUrls !== undefined;
 }
 
-export async function getFullUrls<JobDocPayloadType>({
-  job,
+export function getFullUrls<JobDocPayloadType>({
   server,
-  ...mergeValues // pass-throughs
+  job,
 }: {
-  job: JobDocPayloadPDF | JobDocPayloadPNG;
   server: ServerFacade;
-  conditionalHeaders: ConditionalHeaders;
-  logo?: string;
+  job: JobDocPayloadPDF | JobDocPayloadPNG;
 }) {
   const config = server.config();
 
@@ -48,10 +45,10 @@ export async function getFullUrls<JobDocPayloadType>({
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map(obj => obj.relativeUrl);
+    relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
     );
   }
 
@@ -96,5 +93,5 @@ export async function getFullUrls<JobDocPayloadType>({
     });
   });
 
-  return { job, server, urls, ...mergeValues };
+  return urls;
 }
