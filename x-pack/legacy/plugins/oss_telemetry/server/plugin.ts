@@ -4,24 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../plugins/kibana_task_manager/server';
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { LegacyTaskManagerApi } from '../../task_manager/server';
 
 export interface LegacyConfig {
   get: (key: string) => string | number | boolean;
 }
 
-export interface OssTelemetrySetupDependencies {
+interface OssTelemetryDependencies {
   usageCollection: UsageCollectionSetup;
   __LEGACY: {
     config: LegacyConfig;
     xpackMainStatus: { kbnServer: KbnServer };
   };
-  taskManager?: LegacyTaskManagerApi;
+}
+export interface OssTelemetrySetupDependencies extends OssTelemetryDependencies {
+  taskManager?: TaskManagerSetupContract;
+}
+export interface OssTelemetryStartDependencies extends OssTelemetryDependencies {
+  taskManager?: TaskManagerStartContract;
 }
 
 export class OssTelemetryPlugin implements Plugin {
@@ -32,19 +40,20 @@ export class OssTelemetryPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup, deps: OssTelemetrySetupDependencies) {
-    registerCollectors(deps);
     registerTasks({
       taskManager: deps.taskManager,
       logger: this.logger,
       elasticsearch: core.elasticsearch,
       config: deps.__LEGACY.config,
     });
+  }
+
+  public start(core: CoreStart, deps: OssTelemetryStartDependencies) {
+    registerCollectors(deps);
     scheduleTasks({
       taskManager: deps.taskManager,
       xpackMainStatus: deps.__LEGACY.xpackMainStatus,
       logger: this.logger,
     });
   }
-
-  public start() {}
 }

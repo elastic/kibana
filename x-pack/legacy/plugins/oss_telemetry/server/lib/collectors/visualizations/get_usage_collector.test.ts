@@ -9,12 +9,12 @@ import {
   getMockThrowingTaskFetch,
   getMockTaskInstance,
 } from '../../../../test_utils';
-import { taskManagerMock } from '../../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../../../../plugins/kibana_task_manager/server/task_manager.mock';
 import { getUsageCollector } from './get_usage_collector';
 
 describe('getVisualizationsCollector#fetch', () => {
   test('can return empty stats', async () => {
-    const { type, fetch } = getUsageCollector(taskManagerMock.create());
+    const { type, fetch } = getUsageCollector(taskManagerMock.start());
     expect(type).toBe('visualization_types');
     const fetchResult = await fetch();
     expect(fetchResult).toEqual({});
@@ -22,7 +22,7 @@ describe('getVisualizationsCollector#fetch', () => {
 
   test('provides known stats', async () => {
     const { type, fetch } = getUsageCollector(
-      taskManagerMock.create(
+      taskManagerMock.start(
         getMockTaskFetch([
           getMockTaskInstance({
             state: {
@@ -43,7 +43,7 @@ describe('getVisualizationsCollector#fetch', () => {
   describe('Error handling', () => {
     test('Silently handles Task Manager NotInitialized', async () => {
       const { fetch } = getUsageCollector(
-        taskManagerMock.create(
+        taskManagerMock.start(
           getMockThrowingTaskFetch(
             new Error('NotInitialized taskManager is still waiting for plugins to load')
           )
@@ -55,7 +55,7 @@ describe('getVisualizationsCollector#fetch', () => {
     // In real life, the CollectorSet calls fetch and handles errors
     test('defers the errors', async () => {
       const { fetch } = getUsageCollector(
-        taskManagerMock.create(getMockThrowingTaskFetch(new Error('BOOM')))
+        taskManagerMock.start(getMockThrowingTaskFetch(new Error('BOOM')))
       );
       await expect(fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"BOOM"`);
     });

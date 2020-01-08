@@ -8,9 +8,14 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { CoreStart } from 'kibana/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from './common';
 import { lensServerPlugin } from './server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../plugins/kibana_task_manager/server/index.js';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -64,6 +69,12 @@ export const lens: LegacyPluginInitializer = kibana => {
         savedObjects: server.savedObjects,
         config: server.config(),
         server,
+        taskManager: server.newPlatform.setup.plugins.kibanaTaskManager as TaskManagerSetupContract,
+      });
+
+      plugin.start((kbnServer.newPlatform.start.core as unknown) as CoreStart, {
+        server,
+        taskManager: server.newPlatform.start.plugins.kibanaTaskManager as TaskManagerStartContract,
       });
 
       server.events.on('stop', () => {

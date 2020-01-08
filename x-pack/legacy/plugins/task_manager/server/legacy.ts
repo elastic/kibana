@@ -10,25 +10,10 @@ import {
   TaskManagerStartContract,
 } from '../../../../plugins/kibana_task_manager/server';
 
-export type LegacyTaskManagerApi = Pick<
-  TaskManagerSetupContract,
-  'addMiddleware' | 'registerTaskDefinitions'
-> &
-  TaskManagerStartContract;
-
-function getTaskManagerSetup(server: Server): TaskManagerSetupContract | undefined {
+export function getTaskManagerSetup(server: Server): TaskManagerSetupContract | undefined {
   return server?.newPlatform?.setup?.plugins?.kibanaTaskManager as TaskManagerSetupContract;
 }
 
-function getTaskManagerStart(server: Server): TaskManagerStartContract | undefined {
+export function getTaskManagerStart(server: Server): TaskManagerStartContract | undefined {
   return server?.newPlatform?.start?.plugins?.kibanaTaskManager as TaskManagerStartContract;
-}
-
-export function getAsLegacyTaskManager(server: Server): LegacyTaskManagerApi | undefined {
-  if (getTaskManagerStart(server)) {
-    return {
-      ...getTaskManagerSetup(server)!,
-      ...getTaskManagerStart(server)!,
-    };
-  }
 }

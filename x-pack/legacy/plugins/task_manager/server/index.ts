@@ -10,7 +10,7 @@ import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { TaskManagerSetupContract } from '../../../../plugins/kibana_task_manager/server';
 
-export { LegacyTaskManagerApi, getAsLegacyTaskManager } from './legacy';
+export { getTaskManagerSetup, getTaskManagerStart } from './legacy';
 
 // Once all plugins are migrated to NP, this can be removed
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

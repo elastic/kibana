@@ -5,15 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { LegacyTaskManagerApi } from '../../../../../task_manager/server';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
+import { TaskManagerStartContract } from '../../../../../../../plugins/kibana_task_manager/server';
 
-async function isTaskManagerReady(taskManager?: LegacyTaskManagerApi) {
+async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
   const result = await fetch(taskManager);
   return result !== null;
 }
 
-async function fetch(taskManager?: LegacyTaskManagerApi) {
+async function fetch(taskManager?: TaskManagerStartContract) {
   if (!taskManager) {
     return null;
   }
@@ -38,7 +38,7 @@ async function fetch(taskManager?: LegacyTaskManagerApi) {
   return docs;
 }
 
-export function getUsageCollector(taskManager?: LegacyTaskManagerApi) {
+export function getUsageCollector(taskManager?: TaskManagerStartContract) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;

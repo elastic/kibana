@@ -9,9 +9,9 @@ import { APICaller, CoreSetup } from 'kibana/server';
 import {
   ConcreteTaskInstance,
   TaskStatus,
+  TaskManagerStartContract,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/kibana_task_manager/server';
-import { LegacyTaskManagerApi } from '../../task_manager';
 
 export const getMockTaskInstance = (
   overrides: Partial<ConcreteTaskInstance> = {}
@@ -55,22 +55,22 @@ export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObject
 
 export const getMockTaskFetch = (
   docs: ConcreteTaskInstance[] = defaultMockTaskDocs
-): Partial<jest.Mocked<LegacyTaskManagerApi>> => {
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
     fetch: jest.fn(fetchOpts => {
       return Promise.resolve({ docs, searchAfter: [] });
     }),
-  } as Partial<jest.Mocked<LegacyTaskManagerApi>>;
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
 };
 
 export const getMockThrowingTaskFetch = (
   throws: Error
-): Partial<jest.Mocked<LegacyTaskManagerApi>> => {
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
     fetch: jest.fn(fetchOpts => {
       throw throws;
     }),
-  } as Partial<jest.Mocked<LegacyTaskManagerApi>>;
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
 };
 
 export const getMockConfig = () => {

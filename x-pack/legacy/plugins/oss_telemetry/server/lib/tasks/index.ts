@@ -9,8 +9,11 @@ import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 import { LegacyConfig } from '../../plugin';
-import { TaskInstance } from '../../../../../../plugins/kibana_task_manager/server';
-import { LegacyTaskManagerApi } from '../../../../task_manager/server';
+import {
+  TaskInstance,
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../../../plugins/kibana_task_manager/server';
 
 export function registerTasks({
   taskManager,
@@ -18,7 +21,7 @@ export function registerTasks({
   elasticsearch,
   config,
 }: {
-  taskManager?: LegacyTaskManagerApi;
+  taskManager?: TaskManagerSetupContract;
   logger: Logger;
   elasticsearch: CoreSetup['elasticsearch'];
   config: LegacyConfig;
@@ -46,7 +49,7 @@ export function scheduleTasks({
   xpackMainStatus,
   logger,
 }: {
-  taskManager?: LegacyTaskManagerApi;
+  taskManager?: TaskManagerStartContract;
   xpackMainStatus: { kbnServer: KbnServer };
   logger: Logger;
 }) {

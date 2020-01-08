@@ -6,7 +6,6 @@
 
 import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import {
   SearchParams,
@@ -16,8 +15,11 @@ import {
 } from 'elasticsearch';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { RunContext } from '../../../../../plugins/kibana_task_manager/server';
-import { getAsLegacyTaskManager, LegacyTaskManagerApi } from '../../../task_manager/server';
+import {
+  RunContext,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../plugins/kibana_task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
 
@@ -41,17 +43,21 @@ type ClusterDeleteType = (
   options?: CallClusterOptions
 ) => Promise<DeleteDocumentByQueryResponse>;
 
-export function initializeLensTelemetry(core: CoreSetup, server: Server) {
-  const taskManager = getAsLegacyTaskManager(server);
+export function initializeLensTelemetry(server: Server, taskManager?: TaskManagerSetupContract) {
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
   } else {
     registerLensTelemetryTask(server, taskManager);
+  }
+}
+
+export function scheduleLensTelemetry(server: Server, taskManager?: TaskManagerStartContract) {
+  if (taskManager) {
     scheduleTasks(server, taskManager);
   }
 }
 
-function registerLensTelemetryTask(server: Server, taskManager: LegacyTaskManagerApi) {
+function registerLensTelemetryTask(server: Server, taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -62,7 +68,7 @@ function registerLensTelemetryTask(server: Server, taskManager: LegacyTaskManage
   });
 }
 
-function scheduleTasks(server: Server, taskManager: LegacyTaskManagerApi) {
+function scheduleTasks(server: Server, taskManager: TaskManagerStartContract) {
   const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;
