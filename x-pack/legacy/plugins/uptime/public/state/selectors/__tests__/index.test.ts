@@ -28,6 +28,7 @@ describe('state selectors', () => {
     ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
     monitorStatus: {
       status: null,
+      monitor: null,
       loading: false,
     },
   };

@@ -43,7 +43,7 @@ interface StoreProps {
 
 /**
  * Contains functions that will dispatch actions used
- * for this component's lifecyclel
+ * for this component's life cycle
  */
 interface DispatchProps {
   loadSnapshotCount: typeof fetchSnapshotCount;
@@ -124,8 +124,8 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 });
 
-// @ts-ignore connect is expecting null | undefined for some reason
 export const Snapshot = connect<StoreProps, DispatchProps, OwnProps>(
+  // @ts-ignore connect is expecting null | undefined for some reason
   mapStateToProps,
   mapDispatchToProps
 )(Container);
