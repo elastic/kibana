@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
+import { useDispatch } from '../../../mappings_state';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 
 interface Props {
@@ -17,8 +18,6 @@ interface Props {
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
   isDimmed: boolean;
-  // addField(): void;
-  // editField(): void;
 }
 
 export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
@@ -27,7 +26,15 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
   isHighlighted,
   isDimmed,
 }: Props) {
+  const dispatch = useDispatch();
   const { source, isMultiField, hasChildFields, hasMultiFields } = field;
+
+  const editField = () => {
+    dispatch({
+      type: 'documentField.editField',
+      value: field.id,
+    });
+  };
 
   const renderActionButtons = () => {
     if (!areActionButtonsVisible) {
@@ -46,7 +53,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
           </EuiFlexItem>
         )} */}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => undefined} data-test-subj="editFieldButton">
+          <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
               defaultMessage: 'Edit',
             })}
