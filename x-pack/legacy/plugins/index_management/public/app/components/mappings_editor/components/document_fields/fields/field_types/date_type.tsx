@@ -63,9 +63,10 @@ export const DateType = ({ field }: Props) => {
         <NullValueParameter
           defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.dateType.nullValueFieldDescription',
             {
-              defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
+              defaultMessage:
+                'Replace explicit null values with a date value so that it can be indexed and searched.',
             }
           )}
         />

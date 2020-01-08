@@ -8,7 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import Joi from 'joi';
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiCode } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -436,6 +436,17 @@ export const PARAMETERS_DEFINITION = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.localeLabel', {
         defaultMessage: 'Locale',
       }),
+      helpText: () => (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.localeHelpText"
+          defaultMessage="Separate the language, country, and variant, use {hyphen} or {underscore}. A maximum of 2 separators is allowed. Example: {locale}."
+          values={{
+            locale: <EuiCode>en-US</EuiCode>,
+            hyphen: <EuiCode>-</EuiCode>,
+            underscore: <EuiCode>_</EuiCode>,
+          }}
+        />
+      ),
       validations: [
         {
           validator: emptyField(
@@ -562,6 +573,15 @@ export const PARAMETERS_DEFINITION = {
         format.length ? format.map(({ label }) => label).join('||') : undefined,
       deserializer: (formats: string): ComboBoxOption[] | undefined =>
         formats.split('||').map(format => ({ label: format })),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.formatHelpText"
+          defaultMessage="Specify custom formats using {dateSyntax} syntax."
+          values={{
+            dateSyntax: <EuiCode>yyyy/MM/dd</EuiCode>,
+          }}
+        />
+      ),
     },
     schema: Joi.string(),
   },

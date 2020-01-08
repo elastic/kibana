@@ -160,6 +160,10 @@ class DocumentationService {
   public getWellKnownTextLink() {
     return 'http://docs.opengeospatial.org/is/12-063r5/12-063r5.html';
   }
+
+  public getRootLocaleLink() {
+    return 'https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html#ROOT';
+  }
 }
 
 export const documentationService = new DocumentationService();
