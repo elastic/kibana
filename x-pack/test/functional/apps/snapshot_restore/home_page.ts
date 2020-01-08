@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await repositoriesButton.isDisplayed()).to.be(true);
     });
 
-    describe('Reposiories Tab', async () => {
+    describe('Repositories Tab', async () => {
       before(async () => {
         await es.snapshot.createRepository({
           repository: 'my-repository',
@@ -46,7 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('cleanup repository', async () => {
         await pageObjects.snapshotRestore.viewRepositoryDetails('my-repository');
+        await pageObjects.common.sleep(25000);
         const cleanupResponse = await pageObjects.snapshotRestore.performRepositoryCleanup();
+        await pageObjects.common.sleep(25000);
         expect(cleanupResponse).to.contain('results');
         expect(cleanupResponse).to.contain('deleted_bytes');
         expect(cleanupResponse).to.contain('deleted_blobs');

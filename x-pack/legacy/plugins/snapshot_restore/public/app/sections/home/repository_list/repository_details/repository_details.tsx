@@ -248,7 +248,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
         {renderVerification()}
-        <EuiSpacer size="l" />
+        <EuiHorizontalRule />
         {renderCleanup()}
       </Fragment>
     );
@@ -324,16 +324,19 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           />
         </h3>
       </EuiTitle>
-      {cleanup ? (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              You can clean up a repository to delete any unreferenced data from a snapshot. This
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryMessage"
+            defaultMessage="You can clean up a repository to delete any unreferenced data from a snapshot. This
               may provide storage space savings. Note: If you regularly delete snapshots, this
-              functionality will likely not be as beneficial and should be used less frequently.
-            </p>
-          </EuiText>
+              functionality will likely not be as beneficial and should be used less frequently."
+          />
+        </p>
+      </EuiText>
+      {cleanup ? (
+        <>
           <EuiSpacer size="s" />
           {cleanup?.cleaned ? (
             <div>
@@ -350,13 +353,22 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiCodeBlock>
             </div>
           ) : (
-            <EuiCallOut
-              title="Sorry, there was an error cleaning the repository."
-              color="danger"
-              iconType="alert"
-            />
+            <EuiCallOut color="danger" iconType="alert">
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryErrorTitle"
+                  defaultMessage="Sorry, there was an error cleaning the repository."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryErrorMessage"
+                  defaultMessage={JSON.stringify(cleanup.error)}
+                />
+              </p>
+            </EuiCallOut>
           )}
-        </Fragment>
+        </>
       ) : null}
       <EuiSpacer size="m" />
       <EuiButton
@@ -367,7 +379,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
-          defaultMessage="Cleanup repository"
+          defaultMessage="Clean up repository"
         />
       </EuiButton>
     </>
