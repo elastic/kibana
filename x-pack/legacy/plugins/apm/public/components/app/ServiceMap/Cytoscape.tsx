@@ -92,15 +92,15 @@ export function Cytoscape({
 
     if (cy) {
       cy.on('data', dataHandler);
-      cy.on('mouseover', mouseoverHandler);
-      cy.on('mouseout', mouseoutHandler);
+      cy.on('mouseover', 'edge, node', mouseoverHandler);
+      cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener('data', undefined, dataHandler);
-        cy.removeListener('mouseover', undefined, mouseoverHandler);
-        cy.removeListener('mouseout', undefined, mouseoutHandler);
+        cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
+        cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
   }, [cy, serviceName]);
