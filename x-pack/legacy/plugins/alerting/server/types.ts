@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertInstance } from './lib';
+import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -65,6 +65,7 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 }
 
 export interface Alert {
+  id: string;
   enabled: boolean;
   name: string;
   tags: string[];
@@ -84,6 +85,8 @@ export interface Alert {
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;
