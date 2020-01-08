@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTitle, EuiTextColor, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiTitle,
+  EuiTextColor,
+  EuiSpacer,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
-import { MostRecentCheck } from './most_recent_check';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -34,27 +41,31 @@ export const MonitorStatusBarComponent = ({
     loadMonitorStatus();
   }, [dateStart, dateEnd, loadMonitorStatus]);
 
-  const monitor = monitorStatus?.monitor;
-  const duration: number | undefined = monitor?.duration?.us;
-  const status = monitor?.status ?? 'down';
   const full = monitorStatus?.url?.full ?? '';
 
   return (
-    <>
-      <StatusByLocations locations={monitorLocations?.locations ?? []} />
-      <EuiText>
-        <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-          {full}
-        </EuiLink>
-      </EuiText>
-      <EuiTitle size="xs">
-        <EuiTextColor color="subdued">
-          <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
-        </EuiTextColor>
-      </EuiTitle>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <StatusByLocations locations={monitorLocations?.locations ?? []} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
+            {full}
+          </EuiLink>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <EuiTextColor color="subdued">
+            <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
+          </EuiTextColor>
+        </EuiTitle>
+      </EuiFlexItem>
       <EuiSpacer />
-      <MostRecentCheck timestamp={monitorStatus?.timestamp} duration={duration} status={status} />
-      <MonitorSSLCertificate tls={monitorStatus?.tls} />
-    </>
+      <EuiFlexItem grow={false}>
+        <MonitorSSLCertificate tls={monitorStatus?.tls} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

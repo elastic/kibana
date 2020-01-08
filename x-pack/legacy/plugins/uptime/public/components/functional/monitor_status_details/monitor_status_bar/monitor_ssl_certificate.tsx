@@ -22,7 +22,7 @@ interface Props {
 }
 
 const TextContainer = styled.div`
-  margin-left: 20px;
+  bottom: 0;
 `;
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
