@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { DataState, ProcessEvent } from '../../types';
+import { DataState, ProcessEvent, IndexedProcessTree } from '../../types';
 import { levelOrder } from '../../lib/tree_sequencers';
 import { Vector2 } from '../../types';
 import { add as vector2Add } from '../../lib/vector2';
@@ -15,6 +15,8 @@ import {
   children as indexedProcessTreeChildren,
   parent as indexedProcessTreeParent,
   isOnlyChild as indexedProcessTreeIsOnlyChild,
+  size,
+  levelOrder as indexedProcessTreeLevelOrder,
 } from '../../models/indexed_process_tree';
 
 const unit = 100;
@@ -25,69 +27,51 @@ const distanceBetweenNodesInUnits = 1;
  */
 export const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
 
-function yHalfWayBetweenSourceAndTarget(sourcePosition: Vector2, targetPosition: Vector2) {
-  return sourcePosition[1] + (targetPosition[1] - sourcePosition[1]) / 2;
-}
-
 export function graphableProcesses(state: DataState) {
   return state.results.filter(isGraphableProcess);
 }
 
-const indexedProcessTree = createSelector(graphableProcesses, indexedProcessTreeFactory);
+function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree) {
+  const widths = new Map<ProcessEvent, number>();
 
-const widthOfProcessSubtrees = createSelector(
-  graphableProcesses,
-  indexedProcessTree,
-  function widthOfProcessSubtrees(
-    /* eslint-disable no-shadow */
-    graphableProcesses,
-    indexedProcessTree
-    /* eslint-enable no-shadow */
-  ) {
-    const widths = new Map<ProcessEvent, number>();
-
-    if (graphableProcesses.length === 0) {
-      return widths;
-    }
-
-    const processesInReverseLevelOrder = [
-      ...levelOrder(graphableProcesses[0], (child: ProcessEvent) =>
-        indexedProcessTreeChildren(indexedProcessTree, child)
-      ),
-    ].reverse();
-
-    for (const process of processesInReverseLevelOrder) {
-      const children = indexedProcessTreeChildren(indexedProcessTree, process);
-
-      const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
-        return children.reduce(function sum(currentValue, child) {
-          /**
-           * widths.get will always be defined because we are populating it in reverse level order.
-           */
-          return currentValue + widths.get(child)!;
-        }, 0);
-      };
-
-      const width =
-        sumOfWidthOfChildren() + Math.max(0, children.length - 1) * distanceBetweenNodes;
-      widths.set(process, width);
-    }
-
+  if (size(indexedProcessTree) === 0) {
     return widths;
   }
-);
+
+  const processesInReverseLevelOrder = [
+    ...indexedProcessTreeLevelOrder(indexedProcessTree),
+  ].reverse();
+
+  for (const process of processesInReverseLevelOrder) {
+    const children = indexedProcessTreeChildren(indexedProcessTree, process);
+
+    const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
+      return children.reduce(function sum(currentValue, child) {
+        /**
+         * widths.get will always be defined because we are populating it in reverse level order.
+         * TODO
+         */
+        return currentValue + widths.get(child)!;
+      }, 0);
+    };
+
+    const width = sumOfWidthOfChildren() + Math.max(0, children.length - 1) * distanceBetweenNodes;
+    widths.set(process, width);
+  }
+
+  return widths;
+}
 
 export const processNodePositionsAndEdgeLineSegments = createSelector(
   graphableProcesses,
-  indexedProcessTree,
-  widthOfProcessSubtrees,
   function processNodePositionsAndEdgeLineSegments(
     /* eslint-disable no-shadow */
-    graphableProcesses,
-    indexedProcessTree,
-    widthOfProcessSubtrees
+    graphableProcesses
     /* eslint-enable no-shadow */
   ) {
+    const indexedProcessTree = indexedProcessTreeFactory(graphableProcesses);
+    const widths = widthsOfProcessSubtrees(indexedProcessTree);
+
     const positions = new Map<ProcessEvent, Vector2>();
     const edgeLineSegments = [];
     let parentProcess: ProcessEvent | undefined;
@@ -95,9 +79,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     let runningWidthOfPrecedingSiblings = 0;
 
     if (graphableProcesses.length !== 0) {
-      for (const process of levelOrder(graphableProcesses[0], (child: ProcessEvent) =>
-        indexedProcessTreeChildren(indexedProcessTree, child)
-      )) {
+      for (const process of indexedProcessTreeLevelOrder(indexedProcessTree)) {
         if (parentProcess === undefined) {
           parentProcess = process;
           numberOfPrecedingSiblings = 0;
@@ -111,11 +93,16 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
             runningWidthOfPrecedingSiblings = 0;
           }
 
+          if (!parentProcess) {
+            // since we iterate in level order, this can't happened
+            throw new Error();
+          }
+
           const xOffset =
-            widthOfProcessSubtrees.get(parentProcess) / -2 +
+            widths.get(parentProcess) / -2 +
             numberOfPrecedingSiblings * distanceBetweenNodes +
             runningWidthOfPrecedingSiblings +
-            widthOfProcessSubtrees.get(process) / 2;
+            widths.get(process) / 2;
 
           const position = vector2Add(
             [xOffset, -distanceBetweenNodes],
@@ -126,7 +113,8 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
           const edgeLineSegmentsForProcess = function edgeLineSegmentsForProcess() {
             const parentProcessPosition = positions.get(parentProcess);
-            const midwayY = yHalfWayBetweenSourceAndTarget(parentProcessPosition, position);
+
+            const midwayY = parentProcessPosition[1] + (position[1] - parentProcessPosition[1]) / 2;
 
             // If this is the first child
             if (numberOfPrecedingSiblings === 0) {
@@ -179,9 +167,9 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
               );
               const lastChild = childrenOfParent[childrenOfParent.length - 1];
 
-              const widthOfParent = widthOfProcessSubtrees.get(parentProcessNode);
-              const widthOfFirstChild = widthOfProcessSubtrees.get(process);
-              const widthOfLastChild = widthOfProcessSubtrees.get(lastChild);
+              const widthOfParent = widths.get(parentProcessNode);
+              const widthOfFirstChild = widths.get(process);
+              const widthOfLastChild = widths.get(lastChild);
               const widthOfMidline = widthOfParent - widthOfFirstChild / 2 - widthOfLastChild / 2;
 
               const minX = widthOfParent / -2 + widthOfFirstChild / 2;
@@ -204,7 +192,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
           edgeLineSegments.push(...edgeLineSegmentsForProcess());
           numberOfPrecedingSiblings += 1;
-          runningWidthOfPrecedingSiblings += widthOfProcessSubtrees.get(process);
+          runningWidthOfPrecedingSiblings += widths.get(process);
         }
       }
     }

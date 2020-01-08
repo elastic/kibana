@@ -6,6 +6,7 @@
 
 import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
 import { IndexedProcessTree, ProcessEvent } from '../types';
+import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
 /**
  * Create a new `IndexedProcessTree`
@@ -66,5 +67,36 @@ export function isOnlyChild(tree: IndexedProcessTree, childProcess: ProcessEvent
     return true;
   } else {
     return children(tree, parentProcess).length === 1;
+  }
+}
+
+/**
+ * Number of processes in the tree
+ */
+export function size(tree: IndexedProcessTree) {
+  return tree.idToProcess.size;
+}
+
+/**
+ * Return the root process
+ */
+export function root(tree: IndexedProcessTree) {
+  if (size(tree) === 0) {
+    return null;
+  }
+  let current: ProcessEvent = tree.idToProcess.values().next().value;
+  while (parent(tree, current) !== undefined) {
+    current = parent(tree, current)!;
+  }
+  return current;
+}
+
+/**
+ * Yield processes in level order
+ */
+export function* levelOrder(tree: IndexedProcessTree) {
+  const rootNode = root(tree);
+  if (rootNode !== null) {
+    yield* baseLevelOrder(rootNode, children.bind(null, tree));
   }
 }
