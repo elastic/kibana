@@ -5,19 +5,15 @@
  */
 
 import { exportRulesSchema } from './export_rules_schema';
-import {
-  UpdateRuleAlertParamsRest,
-  ExportRulesRequest,
-  ExportRulesRequestRest,
-} from '../../rules/types';
+import { ExportRulesRequestRest } from '../../rules/types';
 
 describe('create rules schema', () => {
   test('null value or absent values validate', () => {
     expect(exportRulesSchema.validate(null).error).toBeFalsy();
   });
 
-  test('empty object validates', () => {
-    expect(exportRulesSchema.validate<Partial<ExportRulesRequestRest>>({}).error).toBeFalsy();
+  test('empty object does not validate', () => {
+    expect(exportRulesSchema.validate<Partial<ExportRulesRequestRest>>({}).error).toBeTruthy();
   });
 
   test('empty object array does validate', () => {
