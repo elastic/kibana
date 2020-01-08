@@ -30,6 +30,7 @@ import {
   setSearchService,
   setUiSettings,
   setInjectedMetadata,
+  setHttp,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -79,6 +80,7 @@ export class DataPlugin
     setFieldFormats(data.fieldFormats);
     setNotifications(core.notifications);
     setUiSettings(core.uiSettings);
+    setHttp(core.http);
 
     return {
       search: this.search.start(core),

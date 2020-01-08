@@ -32,7 +32,13 @@ import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatterns } from './index_patterns';
-import { setNotifications, setFieldFormats, setOverlays, setIndexPatterns } from './services';
+import {
+  setNotifications,
+  setFieldFormats,
+  setOverlays,
+  setIndexPatterns,
+  setHttp,
+} from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
@@ -75,6 +81,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
     setOverlays(overlays);
+    setHttp(core.http);
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);

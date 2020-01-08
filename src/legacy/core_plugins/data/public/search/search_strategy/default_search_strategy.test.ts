@@ -29,9 +29,17 @@ function getConfigStub(config: any = {}) {
   } as IUiSettingsClient;
 }
 
+const msearchMockResponse: any = Promise.resolve([]);
+msearchMockResponse.abort = jest.fn();
+const msearchMock = jest.fn().mockReturnValue(msearchMockResponse);
+
 const searchMockResponse: any = Promise.resolve([]);
 searchMockResponse.abort = jest.fn();
-const searchMock = jest.fn().mockReturnValue({
+const searchMock = jest.fn().mockReturnValue(searchMockResponse);
+
+const newSearchMockResponse: any = Promise.resolve([]);
+newSearchMockResponse.abort = jest.fn();
+const newSearchMock = jest.fn().mockReturnValue({
   toPromise: () => searchMockResponse,
 });
 
@@ -40,6 +48,9 @@ describe('defaultSearchStrategy', function() {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
 
     beforeEach(() => {
+      msearchMockResponse.abort.mockClear();
+      msearchMock.mockClear();
+
       searchMockResponse.abort.mockClear();
       searchMock.mockClear();
 
@@ -51,18 +62,61 @@ describe('defaultSearchStrategy', function() {
         ],
         esShardTimeout: 0,
         searchService: {
+          search: newSearchMock,
+        },
+        es: {
+          msearch: msearchMock,
           search: searchMock,
         },
       };
     });
 
-    test('should call search service', () => {
-      const config = getConfigStub();
-      search({ ...searchArgs, config });
-      expect(searchMock).toHaveBeenCalled();
+    test('does not send max_concurrent_shard_requests by default', async () => {
+      const config = getConfigStub({ 'courier:batchSearches': true });
+      await search({ ...searchArgs, config });
+      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
     });
 
-    test('should properly abort with search', async () => {
+    test('allows configuration of max_concurrent_shard_requests', async () => {
+      const config = getConfigStub({
+        'courier:batchSearches': true,
+        'courier:maxConcurrentShardRequests': 42,
+      });
+      await search({ ...searchArgs, config });
+      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
+    });
+
+    test('should set rest_total_hits_as_int to true on a request', async () => {
+      const config = getConfigStub({ 'courier:batchSearches': true });
+      await search({ ...searchArgs, config });
+      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
+    });
+
+    test('should set ignore_throttled=false when including frozen indices', async () => {
+      const config = getConfigStub({
+        'courier:batchSearches': true,
+        'search:includeFrozen': true,
+      });
+      await search({ ...searchArgs, config });
+      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
+    });
+
+    test('should properly call abort with msearch', () => {
+      const config = getConfigStub({
+        'courier:batchSearches': true,
+      });
+      search({ ...searchArgs, config }).abort();
+      expect(msearchMockResponse.abort).toHaveBeenCalled();
+    });
+
+    test('should call new search service', () => {
+      const config = getConfigStub();
+      search({ ...searchArgs, config });
+      expect(newSearchMock).toHaveBeenCalled();
+      expect(searchMock).toHaveBeenCalledTimes(0);
+    });
+
+    test('should properly abort with new search service', async () => {
       const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
       const config = getConfigStub({});
       search({ ...searchArgs, config }).abort();

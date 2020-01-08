@@ -32,6 +32,8 @@ export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSe
   'UiSettings'
 );
 
+export const [getHttp, setHttp] = createGetterSetter<CoreStart['http']>('Http');
+
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
 );

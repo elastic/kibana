@@ -19,19 +19,55 @@
 
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-import { getSearchParams } from '../fetch/get_search_params';
+import {
+  getSearchParams,
+  getMSearchParams,
+  getPreference,
+  getTimeout,
+} from '../fetch/get_search_params';
 
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',
 
   search: params => {
-    return search(params);
+    return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
   },
 
   isViable: indexPattern => {
     return indexPattern && isDefaultTypeIndexPattern(indexPattern);
   },
 };
+
+// @deprecated
+function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+  const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
+    const inlineHeader = {
+      index: index.title || index,
+      search_type: searchType,
+      ignore_unavailable: true,
+      preference: getPreference(config),
+    };
+    const inlineBody = {
+      ...body,
+      timeout: getTimeout(esShardTimeout),
+    };
+    return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
+  });
+
+  const searching = es.msearch({
+    ...getMSearchParams(config),
+    body: `${inlineRequests.join('\n')}\n`,
+    headers: {
+      // need to get version from context
+      'kbn-version': '8.0.0',
+    },
+  });
+
+  return {
+    searching: searching.then(({ responses }: any) => responses),
+    abort: searching.abort,
+  };
+}
 
 function search({
   searchRequests,

@@ -69,7 +69,10 @@
  *    `appSearchSource`.
  */
 
+// @ts-ignore
+import { default as es } from 'elasticsearch-browser/elasticsearch';
 import _ from 'lodash';
+import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -77,12 +80,13 @@ import { getHighlightRequest, esFilters, esQuery } from '../../../../../../plugi
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
-import { FetchOptions } from '../fetch/types';
+import { FetchOptions, ApiCaller } from '../fetch/types';
 
 import {
   getSearchService,
   getUiSettings,
   getInjectedMetadata,
+  getHttp,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
 
@@ -97,8 +101,21 @@ export class SearchSource {
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
+  esCli: ApiCaller;
 
-  constructor(private fields: SearchSourceFields = {}) {}
+  constructor(private fields: SearchSourceFields = {}) {
+    const http = getHttp();
+    const esRequestTimeout = getInjectedMetadata().getInjectedVar('esRequestTimeout') as number;
+    const esApiVersion = getInjectedMetadata().getInjectedVar('esApiVersion') as string;
+
+    // Use legacy es client for msearch.
+    this.esCli = es.Client({
+      host: this.getEsUrl(http),
+      log: 'info',
+      requestTimeout: esRequestTimeout,
+      apiVersion: esApiVersion,
+    });
+  }
 
   /** ***
    * PUBLIC API
@@ -188,6 +205,19 @@ export class SearchSource {
     return this.parent;
   }
 
+  getEsUrl(http: CoreStart['http']) {
+    const a = document.createElement('a');
+    a.href = http.basePath.prepend('/elasticsearch');
+    const protocolPort = /https/.test(a.protocol) ? 443 : 80;
+    const port = a.port || protocolPort;
+    return {
+      host: a.hostname,
+      port,
+      protocol: a.protocol,
+      pathname: a.pathname,
+    };
+  }
+
   /**
    * Fetch this source and reject the returned Promise on error
    *
@@ -196,10 +226,12 @@ export class SearchSource {
   async fetch(options: FetchOptions = {}) {
     const searchService = getSearchService();
     const config = getUiSettings();
+
     await this.requestIsStarting(options);
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
+
     const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
 
     const response = await fetchSoon(
@@ -208,7 +240,7 @@ export class SearchSource {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout }
+      { searchService, config, esShardTimeout, es: this.esCli }
     );
 
     if (response.error) {
