@@ -1,0 +1,347 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolver graph layout when rendering no nodes renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {},
+}
+`;
+
+exports[`resolver graph layout when rendering one node renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      0,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two forks, and one fork has an extra long tine renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [
+    Array [
+      Array [
+        0,
+        0,
+      ],
+      Array [
+        0,
+        -50,
+      ],
+    ],
+    Array [
+      Array [
+        -100,
+        -50,
+      ],
+      Array [
+        100,
+        -50,
+      ],
+    ],
+    Array [
+      Array [
+        -100,
+        -50,
+      ],
+      Array [
+        -100,
+        -100,
+      ],
+    ],
+    Array [
+      Array [
+        100,
+        -50,
+      ],
+      Array [
+        100,
+        -100,
+      ],
+    ],
+    Array [
+      Array [
+        -100,
+        -100,
+      ],
+      Array [
+        -100,
+        -150,
+      ],
+    ],
+    Array [
+      Array [
+        -150,
+        -150,
+      ],
+      Array [
+        -50,
+        -150,
+      ],
+    ],
+    Array [
+      Array [
+        -150,
+        -150,
+      ],
+      Array [
+        -150,
+        -200,
+      ],
+    ],
+    Array [
+      Array [
+        -50,
+        -150,
+      ],
+      Array [
+        -50,
+        -200,
+      ],
+    ],
+    Array [
+      Array [
+        100,
+        -100,
+      ],
+      Array [
+        100,
+        -150,
+      ],
+    ],
+    Array [
+      Array [
+        50,
+        -150,
+      ],
+      Array [
+        150,
+        -150,
+      ],
+    ],
+    Array [
+      Array [
+        50,
+        -150,
+      ],
+      Array [
+        50,
+        -200,
+      ],
+    ],
+    Array [
+      Array [
+        150,
+        -150,
+      ],
+      Array [
+        150,
+        -200,
+      ],
+    ],
+    Array [
+      Array [
+        150,
+        -200,
+      ],
+      Array [
+        150,
+        -300,
+      ],
+    ],
+  ],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      0,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "node_id": 1,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      -100,
+      -100,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 2,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      100,
+      -100,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 3,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 1,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      -150,
+      -200,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 4,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 1,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      -50,
+      -200,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 5,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 2,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      50,
+      -200,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 6,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 2,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      150,
+      -200,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 7,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 6,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      150,
+      -300,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two nodes, one being the parent of the other renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [
+    Array [
+      Array [
+        0,
+        0,
+      ],
+      Array [
+        0,
+        -100,
+      ],
+    ],
+  ],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      0,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "node_id": 1,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      -100,
+    ],
+  },
+}
+`;

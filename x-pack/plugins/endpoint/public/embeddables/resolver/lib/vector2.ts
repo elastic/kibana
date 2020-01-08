@@ -32,3 +32,21 @@ export function divide(a: Vector2, b: Vector2): Vector2 {
 export function applyMatrix3([x, y]: Vector2, [m11, m12, m13, m21, m22, m23]: Matrix3): Vector2 {
   return [x * m11 + y * m12 + m13, y * m21 + y * m22 + m23];
 }
+
+/**
+ * Returns the distance between two vectors
+ */
+export function distance(a: Vector2, b: Vector2) {
+  const [x1, y1] = a;
+  const [x2, y2] = b;
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+/**
+ * Returns the angle between two vectors
+ */
+export function angle(a: Vector2, b: Vector2) {
+  const deltaX = b[0] - a[0];
+  const deltaY = b[1] - a[1];
+  return Math.atan2(deltaY, deltaX);
+}

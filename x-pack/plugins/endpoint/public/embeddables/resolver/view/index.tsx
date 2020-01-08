@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -12,7 +12,6 @@ import { ResolverState, ResolverAction } from '../types';
 import * as selectors from '../store/selectors';
 import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
 import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
-import { DiagnosticDot } from './diagnostic_dot';
 import { ProcessEventDot } from './process_event_dot';
 import { EdgeLine } from './edge_line';
 
@@ -126,21 +125,6 @@ const Resolver = styled(
         window.removeEventListener('mousemove', handleMouseMove);
       };
     }, [handleMouseMove]);
-
-    const dotPositions = useMemo(
-      (): ReadonlyArray<readonly [number, number]> => [
-        [0, 0],
-        [0, 100],
-        [100, 100],
-        [100, 0],
-        [100, -100],
-        [0, -100],
-        [-100, -100],
-        [-100, 0],
-        [-100, 100],
-      ],
-      []
-    );
 
     const refCallback = useCallback(
       (node: null | HTMLDivElement) => {

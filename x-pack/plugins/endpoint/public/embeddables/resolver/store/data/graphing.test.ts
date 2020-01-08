@@ -4,119 +4,196 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store, createStore, AnyAction } from 'redux';
+import { Store, createStore } from 'redux';
 import { DataAction } from './action';
 import { dataReducer } from './reducer';
-import { DataState, Vector2 } from '../../types';
-import {
-  graphableProcesses,
-  widthOfProcessSubtrees,
-  distanceBetweenNodes,
-  processNodePositionsAndEdgeLineSegments,
-} from './selectors';
+import { DataState, ProcessEvent } from '../../types';
+import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
+
+type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
+
+function processEvent(
+  parts: {
+    data_buffer: { node_id: ProcessEvent['data_buffer']['node_id'] };
+  } & DeepPartial<ProcessEvent>
+): ProcessEvent {
+  const { data_buffer: dataBuffer } = parts;
+  return {
+    event_timestamp: 1,
+    event_type: 1,
+    machine_id: '',
+    ...parts,
+    data_buffer: {
+      event_subtype_full: 'creation_event',
+      event_type_full: 'process_event',
+      process_name: '',
+      process_path: '',
+      ...dataBuffer,
+    },
+  };
+}
 
 describe('resolver graph layout', () => {
+  let processA: ProcessEvent;
+  let processB: ProcessEvent;
+  let processC: ProcessEvent;
+  let processD: ProcessEvent;
+  let processE: ProcessEvent;
+  let processF: ProcessEvent;
+  let processG: ProcessEvent;
+  let processH: ProcessEvent;
+  let processI: ProcessEvent;
   let store: Store<DataState, DataAction>;
 
   beforeEach(() => {
+    /*
+     *          A
+     *      ____|____
+     *     |         |
+     *     B         C
+     *  ___|___   ___|___
+     * |       | |       |
+     * D       E F       G
+     *                   |
+     *                   H
+     *
+     */
+    processA = processEvent({
+      data_buffer: {
+        process_name: '',
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 0,
+      },
+    });
+    processB = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'already_running',
+        node_id: 1,
+        source_id: 0,
+      },
+    });
+    processC = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 2,
+        source_id: 0,
+      },
+    });
+    processD = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 3,
+        source_id: 1,
+      },
+    });
+    processE = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 4,
+        source_id: 1,
+      },
+    });
+    processF = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 5,
+        source_id: 2,
+      },
+    });
+    processG = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 6,
+        source_id: 2,
+      },
+    });
+    processH = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        node_id: 7,
+        source_id: 6,
+      },
+    });
+    processI = processEvent({
+      data_buffer: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'termination_event',
+        node_id: 8,
+        source_id: 0,
+      },
+    });
     store = createStore(dataReducer, undefined);
   });
-  describe('resolver data is received', () => {
-    let processA;
-    let processB;
-    let processC;
-    let processD;
-    let processE;
-    let processF;
-    let processG;
-    let processH;
-    let processI;
-
+  describe('when rendering no nodes', () => {
     beforeEach(() => {
-      /*
-       *          A
-       *      ____|____
-       *     |         |
-       *     B         C
-       *  ___|___   ___|___
-       * |       | |       |
-       * D       E F       G
-       *                   |
-       *                   H
-       *
-       */
-      processA = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 0,
+      const payload = {
+        data: {
+          result: {
+            search_results: [],
+          },
         },
       };
-      processB = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'already_running',
-          node_id: 1,
-          source_id: 0,
+      const action: DataAction = { type: 'serverReturnedResolverData', payload };
+      store.dispatch(action);
+    });
+    it('the graphableProcesses list should only include nothing', () => {
+      const actual = graphableProcesses(store.getState());
+      expect(actual).toEqual([]);
+    });
+    it('renders right', () => {
+      expect(processNodePositionsAndEdgeLineSegments(store.getState())).toMatchSnapshot();
+    });
+  });
+  describe('when rendering one node', () => {
+    beforeEach(() => {
+      const payload = {
+        data: {
+          result: {
+            search_results: [processA],
+          },
         },
       };
-      processC = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 2,
-          source_id: 0,
+      const action: DataAction = { type: 'serverReturnedResolverData', payload };
+      store.dispatch(action);
+    });
+    it('the graphableProcesses list should only include nothing', () => {
+      const actual = graphableProcesses(store.getState());
+      expect(actual).toEqual([processA]);
+    });
+    it('renders right', () => {
+      expect(processNodePositionsAndEdgeLineSegments(store.getState())).toMatchSnapshot();
+    });
+  });
+  describe('when rendering two nodes, one being the parent of the other', () => {
+    beforeEach(() => {
+      const payload = {
+        data: {
+          result: {
+            search_results: [processA, processB],
+          },
         },
       };
-      processD = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 3,
-          source_id: 1,
-        },
-      };
-      processE = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 4,
-          source_id: 1,
-        },
-      };
-      processF = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 5,
-          source_id: 2,
-        },
-      };
-      processG = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 6,
-          source_id: 2,
-        },
-      };
-      processH = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'creation_event',
-          node_id: 7,
-          source_id: 6,
-        },
-      };
-      processI = {
-        data_buffer: {
-          event_type_full: 'process_event',
-          event_subtype_full: 'termination_event',
-          node_id: 8,
-          source_id: 0,
-        },
-      };
-
+      const action: DataAction = { type: 'serverReturnedResolverData', payload };
+      store.dispatch(action);
+    });
+    it('the graphableProcesses list should only include nothing', () => {
+      const actual = graphableProcesses(store.getState());
+      expect(actual).toEqual([processA, processB]);
+    });
+    it('renders right', () => {
+      expect(processNodePositionsAndEdgeLineSegments(store.getState())).toMatchSnapshot();
+    });
+  });
+  describe('when rendering two forks, and one fork has an extra long tine', () => {
+    beforeEach(() => {
       const payload = {
         data: {
           result: {
@@ -150,36 +227,8 @@ describe('resolver graph layout', () => {
         processH,
       ]);
     });
-    it('the width of process subtress is calculated correctly', () => {
-      const expected = new Map([
-        [processA, 3 * distanceBetweenNodes],
-        [processB, 1 * distanceBetweenNodes],
-        [processC, 1 * distanceBetweenNodes],
-        [processD, 0 * distanceBetweenNodes],
-        [processE, 0 * distanceBetweenNodes],
-        [processF, 0 * distanceBetweenNodes],
-        [processG, 0 * distanceBetweenNodes],
-        [processH, 0 * distanceBetweenNodes],
-      ]);
-      const actual = widthOfProcessSubtrees(store.getState());
-      expect(actual).toEqual(expected);
-    });
-    it('it renders the nodes at the right positions', () => {
-      const expected = new Map([
-        [processA, [0, 100]],
-        [processB, [-100, 0]],
-        [processC, [100, 0]],
-        [processD, [-150, -100]],
-        [processE, [-50, -100]],
-        [processF, [50, -100]],
-        [processG, [150, -100]],
-        [processH, [150, -200]],
-      ]);
-      const actual = processNodePositionsAndEdgeLineSegments(store.getState()).processNodePositions;
-      expect(actual).toEqual(expected);
-    });
-    it('it renders edges at the right positions', () => {
-      expect(false).toEqual(true);
+    it('renders right', () => {
+      expect(processNodePositionsAndEdgeLineSegments(store.getState())).toMatchSnapshot();
     });
   });
 });

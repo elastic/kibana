@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { applyMatrix3 } from '../lib/vector2';
+import { applyMatrix3, distance, angle } from '../lib/vector2';
 import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
@@ -23,24 +23,16 @@ export const EdgeLine = styled(
       endPosition: Vector2;
     }) => {
       const projectionMatrix = useSelector(selectors.projectionMatrix);
-      const [left, top] = applyMatrix3(startPosition, projectionMatrix);
-      const length = distance(startPosition[0], startPosition[1], endPosition[0], endPosition[1]);
-      const deltaX = endPosition[0] - startPosition[0];
-      const deltaY = endPosition[1] - startPosition[1];
-      const angle = -Math.atan2(deltaY, deltaX);
-      /**
-       * https://www.mathsisfun.com/algebra/distance-2-points.html
-       */
-      function distance(x1, y1, x2, y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-      }
+      const screenStart = applyMatrix3(startPosition, projectionMatrix);
+      const screenEnd = applyMatrix3(endPosition, projectionMatrix);
+      const length = distance(screenStart, screenEnd);
 
       const style = {
-        left: left + 'px',
-        top: top + 'px',
+        left: screenStart[0] + 'px',
+        top: screenStart[1] + 'px',
         width: length + 'px',
         transformOrigin: 'top left',
-        transform: `translateY(-50%) rotateZ(${angle}rad)`,
+        transform: `translateY(-50%) rotateZ(${angle(screenStart, screenEnd)}rad)`,
       };
       return <div className={className} style={style} />;
     }
