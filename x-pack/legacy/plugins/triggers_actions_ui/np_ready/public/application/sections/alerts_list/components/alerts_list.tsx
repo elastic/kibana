@@ -10,7 +10,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiFieldSearch,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -251,7 +251,7 @@ export const AlertsList: React.FunctionComponent = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiFieldSearch
+              <EuiFieldText
                 fullWidth
                 data-test-subj="alertSearchField"
                 prepend={<EuiIcon type="search" />}
