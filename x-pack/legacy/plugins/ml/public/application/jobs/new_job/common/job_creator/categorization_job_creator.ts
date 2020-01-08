@@ -70,7 +70,6 @@ export class CategorizationJobCreator extends JobCreator {
   public setDetectorType(type: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE) {
     this._detectorType = type;
     this.removeAllDetectors();
-    this.removeAllInfluencers();
     if (type === ML_JOB_AGGREGATION.COUNT) {
       this._createCountDetector();
       this.bucketSpan = DEFAULT_BUCKET_SPAN;

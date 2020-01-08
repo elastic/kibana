@@ -110,7 +110,11 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-    if (jobCreator.type !== JOB_TYPE.POPULATION && jobCreator.type !== JOB_TYPE.ADVANCED) {
+    if (
+      jobCreator.type !== JOB_TYPE.POPULATION &&
+      jobCreator.type !== JOB_TYPE.ADVANCED &&
+      jobCreator.type !== JOB_TYPE.CATEGORIZATION
+    ) {
       // for all other than population or advanced, use 10MB
       jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     }
