@@ -106,8 +106,8 @@ const PropertiesRightComponent: React.FC<Props> = ({
   onOpenTimelineModal,
 }) => (
   <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
-    <InspectButtonContainer>
-      <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false}>
+      <InspectButtonContainer>
         <EuiPopover
           anchorPosition="downRight"
           button={
@@ -176,8 +176,8 @@ const PropertiesRightComponent: React.FC<Props> = ({
             ) : null}
           </EuiFlexGroup>
         </EuiPopover>
-      </EuiFlexItem>
-    </InspectButtonContainer>
+      </InspectButtonContainer>
+    </EuiFlexItem>
 
     {showUsersView
       ? usersViewing.map(user => (
