@@ -36,24 +36,11 @@ const style: cytoscape.Stylesheet[] = [
         isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
       'background-width': (el: cytoscape.NodeSingular) =>
         isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
-      'border-color': (el: cytoscape.NodeSingular) => {
-        if (el.hasClass('primary')) {
-          return theme.euiColorSecondary;
-        }
-        if (el.selected()) {
-          return theme.euiColorPrimary;
-        }
-        return theme.euiColorMediumShade;
-      },
-      'border-width': (el: cytoscape.NodeSingular) => {
-        if (el.hasClass('primary') || el.hasClass('hover')) {
-          return 4;
-        }
-        if (el.selected()) {
-          return 4;
-        }
-        return 2;
-      },
+      'border-color': (el: cytoscape.NodeSingular) =>
+        el.hasClass('primary')
+          ? theme.euiColorSecondary
+          : theme.euiColorMediumShade,
+      'border-width': 2,
       color: theme.textColors.default,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
@@ -90,20 +77,6 @@ const style: cytoscape.Stylesheet[] = [
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
       width: 2
-    }
-  },
-  {
-    selector: 'edge.hover',
-    style: {
-      'line-color': theme.euiColorPrimary,
-      'target-arrow-color': theme.euiColorPrimary,
-      width: 4
-    }
-  },
-  {
-    selector: 'edge.nodeHover',
-    style: {
-      width: 4
     }
   }
 ];
