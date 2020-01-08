@@ -5,15 +5,15 @@
  */
 
 import { useState, useCallback } from 'react';
-
-import { npStart } from 'ui/new_platform';
 import {
   SavedObjectAttributes,
   SavedObjectsCreateOptions,
   SimpleSavedObject,
 } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useCreateSavedObject = (type: string) => {
+  const kibana = useKibana();
   const [data, setData] = useState<SimpleSavedObject<SavedObjectAttributes> | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,11 @@ export const useCreateSavedObject = (type: string) => {
       setLoading(true);
       const save = async () => {
         try {
-          const d = await npStart.core.savedObjects.client.create(type, attributes, options);
+          const savedObjectsClient = kibana.services.savedObjects?.client;
+          if (!savedObjectsClient) {
+            throw new Error('Saved objects client is unavailable');
+          }
+          const d = await savedObjectsClient.create(type, attributes, options);
           setCreatedId(d.id);
           setError(null);
           setData(d);
@@ -36,7 +40,7 @@ export const useCreateSavedObject = (type: string) => {
       };
       save();
     },
-    [type]
+    [type, kibana.services.savedObjects]
   );
 
   return {

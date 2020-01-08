@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../../../../legacy_singletons';
 
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
@@ -19,7 +19,7 @@ export const callDeleteJobs = async <JobType extends string>(
   jobTypes: JobType[]
 ) => {
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
-  const deleteJobsResponse = await npStart.core.http.fetch('/api/ml/jobs/delete_jobs', {
+  const deleteJobsResponse = await npStart.http.fetch('/api/ml/jobs/delete_jobs', {
     method: 'POST',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
@@ -35,9 +35,7 @@ export const callDeleteJobs = async <JobType extends string>(
 };
 
 export const callGetJobDeletionTasks = async () => {
-  const jobDeletionTasksResponse = await npStart.core.http.fetch(
-    '/api/ml/jobs/deleting_jobs_tasks'
-  );
+  const jobDeletionTasksResponse = await npStart.http.fetch('/api/ml/jobs/deleting_jobs_tasks');
 
   return pipe(
     getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
@@ -51,7 +49,7 @@ export const callStopDatafeeds = async <JobType extends string>(
   jobTypes: JobType[]
 ) => {
   // Stop datafeed due to https://github.com/elastic/kibana/issues/44652
-  const stopDatafeedResponse = await npStart.core.http.fetch('/api/ml/jobs/stop_datafeeds', {
+  const stopDatafeedResponse = await npStart.http.fetch('/api/ml/jobs/stop_datafeeds', {
     method: 'POST',
     body: JSON.stringify(
       stopDatafeedsRequestPayloadRT.encode({

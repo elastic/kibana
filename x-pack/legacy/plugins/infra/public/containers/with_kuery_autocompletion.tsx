@@ -5,14 +5,20 @@
  */
 
 import React from 'react';
-import { npStart } from 'ui/new_platform';
-import { AutocompleteSuggestion, IIndexPattern } from 'src/plugins/data/public';
+import {
+  AutocompleteSuggestion,
+  IIndexPattern,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
+import {
+  withKibana,
+  KibanaReactContextValue,
+  KibanaServices,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { RendererFunction } from '../utils/typed_react';
 
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
-
 interface WithKueryAutocompletionLifecycleProps {
+  kibana: KibanaReactContextValue<{ data: DataPublicPluginStart } & KibanaServices>;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
@@ -31,7 +37,7 @@ interface WithKueryAutocompletionLifecycleState {
   suggestions: AutocompleteSuggestion[];
 }
 
-export class WithKueryAutocompletion extends React.Component<
+class WithKueryAutocompletionComponent extends React.Component<
   WithKueryAutocompletionLifecycleProps,
   WithKueryAutocompletionLifecycleState
 > {
@@ -50,13 +56,17 @@ export class WithKueryAutocompletion extends React.Component<
     });
   }
 
+  private getAutocompleteProvider = (language: string) => {
+    return this.props.kibana.services.data.autocomplete.getProvider(language);
+  };
+
   private loadSuggestions = async (
     expression: string,
     cursorPosition: number,
     maxSuggestions?: number
   ) => {
     const { indexPattern } = this.props;
-    const autocompletionProvider = getAutocompleteProvider('kuery');
+    const autocompletionProvider = this.getAutocompleteProvider('kuery');
     const config = {
       get: () => true,
     };
@@ -98,3 +108,7 @@ export class WithKueryAutocompletion extends React.Component<
     );
   };
 }
+
+export const WithKueryAutocompletion = withKibana<WithKueryAutocompletionLifecycleProps>(
+  WithKueryAutocompletionComponent
+);

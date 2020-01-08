@@ -7,7 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from '../../../../legacy_singletons';
 
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
@@ -19,9 +19,8 @@ import {
 } from '../../../../../common/http_api';
 
 export const fetchLogEntriesItem = async (requestArgs: LogEntriesItemRequest) => {
-  const response = await kfetch({
+  const response = await npStart.http.fetch(LOG_ENTRIES_ITEM_PATH, {
     method: 'POST',
-    pathname: LOG_ENTRIES_ITEM_PATH,
     body: JSON.stringify(logEntriesItemRequestRT.encode(requestArgs)),
   });
 

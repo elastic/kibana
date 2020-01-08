@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from 'kibana/public';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
@@ -13,17 +13,36 @@ import { startApp } from './apps/start_app';
 import { InfraFrontendLibs } from './lib/lib';
 import introspectionQueryResultData from './graphql/introspection.json';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
+import { registerStartSingleton } from './legacy_singletons';
+import { registerFeatures } from './register_feature';
+import {
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+} from '../../../../../src/plugins/home/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-type ClientPlugins = any;
-type LegacyDeps = any;
+interface ClientPluginsSetup {
+  home: HomePublicPluginSetup;
+}
+
+interface ClientPluginsStart {
+  home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
+}
 
 export class Plugin {
   constructor(context: PluginInitializerContext) {}
-  start(core: CoreStart, plugins: ClientPlugins, __LEGACY: LegacyDeps) {
-    startApp(this.composeLibs(core, plugins, __LEGACY), core, plugins);
+
+  setup(core: CoreSetup, plugins: ClientPluginsSetup) {
+    registerFeatures(plugins.home);
   }
 
-  composeLibs(core: CoreStart, plugins: ClientPlugins, legacy: LegacyDeps) {
+  start(core: CoreStart, plugins: ClientPluginsStart) {
+    registerStartSingleton(core);
+    startApp(this.composeLibs(core, plugins), core, plugins);
+  }
+
+  composeLibs(core: CoreStart, plugins: ClientPluginsStart) {
     const cache = new InMemoryCache({
       addTypename: false,
       fragmentMatcher: new IntrospectionFragmentMatcher({

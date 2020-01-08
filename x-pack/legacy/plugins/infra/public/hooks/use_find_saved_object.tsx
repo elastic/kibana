@@ -5,11 +5,11 @@
  */
 
 import { useState, useCallback } from 'react';
-
-import { npStart } from 'ui/new_platform';
 import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
+  const kibana = useKibana();
   const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -18,7 +18,11 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
       setLoading(true);
       const fetchData = async () => {
         try {
-          const d = await npStart.core.savedObjects.client.find<SavedObjectType>({
+          const savedObjectsClient = kibana.services.savedObjects?.client;
+          if (!savedObjectsClient) {
+            throw new Error('Saved objects client is unavailable');
+          }
+          const d = await savedObjectsClient.find<SavedObjectType>({
             type,
             search: query,
             searchFields,
@@ -33,14 +37,17 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
       };
       fetchData();
     },
-    [type]
+    [type, kibana.services.savedObjects]
   );
 
   const hasView = async (name: string) => {
-    const objects = await npStart.core.savedObjects.client.find<SavedObjectType>({
+    const savedObjectsClient = kibana.services.savedObjects?.client;
+    if (!savedObjectsClient) {
+      throw new Error('Saved objects client is unavailable');
+    }
+    const objects = await savedObjectsClient.find<SavedObjectType>({
       type,
     });
-
     return objects.savedObjects.filter(o => o.attributes.name === name).length > 0;
   };
 

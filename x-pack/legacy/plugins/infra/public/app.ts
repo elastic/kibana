@@ -12,22 +12,13 @@
 import { npStart } from 'ui/new_platform';
 import { PluginInitializerContext } from 'kibana/public';
 import chrome from 'ui/chrome';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
-// @ts-ignore
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { plugin } from './new_platform_index';
 
 const ROOT_ELEMENT_ID = 'react-infra-root';
+
 export { ROOT_ELEMENT_ID };
 
 const { core, plugins } = npStart;
-const __LEGACY = {
-  uiModules,
-  uiRoutes,
-  timezoneProvider,
-};
 // This will be moved to core.application.register when the new platform
 // migration is complete.
 // @ts-ignore
@@ -50,5 +41,5 @@ const checkForRoot = () => {
 };
 
 checkForRoot().then(() => {
-  plugin({} as PluginInitializerContext).start(core, plugins, __LEGACY);
+  plugin({} as PluginInitializerContext).start(core, plugins);
 });

@@ -7,12 +7,13 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-
-import { useKibanaInjectedVar } from './use_kibana_injected_var';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useKibanaSpaceId = (): string => {
-  // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
-  const activeSpace = useKibanaInjectedVar('activeSpace');
+  const kibana = useKibana();
+  // NOTE: The injectedMetadata service will be deprecated at some point. We should migrate
+  // this to the client side Spaces plugin when it becomes available.
+  const activeSpace = kibana.services.injectedMetadata?.getInjectedVar('activeSpace');
 
   return pipe(
     activeSpaceRT.decode(activeSpace),

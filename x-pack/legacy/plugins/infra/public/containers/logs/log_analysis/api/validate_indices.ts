@@ -7,7 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../../../../legacy_singletons';
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   ValidationIndicesFieldSpecification,
@@ -21,7 +21,7 @@ export const callValidateIndicesAPI = async (
   indices: string[],
   fields: ValidationIndicesFieldSpecification[]
 ) => {
-  const response = await npStart.core.http.fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
+  const response = await npStart.http.fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',
     body: JSON.stringify(validationIndicesRequestPayloadRT.encode({ data: { indices, fields } })),
   });

@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { useCallback, useMemo } from 'react';
-
-import { npSetup } from 'ui/new_platform';
-import useObservable from 'react-use/lib/useObservable';
+import { useMemo } from 'react';
+import { useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested
@@ -26,19 +23,9 @@ import useObservable from 'react-use/lib/useObservable';
  * because the underlying `UiSettingsClient` doesn't support that.
  */
 export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
-  const uiSettingsClient = npSetup.core.uiSettings;
-
-  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [
-    defaultValue,
-    key,
-    uiSettingsClient,
-  ]);
-  const uiSetting = useObservable(uiSetting$);
-
-  const setUiSetting = useCallback((value: any) => uiSettingsClient.set(key, value), [
-    key,
-    uiSettingsClient,
-  ]);
-
-  return [uiSetting, setUiSetting];
+  const [uiSetting, setUiSetting] = useUiSetting$(key);
+  const uiSettingValue = useMemo(() => {
+    return uiSetting ? uiSetting : defaultValue;
+  }, [uiSetting, defaultValue]);
+  return [uiSettingValue, setUiSetting];
 };

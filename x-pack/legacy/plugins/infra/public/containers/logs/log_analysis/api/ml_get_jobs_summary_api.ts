@@ -8,7 +8,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../../../../legacy_singletons';
 import { jobCustomSettingsRT } from './ml_api_types';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { getJobId } from '../../../../../common/log_analysis';
@@ -18,7 +18,7 @@ export const callJobsSummaryAPI = async <JobType extends string>(
   sourceId: string,
   jobTypes: JobType[]
 ) => {
-  const response = await npStart.core.http.fetch('/api/ml/jobs/jobs_summary', {
+  const response = await npStart.http.fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({

@@ -6,11 +6,11 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { npStart } from 'ui/new_platform';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { npStart } from '../../../legacy_singletons';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
@@ -26,7 +26,7 @@ export const useLogAnalysisCapabilities = () => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const rawResponse = await npStart.core.http.fetch('/api/ml/ml_capabilities');
+        const rawResponse = await npStart.http.fetch('/api/ml/ml_capabilities');
 
         return pipe(
           getMlCapabilitiesResponsePayloadRT.decode(rawResponse),

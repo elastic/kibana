@@ -6,8 +6,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from '../../../../legacy_singletons';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
 import {
@@ -20,9 +19,8 @@ import {
 export const fetchLogSummaryHighlights = async (
   requestArgs: LogEntriesSummaryHighlightsRequest
 ) => {
-  const response = await kfetch({
+  const response = await npStart.http.fetch(LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH, {
     method: 'POST',
-    pathname: LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
     body: JSON.stringify(logEntriesSummaryHighlightsRequestRT.encode(requestArgs)),
   });
 

@@ -5,11 +5,11 @@
  */
 
 import { useState, useCallback } from 'react';
-
-import { npStart } from 'ui/new_platform';
 import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useBulkGetSavedObject = (type: string) => {
+  const kibana = useKibana();
   const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectAttributes> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -19,7 +19,11 @@ export const useBulkGetSavedObject = (type: string) => {
       setLoading(true);
       const fetchData = async () => {
         try {
-          const d = await npStart.core.savedObjects.client.bulkGet(ids.map(i => ({ type, id: i })));
+          const savedObjectsClient = kibana.services.savedObjects?.client;
+          if (!savedObjectsClient) {
+            throw new Error('Saved objects client is unavailable');
+          }
+          const d = await savedObjectsClient.bulkGet(ids.map(i => ({ type, id: i })));
           setError(null);
           setLoading(false);
           setData(d);
@@ -30,7 +34,7 @@ export const useBulkGetSavedObject = (type: string) => {
       };
       fetchData();
     },
-    [type]
+    [type, kibana.services.savedObjects]
   );
 
   return {

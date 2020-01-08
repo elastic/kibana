@@ -5,9 +5,10 @@
  */
 
 import { useState, useCallback } from 'react';
-import { npStart } from 'ui/new_platform';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useDeleteSavedObject = (type: string) => {
+  const kibana = useKibana();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export const useDeleteSavedObject = (type: string) => {
       setLoading(true);
       const dobj = async () => {
         try {
-          await npStart.core.savedObjects.client.delete(type, id);
+          await kibana.services.savedObjects?.client.delete(type, id);
           setError(null);
           setDeletedId(id);
           setLoading(false);
@@ -28,7 +29,7 @@ export const useDeleteSavedObject = (type: string) => {
       };
       dobj();
     },
-    [type]
+    [type, kibana.services.savedObjects]
   );
 
   return {
