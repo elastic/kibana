@@ -21,6 +21,7 @@ import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { useLocation } from '../../../hooks/useLocation';
+import { LoadingOverlay } from './LoadingOverlay';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -82,6 +83,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   });
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { search } = useLocation();
 
@@ -93,6 +95,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     }
 
     if (start && end) {
+      setIsLoading(true);
       callApmApi({
         pathname: '/api/apm/service-map',
         params: {
@@ -104,15 +107,21 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
             after: input.after
           }
         }
-      }).then(data => {
-        setResponses(resp => resp.concat(data));
+      })
+        .then(data => {
+          setResponses(resp => resp.concat(data));
+          setIsLoading(false);
 
-        const shouldGetNext = responses.length + 1 < MAX_REQUESTS && data.after;
+          const shouldGetNext =
+            responses.length + 1 < MAX_REQUESTS && data.after;
 
-        if (shouldGetNext) {
-          getNext({ after: data.after });
-        }
-      });
+          if (shouldGetNext) {
+            getNext({ after: data.after });
+          }
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
     }
   };
 
@@ -203,13 +212,15 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     (license?.type === 'platinum' || license?.type === 'trial');
 
   return isValidPlatinumLicense ? (
-    <Cytoscape
-      elements={elements}
-      serviceName={serviceName}
-      style={cytoscapeDivStyle}
-    >
-      <Controls />
-    </Cytoscape>
+    <LoadingOverlay isLoading={isLoading}>
+      <Cytoscape
+        elements={elements}
+        serviceName={serviceName}
+        style={cytoscapeDivStyle}
+      >
+        <Controls />
+      </Cytoscape>
+    </LoadingOverlay>
   ) : (
     <PlatinumLicensePrompt />
   );
