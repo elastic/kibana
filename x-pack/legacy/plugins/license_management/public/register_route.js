@@ -14,6 +14,7 @@ import {
   setHttpClient,
   TelemetryOptInProvider,
 } from './lib/telemetry';
+import { npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
@@ -63,7 +64,7 @@ const manageAngularLifecycle = ($scope, $route, elem) => {
   });
 };
 const initializeTelemetry = $injector => {
-  const telemetryEnabled = $injector.get('telemetryEnabled');
+  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const Private = $injector.get('Private');
   const telemetryOptInProvider = Private(TelemetryOptInProvider);
   setTelemetryOptInService(telemetryOptInProvider);
