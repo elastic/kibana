@@ -239,6 +239,8 @@ export interface AppMountParameters {
    * This will be called either when the user goes to another application, or when
    * trying to close the tab or manually changing the url.
    *
+   * @example
+   *
    * ```ts
    * // application.tsx
    * import React from 'react';
@@ -270,6 +272,8 @@ export interface AppMountParameters {
  * to not show any message.
  *
  * See {@link AppMountParameters} for detailed usage examples.
+ *
+ * @public
  */
 export type AppLeaveHandler = () => string | undefined;
 

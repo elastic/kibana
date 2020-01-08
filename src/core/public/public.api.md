@@ -35,6 +35,9 @@ export interface AppBase {
     tooltip$?: Observable<string>;
 }
 
+// @public
+export type AppLeaveHandler = () => string | undefined;
+
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
@@ -51,7 +54,7 @@ export interface ApplicationStart {
     navigateToApp(appId: string, options?: {
         path?: string;
         state?: any;
-    }): void;
+    }): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -84,6 +87,7 @@ export type AppMountDeprecated = (context: AppMountContext, params: AppMountPara
 export interface AppMountParameters {
     appBasePath: string;
     element: HTMLElement;
+    onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
 // @public
@@ -273,7 +277,7 @@ export interface ContextSetup {
 // @internal (undocumented)
 export interface CoreContext {
     // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     coreId: CoreId;
     // (undocumented)
@@ -572,7 +576,7 @@ export interface I18nStart {
 }
 
 // Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
+//
 // @public
 export interface IAnonymousPaths {
     isAnonymous(path: string): boolean;
@@ -659,7 +663,7 @@ export interface IUiSettingsClient {
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup<any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataSetup;
 }
@@ -667,7 +671,7 @@ export interface LegacyCoreSetup extends CoreSetup<any> {
 // @public @deprecated
 export interface LegacyCoreStart extends CoreStart {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataStart;
 }
@@ -707,7 +711,7 @@ export interface NotificationsStart {
 export interface OverlayBannersStart {
     add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @internal (undocumented)
     get$(): Observable<OverlayBanner[]>;
     // (undocumented)
@@ -727,11 +731,11 @@ export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
     // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
     // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     openModal: OverlayModalStart['open'];
 }
@@ -781,7 +785,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
@@ -1061,7 +1065,7 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
 }
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
+//
 // @public (undocumented)
 export type Toast = ToastInputFields & {
     id: string;

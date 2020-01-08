@@ -105,6 +105,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return a message to prompt to the user before leaving the page, or undefined to not show any message.<!-- -->See [AppMountParameters](./kibana-plugin-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
