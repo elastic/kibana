@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, Component, Fragment, FC, ReactNode } from 'react';
+import React, { Component, Fragment, FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 

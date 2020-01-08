@@ -36,14 +36,15 @@ import { ExplorerState } from '../reducers';
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
 // which will be considered by memoizeOne. This way we can add the `lastRefresh` argument as a
 // caching parameter without having to change all the original functions which shouldn't care
-// about this parameter.
+// about this parameter. The generic type T retains and returns the type information of
+// the original function.
 const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
-const wrapWithLastRefreshArg = <T extends (...origArgs: any[]) => any>(func: T) => {
-  return function(lastRefresh: number, ...args: Parameters<T>) {
+const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T) => {
+  return function(lastRefresh: number, ...args: Parameters<T>): ReturnType<T> {
     return func.apply(null, args);
   };
 };
-const memoize = <T extends (...origArgs: any[]) => any>(func: T) => {
+const memoize = <T extends (...a: any[]) => any>(func: T) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func), memoizeIsEqual);
 };
 
