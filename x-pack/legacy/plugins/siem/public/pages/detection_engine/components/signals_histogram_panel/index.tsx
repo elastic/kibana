@@ -15,7 +15,7 @@ import { Query } from '../../../../../../../../../src/plugins/data/common/query'
 import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { SignalsHistogramOption, SignalsTotal } from './types';
 import { signalsHistogramOptions } from './config';
-import { getHostsUrl } from '../../../../components/link_to';
+import { getDetectionEngineUrl } from '../../../../components/link_to';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../../lib/kibana';
 
@@ -87,12 +87,15 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
               value={selectedStackByOption.value}
             />
           )}
-          {showLinkToSignals && <EuiButton href={getHostsUrl()}>{i18n.VIEW_SIGNALS}</EuiButton>}
+          {showLinkToSignals && (
+            <EuiButton href={getDetectionEngineUrl()}>{i18n.VIEW_SIGNALS}</EuiButton>
+          )}
         </HeaderSection>
 
         <SignalsHistogram
           filters={filters}
           from={from}
+          legendPosition={legendPosition}
           loadingInitial={loadingInitial}
           query={query}
           to={to}
