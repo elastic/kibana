@@ -78,5 +78,6 @@
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
   "timeline_id": "other-timeline-id",
+  "timeline_title": "other-timeline-title",
   "version": 42
 }
