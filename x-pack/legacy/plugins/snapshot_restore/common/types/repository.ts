@@ -165,7 +165,7 @@ export interface SuccessfulRepositoryCleanup {
 
 export interface FailedRepositoryCleanup {
   cleaned: false;
-  error: string;
+  error: object;
 }
 
 export type RepositoryCleanup = FailedRepositoryCleanup | SuccessfulRepositoryCleanup;

@@ -360,12 +360,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
                   defaultMessage="Sorry, there was an error cleaning the repository."
                 />
               </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryErrorMessage"
-                  defaultMessage={`${cleanup.error}`}
-                />
-              </p>
+              <p>{cleanup.error ? cleanup.error.toString() : '503: Unknown error'}</p>
             </EuiCallOut>
           )}
         </>
