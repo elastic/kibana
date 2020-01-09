@@ -5,8 +5,9 @@
  */
 
 import Hapi from 'hapi';
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Services } from './types';
+import { Services, AlertsConfigType } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -36,6 +37,7 @@ import {
   unmuteAlertInstanceRoute,
 } from './routes';
 import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
+import { registerAlertsUsageCollector } from './usage';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -52,10 +54,12 @@ export class Plugin {
   private adminClient?: IClusterClient;
   private serverBasePath?: string;
   private licenseState: LicenseState | null = null;
+  private readonly config$: Observable<AlertsConfigType>;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
+    this.config$ = initializerContext.config.create();
   }
 
   public async setup(
@@ -63,7 +67,7 @@ export class Plugin {
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
-
+    const config = await this.config$.pipe(first()).toPromise();
     this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
@@ -99,6 +103,10 @@ export class Plugin {
     core.http.route(extendRouteWithLicenseCheck(unmuteAllAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(muteAlertInstanceRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(unmuteAlertInstanceRoute, this.licenseState));
+
+    registerAlertsUsageCollector(plugins.usageCollection, plugins.savedObjects, alertTypeRegistry, {
+      isAlertsEnabled: config.enabled,
+    });
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),

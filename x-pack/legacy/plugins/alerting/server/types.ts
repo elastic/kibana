@@ -113,4 +113,8 @@ export interface AlertingPlugin {
   start: PluginStartContract;
 }
 
+export interface AlertsConfigType {
+  enabled: boolean;
+}
+
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

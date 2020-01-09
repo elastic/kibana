@@ -5,7 +5,9 @@
  */
 
 import Hapi from 'hapi';
+import * as Rx from 'rxjs';
 import { Legacy } from 'kibana';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { TaskManager } from '../../task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -26,6 +28,7 @@ import {
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
+import { AlertsConfigType } from './types';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -58,6 +61,9 @@ export type TaskManagerSetupContract = Pick<
  */
 export interface AlertingPluginInitializerContext {
   logger: LoggerFactory;
+  config: {
+    create(): Rx.Observable<AlertsConfigType>;
+  };
 }
 export interface AlertingCoreSetup {
   elasticsearch: CoreSetup['elasticsearch'];
@@ -78,6 +84,8 @@ export interface AlertingPluginsSetup {
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
   licensing: LicensingPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  savedObjects: SavedObjectsLegacyService;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -105,6 +113,13 @@ export function shim(
 
   const initializerContext: AlertingPluginInitializerContext = {
     logger: newPlatform.coreContext.logger,
+    config: {
+      create() {
+        return Rx.of({
+          enabled: server.config().get('xpack.alerting.enabled') as boolean,
+        }) as Rx.Observable<AlertsConfigType>;
+      },
+    },
   };
 
   const coreSetup: AlertingCoreSetup = {
@@ -127,6 +142,8 @@ export function shim(
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
     licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
+    usageCollection: newPlatform.setup.plugins.usageCollection,
+    savedObjects: server.savedObjects,
   };
 
   const pluginsStart: AlertingPluginsStart = {
