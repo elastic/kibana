@@ -170,10 +170,10 @@ const getSubArrays = (arr: string[]): string[][] => {
   return result;
 };
 
-const getRegexFromArray = (array: string[]): RegExp[] => {
-  const termsRegexArray = array.map(value => new RegExp(value, 'i'));
+const getRegexArrayFromSearchTerms = (searchTerms: string[]): RegExp[] => {
+  const termsRegexArray = searchTerms.map(term => new RegExp(term, 'i'));
   const fuzzyJoinChar = '[_\\.-\\s]?';
-  const fuzzySearchRegexArray = getSubArrays(array).map(
+  const fuzzySearchRegexArray = getSubArrays(searchTerms).map(
     ([A, B]) => new RegExp(A + fuzzyJoinChar + B, 'i')
   );
   const regexArray = [...termsRegexArray, ...fuzzySearchRegexArray];
@@ -191,7 +191,7 @@ const parseSearchTerm = (term: string): SearchData => {
   const parsedTerm = term.replace(/\s+/g, ' ').trim(); // Remove multiple spaces with 1 single space
 
   const words = parsedTerm.split(' ');
-  const searchRegexArray = getRegexFromArray(words);
+  const searchRegexArray = getRegexArrayFromSearchTerms(words);
 
   const firstWordIsType = ALL_DATA_TYPES.includes(words[0]);
   const lastWordIsType = ALL_DATA_TYPES.includes(words[words.length - 1]);
