@@ -9,9 +9,17 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./export_rules.sh; cat export.ndjson | jq .
+EXCLUDE_DETAILS=${1:-false}
+
+# Note: This file does not use jq on purpose for testing and redirections
+
+# Example get all the rules except pre-packaged rules
+# ./export_rules.sh
+
+# Example get the export details at the end
+# ./export_rules.sh false
+
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_export \
-  jq .
+  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_export?exclude_export_details=${EXCLUDE_DETAILS}

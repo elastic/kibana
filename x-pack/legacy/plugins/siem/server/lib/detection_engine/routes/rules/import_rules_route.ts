@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { extname } from 'path';
 import { isFunction } from 'lodash/fp';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
@@ -27,6 +26,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { ImportRuleAlertRest } from '../../types';
 import { transformOrImportError } from './utils';
 import { updateRules } from '../../rules/update_rules';
+import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 
 export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -43,16 +43,8 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         options: {
           abortEarly: false,
         },
-        // TODO: Move this to a schema file
-        query: Joi.object()
-          .keys({
-            overwrite: Joi.boolean().default(false),
-          })
-          .default(),
-        // TODO: Move this to a schema file
-        payload: Joi.object({
-          file: Joi.object().required(),
-        }).default(),
+        query: importRulesQuerySchema,
+        payload: importRulesPayloadSchema,
       },
     },
     async handler(request: ImportRulesRequest, headers) {
@@ -91,8 +83,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           }
 
           const {
-            id,
-            created_at: createdAt,
             description,
             enabled,
             false_positives: falsePositives,
@@ -115,7 +105,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             threats,
             to,
             type,
-            updated_at: updatedAt,
             references,
             timeline_id: timelineId,
             version,
@@ -132,12 +121,12 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 existingImportSuccessError,
               });
             }
-            const rule = await readRules({ alertsClient, id, ruleId });
+            const rule = await readRules({ alertsClient, ruleId });
             if (rule == null) {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
-                createdAt,
+                createdAt: new Date().toISOString(),
                 description,
                 enabled,
                 falsePositives,
@@ -161,7 +150,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 to,
                 type,
                 threats,
-                updatedAt,
+                updatedAt: new Date().toISOString(),
                 references,
                 version,
               });
@@ -182,7 +171,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 timelineId,
                 meta,
                 filters,
-                id,
+                id: undefined,
                 ruleId,
                 index,
                 interval,

@@ -4,37 +4,80 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exportRulesSchema } from './export_rules_schema';
-import { ExportRulesRequestRest } from '../../rules/types';
+import { exportRulesSchema, exportRulesQuerySchema } from './export_rules_schema';
+import { ExportRulesRequest } from '../../rules/types';
 
 describe('create rules schema', () => {
-  test('null value or absent values validate', () => {
-    expect(exportRulesSchema.validate(null).error).toBeFalsy();
+  describe('exportRulesSchema', () => {
+    test('null value or absent values validate', () => {
+      expect(exportRulesSchema.validate(null).error).toBeFalsy();
+    });
+
+    test('empty object does not validate', () => {
+      expect(
+        exportRulesSchema.validate<Partial<ExportRulesRequest['payload']>>({}).error
+      ).toBeTruthy();
+    });
+
+    test('empty object array does validate', () => {
+      expect(
+        exportRulesSchema.validate<Partial<ExportRulesRequest['payload']>>({ objects: [] }).error
+      ).toBeTruthy();
+    });
+
+    test('array with rule_id validates', () => {
+      expect(
+        exportRulesSchema.validate<Partial<ExportRulesRequest['payload']>>({
+          objects: [{ rule_id: 'test-1' }],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('array with id does not validate as we do not allow that on purpose since we export rule_id', () => {
+      expect(
+        exportRulesSchema.validate<Omit<ExportRulesRequest['payload'], 'objects'>>({
+          objects: [{ id: 'test-1' }],
+        }).error
+      ).toBeTruthy();
+    });
   });
 
-  test('empty object does not validate', () => {
-    expect(exportRulesSchema.validate<Partial<ExportRulesRequestRest>>({}).error).toBeTruthy();
-  });
+  describe('exportRulesQuerySchema', () => {
+    test('default value for file_name is export.ndjson', () => {
+      expect(
+        exportRulesQuerySchema.validate<Partial<ExportRulesRequest['query']>>({}).value.file_name
+      ).toEqual('export.ndjson');
+    });
 
-  test('empty object array does validate', () => {
-    expect(
-      exportRulesSchema.validate<Partial<ExportRulesRequestRest>>({ objects: [] }).error
-    ).toBeTruthy();
-  });
+    test('default value for exclude_export_details is false', () => {
+      expect(
+        exportRulesQuerySchema.validate<Partial<ExportRulesRequest['query']>>({}).value
+          .exclude_export_details
+      ).toEqual(false);
+    });
 
-  test('array with rule_id validates', () => {
-    expect(
-      exportRulesSchema.validate<Partial<ExportRulesRequestRest>>({
-        objects: [{ rule_id: 'test-1' }],
-      }).error
-    ).toBeFalsy();
-  });
+    test('file_name validates', () => {
+      expect(
+        exportRulesQuerySchema.validate({
+          file_name: 'test.ndjson',
+        }).error
+      ).toBeFalsy();
+    });
 
-  test('array with id does not validate as we do not allow that on purpose since we export rule_id', () => {
-    expect(
-      exportRulesSchema.validate({
-        objects: [{ id: 'test-1' }],
-      }).error
-    ).toBeTruthy();
+    test('exclude_export_details validates with a boolean true', () => {
+      expect(
+        exportRulesQuerySchema.validate({
+          exclude_export_details: 'true',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('exclude_export_details does not validate with a weird string', () => {
+      expect(
+        exportRulesQuerySchema.validate({
+          exclude_export_details: 'blah',
+        }).error
+      ).toBeTruthy();
+    });
   });
 });

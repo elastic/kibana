@@ -11,7 +11,7 @@ export const getExportDetailsNdjson = (
   missingRules: Array<Partial<OutputRuleAlertRest>> = []
 ): string => {
   const stringified = JSON.stringify({
-    export_count: rules.length,
+    exported_count: rules.length,
     missing_rules: missingRules,
     missing_rules_count: missingRules.length,
   });

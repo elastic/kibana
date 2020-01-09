@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ExportRulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
-import { exportRulesSchema } from '../schemas/export_rules_schema';
+import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 
@@ -26,6 +26,7 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           abortEarly: false,
         },
         payload: exportRulesSchema,
+        query: exportRulesQuerySchema,
       },
     },
     async handler(request: ExportRulesRequest, headers) {
@@ -37,8 +38,6 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       if (!alertsClient || !actionsClient) {
         return headers.response().code(404);
       }
-      // TODO: Add a query parameter for if we export details or not
-      const exportBoolean = true;
 
       const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
       if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
@@ -55,12 +54,12 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ? await getExportByObjectIds(alertsClient, request.payload.objects)
           : await getExportAll(alertsClient);
 
-      const response = exportBoolean
-        ? headers.response(`${exported.rulesNdjson}${exported.exportDetails}`)
-        : headers.response(exported.rulesNdjson);
+      const response = request.query.exclude_export_details
+        ? headers.response(exported.rulesNdjson)
+        : headers.response(`${exported.rulesNdjson}${exported.exportDetails}`);
 
       return response
-        .header('Content-Disposition', `attachment; filename="export.ndjson"`) // TODO: Add a file parameter to use a different filename for the UI if it wants
+        .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
         .header('Content-Type', 'application/ndjson');
     },
   };

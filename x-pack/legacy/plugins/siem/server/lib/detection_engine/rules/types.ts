@@ -62,8 +62,12 @@ export interface ExportRulesRequestRest {
   objects: Array<{ rule_id: string }> | null | undefined;
 }
 
-export interface ExportRulesRequest extends RequestFacade {
+export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
   payload: ExportRulesRequestRest;
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
 }
 
 export type QueryRequest = Omit<RequestFacade, 'query'> & {

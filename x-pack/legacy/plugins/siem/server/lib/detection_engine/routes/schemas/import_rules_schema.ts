@@ -8,6 +8,11 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  id,
+  created_at,
+  updated_at,
+  created_by,
+  updated_by,
   enabled,
   description,
   false_positives,
@@ -41,11 +46,14 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 /**
  * Differences from this and the createRulesSchema are
  *   - rule_id is required
+ *   - id is optional (but ignored in the import code - rule_id is exclusively used for imports)
+ *   - created_at is optional (but ignored in the import code)
+ *   - updated_at is optional (but ignored in the import code)
+ *   - created_by is optional (but ignored in the import code)
+ *   - updated_by is optional (but ignored in the import code)
  */
-
-// TODO: Do we make _most_ of this required since an export should export all the major elements
-// and then on an import we require all those fields and have a 1-1 between export and import?
 export const importRulesSchema = Joi.object({
+  id,
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -75,5 +83,16 @@ export const importRulesSchema = Joi.object({
   threats: threats.default([]),
   references: references.default([]),
   version: version.default(1),
-  // TODO: Add the extra fields of create_at, updated_at, created_by, etc... All the ones you would get on an export
+  created_at,
+  updated_at,
+  created_by,
+  updated_by,
+});
+
+export const importRulesQuerySchema = Joi.object({
+  overwrite: Joi.boolean().default(false),
+});
+
+export const importRulesPayloadSchema = Joi.object({
+  file: Joi.object().required(),
 });
