@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export { encryptTelemetry } from './encryption';
-export { registerTelemetryUsageCollector } from './usage';
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerLocalizationUsageCollector } from './localization';
-export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';
-export { registerManagementUsageCollector } from './management';
+export { registerManagementUsageCollector } from './telemetry_management_collector';
