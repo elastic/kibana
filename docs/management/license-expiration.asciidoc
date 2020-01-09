@@ -92,7 +92,7 @@ failure without immediately impacting other users.
 
 * Pipelines cannot be created, edited, viewed, listed, or deleted from the UI.
 * Cannot list or view existing pipelines from the UI.
-* Cannot run Logstash instances which are registered to listen to existing pipelines.
+* Logstash instances that are registered to listen to existing pipelines cannot run.
 //TBD: * Logstash will continue to poll centrally-managed pipelines
 
 [[expiration-kibana]]
