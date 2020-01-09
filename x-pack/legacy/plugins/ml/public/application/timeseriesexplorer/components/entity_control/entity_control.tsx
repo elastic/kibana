@@ -25,6 +25,7 @@ export interface Entity {
 interface EntityControlProps {
   entity: Entity;
   entityFieldValueChanged: (entity: Entity, fieldValue: any) => void;
+  isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   forceSelection: boolean;
   options: EuiComboBoxOptionProps[];
@@ -46,12 +47,8 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
   };
 
   componentDidUpdate(prevProps: EntityControlProps) {
-    const { entity, forceSelection, options } = this.props;
+    const { entity, forceSelection, isLoading, options } = this.props;
     const { selectedOptions } = this.state;
-
-    if (prevProps.entity === entity) {
-      return;
-    }
 
     const { fieldValue } = entity;
 
@@ -68,11 +65,13 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
       selectedOptionsUpdate = undefined;
     }
 
-    this.setState({
-      options,
-      isLoading: false,
-      selectedOptions: selectedOptionsUpdate,
-    });
+    if (prevProps.isLoading === true && isLoading === false) {
+      this.setState({
+        isLoading: false,
+        options,
+        selectedOptions: selectedOptionsUpdate,
+      });
+    }
 
     if (forceSelection && this.inputRef) {
       this.inputRef.focus();
@@ -100,7 +99,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
   render() {
     const { entity, forceSelection } = this.props;
-    const { selectedOptions, isLoading, options } = this.state;
+    const { isLoading, options, selectedOptions } = this.state;
 
     const control = (
       <EuiComboBox

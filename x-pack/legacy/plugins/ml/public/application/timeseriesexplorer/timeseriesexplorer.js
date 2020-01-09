@@ -127,6 +127,7 @@ function getTimeseriesexplorerDefaultState() {
     contextForecastData: undefined,
     // Not chartable if e.g. model plot with terms for a varp detector
     dataNotChartable: false,
+    entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
     focusChartData: undefined,
@@ -420,6 +421,8 @@ export class TimeSeriesExplorer extends React.Component {
    * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
    */
   loadEntityValues = async (entities, searchTerm = {}) => {
+    this.setState({ entitiesLoading: true });
+
     const { bounds, selectedJobIds, selectedDetectorIndex } = this.props;
     const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
@@ -462,7 +465,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityValues[entity.fieldName] = fieldValues;
     });
 
-    this.setState({ entityValues });
+    this.setState({ entitiesLoading: false, entityValues });
   };
 
   loadForForecastId = forecastId => {
@@ -1336,6 +1339,7 @@ export class TimeSeriesExplorer extends React.Component {
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  isLoading={this.state.entitiesLoading}
                   onSearchChange={this.entityFieldSearchChanged}
                   forceSelection={forceSelection}
                   key={entityKey}
