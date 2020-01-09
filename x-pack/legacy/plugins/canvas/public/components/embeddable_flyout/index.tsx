@@ -19,7 +19,7 @@ import { withKibana } from '../../../../../../../src/plugins/kibana_react/public
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
-    return `filters | savedMap id="${id}" | render`;
+    return `savedMap id="${id}" | render`;
   },
   // FIX: Only currently allow Map embeddables
   /* [EmbeddableTypes.visualization]: (id: string) => {

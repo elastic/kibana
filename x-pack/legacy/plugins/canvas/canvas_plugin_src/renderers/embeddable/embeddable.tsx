@@ -13,7 +13,7 @@ import {
   EmbeddableFactory,
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
