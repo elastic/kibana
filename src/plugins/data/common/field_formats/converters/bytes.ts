@@ -23,9 +23,7 @@ import { FIELD_FORMAT_IDS } from '../types';
 export class BytesFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.BYTES;
   static title = 'Bytes';
-  static isNumeric = true;
 
-  isNumeric = BytesFormat.isNumeric;
   id = BytesFormat.id;
   title = BytesFormat.title;
 }

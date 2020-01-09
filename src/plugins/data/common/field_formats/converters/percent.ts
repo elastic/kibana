@@ -23,9 +23,7 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
   static title = 'Percentage';
-  static isNumeric = true;
 
-  isNumeric = PercentFormat.isNumeric;
   id = PercentFormat.id;
   title = PercentFormat.title;
 

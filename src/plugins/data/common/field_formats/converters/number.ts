@@ -23,9 +23,7 @@ import { FIELD_FORMAT_IDS } from '../types';
 export class NumberFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.NUMBER;
   static title = 'Number';
-  static isNumeric = true;
 
-  isNumeric = NumberFormat.isNumeric;
   id = NumberFormat.id;
   title = NumberFormat.title;
 }
