@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../common/types';
-
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
-
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
-}
-
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
+export function withTimeout<T>({
+  promise,
+  timeout,
+  errorMessage,
+}: {
+  promise: Promise<T>;
+  timeout: number;
+  errorMessage: string;
+}) {
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => setTimeout(() => reject(new Error(errorMessage)), timeout)),
+  ]) as Promise<T>;
 }
