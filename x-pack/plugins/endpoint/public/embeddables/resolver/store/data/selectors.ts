@@ -61,16 +61,26 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree) {
   return widths;
 }
 
+// bet sean loves this
 type ProcessWithWidthMetadata = {
   process: ProcessEvent;
   width: number;
-  parent: ProcessEvent;
-  parentWidth: number;
 } & (
-  | { isOnlyChild: true; lastChildWidth: null; firstChildWidth: null }
-  | { isOnlyChild: false; lastChildWidth: number; firstChildWidth: number }
+  | ({
+      parent: ProcessEvent;
+      parentWidth: number;
+    } & (
+      | { isOnlyChild: true; firstChildWidth: null; lastChildWidth: null }
+      | { isOnlyChild: false; firstChildWidth: number; lastChildWidth: number }
+    ))
+  | {
+      parent: null;
+      parentWidth: null;
+      isOnlyChild: null;
+      lastChildWidth: null;
+      firstChildWidth: null;
+    }
 );
-
 /**
  * 1. calculate widths
  * 2. calculate positions
@@ -80,48 +90,62 @@ type ProcessWithWidthMetadata = {
  *
  * for ({ parent, process, parentWidth, lastChildWidth, firstChildWidth,
  */
-function* levelOrderWithWidths(tree: IndexedProcessTree): Iterable<ProcessWithWidthMetadata> {
-  // TODO, maybe take this in?
-  const widths = widthsOfProcessSubtrees(tree);
+function* levelOrderWithWidths(
+  tree: IndexedProcessTree,
+  widths: ReturnType<typeof widthsOfProcessSubtrees>
+): Iterable<ProcessWithWidthMetadata> {
   for (const process of levelOrder(tree)) {
     const parent = indexedProcessTreeParent(tree, process);
     const width = widths.get(process);
 
+    if (width === undefined) {
+      // TODO explain
+      throw new Error();
+    }
+
     if (parent === undefined) {
-      // TODO explain
-      throw new Error();
-    }
-    const parentWidth = widths.get(parent);
-
-    if (width === undefined || parentWidth === undefined) {
-      // TODO explain
-      throw new Error();
-    }
-
-    const thingy: Partial<ProcessWithWidthMetadata> = {
-      process,
-      width,
-      parent,
-      parentWidth,
-    };
-
-    const siblings = indexedProcessTreeChildren(tree, parent);
-    if (siblings.length === 1) {
-      thingy.isOnlyChild = true;
-      thingy.lastChildWidth = null;
-      thingy.firstChildWidth = null;
+      yield {
+        process,
+        width,
+        parent: null,
+        parentWidth: null,
+        isOnlyChild: null,
+        firstChildWidth: null,
+        lastChildWidth: null,
+      };
     } else {
-      const firstChildWidth = widths.get(siblings[0]);
-      const lastChildWidth = widths.get(siblings[0]);
-      if (firstChildWidth === undefined || lastChildWidth === undefined) {
+      const parentWidth = widths.get(parent);
+
+      if (parentWidth === undefined) {
+        // TODO explain
         throw new Error();
       }
-      thingy.isOnlyChild = false;
-      thingy.firstChildWidth = firstChildWidth;
-      thingy.lastChildWidth = lastChildWidth;
-    }
 
-    yield thingy as ProcessWithWidthMetadata;
+      const thingy: Partial<ProcessWithWidthMetadata> = {
+        process,
+        width,
+        parent,
+        parentWidth,
+      };
+
+      const siblings = indexedProcessTreeChildren(tree, parent);
+      if (siblings.length === 1) {
+        thingy.isOnlyChild = true;
+        thingy.lastChildWidth = null;
+        thingy.firstChildWidth = null;
+      } else {
+        const firstChildWidth = widths.get(siblings[0]);
+        const lastChildWidth = widths.get(siblings[0]);
+        if (firstChildWidth === undefined || lastChildWidth === undefined) {
+          throw new Error();
+        }
+        thingy.isOnlyChild = false;
+        thingy.firstChildWidth = firstChildWidth;
+        thingy.lastChildWidth = lastChildWidth;
+      }
+
+      yield thingy as ProcessWithWidthMetadata;
+    }
   }
 }
 
@@ -143,7 +167,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
     // TODO remove guard
     if (graphableProcesses.length !== 0) {
-      for (const process of levelOrder(indexedProcessTree)) {
+      for (const { process } of levelOrderWithWidths(indexedProcessTree, widths)) {
         if (parentProcess === undefined) {
           parentProcess = process;
           numberOfPrecedingSiblings = 0;
