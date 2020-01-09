@@ -22,11 +22,13 @@ import React, { Component } from 'react';
 
 import { isColorDark } from '@elastic/eui';
 
-import { getHeatmapColors, getFormat, VisParams, Vis } from '../legacy_imports';
+import { getHeatmapColors, getFormat, Vis } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
 import { FieldFormat, ContentType } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { VisParams, MetricVisMetric } from '../types';
+import { SchemaConfig } from '../../../visualizations/public';
 
 interface MetricVisComponentProps {
   visParams: VisParams;
@@ -40,8 +42,9 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = last<{ to: number }>(colorsRange).to;
+    const max = last(colorsRange).to;
     const labels: string[] = [];
+
     colorsRange.forEach((range: any) => {
       const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
       const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
@@ -80,7 +83,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     return bucket;
   }
 
-  private getColor(val: number, labels: string[], colors: any) {
+  private getColor(val: number, labels: string[], colors: { [label: string]: string }) {
     const bucket = this.getBucket(val);
     const label = labels[bucket];
     return colors[label];
@@ -110,10 +113,10 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
-    const max = last<{ to: number }>(config.colorsRange).to;
+    const max = last(config.colorsRange).to;
     const colors = this.getColors();
     const labels = this.getLabels();
-    const metrics: any[] = []; // not yet typed
+    const metrics: MetricVisMetric[] = [];
 
     let bucketColumnId: string;
     let bucketFormatter: FieldFormat;
@@ -123,7 +126,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       bucketFormatter = getFormat(dimensions.bucket.format);
     }
 
-    dimensions.metrics.forEach((metric: any) => {
+    dimensions.metrics.forEach((metric: SchemaConfig) => {
       const columnIndex = metric.accessor;
       const column = table?.columns[columnIndex];
       const formatter = getFormat(metric.format);
@@ -147,8 +150,8 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
         metrics.push({
           label: title,
           value,
-          color: shouldColor && config.style.labelColor ? color : null,
-          bgColor: shouldColor && config.style.bgColor ? color : null,
+          color: shouldColor && config.style.labelColor ? color : undefined,
+          bgColor: shouldColor && config.style.bgColor ? color : undefined,
           lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
           rowIndex,
         });
@@ -158,7 +161,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     return metrics;
   }
 
-  private filterBucket = (metric: any) => {
+  private filterBucket = (metric: MetricVisMetric) => {
     const dimensions = this.props.visParams.dimensions;
     if (!dimensions.bucket) {
       return;
@@ -171,7 +174,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
-  private renderMetric = (metric: any, index: number) => {
+  private renderMetric = (metric: MetricVisMetric, index: number) => {
     return (
       <MetricVisValue
         key={index}

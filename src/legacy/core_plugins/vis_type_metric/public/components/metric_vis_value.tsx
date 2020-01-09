@@ -22,10 +22,12 @@ import classNames from 'classnames';
 
 import { EuiKeyboardAccessible } from '@elastic/eui';
 
+import { MetricVisMetric } from '../types';
+
 interface MetricVisValueProps {
-  metric: any; // not yet typed
+  metric: MetricVisMetric;
   fontSize: number;
-  onFilter?: (metric: any) => void;
+  onFilter?: (metric: MetricVisMetric) => void;
   showLabel?: boolean;
 }
 
