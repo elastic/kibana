@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
-import { EuiKeyboardAccessible } from '@elastic/eui';
+import { EuiKeyboardAccessible, keyCodes } from '@elastic/eui';
 
 import { MetricVisMetric } from '../types';
 
@@ -35,6 +35,12 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
   onClick = () => {
     if (this.props.onFilter) {
       this.props.onFilter(this.props.metric);
+    }
+  };
+
+  onKeyPress = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.keyCode === keyCodes.ENTER) {
+      this.onClick();
     }
   };
 
@@ -57,6 +63,7 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
         className={containerClassName}
         style={{ backgroundColor: metric.bgColor }}
         onClick={hasFilter ? this.onClick : undefined}
+        onKeyPress={hasFilter ? this.onKeyPress : undefined}
         tabIndex={hasFilter ? 0 : undefined}
         role={hasFilter ? 'button' : undefined}
       >

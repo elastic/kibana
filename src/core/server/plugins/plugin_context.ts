@@ -145,8 +145,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createContextContainer: deps.context.createContextContainer,
     },
     elasticsearch: {
-      adminClient$: deps.elasticsearch.adminClient$,
-      dataClient$: deps.elasticsearch.dataClient$,
+      adminClient: deps.elasticsearch.adminClient,
+      dataClient: deps.elasticsearch.dataClient,
       createClient: deps.elasticsearch.createClient,
     },
     http: {

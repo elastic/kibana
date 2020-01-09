@@ -2,24 +2,14 @@
 
 exports[`get_column_renderer renders correctly against snapshot 1`] = `
 <span>
-  <DraggableWrapper
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "plain-column-renderer-data-provider-test-event_severity-1-message-3",
-        "kqlQuery": "",
-        "name": "event.severity: 3",
-        "queryMatch": Object {
-          "field": "message",
-          "operator": ":",
-          "value": "3",
-        },
-      }
-    }
-    key="plain-column-renderer-draggable-wrapper-test-event.severity-1-message-3"
-    render={[Function]}
+  <FormattedFieldValue
+    contextId="plain-column-renderer-formatted-field-value-test"
+    eventId="1"
+    fieldFormat=""
+    fieldName="event.severity"
+    fieldType=""
+    key="plain-column-renderer-formatted-field-value-test-event.severity-1-message-3"
+    value="3"
   />
 </span>
 `;

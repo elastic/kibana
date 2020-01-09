@@ -40,8 +40,14 @@ export class BulkUploader {
     }
 
     this._timer = null;
+    // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
+    // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
+    // every tick when ES is failing or monitoring is disabled.
+    this._holdSendingUsage = false;
     this._interval = interval;
     this._lastFetchUsageTime = null;
+    // Limit sending and fetching usage to once per day once usage is successfully stored
+    // into the monitoring indices.
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
 
     this._log = {
@@ -65,6 +71,29 @@ export class BulkUploader {
       });
   }
 
+  filterCollectorSet(usageCollection) {
+    const successfulUploadInLastDay =
+      this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+
+    return usageCollection.getFilteredCollectorSet(c => {
+      // this is internal bulk upload, so filter out API-only collectors
+      if (c.ignoreForInternalUploader) {
+        return false;
+      }
+      // Only collect usage data at the same interval as telemetry would (default to once a day)
+      if (usageCollection.isUsageCollector(c)) {
+        if (this._holdSendingUsage) {
+          return false;
+        }
+        if (successfulUploadInLastDay) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
   /*
    * Start the interval timer
    * @param {usageCollection} usageCollection object to use for initial the fetch/upload and fetch/uploading on interval
@@ -72,31 +101,15 @@ export class BulkUploader {
    */
   start(usageCollection) {
     this._log.info('Starting monitoring stats collection');
-    const filterCollectorSet = _usageCollection => {
-      const successfulUploadInLastDay =
-        this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
-
-      return _usageCollection.getFilteredCollectorSet(c => {
-        // this is internal bulk upload, so filter out API-only collectors
-        if (c.ignoreForInternalUploader) {
-          return false;
-        }
-        // Only collect usage data at the same interval as telemetry would (default to once a day)
-        if (successfulUploadInLastDay && _usageCollection.isUsageCollector(c)) {
-          return false;
-        }
-        return true;
-      });
-    };
 
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(filterCollectorSet(usageCollection)); // initial fetch
+      this._fetchAndUpload(this.filterCollectorSet(usageCollection)); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(filterCollectorSet(usageCollection));
+      this._fetchAndUpload(this.filterCollectorSet(usageCollection));
     }, this._interval);
   }
 
@@ -146,12 +159,17 @@ export class BulkUploader {
         const sendSuccessful = !result.ignored && !result.errors;
         if (!sendSuccessful && hasUsageCollectors) {
           this._lastFetchUsageTime = null;
+          this._holdSendingUsage = true;
           this._log.debug(
             'Resetting lastFetchWithUsage because uploading to the cluster was not successful.'
           );
         }
-        if (sendSuccessful && hasUsageCollectors) {
-          this._lastFetchUsageTime = Date.now();
+
+        if (sendSuccessful) {
+          this._holdSendingUsage = false;
+          if (hasUsageCollectors) {
+            this._lastFetchUsageTime = Date.now();
+          }
         }
         this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {

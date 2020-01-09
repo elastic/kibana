@@ -498,7 +498,7 @@ export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capa
 // @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
+    asScoped(request?: ScopeableRequest): IScopedClusterClient;
     callAsInternalUser: APICaller;
     close(): void;
     }
@@ -669,9 +669,9 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
-    readonly adminClient$: Observable<IClusterClient>;
-    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
-    readonly dataClient$: Observable<IClusterClient>;
+    readonly adminClient: IClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    readonly dataClient: IClusterClient;
 }
 
 // @public (undocumented)
@@ -752,7 +752,7 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 // @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
@@ -770,6 +770,9 @@ export interface ICspConfig {
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
+
+// @public
+export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
@@ -885,7 +888,7 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Error | Record<string, any> | Buffer | Stream | {
+    custom: <T extends string | Error | Buffer | Stream | Record<string, any> | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -896,9 +899,9 @@ export const kibanaResponseFactory: {
     conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
-    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
@@ -1877,6 +1880,9 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
     // (undocumented)
     references: SavedObjectReference[] | undefined;
 }
+
+// @public
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
 // @public
 export class ScopedClusterClient implements IScopedClusterClient {

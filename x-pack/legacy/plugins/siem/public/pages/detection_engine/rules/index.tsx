@@ -8,6 +8,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
@@ -32,7 +33,10 @@ export const RulesComponent = React.memo(() => {
       />
       <WrapperPage>
         <HeaderPage
-          backOptions={{ href: '#detection-engine', text: i18n.BACK_TO_DETECTION_ENGINE }}
+          backOptions={{
+            href: `#${DETECTION_ENGINE_PAGE_NAME}`,
+            text: i18n.BACK_TO_DETECTION_ENGINE,
+          }}
           subtitle={
             lastCompletedRun ? (
               <FormattedMessage
@@ -61,7 +65,11 @@ export const RulesComponent = React.memo(() => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton fill href="#/detection-engine/rules/create" iconType="plusInCircle">
+              <EuiButton
+                fill
+                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                iconType="plusInCircle"
+              >
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
             </EuiFlexItem>
