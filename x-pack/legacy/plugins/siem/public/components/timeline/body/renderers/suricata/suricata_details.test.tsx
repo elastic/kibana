@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData } from '../../../../../mock';
@@ -26,7 +25,7 @@ describe('SuricataDetails', () => {
           timelineId="test"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns text if the data does contain suricata data', () => {
