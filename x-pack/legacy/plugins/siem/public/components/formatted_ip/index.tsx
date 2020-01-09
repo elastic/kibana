@@ -5,7 +5,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';

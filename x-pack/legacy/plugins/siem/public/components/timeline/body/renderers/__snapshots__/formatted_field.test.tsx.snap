@@ -1,8 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Events renders correctly against snapshot 1`] = `
-<FormattedDate
+<FormattedFieldValue
+  contextId="test"
+  eventId="1"
   fieldName="timestamp"
+  fieldType="date"
   value="2018-11-05T19:03:25.937Z"
 />
 `;

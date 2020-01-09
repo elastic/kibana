@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { OnFilterChange } from '../../../events';
 import { ColumnHeader } from '../column_header';
