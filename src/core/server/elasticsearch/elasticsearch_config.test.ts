@@ -26,12 +26,34 @@ import {
 import { ElasticsearchConfig, config, ElasticsearchConfigType } from './elasticsearch_config';
 import { loggingServiceMock } from '../mocks';
 import { Logger } from '../logging';
+import { applyDeprecations, configDeprecationFactory } from '../config/deprecation';
+
+const CONFIG_PATH = 'elasticsearch';
 
 const createElasticsearchConfig = (rawConfig: ElasticsearchConfigType, log?: Logger) => {
   if (!log) {
     log = loggingServiceMock.create().get('config');
   }
   return new ElasticsearchConfig(rawConfig, log);
+};
+
+const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
+  const deprecations = config.deprecations!(configDeprecationFactory);
+  const deprecationMessages: string[] = [];
+  const _config: any = {};
+  _config[CONFIG_PATH] = settings;
+  const migrated = applyDeprecations(
+    _config,
+    deprecations.map(deprecation => ({
+      deprecation,
+      path: CONFIG_PATH,
+    })),
+    msg => deprecationMessages.push(msg)
+  );
+  return {
+    messages: deprecationMessages,
+    migrated,
+  };
 };
 
 test('set correct defaults', () => {
@@ -316,6 +338,27 @@ describe('logs warnings', () => {
     expect(loggingServiceMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
       `"Detected a certificate without a key; mutual TLS authentication is disabled."`
     );
+  });
+});
+
+describe('deprecations', () => {
+  it('logs a warning if elasticsearch.username is set to "elastic"', () => {
+    const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana\\" user instead.",
+      ]
+    `);
+  });
+
+  it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+    const { messages } = applyElasticsearchDeprecations({ username: 'otheruser' });
+    expect(messages).toHaveLength(0);
+  });
+
+  it('does not log a warning if elasticsearch.username is unset', () => {
+    const { messages } = applyElasticsearchDeprecations({});
+    expect(messages).toHaveLength(0);
   });
 });
 
