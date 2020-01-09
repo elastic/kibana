@@ -5,7 +5,15 @@
  */
 
 import { createSelector } from 'reselect';
-import { DataState, ProcessEvent, IndexedProcessTree } from '../../types';
+import {
+  DataState,
+  ProcessEvent,
+  IndexedProcessTree,
+  ProcessWidths,
+  ProcessPositions,
+  EdgeLineSegment,
+  ProcessWithWidthMetadata,
+} from '../../types';
 import { Vector2 } from '../../types';
 import { add as vector2Add } from '../../lib/vector2';
 import { isGraphableProcess } from '../../models/process_event';
@@ -16,10 +24,6 @@ import {
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
-
-type ProcessWidths = Map<ProcessEvent, number>;
-type ProcessPositions = Map<ProcessEvent, Vector2>;
-type EdgeLineSegment = Vector2[];
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
@@ -101,32 +105,6 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
 
   return widths;
 }
-
-/**
- * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
- */
-type ProcessWithWidthMetadata = {
-  process: ProcessEvent;
-  width: number;
-} & (
-  | {
-      parent: ProcessEvent;
-      parentWidth: number;
-      isOnlyChild: boolean;
-      firstChildWidth: number;
-      lastChildWidth: number;
-    }
-  | {
-      parent: null;
-      /* Without a parent, there is no parent width */
-      parentWidth: null;
-      /* Without a parent, we can't be an only child */
-      isOnlyChild: null;
-      /** If there is no parent, there are no siblings */
-      lastChildWidth: null;
-      firstChildWidth: null;
-    }
-);
 
 function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,

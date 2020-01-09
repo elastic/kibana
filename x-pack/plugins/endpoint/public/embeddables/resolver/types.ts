@@ -64,6 +64,9 @@ export interface CameraState {
   readonly latestFocusedWorldCoordinates: Vector2 | null;
 }
 
+/**
+ * State for `data` reducer which handles receiving Resolver data from the backend.
+ */
 export interface DataState {
   readonly results: readonly ProcessEvent[];
 }
@@ -110,6 +113,9 @@ type eventSubtypeFull =
 
 type eventTypeFull = 'process_event';
 
+/**
+ * The 'events' which contain process data and are used to model Resolver.
+ */
 export interface ProcessEvent {
   readonly event_timestamp: number;
   readonly event_type: number;
@@ -138,7 +144,41 @@ export interface IndexedProcessTree {
   idToProcess: Map<number, ProcessEvent>;
 }
 
-export interface GraphableProcessesPidMaps {
-  processesByUniqueParentPid: Map<number | undefined, ProcessEvent[]>;
-  processesByUniquePid: Map<number, ProcessEvent>;
-}
+/**
+ * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ */
+export type ProcessWidths = Map<ProcessEvent, number>;
+/**
+ * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
+ */
+export type ProcessPositions = Map<ProcessEvent, Vector2>;
+/**
+ * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
+ */
+export type EdgeLineSegment = Vector2[];
+
+/**
+ * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ */
+export type ProcessWithWidthMetadata = {
+  process: ProcessEvent;
+  width: number;
+} & (
+  | {
+      parent: ProcessEvent;
+      parentWidth: number;
+      isOnlyChild: boolean;
+      firstChildWidth: number;
+      lastChildWidth: number;
+    }
+  | {
+      parent: null;
+      /* Without a parent, there is no parent width */
+      parentWidth: null;
+      /* Without a parent, we can't be an only child */
+      isOnlyChild: null;
+      /** If there is no parent, there are no siblings */
+      lastChildWidth: null;
+      firstChildWidth: null;
+    }
+);
