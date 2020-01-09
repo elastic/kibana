@@ -17,7 +17,7 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { SourceErrorPage } from '../../components/source_error_page';
 import { Source, useSource } from '../../containers/source';
 import { StreamPage } from './stream';
-import { SettingsPage } from '../shared/settings';
+import { LogsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import {
   useLogAnalysisCapabilities,
@@ -107,7 +107,7 @@ export const LogsPage = ({ match }: RouteComponentProps) => {
                 <Route path={streamTab.path} component={StreamPage} />
                 <Route path={logRateTab.path} component={LogEntryRatePage} />
                 <Route path={logCategoriesTab.path} component={LogEntryCategoriesPage} />
-                <Route path={settingsTab.path} component={SettingsPage} />
+                <Route path={settingsTab.path} component={LogsSettingsPage} />
                 <RedirectWithQueryParams
                   from={`${match.path}/analysis`}
                   to={logRateTab.path}
