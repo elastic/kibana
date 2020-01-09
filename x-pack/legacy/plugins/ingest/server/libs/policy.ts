@@ -38,7 +38,7 @@ export class PolicyLib {
       description: description || '',
       status: Status.Active,
       datasources: [],
-      label: label || name,
+      label: label || '',
       updated_on: new Date().toISOString(),
       updated_by: withUser.kind === 'authenticated' ? withUser.username : 'system (Fleet)',
     };

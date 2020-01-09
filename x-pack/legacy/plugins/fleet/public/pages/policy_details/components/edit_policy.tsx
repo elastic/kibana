@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Policy } from '../../../../common/types/domain_data';
-import { PolicyForm } from '../../../components';
+import { PolicyForm, policyFormValidation } from '../../../components';
 import { useLibs } from '../../../hooks';
 
 interface Props {
@@ -32,6 +32,7 @@ export const EditPolicyFlyout: React.FC<Props> = ({ policy: originalPolicy, onCl
   const [policy, setPolicy] = useState<Partial<Policy>>({
     name: originalPolicy.name,
     description: originalPolicy.description,
+    label: originalPolicy.label,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const updatePolicy = (updatedFields: Partial<Policy>) => {
@@ -40,6 +41,7 @@ export const EditPolicyFlyout: React.FC<Props> = ({ policy: originalPolicy, onCl
       ...updatedFields,
     });
   };
+  const validation = policyFormValidation(policy);
 
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetEditPolicyFlyoutTitle">
@@ -53,7 +55,7 @@ export const EditPolicyFlyout: React.FC<Props> = ({ policy: originalPolicy, onCl
 
   const body = (
     <EuiFlyoutBody>
-      <PolicyForm policy={policy} updatePolicy={updatePolicy} />
+      <PolicyForm policy={policy} updatePolicy={updatePolicy} validation={validation} />
     </EuiFlyoutBody>
   );
 
@@ -72,6 +74,7 @@ export const EditPolicyFlyout: React.FC<Props> = ({ policy: originalPolicy, onCl
           <EuiButton
             fill
             isLoading={isLoading}
+            disabled={isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
