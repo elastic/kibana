@@ -29,9 +29,11 @@ interface ClippingPlanes {
 export function viewableBoundingBox(state: CameraState): AABB {
   const { renderWidth, renderHeight } = clippingPlanes(state);
   const matrix = inverseProjectionMatrix(state);
+  const bottomLeftCorner: Vector2 = [0, renderHeight];
+  const topRightCorner: Vector2 = [renderWidth, 0];
   return {
-    minimum: applyMatrix3([0, renderHeight], matrix),
-    maximum: applyMatrix3([renderWidth, 0], matrix),
+    minimum: applyMatrix3(bottomLeftCorner, matrix),
+    maximum: applyMatrix3(topRightCorner, matrix),
   };
 }
 
@@ -134,6 +136,13 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
     clippingPlaneBottom,
   } = clippingPlanes(state);
 
+  /* prettier-ignore */
+  const screenToNDC = [
+    2 / renderWidth,  0,                -1,
+    0,                2 / renderHeight, -1,
+    0,                0,                0
+  ] as const
+
   const [translationX, translationY] = translation(state);
 
   return addMatrix(
@@ -157,12 +166,7 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
         scalingTransformation([1, -1]),
         // 1. convert screen coordinates to NDC
         // e.g. for x-axis, divide by renderWidth then multiply by 2 and subtract by one so the value is in range of -1->1
-        // prettier-ignore
-        [
-          2 / renderWidth,  0, -1,
-          2 / renderHeight, 0, -1,
-          0,                0,  0
-        ] as const
+        screenToNDC
       )
     )
   );

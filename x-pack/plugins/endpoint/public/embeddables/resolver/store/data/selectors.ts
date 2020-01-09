@@ -15,7 +15,7 @@ import {
   ProcessWithWidthMetadata,
 } from '../../types';
 import { Vector2 } from '../../types';
-import { add as vector2Add } from '../../lib/vector2';
+import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess } from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
@@ -346,6 +346,14 @@ function processPositions(
        */
       const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
 
+      /* prettier-ignore */
+      const isometricTransformMatrix = [
+        Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
+        Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
+        0,                  0,                    1,
+      ]
+
+      // positions.set(process, applyMatrix3(position, isometricTransformMatrix));
       positions.set(process, position);
 
       numberOfPrecedingSiblings += 1;

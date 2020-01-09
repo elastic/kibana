@@ -30,7 +30,7 @@ export function divide(a: Vector2, b: Vector2): Vector2 {
  * Returns a vector which is the result of applying a 2D transformation matrix to the provided vector.
  */
 export function applyMatrix3([x, y]: Vector2, [m11, m12, m13, m21, m22, m23]: Matrix3): Vector2 {
-  return [x * m11 + y * m12 + m13, y * m21 + y * m22 + m23];
+  return [x * m11 + y * m12 + m13, x * m21 + y * m22 + m23];
 }
 
 /**
