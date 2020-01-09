@@ -20,7 +20,7 @@
 import React, { useCallback } from 'react';
 import { debounce } from 'lodash';
 
-import { EuiLoadingContent10 } from '../../components';
+import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../components/split_panel';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
@@ -60,13 +60,17 @@ export const Editor = ({ loading }: Props) => {
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={firstPanelWidth + '%'}
       >
-        {loading ? <EuiLoadingContent10 /> : <EditorUI initialTextValue={currentTextObject.text} />}
+        {loading ? (
+          <EditorContentSpinner />
+        ) : (
+          <EditorUI initialTextValue={currentTextObject.text} />
+        )}
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={secondPanelWidth + '%'}
       >
-        {loading ? <EuiLoadingContent10 /> : <EditorOutput />}
+        {loading ? <EditorContentSpinner /> : <EditorOutput />}
       </Panel>
     </PanelsContainer>
   );

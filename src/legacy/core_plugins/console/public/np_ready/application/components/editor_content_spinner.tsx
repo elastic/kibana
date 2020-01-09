@@ -20,7 +20,7 @@
 import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 
-export const EuiLoadingContent10 = () => {
+export const EditorContentSpinner = () => {
   return (
     <EuiPageContent className="conApp__editor__spinner">
       <EuiLoadingContent lines={10} />
