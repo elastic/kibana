@@ -17,5 +17,5 @@ export declare enum AppStatus
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  accessible | <code>0</code> | Application is accessible. |
-|  inaccessible | <code>2</code> | Application is not accessible. |
+|  inaccessible | <code>1</code> | Application is not accessible. |
 

@@ -119,9 +119,9 @@ export class ChromeService {
       of(isEmbedded),
       application.currentAppId$.pipe(
         flatMap(appId =>
-          application.availableApps$.pipe(
-            map(availableApps => {
-              return !!appId && availableApps.has(appId) && !!availableApps.get(appId)!.chromeless;
+          application.applications$.pipe(
+            map(applications => {
+              return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
             })
           )
         )

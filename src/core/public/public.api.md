@@ -103,7 +103,7 @@ export enum AppNavLinkStatus {
 // @public
 export enum AppStatus {
     accessible = 0,
-    inaccessible = 2
+    inaccessible = 1
 }
 
 // @public

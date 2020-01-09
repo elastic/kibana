@@ -54,7 +54,7 @@ function defaultStartDeps(availableApps?: App[]) {
   };
 
   if (availableApps) {
-    (deps.application.availableApps$ as Rx.BehaviorSubject<Map<string, App>>).next(
+    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, App>>(
       new Map(availableApps.map(app => [app.id, app]))
     );
   }
@@ -213,14 +213,14 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps$, navigateToApp } = startDeps.application;
+      const { applications$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      const availableApps = await availableApps$.pipe(take(1)).toPromise();
+      const availableApps = await applications$.pipe(take(1)).toPromise();
       [...availableApps.keys()].forEach(appId => navigateToApp(appId));
       service.stop();
 

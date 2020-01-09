@@ -118,7 +118,7 @@ export enum AppStatus {
   /**
    * Application is not accessible.
    */
-  inaccessible = 2,
+  inaccessible = 1,
 }
 
 /**
@@ -449,10 +449,11 @@ export interface ApplicationStart {
 export interface InternalApplicationStart
   extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
   /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
+   * Apps available based on the current capabilities.
+   * Should be used to show navigation links and make routing decisions.
+   * Applications manually disabled from the client-side using {@link AppUpdater}
    */
-  availableApps$: Observable<ReadonlyMap<string, App | LegacyApp>>;
+  applications$: Observable<ReadonlyMap<string, App | LegacyApp>>;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the

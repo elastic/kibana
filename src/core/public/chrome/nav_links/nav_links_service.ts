@@ -103,7 +103,7 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks$ = application.availableApps$.pipe(
+    const appLinks$ = application.applications$.pipe(
       map(apps => {
         return new Map(
           [...apps]

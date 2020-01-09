@@ -28,6 +28,9 @@ const app = (props: Partial<App> = {}): App => ({
   mount: (mount as unknown) as AppMount,
   id: 'some-id',
   title: 'some-title',
+  status: AppStatus.accessible,
+  navLinkStatus: AppNavLinkStatus.default,
+  appRoute: `/app/some-id`,
   legacy: false,
   ...props,
 });
@@ -36,6 +39,8 @@ const legacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
   appUrl: '/my-app-url',
   id: 'some-id',
   title: 'some-title',
+  status: AppStatus.accessible,
+  navLinkStatus: AppNavLinkStatus.default,
   legacy: true,
   ...props,
 });
@@ -43,7 +48,7 @@ const legacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
 describe('toNavLink', () => {
   const basePath = httpServiceMock.createSetupContract({ basePath: '/base-path' }).basePath;
 
-  it('uses the application property when creating the navLink', () => {
+  it('uses the application properties when creating the navLink', () => {
     const link = toNavLink(
       app({
         id: 'id',
@@ -78,6 +83,21 @@ describe('toNavLink', () => {
       basePath
     );
     expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
+  });
+
+  it('uses appUrl when converting legacy applications', () => {
+    expect(
+      toNavLink(
+        legacyApp({
+          appUrl: '/my-legacy-app/#foo',
+        }),
+        basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        baseUrl: 'http://localhost/base-path/my-legacy-app/#foo',
+      })
+    );
   });
 
   it('uses the application status when the navLinkStatus is set to default', () => {

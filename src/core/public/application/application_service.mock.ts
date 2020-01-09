@@ -54,7 +54,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    availableApps$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),

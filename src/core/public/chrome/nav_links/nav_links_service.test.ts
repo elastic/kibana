@@ -76,7 +76,7 @@ describe('NavLinksService', () => {
   beforeEach(() => {
     service = new NavLinksService();
     mockAppService = {
-      availableApps$: new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(
+      applications$: new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(
         availableApps as any
       ),
     };
@@ -205,7 +205,7 @@ describe('NavLinksService', () => {
 
     it('still removes all other links when availableApps are re-emitted', async () => {
       start.showOnly('legacyApp2');
-      mockAppService.availableApps$.next(mockAppService.availableApps$.value);
+      mockAppService.applications$.next(mockAppService.applications$.value);
       expect(
         await start
           .getNavLinks$()
@@ -220,19 +220,18 @@ describe('NavLinksService', () => {
 
   describe('#update()', () => {
     it('updates the navlinks and returns the updated link', async () => {
-      expect(start.update('legacyApp1', { hidden: true })).toMatchInlineSnapshot(`
-        Object {
-          "appUrl": "/app1",
-          "baseUrl": "http://localhost/wow/app1",
-          "disabled": false,
-          "hidden": true,
-          "icon": "legacyApp1",
-          "id": "legacyApp1",
-          "legacy": true,
-          "order": 5,
-          "title": "Legacy App 1",
-        }
-      `);
+      expect(start.update('legacyApp1', { hidden: true })).toEqual(
+        expect.objectContaining({
+          appUrl: '/app1',
+          disabled: false,
+          hidden: true,
+          icon: 'legacyApp1',
+          id: 'legacyApp1',
+          legacy: true,
+          order: 5,
+          title: 'Legacy App 1',
+        })
+      );
       const hiddenLinkIds = await start
         .getNavLinks$()
         .pipe(
@@ -249,7 +248,7 @@ describe('NavLinksService', () => {
 
     it('keeps the updated link when availableApps are re-emitted', async () => {
       start.update('legacyApp1', { hidden: true });
-      mockAppService.availableApps$.next(mockAppService.availableApps$.value);
+      mockAppService.applications$.next(mockAppService.applications$.value);
       const hiddenLinkIds = await start
         .getNavLinks$()
         .pipe(

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
@@ -170,9 +170,8 @@ export class ApplicationService {
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
-          status: app.status !== undefined ? app.status : AppStatus.accessible,
-          navLinkStatus:
-            app.navLinkStatus !== undefined ? app.navLinkStatus : AppNavLinkStatus.default,
+          status: app.status ?? AppStatus.accessible,
+          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           legacy: false,
         });
         if (updater$) {
@@ -202,9 +201,8 @@ export class ApplicationService {
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
-          status: app.status !== undefined ? app.status : AppStatus.accessible,
-          navLinkStatus:
-            app.navLinkStatus !== undefined ? app.navLinkStatus : AppNavLinkStatus.default,
+          status: app.status ?? AppStatus.accessible,
+          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           legacy: true,
         });
         if (updater$) {
@@ -233,30 +231,31 @@ export class ApplicationService {
       http,
     });
     const availableMounters = filterAvailable(this.mounters, capabilities);
+    const availableApps = filterAvailable(this.apps, capabilities);
 
-    const enabledApps = filterAvailable(this.apps, capabilities);
-    const availableApps$ = new BehaviorSubject(enabledApps);
-
-    combineLatest([
-      of(enabledApps),
-      this.statusUpdaters$.pipe(map(statusUpdaters => [...statusUpdaters.values()])),
-    ])
+    const applications$ = new BehaviorSubject(availableApps);
+    this.statusUpdaters$
       .pipe(
-        map(([apps, statusUpdaters]) => {
-          return new Map([...apps].map(([id, app]) => [id, updateStatus(app, statusUpdaters)]));
+        map(statusUpdaters => {
+          return new Map(
+            [...availableApps].map(([id, app]) => [
+              id,
+              updateStatus(app, [...statusUpdaters.values()]),
+            ])
+          );
         })
       )
-      .subscribe(apps => availableApps$.next(apps));
+      .subscribe(apps => applications$.next(apps));
 
     return {
-      availableApps$,
+      applications$,
       capabilities,
       currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        const app = availableApps$.value.get(appId);
+        const app = applications$.value.get(appId);
         if (app && app.status !== AppStatus.accessible) {
           // should probably redirect to the error page instead
           throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
@@ -288,8 +287,10 @@ const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapp
       changes = {
         ...changes,
         ...fields,
-        status: Math.max(changes.status || 0, fields.status || 0),
-        navLinkStatus: Math.max(changes.navLinkStatus || 0, fields.navLinkStatus || 0),
+        // status and navLinkStatus enums are ordered by reversed priority
+        // if multiple updaters wants to change these fields, we will always follow the priority order.
+        status: Math.max(changes.status ?? 0, fields.status ?? 0),
+        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
       };
     }
   });
