@@ -181,7 +181,7 @@ export class JobCreateUi extends Component {
           dateFields: indexPatternDateFields,
           numericFields,
           keywordFields,
-        } = response.data;
+        } = response;
 
         let indexPatternAsyncErrors;
 

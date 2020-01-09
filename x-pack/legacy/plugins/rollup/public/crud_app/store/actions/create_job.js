@@ -86,7 +86,7 @@ export const createJob = jobConfig => async dispatch => {
     );
   }
 
-  const deserializedJob = deserializeJob(newJob.data);
+  const deserializedJob = deserializeJob(newJob);
 
   dispatch({
     type: CREATE_JOB_SUCCESS,
