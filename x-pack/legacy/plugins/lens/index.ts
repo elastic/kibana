@@ -8,7 +8,6 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreStart } from 'kibana/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from './common';
 import { lensServerPlugin } from './server';
@@ -19,7 +18,7 @@ export const lens: LegacyPluginInitializer = kibana => {
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
     // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data', 'task_manager'],
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
@@ -69,7 +68,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         taskManager: getTaskManagerSetup(server)!,
       });
 
-      plugin.start((kbnServer.newPlatform.start.core as unknown) as CoreStart, {
+      plugin.start(kbnServer.newPlatform.start.core, {
         server,
         taskManager: getTaskManagerStart(server)!,
       });
