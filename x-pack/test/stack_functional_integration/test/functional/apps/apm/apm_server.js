@@ -1,18 +1,20 @@
-import expect from 'expect.js';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import {
-  bdd
-} from '../../../support';
 
-import PageObjects from '../../../support/page_objects';
+describe('check apm-server', ({ getService, getPageObjects }) => {
+  const log = getService('log');
+  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
-bdd.describe('check apm-server', function () {
-  bdd.before(function () {
-    PageObjects.common.debug('navigateToApp Visualize');
+  before(function () {
+    log.debug('navigateToApp Visualize');
     return PageObjects.common.navigateToApp('visualize');
   });
 
-  bdd.it('Top Transactions for Time Period [APM]- should have expected test data', async function () {
+  it('Top Transactions for Time Period [APM]- should have expected test data', async function () {
     await PageObjects.visualize.openSavedVisualization('Top Transactions for Time Period [APM]');
     await PageObjects.common.sleep(1000);
     await PageObjects.common.tryForTime(40000, async () => {

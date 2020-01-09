@@ -17,6 +17,7 @@
  * under the License.
  */
 
+
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
@@ -24,11 +25,45 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
+
+    async clickTimepicker() {
+      await retry.try(async () => {
+        await find.clickByCssSelector('superDatePickerToggleQuickMenuButton');
+      });
+    }
+
+    async isTimepickerOpen() {
+      const el = await find.byCssSelector('QuickSelectPopover').getAttribute('class');
+      return el.toString().includes('euiPopover-isOpen');
+    }
+
+    async clickTimespan(timespan) {
+      await find.clickByCssSelector('superDatePickerCommonlyUsed_' + timespan.split(' ').join('_'));
+    }
+
+    async getSpinnerDone() {
+      const tenXLonger = config.get('timeouts.waitFor') * 5;
+      return find.byCssSelector('[data-test-subj="globalLoadingIndicator-hidden"]', tenXLonger);
+    }
+    async setQuickSpan(timespan) {
+      await PageObjects.common.sleep(2000);
+      const isOpen = await this.isTimepickerOpen();
+      if (!isOpen) {
+        log.debug(`### We didn't find the timepicker open so clickTimepicker`);
+        await this.clickTimepicker();
+        await PageObjects.common.sleep(1000);
+        log.debug('### --Select time span : ' + timespan);
+        await this.clickTimespan(timespan);
+        await this.getSpinnerDone();
+      }
+    }
+
     async clickDiscover() {
       await appsMenu.clickLink('Discover');
       await PageObjects.common.waitForTopNavToBeVisible();
