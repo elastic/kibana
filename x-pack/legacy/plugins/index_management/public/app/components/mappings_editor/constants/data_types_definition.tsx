@@ -303,7 +303,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.dateRangeLongDescription"
-          defaultMessage="Date range fields accept a range of date values represented as unsigned, 64-bit integer milliseconds elapsed since system epoch."
+          defaultMessage="Date range fields accept an unsigned 64-bit integer representing milliseconds since the system epoch."
         />
       </p>
     ),
@@ -317,7 +317,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.doubleRangeLongDescription"
-          defaultMessage="Double range fields accept a range of double-precision, 64-bit IEEE 754 floating point values."
+          defaultMessage="Double range fields accept a 64-bit double precision floating point number (IEEE 754 binary64)."
         />
       </p>
     ),
@@ -331,7 +331,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.floatRangeLongDescription"
-          defaultMessage="Float range fields accept a range of single-precision, 32-bit IEEE 754 floating point values."
+          defaultMessage="Float range fields accept a 32-bit single precision floating point number (IEEE 754 binary32)."
         />
       </p>
     ),
@@ -345,7 +345,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.integerRangeLongDescription"
-          defaultMessage="Integer range fields accept a range of signed, 32-bit integers."
+          defaultMessage="Integer range fields accept a signed 32-bit integer."
         />
       </p>
     ),
@@ -359,7 +359,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.longRangeLongDescription"
-          defaultMessage="Long range fields accept a range of signed, 64-bit integers."
+          defaultMessage="Long range fields accept a signed 64-bit integer."
         />
       </p>
     ),
@@ -373,7 +373,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.ipRangeLongDescription"
-          defaultMessage="IP range fields accept a range of IP values, supporting IPv4 or IPv6 addresses."
+          defaultMessage="IP range fields accept an IPv4 or IPV6 address."
         />
       </p>
     ),
