@@ -28,7 +28,6 @@ import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import WrapperPlugin from 'wrapper-webpack-plugin';
-import { defaults } from 'lodash';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
@@ -508,22 +507,19 @@ export default class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    const details = stats.toString(
-      defaults(
-        { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-        Stats.presetToOptions('minimal')
-      )
-    );
+    const details = stats.toString({
+      ...Stats.presetToOptions('minimal'),
+      colors: true,
+      warningsFilter: STATS_WARNINGS_FILTER,
+    });
 
     return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(
-        defaults({
-          warningsFilter: STATS_WARNINGS_FILTER,
-          ...Stats.presetToOptions('detailed'),
-          maxModules: 1000,
-        })
-      )
+      stats.toJson({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
+      })
     );
   }
 
