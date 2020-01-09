@@ -45,19 +45,19 @@ export function DiscoverIndexPattern({
   selectedIndexPattern,
   setIndexPattern,
 }: DiscoverIndexPatternProps) {
-  if (!indexPatternList || indexPatternList.length === 0 || !selectedIndexPattern) {
-    // just in case, shouldn't happen
-    return null;
-  }
-  const options: IndexPatternRef[] = indexPatternList.map(entity => ({
+  const options: IndexPatternRef[] = (indexPatternList || []).map(entity => ({
     id: entity.id,
     title: entity.attributes!.title,
   }));
+  const { id: selectedId, attributes } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
-    id: selectedIndexPattern.id,
-    title: selectedIndexPattern.attributes!.title,
+    id: selectedId,
+    title: attributes?.title || '',
   });
+  if (!selectedId) {
+    return null;
+  }
 
   return (
     <div className="indexPattern__container">
