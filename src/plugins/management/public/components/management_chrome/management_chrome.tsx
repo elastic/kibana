@@ -47,7 +47,7 @@ export class ManagementChrome extends React.Component<Props> {
             legacySections={this.props.legacySections}
             selectedId={this.props.selectedId}
           />
-          <EuiPageBody>
+          <EuiPageBody restrictWidth={true} className="mgtPage__body">
             <div ref={this.container} />
           </EuiPageBody>
         </EuiPage>
