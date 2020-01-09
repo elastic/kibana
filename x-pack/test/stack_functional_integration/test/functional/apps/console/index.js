@@ -1,16 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import {
-  bdd,
-  remote,
-  defaultTimeout,
-} from '../../../support';
 
-bdd.describe('console app', function () {
-  this.timeout = defaultTimeout;
+export default function ({ loadTestFile, getService }) {
 
-  bdd.before(function () {
-    return remote.setWindowSize(1200,800);
+  const browser = getService('browser');
+
+  before(async () => {
+    await browser.setWindowSize(1200, 800);
   });
-
-  require('./_console');
-});
+  describe('console app', function () {
+    loadTestFile(require.resolve('./console'));
+  });
+}
