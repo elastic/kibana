@@ -18,8 +18,8 @@
  */
 
 import { ConfigDeprecation, ConfigDeprecationProvider } from '../../config/deprecation';
-import { LegacyConfigDeprecation, LegacyConfigDeprecationProvider } from './index';
 import { configDeprecationFactory } from '../../config/deprecation/deprecation_factory';
+import { LegacyConfigDeprecation, LegacyConfigDeprecationProvider } from '../types';
 
 const convertLegacyDeprecation = (
   legacyDeprecation: LegacyConfigDeprecation

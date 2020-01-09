@@ -3,5 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { BehaviorSubject } from 'rxjs';
+import { LicensingPluginSetup } from './types';
+import { licenseMock } from '../common/licensing.mock';
 
-export * from './licensing.mock';
+const createSetupMock = () => {
+  const license = licenseMock.createLicense();
+  const mock: jest.Mocked<LicensingPluginSetup> = {
+    license$: new BehaviorSubject(license),
+    refresh: jest.fn(),
+    createLicensePoller: jest.fn(),
+  };
+  mock.refresh.mockResolvedValue(license);
+  mock.createLicensePoller.mockReturnValue({
+    license$: mock.license$,
+    refresh: mock.refresh,
+  });
+
+  return mock;
+};
+
+export const licensingMock = {
+  createSetup: createSetupMock,
+  ...licenseMock,
+};

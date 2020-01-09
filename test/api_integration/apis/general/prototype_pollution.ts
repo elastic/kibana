@@ -26,7 +26,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('prototype pollution smoke test', () => {
     it('prevents payloads with the "constructor.prototype" pollution vector from being accepted', async () => {
       await supertest
-        .post('/api/sample_data/some_data_id')
+        .post('/api/saved_objects/_log_legacy_import')
         .send([
           {
             constructor: {
@@ -44,7 +44,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('prevents payloads with the "__proto__" pollution vector from being accepted', async () => {
       await supertest
-        .post('/api/sample_data/some_data_id')
+        .post('/api/saved_objects/_log_legacy_import')
         .send(JSON.parse(`{"foo": { "__proto__": {} } }`))
         .expect(400, {
           statusCode: 400,

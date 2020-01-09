@@ -19,6 +19,8 @@
 
 export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
 export { TutorialProvider } from './services';
+export { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
+import { PluginInitializerContext } from 'src/core/server';
 import { HomeServerPlugin } from './plugin';
 
-export const plugin = () => new HomeServerPlugin();
+export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);

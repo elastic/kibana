@@ -1,0 +1,17 @@
+{
+  "rule_id": "235988ec-d037-4f5f-a211-74106512b36d",
+  "risk_score": 50,
+  "description": "Generated if a packet filter fails to install.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice PacketFilter::Install_Failure",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"PacketFilter::Install_Failure\" or rule.name: \"PacketFilter::Install_Failure\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

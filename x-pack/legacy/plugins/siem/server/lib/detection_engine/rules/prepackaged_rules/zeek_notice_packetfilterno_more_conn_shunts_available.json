@@ -1,0 +1,17 @@
+{
+  "rule_id": "de4016de-3374-41a0-a678-21d36c70af9a",
+  "risk_score": 50,
+  "description": "Indicative that PacketFilter::max_bpf_shunts connections are already being shunted with BPF filters and no more are allowed.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice PacketFilter::No_More_Conn_Shunts_Available",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"PacketFilter::No_More_Conn_Shunts_Available\" or rule.name: \"PacketFilter::No_More_Conn_Shunts_Available\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

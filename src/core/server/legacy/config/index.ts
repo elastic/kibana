@@ -20,9 +20,3 @@
 export { ensureValidConfiguration } from './ensure_valid_configuration';
 export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
 export { convertLegacyDeprecationProvider } from './legacy_deprecation_adapters';
-export {
-  LegacyConfig,
-  LegacyConfigDeprecation,
-  LegacyConfigDeprecationFactory,
-  LegacyConfigDeprecationProvider,
-} from './types';

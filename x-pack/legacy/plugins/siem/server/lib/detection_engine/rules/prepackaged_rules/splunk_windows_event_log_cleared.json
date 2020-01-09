@@ -1,0 +1,17 @@
+{
+  "rule_id": "c0747553-4652-4e74-bc86-898f2daa2bde",
+  "risk_score": 50,
+  "description": "Splunk - Windows Event Log Cleared",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Windows Event Log Cleared",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:(1102 or 1100)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

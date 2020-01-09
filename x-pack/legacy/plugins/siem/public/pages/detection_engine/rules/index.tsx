@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { HeaderPage } from '../../../components/header_page';
-
-import { WrapperPage } from '../../../components/wrapper_page';
-import { SpyRoute } from '../../../utils/route/spy_routes';
-import * as i18n from './translations';
-import { AllRules } from './all_rules';
-import { ActivityMonitor } from './activity_monitor';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
+import { HeaderPage } from '../../../components/header_page';
+import { WrapperPage } from '../../../components/wrapper_page';
+import { SpyRoute } from '../../../utils/route/spy_routes';
+
+import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
+import * as i18n from './translations';
 
 export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
@@ -33,7 +33,10 @@ export const RulesComponent = React.memo(() => {
       />
       <WrapperPage>
         <HeaderPage
-          backOptions={{ href: '#detection-engine', text: i18n.BACK_TO_DETECTION_ENGINE }}
+          backOptions={{
+            href: `#${DETECTION_ENGINE_PAGE_NAME}`,
+            text: i18n.BACK_TO_DETECTION_ENGINE,
+          }}
           subtitle={
             lastCompletedRun ? (
               <FormattedMessage
@@ -62,27 +65,18 @@ export const RulesComponent = React.memo(() => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton fill href="#/detection-engine/rules/create-rule" iconType="plusInCircle">
+              <EuiButton
+                fill
+                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                iconType="plusInCircle"
+              >
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
 
-        <EuiTabbedContent
-          tabs={[
-            {
-              id: 'tabAllRules',
-              name: i18n.ALL_RULES,
-              content: <AllRules importCompleteToggle={importCompleteToggle} />,
-            },
-            {
-              id: 'tabActivityMonitor',
-              name: i18n.ACTIVITY_MONITOR,
-              content: <ActivityMonitor />,
-            },
-          ]}
-        />
+        <AllRules importCompleteToggle={importCompleteToggle} />
       </WrapperPage>
 
       <SpyRoute />

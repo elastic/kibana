@@ -1,0 +1,17 @@
+{
+  "rule_id": "983f4b7e-38cd-4d7f-8be6-40447431561e",
+  "risk_score": 50,
+  "description": "SSH login was seen to or from a \"watched\" country based on the SSH::watched_countries variable",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSH::Watched_Country_Login",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSH::Watched_Country_Login\" or rule.name: \"SSH::Watched_Country_Login\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

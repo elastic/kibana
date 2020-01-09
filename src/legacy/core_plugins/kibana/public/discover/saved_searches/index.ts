@@ -17,4 +17,5 @@
  * under the License.
  */
 
-import './saved_searches';
+export * from './saved_searches';
+import './saved_searches_register';

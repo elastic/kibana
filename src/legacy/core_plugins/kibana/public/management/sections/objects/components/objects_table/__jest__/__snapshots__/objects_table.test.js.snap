@@ -240,7 +240,6 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 exports[`ObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
-  panelPaddingSize="l"
 >
   <Header
     filteredCount={4}

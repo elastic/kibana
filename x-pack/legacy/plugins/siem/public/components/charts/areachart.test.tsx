@@ -5,11 +5,13 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
+
+jest.mock('../../lib/kibana');
 
 const customHeight = '100px';
 const customWidth = '120px';

@@ -71,6 +71,10 @@ export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltip
 
 export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
 
+export const isLayerControlHidden = ({ map }) => map.mapState.hideLayerControl;
+
+export const isViewControlHidden = ({ map }) => map.mapState.hideViewControl;
+
 export const getMapExtent = ({ map }) => (map.mapState.extent ? map.mapState.extent : {});
 
 export const getMapBuffer = ({ map }) => (map.mapState.buffer ? map.mapState.buffer : {});

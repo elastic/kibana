@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SIGNALS_ID } from '../../../../common/constants';
+import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from './types';
 import { addTags } from './add_tags';
 
@@ -19,6 +19,7 @@ export const createRules = async ({
   language,
   savedId,
   timelineId,
+  timelineTitle,
   meta,
   filters,
   ruleId,
@@ -42,6 +43,7 @@ export const createRules = async ({
       name,
       tags: addTags(tags, ruleId, immutable),
       alertTypeId: SIGNALS_ID,
+      consumer: APP_ID,
       params: {
         createdAt: new Date().toISOString(),
         description,
@@ -55,6 +57,7 @@ export const createRules = async ({
         outputIndex,
         savedId,
         timelineId,
+        timelineTitle,
         meta,
         filters,
         maxSignals,

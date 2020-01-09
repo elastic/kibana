@@ -20,18 +20,21 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
+import { Required } from '@kbn/utility-types';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 import { getTitle } from '../../index_patterns/lib';
 
-export interface IndexPatternSelectProps {
-  onChange: (opt: any) => void;
+export type IndexPatternSelectProps = Required<
+  Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
+  'onChange' | 'placeholder'
+> & {
   indexPatternId: string;
-  placeholder: string;
-  fieldTypes: string[];
-  onNoIndexPatterns: () => void;
+  fieldTypes?: string[];
+  onNoIndexPatterns?: () => void;
   savedObjectsClient: SavedObjectsClientContract;
-}
+};
 
 interface IndexPatternSelectState {
   isLoading: boolean;
@@ -136,7 +139,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
         try {
           const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
           return indexPatternFields.some((field: any) => {
-            return fieldTypes.includes(field.type);
+            return fieldTypes?.includes(field.type);
           });
         } catch (err) {
           // Unable to parse fields JSON, invalid index pattern
@@ -196,6 +199,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
     return (
       <EuiComboBox
+        {...rest}
         placeholder={placeholder}
         singleSelection={true}
         isLoading={this.state.isLoading}
@@ -203,7 +207,6 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
         options={this.state.options}
         selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
         onChange={this.onChange}
-        {...rest}
       />
     );
   }

@@ -152,3 +152,25 @@ test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is t
 
   expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/plugins');
 });
+
+test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
+  const env = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      cliArgs: { runExamples: true },
+    })
+  );
+
+  expect(env.pluginSearchPaths).toContain('/some/home/dir/examples');
+});
+
+test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
+  const env = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      cliArgs: { runExamples: false },
+    })
+  );
+
+  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/examples');
+});

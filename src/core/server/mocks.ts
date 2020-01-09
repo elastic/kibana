@@ -107,7 +107,7 @@ function createCoreSetupMock() {
   const mock: MockedKeys<CoreSetup> = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
@@ -121,6 +121,7 @@ function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   return mock;
@@ -130,7 +131,7 @@ function createInternalCoreSetupMock() {
   const setupDeps: InternalCoreSetup = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createSetupContract(),
@@ -143,6 +144,7 @@ function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   return startDeps;
 }

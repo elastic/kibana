@@ -8,13 +8,23 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
+import { scaleValue } from '../style_util';
+import React from 'react';
+import { OrdinalLegend } from './components/ordinal_legend';
+import { CategoricalLegend } from './components/categorical_legend';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field) {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
+    this._getFieldMeta = getFieldMeta;
+    this._getFieldFormatter = getFieldFormatter;
+  }
+
+  getFieldMeta() {
+    return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
   }
 
   getField() {
@@ -22,6 +32,18 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   isDynamic() {
+    return true;
+  }
+
+  isOrdinal() {
+    return true;
+  }
+
+  hasBreaks() {
+    return false;
+  }
+
+  isRanged() {
     return true;
   }
 
@@ -62,6 +84,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckStyleMetaFromFeatures(features) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const name = this.getField().getName();
     let min = Infinity;
     let max = -Infinity;
@@ -84,6 +110,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const realFieldName = this._field.getESDocFieldName
       ? this._field.getESDocFieldName()
       : this._field.getName();
@@ -104,5 +134,59 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       isMinOutsideStdRange: stats.min < stdLowerBounds,
       isMaxOutsideStdRange: stats.max > stdUpperBounds,
     };
+  }
+
+  formatField(value) {
+    if (this.getField()) {
+      const fieldName = this.getField().getName();
+      const fieldFormatter = this._getFieldFormatter(fieldName);
+      return fieldFormatter ? fieldFormatter(value) : value;
+    } else {
+      return value;
+    }
+  }
+
+  getMbValue(value) {
+    if (!this.isOrdinal()) {
+      return this.formatField(value);
+    }
+
+    const valueAsFloat = parseFloat(value);
+    if (this.isScaled()) {
+      return scaleValue(valueAsFloat, this.getFieldMeta());
+    }
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+    return valueAsFloat;
+  }
+
+  renderBreakedLegend() {
+    return null;
+  }
+
+  _renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    return (
+      <CategoricalLegend
+        style={this}
+        loadIsLinesOnly={loadIsLinesOnly}
+        loadIsPointsOnly={loadIsPointsOnly}
+        symbolId={symbolId}
+      />
+    );
+  }
+
+  _renderRangeLegend() {
+    return <OrdinalLegend style={this} />;
+  }
+
+  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    if (this.isRanged()) {
+      return this._renderRangeLegend();
+    } else if (this.hasBreaks()) {
+      return this._renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId });
+    } else {
+      return null;
+    }
   }
 }

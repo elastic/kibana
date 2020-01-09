@@ -1,0 +1,17 @@
+{
+  "rule_id": "13f51fe0-fc74-4c45-90f3-6fb1cd26ec66",
+  "risk_score": 50,
+  "description": "This notice indicates that the result of validating the certificate along with its full certificate chain was invalid.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Invalid_Server_Cert",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Invalid_Server_Cert\" or rule.name: \"SSL::Invalid_Server_Cert\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -1,0 +1,261 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpacesGridPage renders as expected 1`] = `
+<div
+  className="spcGridPage"
+  data-test-subj="spaces-grid-page"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="m"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Spaces"
+              id="xpack.spaces.management.spacesGridPage.spacesTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="s"
+        >
+          <p>
+            Organize your dashboards and other saved objects into meaningful categories.
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create a space"
+            id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "initials",
+            "name": "",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "name",
+            "name": "Space",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "description",
+            "name": "Description",
+            "sortable": true,
+          },
+          Object {
+            "field": "disabledFeatures",
+            "name": "Features",
+            "render": [Function],
+            "sortable": [Function],
+          },
+          Object {
+            "field": "id",
+            "name": "Identifier",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "actions": Array [
+              Object {
+                "render": [Function],
+              },
+              Object {
+                "available": [Function],
+                "render": [Function],
+              },
+            ],
+            "name": "Actions",
+          },
+        ]
+      }
+      hasActions={true}
+      itemId="id"
+      items={Array []}
+      loading={true}
+      message={
+        <FormattedMessage
+          defaultMessage="loading…"
+          id="xpack.spaces.management.spacesGridPage.loadingTitle"
+          values={Object {}}
+        />
+      }
+      pagination={true}
+      responsive={true}
+      search={
+        Object {
+          "box": Object {
+            "placeholder": "Search",
+          },
+        }
+      }
+      sorting={true}
+    />
+  </EuiPageContent>
+  <SecureSpaceMessage />
+</div>
+`;
+
+exports[`SpacesGridPage renders the list of spaces 1`] = `
+Array [
+  <SpaceAvatar
+    announceSpaceName={true}
+    size="s"
+    space={
+      Object {
+        "_reserved": true,
+        "disabledFeatures": Array [],
+        "id": "default",
+        "name": "Default",
+      }
+    }
+  >
+    <EuiAvatar
+      color="#461A0A"
+      data-test-subj="space-avatar-default"
+      imageUrl=""
+      initials="D"
+      initialsLength={2}
+      name="Default"
+      size="s"
+      type="space"
+    >
+      <div
+        aria-label="Default"
+        className="euiAvatar euiAvatar--s euiAvatar--space"
+        data-test-subj="space-avatar-default"
+        style={
+          Object {
+            "backgroundColor": "#461A0A",
+            "backgroundImage": "none",
+            "color": "#FFFFFF",
+          }
+        }
+        title="Default"
+      >
+        <span
+          aria-hidden="true"
+        >
+          D
+        </span>
+      </div>
+    </EuiAvatar>
+  </SpaceAvatar>,
+  <SpaceAvatar
+    announceSpaceName={true}
+    size="s"
+    space={
+      Object {
+        "disabledFeatures": Array [],
+        "id": "custom-1",
+        "name": "Custom 1",
+      }
+    }
+  >
+    <EuiAvatar
+      color="#BFA180"
+      data-test-subj="space-avatar-custom-1"
+      imageUrl=""
+      initials="C1"
+      initialsLength={2}
+      name="Custom 1"
+      size="s"
+      type="space"
+    >
+      <div
+        aria-label="Custom 1"
+        className="euiAvatar euiAvatar--s euiAvatar--space"
+        data-test-subj="space-avatar-custom-1"
+        style={
+          Object {
+            "backgroundColor": "#BFA180",
+            "backgroundImage": "none",
+            "color": "#000000",
+          }
+        }
+        title="Custom 1"
+      >
+        <span
+          aria-hidden="true"
+        >
+          C1
+        </span>
+      </div>
+    </EuiAvatar>
+  </SpaceAvatar>,
+  <SpaceAvatar
+    announceSpaceName={true}
+    size="s"
+    space={
+      Object {
+        "color": "#ABCDEF",
+        "description": "my description here",
+        "disabledFeatures": Array [],
+        "id": "custom-2",
+        "initials": "LG",
+        "name": "Custom 2",
+      }
+    }
+  >
+    <EuiAvatar
+      color="#ABCDEF"
+      data-test-subj="space-avatar-custom-2"
+      imageUrl=""
+      initials="LG"
+      initialsLength={2}
+      name="Custom 2"
+      size="s"
+      type="space"
+    >
+      <div
+        aria-label="Custom 2"
+        className="euiAvatar euiAvatar--s euiAvatar--space"
+        data-test-subj="space-avatar-custom-2"
+        style={
+          Object {
+            "backgroundColor": "#ABCDEF",
+            "backgroundImage": "none",
+            "color": "#000000",
+          }
+        }
+        title="Custom 2"
+      >
+        <span
+          aria-hidden="true"
+        >
+          LG
+        </span>
+      </div>
+    </EuiAvatar>
+  </SpaceAvatar>,
+]
+`;

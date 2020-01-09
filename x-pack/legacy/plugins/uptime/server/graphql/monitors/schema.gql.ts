@@ -114,12 +114,6 @@ export const monitorsSchema = gql`
     interval: UnsignedInteger!
   }
 
-  type MonitorPageTitle {
-    id: String!
-    url: String
-    name: String
-  }
-
   extend type Query {
     getMonitors(
       dateRangeStart: String!
@@ -156,7 +150,5 @@ export const monitorsSchema = gql`
     ): [Ping!]!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
-
-    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;

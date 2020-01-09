@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PublicLicense, PublicFeatures } from './types';
+import { ILicense, PublicLicense, PublicFeatures, LICENSE_CHECK_STATE } from './types';
 import { License } from './license';
 
 function createLicense({
@@ -40,6 +40,22 @@ function createLicense({
   });
 }
 
+const createLicenseMock = () => {
+  const mock: jest.Mocked<ILicense> = {
+    isActive: true,
+    isAvailable: true,
+    signature: '',
+    toJSON: jest.fn(),
+    getUnavailableReason: jest.fn(),
+    getFeature: jest.fn(),
+    check: jest.fn(),
+    hasAtLeast: jest.fn(),
+  };
+  mock.check.mockReturnValue({ state: LICENSE_CHECK_STATE.Valid });
+  mock.hasAtLeast.mockReturnValue(true);
+  return mock;
+};
 export const licenseMock = {
-  create: createLicense,
+  createLicense,
+  createLicenseMock,
 };

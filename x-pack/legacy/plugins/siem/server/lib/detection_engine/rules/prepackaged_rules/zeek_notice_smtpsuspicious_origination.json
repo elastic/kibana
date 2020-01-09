@@ -1,0 +1,17 @@
+{
+  "rule_id": "cc6e9fef-d936-4faf-8936-e576c089d8b2",
+  "risk_score": 50,
+  "description": "SMTP message orignated from country or network configured to be suspicious.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SMTP::Suspicious_Origination",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SMTP::Suspicious_Origination\" or rule.name: \"SMTP::Suspicious_Origination\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

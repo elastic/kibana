@@ -91,13 +91,22 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
+const elasticsearchUsernameDeprecation: ConfigDeprecation = (settings, _fromPath, log) => {
+  const username: string | undefined = get(settings, 'elasticsearch.username');
+  if (username === 'elastic') {
+    log(
+      `Setting elasticsearch.username to "elastic" is deprecated. You should use the "kibana" user instead.`
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
-  unusedFromRoot('uiSettings.enabled'),
   renameFromRoot('optimize.lazy', 'optimize.watch'),
   renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
@@ -111,4 +120,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
+  elasticsearchUsernameDeprecation,
 ];

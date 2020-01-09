@@ -25,7 +25,7 @@ import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -41,7 +41,7 @@ import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-const HostsComponent = React.memo<HostsComponentProps>(
+export const HostsComponent = React.memo<HostsComponentProps>(
   ({
     deleteQuery,
     isInitializing,
@@ -54,15 +54,14 @@ const HostsComponent = React.memo<HostsComponentProps>(
     hostsPagePath,
   }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
     const { tabName } = useParams();
-
     const hostsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
       }
       return filters;
-    }, [tabName]);
+    }, [tabName, filters]);
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -75,7 +74,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
               filters: hostsFilters,

@@ -19,7 +19,6 @@
 
 import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
-import { LegacyApp, App } from '../types';
 
 const mockedCapabilities = {
   catalogue: {},
@@ -42,36 +41,22 @@ describe('#start', () => {
     http.post.mockReturnValue(Promise.resolve(mockedCapabilities));
   });
 
-  const apps = new Map([
-    ['app1', { id: 'app1' }],
-    ['app2', { id: 'app2', capabilities: { app2: { feature: true } } }],
-    ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
-  ] as Array<[string, App]>);
-  const legacyApps = new Map([
-    ['legacyApp1', { id: 'legacyApp1' }],
-    ['legacyApp2', { id: 'legacyApp2', capabilities: { app2: { feature: true } } }],
-  ] as Array<[string, LegacyApp]>);
-
-  it('filters available apps based on returned navLinks', async () => {
+  it('only returns capabilities for given appIds', async () => {
     const service = new CapabilitiesService();
-    const startContract = await service.start({ apps, legacyApps, http });
-    expect(startContract.availableApps).toEqual(
-      new Map([
-        ['app1', { id: 'app1' }],
-        ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
-      ])
-    );
-    expect(startContract.availableLegacyApps).toEqual(
-      new Map([['legacyApp1', { id: 'legacyApp1' }]])
-    );
+    const { capabilities } = await service.start({
+      http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
+    });
+
+    // @ts-ignore TypeScript knows this shouldn't be possible
+    expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 
   it('does not allow Capabilities to be modified', async () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
-      apps,
-      legacyApps,
       http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
     });
 
     // @ts-ignore TypeScript knows this shouldn't be possible
