@@ -8,7 +8,7 @@ import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
@@ -38,7 +38,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return (
-    <EuiPanel data-test-subj="mlDataVisualizerActionsPanel">
+    <div data-test-subj="mlDataVisualizerActionsPanel">
       <EuiTitle>
         <h2>
           <FormattedMessage
@@ -88,6 +88,6 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         onClick={openAdvancedJobWizard}
         href={`#/jobs/new_job/advanced?index=${indexPattern}`}
       />
-    </EuiPanel>
+    </div>
   );
 };

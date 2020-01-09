@@ -13,7 +13,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
-  EuiPanel,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
@@ -69,7 +68,7 @@ export const SearchPanel: FC<Props> = ({
   };
 
   return (
-    <EuiPanel grow={false} data-test-subj="mlDataVisualizerSearchPanel">
+    <div data-test-subj="mlDataVisualizerSearchPanel">
       {searchQueryLanguage === SEARCH_QUERY_LANGUAGE.KUERY ? (
         <KqlFilterBar
           indexPattern={indexPattern}
@@ -140,6 +139,6 @@ export const SearchPanel: FC<Props> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 };
