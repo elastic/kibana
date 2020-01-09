@@ -5,7 +5,7 @@ exports[`DonutChartLegend applies valid props as expected 1`] = `
   <DonutChartLegendRow
     color="#bd271e"
     content={23}
-    data-test-subj="xpack.uptime.snapshot.donutChart.up"
+    data-test-subj="xpack.uptime.snapshot.donutChart.down"
     message="Down"
   />
   <EuiSpacer
@@ -14,7 +14,7 @@ exports[`DonutChartLegend applies valid props as expected 1`] = `
   <DonutChartLegendRow
     color="#d3dae6"
     content={45}
-    data-test-subj="xpack.uptime.snapshot.donutChart.down"
+    data-test-subj="xpack.uptime.snapshot.donutChart.up"
     message="Up"
   />
 </styled.div>
