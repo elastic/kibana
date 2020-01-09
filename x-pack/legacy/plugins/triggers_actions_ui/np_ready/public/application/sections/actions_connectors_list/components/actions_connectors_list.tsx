@@ -199,6 +199,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'trash',
+          color: 'danger',
           onClick: (item: ActionConnectorTableItem) => setConnectorsToDelete([item.id]),
         },
       ],
