@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedFields, NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
+import { TYPE_DEFINITION } from '../../../constants';
 
 interface Props {
   title: string;
@@ -38,7 +39,17 @@ export const ModalConfirmationDeleteFields = ({
             {fieldItem.isMultiField && (
               <>
                 {' '}
-                <EuiBadge color="hollow">multi-field</EuiBadge>
+                <EuiBadge color="hollow">
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.multiFieldBadgeLabel',
+                    {
+                      defaultMessage: '{dataType} multi-field',
+                      values: {
+                        dataType: TYPE_DEFINITION[fieldItem.source.type].label,
+                      },
+                    }
+                  )}
+                </EuiBadge>
               </>
             )}
           </>
