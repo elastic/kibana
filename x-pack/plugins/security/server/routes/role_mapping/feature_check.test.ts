@@ -45,11 +45,11 @@ const getDefaultInternalUserClusterClientImpl = (
   ((async (endpoint: string, clientParams: Record<string, any>) => {
     if (!clientParams) throw new TypeError('expected clientParams');
 
-    if (endpoint === 'transport.request') {
-      if (clientParams.path && clientParams.path.startsWith('/_nodes/settings')) {
-        return nodeSettingsResponse;
-      }
+    if (endpoint === 'nodes.info') {
+      return nodeSettingsResponse;
+    }
 
+    if (endpoint === 'transport.request') {
       if (clientParams.path === '/_xpack/usage') {
         return xpackUsageResponse;
       }

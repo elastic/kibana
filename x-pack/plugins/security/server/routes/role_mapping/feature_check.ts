@@ -77,9 +77,8 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
   logger.debug(`Retrieving role mappings features`);
 
   const nodeScriptSettingsPromise: Promise<NodeSettingsResponse> = clusterClient
-    .callAsInternalUser('transport.request', {
-      method: 'GET',
-      path: '/_nodes/settings?filter_path=nodes.*.settings.script',
+    .callAsInternalUser('nodes.info', {
+      filterPath: 'nodes.*.settings.script',
     })
     .catch(error => {
       // fall back to assuming that node settings are unset/at their default values.
@@ -90,6 +89,8 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
     });
 
   const xpackUsagePromise: Promise<XPackUsageResponse> = clusterClient
+    // `transport.request` is potentially unsafe when combined with untrusted user input.
+    // Do not augment with such input.
     .callAsInternalUser('transport.request', {
       method: 'GET',
       path: '/_xpack/usage',
