@@ -22,7 +22,7 @@ Acknowledge actions received during checkin
 ## Example
 
 ```js
-POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
+POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/acks
 Authorization: ApiKey VALID_ACCESS_API_KEY
 {
   "action_ids": ["action-1", "action-2"]
