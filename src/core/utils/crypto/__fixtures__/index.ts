@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export const mockReadFileSync = jest.fn();
-jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
+import { resolve } from 'path';
+
+export const NO_CA_PATH = resolve(__dirname, './no_ca.p12');
+export const NO_CERT_PATH = resolve(__dirname, './no_cert.p12');
+export const NO_KEY_PATH = resolve(__dirname, './no_key.p12');
+export const TWO_CAS_PATH = resolve(__dirname, './two_cas.p12');
+export const TWO_KEYS_PATH = resolve(__dirname, './two_keys.p12');

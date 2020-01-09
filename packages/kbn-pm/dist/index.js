@@ -4500,6 +4500,14 @@ var certs_1 = __webpack_require__(422);
 exports.CA_CERT_PATH = certs_1.CA_CERT_PATH;
 exports.ES_KEY_PATH = certs_1.ES_KEY_PATH;
 exports.ES_CERT_PATH = certs_1.ES_CERT_PATH;
+exports.ES_P12_PATH = certs_1.ES_P12_PATH;
+exports.ES_P12_PASSWORD = certs_1.ES_P12_PASSWORD;
+exports.ES_EMPTYPASSWORD_P12_PATH = certs_1.ES_EMPTYPASSWORD_P12_PATH;
+exports.ES_NOPASSWORD_P12_PATH = certs_1.ES_NOPASSWORD_P12_PATH;
+exports.KBN_KEY_PATH = certs_1.KBN_KEY_PATH;
+exports.KBN_CERT_PATH = certs_1.KBN_CERT_PATH;
+exports.KBN_P12_PATH = certs_1.KBN_P12_PATH;
+exports.KBN_P12_PASSWORD = certs_1.KBN_P12_PASSWORD;
 var run_1 = __webpack_require__(423);
 exports.run = run_1.run;
 exports.createFailError = run_1.createFailError;
@@ -36986,6 +36994,14 @@ const path_1 = __webpack_require__(16);
 exports.CA_CERT_PATH = path_1.resolve(__dirname, '../certs/ca.crt');
 exports.ES_KEY_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.key');
 exports.ES_CERT_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.crt');
+exports.ES_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.p12');
+exports.ES_P12_PASSWORD = 'storepass';
+exports.ES_EMPTYPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_emptypassword.p12');
+exports.ES_NOPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_nopassword.p12');
+exports.KBN_KEY_PATH = path_1.resolve(__dirname, '../certs/kibana.key');
+exports.KBN_CERT_PATH = path_1.resolve(__dirname, '../certs/kibana.crt');
+exports.KBN_P12_PATH = path_1.resolve(__dirname, '../certs/kibana.p12');
+exports.KBN_P12_PASSWORD = 'storepass';
 
 
 /***/ }),
