@@ -20,6 +20,7 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
+import { RedirectToCasePage } from './redirect_to_case';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -31,6 +32,7 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
       component={RedirectToOverviewPage}
       path={`${match.url}/:pageName(${SiemPageName.overview})`}
     />
+    <Route component={RedirectToCasePage} path={`${match.url}/:pageName(${SiemPageName.case})`} />
     <Route
       component={RedirectToHostsPage}
       exact

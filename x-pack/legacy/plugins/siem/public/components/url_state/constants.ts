@@ -20,4 +20,10 @@ export enum CONSTANTS {
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'detection-engine' | 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType =
+  | 'detection-engine'
+  | 'host'
+  | 'network'
+  | 'overview'
+  | 'timeline'
+  | 'case';

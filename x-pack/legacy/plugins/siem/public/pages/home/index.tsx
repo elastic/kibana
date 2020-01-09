@@ -26,6 +26,7 @@ import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Case } from '../case';
 import { Timelines } from '../timelines';
 import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
@@ -127,6 +128,7 @@ export const HomePage: React.FC = () => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
+                  <Route path={`/:pageName(${SiemPageName.case})`} render={() => <Case />} />
                   <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>

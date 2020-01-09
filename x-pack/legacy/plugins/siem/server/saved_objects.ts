@@ -12,10 +12,16 @@ import {
   timelineSavedObjectType,
   timelineSavedObjectMappings,
 } from './lib/timeline/saved_object_mappings';
+import {
+  caseSavedObjectMappings,
+  caseCommentSavedObjectMappings,
+} from './lib/case/saved_object_mappings';
 
 export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
+  ...caseSavedObjectMappings,
+  ...caseCommentSavedObjectMappings,
 };

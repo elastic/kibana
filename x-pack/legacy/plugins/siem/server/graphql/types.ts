@@ -10,6 +10,18 @@ import { SiemContext } from '../lib/types';
 
 export type Maybe<T> = T | null;
 
+export interface PageInfoCase {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortCase {
+  sortField: SortFieldCase;
+
+  sortOrder: Direction;
+}
+
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -259,6 +271,10 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
+export interface CaseInput {
+  caseId?: Maybe<string>;
+}
+
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -267,7 +283,7 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldNote {
+export enum SortFieldCase {
   updatedBy = 'updatedBy',
   updated = 'updated',
 }
@@ -275,6 +291,11 @@ export enum SortFieldNote {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -380,6 +401,10 @@ export type EsValue = any;
 // ====================================================
 
 export interface Query {
+  getCase: CaseSavedObject;
+
+  getAllCases: ResponseCases;
+
   getNote: NoteResult;
 
   getNotesByTimelineId: NoteResult[];
@@ -397,6 +422,48 @@ export interface Query {
   getOneTimeline: TimelineResult;
 
   getAllTimeline: ResponseTimelines;
+}
+
+export interface CaseSavedObject {
+  attributes: CaseResult;
+
+  id: string;
+
+  type: string;
+
+  updated_at: string;
+
+  version: string;
+}
+
+export interface CaseResult {
+  assignees: (Maybe<ElasticUser>)[];
+
+  case_type: string;
+
+  created_at: number;
+
+  created_by: ElasticUser;
+
+  description: string;
+
+  state: string;
+
+  tags: (Maybe<string>)[];
+
+  title: string;
+}
+
+export interface ElasticUser {
+  username: string;
+
+  full_name?: Maybe<string>;
+}
+
+export interface ResponseCases {
+  cases: CaseResult[];
+
+  totalCount?: Maybe<number>;
 }
 
 export interface NoteResult {
@@ -2016,6 +2083,7 @@ export interface ResponseTimelines {
 }
 
 export interface Mutation {
+  deleteCase?: Maybe<boolean>;
   /** Persists a note */
   persistNote: ResponseNote;
 
@@ -2114,6 +2182,16 @@ export interface HostFields {
 // Arguments
 // ====================================================
 
+export interface GetCaseQueryArgs {
+  caseId: string;
+}
+export interface GetAllCasesQueryArgs {
+  pageInfo?: Maybe<PageInfoCase>;
+
+  search?: Maybe<string>;
+
+  sort?: Maybe<SortCase>;
+}
 export interface GetNoteQueryArgs {
   id: string;
 }
@@ -2411,6 +2489,9 @@ export interface IndicesExistSourceStatusArgs {
 export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
+export interface DeleteCaseMutationArgs {
+  id: string[];
+}
 export interface PersistNoteMutationArgs {
   noteId?: Maybe<string>;
 
@@ -2499,6 +2580,10 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = {}> {
+    getCase?: GetCaseResolver<CaseSavedObject, TypeParent, TContext>;
+
+    getAllCases?: GetAllCasesResolver<ResponseCases, TypeParent, TContext>;
+
     getNote?: GetNoteResolver<NoteResult, TypeParent, TContext>;
 
     getNotesByTimelineId?: GetNotesByTimelineIdResolver<NoteResult[], TypeParent, TContext>;
@@ -2520,6 +2605,29 @@ export namespace QueryResolvers {
     getOneTimeline?: GetOneTimelineResolver<TimelineResult, TypeParent, TContext>;
 
     getAllTimeline?: GetAllTimelineResolver<ResponseTimelines, TypeParent, TContext>;
+  }
+
+  export type GetCaseResolver<R = CaseSavedObject, Parent = {}, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext,
+    GetCaseArgs
+  >;
+  export interface GetCaseArgs {
+    caseId: string;
+  }
+
+  export type GetAllCasesResolver<
+    R = ResponseCases,
+    Parent = {},
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, GetAllCasesArgs>;
+  export interface GetAllCasesArgs {
+    pageInfo?: Maybe<PageInfoCase>;
+
+    search?: Maybe<string>;
+
+    sort?: Maybe<SortCase>;
   }
 
   export type GetNoteResolver<R = NoteResult, Parent = {}, TContext = SiemContext> = Resolver<
@@ -2611,6 +2719,145 @@ export namespace QueryResolvers {
 
     onlyUserFavorite?: Maybe<boolean>;
   }
+}
+
+export namespace CaseSavedObjectResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = CaseSavedObject> {
+    attributes?: AttributesResolver<CaseResult, TypeParent, TContext>;
+
+    id?: IdResolver<string, TypeParent, TContext>;
+
+    type?: TypeResolver<string, TypeParent, TContext>;
+
+    updated_at?: UpdatedAtResolver<string, TypeParent, TContext>;
+
+    version?: VersionResolver<string, TypeParent, TContext>;
+  }
+
+  export type AttributesResolver<
+    R = CaseResult,
+    Parent = CaseSavedObject,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IdResolver<R = string, Parent = CaseSavedObject, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TypeResolver<R = string, Parent = CaseSavedObject, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type UpdatedAtResolver<
+    R = string,
+    Parent = CaseSavedObject,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type VersionResolver<
+    R = string,
+    Parent = CaseSavedObject,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace CaseResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = CaseResult> {
+    assignees?: AssigneesResolver<(Maybe<ElasticUser>)[], TypeParent, TContext>;
+
+    case_type?: CaseTypeResolver<string, TypeParent, TContext>;
+
+    created_at?: CreatedAtResolver<number, TypeParent, TContext>;
+
+    created_by?: CreatedByResolver<ElasticUser, TypeParent, TContext>;
+
+    description?: DescriptionResolver<string, TypeParent, TContext>;
+
+    state?: StateResolver<string, TypeParent, TContext>;
+
+    tags?: TagsResolver<(Maybe<string>)[], TypeParent, TContext>;
+
+    title?: TitleResolver<string, TypeParent, TContext>;
+  }
+
+  export type AssigneesResolver<
+    R = (Maybe<ElasticUser>)[],
+    Parent = CaseResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CaseTypeResolver<R = string, Parent = CaseResult, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type CreatedAtResolver<R = number, Parent = CaseResult, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type CreatedByResolver<
+    R = ElasticUser,
+    Parent = CaseResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DescriptionResolver<
+    R = string,
+    Parent = CaseResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StateResolver<R = string, Parent = CaseResult, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TagsResolver<
+    R = (Maybe<string>)[],
+    Parent = CaseResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TitleResolver<R = string, Parent = CaseResult, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+}
+
+export namespace ElasticUserResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = ElasticUser> {
+    username?: UsernameResolver<string, TypeParent, TContext>;
+
+    full_name?: FullNameResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type UsernameResolver<R = string, Parent = ElasticUser, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type FullNameResolver<
+    R = Maybe<string>,
+    Parent = ElasticUser,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace ResponseCasesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = ResponseCases> {
+    cases?: CasesResolver<CaseResult[], TypeParent, TContext>;
+
+    totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
+  }
+
+  export type CasesResolver<
+    R = CaseResult[],
+    Parent = ResponseCases,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseCases,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
 }
 
 export namespace NoteResultResolvers {
@@ -8332,6 +8579,7 @@ export namespace ResponseTimelinesResolvers {
 
 export namespace MutationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = {}> {
+    deleteCase?: DeleteCaseResolver<Maybe<boolean>, TypeParent, TContext>;
     /** Persists a note */
     persistNote?: PersistNoteResolver<ResponseNote, TypeParent, TContext>;
 
@@ -8362,6 +8610,15 @@ export namespace MutationResolvers {
     persistFavorite?: PersistFavoriteResolver<ResponseFavoriteTimeline, TypeParent, TContext>;
 
     deleteTimeline?: DeleteTimelineResolver<boolean, TypeParent, TContext>;
+  }
+
+  export type DeleteCaseResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, DeleteCaseArgs>;
+  export interface DeleteCaseArgs {
+    id: string[];
   }
 
   export type PersistNoteResolver<R = ResponseNote, Parent = {}, TContext = SiemContext> = Resolver<
@@ -8761,6 +9018,10 @@ export interface EsValueScalarConfig extends GraphQLScalarTypeConfig<EsValue, an
 
 export type IResolvers<TContext = SiemContext> = {
   Query?: QueryResolvers.Resolvers<TContext>;
+  CaseSavedObject?: CaseSavedObjectResolvers.Resolvers<TContext>;
+  CaseResult?: CaseResultResolvers.Resolvers<TContext>;
+  ElasticUser?: ElasticUserResolvers.Resolvers<TContext>;
+  ResponseCases?: ResponseCasesResolvers.Resolvers<TContext>;
   NoteResult?: NoteResultResolvers.Resolvers<TContext>;
   ResponseNotes?: ResponseNotesResolvers.Resolvers<TContext>;
   PinnedEvent?: PinnedEventResolvers.Resolvers<TContext>;

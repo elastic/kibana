@@ -41,6 +41,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
   ],
   overview: [CONSTANTS.timeline, CONSTANTS.timerange],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  case: [],
 };
 
 export type LocationTypes =

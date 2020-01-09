@@ -9,6 +9,7 @@ import { sharedSchema } from '../../common/graphql/shared';
 
 import { anomaliesSchema } from './anomalies';
 import { authenticationsSchema } from './authentications';
+import { caseSchema } from './case';
 import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
@@ -34,6 +35,7 @@ export const schemas = [
   alertsSchema,
   anomaliesSchema,
   authenticationsSchema,
+  caseSchema,
   ecsSchema,
   eventsSchema,
   dateSchema,

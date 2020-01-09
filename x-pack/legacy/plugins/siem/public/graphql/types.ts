@@ -8,6 +8,18 @@
 
 export type Maybe<T> = T | null;
 
+export interface PageInfoCase {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortCase {
+  sortField: SortFieldCase;
+
+  sortOrder: Direction;
+}
+
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -257,6 +269,10 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
+export interface CaseInput {
+  caseId?: Maybe<string>;
+}
+
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -265,7 +281,7 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldNote {
+export enum SortFieldCase {
   updatedBy = 'updatedBy',
   updated = 'updated',
 }
@@ -273,6 +289,11 @@ export enum SortFieldNote {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -378,6 +399,10 @@ export type EsValue = any;
 // ====================================================
 
 export interface Query {
+  getCase: CaseSavedObject;
+
+  getAllCases: ResponseCases;
+
   getNote: NoteResult;
 
   getNotesByTimelineId: NoteResult[];
@@ -395,6 +420,48 @@ export interface Query {
   getOneTimeline: TimelineResult;
 
   getAllTimeline: ResponseTimelines;
+}
+
+export interface CaseSavedObject {
+  attributes: CaseResult;
+
+  id: string;
+
+  type: string;
+
+  updated_at: string;
+
+  version: string;
+}
+
+export interface CaseResult {
+  assignees: (Maybe<ElasticUser>)[];
+
+  case_type: string;
+
+  created_at: number;
+
+  created_by: ElasticUser;
+
+  description: string;
+
+  state: string;
+
+  tags: (Maybe<string>)[];
+
+  title: string;
+}
+
+export interface ElasticUser {
+  username: string;
+
+  full_name?: Maybe<string>;
+}
+
+export interface ResponseCases {
+  cases: CaseResult[];
+
+  totalCount?: Maybe<number>;
 }
 
 export interface NoteResult {
@@ -2014,6 +2081,7 @@ export interface ResponseTimelines {
 }
 
 export interface Mutation {
+  deleteCase?: Maybe<boolean>;
   /** Persists a note */
   persistNote: ResponseNote;
 
@@ -2112,6 +2180,16 @@ export interface HostFields {
 // Arguments
 // ====================================================
 
+export interface GetCaseQueryArgs {
+  caseId: string;
+}
+export interface GetAllCasesQueryArgs {
+  pageInfo?: Maybe<PageInfoCase>;
+
+  search?: Maybe<string>;
+
+  sort?: Maybe<SortCase>;
+}
 export interface GetNoteQueryArgs {
   id: string;
 }
@@ -2408,6 +2486,9 @@ export interface IndicesExistSourceStatusArgs {
 }
 export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
+}
+export interface DeleteCaseMutationArgs {
+  id: string[];
 }
 export interface PersistNoteMutationArgs {
   noteId?: Maybe<string>;
@@ -2747,6 +2828,68 @@ export namespace GetAuthenticationsQuery {
     dsl: string[];
 
     response: string[];
+  };
+}
+
+export namespace GetCaseQuery {
+  export type Variables = {
+    caseId: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    getCase: GetCase;
+  };
+
+  export type GetCase = {
+    __typename?: 'CaseSavedObject';
+
+    id: string;
+
+    type: string;
+
+    updated_at: string;
+
+    version: string;
+
+    attributes: Attributes;
+  };
+
+  export type Attributes = {
+    __typename?: 'CaseResult';
+
+    assignees: (Maybe<Assignees>)[];
+
+    case_type: string;
+
+    created_at: number;
+
+    created_by: CreatedBy;
+
+    description: string;
+
+    state: string;
+
+    tags: (Maybe<string>)[];
+
+    title: string;
+  };
+
+  export type Assignees = {
+    __typename?: 'ElasticUser';
+
+    username: string;
+
+    full_name: Maybe<string>;
+  };
+
+  export type CreatedBy = {
+    __typename?: 'ElasticUser';
+
+    username: string;
+
+    full_name: Maybe<string>;
   };
 }
 
