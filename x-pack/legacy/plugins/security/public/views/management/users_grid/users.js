@@ -8,7 +8,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import template from 'plugins/security/views/management/users_grid/users.html';
-import 'plugins/security/services/shield_user';
 import { SECURITY_PATH, USERS_PATH } from '../management_urls';
 import { UsersListPage } from './components';
 import { UserAPIClient } from '../../../lib/api';

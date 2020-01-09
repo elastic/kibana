@@ -20,7 +20,7 @@ import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 jest.mock('./repository');
 
 const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');

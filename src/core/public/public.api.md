@@ -18,6 +18,7 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 
 // @public
 export interface App extends AppBase {
+    appRoute?: string;
     chromeless?: boolean;
     mount: AppMount | AppMountDeprecated;
 }

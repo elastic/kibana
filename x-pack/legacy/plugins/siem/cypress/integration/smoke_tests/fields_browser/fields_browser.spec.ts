@@ -22,7 +22,6 @@ import {
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
@@ -40,10 +39,6 @@ const defaultHeaders = [
 describe('Fields Browser', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('renders the fields browser with the expected title when the Fields button is clicked', () => {

@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import Legend from '../Legend';
+import { Legend } from '../Legend';
 import {
   unit,
   units,

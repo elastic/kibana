@@ -19,8 +19,8 @@
 
 import { TimeIntervalParam } from 'ui/vis/editors/config/types';
 import { AggConfig } from '../..';
-import { IndexPattern } from '../../../index_patterns';
-import { leastCommonMultiple } from '../../../utils/math';
+import { IndexPattern } from '../../../../../../plugins/data/public';
+import { leastCommonMultiple } from '../../lib/least_common_multiple';
 import { parseEsInterval } from '../../../../../core_plugins/data/public';
 import { leastCommonInterval } from '../../lib/least_common_interval';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';

@@ -11,8 +11,8 @@ import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
-import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
+import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { InfraNodeType, SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';

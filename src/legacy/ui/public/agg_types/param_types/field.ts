@@ -25,7 +25,7 @@ import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, IFieldList } from '../../index_patterns';
+import { Field, IFieldList } from '../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
