@@ -52,7 +52,7 @@ export function stanMetricsSpecProvider(context) {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
+    // previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
