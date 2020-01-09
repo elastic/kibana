@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 export interface TopNavMenuItem {
@@ -51,4 +51,4 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
       })}
     </EuiTabs>
   );
-}
+};

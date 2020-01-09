@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
-import React from 'react';
 
-export const EditorContentSpinner = () => {
+export const EditorContentSpinner: FunctionComponent = () => {
   return (
     <EuiPageContent className="conApp__editor__spinner">
       <EuiLoadingContent lines={10} />
