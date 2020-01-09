@@ -5,6 +5,7 @@
  */
 import path from 'path';
 import { readFileSync } from 'fs';
+import glob from 'glob';
 import { safeLoad } from 'js-yaml';
 import { flattenFields, dedupFields } from './install';
 import { Field } from '../../fields/field';
@@ -19,24 +20,19 @@ expect.addSnapshotSerializer({
     return val;
   },
 });
-
-const loadYamlFile = (filePath: string) => {
-  const ymlPath = path.join(__dirname, filePath);
-  const fieldsYML = readFileSync(ymlPath, 'utf-8');
-  const fields: Field[] = safeLoad(fieldsYML);
-  return fields;
-};
-const fields = loadYamlFile('./tests/nginx.fields.yml');
-const accessEcsFields = loadYamlFile('./tests/nginx.access.ecs.yml');
-const errorEcsFields = loadYamlFile('./tests/nginx.error.ecs.yml');
+const files = glob.sync(path.join(__dirname, '/tests/*.yml'));
+let allFields: Field[] = [];
+for (const file of files) {
+  const fieldsYML = readFileSync(file, 'utf-8');
+  allFields = allFields.concat(safeLoad(fieldsYML));
+}
 
 test('flattenFields function recursively flattens nested fields and renames name property with path', () => {
-  const flattened = flattenFields(fields);
+  const flattened = flattenFields(allFields);
   expect(flattened).toMatchSnapshot('flattenFields');
 });
 
 test('dedupFields function remove duplicated fields when parsing multiple files', () => {
-  const allFields = accessEcsFields.concat(errorEcsFields);
   const deduped = dedupFields(allFields);
   expect(deduped).toMatchSnapshot('dedupFields');
 });
