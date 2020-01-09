@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScaleType } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
@@ -41,6 +41,7 @@ export const MatrixHistogram = React.memo(
     id,
     isPtrIncluded,
     isInspected,
+    legendPosition,
     limit,
     mapping,
     query,
@@ -63,6 +64,7 @@ export const MatrixHistogram = React.memo(
       scaleType,
       yTickFormatter,
       showLegend,
+      legendPosition,
     });
     const [showInspect, setShowInspect] = useState(false);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);

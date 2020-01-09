@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 import { SetStateAction } from 'react';
 import { DocumentNode } from 'graphql';
 import {

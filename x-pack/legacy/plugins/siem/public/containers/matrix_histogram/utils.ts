@@ -32,6 +32,7 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
+  legendPosition,
 }: {
   from: number;
   to: number;
@@ -39,6 +40,7 @@ export const getBarchartConfigs = ({
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  legendPosition?: Position;
 }) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
@@ -54,7 +56,7 @@ export const getBarchartConfigs = ({
     tickSize: 8,
   },
   settings: {
-    legendPosition: Position.Bottom,
+    legendPosition: legendPosition || Position.Bottom,
     onBrushEnd,
     showLegend: showLegend || true,
     theme: {
