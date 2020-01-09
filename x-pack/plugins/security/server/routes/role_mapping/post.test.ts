@@ -50,6 +50,7 @@ describe('POST role mappings', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ created: true });
 
+    expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
     expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
       'shield.saveRoleMapping',
       {
@@ -95,6 +96,8 @@ describe('POST role mappings', () => {
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
+
+      expect(mockRouteDefinitionParams.clusterClient.asScoped).not.toHaveBeenCalled();
     });
   });
 });

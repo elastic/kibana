@@ -40,6 +40,10 @@ describe('DELETE role mappings', () => {
     const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ acknowledged: true });
+    expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+    expect(
+      mockScopedClusterClient.callAsCurrentUser
+    ).toHaveBeenCalledWith('shield.deleteRoleMapping', { name });
   });
 
   describe('failure', () => {
@@ -73,6 +77,7 @@ describe('DELETE role mappings', () => {
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
+      expect(mockRouteDefinitionParams.clusterClient.asScoped).not.toHaveBeenCalled();
     });
   });
 });

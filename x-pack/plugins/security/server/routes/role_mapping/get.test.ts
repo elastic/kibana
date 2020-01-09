@@ -118,6 +118,12 @@ describe('GET role mappings', () => {
         },
       },
     ]);
+
+    expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+      'shield.getRoleMappings',
+      { name: undefined }
+    );
   });
 
   it('returns role mapping by name', async () => {
@@ -169,6 +175,12 @@ describe('GET role mappings', () => {
         },
       },
     });
+
+    expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+      'shield.getRoleMappings',
+      { name }
+    );
   });
 
   describe('failure', () => {
@@ -199,6 +211,7 @@ describe('GET role mappings', () => {
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
+      expect(mockRouteDefinitionParams.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
     it('returns a 404 when the role mapping is not found', async () => {
@@ -231,6 +244,10 @@ describe('GET role mappings', () => {
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(404);
+      expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+      expect(
+        mockScopedClusterClient.callAsCurrentUser
+      ).toHaveBeenCalledWith('shield.getRoleMappings', { name });
     });
   });
 });
