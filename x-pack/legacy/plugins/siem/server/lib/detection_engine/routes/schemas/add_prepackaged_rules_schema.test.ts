@@ -1076,9 +1076,7 @@ describe('add prepackaged rules schema', () => {
 
   test('You can omit the query string when filters are present', () => {
     expect(
-      addPrepackagedRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>
-      >({
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1099,7 +1097,7 @@ describe('add prepackaged rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('validates with timeline_id', () => {
+  test('validates with timeline_id and timeline_title', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -1117,7 +1115,131 @@ describe('add prepackaged rules schema', () => {
         language: 'kuery',
         version: 1,
         timeline_id: 'timeline-id',
+        timeline_title: 'timeline-title',
       }).error
     ).toBeFalsy();
+  });
+
+  test('You cannot omit timeline_title when timeline_id is present', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: 'timeline-id',
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have a null value for timeline_title when timeline_id is present', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: 'timeline-id',
+        timeline_title: null,
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have empty string for timeline_title when timeline_id is present', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: 'timeline-id',
+        timeline_title: '',
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have timeline_title with an empty timeline_id', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_id: '',
+        timeline_title: 'some-title',
+      }).error
+    ).toBeTruthy();
+  });
+
+  test('You cannot have timeline_title without timeline_id', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        immutable: true,
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        language: 'kuery',
+        filters: [],
+        max_signals: 1,
+        version: 1,
+        timeline_title: 'some-title',
+      }).error
+    ).toBeTruthy();
   });
 });
