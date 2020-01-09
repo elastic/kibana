@@ -71,12 +71,3 @@ export function translationTransformation([x, y]: Vector2): Matrix3 {
     0, 0, 1
   ]
 }
-
-export function rotationTransformation(angleInRadians: number): Matrix3 {
-  // prettier-ignore
-  return [
-    Math.cos(angleInRadians), -Math.sin(angleInRadians),  0,
-    Math.sin(angleInRadians), Math.cos(angleInRadians),   0,
-    0,                        0,                          1
-  ]
-}

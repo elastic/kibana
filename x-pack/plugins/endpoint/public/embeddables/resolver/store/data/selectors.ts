@@ -5,7 +5,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { rotationTransformation } from '../../lib/transformation';
 import {
   DataState,
   ProcessEvent,
