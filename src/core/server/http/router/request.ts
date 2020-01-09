@@ -20,13 +20,11 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { ObjectType, Type, TypeOf } from '@kbn/config-schema';
-
-import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteSchemas, RouteConfigOptions, validBodyOutput } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
+import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
 
@@ -70,12 +68,13 @@ export class KibanaRequest<
    * instance of a KibanaRequest.
    * @internal
    */
-  public static from<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
-    const requestParts = KibanaRequest.validate(req, routeSchemas);
+  public static from<P, Q, B>(
+    req: Request,
+    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
+    withoutSecretHeaders: boolean = true
+  ) {
+    const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
+    const requestParts = KibanaRequest.validate(req, routeValidator);
     return new KibanaRequest(
       req,
       requestParts.params,
@@ -91,40 +90,17 @@ export class KibanaRequest<
    * received in the route handler.
    * @internal
    */
-  private static validate<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(
+  private static validate<P, Q, B>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeValidator: RouteValidator<P, Q, B>
   ): {
-    params: TypeOf<P>;
-    query: TypeOf<Q>;
-    body: TypeOf<B>;
+    params: P;
+    query: Q;
+    body: B;
   } {
-    if (routeSchemas === undefined) {
-      return {
-        body: {},
-        params: {},
-        query: {},
-      };
-    }
-
-    const params =
-      routeSchemas.params === undefined
-        ? {}
-        : routeSchemas.params.validate(req.params, {}, 'request params');
-
-    const query =
-      routeSchemas.query === undefined
-        ? {}
-        : routeSchemas.query.validate(req.query, {}, 'request query');
-
-    const body =
-      routeSchemas.body === undefined
-        ? {}
-        : routeSchemas.body.validate(req.payload, {}, 'request body');
+    const params = routeValidator.getParams(req.params, 'request params');
+    const query = routeValidator.getQuery(req.query, 'request query');
+    const body = routeValidator.getBody(req.payload, 'request body');
 
     return { query, params, body };
   }

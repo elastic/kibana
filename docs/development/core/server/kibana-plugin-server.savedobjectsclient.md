@@ -10,6 +10,10 @@
 export declare class SavedObjectsClient 
 ```
 
+## Remarks
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
+
 ## Properties
 
 |  Property | Modifiers | Type | Description |
@@ -29,8 +33,4 @@ export declare class SavedObjectsClient
 |  [find(options)](./kibana-plugin-server.savedobjectsclient.find.md) |  | Find all SavedObjects matching the search query |
 |  [get(type, id, options)](./kibana-plugin-server.savedobjectsclient.get.md) |  | Retrieves a single object |
 |  [update(type, id, attributes, options)](./kibana-plugin-server.savedobjectsclient.update.md) |  | Updates an SavedObject |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
 

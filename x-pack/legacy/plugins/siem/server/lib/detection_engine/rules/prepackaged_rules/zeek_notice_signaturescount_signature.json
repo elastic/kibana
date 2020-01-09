@@ -1,0 +1,17 @@
+{
+  "rule_id": "a704589c-8ba9-4a3c-8e39-ab9360cade17",
+  "risk_score": 50,
+  "description": "The same signature has triggered multiple times for a host.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Signatures::Count_Signature",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Signatures::Count_Signature\" or rule.name: \"Signatures::Count_Signature\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

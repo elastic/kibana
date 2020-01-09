@@ -174,7 +174,7 @@ export class CoreSystem {
           [this.legacy.legacyId, [...pluginDependencies.keys()]],
         ]),
       });
-      const application = this.application.setup({ context });
+      const application = this.application.setup({ context, http, injectedMetadata });
 
       const core: InternalCoreSetup = {
         application,
@@ -307,6 +307,7 @@ export class CoreSystem {
     this.uiSettings.stop();
     this.chrome.stop();
     this.i18n.stop();
+    this.application.stop();
     this.rootDomElement.textContent = '';
   }
 }

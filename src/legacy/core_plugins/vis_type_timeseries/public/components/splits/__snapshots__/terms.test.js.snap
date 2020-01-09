@@ -139,9 +139,6 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         labelType="label"
       >
         <EuiFieldNumber
-          compressed={false}
-          fullWidth={false}
-          isLoading={false}
           onChange={[Function]}
           value={10}
         />

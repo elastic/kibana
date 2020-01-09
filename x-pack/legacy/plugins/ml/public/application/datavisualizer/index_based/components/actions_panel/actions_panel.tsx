@@ -8,11 +8,9 @@ import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
-import { IndexPattern } from 'ui/index_patterns';
-
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 

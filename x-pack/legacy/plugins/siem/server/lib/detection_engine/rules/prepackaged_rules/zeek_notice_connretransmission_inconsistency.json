@@ -1,0 +1,17 @@
+{
+  "rule_id": "53719624-55f0-4541-8370-f27f6766fb9e",
+  "risk_score": 50,
+  "description": "Possible evasion; usually just chud.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Conn::Retransmission_Inconsistency",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Conn::Retransmission_Inconsistency\" or rule.name: \"Conn::Retransmission_Inconsistency\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

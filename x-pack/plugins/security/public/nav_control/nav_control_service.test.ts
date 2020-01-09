@@ -10,6 +10,8 @@ import { ILicense } from '../../../licensing/public';
 import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
 import { nextTick } from 'test_utils/enzyme_helpers';
+import { securityMock } from '../mocks';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 const validLicense = {
   isAvailable: true,
@@ -29,13 +31,17 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
 
     const navControlService = new SecurityNavControlService();
+    const mockSecuritySetup = securityMock.createSetup();
+    mockSecuritySetup.authc.getCurrentUser.mockResolvedValue(
+      mockAuthenticatedUser({ username: 'some-user', full_name: undefined })
+    );
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      authc: mockSecuritySetup.authc,
     });
 
     const coreStart = coreMock.createStart();
     coreStart.chrome.navControls.registerRight = jest.fn();
-    coreStart.http.get.mockResolvedValue({ username: 'some-user' });
 
     navControlService.start({ core: coreStart });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
@@ -93,6 +99,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -111,6 +118,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -126,6 +134,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();
@@ -146,6 +155,7 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      authc: securityMock.createSetup().authc,
     });
 
     const coreStart = coreMock.createStart();

@@ -49,6 +49,7 @@ interface ScheduleStepRuleForm extends StepRuleForm {
 export const EditRuleComponent = memo(() => {
   const { ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
+
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
     data: null,
@@ -249,7 +250,7 @@ export const EditRuleComponent = memo(() => {
   }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} />;
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
   return (
@@ -257,7 +258,7 @@ export const EditRuleComponent = memo(() => {
       <WrapperPage restrictWidth>
         <HeaderPage
           backOptions={{
-            href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`,
+            href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
           }}
           isLoading={isLoading}
@@ -303,7 +304,7 @@ export const EditRuleComponent = memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`}>
+            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`}>
               {i18n.CANCEL}
             </EuiButton>
           </EuiFlexItem>

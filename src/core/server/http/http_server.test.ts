@@ -27,10 +27,18 @@ import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
+import {
+  Router,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteValidationResultFactory,
+  RouteValidationFunction,
+} from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
 
 const cookieOptions = {
   name: 'sid',
@@ -285,6 +293,229 @@ test('valid body', async () => {
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('valid body with validate function', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying params', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation = (
+    { bar, baz }: any = {},
+    { ok, badRequest }: RouteValidationResultFactory
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying validation handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    { bar, baz } = {},
+    { ok, badRequest }
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+// https://github.com/elastic/kibana/issues/47047
+test('not inline handler - KibanaRequest', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler = (
+    context: RequestHandlerContext,
+    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
+    });
+});
+
+test('not inline handler - RequestHandler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
+    context,
+    req,
+    res
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
 
