@@ -22,17 +22,14 @@ import {
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
-  HttpSetup,
 } from 'kibana/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-import { setIndexPatterns, setSavedObjectsClient } from './services/plugin_services';
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
-  http: HttpSetup;
   timelionPanels: Map<string, Panel>;
 }
 
@@ -55,7 +52,6 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
-      http: core.http,
       timelionPanels,
       ...(await __LEGACY.setup(core, timelionPanels)),
     };
@@ -69,15 +65,12 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start(core: CoreStart, plugins: PluginsStart) {
+  public start(core: CoreStart) {
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
-
-    setIndexPatterns(plugins.data.indexPatterns);
-    setSavedObjectsClient(core.savedObjects.client);
   }
 
   public stop(): void {}

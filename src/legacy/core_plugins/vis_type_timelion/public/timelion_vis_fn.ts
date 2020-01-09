@@ -31,7 +31,7 @@ interface Arguments {
   interval: string;
 }
 
-export interface RenderValue {
+interface RenderValue {
   visData: Context;
   visType: 'timelion';
   visParams: VisParams;
@@ -42,7 +42,7 @@ export type VisParams = Arguments;
 type Return = Promise<Render<RenderValue>>;
 
 export const getTimelionVisualizationConfig = (
-  deps: TimelionVisDependencies
+  dependencies: TimelionVisDependencies
 ): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name,
   type: 'render',
@@ -66,7 +66,7 @@ export const getTimelionVisualizationConfig = (
     },
   },
   async fn(context, args) {
-    const timelionRequestHandler = getTimelionRequestHandler(deps);
+    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
 

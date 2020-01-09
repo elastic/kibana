@@ -102,11 +102,11 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   }, [kibana.services.http]);
 
   return (
-    <div className="visEditor__timelionExpressionInput">
+    <div className="timExpressionInput">
       <EuiFormLabel>
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
-      <div className="timelionExpressionInput__editor">
+      <div className="timExpressionInput__editor">
         <CodeEditor
           languageId={LANGUAGE_ID}
           value={value}
