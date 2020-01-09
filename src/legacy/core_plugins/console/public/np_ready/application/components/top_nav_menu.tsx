@@ -29,7 +29,7 @@ export interface TopNavMenuItem {
 }
 
 interface Props {
-  disabled: boolean;
+  disabled?: boolean;
   items: TopNavMenuItem[];
 }
 
