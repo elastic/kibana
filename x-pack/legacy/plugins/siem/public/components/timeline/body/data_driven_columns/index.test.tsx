@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 
-import * as React from 'react';
+import React from 'react';
 
 import { mockTimelineData } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';
@@ -29,6 +28,6 @@ describe('Columns', () => {
       />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

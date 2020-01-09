@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { FlowDirection } from '../../graphql/types';
 
@@ -25,7 +24,7 @@ describe('Select Flow Direction', () => {
         />
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

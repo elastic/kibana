@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
@@ -18,7 +19,12 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../index';
+import {
+  JobCreatorType,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isCategorizationJobCreator,
+} from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
@@ -250,6 +256,8 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType) {
     jobType = JOB_TYPE.MULTI_METRIC;
   } else if (isPopulationJobCreator(jobCreator)) {
     jobType = JOB_TYPE.POPULATION;
+  } else if (isCategorizationJobCreator(jobCreator)) {
+    jobType = JOB_TYPE.CATEGORIZATION;
   }
 
   window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
@@ -269,4 +277,31 @@ export function advancedStartDatafeed(jobCreator: JobCreatorType) {
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
   return afs.some(a => a.agg.dslName === null) === false;
+}
+
+export function getJobCreatorTitle(jobCreator: JobCreatorType) {
+  switch (jobCreator.type) {
+    case JOB_TYPE.SINGLE_METRIC:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.singleMetric', {
+        defaultMessage: 'Single metric',
+      });
+    case JOB_TYPE.MULTI_METRIC:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.multiMetric', {
+        defaultMessage: 'Multi metric',
+      });
+    case JOB_TYPE.POPULATION:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.population', {
+        defaultMessage: 'Population',
+      });
+    case JOB_TYPE.ADVANCED:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.advanced', {
+        defaultMessage: 'Advanced',
+      });
+    // case JOB_TYPE.CATEGORIZATION:
+    //   return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
+    //     defaultMessage: 'Categorization',
+    //   });
+    default:
+      return '';
+  }
 }

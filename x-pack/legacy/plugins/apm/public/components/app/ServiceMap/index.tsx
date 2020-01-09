@@ -57,7 +57,8 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const elements = Array.isArray(data) ? data : [];
   const license = useLicense();
   const isValidPlatinumLicense =
-    license?.isActive && license?.type === 'platinum';
+    license?.isActive &&
+    (license?.type === 'platinum' || license?.type === 'trial');
 
   return isValidPlatinumLicense ? (
     <Cytoscape
