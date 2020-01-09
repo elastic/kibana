@@ -5,7 +5,7 @@ Coordinate maps display geographic areas overlaid with circles keyed to the data
 
 Coordinate maps have been replaced with <<maps>>, which offers more functionality and is easier to use.
 
-If you still wish to create coordinate maps in Visualize:
+If you still want to create coordinate maps in Visualize:
 
 . Set `xpack.maps.showMapVisualizationTypes` to `true`.
 
@@ -25,7 +25,7 @@ Coordinate maps support the following aggregations.
 The following metric aggregations are supported:
 
 {ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]:: Returns a raw count of
-the elements in the index pattern. The default _metrics_ aggregation for a coordinate map is *Count*.
+the elements in the index pattern. The default metrics aggregation for a coordinate map is *Count*.
 
 {ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: Returns the average of a numeric
 field.
@@ -64,7 +64,7 @@ of the geohash grid cell.
 [[navigate-map]]
 === Navigate the coordinate map
 
-Explore the map with the following options:
+Use the following navigation options:
 
 * To move the map center, click and hold anywhere on the map and move the cursor.
 * To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
