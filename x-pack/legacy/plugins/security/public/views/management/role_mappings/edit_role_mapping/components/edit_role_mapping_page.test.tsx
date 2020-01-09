@@ -32,7 +32,7 @@ describe('EditRoleMappingPage', () => {
   it('allows a role mapping to be created', async () => {
     const roleMappingsAPI = ({
       saveRoleMapping: jest.fn().mockResolvedValue(null),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: true,
@@ -89,7 +89,7 @@ describe('EditRoleMappingPage', () => {
           bar: 'baz',
         },
       }),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: true,
@@ -136,7 +136,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = ({
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: false,
         hasCompatibleRealms: true,
       }),
@@ -156,7 +156,7 @@ describe('EditRoleMappingPage', () => {
 
   it('renders a warning when there are no compatible realms enabled', async () => {
     const roleMappingsAPI = ({
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: false,
       }),
@@ -187,7 +187,7 @@ describe('EditRoleMappingPage', () => {
           field: { username: '*' },
         },
       }),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: true,
@@ -223,7 +223,7 @@ describe('EditRoleMappingPage', () => {
           field: { username: '*' },
         },
       }),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: false,
@@ -271,7 +271,7 @@ describe('EditRoleMappingPage', () => {
           ],
         },
       }),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: true,
@@ -320,7 +320,7 @@ describe('EditRoleMappingPage', () => {
         enabled: true,
         rules: createRule(10),
       }),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
         canUseInlineScripts: true,

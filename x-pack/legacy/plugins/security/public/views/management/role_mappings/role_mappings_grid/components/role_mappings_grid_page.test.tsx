@@ -12,12 +12,13 @@ import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiLink } from '@elastic/eui';
 import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
+import { act } from '@testing-library/react';
 
 describe('RoleMappingsGridPage', () => {
   it('renders an empty prompt when no role mappings exist', async () => {
     const roleMappingsAPI = ({
       getRoleMappings: jest.fn().mockResolvedValue([]),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
       }),
@@ -37,7 +38,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = ({
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: false,
         hasCompatibleRealms: true,
       }),
@@ -65,7 +66,7 @@ describe('RoleMappingsGridPage', () => {
           rules: { field: { username: '*' } },
         },
       ]),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: false,
       }),
@@ -92,7 +93,7 @@ describe('RoleMappingsGridPage', () => {
           rules: { field: { username: '*' } },
         },
       ]),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
       }),
@@ -119,7 +120,7 @@ describe('RoleMappingsGridPage', () => {
           rules: { field: { username: '*' } },
         },
       ]),
-      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
         canManageRoleMappings: true,
         hasCompatibleRealms: true,
       }),
@@ -132,5 +133,50 @@ describe('RoleMappingsGridPage', () => {
     const templates = findTestSubject(wrapper, 'roleMappingRoles');
     expect(templates).toHaveLength(1);
     expect(templates.text()).toEqual(`2 role templates defined`);
+  });
+
+  it('allows role mappings to be deleted, refreshing the grid after', async () => {
+    const roleMappingsAPI = ({
+      getRoleMappings: jest.fn().mockResolvedValue([
+        {
+          name: 'some-realm',
+          enabled: true,
+          roles: ['superuser'],
+          rules: { field: { username: '*' } },
+        },
+      ]),
+      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+      }),
+      deleteRoleMappings: jest.fn().mockReturnValue(
+        Promise.resolve([
+          {
+            name: 'some-realm',
+            success: true,
+          },
+        ])
+      ),
+    } as unknown) as RoleMappingsAPI;
+
+    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(roleMappingsAPI.getRoleMappings).toHaveBeenCalledTimes(1);
+    expect(roleMappingsAPI.deleteRoleMappings).not.toHaveBeenCalled();
+
+    findTestSubject(wrapper, `deleteRoleMappingButton-some-realm`).simulate('click');
+    expect(findTestSubject(wrapper, 'deleteRoleMappingConfirmationModal')).toHaveLength(1);
+
+    await act(async () => {
+      findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(roleMappingsAPI.deleteRoleMappings).toHaveBeenCalledWith(['some-realm']);
+    // Expect an additional API call to refresh the grid
+    expect(roleMappingsAPI.getRoleMappings).toHaveBeenCalledTimes(2);
   });
 });
