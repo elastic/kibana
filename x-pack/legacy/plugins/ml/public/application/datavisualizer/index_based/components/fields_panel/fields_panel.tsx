@@ -11,7 +11,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   // @ts-ignore
   EuiSearchBar,
   EuiSpacer,
@@ -78,7 +77,7 @@ export const FieldsPanel: FC<Props> = ({
   }
 
   return (
-    <EuiPanel data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
+    <div data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
       <EuiTitle>
         <h2>{title}</h2>
       </EuiTitle>
@@ -164,6 +163,6 @@ export const FieldsPanel: FC<Props> = ({
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-    </EuiPanel>
+    </div>
   );
 };
