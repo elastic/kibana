@@ -20,7 +20,6 @@
 import React from 'react';
 import { EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useDeps } from '../../../hooks/use_deps';
 import { routes } from '../../../routes';
 
 // eslint-disable-next-line
