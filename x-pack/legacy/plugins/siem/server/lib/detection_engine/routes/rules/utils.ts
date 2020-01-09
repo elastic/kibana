@@ -103,11 +103,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
   });
 };
 
-export const transformRulesToNdjson = ({
-  rules,
-}: {
-  rules: Array<Partial<OutputRuleAlertRest>>;
-}): string => {
+export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
   if (rules.length !== 0) {
     const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
     return `${rulesString}\n`;

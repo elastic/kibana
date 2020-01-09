@@ -17,7 +17,7 @@ export const getExportAll = async (
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ alertsClient });
   const rules = transformAlertsToRules(ruleAlertTypes);
-  const rulesNdjson = transformRulesToNdjson({ rules });
+  const rulesNdjson = transformRulesToNdjson(rules);
   const exportDetails = getExportDetailsNdjson(rules);
   return { rulesNdjson, exportDetails };
 };

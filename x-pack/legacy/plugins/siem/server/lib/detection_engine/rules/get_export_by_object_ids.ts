@@ -27,9 +27,7 @@ export const getExportByObjectIds = async (
     alertsClient,
     objects,
   });
-  const rulesNdjson = transformRulesToNdjson({
-    rules: rulesAndErrors.rules,
-  });
+  const rulesNdjson = transformRulesToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
 };
