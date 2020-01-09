@@ -28,3 +28,10 @@ export const jobSourceConfigurationRT = rt.type({
 });
 
 export type JobSourceConfiguration = rt.TypeOf<typeof jobSourceConfigurationRT>;
+
+export const jobCustomSettingsRT = rt.partial({
+  job_revision: rt.number,
+  logs_source_config: rt.partial(jobSourceConfigurationRT.props),
+});
+
+export type JobCustomSettings = rt.TypeOf<typeof jobCustomSettingsRT>;

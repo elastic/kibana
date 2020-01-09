@@ -178,6 +178,11 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: RequestHandlerContext,
+    method: 'ml.getJobs',
+    options?: object
+  ): Promise<object>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;

@@ -6,13 +6,6 @@
 
 import * as rt from 'io-ts';
 
-import { jobSourceConfigurationRT } from '../../../../../common/log_analysis';
-
-export const jobCustomSettingsRT = rt.partial({
-  job_revision: rt.number,
-  logs_source_config: rt.partial(jobSourceConfigurationRT.props),
-});
-
 export const getMlCapabilitiesResponsePayloadRT = rt.type({
   capabilities: rt.type({
     canGetJobs: rt.boolean,
