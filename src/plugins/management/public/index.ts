@@ -24,4 +24,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ManagementPlugin();
 }
 
-export { ManagementStart } from './types';
+export { ManagementSetup, ManagementStart, RegisterManagementApp } from './types';
+export { ManagementApp } from './management_app';
+export { ManagementSection } from './management_section';
+export { ManagementSidebarNav } from './components'; // for use in legacy management apps

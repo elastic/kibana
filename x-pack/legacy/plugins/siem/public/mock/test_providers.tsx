@@ -9,7 +9,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
-import * as React from 'react';
+import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
