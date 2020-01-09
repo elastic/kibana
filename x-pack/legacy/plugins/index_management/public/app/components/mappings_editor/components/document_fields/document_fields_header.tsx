@@ -38,10 +38,20 @@ export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }:
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
           style={{ minWidth: '350px' }}
-          placeholder="Search fields"
+          placeholder={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
+            {
+              defaultMessage: 'Search fields',
+            }
+          )}
           value={searchValue}
           onChange={e => onSearchChange(e.target.value)}
-          aria-label="Search mapped fields"
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
+            {
+              defaultMessage: 'Search mapped fields',
+            }
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
