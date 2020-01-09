@@ -32,7 +32,7 @@ interface ResultItem {
   error?: any;
 }
 
-const defaultNumbers = `2000
+const defaultNumbers = [2000, 300, -1, 1000].join('\n');
 300
 -1
 1000
