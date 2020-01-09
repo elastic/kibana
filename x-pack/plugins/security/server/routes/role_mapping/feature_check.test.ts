@@ -6,7 +6,11 @@
 
 import { routeDefinitionParamsMock } from '../index.mock';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import {
+  kibanaResponseFactory,
+  RequestHandlerContext,
+  IClusterClient,
+} from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 
@@ -15,6 +19,7 @@ interface TestOptions {
   canManageRoleMappings?: boolean;
   nodeSettingsResponse?: Record<string, any>;
   xpackUsageResponse?: Record<string, any>;
+  internalUserClusterClientImpl?: IClusterClient['callAsInternalUser'];
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -33,6 +38,26 @@ const defaultXpackUsageResponse = {
   },
 };
 
+const getDefaultInternalUserClusterClientImpl = (
+  nodeSettingsResponse: TestOptions['nodeSettingsResponse'],
+  xpackUsageResponse: TestOptions['xpackUsageResponse']
+) =>
+  ((async (endpoint: string, clientParams: Record<string, any>) => {
+    if (!clientParams) throw new TypeError('expected clientParams');
+
+    if (endpoint === 'transport.request') {
+      if (clientParams.path && clientParams.path.startsWith('/_nodes/settings')) {
+        return nodeSettingsResponse;
+      }
+
+      if (clientParams.path === '/_xpack/usage') {
+        return xpackUsageResponse;
+      }
+    }
+
+    throw new Error(`unexpected endpoint: ${endpoint}`);
+  }) as unknown) as TestOptions['internalUserClusterClientImpl'];
+
 describe('GET role mappings feature check', () => {
   const getFeatureCheckTest = (
     description: string,
@@ -41,6 +66,10 @@ describe('GET role mappings feature check', () => {
       canManageRoleMappings = true,
       nodeSettingsResponse = {},
       xpackUsageResponse = defaultXpackUsageResponse,
+      internalUserClusterClientImpl = getDefaultInternalUserClusterClientImpl(
+        nodeSettingsResponse,
+        xpackUsageResponse
+      ),
       asserts,
     }: TestOptions
   ) => {
@@ -50,21 +79,7 @@ describe('GET role mappings feature check', () => {
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       mockRouteDefinitionParams.clusterClient.callAsInternalUser.mockImplementation(
-        async (method, payload) => {
-          if (!payload) throw new TypeError('expected payload');
-
-          if (method === 'transport.request') {
-            if (payload.path && payload.path.startsWith('/_nodes/settings')) {
-              return nodeSettingsResponse;
-            }
-
-            if (payload.path === '/_xpack/usage') {
-              return xpackUsageResponse;
-            }
-          }
-
-          throw new Error(`unexpected method: ${method}`);
-        }
+        internalUserClusterClientImpl
       );
 
       mockScopedClusterClient.callAsCurrentUser.mockImplementation(async (method, payload) => {
@@ -212,4 +227,22 @@ describe('GET role mappings feature check', () => {
       },
     },
   });
+
+  getFeatureCheckTest(
+    'falls back to allowing both script types if there is an error retrieving node settings',
+    {
+      internalUserClusterClientImpl: (() => {
+        return Promise.reject(new Error('something bad happened'));
+      }) as TestOptions['internalUserClusterClientImpl'],
+      asserts: {
+        statusCode: 200,
+        result: {
+          canManageRoleMappings: true,
+          canUseInlineScripts: true,
+          canUseStoredScripts: true,
+          hasCompatibleRealms: false,
+        },
+      },
+    }
+  );
 });
