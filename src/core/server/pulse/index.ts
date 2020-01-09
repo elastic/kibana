@@ -18,14 +18,14 @@
  */
 
 import { readdirSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, parse } from 'path';
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
+import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
 
 export interface InternalPulseService {
@@ -48,13 +48,16 @@ interface InstructionsResponse {
 const channelNames = readdirSync(resolve(__dirname, 'collectors'))
   .filter((fileName: string) => !fileName.startsWith('.'))
   .map((fileName: string) => {
-    return fileName.slice(0, -3);
+    // Get the base name without the extension
+    return parse(fileName).name;
   });
 
 export class PulseService {
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
   private readonly instructions: Map<string, Subject<any>> = new Map();
+  private readonly subscriptions: Set<NodeJS.Timer> = new Set();
+  private elasticsearch?: IClusterClient;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
@@ -69,22 +72,9 @@ export class PulseService {
   }
 
   public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
-    this.log.debug('Setting up pulse service');
+    this.log.info('Setting up service');
 
-    // poll for instructions every second for this deployment
-    setInterval(() => {
-      // eslint-disable-next-line no-console
-      this.loadInstructions().catch(err => console.error(err.stack));
-    }, 1000);
-
-    // eslint-disable-next-line no-console
-    console.log('Will attempt first telemetry collection in 5 seconds...');
-    setTimeout(() => {
-      setInterval(() => {
-        // eslint-disable-next-line no-console
-        this.sendTelemetry().catch(err => console.error(err.stack));
-      }, 5000);
-    }, 5000);
+    this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
 
     return {
       getChannel: (id: string) => {
@@ -95,6 +85,33 @@ export class PulseService {
         return channel;
       },
     };
+  }
+
+  public async start() {
+    this.log.info('Starting service');
+    if (!this.elasticsearch) {
+      throw Error(`The 'PulseService.setup' method needs to be called before the 'start' method`);
+    }
+    const elasticsearch = this.elasticsearch;
+
+    // poll for instructions every second for this deployment
+    const loadInstructionSubcription = setInterval(() => {
+      this.loadInstructions().catch(err => this.log.error(err.stack));
+    }, 1000);
+    this.subscriptions.add(loadInstructionSubcription);
+
+    this.log.debug('Will attempt first telemetry collection in 5 seconds...');
+    const sendTelemetrySubcription = setInterval(() => {
+      this.sendTelemetry(elasticsearch).catch(err => this.log.error(err.stack));
+    }, 5000);
+    this.subscriptions.add(sendTelemetrySubcription);
+  }
+
+  public async stop() {
+    this.subscriptions.forEach(subscription => {
+      clearInterval(subscription);
+      this.subscriptions.delete(subscription);
+    });
   }
 
   private retriableErrors = 0;
@@ -137,8 +154,7 @@ export class PulseService {
   private handleRetriableError() {
     this.retriableErrors++;
     if (this.retriableErrors === 1) {
-      // eslint-disable-next-line no-console
-      console.warn(
+      this.log.warn(
         'Kibana is not yet available at http://localhost:5601/api, will continue to check for the next 120 seconds...'
       );
     } else if (this.retriableErrors > 120) {
@@ -146,12 +162,14 @@ export class PulseService {
     }
   }
 
-  private async sendTelemetry() {
+  private async sendTelemetry(elasticsearch: IClusterClient) {
+    this.log.debug('Sending telemetry');
     const url = 'http://localhost:5601/api/pulse_poc/intake/123';
 
     const channels = [];
     for (const channel of this.channels.values()) {
-      const records = await channel.getRecords();
+      const records = await channel.getRecords(elasticsearch);
+      this.log.debug(`Channel "${channel.id}" returns the records ${JSON.stringify(records)}`);
       channels.push({
         records,
         channel_id: channel.id,
