@@ -1361,10 +1361,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^4.7.0"
 
-"@elastic/charts@^16.0.2":
-  version "16.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.0.2.tgz#35068a08a19534da62e9bcad700cc7b2a15bc55a"
-  integrity sha512-0tVyltAmAPOAfiRU1iKYk3b9++4oTn6IXvyM4SSj7Ukh5Y90XXmOtGEUPnZTiRPmup9MJi4srrm9ra9k/Kq4UQ==
+"@elastic/charts@^16.1.0":
+  version "16.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.1.0.tgz#67cf11625dcd7e1c2cf16ef53349e6a68a73f5b1"
+  integrity sha512-0jZ7thhGmYC0ZdEVkxfg6M66epCD7k7BfYIi12FnrmIK+mUD2IPhR8b2TJXvaojPryN4YTNreGRncQ9R58fOoQ==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     classnames "^2.2.6"
@@ -3882,6 +3882,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/node-forge@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.9.0.tgz#e9f678ec09283f9f35cb8de6c01f86be9278ac08"
+  integrity sha512-J00+BIHJOfagO1Qs67Jp5CZO3VkFxY8YKMt44oBhXr+3ZYNnl8wv/vtcJyPjuH0QZ+q7+5nnc6o/YH91ZJy2pQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/node-jose@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.0.tgz#26e1d234b41a39035482443ef35414bf34ba5d8b"
@@ -3943,6 +3950,11 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-link-header/-/parse-link-header-1.0.0.tgz#69f059e40a0fa93dc2e095d4142395ae6adc5d7a"
   integrity sha512-fCA3btjE7QFeRLfcD0Sjg+6/CnmC66HpMBoRfRzd2raTaWMJV21CCZ0LO8MOqf8onl5n0EPfjq4zDhbyX8SVwA==
+
+"@types/pegjs@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@types/pegjs/-/pegjs-0.10.1.tgz#9a2f3961dc62430fdb21061eb0ddbd890f9e3b94"
+  integrity sha512-ra8IchO9odGQmYKbm+94K58UyKCEKdZh9y0vxhG4pIpOJOBlC1C+ZtBVr6jLs+/oJ4pl+1p/4t3JtBA8J10Vvw==
 
 "@types/pngjs@^3.3.2":
   version "3.3.2"
@@ -20218,6 +20230,11 @@ node-forge@^0.7.6:
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.6.tgz#fdf3b418aee1f94f0ef642cd63486c77ca9724ac"
   integrity sha512-sol30LUpz1jQFBjOKwbjxijiE3b6pjd74YwfD0fJOKPjF+fONKb2Yg8rYgS6+bK6VDl+/wfr4IYpC7jDzLUIfw==
+
+node-forge@^0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.9.1.tgz#775368e6846558ab6676858a4d8c6e8d16c677b5"
+  integrity sha512-G6RlQt5Sb4GMBzXvhfkeFmbqR6MzhtnT7VTHuLadjkii3rdYHNdw0m8zA4BTxVIh68FicCQ2NSUANpsqkr9jvQ==
 
 node-gyp@^3.8.0:
   version "3.8.0"
