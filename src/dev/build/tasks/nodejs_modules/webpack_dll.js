@@ -35,26 +35,26 @@ export async function getDllEntries(manifestPaths, whiteListedModules, baseDir =
   );
 
   // Process and group modules from all manifests
-  const manifestsModules = await Promise.all(
-    manifests.map(async (manifest, idx) => {
-      if (!manifest || !manifest.content) {
-        // It should fails because if we don't have the manifest file
-        // or it is malformed something wrong is happening and we
-        // should stop
-        throw new Error(`The following dll manifest doesn't exists: ${manifestPaths[idx]}`);
-      }
+  const manifestsModules = manifests.flatMap((manifest, idx) => {
+    if (!manifest || !manifest.content) {
+      // It should fails because if we don't have the manifest file
+      // or it is malformed something wrong is happening and we
+      // should stop
+      throw new Error(`The following dll manifest doesn't exists: ${manifestPaths[idx]}`);
+    }
 
-      const modules = Object.keys(manifest.content);
-      if (!modules.length) {
-        // It should fails because if we don't have any
-        // module inside the client vendors dll something
-        // wrong is happening and we should stop too
-        throw new Error(
-          `The following dll manifest is reporting an empty dll: ${manifestPaths[idx]}`
-        );
-      }
-    })
-  );
+    const modules = Object.keys(manifest.content);
+    if (!modules.length) {
+      // It should fails because if we don't have any
+      // module inside the client vendors dll something
+      // wrong is happening and we should stop too
+      throw new Error(
+        `The following dll manifest is reporting an empty dll: ${manifestPaths[idx]}`
+      );
+    }
+
+    return modules;
+  });
 
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
