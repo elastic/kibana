@@ -37,10 +37,6 @@ export abstract class NumeralFormat extends FieldFormat {
   abstract id: string;
   abstract title: string;
 
-  static isNumeric = true;
-
-  isNumeric = NumeralFormat.isNumeric;
-
   getParamDefaults = () => ({
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
   });

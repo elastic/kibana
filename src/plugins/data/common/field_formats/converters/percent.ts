@@ -23,9 +23,11 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
   static title = 'Percentage';
+  static allowsNumericalAggregations = true;
 
   id = PercentFormat.id;
   title = PercentFormat.title;
+  allowsNumericalAggregations = PercentFormat.allowsNumericalAggregations;
 
   getParamDefaults = () => ({
     pattern: this.getConfig!('format:percent:defaultPattern'),
