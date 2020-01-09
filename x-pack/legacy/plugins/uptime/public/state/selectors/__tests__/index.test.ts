@@ -40,6 +40,11 @@ describe('state selectors', () => {
       integrationsPopoverOpen: null,
       lastRefresh: 125,
     },
+    monitorStatus: {
+      status: null,
+      monitor: null,
+      loading: false,
+    },
   };
 
   it('selects base path from state', () => {

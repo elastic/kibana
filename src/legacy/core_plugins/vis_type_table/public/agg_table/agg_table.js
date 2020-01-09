@@ -135,18 +135,15 @@ export function KbnAggTable(config, RecursionHelper) {
               }
 
               const isDate =
-                _.get(dimension, 'format.id') === 'date' ||
-                _.get(dimension, 'format.params.id') === 'date';
-              const isNumeric =
-                _.get(dimension, 'format.id') === 'number' ||
-                _.get(dimension, 'format.params.id') === 'number';
+                dimension.format?.id === 'date' || dimension.format?.params?.id === 'date';
+              const allowsNumericalAggregations = formatter?.allowsNumericalAggregations;
 
               let { totalFunc } = $scope;
               if (typeof totalFunc === 'undefined' && showPercentage) {
                 totalFunc = 'sum';
               }
 
-              if (isNumeric || isDate || totalFunc === 'count') {
+              if (allowsNumericalAggregations || isDate || totalFunc === 'count') {
                 const sum = tableRows => {
                   return _.reduce(
                     tableRows,
@@ -161,7 +158,6 @@ export function KbnAggTable(config, RecursionHelper) {
                 };
 
                 formattedColumn.sumTotal = sum(table.rows);
-
                 switch (totalFunc) {
                   case 'sum': {
                     if (!isDate) {

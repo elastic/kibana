@@ -98,12 +98,6 @@ export const monitorsSchema = gql`
     interval: UnsignedInteger!
   }
 
-  type MonitorPageTitle {
-    id: String!
-    url: String
-    name: String
-  }
-
   extend type Query {
     getMonitors(
       dateRangeStart: String!
@@ -126,19 +120,5 @@ export const monitorsSchema = gql`
       dateRangeEnd: String!
       location: String
     ): MonitorChart
-
-    "Fetch the most recent event data for a monitor ID, date range, location."
-    getLatestMonitors(
-      "The lower limit of the date range."
-      dateRangeStart: String!
-      "The upper limit of the date range."
-      dateRangeEnd: String!
-      "Optional: a specific monitor ID filter."
-      monitorId: String
-      "Optional: a specific instance location filter."
-      location: String
-    ): [Ping!]!
-
-    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;

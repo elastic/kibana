@@ -5,10 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import styled from 'styled-components';
-import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
   FilterGroup,
@@ -26,15 +24,10 @@ import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } f
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';
+import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
-  basePath: string;
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-  history: any;
-  location: {
-    pathname: string;
-    search: string;
-  };
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -54,8 +47,8 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) => {
-  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
+export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
+  const { colors } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {
@@ -69,18 +62,6 @@ export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) 
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
   useUptimeTelemetry(UptimePage.Overview);
   useIndexPattern(setIndexPattern);
-
-  useEffect(() => {
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
-    if (setHeadingText) {
-      setHeadingText(
-        i18n.translate('xpack.uptime.overviewPage.headerText', {
-          defaultMessage: 'Overview',
-          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-        })
-      );
-    }
-  }, [basePath, setBreadcrumbs, setHeadingText]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
@@ -132,7 +113,8 @@ export const OverviewPage = ({ basePath, autocomplete, setBreadcrumbs }: Props) 
 
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
+      <PageHeader setBreadcrumbs={setBreadcrumbs} />
+      <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar autocomplete={autocomplete} />
