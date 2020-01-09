@@ -75,10 +75,6 @@ export class Plugin {
 
     this.licenseState = new LicenseState(plugins.licensing.license$);
 
-    registerActionsUsageCollector(plugins.usageCollection, plugins.savedObjects, {
-      isActionsEnabled: config.enabled,
-    });
-
     // Encrypted attributes
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
@@ -111,6 +107,15 @@ export class Plugin {
       actionTypeRegistry,
       actionsConfigUtils,
     });
+
+    registerActionsUsageCollector(
+      plugins.usageCollection,
+      plugins.savedObjects,
+      actionTypeRegistry,
+      {
+        isActionsEnabled: config.enabled,
+      }
+    );
 
     // Routes
     core.http.route(extendRouteWithLicenseCheck(createActionRoute, this.licenseState));
