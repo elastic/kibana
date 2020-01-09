@@ -86,7 +86,8 @@ export class DatasourcesLib {
     }
 
     return {
-      results: ids.map(() => ({
+      results: ids.map(id => ({
+        id,
         success: true,
         action: 'deleted',
       })),

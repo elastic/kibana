@@ -22,8 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Policy } from '../../../common/types/domain_data';
+import { DEFAULT_POLICY_ID } from '../../../common/constants';
 import { useLibs, usePagination } from '../../hooks';
-import { ConnectedLink, SearchBar } from '../../components';
+import { ConnectedLink, SearchBar, PolicyDeleteProvider } from '../../components';
 import { CreatePolicyFlyout } from './components';
 
 export const PolicyListPage: React.FC<{}> = () => {
@@ -39,6 +40,7 @@ export const PolicyListPage: React.FC<{}> = () => {
   // Table and search states
   const [search, setSearch] = useState<string>('');
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const [selectedPolicies, setSelectedPolicies] = useState<Policy[]>([]);
 
   // Fetch policies method
   const fetchPolicies = async () => {
@@ -59,7 +61,7 @@ export const PolicyListPage: React.FC<{}> = () => {
   useEffect(() => {
     fetchPolicies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [pagination, search]);
 
   // Some policies retrieved, set up table props
   const columns = [
@@ -161,6 +163,44 @@ export const PolicyListPage: React.FC<{}> = () => {
         <EuiSpacer size="m" />
 
         <EuiFlexGroup alignItems={'center'} gutterSize="m">
+          {selectedPolicies.length ? (
+            <EuiFlexItem>
+              <PolicyDeleteProvider>
+                {deletePoliciesPrompt => (
+                  <EuiButton
+                    color="danger"
+                    onClick={() => {
+                      deletePoliciesPrompt(
+                        selectedPolicies.map(policy => policy.id),
+                        () => {
+                          // Reload policies if on first page and no search query, otherwise
+                          // reset to first page and reset search, which will trigger a reload
+                          if (pagination.currentPage === 1 && !search) {
+                            fetchPolicies();
+                          } else {
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setSearch('');
+                          }
+                          setSelectedPolicies([]);
+                        }
+                      );
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.policyList.deleteButton"
+                      defaultMessage="Delete {count, plural, one {# policy} other {# policies}}"
+                      values={{
+                        count: selectedPolicies.length,
+                      }}
+                    />
+                  </EuiButton>
+                )}
+              </PolicyDeleteProvider>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={4}>
             <SearchBar
               value={search}
@@ -230,6 +270,12 @@ export const PolicyListPage: React.FC<{}> = () => {
           itemId="id"
           columns={columns}
           isSelectable={true}
+          selection={{
+            selectable: (policy: Policy) => policy.id !== DEFAULT_POLICY_ID,
+            onSelectionChange: (newSelectedPolicies: Policy[]) => {
+              setSelectedPolicies(newSelectedPolicies);
+            },
+          }}
           pagination={{
             pageIndex: pagination.currentPage - 1,
             pageSize: pagination.pageSize,

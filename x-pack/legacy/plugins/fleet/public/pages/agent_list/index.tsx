@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -180,11 +181,16 @@ export const AgentListPage: React.FC<{}> = () => {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
-      render: (policyId: string) => (
-        <ConnectedLink color="primary" path={`/policies/${policyId}`}>
-          {policies.find(p => p.id === policyId)?.name || policyId}
-        </ConnectedLink>
-      ),
+      render: (policyId: string) => {
+        const policyName = policies.find(p => p.id === policyId)?.name;
+        return policyName ? (
+          <ConnectedLink color="primary" path={`/policies/${policyId}`}>
+            {policyName}
+          </ConnectedLink>
+        ) : (
+          <EuiTextColor color="subdued">{policyId}</EuiTextColor>
+        );
+      },
     },
     {
       field: 'active',

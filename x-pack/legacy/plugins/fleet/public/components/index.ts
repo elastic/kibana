@@ -5,6 +5,7 @@
  */
 export { AgentHealth } from './agent_health';
 export { AgentUnenrollProvider } from './agent_unenroll_provider';
+export { PolicyDeleteProvider } from './policy_delete_provider';
 export { Loading } from './loading';
 export { PolicyForm } from './policy_form';
 export { SearchBar } from './search_bar';

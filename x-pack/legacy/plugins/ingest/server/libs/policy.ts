@@ -209,7 +209,8 @@ export class PolicyLib {
     }
 
     return {
-      results: ids.map(() => ({
+      results: ids.map(id => ({
+        id,
         success: true,
         action: 'deleted',
       })),

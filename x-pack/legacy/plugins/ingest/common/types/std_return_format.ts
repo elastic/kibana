@@ -41,6 +41,7 @@ export interface ReturnTypeDelete extends BaseReturnType {
 
 export interface ReturnTypeBulkDelete extends BaseReturnType {
   results: Array<{
+    id: string;
     success: boolean;
     action: 'deleted';
     error?: {

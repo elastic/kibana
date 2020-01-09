@@ -11,6 +11,7 @@ import {
   ReturnTypeUpdate,
   ReturnTypeGet,
   ReturnTypeList,
+  ReturnTypeBulkDelete,
 } from '../../../common/types/std_return_format';
 import {
   FrameworkRequest,
@@ -25,6 +26,7 @@ export const registerPolicyRoutes = (frameworkAdapter: HapiFrameworkAdapter, lib
   frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
   frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
   frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createDeletePoliciesRoute(libs));
   frameworkAdapter.registerRoute(createAddPolicyDatasourceRoute(libs));
   frameworkAdapter.registerRoute(createRemovePolicyDatasourceRoute(libs));
 };
@@ -120,7 +122,7 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
     }>
   ): Promise<ReturnTypeUpdate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
-      throw Boom.unauthorized('Only authenticated users can create a policy');
+      throw Boom.unauthorized('Only authenticated users can update a policy');
     }
     const policy = await libs.policy.update(request.user, request.params.policyId, {
       name: request.payload.name,
@@ -128,6 +130,30 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
     });
 
     return { item: policy, success: true, action: 'updated' };
+  }) as FrameworkRouteHandler,
+});
+
+export const createDeletePoliciesRoute = (libs: ServerLibs) => ({
+  method: 'POST',
+  path: '/api/ingest/policies/delete',
+  config: {
+    validate: {
+      payload: {
+        policies: Joi.array()
+          .items(Joi.string())
+          .required(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      payload: { policies: string[] };
+    }>
+  ): Promise<ReturnTypeBulkDelete> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can delete a policy');
+    }
+    return await libs.policy.delete(request.user, request.payload.policies);
   }) as FrameworkRouteHandler,
 });
 
@@ -150,7 +176,7 @@ export const createAddPolicyDatasourceRoute = (libs: ServerLibs) => ({
     }>
   ): Promise<ReturnTypeUpdate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
-      throw Boom.unauthorized('Only authenticated users can create a policy');
+      throw Boom.unauthorized('Only authenticated users can update a policy');
     }
     const policy = await libs.policy.assignDatasource(
       request.user,
@@ -181,7 +207,7 @@ export const createRemovePolicyDatasourceRoute = (libs: ServerLibs) => ({
     }>
   ): Promise<ReturnTypeUpdate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
-      throw Boom.unauthorized('Only authenticated users can create a policy');
+      throw Boom.unauthorized('Only authenticated users can update a policy');
     }
     const policy = await libs.policy.unassignDatasource(
       request.user,
