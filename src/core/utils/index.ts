@@ -19,6 +19,7 @@
 
 export * from './assert_never';
 export * from './context';
+export * from './crypto';
 export * from './deep_freeze';
 export * from './get';
 export * from './map_to_object';
