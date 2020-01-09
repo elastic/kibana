@@ -41,7 +41,6 @@ export type NewRule = t.TypeOf<typeof NewRuleSchema>;
 
 export interface AddRulesProps {
   rule: NewRule;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -71,8 +70,8 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
-    type: t.string,
     tags: t.array(t.string),
+    type: t.string,
     to: t.string,
     threats: t.array(t.unknown),
     updated_at: t.string,
@@ -80,6 +79,8 @@ export const RuleSchema = t.intersection([
   }),
   t.partial({
     saved_id: t.string,
+    timeline_id: t.string,
+    timeline_title: t.string,
   }),
 ]);
 
@@ -98,7 +99,6 @@ export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
   id?: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -117,22 +117,18 @@ export interface FetchRulesResponse {
 
 export interface FetchRuleProps {
   id: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
 export interface EnableRulesProps {
   ids: string[];
   enabled: boolean;
-  kbnVersion: string;
 }
 
 export interface DeleteRulesProps {
   ids: string[];
-  kbnVersion: string;
 }
 
 export interface DuplicateRulesProps {
   rules: Rules;
-  kbnVersion: string;
 }

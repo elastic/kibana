@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import { OVERVIEW_PAGE, TIMELINES_PAGE } from '../../lib/urls';
 import {
   NAVIGATION_HOSTS,
@@ -15,10 +14,6 @@ import {
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('top-level navigation common to all pages in the SIEM app', () => {
-  afterEach(() => {
-    return logout();
-  });
-
   it('navigates to the Overview page', () => {
     loginAndWaitForPage(TIMELINES_PAGE);
 

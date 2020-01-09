@@ -6,10 +6,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../../components/toasters';
-import { useUiSetting$ } from '../../../lib/kibana';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { PostSignalError } from './types';
@@ -28,7 +26,6 @@ export const useSignalIndex = (): Return => {
   const [signalIndexName, setSignalIndexName] = useState<string | null>(null);
   const [signalIndexExists, setSignalIndexExists] = useState<boolean | null>(null);
   const createDeSignalIndex = useRef<Func | null>(null);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -38,10 +35,7 @@ export const useSignalIndex = (): Return => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const signal = await getSignalIndex({
-          kbnVersion,
-          signal: abortCtrl.signal,
-        });
+        const signal = await getSignalIndex({ signal: abortCtrl.signal });
 
         if (isSubscribed && signal != null) {
           setSignalIndexName(signal.name);
@@ -62,10 +56,7 @@ export const useSignalIndex = (): Return => {
       let isFetchingData = false;
       try {
         setLoading(true);
-        await createSignalIndex({
-          kbnVersion,
-          signal: abortCtrl.signal,
-        });
+        await createSignalIndex({ signal: abortCtrl.signal });
 
         if (isSubscribed) {
           isFetchingData = true;

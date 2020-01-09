@@ -7,7 +7,14 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'security',
+    'settings',
+    'common',
+    'visualize',
+    'timePicker',
+    'visChart',
+  ]);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -110,7 +117,7 @@ export default function({ getService, getPageObjects }) {
           '"'
       );
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.forceLogout();
     });
