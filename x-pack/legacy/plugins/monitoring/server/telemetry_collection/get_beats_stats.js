@@ -142,12 +142,17 @@ export function processResults(
       if (functionbeatState !== undefined) {
         if (!clusters[clusterUuid].hasOwnProperty('functionbeat')) {
           clusters[clusterUuid].functionbeat = {
-            // TODO
+            functions: {
+              count: 0,
+            },
           };
         }
-        // const clusterFb = clusters[clusterUuid].functionbeat;
 
-        // TODO
+        clusters[clusterUuid].functionbeat.functions.count += get(
+          functionbeatState,
+          'functions.count',
+          0
+        );
       }
 
       const stateHost = get(hit, '_source.beats_state.state.host');
