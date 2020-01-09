@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import { IStateStorage } from './types';
-import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
-import {
+export { IStateStorage } from './types';
+export { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+export {
   createSessionStorageStateStorage,
   ISessionStorageStateStorage,
 } from './create_session_storage_state_storage';
-
-export {
-  IStateStorage,
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
-};

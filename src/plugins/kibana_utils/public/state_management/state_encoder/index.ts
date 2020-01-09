@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import {
+export {
   encodeState,
   decodeState,
   expandedStateToHashedState,
   hashedStateToExpandedState,
 } from './encode_decode_state';
-
-export { encodeState, decodeState, expandedStateToHashedState, hashedStateToExpandedState };

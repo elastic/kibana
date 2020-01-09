@@ -20,6 +20,10 @@
 import rison, { RisonValue } from 'rison-node';
 import { isStateHash, retrieveState, persistState } from '../state_hash';
 
+// should be:
+// export function decodeState<State extends RisonValue>(expandedOrHashedState: string)
+// but this leads to the chain of types mismatches up to BaseStateContainer interfaces,
+// as in state containers we don't have any restrictions on state shape
 export function decodeState<State>(expandedOrHashedState: string): State {
   if (isStateHash(expandedOrHashedState)) {
     return retrieveState(expandedOrHashedState);
@@ -28,6 +32,10 @@ export function decodeState<State>(expandedOrHashedState: string): State {
   }
 }
 
+// should be:
+// export function encodeState<State extends RisonValue>(expandedOrHashedState: string)
+// but this leads to the chain of types mismatches up to BaseStateContainer interfaces,
+// as in state containers we don't have any restrictions on state shape
 export function encodeState<State>(state: State, useHash: boolean): string {
   if (useHash) {
     return persistState(state);

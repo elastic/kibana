@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
-
-export { isStateHash, createStateHash, persistState, retrieveState };
+export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';

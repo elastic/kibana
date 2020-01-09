@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
-import {
+export { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
+export {
   createKbnUrlControls,
   setStateToKbnUrl,
   getStateFromKbnUrl,
@@ -26,14 +26,3 @@ import {
   IKbnUrlControls,
 } from './kbn_url_storage';
 export { createUrlTracker, useUrlTracker } from './url_tracker';
-export {
-  hashUrl,
-  hashQuery,
-  unhashUrl,
-  unhashQuery,
-  createKbnUrlControls,
-  setStateToKbnUrl,
-  getStatesFromKbnUrl,
-  getStateFromKbnUrl,
-  IKbnUrlControls,
-};
