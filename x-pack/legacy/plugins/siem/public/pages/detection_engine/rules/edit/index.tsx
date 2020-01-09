@@ -57,7 +57,7 @@ export const EditRuleComponent = memo(() => {
     (!isSignalIndexExists || !isAuthenticated)
   ) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (!canUserCRUD) {
+  } else if (canUserCRUD != null && !canUserCRUD) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 

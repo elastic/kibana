@@ -11,7 +11,7 @@ import { usePrivilegeUser } from '../../../../containers/detection_engine/signal
 import { useSignalIndex } from '../../../../containers/detection_engine/signals/use_signal_index';
 import { useKibana } from '../../../../lib/kibana';
 
-type Return = [boolean, boolean | null, boolean | null, boolean, string | null];
+type Return = [boolean, boolean | null, boolean | null, boolean | null, string | null];
 
 export interface State {
   canUserCRUD: boolean | null;
@@ -179,7 +179,7 @@ export const useUserInfo = (): Return => {
     indexNameLoading || privilegeLoading,
     isSignalIndexExists,
     isAuthenticated,
-    canUserCRUD ?? false,
+    canUserCRUD,
     signalIndexName,
   ];
 };
