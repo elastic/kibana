@@ -256,9 +256,11 @@ export class ThresholdWatch extends BaseWatch {
       aggField: this.aggField,
       termSize: this.termSize,
       termField: this.termField,
+      termOrder: this.termOrder,
       thresholdComparator: this.thresholdComparator,
       timeWindowSize: this.timeWindowSize,
       timeWindowUnit: this.timeWindowUnit,
+      hasTermsAgg: this.hasTermsAgg,
       threshold:
         comparators[this.thresholdComparator].requiredValues > 1
           ? this.threshold
