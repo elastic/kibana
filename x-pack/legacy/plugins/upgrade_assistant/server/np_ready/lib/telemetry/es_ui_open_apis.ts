@@ -25,7 +25,7 @@ async function incrementUIOpenOptionCounter(server: ServerShim, uiOpenOptionCoun
 }
 
 export async function upsertUIOpenOption(server: ServerShim, req: RequestShim): Promise<UIOpen> {
-  const { overview, cluster, indices } = req.payload as UIOpen;
+  const { overview, cluster, indices, plugins } = req.payload as UIOpen;
 
   if (overview) {
     await incrementUIOpenOptionCounter(server, 'overview');
@@ -39,9 +39,14 @@ export async function upsertUIOpenOption(server: ServerShim, req: RequestShim): 
     await incrementUIOpenOptionCounter(server, 'indices');
   }
 
+  if (plugins) {
+    await incrementUIOpenOptionCounter(server, 'plugins');
+  }
+
   return {
     overview,
     cluster,
     indices,
+    plugins,
   };
 }

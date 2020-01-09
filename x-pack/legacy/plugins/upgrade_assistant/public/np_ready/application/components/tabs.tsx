@@ -23,6 +23,7 @@ import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
 import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
+import { PluginDeprecations } from './plugin_deprecations';
 
 enum ClusterUpgradeState {
   needsUpgrade,
@@ -231,6 +232,14 @@ export class UpgradeAssistantTabsUI extends React.Component<Props, TabsState> {
             {...commonProps}
           />
         ),
+      },
+      {
+        id: 'plugins',
+        name: intl.formatMessage({
+          id: 'xpack.upgradeAssistant.checkupTab.pluginsTabLabel',
+          defaultMessage: 'Plugins',
+        }),
+        content: <PluginDeprecations />,
       },
     ];
   }

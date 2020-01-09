@@ -20,6 +20,7 @@ import chrome from 'ui/chrome';
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { plugin } from './np_ready';
 import { CloudSetup } from '../../../../plugins/cloud/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
 
 const BASE_PATH = `/management/elasticsearch/upgrade_assistant`;
 
@@ -48,6 +49,7 @@ export interface LegacyPlugins {
   __LEGACY: {
     XSRF: string;
   };
+  security: SecurityPluginSetup;
 }
 
 function startApp() {
@@ -55,9 +57,11 @@ function startApp() {
     template:
       '<kbn-management-app section="elasticsearch/upgrade_assistant"><upgrade-assistant /></kbn-management-app>',
   });
-  const { cloud } = npSetup.plugins as any;
+  const { cloud, security } = npSetup.plugins as any;
+
   const legacyPluginsShim: LegacyPlugins = {
     cloud: cloud as CloudSetup,
+    security: security as SecurityPluginSetup,
     __LEGACY: {
       XSRF: chrome.getXsrfToken(),
     },

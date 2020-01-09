@@ -5,11 +5,13 @@
  */
 import { HttpSetup } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface ContextValue {
   http: HttpSetup;
   isCloudEnabled: boolean;
   XSRF: string;
+  security: SecurityPluginSetup;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

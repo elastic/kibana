@@ -19,6 +19,7 @@ export function registerTelemetryRoutes(server: ServerShimWithRouter) {
           overview: schema.boolean({ defaultValue: false }),
           cluster: schema.boolean({ defaultValue: false }),
           indices: schema.boolean({ defaultValue: false }),
+          plugins: schema.boolean({ defaultValue: false }),
         }),
       },
     },

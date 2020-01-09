@@ -55,6 +55,10 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     return {
       authc,
       sessionTimeout: this.sessionTimeout,
+      getDeprecationData: () => ({
+        name: 'Security',
+        deprecations: [{ title: 'API change!', description: 'Changed x -> y!' }],
+      }),
     };
   }
 

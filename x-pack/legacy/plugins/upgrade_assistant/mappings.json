@@ -25,6 +25,10 @@
           "indices": {
             "type": "long",
             "null_value": 0
+          },
+          "plugins": {
+            "type": "long",
+            "null_value": 0
           }
         }
       },
