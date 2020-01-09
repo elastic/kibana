@@ -44,5 +44,4 @@ export interface FetchHandlers {
   searchService: ISearchStart;
   config: IUiSettingsClient;
   esShardTimeout: number;
-  version: string;
 }

@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PackageInfo,
+} from 'src/core/public';
 import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -50,12 +56,14 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
+  private readonly packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.storage = new Storage(window.localStorage);
+    this.packageInfo = initializerContext.env.packageInfo;
   }
 
   public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
@@ -97,7 +105,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       query: this.queryService.start(core.savedObjects),
       indexPatterns: indexPatternsService,
       __LEGACY: {
-        esClient: getEsClient(core.injectedMetadata, core.http),
+        esClient: getEsClient(core.injectedMetadata, core.http, this.packageInfo),
       },
     };
 

@@ -72,7 +72,6 @@
 // @ts-ignore
 import { default as es } from 'elasticsearch-browser/elasticsearch';
 import _ from 'lodash';
-import { npSetup } from 'ui/new_platform';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -209,14 +208,13 @@ export class SearchSource {
     this.history = [searchRequest];
 
     const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const { version } = npSetup.core.injectedMetadata.getLegacyMetadata();
     const response = await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout, version, es: getEsClient() }
+      { searchService, config, esShardTimeout, es: getEsClient() }
     );
 
     if (response.error) {
