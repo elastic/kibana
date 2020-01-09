@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
+import { MonitorChart } from '../../../../common/graphql/types';
 import { UMElasticsearchQueryFn } from '../framework';
 import { MonitorDetails, MonitorLocations } from '../../../../common/runtime_types';
 
@@ -31,11 +31,6 @@ export interface GetMonitorDetailsParams {
   dateEnd: string;
 }
 
-export interface GetMonitorPageTitleParams {
-  /** @member monitorId the ID to query */
-  monitorId: string;
-}
-
 /**
  * Fetch data for the monitor page title.
  */
@@ -57,7 +52,6 @@ export interface UMMonitorsAdapter {
   /**
    * Fetch data for the monitor page title.
    */
-  getMonitorPageTitle: UMElasticsearchQueryFn<{ monitorId: string }, MonitorPageTitle | null>;
   getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: UMElasticsearchQueryFn<GetMonitorLocationsParams, MonitorLocations>;
 }

@@ -1,0 +1,28 @@
+{
+  "monitor": {
+    "check_group": "d76f0762-d445-11e9-88e3-3e80641b9c71",
+    "duration": {
+      "us": 24627
+    },
+    "id": "0002-up",
+    "ip": "127.0.0.1",
+    "name": "",
+    "status": "up",
+    "type": "http"
+  },
+  "observer": {
+    "geo": {
+      "location": "37.926868, -78.024902",
+      "name": "mpls"
+    },
+    "hostname": "avc-x1x"
+  },
+  "url": {
+    "domain": "localhost",
+    "full": "http://localhost:5678/pattern?r=200x1",
+    "path": "/pattern",
+    "port": 5678,
+    "query": "r=200x1",
+    "scheme": "http"
+  }
+}
