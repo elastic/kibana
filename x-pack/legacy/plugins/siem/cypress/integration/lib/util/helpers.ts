@@ -26,7 +26,8 @@ export const loginAndWaitForPage = (url: string) => {
 export const waitForTableLoad = (dataTestSubj: string) =>
   cy.get(dataTestSubj, { timeout: DEFAULT_TIMEOUT });
 
-const cookiesCache = {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cookiesCache: Record<string, Record<string, any>> = {};
 
 export const saveCookies = () => {
   cy.getCookies().then(cookies => {
