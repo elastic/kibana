@@ -18,12 +18,34 @@ const isFields = (path: string) => {
 };
 
 /**
- * installTemplates installs one template for each dataset
+ * loadFieldsFromYaml
  *
- * For each dataset, the fields.yml files are extracted. If there are multiple
- * in one datasets, they are merged together into 1 and then converted to a template
+ * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
+ */
+
+export const loadFieldsFromYaml = async (pkg: RegistryPackage, datasetName?: string) => {
+  // Fetch all field definition files
+  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
+
+  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
+    // Make sure it is defined as it is optional. Should never happen.
+    if (file.buffer) {
+      const tmpFields = safeLoad(file.buffer.toString());
+      // safeLoad() returns undefined for empty files, we don't want that
+      if (tmpFields) {
+        acc = acc.concat(tmpFields);
+      }
+    }
+    return acc;
+  }, []);
+};
+
+/**
+ * installTemplatesForDataset installs one template for each dataset
+ *
  * The template is currently loaded with the pkgey-package-dataset
  */
+
 export async function installTemplateForDataset({
   pkg,
   callCluster,
@@ -35,25 +57,11 @@ export async function installTemplateForDataset({
   dataset: Dataset;
   datasourceName: string;
 }) {
-  // Fetch all field definition files for this dataset
-  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
-  // Merge all the fields of a dataset together and create an Elasticsearch index template
-  let fields: Field[] = [];
-  for (const file of fieldDefinitionFiles) {
-    // Make sure it is defined as it is optional. Should never happen.
-    if (file.buffer) {
-      const tmpFields = safeLoad(file.buffer.toString());
-      // safeLoad() returns undefined for empty files, we don't want that
-      if (tmpFields) {
-        fields = fields.concat(tmpFields);
-      }
-    }
-    dataset.package = pkg.name;
-    return installTemplate({ callCluster, fields, dataset, datasourceName });
-  }
+  const fields = await loadFieldsFromYaml(pkg, dataset.name);
+  return installTemplate({ callCluster, fields, dataset, datasourceName });
 }
 
-async function installTemplate({
+export async function installTemplate({
   callCluster,
   fields,
   dataset,
@@ -76,7 +84,6 @@ async function installTemplate({
     });
   }
   const template = getTemplate(templateName + '-*', mappings, pipelineName);
-
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
     name: templateName,
