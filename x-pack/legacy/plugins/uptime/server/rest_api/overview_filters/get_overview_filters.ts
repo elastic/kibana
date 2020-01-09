@@ -39,7 +39,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       try {
         parsedSearch = JSON.parse(search);
       } catch (e) {
-        return response.badRequest();
+        return response.badRequest({ body: { message: e.message } });
       }
     }
 
