@@ -161,44 +161,34 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
     const positions = new Map<ProcessEvent, Vector2>();
     const edgeLineSegments = [];
-    let parentProcess: ProcessEvent | undefined;
+    // Keep track of last processed parent so we can reset parent specific counters as we iterate
+    let lastProcessedParentNode: ProcessEvent | undefined;
     let numberOfPrecedingSiblings = 0;
     let runningWidthOfPrecedingSiblings = 0;
 
     // TODO remove guard
     if (graphableProcesses.length !== 0) {
-      for (const { process } of levelOrderWithWidths(indexedProcessTree, widths)) {
-        if (parentProcess === undefined) {
-          parentProcess = process;
-          numberOfPrecedingSiblings = 0;
-          runningWidthOfPrecedingSiblings = 0;
+      for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
+        // Handle root node
+        if (metadata.parent === null) {
+          const { process } = metadata;
           positions.set(process, [0, 0]);
         } else {
-          const currentParent = indexedProcessTreeParent(indexedProcessTree, process);
-          if (parentProcess !== currentParent) {
-            parentProcess = currentParent;
+          const { process, parent, width, parentWidth } = metadata;
+
+          // Reinit counters when parent changes
+          if (lastProcessedParentNode !== parent) {
             numberOfPrecedingSiblings = 0;
             runningWidthOfPrecedingSiblings = 0;
+
+            // keep track of this so we know when to reinitialize
+            lastProcessedParentNode = parent;
           }
 
-          const width = widths.get(process);
+          const parentPosition = positions.get(parent);
 
-          if (!parentProcess) {
-            // TODO explain yourself
-            throw new Error();
-          }
-
-          const parentWidth = widths.get(parentProcess);
-          const parentPosition = positions.get(parentProcess);
-
-          if (
-            parentProcess === undefined ||
-            parentWidth === undefined ||
-            width === undefined ||
-            parentPosition === undefined
-          ) {
-            // TODO explain more
-            // since we iterate in level order, this can't happened
+          if (parentPosition === undefined) {
+            // TODO explain that this can never happen
             throw new Error();
           }
 
@@ -227,7 +217,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
                 // A line from the child to the midway line
                 return [
                   lineFromParentToMidwayLine(),
-                  midwayLine(parentProcess),
+                  midwayLine(lastProcessedParentNode),
                   lineFromProcessToMidwayLine(),
                 ];
               }
@@ -291,7 +281,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
           edgeLineSegments.push(...edgeLineSegmentsForProcess());
           numberOfPrecedingSiblings += 1;
-          runningWidthOfPrecedingSiblings += widths.get(process);
+          runningWidthOfPrecedingSiblings += width;
         }
       }
     }
