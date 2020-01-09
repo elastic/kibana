@@ -123,48 +123,46 @@ function processEdgeLineSegments(
     // TODO, move to sequencer?
     const isFirstChild = process === siblings[0];
 
-    if (isFirstChild) {
-      if (metadata.isOnlyChild) {
-        // add a single line segment directly from parent to child
-        edgeLineSegments.push([parentPosition, position]);
-      } else {
-        const { firstChildWidth, lastChildWidth } = metadata;
-        // Draw 3 line segments
-        // One from the parent to the midway line,
-        // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
-        // A line from the child to the midway line
-        //
-        const lineFromParentToMidwayLine: EdgeLineSegment = [
-          // Add a line from parent to midway point
-          parentPosition,
-          [parentPosition[0], midwayY],
-        ];
+    if (metadata.isOnlyChild) {
+      // add a single line segment directly from parent to child
+      edgeLineSegments.push([parentPosition, position]);
+    } else if (isFirstChild) {
+      const { firstChildWidth, lastChildWidth } = metadata;
+      // Draw 3 line segments
+      // One from the parent to the midway line,
+      // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
+      // A line from the child to the midway line
+      //
+      const lineFromParentToMidwayLine: EdgeLineSegment = [
+        // Add a line from parent to midway point
+        parentPosition,
+        [parentPosition[0], midwayY],
+      ];
 
-        const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
+      const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
 
-        const minX = parentWidth / -2 + firstChildWidth / 2;
-        const maxX = minX + widthOfMidline;
+      const minX = parentWidth / -2 + firstChildWidth / 2;
+      const maxX = minX + widthOfMidline;
 
-        const midwayLine: EdgeLineSegment = [
-          [
-            // Position line relative to the parent's x component
-            parentPosition[0] + minX,
-            midwayY,
-          ],
-          [
-            // Position line relative to the parent's x component
-            parentPosition[0] + maxX,
-            midwayY,
-          ],
-        ];
+      const midwayLine: EdgeLineSegment = [
+        [
+          // Position line relative to the parent's x component
+          parentPosition[0] + minX,
+          midwayY,
+        ],
+        [
+          // Position line relative to the parent's x component
+          parentPosition[0] + maxX,
+          midwayY,
+        ],
+      ];
 
-        edgeLineSegments.push(
-          /* line from parent to midway line */
-          lineFromParentToMidwayLine,
-          midwayLine,
-          lineFromProcessToMidwayLine
-        );
-      }
+      edgeLineSegments.push(
+        /* line from parent to midway line */
+        lineFromParentToMidwayLine,
+        midwayLine,
+        lineFromProcessToMidwayLine
+      );
     } else {
       // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
       // from the parent to the midway line
