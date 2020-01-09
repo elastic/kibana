@@ -11,11 +11,7 @@ import { EDIT_ROLE_MAPPING_PATH } from '../../../../management_urls';
 
 export const CreateRoleMappingButton = () => {
   return (
-    <EuiButton
-      data-test-subj="createRoleMappingButton"
-      onClick={() => (window.location.hash = EDIT_ROLE_MAPPING_PATH)}
-      fill
-    >
+    <EuiButton data-test-subj="createRoleMappingButton" href={`#${EDIT_ROLE_MAPPING_PATH}`} fill>
       <FormattedMessage
         id="xpack.security.management.roleMappings.createRoleMappingButton"
         defaultMessage="Create role mapping"
