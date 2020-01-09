@@ -52,7 +52,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
             <EditorContextProvider settings={{} as any}>
-              <Editor initialTextValue='' />
+              <Editor initialTextValue="" />
             </EditorContextProvider>
           </RequestContextProvider>
         </ServicesContextProvider>

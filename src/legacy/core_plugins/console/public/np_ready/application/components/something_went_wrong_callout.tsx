@@ -38,19 +38,20 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
       iconType="alert"
       color="danger"
       title={i18n.translate('console.loadingError.title', {
-        defaultMessage: 'Something went wrong',
+        defaultMessage: 'Cannot load Console',
       })}
     >
       <EuiText>
         <p>
-          {i18n.translate('console.loadingError.message', {
-            defaultMessage: `Console could not be restored to its previous state. Text entered in the current session may not be persisted. Try reloading this page.`,
-          })}
+          <FormattedMessage
+            id="console.loadingError.message"
+            defaultMessage="Try reloading to get the latest data."
+          />
         </p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiButton color="danger" onClick={() => onButtonClick()}>
-        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload" />
+        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload Console" />
       </EuiButton>
     </EuiCallOut>
   );
