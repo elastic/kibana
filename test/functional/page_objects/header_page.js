@@ -82,6 +82,26 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
       await testSubjects.click('superDatePickerstartDatePopoverButton').click();
     }
+    async setFromTime(timeString) {
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await PageObjects.common.sleep(200);
+      await testSubjects.click('superDatePickerAbsoluteDateInput');
+      await testSubjects.find('superDatePickerAbsoluteDateInput').clearValue();
+      await testSubjects.find('superDatePickerAbsoluteDateInput').type(timeString);
+    }
+
+    async setAbsoluteRange(fromTime, toTime) {
+      await PageObjects.common.sleep(2000);
+      await testSubjects.click('superDatePickerShowDatesButton');
+      log.debug('--Setting From Time : ' + fromTime);
+      await this.setFromTime(fromTime);
+      log.debug('--Setting To Time : ' + toTime);
+      await this.setToTime(toTime);
+      await this.clickGoButton();
+      await this.getSpinnerDone();
+
+    }
 
     async setToRelativeTime(count, unit) {
       await PageObjects.common.sleep(53);
@@ -104,12 +124,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(2000);
       await testSubjects.click('superDatePickerShowDatesButton');
       await PageObjects.common.sleep(2000);
-      await PageObjects.common.debug(`--Setting From Time : ${fromCount} ${fromUnit}`);
+      log.debug(`### --Setting From Time : ${fromCount} ${fromUnit}`);
       await this.setFromRelativeTime(fromCount, fromUnit);
       await PageObjects.common.sleep(200);
       await testSubjects.click('superDatePickerShowDatesButton');
       await PageObjects.common.sleep(200);
-      await PageObjects.common.debug(`--Setting To Time : ${toCount} ${toUnit}`);
+      log.debug(`### --Setting To Time : ${toCount} ${toUnit}`);
       await this.setToRelativeTime(toCount, toUnit);
       await testSubjects.click('querySubmitButton');
       return await this.getSpinnerDone();

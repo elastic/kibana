@@ -52,6 +52,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
     }
 
+    async getPanelData() {
+      log.debug('### in getPanelData');
+      const getTitles = async chart => {
+        const obj = {};
+        obj.dataCol = await chart.getAttribute('data-col');
+        obj.dataRow = await chart.getAttribute('data-row');
+        obj.dataSizeX = await chart.getAttribute('data-sizex');
+        obj.dataSizeY = await chart.getAttribute('data-sizey');
+        const titleElement = await chart.findByCssSelector('span.panel-title');
+        obj.title = await titleElement.getAttribute('title');
+      };
+
+      const titleObjects = await find.allByCssSelector('li.gs-w');
+      return Promise.all(titleObjects.map(getTitles));
+    }
+
     async preserveCrossAppState() {
       const url = await browser.getCurrentUrl();
       await browser.get(url, false);
