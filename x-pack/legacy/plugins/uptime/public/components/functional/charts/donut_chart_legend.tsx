@@ -37,7 +37,7 @@ export const DonutChartLegend = ({ down, up }: Props) => {
         message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.downRowLabel', {
           defaultMessage: 'Down',
         })}
-        data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
@@ -46,7 +46,7 @@ export const DonutChartLegend = ({ down, up }: Props) => {
         message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.upRowLabel', {
           defaultMessage: 'Up',
         })}
-        data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
       />
     </LegendContainer>
   );
