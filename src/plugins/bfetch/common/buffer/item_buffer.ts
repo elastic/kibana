@@ -26,7 +26,7 @@ export interface ItemBufferParams<Item> {
   flushOnMaxItems?: number;
 
   /**
-   * Callback that is called every time buffer is flushed. I receives a single
+   * Callback that is called every time buffer is flushed. It receives a single
    * argument which is a list of all buffered items. If `.flush()` is called
    * when buffer is empty, `.onflush` is called with empty array.
    */
