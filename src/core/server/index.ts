@@ -74,6 +74,7 @@ export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
@@ -83,6 +84,7 @@ export {
   ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
 export {

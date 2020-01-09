@@ -32,7 +32,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const SuperSelectField = ({ field, euiFieldProps, ...rest }: Props) => {
+export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -47,15 +47,13 @@ export const SuperSelectField = ({ field, euiFieldProps, ...rest }: Props) => {
     >
       <EuiSuperSelect
         fullWidth
-        hasDividers
-        itemLayoutAlign="top"
+        hasNoInitialSelection
         valueOfSelected={field.value as string}
         onChange={value => {
           field.setValue(value);
         }}
         isInvalid={isInvalid}
-        data-test-subj="superSelect"
-        options
+        data-test-subj="select"
         {...euiFieldProps}
       />
     </EuiFormRow>

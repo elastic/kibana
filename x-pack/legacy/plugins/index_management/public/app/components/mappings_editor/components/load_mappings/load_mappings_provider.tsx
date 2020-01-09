@@ -222,7 +222,6 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
             onCancel={onCancel}
             onConfirm={onConfirm}
             cancelButtonText={i18nTexts.buttons.cancel}
-            buttonColor="danger"
             confirmButtonText={i18nTexts.buttons.confirm}
             maxWidth={600}
           >
