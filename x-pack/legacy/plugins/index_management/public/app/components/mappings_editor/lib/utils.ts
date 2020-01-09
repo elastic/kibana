@@ -24,6 +24,7 @@ import {
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
+  TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -279,9 +280,9 @@ const replaceAliasIdByAliasPath = (
 };
 
 export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields): Fields => {
-  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
-    const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
+  const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
+  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach(id => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
@@ -400,6 +401,13 @@ export const filterTypesForMultiField = <T extends string = string>(
 ): ComboBoxOption[] =>
   options.filter(
     option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
+  );
+
+export const filterTypesForNonRootFields = <T extends string = string>(
+  options: ComboBoxOption[]
+): ComboBoxOption[] =>
+  options.filter(
+    option => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
   );
 
 /**

@@ -93,6 +93,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
     return (
       <CreateField
         allFields={allFields}
+        isRootLevelField={false}
         isMultiField={canHaveMultiFields}
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}

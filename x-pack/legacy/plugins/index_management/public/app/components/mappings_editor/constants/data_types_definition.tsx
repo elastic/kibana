@@ -122,15 +122,43 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/date.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.dateLongDescription"
+          defaultMessage='Date fields accept strings with formatted dates ("2015/01/01 12:10:30"), long numbers representing milliseconds since the epoch, and integers representing seconds since the epoch. Multiple date formats are allowed. Dates with timezones are converted to UTC.'
+        />
+      </p>
+    ),
   },
   date_nanos: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateNanosDescription', {
-      defaultMessage: 'Date nanos',
+      defaultMessage: 'Date nanoseconds',
     }),
     value: 'date_nanos',
     documentation: {
       main: '/date_nanos.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.dateNanosLongDescription"
+          defaultMessage="Date nanoseconds fields store dates in nanosecond resolution. Aggregations remain in millisecond resolution. To store dates in millisecond resolution, use the {date}."
+          values={{
+            date: (
+              <EuiLink href={documentationService.getTypeDocLink('date')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.dateNanosLongDescription.dateTypeLink',
+                  {
+                    defaultMessage: 'date data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   binary: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.binaryDescription', {
@@ -314,7 +342,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.geoPointLongDescription"
-          defaultMessage="Geo-point fields accept latitude and longitude pairs. Use to search within a bounding box, aggregate documents geographically, and sort documents by distance."
+          defaultMessage="Geo-point fields accept latitude and longitude pairs. Use this data type to search within a bounding box, aggregate documents geographically, and sort documents by distance."
         />
       </p>
     ),

@@ -165,6 +165,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                     <EditFieldHeaderForm
                       type={type}
                       defaultValue={field.source}
+                      isRootLevelField={field.parentId === undefined}
                       isMultiField={isMultiField}
                     />
 

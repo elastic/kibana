@@ -34,12 +34,12 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
   const onHJsonCLick = useCallback(() => {
     formatHJson();
     setIsPopoverOpen(false);
-  }, [isPopoverOpen, formatHJson]);
+  }, [formatHJson]);
 
   const onJsonCLick = useCallback(() => {
     formatJson();
     setIsPopoverOpen(false);
-  }, [isPopoverOpen, formatJson]);
+  }, [formatJson]);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
