@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OVERVIEW_PAGE, TIMELINES_PAGE } from '../../lib/urls';
+import { TIMELINES_PAGE } from '../../lib/urls';
 import {
   NAVIGATION_HOSTS,
   NAVIGATION_NETWORK,
