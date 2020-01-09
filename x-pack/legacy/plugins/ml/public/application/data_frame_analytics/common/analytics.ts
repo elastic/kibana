@@ -374,6 +374,7 @@ interface LoadEvalDataConfig {
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
   jobType: ANALYSIS_CONFIG_TYPE;
+  requiresKeyword?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -385,6 +386,7 @@ export const loadEvalData = async ({
   searchQuery,
   ignoreDefaultQuery,
   jobType,
+  requiresKeyword,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -392,7 +394,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && requiresKeyword === true) {
     predictedField = `${predictedField}.keyword`;
   }
 

@@ -28,6 +28,8 @@ interface WaffleInventorySwitcherProps {
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   changeMetric: (metric: InfraSnapshotMetricInput) => void;
+  changeAccount: (id: string) => void;
+  changeRegion: (name: string) => void;
 }
 
 const getDisplayNameForType = (type: InventoryItemType) => {
@@ -39,6 +41,8 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
   changeNodeType,
   changeGroupBy,
   changeMetric,
+  changeAccount,
+  changeRegion,
   nodeType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,12 +53,14 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
       closePopover();
       changeNodeType(targetNodeType);
       changeGroupBy([]);
+      changeAccount('');
+      changeRegion('');
       const inventoryModel = findInventoryModel(targetNodeType);
       changeMetric({
         type: inventoryModel.metrics.defaultSnapshot as InfraSnapshotMetricType,
       });
     },
-    [closePopover, changeNodeType, changeGroupBy, changeMetric]
+    [closePopover, changeNodeType, changeGroupBy, changeMetric, changeAccount, changeRegion]
   );
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);

@@ -37,6 +37,7 @@ import {
   RadioGroupField,
   RangeField,
   SelectField,
+  SuperSelectField,
   ToggleField,
 } from './fields';
 
@@ -50,6 +51,7 @@ const mapTypeToFieldComponent = {
   [FIELD_TYPES.RADIO_GROUP]: RadioGroupField,
   [FIELD_TYPES.RANGE]: RangeField,
   [FIELD_TYPES.SELECT]: SelectField,
+  [FIELD_TYPES.SUPER_SELECT]: SuperSelectField,
   [FIELD_TYPES.TOGGLE]: ToggleField,
 };
 
