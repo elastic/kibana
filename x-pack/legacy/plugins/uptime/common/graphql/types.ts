@@ -30,7 +30,6 @@ export interface Query {
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
-  getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
   /** Fetches details about the uptime index. */
