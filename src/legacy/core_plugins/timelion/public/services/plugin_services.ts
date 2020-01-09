@@ -17,24 +17,14 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../common/types';
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
 
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
-}
-
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
-}
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
+  SavedObjectsClientContract
+>('SavedObjectsClient');

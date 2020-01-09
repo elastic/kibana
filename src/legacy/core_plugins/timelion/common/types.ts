@@ -17,24 +17,30 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../common/types';
+type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
 
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
-
-export interface TimelionFunctionConfig {
+interface TimelionFunctionArgsSuggestion {
   name: string;
   help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
 }
 
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
+export interface TimelionFunctionArgs {
+  name: string;
+  help?: string;
+  multi?: boolean;
+  types: TimelionFunctionArgsTypes[];
+  suggestions?: TimelionFunctionArgsSuggestion[];
+}
+
+export interface ITimelionFunction {
+  aliases: string[];
+  args: TimelionFunctionArgs[];
+  name: string;
+  help: string;
+  chainable: boolean;
+  extended: boolean;
+  isAlias: boolean;
+  argsByName: {
+    [key: string]: TimelionFunctionArgs[];
+  };
 }
