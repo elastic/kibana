@@ -187,6 +187,20 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     [handleOpenPopover, isDisabled, timelineId, timelineTitle]
   );
 
+  const favoriteElement = useMemo(
+    () => (
+      <EuiFilterButton
+        size="xs"
+        data-test-subj="only-favorites-toggle"
+        hasActiveFilters={onlyFavorites}
+        onClick={handleOnToggleOnlyFavorites}
+      >
+        {i18nTimeline.ONLY_FAVORITES}
+      </EuiFilterButton>
+    ),
+    [onlyFavorites, handleOnToggleOnlyFavorites]
+  );
+
   return (
     <EuiInputPopover
       id="searchTimelinePopover"
@@ -204,68 +218,52 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiFilterGroup>
-                  <EuiFilterButton
-                    size="xs"
-                    data-test-subj="only-favorites-toggle"
-                    hasActiveFilters={onlyFavorites}
-                    onClick={handleOnToggleOnlyFavorites}
-                  >
-                    {i18nTimeline.ONLY_FAVORITES}
-                  </EuiFilterButton>
-                </EuiFilterGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiSelectable
-              height={POPOVER_HEIGHT}
-              isLoading={loading && timelines.length === 0}
-              listProps={{
-                rowHeight: TIMELINE_ITEM_HEIGHT,
-                showIcons: false,
-                virtualizedProps: ({
-                  onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
-                } as unknown) as ListProps,
-              }}
-              renderOption={renderTimelineOption}
-              onChange={handleTimelineChange}
-              searchable
-              searchProps={{
-                'data-test-subj': 'timeline-super-select-search-box',
-                isLoading: loading,
-                placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
-                onSearch: onSearchTimeline,
-                incremental: false,
-              }}
-              singleSelection={true}
-              options={[
-                ...(!onlyFavorites && searchTimelineValue === ''
-                  ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
-                  : []),
-                ...timelines.map(
-                  (t, index) =>
-                    ({
-                      description: t.description,
-                      label: t.title,
-                      id: t.savedObjectId,
-                      key: `${t.title}-${index}`,
-                      title: t.title,
-                      checked: t.savedObjectId === timelineId ? 'on' : undefined,
-                    } as Option)
-                ),
-              ]}
-            >
-              {(list, search) => (
-                <>
-                  {search}
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          </>
+          <EuiSelectable
+            height={POPOVER_HEIGHT}
+            isLoading={loading && timelines.length === 0}
+            listProps={{
+              rowHeight: TIMELINE_ITEM_HEIGHT,
+              showIcons: false,
+              virtualizedProps: ({
+                onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
+              } as unknown) as ListProps,
+            }}
+            renderOption={renderTimelineOption}
+            onChange={handleTimelineChange}
+            searchable
+            searchProps={{
+              'data-test-subj': 'timeline-super-select-search-box',
+              isLoading: loading,
+              placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
+              onSearch: onSearchTimeline,
+              incremental: false,
+              prepend: favoriteElement,
+            }}
+            singleSelection={true}
+            options={[
+              ...(!onlyFavorites && searchTimelineValue === ''
+                ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
+                : []),
+              ...timelines.map(
+                (t, index) =>
+                  ({
+                    description: t.description,
+                    label: t.title,
+                    id: t.savedObjectId,
+                    key: `${t.title}-${index}`,
+                    title: t.title,
+                    checked: t.savedObjectId === timelineId ? 'on' : undefined,
+                  } as Option)
+              ),
+            ]}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
         )}
       </AllTimelinesQuery>
       <SearchTimelineSuperSelectGlobalStyle />
