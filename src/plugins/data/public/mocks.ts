@@ -76,6 +76,12 @@ const createStartContract = (): Start => {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
     },
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
     indexPatterns: {} as IndexPatternsContract,
   };
   return startContract;

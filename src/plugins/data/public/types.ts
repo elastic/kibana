@@ -51,6 +51,9 @@ export interface DataPublicPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  __LEGACY: {
+    esClient: any;
+  };
   ui: {
     IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
     SearchBar: React.ComponentType<StatefulSearchBarProps>;

@@ -72,7 +72,6 @@
 // @ts-ignore
 import { default as es } from 'elasticsearch-browser/elasticsearch';
 import _ from 'lodash';
-import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -80,13 +79,13 @@ import { getHighlightRequest, esFilters, esQuery } from '../../../../../../plugi
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
-import { FetchOptions, ApiCaller } from '../fetch/types';
+import { FetchOptions } from '../fetch/types';
 
 import {
   getSearchService,
   getUiSettings,
   getInjectedMetadata,
-  getHttp,
+  getEsClient,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
 
@@ -101,21 +100,8 @@ export class SearchSource {
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
-  private esCli: ApiCaller;
 
-  constructor(private fields: SearchSourceFields = {}) {
-    const http = getHttp();
-    const esRequestTimeout = getInjectedMetadata().getInjectedVar('esRequestTimeout') as number;
-    const esApiVersion = getInjectedMetadata().getInjectedVar('esApiVersion') as string;
-
-    // Use legacy es client for msearch.
-    this.esCli = es.Client({
-      host: this.getEsUrl(http),
-      log: 'info',
-      requestTimeout: esRequestTimeout,
-      apiVersion: esApiVersion,
-    });
-  }
+  constructor(private fields: SearchSourceFields = {}) {}
 
   /** ***
    * PUBLIC API
@@ -205,19 +191,6 @@ export class SearchSource {
     return this.parent;
   }
 
-  private getEsUrl(http: CoreStart['http']) {
-    const a = document.createElement('a');
-    a.href = http.basePath.prepend('/elasticsearch');
-    const protocolPort = /https/.test(a.protocol) ? 443 : 80;
-    const port = a.port || protocolPort;
-    return {
-      host: a.hostname,
-      port,
-      protocol: a.protocol,
-      pathname: a.pathname,
-    };
-  }
-
   /**
    * Fetch this source and reject the returned Promise on error
    *
@@ -240,7 +213,7 @@ export class SearchSource {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout, es: this.esCli }
+      { searchService, config, esShardTimeout, es: getEsClient() }
     );
 
     if (response.error) {

@@ -42,6 +42,7 @@ import {
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
+import { getEsClient } from './es_client';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
@@ -95,6 +96,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       fieldFormats,
       query: this.queryService.start(core.savedObjects),
       indexPatterns: indexPatternsService,
+      __LEGACY: {
+        esClient: getEsClient(core.injectedMetadata, core.http),
+      },
     };
 
     const SearchBar = createSearchBar({
