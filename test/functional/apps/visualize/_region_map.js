@@ -24,7 +24,7 @@ export default function({ getService, getPageObjects }) {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
-    const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
+    const PageObjects = getPageObjects(['visualize', 'visEditor', 'timePicker']);
 
     before(async function() {
       log.debug('navigateToApp visualize');
@@ -34,12 +34,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Shape field');
-      await PageObjects.visualize.clickBucket('Shape field');
+      await PageObjects.visEditor.clickBucket('Shape field');
       log.debug('Aggregation = Terms');
-      await PageObjects.visualize.selectAggregation('Terms');
+      await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = geo.src');
-      await PageObjects.visualize.selectField('geo.src');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('geo.src');
+      await PageObjects.visEditor.clickGo();
     });
 
     describe('vector map', function indexPatternCreation() {
@@ -60,26 +60,26 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should change results after changing layer to world', async function() {
-        await PageObjects.visualize.clickOptions();
-        await PageObjects.visualize.setSelectByOptionText(
+        await PageObjects.visEditor.clickOptionsTab();
+        await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectLayer',
           'World Countries'
         );
 
         //ensure all fields are there
-        await PageObjects.visualize.setSelectByOptionText(
+        await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectJoinField',
           'ISO 3166-1 alpha-2 code'
         );
-        await PageObjects.visualize.setSelectByOptionText(
+        await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectJoinField',
           'ISO 3166-1 alpha-3 code'
         );
-        await PageObjects.visualize.setSelectByOptionText(
+        await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectJoinField',
           'name'
         );
-        await PageObjects.visualize.setSelectByOptionText(
+        await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectJoinField',
           'ISO 3166-1 alpha-2 code'
         );

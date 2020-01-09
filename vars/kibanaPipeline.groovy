@@ -137,13 +137,8 @@ def jobRunner(label, useRamDisk, closure) {
     def scmVars
 
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retry(8) {
-      try {
-        scmVars = checkout scm
-      } catch (ex) {
-        sleep 15
-        throw ex
-      }
+    retryWithDelay(8, 15) {
+      scmVars = checkout scm
     }
 
     withEnv([
@@ -181,6 +176,18 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
   )
 }
 
+def downloadCoverageArtifacts() {
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
+  def targetLocation = "/tmp/downloaded_coverage"
+
+  sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
+}
+
+def uploadCoverageArtifacts(prefix, pattern) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  uploadGcsArtifact(uploadPrefix, pattern)
+}
+
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
@@ -206,6 +213,11 @@ def withGcsArtifactUpload(workerName, closure) {
       }
     }
   })
+
+  if (env.CODE_COVERAGE) {
+    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
+    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
+  }
 }
 
 def publishJunit() {

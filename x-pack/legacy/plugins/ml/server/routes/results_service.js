@@ -55,6 +55,12 @@ function getMaxAnomalyScore(callWithRequest, payload) {
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
+function getPartitionFieldsValues(callWithRequest, payload) {
+  const rs = resultsServiceProvider(callWithRequest);
+  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
+  return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+}
+
 export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
   route({
     method: 'POST',
@@ -98,6 +104,20 @@ export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, r
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getCategoryExamples(callWithRequest, request.payload).catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig,
+    },
+  });
+
+  route({
+    method: 'POST',
+    path: '/api/ml/results/partition_fields_values',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      return getPartitionFieldsValues(callWithRequest, request.payload).catch(resp =>
+        wrapError(resp)
+      );
     },
     config: {
       ...commonRouteConfig,
