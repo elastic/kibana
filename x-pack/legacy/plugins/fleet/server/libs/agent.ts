@@ -184,6 +184,24 @@ export class AgentLib {
   }
 
   /**
+   * Acknowledge the fact that actions as been received by an agent
+   */
+  public async acknowledgeActions(user: FrameworkUser, agent: Agent, actionIds: string[]) {
+    const now = new Date().toISOString();
+
+    const updatedActions = agent.actions.map(action => {
+      if (action.sent_at) {
+        return action;
+      }
+      return { ...action, sent_at: actionIds.indexOf(action.id) >= 0 ? now : undefined };
+    });
+
+    await this.agentsRepository.update(this._getInternalUser(), agent.id, {
+      actions: updatedActions,
+    });
+  }
+
+  /**
    * Agent checkin, update events, get new actions to perfomed.
    * @param agent
    * @param events
@@ -209,17 +227,11 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
-    const {
-      acknowledgedActionIds,
-      updatedErrorEvents,
-    } = await this.agentEvents.processEventsForCheckin(internalUser, agent, events);
-
-    if (acknowledgedActionIds.length > 0) {
-      const updatedActions = actions.map(a => {
-        return { ...a, sent_at: acknowledgedActionIds.indexOf(a.id) >= 0 ? now : undefined };
-      });
-      updateData.actions = updatedActions;
-    }
+    const { updatedErrorEvents } = await this.agentEvents.processEventsForCheckin(
+      internalUser,
+      agent,
+      events
+    );
 
     if (updatedErrorEvents) {
       updateData.current_error_events = updatedErrorEvents;
@@ -227,7 +239,7 @@ export class AgentLib {
 
     await this.agentsRepository.update(internalUser, agent.id, updateData);
 
-    return { actions: updateData.actions || actions, policy: null };
+    return { actions, policy: null };
   }
 
   public async addAction(
