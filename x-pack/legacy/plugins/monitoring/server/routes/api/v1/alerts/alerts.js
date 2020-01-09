@@ -11,9 +11,14 @@ import {
   MONITORING_CONFIG_SAVED_OBJECT_ID,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../../../../common/constants';
+import { getDateFormat } from '../../../../lib/get_date_format';
+import { getTimezone } from '../../../../lib/get_timezone';
 
-async function createAlerts(alertsClient, { selectedEmailActionId }) {
+async function createAlerts(req, alertsClient, { selectedEmailActionId, ccs }) {
   const createdAlerts = [];
+  const dateFormat = await getDateFormat(req);
+  const timezone = await getTimezone(req);
+  const alertParams = { dateFormat, timezone, ccs };
 
   // Create alerts
   const ALERT_TYPES = {
@@ -47,6 +52,7 @@ async function createAlerts(alertsClient, { selectedEmailActionId }) {
       data: {
         enabled: true,
         alertTypeId,
+        params: alertParams,
         ...ALERT_TYPES[alertTypeId],
       },
     });
@@ -80,13 +86,14 @@ export function createKibanaAlertsRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
+          ccs: Joi.string().optional(),
           selectedEmailActionId: Joi.string().required(),
           emailAddress: Joi.string().required(),
         }),
       },
     },
     async handler(req, headers) {
-      const { emailAddress, selectedEmailActionId } = req.payload;
+      const { emailAddress, selectedEmailActionId, ccs } = req.payload;
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
       const savedObjectsClient = isFunction(req.getSavedObjectsClient)
         ? req.getSavedObjectsClient()
@@ -96,7 +103,7 @@ export function createKibanaAlertsRoute(server) {
       }
 
       const [alerts, emailResponse] = await Promise.all([
-        createAlerts(alertsClient, { ...req.params, selectedEmailActionId }),
+        createAlerts(req, alertsClient, { ...req.params, selectedEmailActionId, ccs }),
         saveEmailAddress(emailAddress, savedObjectsClient),
       ]);
 

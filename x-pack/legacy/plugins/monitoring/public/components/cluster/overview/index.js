@@ -23,7 +23,7 @@ export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   const kibanaAlerts = KIBANA_ALERTING_ENABLED ? (
-    <AlertsStatus emailAddress={props.emailAddress} />
+    <AlertsStatus emailAddress={props.emailAddress} ccs={props.ccs} />
   ) : null;
 
   return (

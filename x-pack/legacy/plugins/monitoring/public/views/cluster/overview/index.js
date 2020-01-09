@@ -78,6 +78,7 @@ uiRoutes.when('/overview', {
             monitoringConfig.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) ||
             chrome.getInjected('monitoringLegacyEmailAddress') ||
             '';
+          const ccs = globalState.ccs;
 
           this.renderReact(
             <I18nContext>
@@ -90,6 +91,7 @@ uiRoutes.when('/overview', {
                     <Overview
                       cluster={data}
                       emailAddress={emailAddress}
+                      ccs={ccs}
                       setupMode={setupMode}
                       changeUrl={changeUrl}
                       showLicenseExpiration={showLicenseExpiration}

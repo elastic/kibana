@@ -17,8 +17,15 @@
  */
 export function prefixIndexPattern(config, indexPattern, ccs) {
   const ccsEnabled = config.get('xpack.monitoring.ccs.enabled');
+  if (!ccsEnabled) {
+    return indexPattern;
+  }
 
-  if (!ccsEnabled || !ccs) {
+  return prefixIndexPatternWithCCS(indexPattern, ccs);
+}
+
+export function prefixIndexPatternWithCCS(indexPattern, ccs) {
+  if (!ccs) {
     return indexPattern;
   }
 

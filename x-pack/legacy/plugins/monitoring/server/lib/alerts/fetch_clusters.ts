@@ -5,15 +5,14 @@
  */
 import { get } from 'lodash';
 import { AlertCluster } from '../../alerts/types';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 
 interface AggregationResult {
   key: string;
 }
 
-export async function fetchClusters(callCluster: any): Promise<AlertCluster[]> {
+export async function fetchClusters(callCluster: any, index: string): Promise<AlertCluster[]> {
   const params = {
-    index: INDEX_PATTERN_ELASTICSEARCH,
+    index,
     filterPath: 'aggregations.clusters.buckets',
     body: {
       size: 0,

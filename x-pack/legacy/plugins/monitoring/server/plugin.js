@@ -156,7 +156,13 @@ export class Plugin {
       function getLogger(contexts) {
         return core.logger.get('plugins', LOGGING_TAG, ...contexts);
       }
-      plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, getLogger));
+      plugins.alerting.setup.registerType(
+        getLicenseExpiration(
+          getMonitoringCluster,
+          getLogger,
+          config.get('xpack.monitoring.ccs.enabled')
+        )
+      );
     }
   }
 }

@@ -5,14 +5,14 @@
  */
 import { get } from 'lodash';
 import { AlertLicense, AlertCluster } from '../../alerts/types';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 
 export async function fetchLicenses(
   callCluster: any,
-  clusters: AlertCluster[]
+  clusters: AlertCluster[],
+  index: string
 ): Promise<AlertLicense[]> {
   const params = {
-    index: INDEX_PATTERN_ELASTICSEARCH,
+    index,
     filterPath: [
       'hits.hits._source.license.*',
       'hits.hits._source.cluster_uuid',
@@ -48,14 +48,18 @@ export async function fetchLicenses(
   };
 
   const response = await callCluster('search', params);
-  return get<any>(response, 'hits.hits').map((hit: any) => {
+  return get<any>(response, 'hits.hits', []).map((hit: any) => {
+    const clusterName: string =
+      get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
+      get(hit, '_source.cluster_name') ||
+      get(hit, '_source.cluster_uuid');
     const rawLicense: any = get(hit, '_source.license', {});
     const license: AlertLicense = {
       status: rawLicense.status,
       type: rawLicense.type,
       expiryDateMS: rawLicense.expiry_date_in_millis,
       clusterUuid: get(hit, '_source.cluster_uuid'),
-      clusterName: get(hit, '_source.cluster_name') || get(hit, '_source.cluster_uuid'),
+      clusterName,
     };
     return license;
   });

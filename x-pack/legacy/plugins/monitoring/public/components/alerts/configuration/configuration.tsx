@@ -18,6 +18,7 @@ import { Step3 } from './step3';
 export interface AlertsConfigurationProps {
   emailAddress: string;
   onDone: Function;
+  ccs: string;
 }
 
 export interface StepResult {
@@ -35,7 +36,7 @@ export const NEW_ACTION_ID = '__new__';
 export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   props: AlertsConfigurationProps
 ) => {
-  const { onDone } = props;
+  const { onDone, ccs } = props;
 
   const [emailActions, setEmailActions] = React.useState<ActionResult[]>([]);
   const [selectedEmailActionId, setSelectedEmailActionId] = React.useState('');
@@ -87,7 +88,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
       await kfetch({
         method: 'POST',
         pathname: `/api/monitoring/v1/alerts`,
-        body: JSON.stringify({ selectedEmailActionId, emailAddress }),
+        body: JSON.stringify({ selectedEmailActionId, emailAddress, ccs }),
       });
     } catch (err) {
       setIsSaving(false);

@@ -37,3 +37,9 @@ export interface AlertCluster {
 export interface LicenseExpirationAlertExecutorOptions extends AlertExecutorOptions {
   state: AlertState;
 }
+
+export interface AlertParams {
+  dateFormat: string;
+  timezone: string;
+  ccs: string | null;
+}

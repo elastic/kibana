@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { getLicenseExpiration } from './license_expiration';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
@@ -13,23 +13,31 @@ import {
 import { Logger } from 'src/core/server';
 import { AlertServices } from '../../../alerting/server/types';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { AlertInstance } from '../../../alerting/server/lib';
-import { AlertState } from './types';
+import { AlertInstance } from '../../../alerting/server/alert_instance';
+import { AlertState, AlertClusterState, AlertParams } from './types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 
-function fillLicense(license: any) {
+function fillLicense(license: any, clusterUuid?: string) {
   return {
     hits: {
       hits: [
         {
           _source: {
             license,
+            cluster_uuid: clusterUuid,
           },
         },
       ],
     },
   };
 }
+
+const clusterUuid = 'a4545jhjb';
+const params: AlertParams = {
+  dateFormat: 'YYYY',
+  timezone: 'UTC',
+  ccs: null,
+};
 
 describe('getLicenseExpiration', () => {
   const getMonitoringCluster: () => void = jest.fn();
@@ -41,15 +49,17 @@ describe('getLicenseExpiration', () => {
     error: jest.fn(),
     fatal: jest.fn(),
     info: jest.fn(),
+    get: jest.fn(),
   };
   const getLogger = (): Logger => logger;
+  const ccrEnabled = false;
 
   afterEach(() => {
     (logger.warn as jest.Mock).mockClear();
   });
 
   it('should have the right id and actionGroups', () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
     expect(alert.actionGroups).toEqual(['default']);
   });
@@ -60,15 +70,12 @@ describe('getLicenseExpiration', () => {
     savedObjectsClient: jest.Mock;
   }
   it('should return the state if no license is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
       alertInstanceFactory: jest.fn(),
       savedObjectsClient: savedObjectsClientMock.create(),
-    };
-    const params = {
-      clusterUuid: '1abd45',
     };
     const state = { foo: 1 };
 
@@ -84,13 +91,13 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const services = {
       callCluster: jest.fn(
-        (method: string, params): Promise<any> => {
+        (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
-            if (params.filterPath === 'hits.hits._source.license.*') {
+            if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense({
                   status: 'good',
@@ -109,9 +116,6 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient: savedObjectsClientMock.create(),
     };
 
-    const params = {
-      clusterUuid: '1abd45',
-    };
     const state = {};
 
     await alert.executor({
@@ -138,8 +142,9 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
+
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -157,17 +162,20 @@ describe('getLicenseExpiration', () => {
     );
     const services = {
       callCluster: jest.fn(
-        (method: string, params): Promise<any> => {
+        (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
-            if (params.filterPath === 'hits.hits._source.license.*') {
+            if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
-                fillLicense({
-                  status: 'active',
-                  type: 'gold',
-                  expiry_date_in_millis: moment()
-                    .add(7, 'days')
-                    .valueOf(),
-                })
+                fillLicense(
+                  {
+                    status: 'active',
+                    type: 'gold',
+                    expiry_date_in_millis: moment()
+                      .add(7, 'days')
+                      .valueOf(),
+                  },
+                  clusterUuid
+                )
               );
             }
             resolve({});
@@ -178,20 +186,19 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient,
     };
 
-    const params = {
-      clusterUuid: '1abd45',
-    };
     const state = {};
 
-    const result = await alert.executor({
+    const result: AlertState = (await alert.executor({
       alertId: '',
       startedAt: new Date(),
       services,
       params,
       state,
-    });
+    })) as AlertState;
 
-    expect((result as AlertState).expired_check_date_in_millis > 0).toBe(true);
+    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+
+    expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
     expect(scheduleActions.mock.calls[0][1].subject).toBe(
       'NEW X-Pack Monitoring: License Expiration'
@@ -209,7 +216,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -227,17 +234,20 @@ describe('getLicenseExpiration', () => {
     );
     const services = {
       callCluster: jest.fn(
-        (method: string, params): Promise<any> => {
+        (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
-            if (params.filterPath === 'hits.hits._source.license.*') {
+            if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
-                fillLicense({
-                  status: 'active',
-                  type: 'gold',
-                  expiry_date_in_millis: moment()
-                    .add(120, 'days')
-                    .valueOf(),
-                })
+                fillLicense(
+                  {
+                    status: 'active',
+                    type: 'gold',
+                    expiry_date_in_millis: moment()
+                      .add(120, 'days')
+                      .valueOf(),
+                  },
+                  clusterUuid
+                )
               );
             }
             resolve({});
@@ -248,24 +258,25 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient,
     };
 
-    const params = {
-      clusterUuid: '1abd45',
-    };
-    const state = {
-      expired_check_date_in_millis: moment()
-        .subtract(1, 'day')
-        .valueOf(),
+    const state: AlertState = {
+      [clusterUuid]: {
+        expiredCheckDateMS: moment()
+          .subtract(1, 'day')
+          .valueOf(),
+        ui: { isFiring: true, severity: 0, message: null, resolvedMS: 0 },
+      },
     };
 
-    const result = await alert.executor({
+    const result: AlertState = (await alert.executor({
       alertId: '',
       startedAt: new Date(),
       services,
       params,
       state,
-    });
+    })) as AlertState;
 
-    expect((result as AlertState).expired_check_date_in_millis).toBe(0);
+    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    expect(newState.expiredCheckDateMS).toBe(0);
     expect(scheduleActions.mock.calls.length).toBe(1);
     expect(scheduleActions.mock.calls[0][1].subject).toBe(
       'RESOLVED X-Pack Monitoring: License Expiration'
@@ -283,7 +294,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -301,17 +312,20 @@ describe('getLicenseExpiration', () => {
     );
     const services = {
       callCluster: jest.fn(
-        (method: string, params): Promise<any> => {
+        (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
-            if (params.filterPath === 'hits.hits._source.license.*') {
+            if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
-                fillLicense({
-                  status: 'active',
-                  type: 'trial',
-                  expiry_date_in_millis: moment()
-                    .add(15, 'days')
-                    .valueOf(),
-                })
+                fillLicense(
+                  {
+                    status: 'active',
+                    type: 'trial',
+                    expiry_date_in_millis: moment()
+                      .add(15, 'days')
+                      .valueOf(),
+                  },
+                  clusterUuid
+                )
               );
             }
             resolve({});
@@ -322,19 +336,17 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient,
     };
 
-    const params = {
-      clusterUuid: '1abd45',
-    };
     const state = {};
-
-    const result = await alert.executor({
+    const result: AlertState = (await alert.executor({
       alertId: '',
       startedAt: new Date(),
       services,
       params,
       state,
-    });
-    expect((result as AlertState).expired_check_date_in_millis).toBe(0);
+    })) as AlertState;
+
+    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    expect(newState.expiredCheckDateMS).toBe(undefined);
     expect(scheduleActions).not.toHaveBeenCalled();
   });
 
@@ -348,7 +360,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -366,17 +378,20 @@ describe('getLicenseExpiration', () => {
     );
     const services = {
       callCluster: jest.fn(
-        (method: string, params): Promise<any> => {
+        (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
-            if (params.filterPath === 'hits.hits._source.license.*') {
+            if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
-                fillLicense({
-                  status: 'active',
-                  type: 'trial',
-                  expiry_date_in_millis: moment()
-                    .add(13, 'days')
-                    .valueOf(),
-                })
+                fillLicense(
+                  {
+                    status: 'active',
+                    type: 'trial',
+                    expiry_date_in_millis: moment()
+                      .add(13, 'days')
+                      .valueOf(),
+                  },
+                  clusterUuid
+                )
               );
             }
             resolve({});
@@ -387,19 +402,17 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient,
     };
 
-    const params = {
-      clusterUuid: '1abd45',
-    };
     const state = {};
-
-    const result = await alert.executor({
+    const result: AlertState = (await alert.executor({
       alertId: '',
       startedAt: new Date(),
       services,
       params,
       state,
-    });
-    expect((result as AlertState).expired_check_date_in_millis > 0).toBe(true);
+    })) as AlertState;
+
+    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
   });
 });
