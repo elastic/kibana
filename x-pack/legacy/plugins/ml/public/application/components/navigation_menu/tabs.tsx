@@ -87,13 +87,14 @@ export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
         const id = tab.id;
         // globalState (e.g. selected jobs and time range) should be retained when changing pages.
         // appState will not be considered.
-        const encodedGlobalState = encode(globalState);
+        const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
+
         return (
           <EuiLink
             data-test-subj={
               TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS] + (id === selectedTabId ? ' selected' : '')
             }
-            href={`#/${id}?_g=${encodedGlobalState}`}
+            href={`#/${id}${fullGlobalStateString}`}
             key={`${id}-key`}
             color="text"
           >
