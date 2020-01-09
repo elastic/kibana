@@ -347,9 +347,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                             <Fragment />
                           </EuiFormRow>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
+                        <EuiFlexItem grow={false} style={{ width: '90%' }}>
                           <EuiDataGrid
-                            aria-label="Data grid demo"
+                            aria-label="Classification confusion matrix"
                             columns={columns}
                             columnVisibility={{ visibleColumns, setVisibleColumns }}
                             rowCount={columnsData.length}

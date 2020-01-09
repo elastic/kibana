@@ -182,7 +182,7 @@ export const getPredictedFieldName = (
   const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
-  }${isClassificationAnalysis(analysis) && !forSort ? '.keyword' : ''}`;
+  }`;
   return predictedField;
 };
 

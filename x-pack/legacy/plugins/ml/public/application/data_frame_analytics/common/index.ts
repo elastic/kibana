@@ -33,6 +33,7 @@ export {
   getDefaultSelectableFields,
   getDefaultRegressionFields,
   getDefaultClassificationFields,
+  getDefaultClassificationFieldsFromJobCaps,
   getFlattenedFields,
   sortColumns,
   sortRegressionResultsColumns,

@@ -5,7 +5,13 @@
  */
 
 import { getNestedProperty } from '../../util/object_utils';
-import { DataFrameAnalyticsConfig, getPredictedFieldName, getDependentVar } from './analytics';
+import {
+  DataFrameAnalyticsConfig,
+  getPredictedFieldName,
+  getDependentVar,
+  getPredictionFieldName,
+} from './analytics';
+import { Field } from '../../../../common/types/fields';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -199,6 +205,38 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
   });
   return flatDocFields.filter(f => f !== ML__ID_COPY);
 }
+
+export const getDefaultClassificationFieldsFromJobCaps = (
+  fields: Field[],
+  jobConfig: DataFrameAnalyticsConfig
+): { selectedFields: Field[]; docFields: Field[] } => {
+  const fieldsObj = { selectedFields: [], docFields: [] };
+  if (fields.length === 0) {
+    return fieldsObj;
+  }
+
+  const dependentVariable = getDependentVar(jobConfig.analysis);
+  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  // default is 'ml'
+  const resultsField = jobConfig.dest.results_field;
+
+  const defaultPredictionField = `${dependentVariable}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+
+  // TODO: ES_FIELD_TYPES.BOOLEAN and update type
+  const allFields: any = [
+    { id: `${resultsField}.is_training`, name: `${resultsField}.is_training`, type: 'boolean' },
+    { id: predictedField, name: predictedField },
+    ...fields,
+  ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
+
+  return {
+    selectedFields: allFields.slice(0, DEFAULT_REGRESSION_COLUMNS),
+    docFields: allFields,
+  };
+};
 
 export const getDefaultClassificationFields = (
   docs: EsDoc[],
