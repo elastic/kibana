@@ -21,7 +21,7 @@ import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
 import { timezoneProvider, VisParams } from '../legacy_imports';
-import { getServices } from '../kibana_services';
+import { TimelionVisDependencies } from '../plugin';
 
 interface Stats {
   cacheCount: number;
@@ -61,8 +61,11 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-export function getTimelionRequestHandler() {
-  const { uiSettings, http, timefilter } = getServices();
+export function getTimelionRequestHandler({
+  uiSettings,
+  http,
+  timefilter,
+}: TimelionVisDependencies) {
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({

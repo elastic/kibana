@@ -25,7 +25,7 @@ import { ChartComponent } from './chart';
 import { VisParams } from '../timelion_vis_fn';
 import { TimelionSuccessResponse } from '../helpers/timelion_request_handler';
 
-interface TimelionVisComponentProp {
+export interface TimelionVisComponentProp {
   config: IUiSettingsClient;
   renderComplete(): void;
   updateStatus: object;

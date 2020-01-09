@@ -17,28 +17,19 @@
  * under the License.
  */
 
-import { IUiSettingsClient, HttpSetup } from 'kibana/public';
-import { TimefilterContract } from 'src/plugins/data/public';
 import { IPanelWrapper } from './timechart';
 
-export interface TimelionKibanaServices {
-  http: HttpSetup;
-  timelionPanels: Map<string, IPanelWrapper>;
-  uiSettings: IUiSettingsClient;
-  timefilter: TimefilterContract;
+let timelionPanels: Map<string, IPanelWrapper> | null = null;
+
+export function setPanels(panels: Map<string, IPanelWrapper>) {
+  timelionPanels = panels;
 }
 
-let services: TimelionKibanaServices | null = null;
-
-export function setServices(newServices: TimelionKibanaServices) {
-  services = newServices;
-}
-
-export function getServices() {
-  if (!services) {
+export function getPanels() {
+  if (!timelionPanels) {
     throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the timelion vis?'
+      'Timelion panels not set - are you trying to import them from outside of the timelion vis?'
     );
   }
-  return services;
+  return timelionPanels;
 }

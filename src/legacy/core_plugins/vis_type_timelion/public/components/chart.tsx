@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getServices } from '../kibana_services';
+import { getPanels } from '../services';
 import { Sheet } from '../helpers/timelion_request_handler';
 import { PanelProps } from './panel';
 
@@ -41,7 +41,7 @@ function ChartComponent({ seriesList, interval, renderComplete }: ChartComponent
     type: 'timechart',
   };
 
-  const panelSchema = getServices().timelionPanels.get(panelScope.seriesList.render.type);
+  const panelSchema = getPanels().get(panelScope.seriesList.render.type);
 
   if (!panelSchema) {
     return (

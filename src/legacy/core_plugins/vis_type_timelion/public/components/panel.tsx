@@ -22,12 +22,14 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
+import { CoreStart } from 'src/core/public';
+import { TimefilterContract } from 'src/plugins/data/public';
+import { IUiSettingsClient } from 'kibana/public';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
 import '../flot';
-
 // @ts-ignore
 import { DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
 
-import { getServices } from '../kibana_services';
 import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from '../helpers/panel_utils';
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 
@@ -56,11 +58,17 @@ interface Ranges {
   yaxis: Range;
 }
 
+interface ITimelionVisPluginServices extends Partial<CoreStart> {
+  timefilter: TimefilterContract;
+  uiSettings: IUiSettingsClient;
+}
+
 const DEBOUNCE_DELAY = 50;
 // ensure legend is the same height with or without a caption so legend items do not move around
 const emptyCaption = '<br>';
 
 function Panel({ interval, seriesList, renderComplete }: PanelProps) {
+  const kibana = useKibana<ITimelionVisPluginServices>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState();
   const [chartElem, setChartElem] = useState();
@@ -176,12 +184,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     () =>
       buildOptions(
         interval,
-        getServices().timefilter,
-        getServices().uiSettings,
+        kibana.services.timefilter,
+        kibana.services.uiSettings,
         chartElem && chartElem.clientWidth,
         seriesList.render.grid
       ),
-    [seriesList.render.grid, interval, chartElem]
+    [seriesList.render.grid, interval, chartElem, kibana.services]
   );
 
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
@@ -209,7 +217,9 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     renderComplete,
   ]);
 
-  moment.tz.setDefault(getServices().uiSettings.get('dateFormat:tz'));
+  useEffect(() => {
+    moment.tz.setDefault(kibana.services.uiSettings.get('dateFormat:tz'));
+  }, [kibana.services.uiSettings]);
 
   const unhighlightSeries = useCallback(() => {
     if (highlightedSeries === null) {
@@ -313,12 +323,15 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     clearLegendNumbers();
   }, [plot, clearLegendNumbers]);
 
-  const plotSelectedHandler = useCallback((event: JQuery.TriggeredEvent, ranges: Ranges) => {
-    getServices().timefilter.setTime({
-      from: moment(ranges.xaxis.from),
-      to: moment(ranges.xaxis.to),
-    });
-  }, []);
+  const plotSelectedHandler = useCallback(
+    (event: JQuery.TriggeredEvent, ranges: Ranges) => {
+      kibana.services.timefilter.setTime({
+        from: moment(ranges.xaxis.from),
+        to: moment(ranges.xaxis.to),
+      });
+    },
+    [kibana.services.timefilter]
+  );
 
   useEffect(() => {
     if (chartElem) {
