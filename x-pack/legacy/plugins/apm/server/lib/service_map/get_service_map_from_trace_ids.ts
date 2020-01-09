@@ -5,7 +5,10 @@
  */
 import { uniq, find } from 'lodash';
 import { Setup } from '../helpers/setup_request';
-import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
+import {
+  TRACE_ID,
+  PROCESSOR_EVENT
+} from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
   ServiceConnectionNode,
@@ -35,6 +38,11 @@ export async function getServiceMapFromTraceIds({
       query: {
         bool: {
           filter: [
+            {
+              terms: {
+                [PROCESSOR_EVENT]: ['span', 'transaction']
+              }
+            },
             {
               terms: {
                 [TRACE_ID]: traceIds
