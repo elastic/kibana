@@ -68,7 +68,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
       if (!isAnonymous) {
         const response = await this.httpClient.get('/api/rollup/indices');
-        return response || {};
         this.rollupIndicesCapabilities = response || {};
       }
 
