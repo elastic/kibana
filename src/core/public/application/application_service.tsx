@@ -200,7 +200,7 @@ export class ApplicationService {
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        if (await this.shouldNavigateTo(appId, overlays)) {
+        if (await this.shouldNavigate(overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
           this.currentAppId$.next(appId);
@@ -210,23 +210,22 @@ export class ApplicationService {
         if (!this.history) {
           return null;
         }
-
-        const setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
-          this.appLeaveHandlers.set(appId, handler);
-        };
-
         return (
           <AppRouter
             history={this.history}
             mounters={availableMounters}
-            setAppLeaveHandler={setAppLeaveHandler}
+            setAppLeaveHandler={this.setAppLeaveHandler}
           />
         );
       },
     };
   }
 
-  private async shouldNavigateTo(_appId: string, overlays: OverlayStart): Promise<boolean> {
+  private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
+    this.appLeaveHandlers.set(appId, handler);
+  };
+
+  private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
       return true;
@@ -234,7 +233,6 @@ export class ApplicationService {
     const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, { title: action.title });
-      // const confirmed = window.confirm(action.text);
       if (!confirmed) {
         return false;
       }

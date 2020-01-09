@@ -188,12 +188,12 @@ export class ModalService {
             onConfirm: () => closeModal(true),
             cancelButtonText:
               options?.cancelButtonText ||
-              t.translate('core.overlays.modal.cancel', {
+              t.translate('core.overlays.confirm.cancelButton', {
                 defaultMessage: 'Cancel',
               }),
             confirmButtonText:
               options?.confirmButtonText ||
-              t.translate('core.overlays.modal.confirm', {
+              t.translate('core.overlays.confirm.okButton', {
                 defaultMessage: 'Confirm',
               }),
           };
