@@ -71,7 +71,8 @@ export async function getTraceSampleIds({
                     }
                   ]
                 }
-              }
+              },
+              { exists: { field: DESTINATION_ADDRESS } }
             ],
             minimum_should_match: 1
           }
