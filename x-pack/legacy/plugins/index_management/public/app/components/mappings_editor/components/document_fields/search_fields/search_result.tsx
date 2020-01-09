@@ -33,12 +33,12 @@ export const SearchResult = React.memo(
       <EuiEmptyPrompt
         iconType="search"
         title={
-          <h1>
+          <h3>
             <FormattedMessage
               id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPromptTitle"
               defaultMessage="No fields found"
             />
-          </h1>
+          </h3>
         }
         body={
           <p>

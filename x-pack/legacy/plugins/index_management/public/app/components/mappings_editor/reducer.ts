@@ -378,8 +378,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
-        // If we have a search in progress, we reexecute the search to
-        // update or result array
+        // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)
           ? {
               ...state.search,
@@ -484,8 +483,7 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
           status: 'idle',
         },
-        // If we have a search in progress, we reexecute the search to
-        // update or result array
+        // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)
           ? {
               ...state.search,
