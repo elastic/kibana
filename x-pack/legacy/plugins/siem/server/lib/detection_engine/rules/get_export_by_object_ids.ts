@@ -23,22 +23,16 @@ export const getExportByObjectIds = async (
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects({
-    alertsClient,
-    objects,
-  });
+  const rulesAndErrors = await getRulesFromObjects(alertsClient, objects);
   const rulesNdjson = transformRulesToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
 };
 
-export const getRulesFromObjects = async ({
-  alertsClient,
-  objects,
-}: {
-  alertsClient: AlertsClient;
-  objects: Array<{ rule_id: string }>;
-}): Promise<RulesErrors> => {
+export const getRulesFromObjects = async (
+  alertsClient: AlertsClient,
+  objects: Array<{ rule_id: string }>
+): Promise<RulesErrors> => {
   const alertsAndErrors = await objects.reduce<Promise<RulesErrors>>(
     async (accumPromise, object) => {
       const accum = await accumPromise;
