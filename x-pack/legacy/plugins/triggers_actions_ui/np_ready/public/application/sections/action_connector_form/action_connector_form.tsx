@@ -175,7 +175,7 @@ export const ActionConnectorForm = ({
               }}
             />
           </EuiFormRow>
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="m" />
           {FieldsComponent !== null ? (
             <FieldsComponent
               action={connector}

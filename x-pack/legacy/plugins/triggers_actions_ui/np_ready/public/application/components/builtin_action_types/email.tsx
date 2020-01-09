@@ -246,52 +246,58 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id="emailPort"
-            fullWidth
-            placeholder="8080"
-            error={errors.port}
-            isInvalid={errors.port.length > 0 && port !== undefined}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
-              {
-                defaultMessage: 'Port',
-              }
-            )}
-          >
-            <EuiFieldNumber
-              prepend=":"
-              isInvalid={errors.port.length > 0 && port !== undefined}
-              fullWidth
-              name="port"
-              value={port || ''}
-              data-test-subj="emailPortInput"
-              onChange={e => {
-                editActionConfig('port', parseInt(e.target.value, 10));
-              }}
-              onBlur={() => {
-                if (!port) {
-                  editActionConfig('port', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiSwitch
-              label={i18n.translate(
-                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
-                {
-                  defaultMessage: 'Secure',
-                }
-              )}
-              checked={secure || false}
-              onChange={e => {
-                editActionConfig('secure', e.target.checked);
-              }}
-            />
-          </EuiFormRow>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiFormRow
+                id="emailPort"
+                fullWidth
+                placeholder="8080"
+                error={errors.port}
+                isInvalid={errors.port.length > 0 && port !== undefined}
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
+                  {
+                    defaultMessage: 'Port',
+                  }
+                )}
+              >
+                <EuiFieldNumber
+                  prepend=":"
+                  isInvalid={errors.port.length > 0 && port !== undefined}
+                  fullWidth
+                  name="port"
+                  value={port || ''}
+                  data-test-subj="emailPortInput"
+                  onChange={e => {
+                    editActionConfig('port', parseInt(e.target.value, 10));
+                  }}
+                  onBlur={() => {
+                    if (!port) {
+                      editActionConfig('port', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+                      {
+                        defaultMessage: 'Secure',
+                      }
+                    )}
+                    checked={secure || false}
+                    onChange={e => {
+                      editActionConfig('secure', e.target.checked);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
