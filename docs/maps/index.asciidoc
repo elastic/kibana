@@ -21,19 +21,6 @@ Start your tour of *Elastic Maps* with the <<maps-getting-started, getting start
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
 
---
-
-include::maps-getting-started.asciidoc[]
-include::heatmap-layer.asciidoc[]
-include::tile-layer.asciidoc[]
-include::vector-layer.asciidoc[]
-include::maps-aggregations.asciidoc[]
-include::search.asciidoc[]
-include::connect-to-ems.asciidoc[]
-include::geojson-upload.asciidoc[]
-include::indexing-geojson-data-tutorial.asciidoc[]
-include::trouble-shooting.asciidoc[]
-
 [float]
 === Create maps with multiple layers and indices
 Context is a force multiplier for spatial analysis, revealing how and where data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions.
@@ -60,3 +47,19 @@ Customize each layer to highlight meaningful dimensions in your data. For exampl
 [float]
 === Focus the data you want to display with searches
 Use the search bar for real-time search for all of your Elasticsearch layers. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.
+
+
+
+
+--
+
+include::maps-getting-started.asciidoc[]
+include::heatmap-layer.asciidoc[]
+include::tile-layer.asciidoc[]
+include::vector-layer.asciidoc[]
+include::maps-aggregations.asciidoc[]
+include::search.asciidoc[]
+include::connect-to-ems.asciidoc[]
+include::geojson-upload.asciidoc[]
+include::indexing-geojson-data-tutorial.asciidoc[]
+include::trouble-shooting.asciidoc[]
