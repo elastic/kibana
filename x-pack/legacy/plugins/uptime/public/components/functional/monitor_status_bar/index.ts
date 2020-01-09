@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './details';
-export * from './locations';
+export { MonitorSSLCertificate } from './monitor_ssl_certificate';
+export { MonitorStatusBar, MonitorStatusBarComponent } from './monitor_status_bar';

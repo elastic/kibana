@@ -2,24 +2,46 @@
 
 exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="euiText euiText--medium"
+      aria-label="Monitor status"
+      class="euiHealth"
+      style="line-height:inherit"
     >
-      <h2>
-        Up in 2 Locations
-      </h2>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          Up
+        </div>
+      </div>
     </div>
   </div>
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <a
         aria-label="Monitor URL link"
@@ -33,23 +55,16 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem"
+    aria-label="Monitor duration in milliseconds"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <span
-      class="euiTextColor euiTextColor--subdued euiTitle euiTitle--xsmall"
-    >
-      <h1
-        data-test-subj="monitor-page-title"
-      >
-        id1
-      </h1>
-    </span>
+    1234ms
   </div>
   <div
-    class="euiSpacer euiSpacer--l"
-  />
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  />
+    aria-label="Time since last check"
+    class="euiFlexItem"
+  >
+    15 minutes ago
+  </div>
 </div>
 `;

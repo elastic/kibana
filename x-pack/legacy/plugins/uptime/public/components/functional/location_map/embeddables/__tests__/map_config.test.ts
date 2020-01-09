@@ -7,7 +7,6 @@
 import { getLayerList } from '../map_config';
 import { mockLayerList } from './__mocks__/mock';
 import { LocationPoint } from '../embedded_map';
-import { UptimeAppColors } from '../../../../../uptime_app';
 
 jest.mock('uuid', () => {
   return {
@@ -18,7 +17,6 @@ jest.mock('uuid', () => {
 describe('map_config', () => {
   let upPoints: LocationPoint[];
   let downPoints: LocationPoint[];
-  let colors: Pick<UptimeAppColors, 'gray' | 'danger'>;
 
   beforeEach(() => {
     upPoints = [
@@ -31,15 +29,11 @@ describe('map_config', () => {
       { lat: '55.487239', lon: '13.399262' },
       { lat: '54.487239', lon: '14.399262' },
     ];
-    colors = {
-      danger: '#BC261E',
-      gray: '#000',
-    };
   });
 
   describe('#getLayerList', () => {
     test('it returns the low poly layer', () => {
-      const layerList = getLayerList(upPoints, downPoints, colors);
+      const layerList = getLayerList(upPoints, downPoints, { danger: '#BC261E', gray: '#000' });
       expect(layerList).toStrictEqual(mockLayerList);
     });
   });

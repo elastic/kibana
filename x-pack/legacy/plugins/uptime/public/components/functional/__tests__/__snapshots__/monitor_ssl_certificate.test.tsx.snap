@@ -5,14 +5,22 @@ Array [
   <div
     class="euiSpacer euiSpacer--s"
   />,
-  <div
-    aria-label="SSL certificate expires"
-    class="euiText euiText--small euiText--constrainedWidth"
+  .c0 {
+  margin-left: 20px;
+}
+
+<div
+    class="c0"
   >
     <div
-      class="euiTextColor euiTextColor--subdued"
+      aria-label="SSL certificate expires"
+      class="euiText euiText--small euiText--constrainedWidth"
     >
-      SSL certificate expires in 2 months
+      <div
+        class="euiTextColor euiTextColor--subdued"
+      >
+        SSL certificate expires in 2 months
+      </div>
     </div>
   </div>,
 ]

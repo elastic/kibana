@@ -227,24 +227,54 @@ exports[`UptimeDatePicker component validates props with shallow render 1`] = `
   commonlyUsedRanges={
     Array [
       Object {
-        "end": "now",
+        "end": "now/d",
         "label": "Today",
         "start": "now/d",
       },
       Object {
-        "end": "now",
-        "label": "Week to date",
+        "end": "now/w",
+        "label": "This week",
         "start": "now/w",
       },
       Object {
         "end": "now",
-        "label": "Month to date",
-        "start": "now/M",
+        "label": "Last 15 minutes",
+        "start": "now-15m",
       },
       Object {
         "end": "now",
-        "label": "Year to date",
-        "start": "now/y",
+        "label": "Last 30 minutes",
+        "start": "now-30m",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 1 hour",
+        "start": "now-1h",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 24 hours",
+        "start": "now-24h",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 7 days",
+        "start": "now-7d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 30 days",
+        "start": "now-30d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 90 days",
+        "start": "now-90d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 2 year",
+        "start": "now-1y",
       },
     ]
   }

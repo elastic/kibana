@@ -9,8 +9,12 @@ import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
   FilterBar,
   GetFilterBarQueryArgs,
+  GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
+  GetMonitorPageTitleQueryArgs,
   MonitorChart,
+  MonitorPageTitle,
+  Ping,
   GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
@@ -18,6 +22,13 @@ import { CreateUMGraphQLResolvers, UMContext } from '../types';
 import { HistogramResult } from '../../../common/domain_types';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
+
+export type UMLatestMonitorsResolver = UMResolver<
+  Ping[] | Promise<Ping[]>,
+  any,
+  GetLatestMonitorsQueryArgs,
+  UMContext
+>;
 
 export type UMGetMonitorChartsResolver = UMResolver<
   any | Promise<any>,
@@ -30,6 +41,13 @@ export type UMGetFilterBarResolver = UMResolver<
   any | Promise<any>,
   any,
   GetFilterBarQueryArgs,
+  UMContext
+>;
+
+export type UMGetMontiorPageTitleResolver = UMResolver<
+  MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
+  any,
+  GetMonitorPageTitleQueryArgs,
   UMContext
 >;
 
@@ -46,7 +64,9 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   Query: {
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
+    getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
+    getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -77,6 +97,19 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         location,
       });
     },
+    async getLatestMonitors(
+      _resolver,
+      { dateRangeStart, dateRangeEnd, monitorId, location },
+      { APICaller }
+    ): Promise<Ping[]> {
+      return await libs.pings.getLatestMonitorDocs({
+        callES: APICaller,
+        dateRangeStart,
+        dateRangeEnd,
+        monitorId,
+        location,
+      });
+    },
     async getFilterBar(
       _resolver,
       { dateRangeStart, dateRangeEnd },
@@ -87,6 +120,13 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         dateRangeStart,
         dateRangeEnd,
       });
+    },
+    async getMonitorPageTitle(
+      _resolver: any,
+      { monitorId },
+      { APICaller }
+    ): Promise<MonitorPageTitle | null> {
+      return await libs.monitors.getMonitorPageTitle({ callES: APICaller, monitorId });
     },
   },
 });

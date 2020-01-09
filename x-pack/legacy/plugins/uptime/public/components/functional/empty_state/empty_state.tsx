@@ -18,12 +18,13 @@ interface EmptyStateQueryResult {
 }
 
 interface EmptyStateProps {
+  basePath: string;
   children: JSX.Element[] | JSX.Element;
 }
 
 type Props = UptimeGraphQLQueryProps<EmptyStateQueryResult> & EmptyStateProps;
 
-export const EmptyStateComponent = ({ children, data, errors }: Props) => {
+export const EmptyStateComponent = ({ basePath, children, data, errors }: Props) => {
   if (errors) {
     return <EmptyStateError errors={errors} />;
   }
@@ -32,6 +33,7 @@ export const EmptyStateComponent = ({ children, data, errors }: Props) => {
     if (!indexExists) {
       return (
         <DataMissing
+          basePath={basePath}
           headingMessage={i18n.translate('xpack.uptime.emptyState.noIndexTitle', {
             defaultMessage: 'Uptime index not found',
           })}
@@ -40,6 +42,7 @@ export const EmptyStateComponent = ({ children, data, errors }: Props) => {
     } else if (indexExists && docCount && docCount.count === 0) {
       return (
         <DataMissing
+          basePath={basePath}
           headingMessage={i18n.translate('xpack.uptime.emptyState.noDataMessage', {
             defaultMessage: 'No uptime data found',
           })}
