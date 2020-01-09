@@ -25,7 +25,7 @@ interface Props {
   error: Error;
 }
 
-export const SomethingWentWrongCallout = ({ error }: Props) => {
+export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error }) => {
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.error(error);
