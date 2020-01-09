@@ -129,8 +129,7 @@ export interface Dataset {
   ingest_pipeline: string;
   vars?: VarsEntry[];
   type: string;
-  // This is for convenience and not in the output from the registry. When creating a dataset, this info should be added.
-  packageName: string;
+  package: string;
 }
 
 export interface VarsEntry {

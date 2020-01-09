@@ -113,7 +113,7 @@ exports[`dedupFields function remove duplicated fields when parsing multiple fil
 ]
 `;
 
-exports[`flattenFields function recurseively flattens nested fields and renames name property with path: flattenFields 1`] = `
+exports[`flattenFields function recursively flattens nested fields and renames name property with path: flattenFields 1`] = `
 [
   {
     "name": "nginx.access.remote_ip_list",

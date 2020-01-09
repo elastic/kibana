@@ -79,7 +79,7 @@ export async function installTemplate({
     pipelineName = getPipelineNameForInstallation({
       pipelineName: dataset.ingest_pipeline,
       dataset,
-      packageName: dataset.packageName,
+      packageName: dataset.package,
       datasourceName,
     });
   }
