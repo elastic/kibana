@@ -84,13 +84,6 @@ export const positiveNumbersAboveZeroErrorMessage = i18n.translate(
   }
 );
 
-export const positiveNumbersEqualAboveZeroErrorMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.positiveNumberEqualAboveZeroRequiredError',
-  {
-    defaultMessage: 'Only numbers equal to or above 0 are allowed.',
-  }
-);
-
 export const validatePhase = (type, phase, errors) => {
   const phaseErrors = {};
 
@@ -127,12 +120,6 @@ export const validatePhase = (type, phase, errors) => {
         phaseErrors[numberedAttribute] = [numberRequiredMessage];
       } else if (phase[numberedAttribute] < 0) {
         phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
-      } else if (
-        (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE ||
-          numberedAttribute === PHASE_PRIMARY_SHARD_COUNT) &&
-        phase[numberedAttribute] < 0
-      ) {
-        phaseErrors[numberedAttribute] = [positiveNumbersEqualAboveZeroErrorMessage];
       }
     }
   }

@@ -21,6 +21,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   positiveNumbersAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
+  numberRequiredMessage,
   maximumAgeRequiredMessage,
   maximumSizeRequiredMessage,
   policyNameRequiredMessage,
@@ -237,6 +238,15 @@ describe('edit policy', () => {
     });
   });
   describe('warm phase', () => {
+    test('should show number required error when trying to save empty warm phase', () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      activatePhase(rendered, 'warm');
+      setPhaseAfter(rendered, 'warm', '');
+      save(rendered);
+      expectedErrorMessages(rendered, [numberRequiredMessage]);
+    });
     test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
