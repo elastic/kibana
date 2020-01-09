@@ -134,17 +134,9 @@ export function KbnAggTable(config, RecursionHelper) {
                 formattedColumn.class = 'visualize-table-right';
               }
 
-              const checkDimensionType = (dimension, type) =>
-                _.get(dimension, 'format.id') === type ||
-                _.get(dimension, 'format.params.id') === type;
-
-              const shouldShowTotal = dimension => {
-                const allowedFormatTypes = ['number', 'duration', 'bytes', 'percent'];
-                return allowedFormatTypes.some(type => checkDimensionType(dimension, type));
-              };
-
-              const isDate = checkDimensionType(dimension, 'date');
-              const isNumeric = shouldShowTotal(dimension);
+              const isDate =
+                dimension.format?.id === 'date' || dimension.format?.params?.id === 'date';
+              const isNumeric = formatter?.isNumeric;
 
               let { totalFunc } = $scope;
               if (typeof totalFunc === 'undefined' && showPercentage) {

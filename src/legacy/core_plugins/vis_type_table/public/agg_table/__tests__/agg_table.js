@@ -235,10 +235,6 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 3, format: { id: 'date' } },
           { accessor: 4, format: { id: 'number' } },
           { accessor: 5, format: { id: 'number' } },
-          { accessor: 6, format: { id: 'duration' } },
-          { accessor: 7, format: { id: 'bytes' } },
-          { accessor: 8, format: { id: 'color' } },
-          { accessor: 9, format: { id: 'boolean' } },
         ],
       };
       const response = await tableAggResponse(
