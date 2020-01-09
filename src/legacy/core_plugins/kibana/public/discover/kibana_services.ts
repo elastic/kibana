@@ -94,11 +94,11 @@ export {
   IndexPatternsContract,
   IIndexPattern,
   IndexPattern,
+  indexPatterns,
   IFieldType,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from 'ui/registry/doc_views_types';
-export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
+export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
-export { DocView, DocViewInput } from 'ui/registry/doc_views_types';
+export { Chrome, IInjector } from 'ui/chrome';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-export { IInjector } from 'ui/chrome';
+export { FieldName } from 'ui/directives/field_name/field_name';
