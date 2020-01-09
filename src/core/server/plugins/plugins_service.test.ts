@@ -143,7 +143,7 @@ describe('PluginsService', () => {
       `);
     });
 
-    it('throws if plugin required Kibana version is incompatible with the current version', async () => {
+    it('does not throw if plugin required Kibana version is incompatible with the current version', async () => {
       mockDiscover.mockReturnValue({
         error$: from([
           PluginDiscoveryError.incompatibleVersion('path-3', new Error('Incompatible version')),
@@ -151,11 +151,10 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(`
-              [Error: Failed to initialize plugins:
-              	Incompatible version (incompatible-version, path-3)]
-            `);
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      await pluginsService.discover();
+
+      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`Array []`);
+      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Incompatible version (incompatible-version, path-3)],

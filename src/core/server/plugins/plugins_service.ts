@@ -166,18 +166,22 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     // At this stage we report only errors that can occur when new platform plugin
     // manifest is present, otherwise we can't be sure that the plugin is for the new
     // platform and let legacy platform to handle it.
-    const errorTypesToReport = [
-      PluginDiscoveryErrorType.IncompatibleVersion,
-      PluginDiscoveryErrorType.InvalidManifest,
-    ];
-
+    const typesToError = [PluginDiscoveryErrorType.InvalidManifest];
+    const typesToWarn = [PluginDiscoveryErrorType.IncompatibleVersion];
     const errors = await error$
       .pipe(
-        filter(error => errorTypesToReport.includes(error.type)),
-        tap(pluginError => this.log.error(pluginError)),
+        tap(error => {
+          if (typesToError.includes(error.type)) {
+            this.log.error(error);
+          } else if (typesToWarn.includes(error.type)) {
+            this.log.warn(error);
+          }
+        }),
+        filter(error => typesToError.includes(error.type)),
         toArray()
       )
       .toPromise();
+
     if (errors.length > 0) {
       throw new Error(
         `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
