@@ -17,19 +17,24 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { VisOptionsProps } from 'ui/vis/editors/default';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
-import editorConfigTemplate from './timelion_vis_params.html';
 import { TimelionVisualizationDependencies } from '../plugin';
 // @ts-ignore
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
+import { TimelionOptions } from './timelion_options';
+import { VisParams } from '../timelion_vis_fn';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
 export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+  const { http, uiSettings } = dependencies;
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
@@ -50,7 +55,11 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
       template: visConfigTemplate,
     },
     editorConfig: {
-      optionsTemplate: editorConfigTemplate,
+      optionsTemplate: (props: VisOptionsProps<VisParams>) => (
+        <KibanaContextProvider services={{ uiSettings, http }}>
+          <TimelionOptions {...props} />
+        </KibanaContextProvider>
+      ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,

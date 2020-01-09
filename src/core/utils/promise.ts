@@ -17,24 +17,17 @@
  * under the License.
  */
 
-// Field types
-export const FIELD_TYPES = {
-  TEXT: 'text',
-  TEXTAREA: 'textarea',
-  NUMBER: 'number',
-  TOGGLE: 'toggle',
-  CHECKBOX: 'checkbox',
-  COMBO_BOX: 'comboBox',
-  RADIO_GROUP: 'radioGroup',
-  RANGE: 'range',
-  SELECT: 'select',
-  SUPER_SELECT: 'superSelect',
-  MULTI_SELECT: 'multiSelect',
-};
-
-// Validation types
-export const VALIDATION_TYPES = {
-  FIELD: 'field', // Default validation error (on the field value)
-  ASYNC: 'async', // Returned from asynchronous validations
-  ARRAY_ITEM: 'arrayItem', // If the field value is an Array, this error would be returned if an _item_ of the array is invalid
-};
+export function withTimeout<T>({
+  promise,
+  timeout,
+  errorMessage,
+}: {
+  promise: Promise<T>;
+  timeout: number;
+  errorMessage: string;
+}) {
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => setTimeout(() => reject(new Error(errorMessage)), timeout)),
+  ]) as Promise<T>;
+}

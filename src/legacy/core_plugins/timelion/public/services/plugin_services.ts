@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 
-export function createIndexPatternSelectDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
-    ['indexPatternList', { watchDepth: 'reference' }],
-    ['selectedIndexPattern', { watchDepth: 'reference' }],
-    ['setIndexPattern', { watchDepth: 'reference' }],
-  ]);
-}
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
+
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
+  SavedObjectsClientContract
+>('SavedObjectsClient');

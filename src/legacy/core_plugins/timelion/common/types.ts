@@ -17,24 +17,30 @@
  * under the License.
  */
 
-// Field types
-export const FIELD_TYPES = {
-  TEXT: 'text',
-  TEXTAREA: 'textarea',
-  NUMBER: 'number',
-  TOGGLE: 'toggle',
-  CHECKBOX: 'checkbox',
-  COMBO_BOX: 'comboBox',
-  RADIO_GROUP: 'radioGroup',
-  RANGE: 'range',
-  SELECT: 'select',
-  SUPER_SELECT: 'superSelect',
-  MULTI_SELECT: 'multiSelect',
-};
+type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
 
-// Validation types
-export const VALIDATION_TYPES = {
-  FIELD: 'field', // Default validation error (on the field value)
-  ASYNC: 'async', // Returned from asynchronous validations
-  ARRAY_ITEM: 'arrayItem', // If the field value is an Array, this error would be returned if an _item_ of the array is invalid
-};
+interface TimelionFunctionArgsSuggestion {
+  name: string;
+  help: string;
+}
+
+export interface TimelionFunctionArgs {
+  name: string;
+  help?: string;
+  multi?: boolean;
+  types: TimelionFunctionArgsTypes[];
+  suggestions?: TimelionFunctionArgsSuggestion[];
+}
+
+export interface ITimelionFunction {
+  aliases: string[];
+  args: TimelionFunctionArgs[];
+  name: string;
+  help: string;
+  chainable: boolean;
+  extended: boolean;
+  isAlias: boolean;
+  argsByName: {
+    [key: string]: TimelionFunctionArgs[];
+  };
+}
