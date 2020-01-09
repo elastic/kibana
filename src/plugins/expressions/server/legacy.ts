@@ -26,7 +26,7 @@ import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Logger, IClusterClient } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { ExpressionsServerSetupDependencies } from './plugin';
 import { typeSpecs as types, Type } from '../common';
 import { serializeProvider } from '../common';
