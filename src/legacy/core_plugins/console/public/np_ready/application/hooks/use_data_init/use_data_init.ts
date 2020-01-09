@@ -17,20 +17,13 @@
  * under the License.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState<boolean>(false);
-  const [retryToken, setRetryToken] = useState<object>({});
-
-  const retry = useCallback(() => {
-    setRetryToken({});
-    setDone(false);
-    setError(null);
-  }, []);
 
   const {
     services: { objectStorageClient, history },
@@ -55,6 +48,8 @@ export const useDataInit = () => {
           dispatch({ type: 'setCurrentTextObject', payload: results[0] });
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
         setError(e);
       } finally {
         setDone(true);
@@ -62,11 +57,10 @@ export const useDataInit = () => {
     };
 
     load();
-  }, [dispatch, objectStorageClient, history, retryToken]);
+  }, [dispatch, objectStorageClient, history]);
 
   return {
     error,
     done,
-    retry,
   };
 };

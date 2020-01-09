@@ -18,7 +18,6 @@
  */
 
 export * from './split_panel';
-export { SomethingWentWrongCallout } from './something_went_wrong_callout';
 export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
 export { ConsoleMenu } from './console_menu';
 export { WelcomePanel } from './welcome_panel';
