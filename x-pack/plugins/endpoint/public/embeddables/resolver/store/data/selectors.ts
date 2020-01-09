@@ -93,6 +93,7 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
+    // TODO comment
     if (metadata.parent === null) {
       continue;
     }
@@ -101,11 +102,14 @@ function processEdgeLineSegments(
     const parentPosition = positions.get(parent);
 
     if (position === undefined || parentPosition === undefined) {
+      // TODO comment
       throw new Error();
     }
 
+    // TODO comment
     const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
 
+    // TODO comment
     const lineFromProcessToMidwayLine: EdgeLineSegment = [
       [
         position[0],
@@ -116,11 +120,10 @@ function processEdgeLineSegments(
     ];
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
+    // TODO, move to sequencer?
     const isFirstChild = process === siblings[0];
 
-    // If this is the first child
     if (isFirstChild) {
-      // is only child?
       if (metadata.isOnlyChild) {
         // add a single line segment directly from parent to child
         edgeLineSegments.push([parentPosition, position]);
@@ -131,10 +134,10 @@ function processEdgeLineSegments(
         // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
         // A line from the child to the midway line
         //
-        const lineFromParentToMidwayLine = [
+        const lineFromParentToMidwayLine: EdgeLineSegment = [
           // Add a line from parent to midway point
           parentPosition,
-          [parentPosition[0], midwayY] as const,
+          [parentPosition[0], midwayY],
         ];
 
         const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
@@ -294,130 +297,6 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
     const positions = processPositions(indexedProcessTree, widths);
     const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
-    /*
-    // Keep track of last processed parent so we can reset parent specific counters as we iterate
-    let lastProcessedParentNode: ProcessEvent | undefined;
-    let numberOfPrecedingSiblings = 0;
-    let runningWidthOfPrecedingSiblings = 0;
-
-    // TODO remove guard
-    if (graphableProcesses.length !== 0) {
-      for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-        // Handle root node
-        if (metadata.parent === null) {
-          const { process } = metadata;
-          positions.set(process, [0, 0]);
-        } else {
-          const { process, parent, width, parentWidth } = metadata;
-
-          // Reinit counters when parent changes
-          if (lastProcessedParentNode !== parent) {
-            numberOfPrecedingSiblings = 0;
-            runningWidthOfPrecedingSiblings = 0;
-
-            // keep track of this so we know when to reinitialize
-            lastProcessedParentNode = parent;
-          }
-
-          const parentPosition = positions.get(parent);
-
-          if (parentPosition === undefined) {
-            // TODO explain that this can never happen
-            throw new Error();
-          }
-
-          const xOffset =
-            parentWidth / -2 +
-            numberOfPrecedingSiblings * distanceBetweenNodes +
-            runningWidthOfPrecedingSiblings +
-            width / 2;
-
-          const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
-
-          // positions.set(process, position);
-
-          const edgeLineSegmentsForProcess = function edgeLineSegmentsForProcess() {
-            const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
-
-            // If this is the first child
-            if (numberOfPrecedingSiblings === 0) {
-              if (indexedProcessTreeIsOnlyChild(indexedProcessTree, process)) {
-                // add a single line segment directly from parent to child
-                return [[parentPosition, position]];
-              } else {
-                // Draw 3 line segments
-                // One from the parent to the midway line,
-                // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
-                // A line from the child to the midway line
-                return [
-                  lineFromParentToMidwayLine(),
-                  midwayLine(lastProcessedParentNode),
-                  lineFromProcessToMidwayLine(),
-                ];
-              }
-            } else {
-              // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
-              // from the parent to the midway line
-              return [lineFromProcessToMidwayLine()];
-            }
-
-            function lineFromParentToMidwayLine() {
-              return [
-                // Add a line from parent to midway point
-                parentPosition,
-                [parentPosition[0], midwayY],
-              ];
-            }
-
-            function lineFromProcessToMidwayLine() {
-              return [
-                [
-                  position[0],
-                  // Simulate a capped line by moving this up a bit so it overlaps with the midline segment
-                  midwayY,
-                ],
-                position,
-              ];
-            }
-
-            function midwayLine(parentProcessNode: ProcessEvent) {
-              const parentProcessPosition = positions.get(parentProcessNode);
-              const childrenOfParent = indexedProcessTreeChildren(
-                indexedProcessTree,
-                parentProcessNode
-              );
-              const lastChild = childrenOfParent[childrenOfParent.length - 1];
-
-              const widthOfParent = widths.get(parentProcessNode);
-              const widthOfFirstChild = widths.get(process);
-              const widthOfLastChild = widths.get(lastChild);
-              const widthOfMidline = widthOfParent - widthOfFirstChild / 2 - widthOfLastChild / 2;
-
-              const minX = widthOfParent / -2 + widthOfFirstChild / 2;
-              const maxX = minX + widthOfMidline;
-
-              return [
-                [
-                  // Position line relative to the parent's x component
-                  parentProcessPosition[0] + minX,
-                  midwayY,
-                ],
-                [
-                  // Position line relative to the parent's x component
-                  parentProcessPosition[0] + maxX,
-                  midwayY,
-                ],
-              ];
-            }
-          };
-
-          edgeLineSegments.push(...edgeLineSegmentsForProcess());
-          numberOfPrecedingSiblings += 1;
-          runningWidthOfPrecedingSiblings += width;
-        }
-      }
-    }
-    */
 
     return {
       processNodePositions: positions,
