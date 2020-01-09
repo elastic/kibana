@@ -416,7 +416,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
       <EuiSpacer size="m" />
       <div>
-        {Object.keys(headers || {}).length > 0 ? (
+        {hasHeaders && Object.keys(headers || {}).length > 0 ? (
           <Fragment>
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
