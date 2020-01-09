@@ -4,49 +4,90 @@
 
   // Note the names of these styles need to match the type of the field they are displaying.
   .boolean {
-    background-color: $euiColorVis5;
+    color: $euiColorVis5;
+    border-color: $euiColorVis5;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis5, 30%);
+    }
   }
 
   .date {
-    background-color: $euiColorVis7;
+    color: $euiColorVis7;
+    border-color: $euiColorVis7;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis7, 30%);
+    }
   }
 
   .document_count {
-    background-color: $euiColorVis2;
+    color: $euiColorVis2;
+    border-color: $euiColorVis2;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis2, 30%);
+    }
   }
 
   .geo_point {
-    background-color: $euiColorVis8;
+    color: $euiColorVis8;
+    border-color: $euiColorVis8;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis8, 30%);
+    }
   }
 
   .ip {
-    background-color: $euiColorVis3;
+    color: $euiColorVis3;
+    border-color: $euiColorVis3;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis3, 30%);
+    }
   }
 
   .keyword {
-    background-color: $euiColorVis0;
+    color: $euiColorVis0;
+    border-color: $euiColorVis0;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis0, 30%);
+    }
   }
 
   .number {
-    background-color: $euiColorVis1;
+    color: $euiColorVis1;
+    border-color: $euiColorVis1;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis1, 30%);
+    }
   }
 
   .text {
-    background-color: $euiColorVis9;
+    color: $euiColorVis9;
+    border-color: $euiColorVis9;
+
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis9, 30%);
+    }
   }
 
   .type-other,
   .unknown {
-    background-color: $euiColorVis6;
-  }
+    color: $euiColorVis6;
+    border-color: $euiColorVis6;
 
-  // Use euiPanel styling
-  @include euiPanel($selector: '.mlFieldDataCard__content');
+    .field-type-icon-container {
+      background-color: lighten($euiColorVis6, 30%);
+    }
+  }
 
   .mlFieldDataCard__content {
     @include euiFontSizeS;
     height: 385px;
-    border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
     overflow: hidden;
   }
 
