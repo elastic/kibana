@@ -78,7 +78,7 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
 
   return (
     <EuiForm data-test-subj="CountUntil">
-      <EuiFormRow label="Numbers in ms separated by new line" fullWidth>
+      <EuiFormRow label="Some integer" fullWidth>
         <EuiFieldNumber
           placeholder="Some integer"
           value={data}
