@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiCallOut } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../i18n';
 const { DatasourceNoDatasource: strings } = ComponentStrings;

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiFieldSearch } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiFieldSearch } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { ComponentStrings } from '../../../i18n';
 

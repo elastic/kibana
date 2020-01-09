@@ -14,8 +14,8 @@
 /* eslint-disable jsx-a11y/role-has-required-aria-props */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, keyCodes } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, keyCodes } from '@elastic/eui';
 
 /**
  * An autocomplete component. Currently this is only used for the expression editor but in theory

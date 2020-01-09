@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
 
 export const ArgAdd = ({ onValueAdd, displayName, help }) => {
   return (

@@ -5,8 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion, EuiText, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { ComponentStrings } from '../../../i18n';
 
 const { ElementConfig: strings } = ComponentStrings;

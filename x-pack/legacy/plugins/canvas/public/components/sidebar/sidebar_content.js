@@ -5,9 +5,9 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
+import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
 import { globalStateUpdater } from '../workpad_page/integration_utils';

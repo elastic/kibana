@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
-import moment from 'moment';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { Paginate } from '../paginate';
 
 const getIcon = type => {

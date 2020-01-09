@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiButton } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n';
 
 const { WorkpadCreate: strings } = ComponentStrings;

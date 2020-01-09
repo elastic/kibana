@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import { sortByOrder } from 'lodash';
 import { Paginate } from '../paginate';
 import { TagList } from '../tag_list';

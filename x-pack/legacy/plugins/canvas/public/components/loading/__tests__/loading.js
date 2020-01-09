@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import expect from '@kbn/expect';
 import { shallow } from 'enzyme';
+import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import { Loading } from '../loading';
 
 describe('<Loading />', () => {

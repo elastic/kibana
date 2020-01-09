@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@elastic/eui": "17.3.1",
-    "@elastic/charts": "^16.0.2",
+    "@elastic/charts": "^16.1.0",
     "@kbn/dev-utils": "1.0.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "angular": "^1.7.9",

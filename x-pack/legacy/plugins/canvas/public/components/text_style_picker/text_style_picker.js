@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n';
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';

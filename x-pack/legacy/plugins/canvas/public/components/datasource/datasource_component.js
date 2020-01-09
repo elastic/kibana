@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,6 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
 import { ComponentStrings, DataSourceStrings } from '../../../i18n';
 import { getDefaultIndex } from '../../lib/es_service';

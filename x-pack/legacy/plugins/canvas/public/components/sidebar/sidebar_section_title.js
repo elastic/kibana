@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import PropTypes from 'prop-types';
+import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
   const formattedTitle = (

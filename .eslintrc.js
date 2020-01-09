@@ -19,7 +19,6 @@
 
 const { readdirSync } = require('fs');
 const { resolve } = require('path');
-const UiSharedDeps = require('@kbn/ui-shared-deps');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -362,7 +361,6 @@ module.exports = {
           'uiExports',
           // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
           'querystring',
-          ...Object.keys(UiSharedDeps.externals),
         ],
 
         'import/resolver': {

@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import { withState } from 'recompose';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { Debug } from '../debug';
 
 const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
