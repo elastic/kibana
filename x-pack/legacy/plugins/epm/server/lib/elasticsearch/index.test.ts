@@ -10,7 +10,7 @@ import { getDatasetAssetBaseName } from './index';
 test('getBaseName', () => {
   const dataset: Dataset = {
     name: 'bar',
-    packageName: 'foo',
+    package: 'foo',
     type: 'logs',
   } as Dataset;
   const name = getDatasetAssetBaseName(dataset);
