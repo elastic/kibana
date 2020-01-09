@@ -38,7 +38,7 @@ export const usePrivilegeUser = (): Return => {
           setAuthenticated(privilege.isAuthenticated);
           if (privilege.index != null && Object.keys(privilege.index).length > 0) {
             const indexName = Object.keys(privilege.index)[0];
-            setHasWrite(privilege.index[indexName].create_index);
+            setHasWrite(privilege.index[indexName].manage);
           }
         }
       } catch (error) {

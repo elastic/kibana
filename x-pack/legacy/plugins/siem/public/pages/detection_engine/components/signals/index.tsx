@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -45,6 +46,8 @@ import { combineQueries } from '../../../../components/timeline/helpers';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { InputsRange } from '../../../../store/inputs/model';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
+
+import { HeaderSection } from '../../../../components/header_section';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -91,6 +94,7 @@ interface OwnProps {
   canUserCRUD: boolean;
   defaultFilters?: esFilters.Filter[];
   from: number;
+  loading: boolean;
   signalsIndex: string;
   to: number;
 }
@@ -109,6 +113,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     globalFilters,
     globalQuery,
     isSelectAllChecked,
+    loading,
     loadingEventIds,
     removeTimelineLinkTo,
     selectedEventIds,
@@ -288,6 +293,15 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       }),
       [additionalActions, canUserCRUD, selectAll]
     );
+
+    if (loading) {
+      return (
+        <EuiPanel>
+          <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
+          <EuiLoadingContent />
+        </EuiPanel>
+      );
+    }
 
     return (
       <StatefulEventsViewer

@@ -5,8 +5,9 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
@@ -17,18 +18,27 @@ import { SpyRoute } from '../../../utils/route/spy_routes';
 
 import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
+import { ReadOnlyCallOut } from './components/read_only_callout';
+import { useUserInfo } from '../components/user_info';
 import * as i18n from './translations';
 
-interface RulesComponentProps {
-  canUserCRUD: boolean;
-}
-export const RulesComponent = React.memo<RulesComponentProps>(({ canUserCRUD }) => {
+export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
+  const [loading, isSignalIndexExists, isAuthenticated, canUserCRUD] = useUserInfo();
+
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  }
 
   const lastCompletedRun = undefined;
   return (
     <>
+      {!canUserCRUD && <ReadOnlyCallOut />}
       <ImportRuleModal
         showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
@@ -55,31 +65,35 @@ export const RulesComponent = React.memo<RulesComponentProps>(({ canUserCRUD }) 
           }
           title={i18n.PAGE_TITLE}
         >
-          {canUserCRUD && (
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="importAction"
-                  onClick={() => {
-                    setShowImportModal(true);
-                  }}
-                >
-                  {i18n.IMPORT_RULE}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
-                  iconType="plusInCircle"
-                >
-                  {i18n.ADD_NEW_RULE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="importAction"
+                isDisabled={!canUserCRUD || loading}
+                onClick={() => {
+                  setShowImportModal(true);
+                }}
+              >
+                {i18n.IMPORT_RULE}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                iconType="plusInCircle"
+                isDisabled={!canUserCRUD || loading}
+              >
+                {i18n.ADD_NEW_RULE}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </HeaderPage>
-        <AllRules importCompleteToggle={importCompleteToggle} canUserCRUD={canUserCRUD} />
+        <AllRules
+          loading={loading}
+          importCompleteToggle={importCompleteToggle}
+          canUserCRUD={canUserCRUD}
+        />
       </WrapperPage>
 
       <SpyRoute />

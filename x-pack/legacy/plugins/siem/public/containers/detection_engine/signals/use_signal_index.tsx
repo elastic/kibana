@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from 'react';
 
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../../components/toasters';
+import { createPrepackagedRules } from '../rules';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { PostSignalError, SignalIndexError } from './types';
@@ -40,6 +41,7 @@ export const useSignalIndex = (): Return => {
         if (isSubscribed && signal != null) {
           setSignalIndexName(signal.name);
           setSignalIndexExists(true);
+          createPrepackagedRules({ signal: abortCtrl.signal });
         }
       } catch (error) {
         if (isSubscribed) {

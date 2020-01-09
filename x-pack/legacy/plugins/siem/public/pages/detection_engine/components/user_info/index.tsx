@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { noop } from 'lodash/fp';
+import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
+
+import { usePrivilegeUser } from '../../../../containers/detection_engine/signals/use_privilege_user';
+import { useSignalIndex } from '../../../../containers/detection_engine/signals/use_signal_index';
+import { useKibana } from '../../../../lib/kibana';
+
+type Return = [boolean, boolean | null, boolean | null, boolean, string | null];
+
+export interface State {
+  canUserCRUD: boolean | null;
+  hasWrite: boolean | null;
+  isSignalIndexExists: boolean | null;
+  isAuthenticated: boolean | null;
+  loading: boolean | null;
+  signalIndexName: string | null;
+}
+
+const initialState: State = {
+  canUserCRUD: null,
+  hasWrite: null,
+  isSignalIndexExists: null,
+  isAuthenticated: null,
+  loading: true,
+  signalIndexName: null,
+};
+
+export type Action =
+  | { type: 'updateLoading'; loading: boolean }
+  | {
+      type: 'updateHasWrite';
+      hasWrite: boolean | null;
+    }
+  | {
+      type: 'updateIsSignalIndexExists';
+      isSignalIndexExists: boolean | null;
+    }
+  | {
+      type: 'updateIsAuthenticated';
+      isAuthenticated: boolean | null;
+    }
+  | {
+      type: 'updateCanUserCRUD';
+      canUserCRUD: boolean | null;
+    }
+  | {
+      type: 'updateSignalIndexName';
+      signalIndexName: string | null;
+    };
+
+export const userInfoReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'updateLoading': {
+      return {
+        ...state,
+        loading: action.loading,
+      };
+    }
+    case 'updateHasWrite': {
+      return {
+        ...state,
+        hasWrite: action.hasWrite,
+      };
+    }
+    case 'updateIsSignalIndexExists': {
+      return {
+        ...state,
+        isSignalIndexExists: action.isSignalIndexExists,
+      };
+    }
+    case 'updateIsAuthenticated': {
+      return {
+        ...state,
+        isAuthenticated: action.isAuthenticated,
+      };
+    }
+    case 'updateCanUserCRUD': {
+      return {
+        ...state,
+        canUserCRUD: action.canUserCRUD,
+      };
+    }
+    case 'updateSignalIndexName': {
+      return {
+        ...state,
+        signalIndexName: action.signalIndexName,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([initialState, () => noop]);
+
+const useUserData = () => useContext(StateUserInfoContext);
+
+interface ManageUserInfoProps {
+  children: React.ReactNode;
+}
+
+export const ManageUserInfo = ({ children }: ManageUserInfoProps) => (
+  <StateUserInfoContext.Provider value={useReducer(userInfoReducer, initialState)}>
+    {children}
+  </StateUserInfoContext.Provider>
+);
+
+export const useUserInfo = (): Return => {
+  const [
+    { canUserCRUD, hasWrite, isSignalIndexExists, isAuthenticated, loading, signalIndexName },
+    dispatch,
+  ] = useUserData();
+  const [privilegeLoading, isApiAuthenticated, hasApiWrite] = usePrivilegeUser();
+  const [
+    indexNameLoading,
+    isApiSignalIndexExists,
+    apiSignalIndexName,
+    createSignalIndex,
+  ] = useSignalIndex();
+
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const capabilitiesCanUserCRUD = (uiCapabilities?.siem?.crud as boolean) ?? false;
+
+  useEffect(() => {
+    if (loading !== privilegeLoading || indexNameLoading) {
+      dispatch({ type: 'updateLoading', loading: privilegeLoading || indexNameLoading });
+    }
+  }, [loading, privilegeLoading, indexNameLoading]);
+
+  useEffect(() => {
+    if (hasWrite !== hasApiWrite && hasApiWrite != null) {
+      dispatch({ type: 'updateHasWrite', hasWrite: hasApiWrite });
+    }
+  }, [hasWrite, hasApiWrite]);
+
+  useEffect(() => {
+    if (isSignalIndexExists !== isApiSignalIndexExists && isApiSignalIndexExists != null) {
+      dispatch({ type: 'updateIsSignalIndexExists', isSignalIndexExists: isApiSignalIndexExists });
+    }
+  }, [isSignalIndexExists, isApiSignalIndexExists]);
+
+  useEffect(() => {
+    if (isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
+      dispatch({ type: 'updateIsAuthenticated', isAuthenticated: isApiAuthenticated });
+    }
+  }, [isAuthenticated, isApiAuthenticated]);
+
+  useEffect(() => {
+    if (canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
+      dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
+    }
+  }, [canUserCRUD, capabilitiesCanUserCRUD]);
+
+  useEffect(() => {
+    if (signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
+      dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
+    }
+  }, [signalIndexName, apiSignalIndexName]);
+
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      hasApiWrite &&
+      isSignalIndexExists != null &&
+      !isSignalIndexExists &&
+      createSignalIndex != null
+    ) {
+      createSignalIndex();
+    }
+  }, [createSignalIndex, isAuthenticated, isSignalIndexExists, hasWrite]);
+
+  return [
+    indexNameLoading || privilegeLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD ?? false,
+    signalIndexName,
+  ];
+};

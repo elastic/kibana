@@ -4,84 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
-import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
-import { useKibana } from '../../lib/kibana';
 import { CreateRuleComponent } from './rules/create';
 import { DetectionEngineComponent } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
 import { RuleDetailsComponent } from './rules/details';
 import { RulesComponent } from './rules';
+import { useUserInfo, ManageUserInfo } from './components/user_info';
 
 const detectionEnginePath = `/:pageName(detection-engine)`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 export const DetectionEngineContainer = React.memo<Props>(() => {
-  const [privilegeLoading, isAuthenticated, hasWrite] = usePrivilegeUser();
   const [
-    indexNameLoading,
+    loading,
     isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
     signalIndexName,
-    createSignalIndex,
-  ] = useSignalIndex();
-  const uiCapabilities = useKibana().services.application?.capabilities;
-  const canUserCRUD = (uiCapabilities?.siem?.crud as boolean) ?? false;
-
-  useEffect(() => {
-    if (
-      isAuthenticated &&
-      hasWrite &&
-      isSignalIndexExists != null &&
-      !isSignalIndexExists &&
-      createSignalIndex != null
-    ) {
-      createSignalIndex();
-    }
-  }, [createSignalIndex, isAuthenticated, isSignalIndexExists, hasWrite]);
+  ] = useUserInfo();
 
   return (
-    <Switch>
-      <Route exact path={detectionEnginePath} strict>
-        <DetectionEngineComponent
-          canUserCRUD={canUserCRUD}
-          loading={indexNameLoading || privilegeLoading}
-          isSignalIndexExists={isSignalIndexExists}
-          isUserAuthenticated={isAuthenticated}
-          signalsIndex={signalIndexName}
+    <ManageUserInfo>
+      <Switch>
+        <Route exact path={detectionEnginePath} strict>
+          <DetectionEngineComponent
+            canUserCRUD={canUserCRUD}
+            loading={loading}
+            isSignalIndexExists={isSignalIndexExists}
+            isUserAuthenticated={isAuthenticated}
+            signalsIndex={signalIndexName}
+          />
+        </Route>
+        <Route exact path={`${detectionEnginePath}/rules`}>
+          <RulesComponent />
+        </Route>
+        <Route exact path={`${detectionEnginePath}/rules/create`}>
+          <CreateRuleComponent />
+        </Route>
+        <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
+          <RuleDetailsComponent />
+        </Route>
+        <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
+          <EditRuleComponent />
+        </Route>
+        <Route
+          path="/detection-engine/"
+          render={({ location: { search = '' } }) => (
+            <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
+          )}
         />
-      </Route>
-      {isSignalIndexExists && isAuthenticated && (
-        <>
-          <Route exact path={`${detectionEnginePath}/rules`}>
-            <RulesComponent canUserCRUD={canUserCRUD} />
-          </Route>
-          {canUserCRUD && (
-            <Route exact path={`${detectionEnginePath}/rules/create`}>
-              <CreateRuleComponent />
-            </Route>
-          )}
-          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
-            <RuleDetailsComponent signalsIndex={signalIndexName} canUserCRUD={canUserCRUD} />
-          </Route>
-          {canUserCRUD && (
-            <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
-              <EditRuleComponent />
-            </Route>
-          )}
-        </>
-      )}
-
-      <Route
-        path="/detection-engine/"
-        render={({ location: { search = '' } }) => (
-          <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
-        )}
-      />
-    </Switch>
+      </Switch>
+    </ManageUserInfo>
   );
 });
 DetectionEngineContainer.displayName = 'DetectionEngineContainer';

@@ -160,8 +160,6 @@ export const getColumns = (
       truncateText: true,
       width: '20%',
     },
-  ];
-  const actions: RulesColumns[] = [
     {
       align: 'center',
       field: 'activate',
@@ -171,12 +169,15 @@ export const getColumns = (
           dispatch={dispatch}
           id={item.id}
           enabled={item.activate}
+          isDisabled={!canUserCRUD}
           isLoading={item.isLoading}
         />
       ),
       sortable: true,
       width: '85px',
     },
+  ];
+  const actions: RulesColumns[] = [
     {
       actions: getActions(dispatch, history),
       width: '40px',
