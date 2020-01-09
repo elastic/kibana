@@ -13,7 +13,10 @@ import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import { SummaryBucket, SummaryHighlightBucket } from './types';
+import {
+  LogEntriesSummaryBucket,
+  LogEntriesSummaryHighlightsBucket,
+} from '../../../../common/http_api';
 
 interface Interval {
   end: number;
@@ -26,8 +29,8 @@ interface LogMinimapProps {
   highlightedInterval: Interval | null;
   jumpToTarget: (params: LogEntryTime) => any;
   intervalSize: number;
-  summaryBuckets: SummaryBucket[];
-  summaryHighlightBuckets?: SummaryHighlightBucket[];
+  summaryBuckets: LogEntriesSummaryBucket[];
+  summaryHighlightBuckets?: LogEntriesSummaryHighlightsBucket[];
   target: number | null;
   start: number | null;
   end: number | null;

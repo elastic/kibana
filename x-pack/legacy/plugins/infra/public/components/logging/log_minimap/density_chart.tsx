@@ -10,10 +10,10 @@ import max from 'lodash/fp/max';
 import * as React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { SummaryBucket } from './types';
+import { LogEntriesSummaryBucket } from '../../../../common/http_api';
 
 interface DensityChartProps {
-  buckets: SummaryBucket[];
+  buckets: LogEntriesSummaryBucket[];
   end: number;
   start: number;
   width: number;
@@ -41,7 +41,7 @@ export const DensityChart: React.FC<DensityChartProps> = ({
     .range([0, width * (2 / 3)]);
 
   // FIXME: path is not closed at the bottom.
-  const path = area<SummaryBucket>()
+  const path = area<LogEntriesSummaryBucket>()
     .x0(xScale(0))
     .x1(bucket => xScale(bucket.entriesCount))
     .y0(bucket => yScale(bucket.start))
