@@ -18,14 +18,16 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   error: Error;
+  onButtonClick: () => void;
 }
 
-export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error }) => {
+export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onButtonClick }) => {
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -35,17 +37,21 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error }) =
     <EuiCallOut
       iconType="alert"
       color="danger"
-      title={i18n.translate('console.loadingErrorTitle', {
+      title={i18n.translate('console.loadingError.title', {
         defaultMessage: 'Something went wrong',
       })}
     >
       <EuiText>
         <p>
-          {i18n.translate('console.loadingErrorMessage', {
+          {i18n.translate('console.loadingError.message', {
             defaultMessage: `Console could not be restored to its previous state. Text entered in the current session may not be persisted. Try reloading this page.`,
           })}
         </p>
       </EuiText>
+      <EuiSpacer size="m" />
+      <EuiButton color="danger" onClick={() => onButtonClick()}>
+        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload" />
+      </EuiButton>
     </EuiCallOut>
   );
 };

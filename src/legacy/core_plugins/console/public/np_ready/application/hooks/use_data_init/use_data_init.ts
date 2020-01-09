@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState<boolean>(false);
+  const [retryToken, setRetryToken] = useState<object>({});
+
+  const retry = useCallback(() => {
+    setRetryToken({});
+    setDone(false);
+    setError(null);
+  }, []);
 
   const {
     services: { objectStorageClient, history },
@@ -55,10 +62,11 @@ export const useDataInit = () => {
     };
 
     load();
-  }, [dispatch, objectStorageClient, history]);
+  }, [dispatch, objectStorageClient, history, retryToken]);
 
   return {
     error,
     done,
+    retry,
   };
 };

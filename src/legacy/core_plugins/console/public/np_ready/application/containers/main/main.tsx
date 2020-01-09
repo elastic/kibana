@@ -49,58 +49,59 @@ export function Main() {
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
-  const { done, error } = useDataInit();
+  const { done, error, retry } = useDataInit();
+
+  if (error) {
+    return (
+      <EuiPageContent>
+        <SomethingWentWrongCallout onButtonClick={retry} error={error} />
+      </EuiPageContent>
+    );
+  }
 
   return (
-    <>
-      {error ? (
-        <EuiPageContent>
-          <SomethingWentWrongCallout error={error} />
-        </EuiPageContent>
-      ) : null}
-      <div id="consoleRoot">
-        <EuiFlexGroup
-          className="consoleContainer"
-          gutterSize="none"
-          direction="column"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle className="euiScreenReaderOnly">
-              <h1>
-                {i18n.translate('console.pageHeading', {
-                  defaultMessage: 'Console',
-                })}
-              </h1>
-            </EuiTitle>
-            <TopNavMenu
-              disabled={!done}
-              items={getTopNavConfig({
-                onClickHistory: () => setShowHistory(!showingHistory),
-                onClickSettings: () => setShowSettings(true),
-                onClickHelp: () => setShowHelp(!showHelp),
+    <div id="consoleRoot">
+      <EuiFlexGroup
+        className="consoleContainer"
+        gutterSize="none"
+        direction="column"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle className="euiScreenReaderOnly">
+            <h1>
+              {i18n.translate('console.pageHeading', {
+                defaultMessage: 'Console',
               })}
-            />
-          </EuiFlexItem>
-          {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
-          <EuiFlexItem>
-            <Editor loading={!done} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {done && showWelcome ? (
-          <WelcomePanel
-            onDismiss={() => {
-              storage.set('version_welcome_shown', '@@SENSE_REVISION');
-              setShowWelcomePanel(false);
-            }}
+            </h1>
+          </EuiTitle>
+          <TopNavMenu
+            disabled={!done}
+            items={getTopNavConfig({
+              onClickHistory: () => setShowHistory(!showingHistory),
+              onClickSettings: () => setShowSettings(true),
+              onClickHelp: () => setShowHelp(!showHelp),
+            })}
           />
-        ) : null}
+        </EuiFlexItem>
+        {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
+        <EuiFlexItem>
+          <Editor loading={!done} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {done && showWelcome ? (
+        <WelcomePanel
+          onDismiss={() => {
+            storage.set('version_welcome_shown', '@@SENSE_REVISION');
+            setShowWelcomePanel(false);
+          }}
+        />
+      ) : null}
 
-        {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-      </div>
-    </>
+      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+
+      {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
+    </div>
   );
 }
