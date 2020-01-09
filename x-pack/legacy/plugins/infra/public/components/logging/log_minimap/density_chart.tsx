@@ -40,25 +40,23 @@ export const DensityChart: React.FC<DensityChartProps> = ({
     .domain([0, xMax])
     .range([0, width * (2 / 3)]);
 
+  // FIXME: path is not closed at the bottom.
   const path = area<SummaryBucket>()
     .x0(xScale(0))
     .x1(bucket => xScale(bucket.entriesCount))
-    .y(bucket => yScale((bucket.start + bucket.end) / 2))
+    .y0(bucket => yScale(bucket.start))
+    .y1(bucket => yScale(bucket.end))
     .curve(curveMonotoneY);
   const pathData = path(buckets);
 
-  const highestPathCoord = String(pathData)
-    .replace(/[^.0-9,]/g, ' ')
-    .split(/[ ,]/)
-    .reduce((result, num) => (Number(num) > result ? Number(num) : result), 0);
   return (
     <g transform={`translate(${width / 3}, 0)`}>
       <DensityChartNegativeBackground
         transform={`translate(${-width / 3}, 0)`}
         width={width / 2}
-        height={highestPathCoord}
+        height={height}
       />
-      <DensityChartPositiveBackground width={width * (2 / 3)} height={highestPathCoord} />
+      <DensityChartPositiveBackground width={width * (2 / 3)} height={height} />
       <PositiveAreaPath d={pathData || ''} />
     </g>
   );

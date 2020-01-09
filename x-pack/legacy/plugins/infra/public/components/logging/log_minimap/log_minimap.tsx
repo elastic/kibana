@@ -34,6 +34,8 @@ interface LogMinimapProps {
   summaryBuckets: SummaryBucket[];
   summaryHighlightBuckets?: SummaryHighlightBucket[];
   target: number | null;
+  start: number | null;
+  end: number | null;
   width: number;
 }
 
@@ -44,11 +46,9 @@ interface LogMinimapState {
   timeCursorY: number;
 }
 
-function calculateYScale(target: number | null, height: number, intervalSize: number) {
-  const domainStart = target ? target - intervalSize / 2 : 0;
-  const domainEnd = target ? target + intervalSize / 2 : 0;
+function calculateYScale(start: number | null, end: number | null, height: number) {
   return scaleLinear()
-    .domain([domainStart, domainEnd])
+    .domain([start || 0, end || 0])
     .range([0, height]);
 }
 
@@ -166,6 +166,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
   public render() {
     const {
+      start,
+      end,
       className,
       height,
       highlightedInterval,
@@ -173,19 +175,14 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       summaryBuckets,
       summaryHighlightBuckets,
       width,
-      intervalSize,
     } = this.props;
     const { timeCursorY, drag, target } = this.state;
+
     // Render the time ruler and density map beyond the visible range of time, so that
     // the user doesn't run out of ruler when they click and drag
-    const overscanHeight = Math.round(window.screen.availHeight * 2.5) || height * 3;
-    const [minTime, maxTime] = calculateYScale(
-      target,
-      overscanHeight,
-      intervalSize * (overscanHeight / height)
-    ).domain();
-    const tickCount = height ? Math.round((overscanHeight / height) * 144) : 12;
-    const overscanTranslate = height ? -(overscanHeight - height) / 2 : 0;
+    const [minTime, maxTime] = calculateYScale(start, end, height).domain();
+    const tickCount = height ? height / 8 : 12;
+    const overscanTranslate = 0;
     const dragTransform = !drag || !drag.currentY ? 0 : drag.currentY - drag.startY;
     return (
       <MinimapWrapper
@@ -204,15 +201,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             start={minTime}
             end={maxTime}
             width={width}
-            height={overscanHeight}
+            height={height}
           />
 
-          <MinimapBorder x1={width / 3} y1={0} x2={width / 3} y2={overscanHeight} />
+          <MinimapBorder x1={width / 3} y1={0} x2={width / 3} y2={height} />
           <TimeRuler
             start={minTime}
             end={maxTime}
             width={width}
-            height={overscanHeight}
+            height={height}
             tickCount={tickCount}
           />
 

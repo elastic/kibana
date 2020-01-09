@@ -113,10 +113,12 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             return (
               <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
-                  {({ buckets }) => (
+                  {({ buckets, start, end }) => (
                     <WithStreamItems>
                       {({ isReloading }) => (
                         <LogMinimap
+                          start={start}
+                          end={end}
                           height={height}
                           width={width}
                           highlightedInterval={isReloading ? null : visibleTimeInterval}
