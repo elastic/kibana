@@ -5,13 +5,22 @@
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
-
-import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPageContentBody,
+} from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
+import { getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -37,7 +46,6 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
-
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
@@ -149,21 +157,39 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     };
   });
 
+  const jobCreatorTitle = getJobCreatorTitle(jobCreator);
+
   return (
     <Fragment>
       <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiPageBody>
-          <EuiPageContentBody>
-            <Wizard
-              jobCreator={jobCreator}
-              chartLoader={chartLoader}
-              resultsLoader={resultsLoader}
-              chartInterval={chartInterval}
-              jobValidator={jobValidator}
-              existingJobsAndGroups={existingJobsAndGroups}
-              firstWizardStep={firstWizardStep}
-            />
-          </EuiPageContentBody>
+          <EuiPageContent>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.page.createJob"
+                      defaultMessage="Create job"
+                    />
+                    : {jobCreatorTitle}
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+
+            <EuiPageContentBody>
+              <Wizard
+                jobCreator={jobCreator}
+                chartLoader={chartLoader}
+                resultsLoader={resultsLoader}
+                chartInterval={chartInterval}
+                jobValidator={jobValidator}
+                existingJobsAndGroups={existingJobsAndGroups}
+                firstWizardStep={firstWizardStep}
+              />
+            </EuiPageContentBody>
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     </Fragment>

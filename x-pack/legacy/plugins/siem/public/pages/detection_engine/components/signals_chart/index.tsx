@@ -23,7 +23,7 @@ export const sampleChartOptions = [
   { text: 'Top users', value: 'users' },
 ];
 
-export const SignalsCharts = memo(() => (
+const SignalsChartsComponent = () => (
   <EuiPanel>
     <HeaderSection title="Signal detection frequency">
       <EuiSelect
@@ -36,4 +36,6 @@ export const SignalsCharts = memo(() => (
 
     <HistogramSignals />
   </EuiPanel>
-));
+);
+
+export const SignalsCharts = memo(SignalsChartsComponent);
