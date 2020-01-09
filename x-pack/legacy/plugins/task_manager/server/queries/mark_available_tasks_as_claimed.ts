@@ -95,29 +95,9 @@ if (doc['task.runAt'].size()!=0) {
   },
 };
 
-const SORT_VALUE_TO_BE_FIRST = 0;
+// function changed to stop sorting by _id: https://github.com/elastic/kibana/issues/52517
 export const sortByIdsThenByScheduling = (claimTasksById: string[]): SortClause => {
-  const {
-    _script: {
-      script: { source },
-    },
-  } = SortByRunAtAndRetryAt;
-  return defaultsDeep(
-    {
-      _script: {
-        script: {
-          source: `
-if(params.ids.contains(doc['_id'].value)){
-  return ${SORT_VALUE_TO_BE_FIRST};
-}
-${source}
-`,
-          params: { ids: claimTasksById },
-        },
-      },
-    },
-    SortByRunAtAndRetryAt
-  );
+  return SortByRunAtAndRetryAt;
 };
 
 export const updateFields = (fieldUpdates: {

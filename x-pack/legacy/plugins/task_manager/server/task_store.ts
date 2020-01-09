@@ -427,18 +427,13 @@ export class TaskStore {
   }
 }
 
+// function changed to stop sorting by _id: https://github.com/elastic/kibana/issues/52517
 function paginatableSort(sort: any[] = []) {
-  const sortById = { _id: 'desc' };
-
   if (!sort.length) {
-    return [{ 'task.runAt': 'asc' }, sortById];
+    return [{ 'task.runAt': 'asc' }];
   }
 
-  if (sort.find(({ _id }) => !!_id)) {
-    return sort;
-  }
-
-  return [...sort, sortById];
+  return sort;
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {

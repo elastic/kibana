@@ -203,7 +203,7 @@ describe('TaskStore', () => {
       expect(args).toMatchObject({
         index: 'tasky',
         body: {
-          sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
+          sort: [{ 'task.runAt': 'asc' }],
           query: { term: { type: 'task' } },
         },
       });
@@ -234,7 +234,7 @@ describe('TaskStore', () => {
 
       expect(args).toMatchObject({
         body: {
-          sort: [{ 'task.taskType': 'desc' }, { _id: 'desc' }],
+          sort: [{ 'task.taskType': 'desc' }],
         },
       });
     });
@@ -669,24 +669,13 @@ describe('TaskStore', () => {
           script: {
             lang: 'painless',
             source: `
-if(params.ids.contains(doc['_id'].value)){
-  return 0;
-}
-
 if (doc['task.retryAt'].size()!=0) {
   return doc['task.retryAt'].value.toInstant().toEpochMilli();
 }
 if (doc['task.runAt'].size()!=0) {
   return doc['task.runAt'].value.toInstant().toEpochMilli();
 }
-    
-`,
-            params: {
-              ids: [
-                'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-                'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-              ],
-            },
+    `,
           },
         },
       });
