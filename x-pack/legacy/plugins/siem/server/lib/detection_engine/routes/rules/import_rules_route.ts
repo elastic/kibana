@@ -107,6 +107,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             type,
             references,
             timeline_id: timelineId,
+            timeline_title: timelineTitle,
             version,
           } = parsedRule;
           try {
@@ -137,6 +138,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 outputIndex: finalIndex,
                 savedId,
                 timelineId,
+                timelineTitle,
                 meta,
                 filters,
                 ruleId,
@@ -169,6 +171,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 outputIndex,
                 savedId,
                 timelineId,
+                timelineTitle,
                 meta,
                 filters,
                 id: undefined,
