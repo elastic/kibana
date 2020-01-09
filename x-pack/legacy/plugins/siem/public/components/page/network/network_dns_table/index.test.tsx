@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -17,8 +16,6 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
-
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
@@ -52,7 +49,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkDnsTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkDnsTableComponent)')).toMatchSnapshot();
     });
   });
 

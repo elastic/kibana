@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
+import { FieldFormat, IFieldFormatMetaParams } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -64,7 +64,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: Record<string, any>) {
+  constructor(params: IFieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }

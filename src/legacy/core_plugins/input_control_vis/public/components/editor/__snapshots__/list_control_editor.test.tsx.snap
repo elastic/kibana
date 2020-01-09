@@ -102,10 +102,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="listControlSizeInput"
-      fullWidth={false}
-      isLoading={false}
       min={1}
       onChange={[Function]}
       value={5}
@@ -296,10 +293,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="listControlSizeInput"
-      fullWidth={false}
-      isLoading={false}
       min={1}
       onChange={[Function]}
       value={5}
@@ -459,10 +453,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="listControlSizeInput"
-      fullWidth={false}
-      isLoading={false}
       min={1}
       onChange={[Function]}
       value={10}

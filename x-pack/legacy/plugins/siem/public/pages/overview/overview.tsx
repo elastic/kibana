@@ -8,8 +8,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { documentationLinks } from 'ui/documentation_links';
 
+import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
@@ -24,6 +24,7 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 
 export const OverviewComponent = React.memo(() => {
+  const docLinks = useKibana().services.docLinks;
   const dateEnd = Date.now();
   const dateRange = moment.duration(24, 'hours').asMilliseconds();
   const dateStart = dateEnd - dateRange;
@@ -62,7 +63,7 @@ export const OverviewComponent = React.memo(() => {
                 actionSecondaryIcon="popout"
                 actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
                 actionSecondaryTarget="_blank"
-                actionSecondaryUrl={documentationLinks.siem}
+                actionSecondaryUrl={docLinks.links.siem}
                 data-test-subj="empty-page"
                 title={i18n.EMPTY_TITLE}
               />

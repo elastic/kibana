@@ -47,9 +47,10 @@ export class TimePicker extends Component<Props, State> {
     isDirty: false,
   };
 
-  // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
-  UNSAFE_componentWillReceiveProps({ from, to }: Props) {
-    if (from !== this.props.from || to !== this.props.to) {
+  componentDidUpdate(prevProps: Props) {
+    const { to, from } = this.props;
+
+    if (prevProps.from !== from || prevProps.to !== to) {
       this.setState({
         range: { from, to },
         isDirty: false,

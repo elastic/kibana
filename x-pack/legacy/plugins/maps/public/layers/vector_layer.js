@@ -373,7 +373,6 @@ export class VectorLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
-
     const canSkipFetch = await canSkipSourceUpdate({
       source: this._source,
       prevDataRequest,

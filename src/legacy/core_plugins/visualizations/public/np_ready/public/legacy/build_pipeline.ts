@@ -28,7 +28,7 @@ import {
   createFormat,
 } from '../../../legacy_imports';
 // eslint-disable-next-line
-import { SearchSourceContract } from '../../../../../../ui/public/courier/search_source/search_source';
+import { ISearchSource } from '../../../../../../ui/public/courier/search_source/search_source';
 import { Vis, VisParams, VisState } from '..';
 
 interface SchemaConfigParams {
@@ -445,6 +445,8 @@ export const buildVislibDimensions = async (
       dimensions.x.params.date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
+      dimensions.x.params.intervalESValue = esValue;
+      dimensions.x.params.intervalESUnit = esUnit;
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
@@ -466,7 +468,7 @@ export const buildVislibDimensions = async (
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
 export const getVisParams = async (
   vis: Vis,
-  params: { searchSource: SearchSourceContract; timeRange?: any; abortSignal?: AbortSignal }
+  params: { searchSource: ISearchSource; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
@@ -484,7 +486,7 @@ export const getVisParams = async (
 export const buildPipeline = async (
   vis: Vis,
   params: {
-    searchSource: SearchSourceContract;
+    searchSource: ISearchSource;
     timeRange?: any;
   }
 ) => {

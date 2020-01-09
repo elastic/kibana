@@ -1,0 +1,17 @@
+{
+  "rule_id": "e020f504-c0e5-4768-8e1f-1e2ec7bac961",
+  "risk_score": 50,
+  "description": "Indicates that a server is using a potentially unsafe key.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Weak_Key",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Weak_Key\" or rule.name: \"SSL::Weak_Key\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

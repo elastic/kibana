@@ -30,7 +30,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
-  const comboBox = getService('comboBox');
   const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
@@ -118,8 +117,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
+    async getChartCanvas() {
+      return await find.byCssSelector('.echChart canvas:last-of-type');
+    }
+
+    async chartCanvasExist() {
+      return await find.existsByCssSelector('.echChart canvas:last-of-type');
+    }
+
     async clickHistogramBar() {
-      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+      const el = await this.getChartCanvas();
 
       await browser
         .getActions()
@@ -129,7 +136,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async brushHistogram() {
-      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+      const el = await this.getChartCanvas();
+
       await browser.dragAndDrop(
         { location: el, offset: { x: 200, y: 20 } },
         { location: el, offset: { x: 400, y: 30 } }
@@ -279,7 +287,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async selectIndexPattern(indexPattern) {
       await testSubjects.click('indexPattern-switch-link');
-      await comboBox.set('index-pattern-selection', indexPattern);
+      await find.clickByCssSelector(
+        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

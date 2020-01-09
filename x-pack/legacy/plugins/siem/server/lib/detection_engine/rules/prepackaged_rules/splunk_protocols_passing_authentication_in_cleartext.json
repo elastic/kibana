@@ -1,0 +1,17 @@
+{
+  "rule_id": "f4442e7f-856a-4a4a-851b-c1f9b97b0d39",
+  "risk_score": 50,
+  "description": "Splunk - Protocols passing authentication in cleartext",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Protocols passing authentication in cleartext",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:(21 or 23 or 110 or 143) and network.transport:tcp",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

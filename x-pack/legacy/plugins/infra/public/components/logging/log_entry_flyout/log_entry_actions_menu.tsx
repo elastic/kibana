@@ -9,14 +9,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import url from 'url';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { InfraLogItem } from '../../../graphql/types';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { getTraceUrl } from '../../../../../apm/public/components/shared/Links/apm/ExternalLinks';
+import { LogEntriesItem } from '../../../../common/http_api';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
-  logItem: InfraLogItem;
+  logItem: LogEntriesItem;
 }> = ({ logItem }) => {
   const prependBasePath = useKibana().services.http?.basePath?.prepend;
   const { hide, isVisible, show } = useVisibilityState(false);
@@ -89,7 +89,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const getUptimeLink = (logItem: InfraLogItem) => {
+const getUptimeLink = (logItem: LogEntriesItem) => {
   const searchExpressions = logItem.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
     .map(({ field, value }) => `${field}:${value}`);
@@ -104,7 +104,7 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   });
 };
 
-const getAPMLink = (logItem: InfraLogItem) => {
+const getAPMLink = (logItem: LogEntriesItem) => {
   const traceIdEntry = logItem.fields.find(
     ({ field, value }) => value != null && field === 'trace.id'
   );

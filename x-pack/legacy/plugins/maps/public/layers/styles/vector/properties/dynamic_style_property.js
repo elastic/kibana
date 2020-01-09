@@ -8,8 +8,10 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
-import { DynamicLegendRow } from './components/dynamic_legend_row';
+import { scaleValue } from '../style_util';
 import React from 'react';
+import { OrdinalLegend } from './components/ordinal_legend';
+import { CategoricalLegend } from './components/categorical_legend';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
@@ -34,6 +36,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   isOrdinal() {
+    return true;
+  }
+
+  hasBreaks() {
+    return false;
+  }
+
+  isRanged() {
     return true;
   }
 
@@ -74,6 +84,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckStyleMetaFromFeatures(features) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const name = this.getField().getName();
     let min = Infinity;
     let max = -Infinity;
@@ -96,6 +110,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+    if (!this.isOrdinal()) {
+      return null;
+    }
+
     const realFieldName = this._field.getESDocFieldName
       ? this._field.getESDocFieldName()
       : this._field.getName();
@@ -128,7 +146,47 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  renderLegendDetailRow() {
-    return <DynamicLegendRow style={this} />;
+  getMbValue(value) {
+    if (!this.isOrdinal()) {
+      return this.formatField(value);
+    }
+
+    const valueAsFloat = parseFloat(value);
+    if (this.isScaled()) {
+      return scaleValue(valueAsFloat, this.getFieldMeta());
+    }
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+    return valueAsFloat;
+  }
+
+  renderBreakedLegend() {
+    return null;
+  }
+
+  _renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    return (
+      <CategoricalLegend
+        style={this}
+        loadIsLinesOnly={loadIsLinesOnly}
+        loadIsPointsOnly={loadIsPointsOnly}
+        symbolId={symbolId}
+      />
+    );
+  }
+
+  _renderRangeLegend() {
+    return <OrdinalLegend style={this} />;
+  }
+
+  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    if (this.isRanged()) {
+      return this._renderRangeLegend();
+    } else if (this.hasBreaks()) {
+      return this._renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId });
+    } else {
+      return null;
+    }
   }
 }

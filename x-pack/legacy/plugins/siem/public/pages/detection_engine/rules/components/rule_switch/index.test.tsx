@@ -5,29 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-
-import { useKibanaCore } from '../../../../../lib/compose/kibana_core';
+import React from 'react';
 
 import { RuleSwitchComponent } from './index';
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: {
-    get$: () => 'world',
-  },
-  injectedMetadata: {
-    getKibanaVersion: () => '8.0.0',
-  },
-}));
 
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <RuleSwitchComponent optionLabel="rule-switch" enabled={true} id={'7'} isLoading={false} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });
