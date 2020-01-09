@@ -1,6 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default ({ getService, getPageObjects }) => {
   describe('creating and deleting default index', function describeIndexTests() {
     const PageObjects = getPageObjects(['common', 'settings']);
     const retry = getService('retry');
@@ -56,4 +63,4 @@ export default function({ getService, getPageObjects }) {
       });
     });
   });
-}
+};

@@ -18,6 +18,8 @@
  */
 
 
+
+
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
@@ -51,6 +53,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       const tenXLonger = config.get('timeouts.waitFor') * 5;
       return find.byCssSelector('[data-test-subj="globalLoadingIndicator-hidden"]', tenXLonger);
     }
+
     async setQuickSpan(timespan) {
       await PageObjects.common.sleep(2000);
       const isOpen = await this.isTimepickerOpen();
@@ -62,6 +65,54 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.clickTimespan(timespan);
         await this.getSpinnerDone();
       }
+    }
+
+    async setFromRelativeTime(count, unit) {
+      await testSubjects.click('superDatePickerstartDatePopoverButton').click();
+      await PageObjects.common.sleep(50);
+      await testSubjects.click('superDatePickerRelativeTab').click();
+      await PageObjects.common.sleep(51);
+      await testSubjects.click('superDatePickerRelativeDateInputNumber').click();
+      await PageObjects.common.sleep(51);
+      await testSubjects.find('superDatePickerRelativeDateInputNumber').clearValue();
+      await testSubjects.find('superDatePickerRelativeDateInputNumber').type(count);
+      await PageObjects.common.sleep(52);
+      await testSubjects.click('superDatePickerRelativeDateInputUnitSelector').click();
+      await PageObjects.common.sleep(53);
+      await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
+      await testSubjects.click('superDatePickerstartDatePopoverButton').click();
+    }
+
+    async setToRelativeTime(count, unit) {
+      await PageObjects.common.sleep(53);
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+      await PageObjects.common.sleep(54);
+      await testSubjects.click('superDatePickerRelativeTab');
+      await PageObjects.common.sleep(55);
+      await testSubjects.click('superDatePickerRelativeDateInputNumber');
+      await PageObjects.common.sleep(51);
+      await testSubjects.find('superDatePickerRelativeDateInputNumber').clearValue();
+      await testSubjects.find('superDatePickerRelativeDateInputNumber').type(count);
+      await PageObjects.common.sleep(56);
+      await testSubjects.click('superDatePickerRelativeDateInputUnitSelector');
+      await PageObjects.common.sleep(57);
+      await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+    }
+
+    async setRelativeRange(fromCount, fromUnit, toCount, toUnit) {
+      await PageObjects.common.sleep(2000);
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await PageObjects.common.sleep(2000);
+      await PageObjects.common.debug(`--Setting From Time : ${fromCount} ${fromUnit}`);
+      await this.setFromRelativeTime(fromCount, fromUnit);
+      await PageObjects.common.sleep(200);
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await PageObjects.common.sleep(200);
+      await PageObjects.common.debug(`--Setting To Time : ${toCount} ${toUnit}`);
+      await this.setToRelativeTime(toCount, toUnit);
+      await testSubjects.click('querySubmitButton');
+      return await this.getSpinnerDone();
     }
 
     async clickDiscover() {
@@ -120,7 +171,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async awaitGlobalLoadingIndicatorHidden() {
       await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
         allowHidden: true,
-        timeout: defaultFindTimeout * 10
+        timeout: defaultFindTimeout * 10,
       });
     }
 
