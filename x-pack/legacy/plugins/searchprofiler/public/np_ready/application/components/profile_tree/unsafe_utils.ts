@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import tinycolor from 'tinycolor2';
 import _ from 'lodash';
@@ -199,30 +198,12 @@ export function initTree<T>(
   data.sort((a, b) => comparator(timeInMilliseconds(a), timeInMilliseconds(b)));
 }
 
-export function closeNode<T = any>(node: Operation) {
-  const closeDraft = (draft: Operation) => {
-    draft.visible = false;
-
-    if (draft.children == null || draft.children.length === 0) {
-      return;
-    }
-
-    for (const child of draft.children) {
-      closeDraft(child);
-    }
-  };
-  return produce<Operation>(node, draft => {
-    closeDraft(draft);
-  });
-}
-
-export const sortIndices = (data: IndexMap) =>
-  produce<IndexMap, Index[]>(data, doNotChange => {
-    const sortedIndices: Index[] = [];
-    for (const index of Object.values(doNotChange)) {
-      sortedIndices.push(index);
-    }
-    // And now sort the indices themselves
-    sortedIndices.sort((a, b) => comparator(a.time, b.time));
-    return sortedIndices;
-  });
+export const sortIndices = (data: IndexMap) => {
+  const sortedIndices: Index[] = [];
+  for (const index of Object.values(data)) {
+    sortedIndices.push(index);
+  }
+  // And now sort the indices themselves
+  sortedIndices.sort((a, b) => comparator(a.time, b.time));
+  return sortedIndices;
+};

@@ -7,11 +7,11 @@ import { useReducer } from 'react';
 import { reducer } from './reducer';
 import { Operation, ShardSerialized, Targets } from '../types';
 
-type OperationNoChildren = Omit<Operation, 'children'>;
+export type OperationNoChildParent = Omit<Operation, 'children' | 'parent'>;
 
 interface HighlightDetails {
   indexName: string;
-  operation: OperationNoChildren;
+  operation: OperationNoChildParent;
   shardName: string;
 }
 

@@ -13,7 +13,6 @@ describe('Highlight Details Flyout', () => {
       onClose: () => {},
       shardName: '[test][test]',
       operation: {
-        parent: null,
         breakdown: [
           {
             color: 'test',

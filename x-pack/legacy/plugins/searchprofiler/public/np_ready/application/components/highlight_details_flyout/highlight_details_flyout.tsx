@@ -20,7 +20,7 @@ import { HighlightDetailsTable } from './highlight_details_table';
 import { Operation } from '../../types';
 
 export interface Props {
-  operation: Omit<Operation, 'children'>;
+  operation: Omit<Operation, 'children' | 'parent'>;
   shardName: string;
   indexName: string;
   onClose: () => void;
