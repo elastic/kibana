@@ -48,6 +48,7 @@ describe('ui reducer', () => {
       uiReducer(
         {
           basePath: 'abc',
+          esKuery: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
         },
