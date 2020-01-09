@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusByLocation component renders duration in ms, not us 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Up in 2/2 Locations
+  </h2>
+</div>
+`;
