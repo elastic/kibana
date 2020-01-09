@@ -13,28 +13,27 @@ export const formatSignalsData = (
 ) => {
   const groupBuckets: SignalsGroupBucket[] =
     signalsData?.aggregations?.signalsByGrouping?.buckets ?? [];
-  let result: HistogramData[] = [];
-  groupBuckets.forEach(({ key: group, signals }) => {
-    const signalsBucket: SignalsBucket[] = signals?.buckets ?? [];
+  return groupBuckets.reduce<HistogramData[]>((acc, { key: group, signals }) => {
+    const signalsBucket: SignalsBucket[] = signals.buckets ?? [];
 
-    result = [
-      ...result,
+    return [
+      ...acc,
       ...signalsBucket.map(({ key, doc_count }: SignalsBucket) => ({
         x: key,
         y: doc_count,
         g: group,
       })),
     ];
-  });
-
-  return result;
+  }, []);
 };
 
 export const getSignalsHistogramQuery = (
   stackByField: string,
   from: number,
   to: number,
-  additionalFilters: object[]
+  additionalFilters: Array<{
+    bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
+  }>
 ) => ({
   aggs: {
     signalsByGrouping: {

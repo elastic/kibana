@@ -12,17 +12,17 @@ import { SignalSearchResponse } from './types';
 type Return<Hit, Aggs> = [
   boolean,
   SignalSearchResponse<Hit, Aggs> | null,
-  React.Dispatch<SetStateAction<string>>
+  React.Dispatch<SetStateAction<object>>
 ];
 
 /**
  * Hook for using to get a Signals from the Detection Engine API
  *
- * @param query convert a dsl into string
+ * @param initialQuery query dsl object
  *
  */
-export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => {
-  const [queryString, setQueryString] = useState(query);
+export const useQuerySignals = <Hit, Aggs>(initialQuery: object): Return<Hit, Aggs> => {
+  const [query, setQuery] = useState(initialQuery);
   const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +34,7 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
     async function fetchData() {
       try {
         const signalResponse = await fetchQuerySignals<Hit, Aggs>({
-          query: queryString,
+          query,
           signal: abortCtrl.signal,
         });
 
@@ -56,7 +56,7 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [queryString]);
+  }, [query]);
 
-  return [loading, signals, setQueryString];
+  return [loading, signals, setQuery];
 };

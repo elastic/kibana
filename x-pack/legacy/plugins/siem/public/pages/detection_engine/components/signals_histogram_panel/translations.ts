@@ -16,7 +16,7 @@ export const STACK_BY_LABEL = i18n.translate(
 export const STACK_BY_RISK_SCORES = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.riskScoresDropDown',
   {
-    defaultMessage: 'Risk Scores',
+    defaultMessage: 'Risk scores',
   }
 );
 
@@ -30,56 +30,56 @@ export const STACK_BY_SEVERITIES = i18n.translate(
 export const STACK_BY_DESTINATION_IPS = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.destinationIpsDropDown',
   {
-    defaultMessage: 'Destination IPs',
+    defaultMessage: 'Top destination IPs',
   }
 );
 
 export const STACK_BY_SOURCE_IPS = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.sourceIpsDropDown',
   {
-    defaultMessage: 'Source IPs',
+    defaultMessage: 'Top source IPs',
   }
 );
 
 export const STACK_BY_ACTIONS = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.eventActionsDropDown',
   {
-    defaultMessage: 'Event Actions',
+    defaultMessage: 'Top event actions',
   }
 );
 
 export const STACK_BY_CATEGORIES = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.eventCategoriesDropDown',
   {
-    defaultMessage: 'Event Categories',
+    defaultMessage: 'Top event categories',
   }
 );
 
 export const STACK_BY_HOST_NAMES = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.hostNamesDropDown',
   {
-    defaultMessage: 'Host Names',
+    defaultMessage: 'Top host names',
   }
 );
 
 export const STACK_BY_RULE_TYPES = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.ruleTypesDropDown',
   {
-    defaultMessage: 'Rule Types',
+    defaultMessage: 'Top rule types',
   }
 );
 
 export const STACK_BY_RULE_NAMES = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.rulesDropDown',
   {
-    defaultMessage: 'Rules',
+    defaultMessage: 'Top rules',
   }
 );
 
 export const STACK_BY_USERS = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.stackByOptions.usersDropDown',
   {
-    defaultMessage: 'Users',
+    defaultMessage: 'Top users',
   }
 );
 

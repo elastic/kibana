@@ -26,6 +26,7 @@ export interface SignalsBucket {
   key: number;
   doc_count: number;
 }
+
 export interface SignalsGroupBucket {
   key: string;
   signals: {

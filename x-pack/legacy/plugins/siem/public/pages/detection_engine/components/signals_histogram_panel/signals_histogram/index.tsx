@@ -11,6 +11,7 @@ import {
   getSpecId,
   HistogramBarSeries,
   niceTimeFormatByDay,
+  Position,
   Settings,
   timeFormatter,
 } from '@elastic/charts';
@@ -28,7 +29,7 @@ import { useKibana } from '../../../../../lib/kibana';
 interface HistogramSignalsProps {
   filters?: esFilters.Filter[];
   from: number;
-  legendPosition?: 'left' | 'right' | 'bottom' | 'top';
+  legendPosition?: Position;
   loadingInitial: boolean;
   query?: Query;
   setTotalSignalsCount: React.Dispatch<SignalsTotal>;
@@ -49,8 +50,8 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     stackByField,
     updateDateRange,
   }) => {
-    const [isLoadingSignals, signalsData, setQueryString] = useQuerySignals<{}, SignalsAggregation>(
-      JSON.stringify(getSignalsHistogramQuery(stackByField, from, to, []))
+    const [isLoadingSignals, signalsData, setQuery] = useQuerySignals<{}, SignalsAggregation>(
+      getSignalsHistogramQuery(stackByField, from, to, [])
     );
     const theme = useTheme();
     const kibana = useKibana();
@@ -77,15 +78,9 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
         }
       );
 
-      try {
-        setQueryString(
-          JSON.stringify(
-            getSignalsHistogramQuery(stackByField, from, to, !isEmpty(converted) ? [converted] : [])
-          )
-        );
-      } catch (e) {
-        setQueryString('');
-      }
+      setQuery(
+        getSignalsHistogramQuery(stackByField, from, to, !isEmpty(converted) ? [converted] : [])
+      );
     }, [stackByField, from, to, query, filters]);
 
     return (

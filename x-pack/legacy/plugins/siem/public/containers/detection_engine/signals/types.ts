@@ -10,7 +10,7 @@ export interface BasicSignals {
   signal: AbortSignal;
 }
 export interface QuerySignals extends BasicSignals {
-  query: string;
+  query: object;
 }
 
 export interface SignalsResponse {

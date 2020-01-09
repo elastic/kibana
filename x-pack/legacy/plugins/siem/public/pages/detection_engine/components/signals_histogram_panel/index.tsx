@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Position } from '@elastic/charts';
 import { EuiButton, EuiPanel, EuiSelect } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -29,7 +30,7 @@ interface SignalsHistogramPanelProps {
   filters?: esFilters.Filter[];
   from: number;
   query?: Query;
-  legendPosition?: 'left' | 'right' | 'bottom' | 'top';
+  legendPosition?: Position;
   loadingInitial?: boolean;
   showLinkToSignals?: boolean;
   showTotalSignalsCount?: boolean;
