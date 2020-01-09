@@ -98,7 +98,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   }
 
-  getEditableValue(type, value, defVal) {
+  getEditableValue(type: string, value: Setting['value'], defVal: Setting['defVal']) {
     const val = value === null || value === undefined ? defVal : value;
     switch (type) {
       case 'array':
@@ -114,7 +114,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   }
 
-  getDisplayedDefaultValue(type, defVal, optionLabels = {}) {
+  getDisplayedDefaultValue(type: string, defVal: Setting['defVal'], optionLabels = {}) {
     if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
@@ -122,7 +122,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       case 'array':
         return defVal.join(', ');
       case 'select':
-        return optionLabels.hasOwnProperty(defVal) ? optionLabels[defVal] : String(defVal);
+        return optionLabels.hasOwnProperty(defVal)
+          ? optionLabels[defVal as string]
+          : String(defVal);
       default:
         return String(defVal);
     }
@@ -156,12 +158,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
           JSON.parse(newUnsavedValue);
         } catch (e) {
           isInvalid = true;
-          error = (
-            <FormattedMessage
-              id="kbn.management.settings.field.codeEditorSyntaxErrorMessage"
-              defaultMessage="Invalid JSON syntax"
-            />
-          );
+          error = i18n.translate('kbn.management.settings.field.codeEditorSyntaxErrorMessage', {
+            defaultMessage: 'Invalid JSON syntax',
+          });
         }
         break;
       default:
@@ -175,7 +174,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   };
 
-  onFieldChange = e => {
+  onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const { type, validation } = this.props.setting;
     const { unsavedValue } = this.state;
@@ -194,10 +193,10 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
 
     let isInvalid = false;
-    let error;
+    let error = null;
 
     if (validation && validation.regex) {
-      if (!validation.regex.test(newUnsavedValue)) {
+      if (!validation.regex.test(newUnsavedValue.toString())) {
         error = validation.message;
         isInvalid = true;
       }
@@ -210,7 +209,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   };
 
-  onFieldKeyDown = ({ keyCode }) => {
+  onFieldKeyDown = ({ keyCode }: { keyCode: number }) => {
     if (keyCode === keyCodes.ENTER) {
       this.saveEdit();
     }
@@ -219,7 +218,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   };
 
-  onFieldEscape = ({ keyCode }) => {
+  onFieldEscape = ({ keyCode }: { keyCode: number }) => {
     if (keyCode === keyCodes.ESCAPE) {
       this.cancelEdit();
     }
@@ -262,8 +261,8 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   };
 
-  getImageAsBase64(file: File) {
-    if (!file instanceof File) {
+  getImageAsBase64(file: any) {
+    if (!(file instanceof File)) {
       return null;
     }
 
@@ -618,7 +617,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
                     <EuiCodeBlock
                       language="json"
                       paddingSize="s"
-                      overflowHeight={defVal.length >= 500 ? 300 : null}
+                      overflowHeight={defVal.length >= 500 ? 300 : undefined}
                     >
                       {this.getDisplayedDefaultValue(type, defVal)}
                     </EuiCodeBlock>

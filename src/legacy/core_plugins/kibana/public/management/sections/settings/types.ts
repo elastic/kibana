@@ -17,17 +17,24 @@
  * under the License.
  */
 
+interface Validation {
+  regex: RegExp;
+  message: string;
+}
 export interface Setting {
   name: string;
   ariaName: string;
   isOverridden: boolean;
   type: string;
-  value: string; // wild guess
-  defVal: string; // wild guess
+  value: any;
+  defVal: any;
   optionLabels: { [key: string]: string };
-  options: string[];
   description: string;
   displayName: string;
   isCustom: boolean;
   requiresPageReload: boolean;
+  options: {
+    maxSize: number[];
+  };
+  validation: Validation;
 }
