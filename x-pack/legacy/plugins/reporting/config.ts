@@ -140,9 +140,7 @@ export async function config(Joi: any) {
     }).default(),
     encryptionKey: Joi.when(Joi.ref('$dist'), {
       is: true,
-      then: Joi.string()
-        .allow(null)
-        .default(null),
+      then: Joi.string(),
       otherwise: Joi.string().default('a'.repeat(32)),
     }),
     roles: Joi.object({
