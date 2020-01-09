@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { MatrixHistogram } from '.';
 
