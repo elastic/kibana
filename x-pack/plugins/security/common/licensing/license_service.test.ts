@@ -91,7 +91,7 @@ describe('license features', function() {
     }
   });
 
-  it('should show login page and other security elements, allow RBAC but forbid role m appings and document level security if license is basic.', () => {
+  it('should show login page and other security elements, allow RBAC but forbid role mappings and document level security if license is basic.', () => {
     const mockRawLicense = licensingMock.createLicense({
       features: { security: { isEnabled: true, isAvailable: true } },
     });
