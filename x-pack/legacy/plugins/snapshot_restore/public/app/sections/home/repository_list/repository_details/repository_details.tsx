@@ -353,14 +353,23 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiCodeBlock>
             </div>
           ) : (
-            <EuiCallOut color="danger" iconType="alert">
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              title={i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle', {
+                defaultMessage: 'Sorry, there was an error cleaning the repository.',
+              })}
+            >
               <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryErrorTitle"
-                  defaultMessage="Sorry, there was an error cleaning the repository."
-                />
+                {JSON.stringify(
+                  cleanup.error
+                    ? cleanup.error
+                    : i18n.translate(
+                        'xpack.snapshotRestore.repositoryDetails.cleanupUnknownError',
+                        { defaultMessage: '503: Unknown error' }
+                      )
+                )}
               </p>
-              <p>{cleanup.error ? cleanup.error.toString() : '503: Unknown error'}</p>
             </EuiCallOut>
           )}
         </>
