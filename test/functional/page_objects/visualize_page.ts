@@ -208,7 +208,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async getSideEditorExists() {
-      return await find.existsByCssSelector('.collapsible-sidebar');
+      return await find.existsByCssSelector('.visEditor__collapsibleSidebar');
     }
 
     public async clickSavedSearch(savedSearchName: string) {
