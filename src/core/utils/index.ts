@@ -24,5 +24,6 @@ export * from './get';
 export * from './map_to_object';
 export * from './merge';
 export * from './pick';
+export * from './promise';
 export * from './url';
 export * from './unset';

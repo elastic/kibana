@@ -13,9 +13,7 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./doc_count'));
     loadTestFile(require.resolve('./filter_bar'));
     loadTestFile(require.resolve('./monitor_charts'));
-    loadTestFile(require.resolve('./monitor_page_title'));
     loadTestFile(require.resolve('./monitor_states'));
-    loadTestFile(require.resolve('./monitor_status_bar'));
     loadTestFile(require.resolve('./ping_list'));
     loadTestFile(require.resolve('./snapshot_histogram'));
   });

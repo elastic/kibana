@@ -17,6 +17,7 @@ import { Plugin, PluginSetupContract, PluginSetupDependencies } from './plugin';
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
 export {
+  Authentication,
   AuthenticationResult,
   DeauthenticationResult,
   CreateAPIKeyResult,
@@ -24,6 +25,7 @@ export {
   InvalidateAPIKeyResult,
 } from './authentication';
 export { PluginSetupContract };
+export { AuthenticatedUser } from '../common/model';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
