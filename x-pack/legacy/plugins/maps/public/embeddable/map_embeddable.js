@@ -152,7 +152,20 @@ export class MapEmbeddable extends Embeddable {
       );
     }
 
-    this._store.dispatch(replaceLayerList(this._layerList));
+    // Use hiddenLayers input to set visibility of layers
+    let layerList = this._layerList;
+
+    if (this.input.hiddenLayers) {
+      layerList = [...this._layerList];
+      for (const [index, layer] of Object.entries(layerList)) {
+        layerList[index] = {
+          ...layer,
+          visible: !this.input.hiddenLayers.includes(layer.id),
+        };
+      }
+    }
+
+    this._store.dispatch(replaceLayerList(layerList));
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
@@ -242,6 +255,18 @@ export class MapEmbeddable extends Embeddable {
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
         openTOCDetails,
+      });
+    }
+
+    const hiddenLayerIds = this._store
+      .getState()
+      .map.layerList.filter(layer => !layer.visible)
+      .map(layer => layer.id)
+      .sort();
+
+    if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
+      this.updateInput({
+        hiddenLayers: hiddenLayerIds,
       });
     }
   }
