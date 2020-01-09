@@ -232,7 +232,10 @@ export class ApplicationService {
     }
     const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
     if (isConfirmAction(action)) {
-      const confirmed = await overlays.openConfirm(action.text, { title: action.title });
+      const confirmed = await overlays.openConfirm(action.text, {
+        title: action.title,
+        'data-test-subj': 'appLeaveConfirmModal',
+      });
       if (!confirmed) {
         return false;
       }
