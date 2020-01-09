@@ -70,7 +70,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.watcher.sections.watchEdit.threshold.webhookAction.SchemeFieldLabel',
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.schemeFieldLabel',
               {
                 defaultMessage: 'Scheme',
               }
