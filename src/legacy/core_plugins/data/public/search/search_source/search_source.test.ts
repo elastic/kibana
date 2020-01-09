@@ -30,7 +30,6 @@ import {
 import {
   injectedMetadataServiceMock,
   uiSettingsServiceMock,
-  httpServiceMock,
 } from '../../../../../../core/public/mocks';
 
 setUiSettings(uiSettingsServiceMock.createStartContract());
