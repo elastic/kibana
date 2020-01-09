@@ -58,23 +58,39 @@ describe('create rules schema', () => {
 
     test('file_name validates', () => {
       expect(
-        exportRulesQuerySchema.validate({
+        exportRulesQuerySchema.validate<Partial<ExportRulesRequest['query']>>({
           file_name: 'test.ndjson',
         }).error
       ).toBeFalsy();
     });
 
+    test('file_name does not validate with a number', () => {
+      expect(
+        exportRulesQuerySchema.validate<
+          Partial<Omit<ExportRulesRequest['query'], 'file_name'> & { file_name: number }>
+        >({
+          file_name: 5,
+        }).error
+      ).toBeTruthy();
+    });
+
     test('exclude_export_details validates with a boolean true', () => {
       expect(
-        exportRulesQuerySchema.validate({
-          exclude_export_details: 'true',
+        exportRulesQuerySchema.validate<Partial<ExportRulesRequest['query']>>({
+          exclude_export_details: true,
         }).error
       ).toBeFalsy();
     });
 
     test('exclude_export_details does not validate with a weird string', () => {
       expect(
-        exportRulesQuerySchema.validate({
+        exportRulesQuerySchema.validate<
+          Partial<
+            Omit<ExportRulesRequest['query'], 'exclude_export_details'> & {
+              exclude_export_details: string;
+            }
+          >
+        >({
           exclude_export_details: 'blah',
         }).error
       ).toBeTruthy();
