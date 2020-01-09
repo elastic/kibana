@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { generateRulesFromRaw, ExceptFieldRule, AnyRule, FieldRule } from '.';
+import { generateRulesFromRaw, FieldRule } from '.';
 import { RoleMapping } from '../../../../../common/model';
-import { AllRule } from './all_rule';
 import { RuleBuilderError } from './rule_builder_error';
 
 describe('generateRulesFromRaw', () => {
@@ -37,16 +36,27 @@ describe('generateRulesFromRaw', () => {
 
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
 
-    expect(rules).toBeInstanceOf(AllRule);
+    expect(rules).toMatchInlineSnapshot(`
+      AllRule {
+        "rules": Array [
+          ExceptFieldRule {
+            "fieldRule": FieldRule {
+              "field": "username",
+              "value": "*",
+            },
+          },
+          AnyRule {
+            "rules": Array [
+              FieldRule {
+                "field": "dn",
+                "value": "*",
+              },
+            ],
+          },
+        ],
+      }
+    `);
     expect(maxDepth).toEqual(3);
-
-    const subRules = (rules as AllRule).getRules();
-    expect(subRules).toHaveLength(2);
-    expect(subRules[0]).toBeInstanceOf(ExceptFieldRule);
-    expect((subRules[0] as ExceptFieldRule).getRules()).toHaveLength(1);
-
-    expect(subRules[1]).toBeInstanceOf(AnyRule);
-    expect((subRules[1] as AnyRule).getRules()).toHaveLength(1);
   });
 
   it('does not support multiple rules at the root level', () => {
