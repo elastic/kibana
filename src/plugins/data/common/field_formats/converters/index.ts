@@ -27,7 +27,7 @@ export { DateNanosFormat } from './date_nanos';
 export { RelativeDateFormat } from './relative_date';
 export { DurationFormat } from './duration';
 export { IpFormat } from './ip';
-export { LargeNumberFormat } from './large_number';
+export { ShortNumberFormat } from './short_number';
 export { PercentFormat } from './percent';
 export { StringFormat } from './string';
 export { SourceFormat } from './source';

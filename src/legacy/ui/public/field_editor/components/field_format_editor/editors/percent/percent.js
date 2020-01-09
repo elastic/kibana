@@ -38,7 +38,7 @@ export class PercentFormatEditor extends DefaultNumberFormatEditor {
 
     return (
       <Fragment>
-        {this.renderLocaleOverride()}
+        {this.renderDecimalSelector()}
 
         <FormatEditorSamples samples={samples} />
       </Fragment>

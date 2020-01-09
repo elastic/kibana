@@ -1514,10 +1514,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
   integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
 
-"@elastic/numeral@2.3.3":
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
-  integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
+"@elastic/numeral@2.3.5":
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.5.tgz#fcaeac57ddc55cd4b7f0b9c7e070c242dd5d0600"
+  integrity sha512-lJVZHPuI2csrfwDIEdKedFqNIF+5YsyqvX2soAqhu49iKOd9n7tifLRn30vP6D7oKd+6HsiGfPzT0nzdJWsexQ==
 
 "@elastic/request-crypto@^1.0.2":
   version "1.0.2"

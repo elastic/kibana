@@ -18,7 +18,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor } from '../default';
 import { FormatEditorSamples } from '../../samples';
 
@@ -36,15 +35,9 @@ export class BytesFormatEditor extends DefaultFormatEditor {
 
   render() {
     const { samples } = this.state;
-    const locale = this.props.format.getConfig('format:number:defaultLocale');
 
     return (
       <Fragment>
-        <FormattedMessage
-          id="common.ui.fieldEditor.numberLocaleLabel"
-          defaultMessage="The number locale ({locale}) is controlled by the Kibana advanced setting format:number:defaultLocale"
-          values={{ locale }}
-        />
         <FormatEditorSamples samples={samples} />
       </Fragment>
     );

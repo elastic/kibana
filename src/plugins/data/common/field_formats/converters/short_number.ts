@@ -17,31 +17,21 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import { DefaultNumberFormatEditor } from '../default_number';
-import { FormatEditorSamples } from '../../samples';
+import { i18n } from '@kbn/i18n';
+import { IntlNumberFormat } from './intl_number_format';
+import { FIELD_FORMAT_IDS } from '../types';
 
-export class LargeNumberFormatEditor extends DefaultNumberFormatEditor {
-  static formatId = 'large_number';
+export class ShortNumberFormat extends IntlNumberFormat {
+  static id = FIELD_FORMAT_IDS.SHORT_NUMBER;
+  static title = i18n.translate('data.common.fieldFormats.short_number.title', {
+    defaultMessage: 'Short number',
+  });
 
-  constructor(props) {
-    super(props);
+  id = ShortNumberFormat.id;
+  title = ShortNumberFormat.title;
 
-    this.state = {
-      ...this.state,
-      sampleInputs: [1234, 99.9999, 5150000.0001, 0.00005, 199000000],
-    };
-  }
-
-  render() {
-    const { samples } = this.state;
-
-    return (
-      <Fragment>
-        {this.renderLocaleOverride()}
-
-        <FormatEditorSamples samples={samples} />
-      </Fragment>
-    );
-  }
+  getArguments = () => ({
+    style: 'decimal',
+    notation: 'compact',
+  });
 }

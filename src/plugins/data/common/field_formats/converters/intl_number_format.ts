@@ -19,7 +19,6 @@
 
 // import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '../field_format';
-// import { FIELD_FORMAT_IDS } from '../types';
 import { TextContextTypeConvert } from '../types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 
@@ -29,9 +28,7 @@ export abstract class IntlNumberFormat extends FieldFormat {
   abstract id: string;
   abstract title: string;
 
-  getParamDefaults = () => ({
-    localeOverride: false,
-  });
+  getParamDefaults = () => ({});
 
   abstract getArguments: () => Record<string, unknown>;
 
@@ -44,12 +41,19 @@ export abstract class IntlNumberFormat extends FieldFormat {
 
     if (isNaN(val)) return '';
 
-    const locale =
-      this.param('localeOverride') ||
-      (this.getConfig && this.getConfig('format:number:defaultLocale')) ||
-      'en';
+    const defaultLocale = this.getConfig && this.getConfig('format:defaultLocale');
+    let locales = [defaultLocale, 'en'];
+    if (defaultLocale === 'detect') {
+      locales = navigator.languages
+        ? navigator.languages.concat(['en'])
+        : [navigator.language].concat(locales);
+    }
+    // const locale = (this.getConfig && this.getConfig('format:defaultLocale')) || 'en';
+    // if (locale === 'detect') {
+    //   locale =
+    // }
 
-    const inst = new Intl.NumberFormat(locale, this.getArguments());
+    const inst = new Intl.NumberFormat(locales, this.getArguments());
 
     return inst.format(val);
   }

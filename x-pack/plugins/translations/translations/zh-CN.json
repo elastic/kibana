@@ -1369,8 +1369,6 @@
     "kbn.advancedSettings.format.defaultTypeMapText": "要默认用于每个字段类型的格式名称的映射。如果未显式提及字段类型，则将使用{defaultFormat}",
     "kbn.advancedSettings.format.defaultTypeMapTitle": "字段类型格式名称",
     "kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText": "数值语言",
-    "kbn.advancedSettings.format.formattingLocaleText": "{numeralLanguageLink}区域设置",
-    "kbn.advancedSettings.format.formattingLocaleTitle": "格式区域设置",
     "kbn.advancedSettings.format.numberFormat.numeralFormatLinkText": "数值格式",
     "kbn.advancedSettings.format.numberFormatText": "“数字”格式的默认{numeralFormatLink}",
     "kbn.advancedSettings.format.numberFormatTitle": "数字格式",

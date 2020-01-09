@@ -17,21 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IntlNumberFormat } from './intl_number_format';
-import { FIELD_FORMAT_IDS } from '../types';
-
-export class LargeNumberFormat extends IntlNumberFormat {
-  static id = FIELD_FORMAT_IDS.LARGE_NUMBER;
-  static title = i18n.translate('data.common.fieldFormats.large_number.title', {
-    defaultMessage: 'Shorter number',
-  });
-
-  id = LargeNumberFormat.id;
-  title = LargeNumberFormat.title;
-
-  getArguments = () => ({
-    style: 'decimal',
-    notation: 'compact',
-  });
-}
+export { ShortNumberFormatEditor } from './short_number';

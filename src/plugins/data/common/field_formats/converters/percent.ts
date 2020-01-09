@@ -30,5 +30,14 @@ export class PercentFormat extends IntlNumberFormat {
   id = PercentFormat.id;
   title = PercentFormat.title;
 
-  getArguments = () => ({ style: 'percent' });
+  getParamDefaults = () => ({
+    minDecimals: 0,
+    maxDecimals: 3,
+  });
+
+  getArguments = () => ({
+    style: 'percent',
+    minimumFractionDigits: this.param('minDecimals'),
+    maximumFractionDigits: this.param('maxDecimals'),
+  });
 }

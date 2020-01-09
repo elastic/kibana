@@ -29,4 +29,8 @@ export class BytesFormat extends NumeralFormat {
 
   id = BytesFormat.id;
   title = BytesFormat.title;
+
+  getParamDefaults = () => ({
+    pattern: '0,0.0b',
+  });
 }

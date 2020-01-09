@@ -32,8 +32,8 @@ describe('PercentFormat', () => {
     expect(formatter.convert(0.99999)).toBe('99.999%');
   });
 
-  test('custom pattern', () => {
-    const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
+  test('custom number of digits', () => {
+    const formatter = new PercentFormat({ maxDecimals: 0 }, getConfig);
 
     expect(formatter.convert('0.99999')).toBe('100%');
   });

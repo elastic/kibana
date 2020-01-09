@@ -32,7 +32,6 @@ export class DefaultNumberFormat extends IntlNumberFormat {
   title = DefaultNumberFormat.title;
 
   getParamDefaults = () => ({
-    localeOverride: false,
     minDecimals: 0,
     maxDecimals: 3,
   });

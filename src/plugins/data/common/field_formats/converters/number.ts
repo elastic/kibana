@@ -24,7 +24,7 @@ import { FIELD_FORMAT_IDS } from '../types';
 export class CustomNumberFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.CUSTOM_NUMBER;
   static title = i18n.translate('data.common.fieldFormats.number.title', {
-    defaultMessage: 'Custom numeral.js format string',
+    defaultMessage: 'Custom numeral.js format',
   });
 
   id = CustomNumberFormat.id;

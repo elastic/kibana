@@ -30,8 +30,9 @@ export class CurrencyFormat extends IntlNumberFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
 
   getParamDefaults = () => ({
-    currencyCode: 'USD',
-    localeOverride: false,
+    currencyCode: this.getConfig!('format:currency:defaultCurrency'),
+    minDecimals: 0,
+    maxDecimals: 2,
   });
 
   id = CurrencyFormat.id;
@@ -41,6 +42,8 @@ export class CurrencyFormat extends IntlNumberFormat {
     return {
       style: 'currency',
       currency: this.param('currencyCode'),
+      minimumFractionDigits: this.param('minDecimals'),
+      maximumFractionDigits: this.param('maxDecimals'),
     };
   };
 }

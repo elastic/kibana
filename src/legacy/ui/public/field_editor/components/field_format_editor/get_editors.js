@@ -25,7 +25,7 @@ import { DateNanosFormatEditor } from './editors/date_nanos';
 import { DefaultNumberFormatEditor } from './editors/default_number';
 import { CustomNumberFormatEditor } from './editors/number';
 import { DurationFormatEditor } from './editors/duration';
-import { LargeNumberFormatEditor } from './editors/large_number';
+import { ShortNumberFormatEditor } from './editors/short_number';
 import { PercentFormatEditor } from './editors/percent';
 import { StaticLookupFormatEditor } from './editors/static_lookup';
 import { StringFormatEditor } from './editors/string';
@@ -41,7 +41,7 @@ export const editors = [
   CustomNumberFormatEditor,
   DefaultNumberFormatEditor,
   DurationFormatEditor,
-  LargeNumberFormatEditor,
+  ShortNumberFormatEditor,
   PercentFormatEditor,
   StaticLookupFormatEditor,
   StringFormatEditor,

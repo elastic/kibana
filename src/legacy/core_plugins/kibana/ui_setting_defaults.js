@@ -22,6 +22,44 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
 
+const topCurrencies = [
+  { name: 'United States dollar', code: 'USD', symbol: 'US$' },
+  { name: 'Euro', code: 'EUR', symbol: '€' },
+  { name: 'Japanese yen', code: 'JPY', symbol: '¥' },
+  { name: 'Pound sterling', code: 'GBP', symbol: '£' },
+  { name: 'Australian dollar', code: 'AUD', symbol: 'A$' },
+  { name: 'Canadian dollar', code: 'CAD', symbol: 'C$' },
+  { name: 'Swiss franc', code: 'CHF', symbol: 'CHF' },
+  { name: 'Renminbi', code: 'CNY', symbol: '元' },
+  { name: 'Hong Kong dollar', code: 'HKD', symbol: 'HK$' },
+  { name: 'New Zealand dollar', code: 'NZD', symbol: 'NZ$' },
+  { name: 'Swedish krona', code: 'SEK', symbol: 'kr' },
+  { name: 'South Korean won', code: 'KRW', symbol: '₩' },
+  { name: 'Singapore dollar', code: 'SGD', symbol: 'S$' },
+  { name: 'Norwegian krone', code: 'NOK', symbol: 'kr' },
+  { name: 'Mexican peso', code: 'MXN', symbol: '$' },
+  { name: 'Indian rupee', code: 'INR', symbol: '₹' },
+  { name: 'Russian ruble', code: 'RUB', symbol: '₽' },
+  { name: 'South African rand', code: 'ZAR', symbol: 'R' },
+  { name: 'Turkish lira', code: 'TRY', symbol: '₺' },
+  { name: 'Brazilian real', code: 'BRL', symbol: 'R$' },
+  { name: 'New Taiwan dollar', code: 'TWD', symbol: 'NT$' },
+  { name: 'Danish krone', code: 'DKK', symbol: 'kr' },
+  { name: 'Polish zloty', code: 'PLN', symbol: 'zł' },
+  { name: 'Thai baht', code: 'THB', symbol: '฿' },
+  { name: 'Indonesian rupiah', code: 'IDR', symbol: 'Rp' },
+  { name: 'Hungarian forint', code: 'HUF', symbol: 'Ft' },
+  { name: 'Czech koruna', code: 'CZK', symbol: 'Kč' },
+  { name: 'Israeli new shekel', code: 'ILS', symbol: '₪' },
+  { name: 'Chilean peso', code: 'CLP', symbol: 'CLP$' },
+  { name: 'Philippine peso', code: 'PHP', symbol: '₱' },
+  { name: 'UAE dirham', code: 'AED', symbol: 'د.إ' },
+  { name: 'Colombian peso', code: 'COP', symbol: 'COL$' },
+  { name: 'Saudi riyal', code: 'SAR', symbol: '﷼' },
+  { name: 'Malaysian ringgit', code: 'MYR', symbol: 'RM' },
+  { name: 'Romanian leu', code: 'RON', symbol: 'L' },
+];
+
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
@@ -33,6 +71,22 @@ export function getUiSettingDefaults() {
       return numeralLanguage.id;
     }),
   ];
+
+  const locales = ['detect', ...i18n.getKnownLocales()];
+  const localeDisplay = Object.fromEntries(
+    [
+      [
+        'detect',
+        i18n.translate('kbn.advancedSettings.locale.detectFromBrowserLabel', {
+          defaultMessage: 'Detect locale from browser locale',
+        }),
+      ],
+    ].concat(
+      Object.entries(i18n.getKnownLocalesWithDisplay()).map(([id, { name, native }]) => {
+        return [id, native ? `${native} - ${name}` : name];
+      })
+    )
+  );
 
   const luceneQueryLanguageLabel = i18n.translate(
     'kbn.advancedSettings.searchQueryLanguageLucene',
@@ -717,14 +771,52 @@ export function getUiSettingDefaults() {
         },
       }),
     },
+    'format:defaultLocale': {
+      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
+        defaultMessage: 'Default number display locale',
+      }),
+      value: 'detect',
+      type: 'select',
+      options: locales,
+      optionLabels: localeDisplay,
+      description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
+        defaultMessage: `This locale will affect number formatting for most formatters.`,
+      }),
+    },
+    'format:number:defaultLocale': {
+      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
+        defaultMessage: 'Numeral.js formatting locale',
+      }),
+      value: 'en',
+      type: 'select',
+      options: numeralLanguageIds,
+      optionLabels: Object.fromEntries(
+        numeralLanguages.map(language => [language.id, language.name])
+      ),
+      description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
+        defaultMessage: `{numeralLanguageLink} locale. This affects the custom numeral.js formatter and the bytes formatter.`,
+        description:
+          'Part of composite text: kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText + ' +
+          'kbn.advancedSettings.format.formattingLocaleText',
+        values: {
+          numeralLanguageLink:
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText', {
+              defaultMessage: 'Numeral language',
+            }) +
+            '</a>',
+        },
+      }),
+    },
     'format:number:defaultPattern': {
       name: i18n.translate('kbn.advancedSettings.format.numberFormatTitle', {
-        defaultMessage: 'Number format',
+        defaultMessage: 'numeral.js default pattern',
       }),
       value: '0,0.[000]',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.numberFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "number" format',
+        defaultMessage:
+          'Default {numeralFormatLink} for the "Custom numeral.js" format. Does not affect other formats.',
         description:
           'Part of composite text: kbn.advancedSettings.format.numberFormatText + ' +
           'kbn.advancedSettings.format.numberFormat.numeralFormatLinkText',
@@ -738,89 +830,17 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'format:bytes:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
-        defaultMessage: 'Bytes format',
+    'format:currency:defaultCurrency': {
+      name: i18n.translate('kbn.advancedSettings.format.currencyTitle', {
+        defaultMessage: 'Default currency',
       }),
-      value: '0,0.[0]b',
-      type: 'string',
-      description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',
-        description:
-          'Part of composite text: kbn.advancedSettings.format.bytesFormatText + ' +
-          'kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-    },
-    'format:percent:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.percentFormatTitle', {
-        defaultMessage: 'Percent format',
-      }),
-      value: '0,0.[000]%',
-      type: 'string',
-      description: i18n.translate('kbn.advancedSettings.format.percentFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "percent" format',
-        description:
-          'Part of composite text: kbn.advancedSettings.format.percentFormatText + ' +
-          'kbn.advancedSettings.format.percentFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.format.percentFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-    },
-    'format:currency:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.currencyFormatTitle', {
-        defaultMessage: 'Currency format',
-      }),
-      value: '($0,0.[00])',
-      type: 'string',
-      description: i18n.translate('kbn.advancedSettings.format.currencyFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "currency" format',
-        description:
-          'Part of composite text: kbn.advancedSettings.format.currencyFormatText + ' +
-          'kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-    },
-    'format:number:defaultLocale': {
-      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
-        defaultMessage: 'Formatting locale',
-      }),
-      value: 'en',
+      value: 'USD',
       type: 'select',
-      options: numeralLanguageIds,
-      description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
-        defaultMessage: `{numeralLanguageLink} locale`,
-        description:
-          'Part of composite text: kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText + ' +
-          'kbn.advancedSettings.format.formattingLocaleText',
-        values: {
-          numeralLanguageLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText', {
-              defaultMessage: 'Numeral language',
-            }) +
-            '</a>',
-        },
+      options: topCurrencies.map(c => c.code),
+      optionLabels: Object.fromEntries(topCurrencies.map(c => [c.code, `${c.name} (${c.symbol})`])),
+      description: i18n.translate('kbn.advancedSettings.format.currencyDescription', {
+        defaultMessage:
+          'The currency used for all currency formatting by default. Currency can be changed for a single field using the index management section. If a currency is unlisted here, it can also be set in the index management section.',
       }),
     },
     'savedObjects:perPage': {

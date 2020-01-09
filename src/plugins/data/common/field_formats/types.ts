@@ -61,7 +61,7 @@ export enum FIELD_FORMAT_IDS {
   DATE_NANOS = 'date_nanos',
   DURATION = 'duration',
   IP = 'ip',
-  LARGE_NUMBER = 'large_number',
+  SHORT_NUMBER = 'short_number',
   PERCENT = 'percent',
   RELATIVE_DATE = 'relative_date',
   STATIC_LOOKUP = 'static_lookup',

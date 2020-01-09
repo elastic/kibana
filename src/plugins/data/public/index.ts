@@ -75,7 +75,9 @@ export {
   FieldFormat,
   getHighlightRequest, // only used in search source
   IpFormat,
-  NumberFormat,
+  DefaultNumberFormat,
+  CustomNumberFormat,
+  ShortNumberFormat,
   PercentFormat,
   RelativeDateFormat,
   SourceFormat,

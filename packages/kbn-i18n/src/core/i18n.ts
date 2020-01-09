@@ -25,9 +25,11 @@ import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
+import { knownLocales } from './known_locales';
 
 // Add all locale data to `IntlMessageFormat`.
-import './locales.js';
+// This has a side effect./register_localest of registering locale data to numeral-js
+import './register_locales';
 
 const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};
@@ -161,6 +163,21 @@ export function getFormats() {
  */
 export function getRegisteredLocales() {
   return Object.keys(translationsForLocale);
+}
+
+/**
+ * Returns array of locales that can be used with i18n, even if there is no translation.
+ * This could be used for number formatting.
+ */
+export function getKnownLocales() {
+  return Object.keys(knownLocales);
+}
+
+/**
+ * Returns { [locale]: { name: [display], native: '', currency: '' } } map.
+ */
+export function getKnownLocalesWithDisplay() {
+  return knownLocales;
 }
 
 interface TranslateArguments {

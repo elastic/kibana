@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NumberFormatEditor } from './number';
+import { CustomNumberFormatEditor } from './number';
 
 const fieldType = 'number';
 const format = {
@@ -35,12 +35,12 @@ const onError = jest.fn();
 
 describe('NumberFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(NumberFormatEditor.formatId).toEqual('number');
+    expect(CustomNumberFormatEditor.formatId).toEqual('number');
   });
 
   it('should render normally', async () => {
     const component = shallow(
-      <NumberFormatEditor
+      <CustomNumberFormatEditor
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}

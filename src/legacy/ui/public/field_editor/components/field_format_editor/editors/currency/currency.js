@@ -18,8 +18,9 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiFieldText } from '@elastic/eui';
 
 import { DefaultNumberFormatEditor } from '../default_number';
 import { FormatEditorSamples } from '../../samples';
@@ -76,6 +77,7 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
     this.state = {
       ...this.state,
       sampleInputs: [1234, 99.9999, 5150000.0001, 0.00005],
+      hasOther: false,
     };
   }
 
@@ -88,6 +90,13 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
     if (currencyMatch) {
       currencyLabel = `${currencyMatch.name} (${currencyMatch.code}) ${currencyMatch.symbol}`;
     }
+
+    const otherLabel = {
+      value: null,
+      label: i18n.translate('common.ui.fieldEditor.currency.otherCurrencyLabel', {
+        defaultMessage: 'Other currency',
+      }),
+    };
 
     return (
       <Fragment>
@@ -103,19 +112,44 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
             fullWidth
             compressed
             isClearable={false}
-            selectedOptions={[{ value: currencyCode, label: currencyLabel }]}
+            selectedOptions={
+              this.state.hasOther ? [otherLabel] : [{ value: currencyCode, label: currencyLabel }]
+            }
             singleSelection={{ asPlainText: true }}
-            options={topCurrencies.map(cur => ({
-              value: cur.code,
-              label: `${cur.name} (${cur.code}) ${cur.symbol}`,
-            }))}
+            options={topCurrencies
+              .map(cur => ({
+                value: cur.code,
+                label: `${cur.name} (${cur.code}) ${cur.symbol}`,
+              }))
+              .concat([otherLabel])}
             onChange={choices => {
-              this.onChange({ currencyCode: choices[0].value });
+              if (choices[0].value) {
+                // There is no value for the "Other" currency
+                this.onChange({ currencyCode: choices[0].value });
+                this.setState({ hasOther: false });
+              } else {
+                this.setState({ hasOther: true });
+              }
             }}
           />
         </EuiFormRow>
 
-        {this.renderLocaleOverride()}
+        {this.state.hasOther ? (
+          <EuiFormRow
+            label={i18n.translate('common.ui.fieldEditor.currency.otherCurrencyLabel', {
+              defaultMessage: 'Other currency',
+            })}
+          >
+            <EuiFieldText
+              value={currencyCode}
+              onChange={e => {
+                this.onChange({ currencyCode: e.target.value ? e.target.value.toUpperCase() : '' });
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {this.renderDecimalSelector()}
 
         <FormatEditorSamples samples={samples} />
       </Fragment>

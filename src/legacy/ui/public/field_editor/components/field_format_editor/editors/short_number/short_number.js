@@ -17,4 +17,29 @@
  * under the License.
  */
 
-export { LargeNumberFormatEditor } from './large_number';
+import React, { Fragment } from 'react';
+import { DefaultNumberFormatEditor } from '../default_number';
+import { FormatEditorSamples } from '../../samples';
+
+export class ShortNumberFormatEditor extends DefaultNumberFormatEditor {
+  static formatId = 'short_number';
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ...this.state,
+      sampleInputs: [1234, 99.9999, 5150000.0001, 0.00005, 199000000],
+    };
+  }
+
+  render() {
+    const { samples } = this.state;
+
+    return (
+      <Fragment>
+        <FormatEditorSamples samples={samples} />
+      </Fragment>
+    );
+  }
+}

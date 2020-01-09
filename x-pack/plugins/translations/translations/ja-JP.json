@@ -1368,8 +1368,6 @@
     "kbn.advancedSettings.format.defaultTypeMapText": "各フィールドタイプにデフォルトで使用するフォーマット名のマップです。フィールドタイプが特に指定されていない場合は {defaultFormat} が使用されます",
     "kbn.advancedSettings.format.defaultTypeMapTitle": "フィールドタイプフォーマット名",
     "kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText": "数字言語",
-    "kbn.advancedSettings.format.formattingLocaleText": "{numeralLanguageLink} ロケール",
-    "kbn.advancedSettings.format.formattingLocaleTitle": "フォーマットロケール",
     "kbn.advancedSettings.format.numberFormat.numeralFormatLinkText": "数字フォーマット",
     "kbn.advancedSettings.format.numberFormatText": "「数字」フォーマットのデフォルト {numeralFormatLink} です",
     "kbn.advancedSettings.format.numberFormatTitle": "数字フォーマット",

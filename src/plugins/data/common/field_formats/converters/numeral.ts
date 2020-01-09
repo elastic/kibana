@@ -31,6 +31,12 @@ numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
+const supportedNumeralLanguages = Object.fromEntries(
+  numeralLanguages.map((numeralLanguage: Record<string, any>) => {
+    return [numeralLanguage.id, true];
+  })
+);
+
 export abstract class NumeralFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
 
@@ -39,7 +45,6 @@ export abstract class NumeralFormat extends FieldFormat {
 
   getParamDefaults = () => ({
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
-    localeOverride: false,
   });
 
   protected getConvertedValue(val: any, pattern?: string): string {
@@ -52,13 +57,22 @@ export abstract class NumeralFormat extends FieldFormat {
     if (isNaN(val)) return '';
 
     const previousLocale = numeral.language();
-    if (this.param('localeOverride')) {
-      numeral.language(this.param('localeOverride'));
-    } else {
-      const defaultLocale =
-        (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-      numeral.language(defaultLocale);
+    const defaultLocale = this.getConfig && this.getConfig('format:number:defaultLocale');
+    let locale = 'en';
+    if (defaultLocale === 'detect') {
+      if (navigator.languages && navigator.languages.length) {
+        const match = navigator.languages.find(lang => {
+          return !!supportedNumeralLanguages[lang];
+        });
+        if (match) {
+          locale = match;
+        }
+      } else if (navigator.language && !!supportedNumeralLanguages[navigator.language]) {
+        locale = navigator.language;
+      }
     }
+
+    numeral.language(locale);
 
     const formatted = numeralInst.set(val).format(pattern || this.param('pattern'));
 
