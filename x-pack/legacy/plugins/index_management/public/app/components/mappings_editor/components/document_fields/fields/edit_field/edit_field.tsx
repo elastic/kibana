@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCallOut,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
@@ -146,17 +145,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                     {/* Field path */}
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
-                        <CodeBlock padding="small">
-                          {field.path.map((path, i) =>
-                            i < field.path.length - 1 ? (
-                              <span key={i}>
-                                {path} <EuiIcon type="sortRight" />{' '}
-                              </span>
-                            ) : (
-                              path
-                            )
-                          )}
-                        </CodeBlock>
+                        <CodeBlock padding="small">{field.path.join(' > ')}</CodeBlock>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlyoutHeader>
