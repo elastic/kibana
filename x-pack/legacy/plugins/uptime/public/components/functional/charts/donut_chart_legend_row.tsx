@@ -23,9 +23,10 @@ interface Props {
   color: string;
   message: string;
   content: string | number;
+  'data-test-subj': string;
 }
 
-export const DonutChartLegendRow = ({ color, content, message }: Props) => (
+export const DonutChartLegendRow = ({ color, content, message, 'data-test-subj': dts }: Props) => (
   <EuiFlexGroup gutterSize="l" responsive={false}>
     <EuiFlexItemReducedMargin component="span" grow={false}>
       <EuiHealth color={color} />
@@ -33,6 +34,8 @@ export const DonutChartLegendRow = ({ color, content, message }: Props) => (
     <EuiFlexItemReducedMargin component="span" grow={false}>
       {message}
     </EuiFlexItemReducedMargin>
-    <EuiFlexItemAlignRight component="span">{content}</EuiFlexItemAlignRight>
+    <EuiFlexItemAlignRight component="span" data-test-subj={dts}>
+      {content}
+    </EuiFlexItemAlignRight>
   </EuiFlexGroup>
 );
