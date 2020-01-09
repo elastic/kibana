@@ -7,13 +7,15 @@
 import React, { FC } from 'react';
 
 import {
-  EuiCheckbox,
+  EuiBadge,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
   EuiSearchBar,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -78,43 +80,39 @@ export const FieldsPanel: FC<Props> = ({
 
   return (
     <div data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
-      <EuiTitle>
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <span>
-            {showAllFields === true ? (
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.fieldsPanel.showAllCountDescription"
-                defaultMessage="{wrappedCardsCount} {cardsCount, plural, one {field} other {fields}} ({wrappedPopulatedFieldCount} {populatedFieldCount, plural, one {exists} other {exist}} in documents)"
-                values={{
-                  cardsCount: fieldVisConfigs.length,
-                  wrappedCardsCount: <b>{fieldVisConfigs.length}</b>,
-                  populatedFieldCount,
-                  wrappedPopulatedFieldCount: <b>{populatedFieldCount}</b>,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.fieldsPanel.fieldsCountDescription"
-                defaultMessage="{wrappedCardsCount} {cardsCount, plural, one {field exists} other {fields exist}} in documents ({wrappedTotalFieldCount} in total)"
-                values={{
-                  cardsCount: fieldVisConfigs.length,
-                  wrappedCardsCount: <b>{fieldVisConfigs.length}</b>,
-                  wrappedTotalFieldCount: <b>{totalFieldCount}</b>,
-                }}
-              />
-            )}
-          </span>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge>
+                <b>{fieldVisConfigs.length}</b>
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.fieldsPanel.totalFieldLabel"
+                  defaultMessage="Total fields: {wrappedTotalFields}"
+                  values={{
+                    wrappedTotalFields: <b>{populatedFieldCount}</b>,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+
         {populatedFieldCount < totalFieldCount && (
           <EuiFlexItem>
-            <EuiCheckbox
+            <EuiSwitch
               id={`${title}_show_empty_fields`}
               label={i18n.translate('xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel', {
-                defaultMessage: 'show empty fields',
+                defaultMessage: 'Show empty fields',
               })}
               checked={showAllFields}
               onChange={onShowAllFieldsChange}
