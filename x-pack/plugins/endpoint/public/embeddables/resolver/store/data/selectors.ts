@@ -13,7 +13,6 @@ import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
   parent as indexedProcessTreeParent,
-  isOnlyChild as indexedProcessTreeIsOnlyChild,
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';

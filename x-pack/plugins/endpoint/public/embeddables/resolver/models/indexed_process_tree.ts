@@ -58,19 +58,6 @@ export function parent(
 }
 
 /**
- * Returns true if the `childProcess` has no siblings
- */
-export function isOnlyChild(tree: IndexedProcessTree, childProcess: ProcessEvent) {
-  const parentProcess = parent(tree, childProcess);
-  if (parentProcess === undefined) {
-    // if parent process is undefined, then the child is the root. We choose not to support multiple roots
-    return true;
-  } else {
-    return children(tree, parentProcess).length === 1;
-  }
-}
-
-/**
  * Number of processes in the tree
  */
 export function size(tree: IndexedProcessTree) {
