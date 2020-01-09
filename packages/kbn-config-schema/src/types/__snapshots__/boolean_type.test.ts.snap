@@ -9,3 +9,7 @@ exports[`returns error when not boolean 1`] = `"expected value of type [boolean]
 exports[`returns error when not boolean 2`] = `"expected value of type [boolean] but got [Array]"`;
 
 exports[`returns error when not boolean 3`] = `"expected value of type [boolean] but got [string]"`;
+
+exports[`returns error when not boolean 4`] = `"expected value of type [boolean] but got [number]"`;
+
+exports[`returns error when not boolean 5`] = `"expected value of type [boolean] but got [string]"`;

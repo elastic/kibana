@@ -7,6 +7,7 @@
 import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
+import { useTimeZone } from '../../hooks';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -17,7 +18,6 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useBrowserTimeZone,
   useTheme,
 } from './common';
 
@@ -44,7 +44,7 @@ export const BarChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
 }) => {
   const theme = useTheme();
-  const timeZone = useBrowserTimeZone();
+  const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
