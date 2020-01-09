@@ -72,7 +72,7 @@ const style: cytoscape.Stylesheet[] = [
       //
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
-      width: 2
+      width: 1
     }
   }
 ];

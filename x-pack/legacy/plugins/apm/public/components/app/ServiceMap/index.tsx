@@ -247,6 +247,17 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         const destination =
           nodesById[getConnectionNodeId(connection.destination, destMap)];
 
+        if (acc[getEdgeId(destination, source)]) {
+          return {
+            ...acc,
+            [getEdgeId(destination, source)]: {
+              source,
+              destination,
+              bidirectional: true
+            }
+          };
+        }
+
         return {
           ...acc,
           [getEdgeId(source, destination)]: {
@@ -287,7 +298,19 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
               id: getEdgeId(connection.source, connection.destination),
               source: getConnectionNodeId(connection.source, destMap),
               target: getConnectionNodeId(connection.destination, destMap)
-            }
+            },
+            style: connection.bidirectional
+              ? {
+                  'source-arrow-shape': 'triangle',
+                  'target-arrow-shape': 'triangle',
+                  'source-distance-from-node': theme.paddingSizes.xs,
+                  'target-distance-from-node': theme.paddingSizes.xs
+                }
+              : {
+                  'source-arrow-shape': 'none',
+                  'target-arrow-shape': 'triangle',
+                  'target-distance-from-node': theme.paddingSizes.xs
+                }
           };
         })
     ];
