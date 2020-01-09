@@ -129,88 +129,130 @@ export const signalRulesAlertType = ({
         DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
           ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
           : params.maxSignals;
-
-      const inputIndex = await getInputIndex(services, version, index);
-      const esFilter = await getFilter({
-        type,
-        filters,
-        language,
-        query,
-        savedId,
-        services,
-        index: inputIndex,
-      });
-
-      const noReIndex = buildEventsSearchQuery({
-        index: inputIndex,
-        from,
-        to,
-        filter: esFilter,
-        size: searchAfterSize,
-        searchAfterSortId: undefined,
-      });
-
       try {
-        logger.debug(
-          `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        logger.debug(
-          `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        const noReIndexResult = await services.callCluster('search', noReIndex);
-        if (noReIndexResult.hits.total.value !== 0) {
-          logger.info(
-            `Found ${
-              noReIndexResult.hits.total.value
-            } signals from the indexes of "[${inputIndex.join(
-              ', '
-            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
-          );
-        }
-
-        const bulkIndexResult = await searchAfterAndBulkCreate({
-          someResult: noReIndexResult,
-          ruleParams: params,
+        const inputIndex = await getInputIndex(services, version, index);
+        const esFilter = await getFilter({
+          type,
+          filters,
+          language,
+          query,
+          savedId,
           services,
-          logger,
-          id: alertId,
-          signalsIndex: outputIndex,
-          filter: esFilter,
-          name,
-          createdBy,
-          updatedBy,
-          interval,
-          enabled,
-          pageSize: searchAfterSize,
-          tags,
+          index: inputIndex,
         });
 
-        if (bulkIndexResult) {
-          logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-          );
-          const sDate = new Date().toISOString();
-          ruleStatusSavedObjects.saved_objects[0].attributes.status = 'succeeded';
-          ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = sDate;
-          ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt = sDate;
-          ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage = 'succeeded';
-          await services.savedObjectsClient.update(
-            ruleStatusSavedObjectType,
-            ruleStatusSavedObjects.saved_objects[0].id,
-            {
-              ...ruleStatusSavedObjects.saved_objects[0].attributes,
-            }
-          );
-        } else {
-          logger.error(
-            `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-          );
+        const noReIndex = buildEventsSearchQuery({
+          index: inputIndex,
+          from,
+          to,
+          filter: esFilter,
+          size: searchAfterSize,
+          searchAfterSortId: undefined,
+        });
 
+        try {
+          logger.debug(
+            `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          logger.debug(
+            `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          if (noReIndexResult.hits.total.value !== 0) {
+            logger.info(
+              `Found ${
+                noReIndexResult.hits.total.value
+              } signals from the indexes of "[${inputIndex.join(
+                ', '
+              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+            );
+          }
+
+          const bulkIndexResult = await searchAfterAndBulkCreate({
+            someResult: noReIndexResult,
+            ruleParams: params,
+            services,
+            logger,
+            id: alertId,
+            signalsIndex: outputIndex,
+            filter: esFilter,
+            name,
+            createdBy,
+            updatedBy,
+            interval,
+            enabled,
+            pageSize: searchAfterSize,
+            tags,
+          });
+
+          if (bulkIndexResult) {
+            logger.debug(
+              `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            );
+            const sDate = new Date().toISOString();
+            ruleStatusSavedObjects.saved_objects[0].attributes.status = 'succeeded';
+            ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = sDate;
+            ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt = sDate;
+            ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage = 'succeeded';
+            await services.savedObjectsClient.update(
+              ruleStatusSavedObjectType,
+              ruleStatusSavedObjects.saved_objects[0].id,
+              {
+                ...ruleStatusSavedObjects.saved_objects[0].attributes,
+              }
+            );
+          } else {
+            logger.error(
+              `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            );
+
+            if (ruleStatusSavedObjects.saved_objects.length < 5) {
+              // create new status with same alertId
+              const sDate = new Date().toISOString();
+              await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+                alertId, // do a search for this id.
+                statusDate: sDate,
+                status: 'failed',
+                lastFailureAt: sDate,
+                lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+                lastFailureMessage: 'There was an error!!',
+                lastSuccessMessage:
+                  ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+              });
+            } else {
+              // delete all statuses with same alertId, then bulk create
+              ruleStatusSavedObjects.saved_objects.forEach(async obj =>
+                services.savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+              );
+              const sDate = new Date().toISOString();
+              const newStatus = ruleStatusSavedObjects.saved_objects[0];
+              newStatus.attributes = {
+                alertId,
+                statusDate: sDate,
+                status: 'failed',
+                lastFailureAt: sDate,
+                lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
+                lastFailureMessage: 'There was an error!!',
+                lastSuccessMessage:
+                  ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
+              };
+              await services.savedObjectsClient.bulkCreate([
+                newStatus,
+                ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+              ]);
+            }
+          }
+        } catch (err) {
+          // TODO: Error handling and writing of errors into a signal that has error
+          // handling/conditions
+          logger.error(
+            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
           if (ruleStatusSavedObjects.saved_objects.length < 5) {
             // create new status with same alertId
             const sDate = new Date().toISOString();
             await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
-              alertId, // do a search for this id.
+              alertId,
               statusDate: sDate,
               status: 'failed',
               lastFailureAt: sDate,
@@ -232,7 +274,7 @@ export const signalRulesAlertType = ({
               status: 'failed',
               lastFailureAt: sDate,
               lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
-              lastFailureMessage: 'There was an error!!',
+              lastFailureMessage: err.message,
               lastSuccessMessage:
                 ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
             };
@@ -242,9 +284,7 @@ export const signalRulesAlertType = ({
             ]);
           }
         }
-      } catch (err) {
-        // TODO: Error handling and writing of errors into a signal that has error
-        // handling/conditions
+      } catch (exception) {
         logger.error(
           `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${err.message}`
         );
@@ -257,7 +297,7 @@ export const signalRulesAlertType = ({
             status: 'failed',
             lastFailureAt: sDate,
             lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
-            lastFailureMessage: 'There was an error!!',
+            lastFailureMessage: JSON.stringify(exception, null, 4),
             lastSuccessMessage:
               ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
           });
@@ -274,7 +314,7 @@ export const signalRulesAlertType = ({
             status: 'failed',
             lastFailureAt: sDate,
             lastSuccessAt: ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessAt,
-            lastFailureMessage: err.message,
+            lastFailureMessage: JSON.stringify(exception, null, 4),
             lastSuccessMessage:
               ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
           };

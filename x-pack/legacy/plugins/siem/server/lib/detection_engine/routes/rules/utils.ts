@@ -139,8 +139,8 @@ export const transformFindAlertsOrError = (
   ruleStatuses: unknown[]
 ): unknown | Boom => {
   if (isAlertTypes(findResults.data) && isRuleStatusTypes(ruleStatuses)) {
-    findResults.data = findResults.data.map((alert, idx) =>
-      transformAlertToRule(alert, ruleStatuses[idx])
+    findResults.data = findResults.data.map(
+      (alert, idx) => transformAlertToRule(alert, ruleStatuses[idx][0].attributes) // fix type
     );
     return findResults;
   } else {

@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { FindRulesRequest, RuleAlertType } from '../../rules/types';
+import { FindRulesRequest } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { transformFindAlertsOrError } from './utils';
@@ -47,15 +47,17 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
         sortOrder: query.sort_order,
         filter: query.filter,
       });
-      const ruleStatuses = rules.data.map(alert => {
-        const results = savedObjectsClient.find({
-          type: ruleStatusSavedObjectType,
-          perPage: 10,
-          search: `"${(alert as RuleAlertType).params.alertId}"`,
-          searchFields: ['alertId'],
-        });
-        return results;
-      });
+      const ruleStatuses = await Promise.all(
+        rules.data.map(async rule => {
+          const results = await savedObjectsClient.find({
+            type: ruleStatusSavedObjectType,
+            perPage: 10,
+            search: `"${rule.id}"`,
+            searchFields: ['alertId'],
+          });
+          return results.saved_objects;
+        })
+      );
       return transformFindAlertsOrError(rules, ruleStatuses);
     } catch (err) {
       return transformError(err);

@@ -27,6 +27,7 @@ import { updateRulesBulkRoute } from './lib/detection_engine/routes/rules/update
 import { deleteRulesBulkRoute } from './lib/detection_engine/routes/rules/delete_rules_bulk_route';
 import { importRulesRoute } from './lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from './lib/detection_engine/routes/rules/export_rules_route';
+import { findRulesStatusesRoute } from './lib/detection_engine/routes/rules/find_rules_status_route';
 
 const APP_ID = 'siem';
 
@@ -52,8 +53,12 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   createRulesBulkRoute(__legacy);
   updateRulesBulkRoute(__legacy);
   deleteRulesBulkRoute(__legacy);
+<<<<<<< HEAD
   importRulesRoute(__legacy);
   exportRulesRoute(__legacy);
+=======
+  findRulesStatusesRoute(__legacy);
+>>>>>>> adds new route for getting statuses for a list of given alert ids, adds try-catch and more logic in executor for logging errors, adds scripts and rules for testing, updates find_rules endpoint to display statuses too. Would like to look into using the alerts executor state to better manage logic for statuses, and need to update some types. Also needs unit tests still.
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

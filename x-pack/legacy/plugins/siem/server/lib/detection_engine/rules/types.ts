@@ -108,6 +108,12 @@ export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
+export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
+  query: {
+    ids: string[];
+  };
+}
+
 export interface Clients {
   alertsClient: AlertsClient;
   actionsClient: ActionsClient;
