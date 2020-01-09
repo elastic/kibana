@@ -85,7 +85,7 @@ export const OverviewPage = ({
         })
       );
     }
-  }, []);
+  }, [basePath, logOverviewPageLoad, setBreadcrumbs, setHeadingText]);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });

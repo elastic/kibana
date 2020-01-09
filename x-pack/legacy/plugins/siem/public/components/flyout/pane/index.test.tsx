@@ -15,8 +15,6 @@ const testFlyoutHeight = 980;
 const testWidth = 640;
 const usersViewing = ['elastic'];
 
-jest.mock('../../../lib/kibana');
-
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
@@ -52,7 +50,7 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="eui-flyout"]').get(0).props.maxWidth).toEqual('95%');
+    expect(wrapper.find('Resizable').get(0).props.maxWidth).toEqual('95vw');
   });
 
   test('it applies timeline styles to the EuiFlyout', () => {
