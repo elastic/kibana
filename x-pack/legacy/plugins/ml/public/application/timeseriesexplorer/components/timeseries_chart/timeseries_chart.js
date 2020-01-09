@@ -1523,12 +1523,12 @@ const TimeseriesChartIntl = injectI18n(
         } else {
           tooltipData.push({
             name: intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.valueLabel',
-              defaultMessage: 'value',
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.actualLabel',
+              defaultMessage: 'actual',
             }),
-            value: formatValue(marker.value, marker.function, fieldFormat),
+            value: formatValue(marker.actual, marker.function, fieldFormat),
             seriesKey,
-            yAccessor: 'value',
+            yAccessor: 'actual',
           });
           tooltipData.push({
             name: intl.formatMessage({
