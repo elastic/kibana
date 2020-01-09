@@ -33,6 +33,44 @@ export function graphableProcesses(state: DataState) {
   return state.results.filter(isGraphableProcess);
 }
 
+/**
+ * In laying out the graph, we precalculate the 'width' of each subtree. The 'width' of the subtree is determined by its
+ * descedants and the rule that each process node must be at least 1 unit apart. Enforcing that all nodes are at least
+ * 1 unit apart on the x axis makes it easy to prevent the UI components from overlapping. There will always be space.
+ *
+ * Example widths:
+ *
+ *    A and B each have a width of 0
+ *
+ *          A
+ *          |
+ *          B
+ *
+ *    A has a width of 1. B and C have a width of 0.
+ *    B and C must be 1 unit apart, so the A subtree has a width of 1.
+ *
+ *          A
+ *      ____|____
+ *     |         |
+ *     B         C
+ *
+ *
+ *    D, E, F, G, H all have a width of 0.
+ *    B has a width of 1 since D->E must be 1 unit apart.
+ *    Similarly, C has a width of 1 since F->G must be 1 unit apart.
+ *    A has width of 3, since B has a width of 1, and C has a width of 1, and E->F must be at least
+ *    1 unit apart.
+ *          A
+ *      ____|____
+ *     |         |
+ *     B         C
+ *  ___|___   ___|___
+ * |       | |       |
+ * D       E F       G
+ *                   |
+ *                   H
+ *
+ */
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ProcessEvent, number>();
 
@@ -72,14 +110,17 @@ type ProcessWithWidthMetadata = {
   | ({
       parent: ProcessEvent;
       parentWidth: number;
-    } & (
+    } & ( // TODO bolete this
       | { isOnlyChild: true; firstChildWidth: null; lastChildWidth: null }
       | { isOnlyChild: false; firstChildWidth: number; lastChildWidth: number }
     ))
   | {
       parent: null;
+      /* Without a parent, there is no parent width */
       parentWidth: null;
+      /* Without a parent, we can't be an only child */
       isOnlyChild: null;
+      /** If there is no parent, there are no siblings */
       lastChildWidth: null;
       firstChildWidth: null;
     }
@@ -92,7 +133,9 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    // TODO comment
+    /**
+     * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
+     */
     if (metadata.parent === null) {
       continue;
     }
@@ -101,39 +144,51 @@ function processEdgeLineSegments(
     const parentPosition = positions.get(parent);
 
     if (position === undefined || parentPosition === undefined) {
-      // TODO comment
+      /**
+       * All positions have been precalculated, so if any are missing, it's an error. This will never happen.
+       */
       throw new Error();
     }
 
-    // TODO comment
+    /**
+     * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
+     */
     const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
 
-    // TODO comment
-    const lineFromProcessToMidwayLine: EdgeLineSegment = [
-      [
-        position[0],
-        // Simulate a capped line by moving this up a bit so it overlaps with the midline segment
-        midwayY,
-      ],
-      position,
-    ];
+    /**
+     * When drawing edge lines between a parent and children (when there are multiple children) we draw a pitchfork type
+     * design. The 'midway' line, runs along the x axis and joins all the children with a single descendant line from the parent.
+     * See the ascii diagram below. The underscore characters would be the midway line.
+     *
+     *          A
+     *      ____|____
+     *     |         |
+     *     B         C
+     */
+    const lineFromProcessToMidwayLine: EdgeLineSegment = [[position[0], midwayY], position];
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
-    // TODO, move to sequencer?
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
-      // add a single line segment directly from parent to child
+      // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
       edgeLineSegments.push([parentPosition, position]);
     } else if (isFirstChild) {
+      /**
+       * If the parent has multiple children, we draw the 'midway' line, and the line from the
+       * parent to the midway line, while handling the first child.
+       *
+       * Consider A the parent, and B the first child. We would draw somemthing like what's in the below diagram. The line from the
+       * midway line to C would be drawn when we handle C.
+       *
+       *          A
+       *      ____|____
+       *     |
+       *     B         C
+       */
       const { firstChildWidth, lastChildWidth } = metadata;
-      // Draw 3 line segments
-      // One from the parent to the midway line,
-      // The midway line (a horizontal line the width of the parent, halfway between the parent and child)
-      // A line from the child to the midway line
-      //
+
       const lineFromParentToMidwayLine: EdgeLineSegment = [
-        // Add a line from parent to midway point
         parentPosition,
         [parentPosition[0], midwayY],
       ];
@@ -180,10 +235,13 @@ function* levelOrderWithWidths(
     const width = widths.get(process);
 
     if (width === undefined) {
-      // TODO explain
+      /**
+       * All widths have been precalcluated, so this will not happen.
+       */
       throw new Error();
     }
 
+    /** If the parent is undefined, we are processing the root. */
     if (parent === undefined) {
       yield {
         process,
@@ -198,11 +256,13 @@ function* levelOrderWithWidths(
       const parentWidth = widths.get(parent);
 
       if (parentWidth === undefined) {
-        // TODO explain
+        /**
+         * All widths have been precalcluated, so this will not happen.
+         */
         throw new Error();
       }
 
-      const thingy: Partial<ProcessWithWidthMetadata> = {
+      const metadata: Partial<ProcessWithWidthMetadata> = {
         process,
         width,
         parent,
@@ -211,21 +271,25 @@ function* levelOrderWithWidths(
 
       const siblings = indexedProcessTreeChildren(tree, parent);
       if (siblings.length === 1) {
-        thingy.isOnlyChild = true;
-        thingy.lastChildWidth = null;
-        thingy.firstChildWidth = null;
+        metadata.isOnlyChild = true;
+        // TODO, just make these === width
+        metadata.lastChildWidth = null;
+        metadata.firstChildWidth = null;
       } else {
         const firstChildWidth = widths.get(siblings[0]);
         const lastChildWidth = widths.get(siblings[0]);
         if (firstChildWidth === undefined || lastChildWidth === undefined) {
+          /**
+           * All widths have been precalcluated, so this will not happen.
+           */
           throw new Error();
         }
-        thingy.isOnlyChild = false;
-        thingy.firstChildWidth = firstChildWidth;
-        thingy.lastChildWidth = lastChildWidth;
+        metadata.isOnlyChild = false;
+        metadata.firstChildWidth = firstChildWidth;
+        metadata.lastChildWidth = lastChildWidth;
       }
 
-      yield thingy as ProcessWithWidthMetadata;
+      yield metadata as ProcessWithWidthMetadata;
     }
   }
 }
@@ -235,8 +299,20 @@ function processPositions(
   widths: ProcessWidths
 ): ProcessPositions {
   const positions = new Map<ProcessEvent, Vector2>();
-  // Keep track of last processed parent so we can reset parent specific counters as we iterate
+  /**
+   * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
+   * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
+   * reset the counters.
+   */
   let lastProcessedParentNode: ProcessEvent | undefined;
+  /**
+   * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
+   * children left -> right.
+   *
+   * The width of preceding siblings is used to left align the node.
+   * The number of preceding siblings is important because each sibling must be 1 unit apart
+   * on the x axis.
+   */
   let numberOfPrecedingSiblings = 0;
   let runningWidthOfPrecedingSiblings = 0;
 
@@ -244,6 +320,9 @@ function processPositions(
     // Handle root node
     if (metadata.parent === null) {
       const { process } = metadata;
+      /**
+       * Place the root node at (0, 0) for now.
+       */
       positions.set(process, [0, 0]);
     } else {
       const { process, parent, width, parentWidth } = metadata;
@@ -260,16 +339,32 @@ function processPositions(
       const parentPosition = positions.get(parent);
 
       if (parentPosition === undefined) {
-        // TODO explain that this can never happen
+        /**
+         * Since this algorithm populates the `positions` map in level order,
+         * the parent node will have been processed already and the parent position
+         * will always be available.
+         *
+         * This will never happen.
+         */
         throw new Error();
       }
 
+      /**
+       * The x 'offset' is added to the x value of the parent to determine the position of the node.
+       * We add `parentWidth / -2` in order to align the left side of this node with the left side of its parent.
+       * We add `numberOfPrecedingSiblings * distanceBetweenNodes` in order to keep each node 1 apart on the x axis.
+       * We add `runningWidthOfPrecedingSiblings` so that we don't overlap with our preceding siblings. We stack em up.
+       * We add `width / 2` so that we center the node horizontally (in case it has non-0 width.)
+       */
       const xOffset =
         parentWidth / -2 +
         numberOfPrecedingSiblings * distanceBetweenNodes +
         runningWidthOfPrecedingSiblings +
         width / 2;
 
+      /**
+       * The y axis gains `-distanceBetweenNodes` as we move down the screen 1 unit at a time.
+       */
       const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
 
       positions.set(process, position);
@@ -289,10 +384,25 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     graphableProcesses
     /* eslint-enable no-shadow */
   ) {
+    /**
+     * Index the tree, creating maps from id -> node and id -> children
+     */
     const indexedProcessTree = indexedProcessTreeFactory(graphableProcesses);
+    /**
+     * Walk the tree in reverse level order, calculating the 'width' of subtrees.
+     */
     const widths = widthsOfProcessSubtrees(indexedProcessTree);
 
+    /**
+     * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
+     * Nodes are positioned relative to their parents and preceding siblings.
+     */
     const positions = processPositions(indexedProcessTree, widths);
+
+    /**
+     * With the widths and positions precalculated, we calculate edge line segments (arrays of vector2s)
+     * which connect them in a 'pitchfork' design.
+     */
     const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
 
     return {
