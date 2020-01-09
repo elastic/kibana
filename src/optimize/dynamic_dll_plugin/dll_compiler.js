@@ -311,7 +311,6 @@ export class DllCompiler {
               // node_module or no?
               if (notInNodeModules(reason.module.resource)) {
                 notAllowedModules.push(module.resource);
-                return;
               }
             });
           }
