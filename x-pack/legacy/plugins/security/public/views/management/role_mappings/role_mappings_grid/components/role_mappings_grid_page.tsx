@@ -449,17 +449,12 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       });
 
       if (canManageRoleMappings) {
-        this.initiallyLoadRoleMappings();
+        this.loadRoleMappings();
       }
     } catch (e) {
       this.setState({ error: e, loadState: 'finished' });
     }
   }
-
-  private initiallyLoadRoleMappings = () => {
-    this.setState({ loadState: 'loadingApp' });
-    this.loadRoleMappings();
-  };
 
   private reloadRoleMappings = () => {
     this.setState({ roleMappings: [], loadState: 'loadingTable' });
