@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import VirtualList from 'react-tiny-virtual-list';
-import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SearchResult as SearchResultType } from '../../../types';
@@ -49,12 +49,12 @@ export const SearchResult = React.memo(
           </p>
         }
         actions={
-          <EuiButtonEmpty onClick={clearSearch}>
+          <EuiButton onClick={clearSearch}>
             <FormattedMessage
               id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPrompt.clearSearchButtonLabel"
               defaultMessage="Clear search"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         }
       />
     ) : (
