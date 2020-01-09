@@ -131,7 +131,7 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('disallowes stored scripts when disabled', {
+  getFeatureCheckTest('disallows stored scripts when disabled', {
     nodeSettingsResponse: {
       nodes: {
         someNodeId: {
@@ -154,7 +154,7 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('disallowes inline scripts when disabled', {
+  getFeatureCheckTest('disallows inline scripts when disabled', {
     nodeSettingsResponse: {
       nodes: {
         someNodeId: {

@@ -5,9 +5,7 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-// @ts-ignore
 import routes from 'ui/routes';
-// @ts-ignore
 import { I18nContext } from 'ui/i18n';
 import { npSetup } from 'ui/new_platform';
 import { RoleMappingsAPI } from '../../../../lib/role_mappings_api';
