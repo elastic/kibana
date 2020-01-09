@@ -19,11 +19,11 @@
 
 import { Storage } from '../../services';
 import { ObjectStorageClient } from '../../../../common/types';
-import { TextObject, type } from '../../../../common/text_object';
+import { TextObject, textObjectTypeName } from '../../../../common/text_object';
 import { LocalObjectStorage } from './local_storage_object_client';
 
 export const create = (storage: Storage): ObjectStorageClient => {
   return {
-    text: new LocalObjectStorage<TextObject>(storage, type),
+    text: new LocalObjectStorage<TextObject>(storage, textObjectTypeName),
   };
 };

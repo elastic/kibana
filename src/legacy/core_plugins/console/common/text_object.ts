@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const type = 'text-object';
+export const textObjectTypeName = 'text-object';
 
 export interface TextObject {
   createdAt: number;
