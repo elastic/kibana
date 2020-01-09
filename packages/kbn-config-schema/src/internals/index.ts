@@ -82,7 +82,23 @@ export const internals = Joi.extend([
     base: Joi.boolean(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && typeof value !== 'boolean') {
+      if (value === undefined) {
+        return value;
+      }
+
+      // Allow strings 'true' and 'false' to be coerced to booleans (case-insensitive).
+
+      // From Joi docs on `Joi.boolean`:
+      // > Generates a schema object that matches a boolean data type. Can also
+      // >  be called via bool(). If the validation convert option is on
+      // > (enabled by default), a string (either "true" or "false") will be
+      // converted to a boolean if specified.
+      if (typeof value === 'string') {
+        const normalized = value.toLowerCase();
+        value = normalized === 'true' ? true : normalized === 'false' ? false : value;
+      }
+
+      if (typeof value !== 'boolean') {
         return this.createError('boolean.base', { value }, state, options);
       }
 
