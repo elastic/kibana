@@ -22,12 +22,13 @@ import { NetworkComponentQueryProps } from './types';
 import { MatrixHistogramOption } from '../../../containers/matrix_histogram/types';
 import { networkDnsQuery } from '../../../containers/network_dns/index.gql_query';
 import { bytesFormatter } from '../../../containers/matrix_histogram/utils';
+import * as i18n from '../translations';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 const dnsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'domain',
+    text: i18n.NAVIGATION_DNS_STACK_BY_DOMAIN,
     value: 'dns.question.registered_domain',
   },
 ];
@@ -65,7 +66,7 @@ export const DnsQueryTabBody = React.memo(
           sourceId="default"
           startDate={startDate}
           stackByOptions={dnsStackByOptions}
-          title="DNS"
+          title={i18n.NAVIGATION_DNS_TITLE}
           type={type}
           updateDateRange={updateDateRange}
           yTickFormatter={bytesFormatter}

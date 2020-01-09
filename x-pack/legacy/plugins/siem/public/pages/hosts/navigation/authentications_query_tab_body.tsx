@@ -19,12 +19,14 @@ import {
 import { AuthenticationOverTimeQuery } from '../../../containers/authentications/authentication_over_time';
 import { AuthenticationsOverTimeGqlQuery } from '../../../containers/authentications/authentication_over_time/authentications_over_time.gql_query';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
+import * as i18n from '../translations';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
+
 const authStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'event type',
+    text: i18n.NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE,
     value: 'event.type',
   },
 ];
@@ -72,7 +74,7 @@ export const AuthenticationsQueryTabBody = ({
       sourceId="default"
       startDate={startDate}
       stackByOptions={authStackByOptions}
-      title="Authentication"
+      title={i18n.NAVIGATION_AUTHENTICATIONS_TITLE}
       type={hostsModel.HostsType.page}
       updateDateRange={updateDateRange}
     />

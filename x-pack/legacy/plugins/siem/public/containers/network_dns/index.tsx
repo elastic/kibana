@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -31,7 +31,6 @@ import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { MatrixHistogram } from '../matrix_histogram';
-import { useQuery as useMatrixHistogramQuery } from '../matrix_histogram/utils';
 
 export const NETWORK_DNS_ID = 'networkDnsQuery';
 export const NETWORK_DNS_HISTOGRAM_ID = 'networkDnsHistogramQuery';

@@ -12,3 +12,7 @@ export const ANOMALIES_STACK_BY_JOB_ID = i18n.translate(
     defaultMessage: 'job',
   }
 );
+
+export const ANOMALIES_TITLE = i18n.translate('xpack.siem.containers.anomalies.title', {
+  defaultMessage: 'Anomalies',
+});

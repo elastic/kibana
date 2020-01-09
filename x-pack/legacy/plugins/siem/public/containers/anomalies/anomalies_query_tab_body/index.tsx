@@ -11,10 +11,10 @@ import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { AnomaliesOverTimeQuery as AnomaliesOverTimeQueryComponent } from '../../anomalies/anomalies_over_time';
-import { AnomaliesOverTimeGqlQuery } from '../../anomalies/anomalies_over_time/anomalies_over_time.gql_query.ts';
+import { AnomaliesOverTimeQuery } from '../anomalies_over_time';
 import { MatrixHistogramOption } from '../../matrix_histogram/types';
-import * as i18n from './translation.ts';
+import * as i18n from './translations';
+import { AnomaliesOverTimeGqlQuery } from '../anomalies_over_time/anomalies_over_time.gql_query';
 
 const ID = 'anomaliesOverTimeQuery';
 const anomaliesStackByOptions: MatrixHistogramOption[] = [
@@ -61,7 +61,7 @@ export const AnomaliesQueryTabBody = ({
 
   return (
     <>
-      <AnomaliesOverTimeQueryComponent
+      <AnomaliesOverTimeQuery
         dataKey="Anomalies"
         defaultStackByOption={anomaliesStackByOptions[0]}
         deleteQuery={deleteQuery}
@@ -75,7 +75,7 @@ export const AnomaliesQueryTabBody = ({
         sourceId="default"
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
-        title="Anomalies"
+        title={i18n.ANOMALIES_TITLE}
         type={type}
         updateDateRange={updateDateRange}
       />

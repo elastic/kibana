@@ -33,7 +33,6 @@ export interface MatrixHistogramOption {
 export interface MatrixHistogramBasicProps {
   dataKey: string;
   deleteQuery?: ({ id }: { id: string }) => void;
-  defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
   filterQuery?: ESQuery | string | undefined;
@@ -50,12 +49,13 @@ export interface MatrixHistogramBasicProps {
   title?: string;
   type?: networkModel.NetworkType | hostsModel.HostsType;
   updateDateRange: UpdateDateRange;
-  useQuery: () => void;
 }
 
 export interface MatrixHistogramQueryProps {
   activePage?: number;
+  dataKey: string;
   endDate: number;
+  filterQuery?: ESQuery | string | undefined;
   limit?: number;
   sort?: NetworkDnsSortField;
   stackByField: string;
@@ -66,13 +66,14 @@ export interface MatrixHistogramQueryProps {
   isPtrIncluded: boolean;
   isHistogram?: boolean;
   pagination?: PaginationInputPaginated;
+  query: DocumentNode;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
-  legendPosition: Position;
+  legendPosition?: Position;
 }
 
 export interface MatrixHistogramQueryVariables<SortField = NetworkDnsSortField> {

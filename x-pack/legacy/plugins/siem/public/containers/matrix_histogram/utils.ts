@@ -7,6 +7,7 @@ import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs, getOr } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import { useEffect, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { UpdateDateRange, ChartSeriesData } from '../../components/charts/common';
 import {

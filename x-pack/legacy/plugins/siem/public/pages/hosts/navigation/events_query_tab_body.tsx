@@ -13,13 +13,14 @@ import { eventsDefaultModel } from '../../../components/events_viewer/default_mo
 import { MatrixHistogramOption } from '../../../containers/matrix_histogram/types';
 import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
 import { EventsOverTimeGqlQuery } from '../../../containers/events/events_over_time/events_over_time.gql_query';
+import * as i18n from '../translations';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 const eventsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'action',
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
     value: 'event.action',
   },
 ];
@@ -55,7 +56,7 @@ export const EventsQueryTabBody = ({
         stackByOptions={eventsStackByOptions}
         startDate={startDate}
         type={hostsModel.HostsType.page}
-        title="Events"
+        title={i18n.NAVIGATION_EVENTS_TITLE}
         updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
       />

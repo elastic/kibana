@@ -10,13 +10,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
 import { State, inputsSelectors } from '../../../store';
 import { MatrixHistogram } from '../../matrix_histogram';
-import { useQuery as useMatrixHistogramQuery } from '../../matrix_histogram/utils';
 import { MatrixHistogramProps } from '../../matrix_histogram/types';
 
 export interface AnomaliesOverTimeComponentReduxProps {
