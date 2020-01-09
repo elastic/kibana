@@ -12,7 +12,7 @@ import { StatusByLocations } from '../';
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
 
-  beforeEach(() => {
+  it('renders when up in all locations', () => {
     monitorLocations = [
       {
         summary: { up: 4, down: 0 },
@@ -23,9 +23,58 @@ describe('StatusByLocation component', () => {
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
       },
     ];
+    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
   });
 
-  it('renders duration in ms, not us', () => {
+  it('renders when only one location and it is up', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+    ];
+    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when only one location and it is down', () => {
+    monitorLocations = [
+      {
+        summary: { up: 0, down: 4 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+    ];
+    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders all locations are down', () => {
+    monitorLocations = [
+      {
+        summary: { up: 0, down: 4 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+      {
+        summary: { up: 0, down: 4 },
+        geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+    ];
+    const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when down in some locations', () => {
+    monitorLocations = [
+      {
+        summary: { up: 0, down: 4 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+    ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });

@@ -26,20 +26,41 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
       }
     });
 
+  let statusMessage = '';
+  let status = '';
+  if (downLocations.length === 0) {
+    statusMessage = `${locations.length}`;
+    status = 'Up';
+  } else if (downLocations.length > 0) {
+    status = 'Down';
+    statusMessage = `${downLocations.length}/${locations.length}`;
+    if (downLocations.length === locations.length) {
+      statusMessage = `${locations.length}`;
+    }
+  }
+
   return (
     <EuiText>
       <h2>
-        <FormattedMessage
-          id="xpack.uptime.monitorStatusBar.locations.upStatus"
-          values={{
-            status: downLocations.length > 0 ? 'Down' : 'Up',
-            loc:
-              downLocations.length > 0
-                ? `${downLocations.length}/${locations.length}`
-                : `${upLocations.length}/${locations.length}`,
-          }}
-          defaultMessage="{status} in {loc} Locations"
-        />
+        {locations.length <= 1 ? (
+          <FormattedMessage
+            id="xpack.uptime.monitorStatusBar.locations.oneLocStatus"
+            values={{
+              status,
+              loc: statusMessage,
+            }}
+            defaultMessage="{status} in {loc} Location"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.uptime.monitorStatusBar.locations.upStatus"
+            values={{
+              status,
+              loc: statusMessage,
+            }}
+            defaultMessage="{status} in {loc} Locations"
+          />
+        )}
       </h2>
     </EuiText>
   );
