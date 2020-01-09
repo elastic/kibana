@@ -11,7 +11,7 @@ set -e
 
 EXCLUDE_DETAILS=${1:-false}
 
-# Note: This file does not use jq on purpose for testing and redirections
+# Note: This file does not use jq on purpose for testing and pipe redirections
 
 # Example get all the rules except pre-packaged rules
 # ./export_rules.sh

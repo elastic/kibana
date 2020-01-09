@@ -75,7 +75,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             // If the JSON object had a validation or parse error then we return
             // early with the error and an (unknown) for the ruleId
             return createImportErrorObject({
-              ruleId: '(unknown)',
+              ruleId: '(unknown)', // TODO: Better handling where we know which ruleId is having issues with imports
               statusCode: 400,
               message: parsedRule.message,
               existingImportSuccessError,

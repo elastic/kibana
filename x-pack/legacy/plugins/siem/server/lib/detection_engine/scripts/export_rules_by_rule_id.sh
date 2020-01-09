@@ -14,7 +14,7 @@ set -e
 RULES=${1:-./rules/export/ruleid_queries.json}
 EXCLUDE_DETAILS=${2:-false}
 
-# Note: This file does not use jq on purpose for testing and redirections
+# Note: This file does not use jq on purpose for testing and pipe redirections
 
 # Example get all the rules except pre-packaged rules
 # ./export_rules_by_rule_id.sh

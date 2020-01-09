@@ -6,7 +6,7 @@
 
 import { AlertsClient } from '../../../../../alerting';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { ExportRulesRequestRest, isAlertType } from '../rules/types';
+import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';
 import { transformRulesToNdjson, transformAlertToRule } from '../routes/rules/utils';
 import { OutputRuleAlertRest } from '../types';
@@ -39,38 +39,30 @@ export const getRulesFromObjects = async ({
   objects,
 }: {
   alertsClient: AlertsClient;
-  objects: ExportRulesRequestRest['objects'];
+  objects: Array<{ rule_id: string }>;
 }): Promise<RulesErrors> => {
-  // TODO: Can we remove this null check yet?
-  if (objects != null) {
-    const alertsAndErrors = await objects.reduce<Promise<RulesErrors>>(
-      async (accumPromise, object) => {
-        const accum = await accumPromise;
-        const rule = await readRules({ alertsClient, ruleId: object.rule_id });
-        if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
-          const transformedRule = transformAlertToRule(rule);
-          return {
-            missingRules: accum.missingRules,
-            rules: [...accum.rules, transformedRule],
-          };
-        } else {
-          return {
-            missingRules: [...accum.missingRules, { rule_id: object.rule_id }],
-            rules: accum.rules,
-          };
-        }
-      },
-      Promise.resolve({
-        exportedCount: 0,
-        missingRules: [],
-        rules: [],
-      })
-    );
-    return alertsAndErrors;
-  } else {
-    return {
+  const alertsAndErrors = await objects.reduce<Promise<RulesErrors>>(
+    async (accumPromise, object) => {
+      const accum = await accumPromise;
+      const rule = await readRules({ alertsClient, ruleId: object.rule_id });
+      if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
+        const transformedRule = transformAlertToRule(rule);
+        return {
+          missingRules: accum.missingRules,
+          rules: [...accum.rules, transformedRule],
+        };
+      } else {
+        return {
+          missingRules: [...accum.missingRules, { rule_id: object.rule_id }],
+          rules: accum.rules,
+        };
+      }
+    },
+    Promise.resolve({
+      exportedCount: 0,
       missingRules: [],
       rules: [],
-    };
-  }
+    })
+  );
+  return alertsAndErrors;
 };

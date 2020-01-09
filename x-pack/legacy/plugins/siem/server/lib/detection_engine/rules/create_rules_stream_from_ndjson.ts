@@ -68,6 +68,7 @@ export const createLimitStream = (limit: number): Transform => {
 };
 
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
+// eventually and then pass it down so we can give error messages on the line number
 
 /**
  * Inspiration and the pattern of code followed is from:
