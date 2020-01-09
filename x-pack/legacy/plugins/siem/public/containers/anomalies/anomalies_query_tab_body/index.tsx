@@ -6,26 +6,24 @@
 
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { MatrixHistogramContainer } from '../../matrix_histogram';
+import { AnomaliesOverTimeQuery as AnomaliesOverTimeQueryComponent } from '../../anomalies/anomalies_over_time';
+import { AnomaliesOverTimeGqlQuery } from '../../anomalies/anomalies_over_time/anomalies_over_time.gql_query.ts';
 import { MatrixHistogramOption } from '../../matrix_histogram/types';
-import { getMatrixHistogramQuery } from '../../helpers';
+import * as i18n from './translation.ts';
 
 const ID = 'anomaliesOverTimeQuery';
 const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'job',
+    text: i18n.ANOMALIES_STACK_BY_JOB_ID,
     value: 'job_id',
   },
 ];
-const AnomaliesOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Anomalies')}
-`;
+
 export const AnomaliesQueryTabBody = ({
   deleteQuery,
   endDate,
@@ -63,7 +61,7 @@ export const AnomaliesQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
+      <AnomaliesOverTimeQueryComponent
         dataKey="Anomalies"
         defaultStackByOption={anomaliesStackByOptions[0]}
         deleteQuery={deleteQuery}

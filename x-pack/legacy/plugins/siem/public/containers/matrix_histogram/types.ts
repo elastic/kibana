@@ -19,6 +19,7 @@ import {
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { UpdateDateRange } from '../../components/charts/common';
+import { networkModel, hostsModel } from '../../store';
 
 export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 export type MatrixHistogramMappingTypes = Record<
@@ -30,29 +31,32 @@ export interface MatrixHistogramOption {
   value: string;
 }
 export interface MatrixHistogramBasicProps {
+  dataKey: string;
   deleteQuery?: ({ id }: { id: string }) => void;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
+  filterQuery?: ESQuery | string | undefined;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
+  query: DocumentNode;
   setQuery: SetQuery;
+  skip: boolean;
   sourceId: string;
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string;
   title?: string;
+  type?: networkModel.NetworkType | hostsModel.HostsType;
   updateDateRange: UpdateDateRange;
+  useQuery: () => void;
 }
 
 export interface MatrixHistogramQueryProps {
   activePage?: number;
-  dataKey: string;
   endDate: number;
-  filterQuery?: ESQuery | string | undefined;
   limit?: number;
-  query: DocumentNode;
   sort?: NetworkDnsSortField;
   stackByField: string;
   skip: boolean;
@@ -68,6 +72,7 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  legendPosition: Position;
 }
 
 export interface MatrixHistogramQueryVariables<SortField = NetworkDnsSortField> {

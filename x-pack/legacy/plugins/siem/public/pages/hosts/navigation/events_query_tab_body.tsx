@@ -6,20 +6,17 @@
 
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
 import { MatrixHistogramOption } from '../../../containers/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { getMatrixHistogramQuery } from '../../../containers/helpers';
+import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
+import { EventsOverTimeGqlQuery } from '../../../containers/events/events_over_time/events_over_time.gql_query';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
-export const EventsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Events')}
-`;
+
 const eventsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'action',
@@ -45,7 +42,7 @@ export const EventsQueryTabBody = ({
   }, []);
   return (
     <>
-      <MatrixHistogramContainer
+      <EventsOverTimeQuery
         dataKey="Events"
         defaultStackByOption={eventsStackByOptions[0]}
         deleteQuery={deleteQuery}

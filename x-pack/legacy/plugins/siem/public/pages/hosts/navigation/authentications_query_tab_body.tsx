@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -17,8 +16,8 @@ import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
 } from '../../../containers/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { getMatrixHistogramQuery } from '../../../containers/helpers';
+import { AuthenticationOverTimeQuery } from '../../../containers/authentications/authentication_over_time';
+import { AuthenticationsOverTimeGqlQuery } from '../../../containers/authentications/authentication_over_time/authentications_over_time.gql_query';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
@@ -29,10 +28,6 @@ const authStackByOptions: MatrixHistogramOption[] = [
     value: 'event.type',
   },
 ];
-
-const AuthenticationsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Authentications')}
-`;
 
 enum AuthMatrixDataGroup {
   authSuccess = 'authentication_success',
@@ -63,7 +58,7 @@ export const AuthenticationsQueryTabBody = ({
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => (
   <>
-    <MatrixHistogramContainer
+    <AuthenticationOverTimeQuery
       dataKey="Authentications"
       defaultStackByOption={authStackByOptions[0]}
       deleteQuery={deleteQuery}

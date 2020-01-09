@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { noop } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
-
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { MatrixHistogramOption } from '../../containers/matrix_histogram/types';
-import { getMatrixHistogramQuery } from '../../containers/helpers';
-import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
+import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
+import { AlertsOverTimeGqlQuery } from '../../containers/alerts/alerts_over_time/alerts_over_time.gql_query';
+
 const ID = 'alertsOverTimeQuery';
 const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -22,49 +21,49 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 const dataKey = 'Alerts';
-const AlertsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Alerts')}
-`;
-export const AlertsView = ({
-  deleteQuery,
-  endDate,
-  filterQuery,
-  pageFilters,
-  setQuery,
-  skip,
-  startDate,
-  type,
-  updateDateRange = noop,
-}: AlertsComponentsQueryProps) => {
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-  }, []);
-  return (
-    <>
-      <MatrixHistogramContainer
-        dataKey={dataKey}
-        defaultStackByOption={alertsStackByOptions[0]}
-        endDate={endDate}
-        filterQuery={filterQuery}
-        id={ID}
-        query={AlertsOverTimeGqlQuery}
-        setQuery={setQuery}
-        skip={skip}
-        sourceId="default"
-        stackByOptions={alertsStackByOptions}
-        startDate={startDate}
-        subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
-        title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
-        type={type}
-        updateDateRange={updateDateRange}
-      />
-      <EuiSpacer size="l" />
-      <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
-    </>
-  );
-};
+
+export const AlertsView = React.memo(
+  ({
+    deleteQuery,
+    endDate,
+    filterQuery,
+    pageFilters,
+    setQuery,
+    skip,
+    startDate,
+    type,
+    updateDateRange = noop,
+  }: AlertsComponentsQueryProps) => {
+    useEffect(() => {
+      return () => {
+        if (deleteQuery) {
+          deleteQuery({ id: ID });
+        }
+      };
+    }, []);
+    return (
+      <>
+        <AlertsOverTimeQuery
+          dataKey={dataKey}
+          defaultStackByOption={alertsStackByOptions[0]}
+          endDate={endDate}
+          filterQuery={filterQuery}
+          id={ID}
+          query={useMemo(() => AlertsOverTimeGqlQuery, [{ id: ID }])}
+          setQuery={setQuery}
+          skip={skip}
+          sourceId="default"
+          stackByOptions={alertsStackByOptions}
+          startDate={startDate}
+          subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
+          title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
+          type={type}
+          updateDateRange={updateDateRange}
+        />
+        <EuiSpacer size="l" />
+        <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+      </>
+    );
+  }
+);
 AlertsView.displayName = 'AlertsView';

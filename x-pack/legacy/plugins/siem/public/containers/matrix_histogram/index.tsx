@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { compose } from 'redux';
-
-import { connect } from 'react-redux';
-import { inputsModel, State, inputsSelectors, hostsModel, networkModel } from '../../store';
+import { inputsModel, hostsModel, networkModel } from '../../store';
 import { QueryTemplateProps } from '../query_template';
 
 import { MatrixOverTimeHistogramData, Maybe } from '../../graphql/types';
@@ -16,7 +12,6 @@ import { MatrixHistogramOption, MatrixHistogramMappingTypes } from './types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { MatrixHistogram } from './matrix_histogram';
-export { MatrixHistogram } from './matrix_histogram';
 
 export interface EventsArgs {
   endDate: number;
@@ -50,17 +45,4 @@ export interface EventsOverTimeComponentReduxProps {
   isInspected: boolean;
 }
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps)
-)(MatrixHistogram);
+export { MatrixHistogram };
