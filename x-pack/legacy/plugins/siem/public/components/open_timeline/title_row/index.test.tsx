@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { EuiButtonProps } from '@elastic/eui';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { TitleRow } from '.';

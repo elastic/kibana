@@ -238,7 +238,23 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     };
   },
 
-  getMonitorDetails: async ({ callES, monitorId }) => {
+  getMonitorDetails: async ({ callES, monitorId, dateStart, dateEnd }) => {
+    const queryFilters: any = [
+      {
+        range: {
+          '@timestamp': {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+      },
+      {
+        term: {
+          'monitor.id': monitorId,
+        },
+      },
+    ];
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -253,13 +269,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
                 },
               },
             ],
-            filter: [
-              {
-                term: {
-                  'monitor.id': monitorId,
-                },
-              },
-            ],
+            filter: queryFilters,
           },
         },
         sort: [

@@ -12,13 +12,6 @@ Helpers for working with errors returned from the Elasticsearch service.Since th
 export declare class ElasticsearchErrorHelpers 
 ```
 
-## Methods
-
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [decorateNotAuthorizedError(error, reason)](./kibana-plugin-server.elasticsearcherrorhelpers.decoratenotauthorizederror.md) | <code>static</code> |  |
-|  [isNotAuthorizedError(error)](./kibana-plugin-server.elasticsearcherrorhelpers.isnotauthorizederror.md) | <code>static</code> |  |
-
 ## Example
 
 Handle errors
@@ -32,4 +25,11 @@ try {
   }
 
 ```
+
+## Methods
+
+|  Method | Modifiers | Description |
+|  --- | --- | --- |
+|  [decorateNotAuthorizedError(error, reason)](./kibana-plugin-server.elasticsearcherrorhelpers.decoratenotauthorizederror.md) | <code>static</code> |  |
+|  [isNotAuthorizedError(error)](./kibana-plugin-server.elasticsearcherrorhelpers.isnotauthorizederror.md) | <code>static</code> |  |
 

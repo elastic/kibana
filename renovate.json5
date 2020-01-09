@@ -47,10 +47,49 @@
     },
     packageRules: [
       {
-        groupSlug: 'eslint',
-        groupName: 'eslint related packages',
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+        masterIssueApproval: false,
+      },
+      {
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
+        packageNames: [
+          '@reach/router',
+          '@types/reach__router',
+        ],
+      },
+      {
+        groupSlug: 'angular',
+        groupName: 'angular related packages',
         packagePatterns: [
-          '(\\b|_)eslint(\\b|_)',
+          '(\\b|_)angular(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'api-documenter',
+        groupName: 'api-documenter related packages',
+        packageNames: [
+          '@microsoft/api-documenter',
+          '@types/microsoft__api-documenter',
+          '@microsoft/api-extractor',
+          '@types/microsoft__api-extractor',
+        ],
+        enabled: false,
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -69,57 +108,91 @@
         ],
       },
       {
-        groupSlug: 'jest',
-        groupName: 'jest related packages',
-        packagePatterns: [
-          '(\\b|_)jest(\\b|_)',
-        ],
-      },
-      {
-        groupSlug: '@elastic/charts',
-        groupName: '@elastic/charts related packages',
+        groupSlug: 'base64-js',
+        groupName: 'base64-js related packages',
         packageNames: [
-          '@elastic/charts',
-          '@types/elastic__charts',
-        ],
-        reviewers: [
-          'markov00',
-        ],
-        masterIssueApproval: false,
-      },
-      {
-        groupSlug: 'mocha',
-        groupName: 'mocha related packages',
-        packagePatterns: [
-          '(\\b|_)mocha(\\b|_)',
+          'base64-js',
+          '@types/base64-js',
         ],
       },
       {
-        groupSlug: 'karma',
-        groupName: 'karma related packages',
-        packagePatterns: [
-          '(\\b|_)karma(\\b|_)',
+        groupSlug: 'bluebird',
+        groupName: 'bluebird related packages',
+        packageNames: [
+          'bluebird',
+          '@types/bluebird',
         ],
       },
       {
-        groupSlug: 'gulp',
-        groupName: 'gulp related packages',
-        packagePatterns: [
-          '(\\b|_)gulp(\\b|_)',
+        groupSlug: 'chance',
+        groupName: 'chance related packages',
+        packageNames: [
+          'chance',
+          '@types/chance',
         ],
       },
       {
-        groupSlug: 'grunt',
-        groupName: 'grunt related packages',
-        packagePatterns: [
-          '(\\b|_)grunt(\\b|_)',
+        groupSlug: 'cheerio',
+        groupName: 'cheerio related packages',
+        packageNames: [
+          'cheerio',
+          '@types/cheerio',
         ],
       },
       {
-        groupSlug: 'angular',
-        groupName: 'angular related packages',
-        packagePatterns: [
-          '(\\b|_)angular(\\b|_)',
+        groupSlug: 'chroma-js',
+        groupName: 'chroma-js related packages',
+        packageNames: [
+          'chroma-js',
+          '@types/chroma-js',
+        ],
+      },
+      {
+        groupSlug: 'chromedriver',
+        groupName: 'chromedriver related packages',
+        packageNames: [
+          'chromedriver',
+          '@types/chromedriver',
+        ],
+      },
+      {
+        groupSlug: 'classnames',
+        groupName: 'classnames related packages',
+        packageNames: [
+          'classnames',
+          '@types/classnames',
+        ],
+      },
+      {
+        groupSlug: 'cmd-shim',
+        groupName: 'cmd-shim related packages',
+        packageNames: [
+          'cmd-shim',
+          '@types/cmd-shim',
+        ],
+      },
+      {
+        groupSlug: 'color',
+        groupName: 'color related packages',
+        packageNames: [
+          'color',
+          '@types/color',
+        ],
+      },
+      {
+        groupSlug: 'cpy',
+        groupName: 'cpy related packages',
+        packageNames: [
+          'cpy',
+          '@types/cpy',
+        ],
+      },
+      {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
         ],
       },
       {
@@ -130,31 +203,114 @@
         ],
       },
       {
-        groupSlug: 'react',
-        groupName: 'react related packages',
-        packagePatterns: [
-          '(\\b|_)react(\\b|_)',
-          '(\\b|_)redux(\\b|_)',
-          '(\\b|_)enzyme(\\b|_)',
-        ],
+        groupSlug: 'dedent',
+        groupName: 'dedent related packages',
         packageNames: [
-          'ngreact',
-          '@types/ngreact',
-          'recompose',
-          '@types/recompose',
-          'prop-types',
-          '@types/prop-types',
-          'typescript-fsa-reducers',
-          '@types/typescript-fsa-reducers',
-          'reselect',
-          '@types/reselect',
+          'dedent',
+          '@types/dedent',
         ],
       },
       {
-        groupSlug: 'moment',
-        groupName: 'moment related packages',
+        groupSlug: 'delete-empty',
+        groupName: 'delete-empty related packages',
+        packageNames: [
+          'delete-empty',
+          '@types/delete-empty',
+        ],
+      },
+      {
+        groupSlug: 'dragselect',
+        groupName: 'dragselect related packages',
+        packageNames: [
+          'dragselect',
+          '@types/dragselect',
+        ],
+        labels: [
+          'release_note:skip',
+          'Team:Operations',
+          'renovate',
+          'v8.0.0',
+          'v7.6.0',
+          ':ml',
+        ],
+      },
+      {
+        groupSlug: 'elasticsearch',
+        groupName: 'elasticsearch related packages',
+        packageNames: [
+          'elasticsearch',
+          '@types/elasticsearch',
+        ],
+      },
+      {
+        groupSlug: 'eslint',
+        groupName: 'eslint related packages',
         packagePatterns: [
-          '(\\b|_)moment(\\b|_)',
+          '(\\b|_)eslint(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
+        groupSlug: 'fetch-mock',
+        groupName: 'fetch-mock related packages',
+        packageNames: [
+          'fetch-mock',
+          '@types/fetch-mock',
+        ],
+      },
+      {
+        groupSlug: 'file-saver',
+        groupName: 'file-saver related packages',
+        packageNames: [
+          'file-saver',
+          '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getopts',
+        groupName: 'getopts related packages',
+        packageNames: [
+          'getopts',
+          '@types/getopts',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
+        ],
+      },
+      {
+        groupSlug: 'git-url-parse',
+        groupName: 'git-url-parse related packages',
+        packageNames: [
+          'git-url-parse',
+          '@types/git-url-parse',
+        ],
+      },
+      {
+        groupSlug: 'glob',
+        groupName: 'glob related packages',
+        packageNames: [
+          'glob',
+          '@types/glob',
+        ],
+      },
+      {
+        groupSlug: 'globby',
+        groupName: 'globby related packages',
+        packageNames: [
+          'globby',
+          '@types/globby',
         ],
       },
       {
@@ -166,39 +322,17 @@
         ],
       },
       {
-        groupSlug: 'webpack',
-        groupName: 'webpack related packages',
+        groupSlug: 'grunt',
+        groupName: 'grunt related packages',
         packagePatterns: [
-          '(\\b|_)webpack(\\b|_)',
-          '(\\b|_)loader(\\b|_)',
-          '(\\b|_)acorn(\\b|_)',
-          '(\\b|_)terser(\\b|_)',
-        ],
-        packageNames: [
-          'mini-css-extract-plugin',
-          '@types/mini-css-extract-plugin',
-          'chokidar',
-          '@types/chokidar',
+          '(\\b|_)grunt(\\b|_)',
         ],
       },
       {
-        groupSlug: 'vega',
-        groupName: 'vega related packages',
+        groupSlug: 'gulp',
+        groupName: 'gulp related packages',
         packagePatterns: [
-          '(\\b|_)vega(\\b|_)',
-        ],
-        enabled: false,
-      },
-      {
-        groupSlug: 'language server',
-        groupName: 'language server related packages',
-        packageNames: [
-          'vscode-jsonrpc',
-          '@types/vscode-jsonrpc',
-          'vscode-languageserver',
-          '@types/vscode-languageserver',
-          'vscode-languageserver-types',
-          '@types/vscode-languageserver-types',
+          '(\\b|_)gulp(\\b|_)',
         ],
       },
       {
@@ -227,173 +361,6 @@
         ],
       },
       {
-        groupSlug: 'dragselect',
-        groupName: 'dragselect related packages',
-        packageNames: [
-          'dragselect',
-          '@types/dragselect',
-        ],
-        labels: [
-          'release_note:skip',
-          'Team:Operations',
-          'renovate',
-          'v8.0.0',
-          'v7.6.0',
-          ':ml',
-        ],
-      },
-      {
-        groupSlug: 'api-documenter',
-        groupName: 'api-documenter related packages',
-        packageNames: [
-          '@microsoft/api-documenter',
-          '@types/microsoft__api-documenter',
-          '@microsoft/api-extractor',
-          '@types/microsoft__api-extractor',
-        ],
-        enabled: false,
-      },
-      {
-        groupSlug: 'jsts',
-        groupName: 'jsts related packages',
-        packageNames: [
-          'jsts',
-          '@types/jsts',
-        ],
-        allowedVersions: '^1.6.2',
-      },
-      {
-        groupSlug: 'storybook',
-        groupName: 'storybook related packages',
-        packagePatterns: [
-          '(\\b|_)storybook(\\b|_)',
-        ],
-      },
-      {
-        groupSlug: 'typescript',
-        groupName: 'typescript related packages',
-        packagePatterns: [
-          '(\\b|_)ts(\\b|_)',
-          '(\\b|_)typescript(\\b|_)',
-        ],
-        packageNames: [
-          'tslib',
-          '@types/tslib',
-        ],
-      },
-      {
-        groupSlug: 'json-stable-stringify',
-        groupName: 'json-stable-stringify related packages',
-        packageNames: [
-          'json-stable-stringify',
-          '@types/json-stable-stringify',
-        ],
-      },
-      {
-        groupSlug: 'lodash.clonedeep',
-        groupName: 'lodash.clonedeep related packages',
-        packageNames: [
-          'lodash.clonedeep',
-          '@types/lodash.clonedeep',
-        ],
-      },
-      {
-        groupSlug: 'bluebird',
-        groupName: 'bluebird related packages',
-        packageNames: [
-          'bluebird',
-          '@types/bluebird',
-        ],
-      },
-      {
-        groupSlug: 'chance',
-        groupName: 'chance related packages',
-        packageNames: [
-          'chance',
-          '@types/chance',
-        ],
-      },
-      {
-        groupSlug: 'cheerio',
-        groupName: 'cheerio related packages',
-        packageNames: [
-          'cheerio',
-          '@types/cheerio',
-        ],
-      },
-      {
-        groupSlug: 'chromedriver',
-        groupName: 'chromedriver related packages',
-        packageNames: [
-          'chromedriver',
-          '@types/chromedriver',
-        ],
-      },
-      {
-        groupSlug: 'classnames',
-        groupName: 'classnames related packages',
-        packageNames: [
-          'classnames',
-          '@types/classnames',
-        ],
-      },
-      {
-        groupSlug: 'dedent',
-        groupName: 'dedent related packages',
-        packageNames: [
-          'dedent',
-          '@types/dedent',
-        ],
-      },
-      {
-        groupSlug: 'delete-empty',
-        groupName: 'delete-empty related packages',
-        packageNames: [
-          'delete-empty',
-          '@types/delete-empty',
-        ],
-      },
-      {
-        groupSlug: 'elasticsearch',
-        groupName: 'elasticsearch related packages',
-        packageNames: [
-          'elasticsearch',
-          '@types/elasticsearch',
-        ],
-      },
-      {
-        groupSlug: 'fetch-mock',
-        groupName: 'fetch-mock related packages',
-        packageNames: [
-          'fetch-mock',
-          '@types/fetch-mock',
-        ],
-      },
-      {
-        groupSlug: 'getopts',
-        groupName: 'getopts related packages',
-        packageNames: [
-          'getopts',
-          '@types/getopts',
-        ],
-      },
-      {
-        groupSlug: 'glob',
-        groupName: 'glob related packages',
-        packageNames: [
-          'glob',
-          '@types/glob',
-        ],
-      },
-      {
-        groupSlug: 'globby',
-        groupName: 'globby related packages',
-        packageNames: [
-          'globby',
-          '@types/globby',
-        ],
-      },
-      {
         groupSlug: 'has-ansi',
         groupName: 'has-ansi related packages',
         packageNames: [
@@ -407,6 +374,29 @@
         packageNames: [
           'history',
           '@types/history',
+        ],
+      },
+      {
+        groupSlug: 'indent-string',
+        groupName: 'indent-string related packages',
+        packageNames: [
+          'indent-string',
+          '@types/indent-string',
+        ],
+      },
+      {
+        groupSlug: 'intl-relativeformat',
+        groupName: 'intl-relativeformat related packages',
+        packageNames: [
+          'intl-relativeformat',
+          '@types/intl-relativeformat',
+        ],
+      },
+      {
+        groupSlug: 'jest',
+        groupName: 'jest related packages',
+        packagePatterns: [
+          '(\\b|_)jest(\\b|_)',
         ],
       },
       {
@@ -426,11 +416,63 @@
         ],
       },
       {
+        groupSlug: 'jsdom',
+        groupName: 'jsdom related packages',
+        packageNames: [
+          'jsdom',
+          '@types/jsdom',
+        ],
+      },
+      {
+        groupSlug: 'json-stable-stringify',
+        groupName: 'json-stable-stringify related packages',
+        packageNames: [
+          'json-stable-stringify',
+          '@types/json-stable-stringify',
+        ],
+      },
+      {
         groupSlug: 'json5',
         groupName: 'json5 related packages',
         packageNames: [
           'json5',
           '@types/json5',
+        ],
+      },
+      {
+        groupSlug: 'jsonwebtoken',
+        groupName: 'jsonwebtoken related packages',
+        packageNames: [
+          'jsonwebtoken',
+          '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
+      },
+      {
+        groupSlug: 'karma',
+        groupName: 'karma related packages',
+        packagePatterns: [
+          '(\\b|_)karma(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'language server',
+        groupName: 'language server related packages',
+        packageNames: [
+          'vscode-jsonrpc',
+          '@types/vscode-jsonrpc',
+          'vscode-languageserver',
+          '@types/vscode-languageserver',
+          'vscode-languageserver-types',
+          '@types/vscode-languageserver-types',
         ],
       },
       {
@@ -458,11 +500,43 @@
         ],
       },
       {
+        groupSlug: 'lodash.clonedeep',
+        groupName: 'lodash.clonedeep related packages',
+        packageNames: [
+          'lodash.clonedeep',
+          '@types/lodash.clonedeep',
+        ],
+      },
+      {
+        groupSlug: 'lodash.clonedeepwith',
+        groupName: 'lodash.clonedeepwith related packages',
+        packageNames: [
+          'lodash.clonedeepwith',
+          '@types/lodash.clonedeepwith',
+        ],
+      },
+      {
+        groupSlug: 'log-symbols',
+        groupName: 'log-symbols related packages',
+        packageNames: [
+          'log-symbols',
+          '@types/log-symbols',
+        ],
+      },
+      {
         groupSlug: 'lru-cache',
         groupName: 'lru-cache related packages',
         packageNames: [
           'lru-cache',
           '@types/lru-cache',
+        ],
+      },
+      {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
         ],
       },
       {
@@ -474,11 +548,41 @@
         ],
       },
       {
+        groupSlug: 'memoize-one',
+        groupName: 'memoize-one related packages',
+        packageNames: [
+          'memoize-one',
+          '@types/memoize-one',
+        ],
+      },
+      {
+        groupSlug: 'mime',
+        groupName: 'mime related packages',
+        packageNames: [
+          'mime',
+          '@types/mime',
+        ],
+      },
+      {
         groupSlug: 'minimatch',
         groupName: 'minimatch related packages',
         packageNames: [
           'minimatch',
           '@types/minimatch',
+        ],
+      },
+      {
+        groupSlug: 'mocha',
+        groupName: 'mocha related packages',
+        packagePatterns: [
+          '(\\b|_)mocha(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
         ],
       },
       {
@@ -490,6 +594,22 @@
         ],
       },
       {
+        groupSlug: 'ncp',
+        groupName: 'ncp related packages',
+        packageNames: [
+          'ncp',
+          '@types/ncp',
+        ],
+      },
+      {
+        groupSlug: 'nock',
+        groupName: 'nock related packages',
+        packageNames: [
+          'nock',
+          '@types/nock',
+        ],
+      },
+      {
         groupSlug: 'node',
         groupName: 'node related packages',
         packageNames: [
@@ -498,11 +618,59 @@
         ],
       },
       {
+        groupSlug: 'node-fetch',
+        groupName: 'node-fetch related packages',
+        packageNames: [
+          'node-fetch',
+          '@types/node-fetch',
+        ],
+      },
+      {
+        groupSlug: 'nodemailer',
+        groupName: 'nodemailer related packages',
+        packageNames: [
+          'nodemailer',
+          '@types/nodemailer',
+        ],
+      },
+      {
+        groupSlug: 'object-hash',
+        groupName: 'object-hash related packages',
+        packageNames: [
+          'object-hash',
+          '@types/object-hash',
+        ],
+      },
+      {
         groupSlug: 'opn',
         groupName: 'opn related packages',
         packageNames: [
           'opn',
           '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'ora',
+        groupName: 'ora related packages',
+        packageNames: [
+          'ora',
+          '@types/ora',
+        ],
+      },
+      {
+        groupSlug: 'papaparse',
+        groupName: 'papaparse related packages',
+        packageNames: [
+          'papaparse',
+          '@types/papaparse',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
         ],
       },
       {
@@ -522,11 +690,56 @@
         ],
       },
       {
-        groupSlug: '@reach/router',
-        groupName: '@reach/router related packages',
+        groupSlug: 'proper-lockfile',
+        groupName: 'proper-lockfile related packages',
         packageNames: [
-          '@reach/router',
-          '@types/reach__router',
+          'proper-lockfile',
+          '@types/proper-lockfile',
+        ],
+      },
+      {
+        groupSlug: 'puppeteer',
+        groupName: 'puppeteer related packages',
+        packageNames: [
+          'puppeteer',
+          '@types/puppeteer',
+        ],
+      },
+      {
+        groupSlug: 'react',
+        groupName: 'react related packages',
+        packagePatterns: [
+          '(\\b|_)react(\\b|_)',
+          '(\\b|_)redux(\\b|_)',
+          '(\\b|_)enzyme(\\b|_)',
+        ],
+        packageNames: [
+          'ngreact',
+          '@types/ngreact',
+          'recompose',
+          '@types/recompose',
+          'prop-types',
+          '@types/prop-types',
+          'typescript-fsa-reducers',
+          '@types/typescript-fsa-reducers',
+          'reselect',
+          '@types/reselect',
+        ],
+      },
+      {
+        groupSlug: 'read-pkg',
+        groupName: 'read-pkg related packages',
+        packageNames: [
+          'read-pkg',
+          '@types/read-pkg',
+        ],
+      },
+      {
+        groupSlug: 'reduce-reducers',
+        groupName: 'reduce-reducers related packages',
+        packageNames: [
+          'reduce-reducers',
+          '@types/reduce-reducers',
         ],
       },
       {
@@ -562,11 +775,26 @@
         ],
       },
       {
+        groupSlug: 'storybook',
+        groupName: 'storybook related packages',
+        packagePatterns: [
+          '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
         groupSlug: 'strip-ansi',
         groupName: 'strip-ansi related packages',
         packageNames: [
           'strip-ansi',
           '@types/strip-ansi',
+        ],
+      },
+      {
+        groupSlug: 'strong-log-transformer',
+        groupName: 'strong-log-transformer related packages',
+        packageNames: [
+          'strong-log-transformer',
+          '@types/strong-log-transformer',
         ],
       },
       {
@@ -594,219 +822,19 @@
         ],
       },
       {
-        groupSlug: 'type-detect',
-        groupName: 'type-detect related packages',
-        packageNames: [
-          'type-detect',
-          '@types/type-detect',
-        ],
-      },
-      {
-        groupSlug: 'uuid',
-        groupName: 'uuid related packages',
-        packageNames: [
-          'uuid',
-          '@types/uuid',
-        ],
-      },
-      {
-        groupSlug: 'vinyl-fs',
-        groupName: 'vinyl-fs related packages',
-        packageNames: [
-          'vinyl-fs',
-          '@types/vinyl-fs',
-        ],
-      },
-      {
-        groupSlug: 'zen-observable',
-        groupName: 'zen-observable related packages',
-        packageNames: [
-          'zen-observable',
-          '@types/zen-observable',
-        ],
-      },
-      {
-        groupSlug: 'archiver',
-        groupName: 'archiver related packages',
-        packageNames: [
-          'archiver',
-          '@types/archiver',
-        ],
-      },
-      {
-        groupSlug: 'base64-js',
-        groupName: 'base64-js related packages',
-        packageNames: [
-          'base64-js',
-          '@types/base64-js',
-        ],
-      },
-      {
-        groupSlug: 'chroma-js',
-        groupName: 'chroma-js related packages',
-        packageNames: [
-          'chroma-js',
-          '@types/chroma-js',
-        ],
-      },
-      {
-        groupSlug: 'color',
-        groupName: 'color related packages',
-        packageNames: [
-          'color',
-          '@types/color',
-        ],
-      },
-      {
-        groupSlug: 'cytoscape',
-        groupName: 'cytoscape related packages',
-        packageNames: [
-          'cytoscape',
-          '@types/cytoscape',
-        ],
-      },
-      {
-        groupSlug: 'fancy-log',
-        groupName: 'fancy-log related packages',
-        packageNames: [
-          'fancy-log',
-          '@types/fancy-log',
-        ],
-      },
-      {
-        groupSlug: 'file-saver',
-        groupName: 'file-saver related packages',
-        packageNames: [
-          'file-saver',
-          '@types/file-saver',
-        ],
-      },
-      {
-        groupSlug: 'getos',
-        groupName: 'getos related packages',
-        packageNames: [
-          'getos',
-          '@types/getos',
-        ],
-      },
-      {
-        groupSlug: 'git-url-parse',
-        groupName: 'git-url-parse related packages',
-        packageNames: [
-          'git-url-parse',
-          '@types/git-url-parse',
-        ],
-      },
-      {
-        groupSlug: 'jsdom',
-        groupName: 'jsdom related packages',
-        packageNames: [
-          'jsdom',
-          '@types/jsdom',
-        ],
-      },
-      {
-        groupSlug: 'jsonwebtoken',
-        groupName: 'jsonwebtoken related packages',
-        packageNames: [
-          'jsonwebtoken',
-          '@types/jsonwebtoken',
-        ],
-      },
-      {
-        groupSlug: 'mapbox-gl',
-        groupName: 'mapbox-gl related packages',
-        packageNames: [
-          'mapbox-gl',
-          '@types/mapbox-gl',
-        ],
-      },
-      {
-        groupSlug: 'memoize-one',
-        groupName: 'memoize-one related packages',
-        packageNames: [
-          'memoize-one',
-          '@types/memoize-one',
-        ],
-      },
-      {
-        groupSlug: 'mime',
-        groupName: 'mime related packages',
-        packageNames: [
-          'mime',
-          '@types/mime',
-        ],
-      },
-      {
-        groupSlug: 'nock',
-        groupName: 'nock related packages',
-        packageNames: [
-          'nock',
-          '@types/nock',
-        ],
-      },
-      {
-        groupSlug: 'node-fetch',
-        groupName: 'node-fetch related packages',
-        packageNames: [
-          'node-fetch',
-          '@types/node-fetch',
-        ],
-      },
-      {
-        groupSlug: 'nodemailer',
-        groupName: 'nodemailer related packages',
-        packageNames: [
-          'nodemailer',
-          '@types/nodemailer',
-        ],
-      },
-      {
-        groupSlug: 'object-hash',
-        groupName: 'object-hash related packages',
-        packageNames: [
-          'object-hash',
-          '@types/object-hash',
-        ],
-      },
-      {
-        groupSlug: 'papaparse',
-        groupName: 'papaparse related packages',
-        packageNames: [
-          'papaparse',
-          '@types/papaparse',
-        ],
-      },
-      {
-        groupSlug: 'proper-lockfile',
-        groupName: 'proper-lockfile related packages',
-        packageNames: [
-          'proper-lockfile',
-          '@types/proper-lockfile',
-        ],
-      },
-      {
-        groupSlug: 'puppeteer',
-        groupName: 'puppeteer related packages',
-        packageNames: [
-          'puppeteer',
-          '@types/puppeteer',
-        ],
-      },
-      {
-        groupSlug: 'reduce-reducers',
-        groupName: 'reduce-reducers related packages',
-        packageNames: [
-          'reduce-reducers',
-          '@types/reduce-reducers',
-        ],
-      },
-      {
         groupSlug: 'tar-fs',
         groupName: 'tar-fs related packages',
         packageNames: [
           'tar-fs',
           '@types/tar-fs',
+        ],
+      },
+      {
+        groupSlug: 'tempy',
+        groupName: 'tempy related packages',
+        packageNames: [
+          'tempy',
+          '@types/tempy',
         ],
       },
       {
@@ -818,107 +846,63 @@
         ],
       },
       {
-        groupSlug: 'xml-crypto',
-        groupName: 'xml-crypto related packages',
+        groupSlug: 'type-detect',
+        groupName: 'type-detect related packages',
         packageNames: [
-          'xml-crypto',
-          '@types/xml-crypto',
+          'type-detect',
+          '@types/type-detect',
         ],
       },
       {
-        groupSlug: 'xml2js',
-        groupName: 'xml2js related packages',
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
         packageNames: [
-          'xml2js',
-          '@types/xml2js',
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
-        groupSlug: 'intl-relativeformat',
-        groupName: 'intl-relativeformat related packages',
+        groupSlug: 'uuid',
+        groupName: 'uuid related packages',
         packageNames: [
-          'intl-relativeformat',
-          '@types/intl-relativeformat',
+          'uuid',
+          '@types/uuid',
         ],
       },
       {
-        groupSlug: 'cmd-shim',
-        groupName: 'cmd-shim related packages',
+        groupSlug: 'vega',
+        groupName: 'vega related packages',
+        packagePatterns: [
+          '(\\b|_)vega(\\b|_)',
+        ],
+        enabled: false,
+      },
+      {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
         packageNames: [
-          'cmd-shim',
-          '@types/cmd-shim',
+          'vinyl-fs',
+          '@types/vinyl-fs',
         ],
       },
       {
-        groupSlug: 'cpy',
-        groupName: 'cpy related packages',
-        packageNames: [
-          'cpy',
-          '@types/cpy',
+        groupSlug: 'webpack',
+        groupName: 'webpack related packages',
+        packagePatterns: [
+          '(\\b|_)webpack(\\b|_)',
+          '(\\b|_)loader(\\b|_)',
+          '(\\b|_)acorn(\\b|_)',
+          '(\\b|_)terser(\\b|_)',
         ],
-      },
-      {
-        groupSlug: 'indent-string',
-        groupName: 'indent-string related packages',
         packageNames: [
-          'indent-string',
-          '@types/indent-string',
-        ],
-      },
-      {
-        groupSlug: 'lodash.clonedeepwith',
-        groupName: 'lodash.clonedeepwith related packages',
-        packageNames: [
-          'lodash.clonedeepwith',
-          '@types/lodash.clonedeepwith',
-        ],
-      },
-      {
-        groupSlug: 'log-symbols',
-        groupName: 'log-symbols related packages',
-        packageNames: [
-          'log-symbols',
-          '@types/log-symbols',
-        ],
-      },
-      {
-        groupSlug: 'ncp',
-        groupName: 'ncp related packages',
-        packageNames: [
-          'ncp',
-          '@types/ncp',
-        ],
-      },
-      {
-        groupSlug: 'ora',
-        groupName: 'ora related packages',
-        packageNames: [
-          'ora',
-          '@types/ora',
-        ],
-      },
-      {
-        groupSlug: 'read-pkg',
-        groupName: 'read-pkg related packages',
-        packageNames: [
-          'read-pkg',
-          '@types/read-pkg',
-        ],
-      },
-      {
-        groupSlug: 'strong-log-transformer',
-        groupName: 'strong-log-transformer related packages',
-        packageNames: [
-          'strong-log-transformer',
-          '@types/strong-log-transformer',
-        ],
-      },
-      {
-        groupSlug: 'tempy',
-        groupName: 'tempy related packages',
-        packageNames: [
-          'tempy',
-          '@types/tempy',
+          'mini-css-extract-plugin',
+          '@types/mini-css-extract-plugin',
+          'chokidar',
+          '@types/chokidar',
         ],
       },
       {
@@ -938,11 +922,27 @@
         ],
       },
       {
-        groupSlug: 'parse-link-header',
-        groupName: 'parse-link-header related packages',
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
         packageNames: [
-          'parse-link-header',
-          '@types/parse-link-header',
+          'xml-crypto',
+          '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
+        groupSlug: 'zen-observable',
+        groupName: 'zen-observable related packages',
+        packageNames: [
+          'zen-observable',
+          '@types/zen-observable',
         ],
       },
       {

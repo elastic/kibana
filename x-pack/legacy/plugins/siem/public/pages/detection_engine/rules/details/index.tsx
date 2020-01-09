@@ -40,7 +40,11 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
 
-export const RuleDetailsComponent = memo(() => {
+interface RuleDetailsComponentProps {
+  signalsIndex: string | null;
+}
+
+export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(({ signalsIndex }) => {
   const { ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
   const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
@@ -109,7 +113,10 @@ export const RuleDetailsComponent = memo(() => {
 
                   <WrapperPage>
                     <HeaderPage
-                      backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
+                      backOptions={{
+                        href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
+                        text: i18n.BACK_TO_RULES,
+                      }}
                       badgeOptions={{ text: i18n.EXPERIMENTAL }}
                       border
                       subtitle={subTitle}
@@ -138,7 +145,7 @@ export const RuleDetailsComponent = memo(() => {
                           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                             <EuiFlexItem grow={false}>
                               <EuiButton
-                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}/edit`}
+                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
                                 iconType="visControls"
                                 isDisabled={rule?.immutable ?? true}
                               >
@@ -200,7 +207,12 @@ export const RuleDetailsComponent = memo(() => {
                     <EuiSpacer />
 
                     {ruleId != null && (
-                      <SignalsTable from={from} to={to} defaultFilters={signalDefaultFilters} />
+                      <SignalsTable
+                        defaultFilters={signalDefaultFilters}
+                        from={from}
+                        signalsIndex={signalsIndex ?? ''}
+                        to={to}
+                      />
                     )}
                   </WrapperPage>
                 </StickyContainer>
@@ -220,4 +232,5 @@ export const RuleDetailsComponent = memo(() => {
     </>
   );
 });
+
 RuleDetailsComponent.displayName = 'RuleDetailsComponent';
