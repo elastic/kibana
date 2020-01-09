@@ -8,7 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import _ from 'lodash';
+import { first, get, has, zip } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
