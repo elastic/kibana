@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ResultsLoader, Results, ModelItem, Anomaly } from './results_loader';
-export { CategorizationExamplesLoader, CategoryExample } from './categorization_examples_loader';
+export { CategorizationView } from './categorization_view';
