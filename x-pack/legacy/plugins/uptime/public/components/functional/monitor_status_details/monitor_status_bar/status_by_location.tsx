@@ -7,21 +7,22 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MonitorLocation } from '../../../../../common/runtime_types';
 
 interface StatusByLocationsProps {
-  locations: any;
+  locations: MonitorLocation[];
 }
 
 export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
-  const upLocs: string[] = [];
-  const downLocs: string[] = [];
+  const upLocations: string[] = [];
+  const downLocations: string[] = [];
 
   if (locations)
     locations.forEach((item: any) => {
       if (item.summary.down === 0) {
-        upLocs.push(item.geo.name);
+        upLocations.push(item.geo.name);
       } else {
-        downLocs.push(item.geo.name);
+        downLocations.push(item.geo.name);
       }
     });
 
@@ -31,11 +32,11 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
         <FormattedMessage
           id="xpack.uptime.monitorStatusBar.locations.upStatus"
           values={{
-            status: downLocs.length > 0 ? 'Down' : 'Up',
+            status: downLocations.length > 0 ? 'Down' : 'Up',
             loc:
-              downLocs.length > 0
-                ? `${downLocs.length}/${locations.length}`
-                : `${upLocs.length}/${locations.length}`,
+              downLocations.length > 0
+                ? `${downLocations.length}/${locations.length}`
+                : `${upLocations.length}/${locations.length}`,
           }}
           defaultMessage="{status} in {loc} Locations"
         />

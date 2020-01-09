@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getLayerList } from '../map_config';
 import { mockLayerList } from './__mocks__/mock';
 import { LocationPoint } from '../embedded_map';
@@ -19,7 +18,7 @@ jest.mock('uuid', () => {
 describe('map_config', () => {
   let upPoints: LocationPoint[];
   let downPoints: LocationPoint[];
-  let colors: UptimeAppColors;
+  let colors: Pick<UptimeAppColors, 'gray' | 'danger'>;
 
   beforeEach(() => {
     upPoints = [
@@ -35,10 +34,6 @@ describe('map_config', () => {
     colors = {
       danger: '#BC261E',
       gray: '#000',
-      mean: euiLightVars.euiColorPrimary,
-      range: euiLightVars.euiFocusBackgroundColor,
-      success: euiLightVars.euiColorSuccess,
-      warning: euiLightVars.euiColorWarning,
     };
   });
 

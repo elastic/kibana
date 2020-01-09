@@ -20,23 +20,31 @@ import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
 
-interface MonitorStatusBarProps {
-  monitorId: string;
-  loadMonitorStatus?: any;
-  dateStart: string;
-  dateEnd: string;
+export interface StateProps {
   monitorStatus: Ping;
   monitorLocations: MonitorLocations;
 }
 
-export const MonitorStatusBarComponent = ({
+export interface DispatchProps {
+  loadMonitorStatus: () => void;
+}
+
+export interface MonitorStatusBarProps {
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+}
+
+type Props = MonitorStatusBarProps & StateProps & DispatchProps;
+
+export const MonitorStatusBarComponent: React.FC<Props> = ({
   dateStart,
   dateEnd,
   monitorId,
   loadMonitorStatus,
   monitorStatus,
   monitorLocations,
-}: MonitorStatusBarProps) => {
+}) => {
   useEffect(() => {
     loadMonitorStatus();
   }, [dateStart, dateEnd, loadMonitorStatus]);

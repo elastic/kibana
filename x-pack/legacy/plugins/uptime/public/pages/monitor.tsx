@@ -17,10 +17,9 @@ import { PageHeader } from './page_header';
 
 interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
-  commonlyUsedRanges: any;
 }
 
-export const MonitorPage = ({ setBreadcrumbs, commonlyUsedRanges }: MonitorPageProps) => {
+export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
@@ -47,7 +46,7 @@ export const MonitorPage = ({ setBreadcrumbs, commonlyUsedRanges }: MonitorPageP
 
   return (
     <Fragment>
-      <PageHeader setBreadcrumbs={setBreadcrumbs} commonlyUsedRanges={commonlyUsedRanges} />
+      <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EuiSpacer size="s" />
       <MonitorStatusDetails
         monitorId={monitorId}

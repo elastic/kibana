@@ -16,7 +16,7 @@ import { UptimeAppColors } from '../../../../uptime_app';
 export const getLayerList = (
   upPoints: LocationPoint[],
   downPoints: LocationPoint[],
-  { gray, danger }: UptimeAppColors
+  { gray, danger }: Pick<UptimeAppColors, 'gray' | 'danger'>
 ) => {
   return [getLowPolyLayer(), getDownPointsLayer(downPoints, danger), getUpPointsLayer(upPoints)];
 };

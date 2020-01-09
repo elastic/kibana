@@ -5,17 +5,23 @@
  */
 
 import { connect } from 'react-redux';
-import { MonitorStatusBarComponent } from './monitor_status_bar';
+import { Dispatch } from 'redux';
+import {
+  StateProps,
+  DispatchProps,
+  MonitorStatusBarComponent,
+  MonitorStatusBarProps,
+} from './monitor_status_bar';
 import { selectMonitorStatus, selectMonitorLocations } from '../../../../state/selectors';
 import { AppState } from '../../../../state';
 import { getMonitorStatus, getSelectedMonitor } from '../../../../state/actions';
 
-const mapStateToProps = (state: AppState, ownProps: any) => ({
+const mapStateToProps = (state: AppState, ownProps: MonitorStatusBarProps) => ({
   monitorStatus: selectMonitorStatus(state),
   monitorLocations: selectMonitorLocations(state, ownProps.monitorId),
 });
 
-const mapDispatchToProps = (dispatch: any, ownProps: any) => ({
+const mapDispatchToProps = (dispatch: Dispatch<any>, ownProps: MonitorStatusBarProps) => ({
   loadMonitorStatus: () => {
     const { dateStart, dateEnd, monitorId } = ownProps;
     dispatch(
@@ -33,10 +39,11 @@ const mapDispatchToProps = (dispatch: any, ownProps: any) => ({
   },
 });
 
-export const MonitorStatusBar = connect(
+// @ts-ignore TODO: Investigate typescript issues here
+export const MonitorStatusBar = connect<StateProps, DispatchProps, MonitorStatusBarProps>(
+  // @ts-ignore TODO: Investigate typescript issues here
   mapStateToProps,
   mapDispatchToProps
-  // @ts-ignore some unrecognized ts check error here, TODO: investigate
 )(MonitorStatusBarComponent);
 
 export { MonitorSSLCertificate } from './monitor_ssl_certificate';

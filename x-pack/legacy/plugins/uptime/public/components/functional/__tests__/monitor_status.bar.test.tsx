@@ -59,6 +59,7 @@ describe('MonitorStatusBar component', () => {
         dateStart={dateStart}
         dateEnd={dateEnd}
         monitorLocations={monitorLocations}
+        loadMonitorStatus={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();

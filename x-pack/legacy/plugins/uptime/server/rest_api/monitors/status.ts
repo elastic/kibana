@@ -13,7 +13,7 @@ export const createGetMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs)
   path: '/api/uptime/monitor/selected',
   validate: {
     query: schema.object({
-      monitorId: schema.maybe(schema.string()),
+      monitorId: schema.string(),
     }),
   },
   options: {

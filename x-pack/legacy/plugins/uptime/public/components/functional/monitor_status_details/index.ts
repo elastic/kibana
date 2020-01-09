@@ -33,3 +33,4 @@ export const MonitorStatusDetails = connect(
 
 export * from './monitor_status_details';
 export { MonitorStatusBar } from './monitor_status_bar';
+export { StatusByLocations } from './monitor_status_bar/status_by_location';

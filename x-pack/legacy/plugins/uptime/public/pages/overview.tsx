@@ -25,8 +25,6 @@ import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plu
 import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
-  commonlyUsedRanges: any;
-  basePath: string;
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
@@ -47,12 +45,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({
-  basePath,
-  autocomplete,
-  setBreadcrumbs,
-  commonlyUsedRanges,
-}: Props) => {
+export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
   const { colors } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -109,8 +102,8 @@ export const OverviewPage = ({
 
   return (
     <Fragment>
-      <PageHeader commonlyUsedRanges={commonlyUsedRanges} setBreadcrumbs={setBreadcrumbs} />
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
+      <PageHeader setBreadcrumbs={setBreadcrumbs} />
+      <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar autocomplete={autocomplete} />

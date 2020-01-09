@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-// import { isRight } from 'fp-ts/lib/Either';
 import { getApiPath } from '../../lib/helper';
-// import { SnapshotType, Snapshot } from '../../../common/runtime_types';
 import { QueryParams } from '../actions/types';
 import { Ping } from '../../../common/graphql/types';
 
