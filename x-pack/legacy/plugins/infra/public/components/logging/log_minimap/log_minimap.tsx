@@ -20,11 +20,6 @@ interface Interval {
   start: number;
 }
 
-interface DragRecord {
-  startY: number;
-  currentY: number | null;
-}
-
 interface LogMinimapProps {
   className?: string;
   height: number;
@@ -41,7 +36,6 @@ interface LogMinimapProps {
 
 interface LogMinimapState {
   target: number | null;
-  drag: DragRecord | null;
   svgPosition: ClientRect;
   timeCursorY: number;
 }
@@ -58,7 +52,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     this.state = {
       timeCursorY: 0,
       target: props.target,
-      drag: null,
       svgPosition: {
         width: 0,
         height: 0,
@@ -70,83 +63,25 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     };
   }
 
-  private dragTargetArea: SVGElement | null = null;
-
-  public static getDerivedStateFromProps({ target }: LogMinimapProps, { drag }: LogMinimapState) {
-    if (!drag) {
-      return { target };
-    }
-    return null;
+  public static getDerivedStateFromProps({ target }: LogMinimapProps) {
+    return { target };
   }
 
-  public handleClick = (event: MouseEvent) => {
-    if (!this.dragTargetArea) return;
-    const svgPosition = this.dragTargetArea.getBoundingClientRect();
-    const clickedYPosition = event.clientY - svgPosition.top;
+  public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
+    const minimapTop = event.currentTarget.getBoundingClientRect().top;
+    const clickedYPosition = event.clientY - minimapTop;
+
     const clickedTime = Math.floor(this.getYScale().invert(clickedYPosition));
-    this.setState({
-      drag: null,
-    });
+
     this.props.jumpToTarget({
       tiebreaker: 0,
       time: clickedTime,
     });
   };
 
-  private handleMouseDown: React.MouseEventHandler<SVGSVGElement> = event => {
-    const { clientY, target } = event;
-    if (target === this.dragTargetArea) {
-      const svgPosition = event.currentTarget.getBoundingClientRect();
-      this.setState({
-        drag: {
-          startY: clientY,
-          currentY: null,
-        },
-        svgPosition,
-      });
-      window.addEventListener('mousemove', this.handleDragMove);
-    }
-    window.addEventListener('mouseup', this.handleMouseUp);
-  };
-
-  private handleMouseUp = (event: MouseEvent) => {
-    window.removeEventListener('mousemove', this.handleDragMove);
-    window.removeEventListener('mouseup', this.handleMouseUp);
-
-    const { drag, svgPosition } = this.state;
-    if (!drag || !drag.currentY) {
-      this.handleClick(event);
-      return;
-    }
-    const getTime = (pos: number) => Math.floor(this.getYScale().invert(pos));
-    const startYPosition = drag.startY - svgPosition.top;
-    const endYPosition = event.clientY - svgPosition.top;
-    const startTime = getTime(startYPosition);
-    const endTime = getTime(endYPosition);
-    const timeDifference = endTime - startTime;
-    const newTime = (this.props.target || 0) - timeDifference;
-    this.setState({ drag: null, target: newTime });
-    this.props.jumpToTarget({
-      tiebreaker: 0,
-      time: newTime,
-    });
-  };
-
-  private handleDragMove = (event: MouseEvent) => {
-    const { drag } = this.state;
-    if (!drag) return;
-    this.setState({
-      drag: {
-        ...drag,
-        currentY: event.clientY,
-      },
-    });
-  };
-
   public getYScale = () => {
-    const { target } = this.state;
-    const { height, intervalSize } = this.props;
-    return calculateYScale(target, height, intervalSize);
+    const { start, end, height } = this.props;
+    return calculateYScale(start, end, height);
   };
 
   public getPositionOfTime = (time: number) => {
@@ -176,14 +111,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       summaryHighlightBuckets,
       width,
     } = this.props;
-    const { timeCursorY, drag, target } = this.state;
-
-    // Render the time ruler and density map beyond the visible range of time, so that
-    // the user doesn't run out of ruler when they click and drag
+    const { timeCursorY, target } = this.state;
     const [minTime, maxTime] = calculateYScale(start, end, height).domain();
     const tickCount = height ? height / 8 : 12;
-    const overscanTranslate = 0;
-    const dragTransform = !drag || !drag.currentY ? 0 : drag.currentY - drag.startY;
     return (
       <MinimapWrapper
         className={className}
@@ -191,11 +121,10 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
-        onMouseDown={this.handleMouseDown}
+        onClick={this.handleClick}
         onMouseMove={this.updateTimeCursor}
-        showOverscanBoundaries={Boolean(height && summaryBuckets.length)}
       >
-        <g transform={`translate(0, ${dragTransform + overscanTranslate})`}>
+        <g>
           <DensityChart
             buckets={summaryBuckets}
             start={minTime}
@@ -232,25 +161,10 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
           />
         ) : null}
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
-        <DragTargetArea
-          isGrabbing={Boolean(drag)}
-          ref={node => {
-            this.dragTargetArea = node;
-          }}
-          x={0}
-          y={0}
-          width={width / 3}
-          height={height}
-        />
       </MinimapWrapper>
     );
   }
 }
-
-const DragTargetArea = euiStyled.rect<{ isGrabbing: boolean }>`
-  fill: transparent;
-  cursor: ${({ isGrabbing }) => (isGrabbing ? 'grabbing' : 'grab')};
-`;
 
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
@@ -266,9 +180,8 @@ const TimeCursor = euiStyled.line`
       : props.theme.eui.euiColorDarkShade};
 `;
 
-const MinimapWrapper = euiStyled.svg<{ showOverscanBoundaries: boolean }>`
-  background: ${props =>
-    props.showOverscanBoundaries ? props.theme.eui.euiColorMediumShade : 'transparent'};
+const MinimapWrapper = euiStyled.svg`
+  cursor: pointer;
   & ${TimeCursor} {
     visibility: hidden;
   }
