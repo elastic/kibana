@@ -12,7 +12,6 @@ import {
   RequestHandler,
 } from 'src/core/server';
 import {
-  savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
   loggingServiceMock,
@@ -21,9 +20,6 @@ import {
 
 const mockRouteContext = ({
   core: {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
     elasticsearch: { dataClient: elasticsearchServiceMock.createScopedClusterClient() },
   },
 } as unknown) as RequestHandlerContext;
