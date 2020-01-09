@@ -6,7 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -24,6 +24,21 @@ const Overlay = styled.div`
   padding: ${theme.gutterTypes.gutterMedium};
 `;
 
+const ProgressBarContainer = styled.div`
+  width: 50%;
+  max-width: 600px;
+`;
+
+const Content = styled.div<{ isLoading: boolean }>`
+  ${props =>
+    props.isLoading
+      ? `
+      pointer-events: none;
+      opacity: 0.5;
+    `
+      : ''}
+`;
+
 interface Props {
   children: React.ReactNode;
   isLoading: boolean;
@@ -38,15 +53,20 @@ export const LoadingOverlay = ({
   <Container>
     {isLoading && (
       <Overlay>
-        <EuiProgress
-          value={percentageLoaded}
-          max={100}
-          color="subdued"
-          size="m"
-        />
-        {/*<EuiLoadingChart size="xl" mono />*/}
+        <ProgressBarContainer>
+          <EuiProgress
+            value={percentageLoaded}
+            max={100}
+            color="primary"
+            size="m"
+          />
+        </ProgressBarContainer>
+        <EuiSpacer size="s" />
+        <EuiText size="s" textAlign="center">
+          {'Loading service map... This might take a short while.'}
+        </EuiText>
       </Overlay>
     )}
-    {children}
+    <Content isLoading={isLoading}>{children}</Content>
   </Container>
 );
