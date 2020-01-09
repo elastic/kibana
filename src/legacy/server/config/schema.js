@@ -254,7 +254,8 @@ export default () =>
           )
           .default([]),
       }).default(),
-      manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
+      emsFileApiUrl: Joi.string().default('https://vector-staging.maps.elastic.co'),
+      emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
       emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
