@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
+import { IUiSettingsClient } from 'src/core/server';
 import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
@@ -44,6 +45,7 @@ export interface ServerFacade {
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
   uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
+  fieldFormatServiceFactory: (uiConfig: IUiSettingsClient) => unknown;
 }
 
 export const reporting = (kibana: any) => {
@@ -102,6 +104,8 @@ export const reporting = (kibana: any) => {
         },
         savedObjects: server.savedObjects,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
+        // @ts-ignore Property 'fieldFormatServiceFactory' does not exist on type 'Server'.
+        fieldFormatServiceFactory: server.fieldFormatServiceFactory,
         log: server.log.bind(server),
       };
       const exportTypesRegistry = getExportTypesRegistry();
