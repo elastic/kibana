@@ -24,6 +24,7 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const security = getService('security');
   const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
@@ -34,7 +35,16 @@ export default function({ getService, getPageObjects }) {
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await security.testUser.setRoles([
+        'kibana_user',
+        'kibana_sample_admin',
+        'machine_learning_user',
+      ]);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should display registered flights sample data sets', async () => {

@@ -179,6 +179,21 @@ export default async function({ readConfigFile }) {
           },
           kibana: [],
         },
+        //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
+        kibana_sample_admin: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
       },
       defaultRoles: [
         'test_logstash_reader',
