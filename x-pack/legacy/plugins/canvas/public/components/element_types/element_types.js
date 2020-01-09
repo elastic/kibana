@@ -5,7 +5,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiModalBody,
   EuiTabbedContent,
@@ -14,6 +13,7 @@ import {
   EuiSpacer,
   EuiOverlayMask,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { map, sortBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';

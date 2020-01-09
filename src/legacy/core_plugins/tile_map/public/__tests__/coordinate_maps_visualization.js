@@ -306,7 +306,7 @@ describe('CoordinateMapsVisualizationTest', function() {
   async function compareImage(expectedImageSource, index) {
     const elementList = domNode.querySelectorAll('canvas');
     const firstCanvasOnMap = elementList[index];
-    return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
+    return await imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
 
   function setupDOM(width, height) {

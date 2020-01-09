@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -18,6 +16,8 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import PropTypes from 'prop-types';
 import { Datatable } from '../../datatable';
 import { Error } from '../../error';
 import { ComponentStrings } from '../../../../i18n';

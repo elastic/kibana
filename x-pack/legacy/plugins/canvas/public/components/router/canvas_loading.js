@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import PropTypes from 'prop-types';
 
 export const CanvasLoading = ({ msg }) => (
   <div className="canvasContainer--loading">

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';

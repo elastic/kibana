@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiTabbedContent,
   EuiModalHeader,
@@ -15,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
 import { ComponentStrings } from '../../../i18n';

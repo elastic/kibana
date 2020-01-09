@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiPanel,
   EuiButton,
@@ -16,6 +15,7 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { ComponentStrings } from '../../../i18n';
 import { ExpressionInput } from '../expression_input';

@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,8 +18,9 @@ import {
   EuiFilePicker,
   EuiLink,
 } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
 import moment from 'moment';
+import PropTypes from 'prop-types';
+import { sortByOrder } from 'lodash';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';

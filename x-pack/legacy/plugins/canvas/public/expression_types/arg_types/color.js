@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { ColorPickerPopover } from '../../components/color_picker_popover';
 import { ArgTypesStrings } from '../../../i18n';

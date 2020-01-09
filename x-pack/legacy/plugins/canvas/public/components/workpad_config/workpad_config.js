@@ -5,7 +5,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFieldText,
   EuiFieldNumber,
@@ -22,6 +21,7 @@ import {
   EuiText,
   EuiButton,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { ComponentStrings } from '../../../i18n';
 

@@ -19,6 +19,7 @@
 
 const { readdirSync } = require('fs');
 const { resolve } = require('path');
+const UiSharedDeps = require('@kbn/ui-shared-deps');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -366,15 +367,15 @@ module.exports = {
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
-        // instructs import/no-extraneous-dependencies to treat modules
-        // in plugins/ or ui/ namespace as "core modules" so they don't
-        // trigger failures for not being listed in package.json
+        // instructs import/no-extraneous-dependencies to treat certain modules
+        // as core modules, even if they aren't listed in package.json
         'import/core-modules': [
           'plugins',
           'legacy/ui',
           'uiExports',
           // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
           'querystring',
+          ...Object.keys(UiSharedDeps.externals),
         ],
 
         'import/resolver': {

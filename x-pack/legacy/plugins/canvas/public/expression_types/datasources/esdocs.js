@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiTextArea, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';

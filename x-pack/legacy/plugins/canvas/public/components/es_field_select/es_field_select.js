@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur }) => {

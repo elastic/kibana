@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
+import PropTypes from 'prop-types';
 
 export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) => {
   const options = fields.map(value => ({

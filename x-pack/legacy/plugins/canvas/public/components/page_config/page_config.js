@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiCard,
   EuiFormRow,
@@ -15,6 +14,7 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { WorkpadColorPicker } from '../workpad_color_picker';
 import { ComponentStrings } from '../../../i18n';
 

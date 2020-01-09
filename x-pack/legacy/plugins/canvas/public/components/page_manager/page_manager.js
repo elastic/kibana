@@ -5,8 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import PropTypes from 'prop-types';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
