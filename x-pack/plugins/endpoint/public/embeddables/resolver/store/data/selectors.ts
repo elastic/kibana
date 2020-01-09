@@ -102,18 +102,20 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
   return widths;
 }
 
-// bet sean loves this
+/**
+ * TODO comments
+ */
 type ProcessWithWidthMetadata = {
   process: ProcessEvent;
   width: number;
 } & (
-  | ({
+  | {
       parent: ProcessEvent;
       parentWidth: number;
-    } & ( // TODO bolete this
-      | { isOnlyChild: true; firstChildWidth: null; lastChildWidth: null }
-      | { isOnlyChild: false; firstChildWidth: number; lastChildWidth: number }
-    ))
+      isOnlyChild: boolean;
+      firstChildWidth: number;
+      lastChildWidth: number;
+    }
   | {
       parent: null;
       /* Without a parent, there is no parent width */
@@ -272,9 +274,8 @@ function* levelOrderWithWidths(
       const siblings = indexedProcessTreeChildren(tree, parent);
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
-        // TODO, just make these === width
-        metadata.lastChildWidth = null;
-        metadata.firstChildWidth = null;
+        metadata.lastChildWidth = width;
+        metadata.firstChildWidth = width;
       } else {
         const firstChildWidth = widths.get(siblings[0]);
         const lastChildWidth = widths.get(siblings[0]);
