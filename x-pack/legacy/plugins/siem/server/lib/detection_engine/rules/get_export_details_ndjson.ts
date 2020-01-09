@@ -8,7 +8,7 @@ import { OutputRuleAlertRest } from '../types';
 
 export const getExportDetailsNdjson = (
   rules: Array<Partial<OutputRuleAlertRest>>,
-  missingRules: Array<Partial<OutputRuleAlertRest>> = []
+  missingRules: Array<{ rule_id: string }> = []
 ): string => {
   const stringified = JSON.stringify({
     exported_count: rules.length,
