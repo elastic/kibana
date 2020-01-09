@@ -176,7 +176,7 @@ export const getFindResult = (): FindHit => ({
 export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
-  total: 0,
+  total: 1,
   data: [getResult()],
 });
 
