@@ -42,6 +42,7 @@ export const signalRulesAlertType = ({
         outputIndex: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
         timelineId: schema.nullable(schema.string()),
+        timelineTitle: schema.nullable(schema.string()),
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),

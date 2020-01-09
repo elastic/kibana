@@ -17,7 +17,7 @@ import {
 import { Action } from './reducer';
 
 export const editRuleAction = (rule: Rule, history: H.History) => {
-  history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/${rule.id}/edit`);
+  history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${rule.id}/edit`);
 };
 
 export const runRuleAction = () => {};
