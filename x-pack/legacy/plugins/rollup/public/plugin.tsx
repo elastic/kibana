@@ -5,6 +5,7 @@
  */
 
 import { render, unmountComponentAtNode } from 'react-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +39,8 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+// @ts-ignore
+import { setHttp } from './crud_app/services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -70,7 +73,7 @@ export class RollupPlugin implements Plugin {
         aggTypeFieldFilters,
         editorConfigProviders,
         addSearchStrategy,
-        management,
+        management: managementLegacy,
         addBadgeExtension,
         addToggleExtension,
       },
@@ -83,8 +86,8 @@ export class RollupPlugin implements Plugin {
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 
     if (isRollupIndexPatternsEnabled) {
-      management.indexPattern.creation.add(RollupIndexPatternCreationConfig);
-      management.indexPattern.list.add(RollupIndexPatternListConfig);
+      managementLegacy.indexPattern.creation.add(RollupIndexPatternCreationConfig);
+      managementLegacy.indexPattern.list.add(RollupIndexPatternListConfig);
       addSearchStrategy(rollupSearchStrategy);
       initAggTypeFilter(aggTypeFilters);
       initAggTypeFieldFilter(aggTypeFieldFilters);
@@ -107,42 +110,48 @@ export class RollupPlugin implements Plugin {
     }
   }
 
-  start(
-    core: CoreStart,
-    { management, __LEGACY: { registerRollupApp } }: RollupPluginStartDependencies
-  ) {
-    const esSection = management.legacy.getSection('elasticsearch');
-
-    esSection.register('rollup_jobs', {
-      visible: true,
-      display: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-      order: 3,
-      url: `#${CRUD_APP_BASE_PATH}/job_list`,
-    });
+  start(core: CoreStart, { management }: RollupPluginStartDependencies) {
+    setHttp(core.http);
+    const esSection = management.sections.getSection('elasticsearch');
 
     const I18nContext = core.i18n.Context;
 
-    registerRollupApp(elem => {
-      render(
-        <I18nContext>
-          <KibanaContextProvider
-            services={{
-              http: core.http,
-              notifications: core.notifications,
-              chrome: core.chrome,
-            }}
-          >
-            <Provider store={rollupJobsStore}>
-              <App />
-            </Provider>
-          </KibanaContextProvider>
-        </I18nContext>,
-        elem
-      );
+    esSection!.registerApp({
+      id: 'rollup_jobs',
+      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+      order: 3,
+      mount(params) {
+        params.setBreadcrumbs([
+          {
+            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
+              defaultMessage: 'Rollup Jobs',
+            }),
+          },
+        ]);
 
-      return () => {
-        unmountComponentAtNode(elem);
-      };
+        render(
+          <Router>
+            <I18nContext>
+              <KibanaContextProvider
+                services={{
+                  http: core.http,
+                  notifications: core.notifications,
+                  chrome: core.chrome,
+                }}
+              >
+                <Provider store={rollupJobsStore}>
+                  <App />
+                </Provider>
+              </KibanaContextProvider>
+            </I18nContext>
+          </Router>,
+          params.element
+        );
+
+        return () => {
+          unmountComponentAtNode(params.element);
+        };
+      },
     });
   }
 }
