@@ -30,7 +30,7 @@ const fields = loadYamlFile('./tests/nginx.fields.yml');
 const accessEcsFields = loadYamlFile('./tests/nginx.access.ecs.yml');
 const errorEcsFields = loadYamlFile('./tests/nginx.error.ecs.yml');
 
-test('flattenFields function recurseively flattens nested fields and renames name property with path', () => {
+test('flattenFields function recursively flattens nested fields and renames name property with path', () => {
   const flattened = flattenFields(fields);
   expect(flattened).toMatchSnapshot('flattenFields');
 });
