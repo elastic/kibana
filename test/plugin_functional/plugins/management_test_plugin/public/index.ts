@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { SidebarNav } from './sidebar_nav';
+import { PluginInitializer } from 'kibana/public';
+import {
+  ManagementTestPlugin,
+  ManagementTestPluginSetup,
+  ManagementTestPluginStart,
+} from './plugin';
+
+export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>
+  new ManagementTestPlugin();
