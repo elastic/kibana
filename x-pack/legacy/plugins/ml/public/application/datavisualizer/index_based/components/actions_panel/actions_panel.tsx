@@ -39,7 +39,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   // controls whether the recognizer section is ultimately displayed.
   return (
     <div data-test-subj="mlDataVisualizerActionsPanel">
-      <EuiTitle>
+      <EuiTitle size="s">
         <h2>
           <FormattedMessage
             id="xpack.ml.datavisualizer.actionsPanel.createJobTitle"
@@ -49,7 +49,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <div style={recognizerResultsCount === 0 ? { display: 'none' } : {}}>
-        <EuiText>
+        <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
@@ -67,7 +67,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </EuiFlexGroup>
         <EuiSpacer size="l" />
       </div>
-      <EuiText>
+      <EuiText size="s" color="subdued">
         <p>
           <FormattedMessage
             id="xpack.ml.datavisualizer.actionsPanel.createJobDescription"
