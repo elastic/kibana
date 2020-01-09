@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
 import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { EmptyPrompt } from './empty_prompt';
@@ -453,12 +452,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         this.initiallyLoadRoleMappings();
       }
     } catch (e) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.security.management.roleMappings.fetchingRoleMappingsErrorMessage', {
-          defaultMessage: 'Error loading role mappings: {message}',
-          values: { message: e?.body?.message ?? '' },
-        })
-      );
+      this.setState({ error: e, loadState: 'finished' });
     }
   }
 
