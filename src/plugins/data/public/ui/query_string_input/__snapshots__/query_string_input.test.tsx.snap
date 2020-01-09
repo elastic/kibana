@@ -150,6 +150,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "addProvider": [MockFunction],
                 "clearProviders": [MockFunction],
@@ -769,6 +775,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "addProvider": [MockFunction],
                         "clearProviders": [MockFunction],
@@ -1376,6 +1388,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "addProvider": [MockFunction],
                 "clearProviders": [MockFunction],
@@ -1992,6 +2010,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "addProvider": [MockFunction],
                         "clearProviders": [MockFunction],
@@ -2599,6 +2623,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "addProvider": [MockFunction],
                 "clearProviders": [MockFunction],
@@ -3215,6 +3245,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "addProvider": [MockFunction],
                         "clearProviders": [MockFunction],
