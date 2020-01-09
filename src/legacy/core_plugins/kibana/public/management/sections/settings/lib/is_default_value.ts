@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Setting } from '../types';
 
-export function isDefaultValue(setting) {
+export function isDefaultValue(setting: Setting) {
   return (
     setting.isCustom ||
     setting.value === undefined ||

@@ -50,7 +50,7 @@ describe('Advanced Settings: Voice Announcement', () => {
     const { query, filteredSettings } = testProps.nothing;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement query={query} settings={filteredSettings} />
+      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={filteredSettings} />
     );
 
     expect(component).toMatchSnapshot();
@@ -60,7 +60,7 @@ describe('Advanced Settings: Voice Announcement', () => {
     const { query, filteredSettings } = testProps.searchResult;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement query={query} settings={filteredSettings} />
+      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={filteredSettings} />
     );
 
     expect(component).toMatchSnapshot();

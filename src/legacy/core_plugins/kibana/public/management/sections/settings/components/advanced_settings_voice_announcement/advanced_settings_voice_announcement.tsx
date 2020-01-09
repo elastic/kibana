@@ -40,9 +40,15 @@
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
+import { Setting } from '../../types';
 
-export class AdvancedSettingsVoiceAnnouncement extends Component {
-  shouldComponentUpdate = nextProps => {
+interface Props {
+  queryText: string;
+  settings: Setting[][];
+}
+
+export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
+  shouldComponentUpdate = (nextProps: Props) => {
     /*
       If a user typed smth new, we should clear the previous timer
       and start another one + block component rendering.
@@ -57,7 +63,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
     const filteredSections = Object.values(this.props.settings).map(setting =>
       setting.map(option => option.ariaName)
     );
-    const filteredOptions = [].concat(...filteredSections);
+    const filteredOptions = [...filteredSections];
     return (
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">

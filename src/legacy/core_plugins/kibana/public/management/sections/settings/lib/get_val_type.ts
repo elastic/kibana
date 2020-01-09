@@ -22,7 +22,9 @@
  * @param {?} current value of the setting
  * @returns {string} the type to use for determining the display and editor
  */
-export function getValType(def, value) {
+
+// todo
+export function getValType(def: any, value: any): string {
   if (def.type) {
     return def.type;
   }

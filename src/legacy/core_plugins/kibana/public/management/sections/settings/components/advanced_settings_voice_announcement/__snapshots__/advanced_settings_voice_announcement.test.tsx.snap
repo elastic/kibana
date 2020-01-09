@@ -15,7 +15,7 @@ exports[`Advanced Settings: Voice Announcement should render announcement 1`] = 
         values={
           Object {
             "optionLenght": 1,
-            "query": undefined,
+            "query": "dark theme",
             "sectionLenght": 1,
           }
         }
@@ -40,7 +40,7 @@ exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
         values={
           Object {
             "optionLenght": 1,
-            "query": undefined,
+            "query": "",
             "sectionLenght": 1,
           }
         }

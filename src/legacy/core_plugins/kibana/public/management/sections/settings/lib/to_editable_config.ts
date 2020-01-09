@@ -20,6 +20,7 @@
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
+import { Setting } from '../types';
 
 /**
  * @param {object} advanced setting definition object
@@ -27,7 +28,7 @@ import { DEFAULT_CATEGORY } from './default_category';
  * @param {object} current value of setting
  * @returns {object} the editable config object
  */
-export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
+export function toEditableConfig({ def, name, value, isCustom, isOverridden }: Setting) {
   if (!def) {
     def = {};
   }

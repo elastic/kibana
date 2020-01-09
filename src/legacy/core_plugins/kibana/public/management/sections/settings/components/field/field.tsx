@@ -18,7 +18,6 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
@@ -33,6 +32,7 @@ import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
+  // @ts-ignore
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,18 +48,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Setting } from '../../types';
 
 import { isDefaultValue } from '../../lib';
 
-export class Field extends PureComponent {
-  static propTypes = {
-    setting: PropTypes.object.isRequired,
-    save: PropTypes.func.isRequired,
-    clear: PropTypes.func.isRequired,
-    enableSaving: PropTypes.bool.isRequired,
-  };
+interface FieldProps {
+  setting: Setting;
+  save: (name: string, value: string) => Promise<void>;
+  clear: (name: string) => Promise<void>;
+  enableSaving: boolean;
+}
 
-  constructor(props) {
+interface FieldState {
+  unsavedValue: any;
+  savedValue: any;
+  loading: boolean;
+  isInvalid: boolean;
+  error: string | null;
+  changeImage: boolean;
+  isJsonArray: boolean;
+}
+
+export class Field extends PureComponent<FieldProps, FieldState> {
+  private changeImageForm: EuiFilePicker | undefined;
+  constructor(props: FieldProps) {
     super(props);
     const { type, value, defVal } = this.props.setting;
     const editableValue = this.getEditableValue(type, value, defVal);
@@ -73,10 +85,9 @@ export class Field extends PureComponent {
       unsavedValue: editableValue,
       isJsonArray: type === 'json' ? Array.isArray(JSON.parse(defVal || '{}')) : false,
     };
-    this.changeImageForm = null;
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: FieldProps) {
     const { unsavedValue } = this.state;
     const { type, value, defVal } = nextProps.setting;
     const editableValue = this.getEditableValue(type, value, defVal);
@@ -117,7 +128,7 @@ export class Field extends PureComponent {
     }
   }
 
-  setLoading(loading) {
+  setLoading(loading: boolean) {
     this.setState({
       loading,
     });
@@ -130,11 +141,11 @@ export class Field extends PureComponent {
     });
   }
 
-  onCodeEditorChange = value => {
+  onCodeEditorChange = (value: string) => {
     const { type } = this.props.setting;
     const { isJsonArray } = this.state;
 
-    let newUnsavedValue = undefined;
+    let newUnsavedValue;
     let isInvalid = false;
     let error = null;
 
@@ -169,7 +180,7 @@ export class Field extends PureComponent {
     const { type, validation } = this.props.setting;
     const { unsavedValue } = this.state;
 
-    let newUnsavedValue = undefined;
+    let newUnsavedValue;
 
     switch (type) {
       case 'boolean':
@@ -183,7 +194,7 @@ export class Field extends PureComponent {
     }
 
     let isInvalid = false;
-    let error = undefined;
+    let error;
 
     if (validation && validation.regex) {
       if (!validation.regex.test(newUnsavedValue)) {
@@ -251,7 +262,7 @@ export class Field extends PureComponent {
     }
   };
 
-  getImageAsBase64(file) {
+  getImageAsBase64(file: File) {
     if (!file instanceof File) {
       return null;
     }
@@ -391,7 +402,7 @@ export class Field extends PureComponent {
     this.setLoading(false);
   };
 
-  renderField(setting) {
+  renderField(setting: Setting) {
     const { enableSaving } = this.props;
     const { loading, changeImage, unsavedValue } = this.state;
     const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
@@ -453,7 +464,7 @@ export class Field extends PureComponent {
               disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
-              ref={input => {
+              ref={(input: HTMLInputElement) => {
                 this.changeImageForm = input;
               }}
               onKeyDown={this.onFieldEscape}
@@ -506,11 +517,11 @@ export class Field extends PureComponent {
     }
   }
 
-  renderLabel(setting) {
+  renderLabel(setting: Setting) {
     return setting.name;
   }
 
-  renderHelpText(setting) {
+  renderHelpText(setting: Setting) {
     if (setting.isOverridden) {
       return (
         <EuiText size="xs">
@@ -538,7 +549,7 @@ export class Field extends PureComponent {
     return null;
   }
 
-  renderTitle(setting) {
+  renderTitle(setting: Setting) {
     return (
       <h3>
         {setting.displayName || setting.name}
@@ -563,7 +574,7 @@ export class Field extends PureComponent {
     );
   }
 
-  renderDescription(setting) {
+  renderDescription(setting: Setting) {
     let description;
 
     if (React.isValidElement(setting.description)) {
@@ -575,7 +586,7 @@ export class Field extends PureComponent {
            * Justification for dangerouslySetInnerHTML:
            * Setting description may contain formatting and links to documentation.
            */
-          dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: setting.description }} // eslint-disable-line react/no-danger
         />
       );
     }
@@ -588,7 +599,7 @@ export class Field extends PureComponent {
     );
   }
 
-  renderDefaultValue(setting) {
+  renderDefaultValue(setting: Setting) {
     const { type, defVal, optionLabels } = setting;
     if (isDefaultValue(setting)) {
       return;
@@ -633,7 +644,7 @@ export class Field extends PureComponent {
     );
   }
 
-  renderResetToDefaultLink(setting) {
+  renderResetToDefaultLink(setting: Setting) {
     const { ariaName, name } = setting;
     if (isDefaultValue(setting)) {
       return;
@@ -660,7 +671,7 @@ export class Field extends PureComponent {
     );
   }
 
-  renderChangeImageLink(setting) {
+  renderChangeImageLink(setting: Setting) {
     const { changeImage } = this.state;
     const { type, value, ariaName, name } = setting;
     if (type !== 'image' || !value || changeImage) {
@@ -687,7 +698,7 @@ export class Field extends PureComponent {
     );
   }
 
-  renderActions(setting) {
+  renderActions(setting: Setting) {
     const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
     const isDisabled = loading || setting.isOverridden;
@@ -764,6 +775,7 @@ export class Field extends PureComponent {
               helpText={this.renderHelpText(setting)}
               describedByIds={[`${setting.name}-aria`]}
               className="mgtAdvancedSettings__fieldRow"
+              // @ts-ignore
               hasChildLabel={setting.type !== 'boolean'}
             >
               {this.renderField(setting)}
