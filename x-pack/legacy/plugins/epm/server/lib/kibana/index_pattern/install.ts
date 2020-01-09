@@ -60,11 +60,11 @@ const createIndexPattern = async ({
   registryPackageInfo: RegistryPackage;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
-  let allFields: Field[] = [];
-  for (let i = 0; i < datasets.length; i++) {
-    const fields = await loadFieldsFromYaml(registryPackageInfo, datasets[i].name);
-    allFields = allFields.concat(fields);
-  }
+  const loadingFields = datasets.map(dataset =>
+    loadFieldsFromYaml(registryPackageInfo, dataset.name)
+  );
+  const nestedResults = await Promise.all(loadingFields);
+  const allFields = nestedResults.flat();
 
   const kibanaIndexPatternFields = makeKibanaIndexPatternFields(allFields);
 
