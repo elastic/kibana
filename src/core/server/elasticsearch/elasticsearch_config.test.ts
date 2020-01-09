@@ -23,19 +23,10 @@ import {
   mockReadPkcs12Truststore,
 } from './elasticsearch_config.test.mocks';
 
-import { ElasticsearchConfig, config, ElasticsearchConfigType } from './elasticsearch_config';
-import { loggingServiceMock } from '../mocks';
-import { Logger } from '../logging';
+import { ElasticsearchConfig, config } from './elasticsearch_config';
 import { applyDeprecations, configDeprecationFactory } from '../config/deprecation';
 
 const CONFIG_PATH = 'elasticsearch';
-
-const createElasticsearchConfig = (rawConfig: ElasticsearchConfigType, log?: Logger) => {
-  if (!log) {
-    log = loggingServiceMock.create().get('config');
-  }
-  return new ElasticsearchConfig(rawConfig, log);
-};
 
 const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
@@ -57,7 +48,7 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 test('set correct defaults', () => {
-  const configValue = createElasticsearchConfig(config.schema.validate({}));
+  const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
@@ -92,17 +83,17 @@ test('set correct defaults', () => {
 });
 
 test('#hosts accepts both string and array of strings', () => {
-  let configValue = createElasticsearchConfig(
+  let configValue = new ElasticsearchConfig(
     config.schema.validate({ hosts: 'http://some.host:1234' })
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  configValue = createElasticsearchConfig(
+  configValue = new ElasticsearchConfig(
     config.schema.validate({ hosts: ['http://some.host:1234'] })
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  configValue = createElasticsearchConfig(
+  configValue = new ElasticsearchConfig(
     config.schema.validate({
       hosts: ['http://some.host:1234', 'https://some.another.host'],
     })
@@ -111,17 +102,17 @@ test('#hosts accepts both string and array of strings', () => {
 });
 
 test('#requestHeadersWhitelist accepts both string and array of strings', () => {
-  let configValue = createElasticsearchConfig(
+  let configValue = new ElasticsearchConfig(
     config.schema.validate({ requestHeadersWhitelist: 'token' })
   );
   expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  configValue = createElasticsearchConfig(
+  configValue = new ElasticsearchConfig(
     config.schema.validate({ requestHeadersWhitelist: ['token'] })
   );
   expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  configValue = createElasticsearchConfig(
+  configValue = new ElasticsearchConfig(
     config.schema.validate({
       requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
     })
@@ -144,7 +135,7 @@ describe('reads files', () => {
   });
 
   it('reads certificate authorities when ssl.keystore.path is specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { keystore: { path: 'some-path' } } })
     );
     expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
@@ -152,7 +143,7 @@ describe('reads files', () => {
   });
 
   it('reads certificate authorities when ssl.truststore.path is specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { truststore: { path: 'some-path' } } })
     );
     expect(mockReadPkcs12Truststore).toHaveBeenCalledTimes(1);
@@ -160,21 +151,21 @@ describe('reads files', () => {
   });
 
   it('reads certificate authorities when ssl.certificateAuthorities is specified', () => {
-    let configValue = createElasticsearchConfig(
+    let configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
 
     mockReadFileSync.mockClear();
-    configValue = createElasticsearchConfig(
+    configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
 
     mockReadFileSync.mockClear();
-    configValue = createElasticsearchConfig(
+    configValue = new ElasticsearchConfig(
       config.schema.validate({
         ssl: { certificateAuthorities: ['some-path', 'another-path'] },
       })
@@ -187,7 +178,7 @@ describe('reads files', () => {
   });
 
   it('reads certificate authorities when ssl.keystore.path, ssl.truststore.path, and ssl.certificateAuthorities are specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({
         ssl: {
           keystore: { path: 'some-path' },
@@ -207,7 +198,7 @@ describe('reads files', () => {
   });
 
   it('reads a private key and certificate when ssl.keystore.path is specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { keystore: { path: 'some-path' } } })
     );
     expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
@@ -216,7 +207,7 @@ describe('reads files', () => {
   });
 
   it('reads a private key when ssl.key is specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { key: 'some-path' } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
@@ -224,7 +215,7 @@ describe('reads files', () => {
   });
 
   it('reads a certificate when ssl.certificate is specified', () => {
-    const configValue = createElasticsearchConfig(
+    const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { certificate: 'some-path' } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
@@ -247,8 +238,8 @@ describe('throws when config is invalid', () => {
 
   it('throws if key is invalid', () => {
     const value = { ssl: { key: '/invalid/key' } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
       `"ENOENT: no such file or directory, open '/invalid/key'"`
     );
@@ -256,8 +247,8 @@ describe('throws when config is invalid', () => {
 
   it('throws if certificate is invalid', () => {
     const value = { ssl: { certificate: '/invalid/cert' } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
       `"ENOENT: no such file or directory, open '/invalid/cert'"`
     );
@@ -265,15 +256,15 @@ describe('throws when config is invalid', () => {
 
   it('throws if certificateAuthorities is invalid', () => {
     const value = { ssl: { certificateAuthorities: '/invalid/ca' } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(`"ENOENT: no such file or directory, open '/invalid/ca'"`);
   });
 
   it('throws if keystore path is invalid', () => {
     const value = { ssl: { keystore: { path: '/invalid/keystore' } } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
       `"ENOENT: no such file or directory, open '/invalid/keystore'"`
     );
@@ -282,8 +273,8 @@ describe('throws when config is invalid', () => {
   it('throws if keystore does not contain a key or certificate', () => {
     mockReadPkcs12Keystore.mockReturnValueOnce({});
     const value = { ssl: { keystore: { path: 'some-path' } } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
       `"Did not find key or certificate in Elasticsearch keystore."`
     );
@@ -291,8 +282,8 @@ describe('throws when config is invalid', () => {
 
   it('throws if truststore path is invalid', () => {
     const value = { ssl: { keystore: { path: '/invalid/truststore' } } };
-    expect(() =>
-      createElasticsearchConfig(config.schema.validate(value))
+    expect(
+      () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(
       `"ENOENT: no such file or directory, open '/invalid/truststore'"`
     );
@@ -309,34 +300,6 @@ describe('throws when config is invalid', () => {
     const value = { ssl: { certificate: 'foo', keystore: { path: 'bar' } } };
     expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
       `"[ssl]: cannot use [certificate] when [keystore.path] is specified"`
-    );
-  });
-});
-
-describe('logs warnings', () => {
-  let logger: ReturnType<typeof loggingServiceMock.create>;
-  let log: Logger;
-
-  beforeAll(() => {
-    mockReadFileSync.mockResolvedValue('foo');
-  });
-
-  beforeEach(() => {
-    logger = loggingServiceMock.create();
-    log = logger.get('config');
-  });
-
-  it('warns if ssl.key is set and ssl.certificate is not', () => {
-    createElasticsearchConfig(config.schema.validate({ ssl: { key: 'some-path' } }), log);
-    expect(loggingServiceMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
-      `"Detected a key without a certificate; mutual TLS authentication is disabled."`
-    );
-  });
-
-  it('warns if ssl.certificate is set and ssl.key is not', () => {
-    createElasticsearchConfig(config.schema.validate({ ssl: { certificate: 'some-path' } }), log);
-    expect(loggingServiceMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
-      `"Detected a certificate without a key; mutual TLS authentication is disabled."`
     );
   });
 });

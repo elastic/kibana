@@ -22,7 +22,6 @@ import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
-import { Logger } from '../logging';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -234,7 +233,7 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType, log: Logger) {
+  constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
@@ -255,12 +254,6 @@ export class ElasticsearchConfig {
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
-
-    if (key && !certificate) {
-      log.warn(`Detected a key without a certificate; mutual TLS authentication is disabled.`);
-    } else if (certificate && !key) {
-      log.warn(`Detected a certificate without a key; mutual TLS authentication is disabled.`);
-    }
 
     this.ssl = {
       alwaysPresentCertificate,
