@@ -37,7 +37,7 @@ export const RuntimeAgentPolicy = t.interface({
         ]),
       }),
       t.partial({
-        url: t.string,
+        hosts: t.array(t.string),
         api_token: t.string,
         username: t.string,
         pass: t.string,
@@ -56,7 +56,7 @@ export const RuntimeAgentPolicy = t.interface({
       t.partial({
         output: t.partial({
           overide: t.partial({
-            url: t.string,
+            hosts: t.array(t.string),
             api_token: t.string,
             username: t.string,
             pass: t.string,

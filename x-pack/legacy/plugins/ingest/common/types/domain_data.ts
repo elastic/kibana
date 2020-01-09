@@ -200,7 +200,7 @@ export interface Output {
   ingest_pipeline?: string;
   name: string;
   type: OutputType;
-  url?: string;
+  hosts?: string[];
 }
 
 export enum OutputType {
