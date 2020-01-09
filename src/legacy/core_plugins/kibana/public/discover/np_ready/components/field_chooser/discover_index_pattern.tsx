@@ -38,17 +38,6 @@ export interface DiscoverIndexPatternProps {
 }
 
 /**
- * At initial rendering the angular directive the selectedIndexPattern prop is undefined
- * this wrapper component should be removed once all is deangularized
- */
-export function DiscoverIndexPatternWrapper(props: DiscoverIndexPatternProps) {
-  if (!props.selectedIndexPattern || !Array.isArray(props.indexPatternList)) {
-    return null;
-  }
-  return <DiscoverIndexPattern {...props} />;
-}
-
-/**
  * Component allows you to select an index pattern in discovers side bar
  */
 export function DiscoverIndexPattern({
@@ -60,12 +49,15 @@ export function DiscoverIndexPattern({
     id: entity.id,
     title: entity.attributes!.title,
   }));
-  const { id: selectedId, attributes } = selectedIndexPattern;
+  const { id: selectedId, attributes } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
     id: selectedId,
     title: attributes ? attributes.title : '',
   });
+  if (!selectedId) {
+    return null;
+  }
 
   return (
     <div className="indexPattern__container">
