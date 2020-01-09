@@ -24,7 +24,12 @@ import {
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
+import {
+  saveCookies,
+  loadCookies,
+  loginAndWaitForPage,
+  DEFAULT_TIMEOUT,
+} from '../../lib/util/helpers';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -41,8 +46,13 @@ describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
+      saveCookies();
       populateTimeline();
       openTimelineFieldsBrowser();
+    });
+
+    beforeEach(() => {
+      loadCookies();
     });
 
     afterEach(() => {
@@ -120,8 +130,13 @@ describe('Fields Browser', () => {
   context('Editing the timeline', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
+      saveCookies();
       populateTimeline();
       openTimelineFieldsBrowser();
+    });
+
+    beforeEach(() => {
+      loadCookies();
     });
 
     afterEach(() => {

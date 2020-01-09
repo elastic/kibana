@@ -25,3 +25,24 @@ export const loginAndWaitForPage = (url: string) => {
 
 export const waitForTableLoad = (dataTestSubj: string) =>
   cy.get(dataTestSubj, { timeout: DEFAULT_TIMEOUT });
+
+const cookiesCache = {};
+
+export const saveCookies = () => {
+  cy.getCookies().then(cookies => {
+    cookies.forEach(({ name, ...rest }) => {
+      cookiesCache[name] = {
+        name,
+        ...rest,
+      };
+    });
+  });
+};
+
+export const loadCookies = () => {
+  Object.keys(cookiesCache).forEach(key => {
+    const { name, value, ...rest } = cookiesCache[key];
+
+    cy.setCookie(name, value, rest);
+  });
+};
