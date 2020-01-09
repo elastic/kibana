@@ -72,6 +72,7 @@
 // @ts-ignore
 import { default as es } from 'elasticsearch-browser/elasticsearch';
 import _ from 'lodash';
+import { npSetup } from 'ui/new_platform';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -88,6 +89,8 @@ import {
   getEsClient,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
+
+// TODO: While moving to NP, replace with initializerContext
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -206,14 +209,14 @@ export class SearchSource {
     this.history = [searchRequest];
 
     const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-
+    const { version } = npSetup.core.injectedMetadata.getLegacyMetadata();
     const response = await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout, es: getEsClient() }
+      { searchService, config, esShardTimeout, version, es: getEsClient() }
     );
 
     if (response.error) {

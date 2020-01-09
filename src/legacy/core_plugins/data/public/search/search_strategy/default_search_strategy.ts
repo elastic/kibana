@@ -39,7 +39,13 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
 };
 
 // @deprecated
-function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+function msearch({
+  searchRequests,
+  es,
+  config,
+  version,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
       index: index.title || index,
@@ -58,8 +64,7 @@ function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategyS
     ...getMSearchParams(config),
     body: `${inlineRequests.join('\n')}\n`,
     headers: {
-      // need to get version from context
-      'kbn-version': '8.0.0',
+      'kbn-version': version,
     },
   });
 
