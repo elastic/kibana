@@ -53,7 +53,7 @@ export function DiscoverIndexPattern({
 
   const [selected, setSelected] = useState({
     id: selectedId,
-    title: attributes ? attributes.title : '',
+    title: attributes?.title || '',
   });
   if (!selectedId) {
     return null;
