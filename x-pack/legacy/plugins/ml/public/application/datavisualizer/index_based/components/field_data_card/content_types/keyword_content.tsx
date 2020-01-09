@@ -36,7 +36,7 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
         />
       </div>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
 
       <div>
         <EuiIcon type="database" />
@@ -50,14 +50,14 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
         />
       </div>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <div>
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
           defaultMessage="top values"
         />
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       </div>
     </div>

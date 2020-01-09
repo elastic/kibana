@@ -102,11 +102,11 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         />
       </div>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={1}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.ml.fieldDataCard.cardNumber.minLabel"
               defaultMessage="min"
@@ -114,7 +114,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
               defaultMessage="median"
@@ -122,7 +122,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.ml.fieldDataCard.cardNumber.maxLabel"
               defaultMessage="max"
@@ -143,9 +143,11 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
 
       <EuiButtonGroup
+        buttonSize="compressed"
+        isFullWidth
         options={detailsOptions}
         idSelected={detailsMode}
         onChange={optionId => setDetailsMode(optionId as DETAILS_MODE)}
@@ -158,7 +160,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         data-test-subj="mlFieldDataCardNumberDetailsSelect"
       />
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       {detailsMode === DETAILS_MODE.DISTRIBUTION && (
         <Fragment>

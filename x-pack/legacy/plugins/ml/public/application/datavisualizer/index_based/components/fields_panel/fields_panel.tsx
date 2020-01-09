@@ -81,7 +81,7 @@ export const FieldsPanel: FC<Props> = ({
   return (
     <div data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
@@ -110,6 +110,7 @@ export const FieldsPanel: FC<Props> = ({
         {populatedFieldCount < totalFieldCount && (
           <EuiFlexItem>
             <EuiSwitch
+              compressed
               id={`${title}_show_empty_fields`}
               label={i18n.translate('xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel', {
                 defaultMessage: 'Show empty fields',
@@ -133,7 +134,7 @@ export const FieldsPanel: FC<Props> = ({
                   placeholder: i18n.translate(
                     'xpack.ml.datavisualizer.fieldsPanel.filterFieldsPlaceholder',
                     {
-                      defaultMessage: 'filter',
+                      defaultMessage: `Filter ${title}`,
                     }
                   ),
                 }}
@@ -153,7 +154,7 @@ export const FieldsPanel: FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGrid gutterSize="m">
         {fieldVisConfigs.map((visConfig, i) => (
           <EuiFlexItem key={`card_${i}`} style={{ minWidth: '360px' }}>

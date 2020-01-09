@@ -5,9 +5,9 @@
   font-weight: bold;
   font-size: $euiFontSizeS;
   border-radius: $euiBorderRadius $euiBorderRadius 0 0;
-  padding: $euiSizeXS;
-  margin: (-$euiSize) (-$euiSize) 0 (-$euiSize);
-  border-top: 3px solid;
+  padding: $euiSizeS $euiSizeXS;
+  margin: (-$euiSize) (-$euiSize) $euiSizeS (-$euiSize);
+  //border-top: 3px solid;
   text-align: center;
 
   .field-type-icon {
