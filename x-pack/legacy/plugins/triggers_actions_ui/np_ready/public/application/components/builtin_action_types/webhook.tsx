@@ -15,7 +15,9 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButtonIcon,
-  EuiText,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiTitle,
   EuiCodeEditor,
   EuiSwitch,
@@ -175,78 +177,89 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   let headerControl;
   if (hasHeaders) {
     headerControl = (
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            id="webhookHeaderKey"
-            fullWidth
-            error={headerErrors.keyHeader}
-            isInvalid={hasHeaderErrors && headerKey !== undefined}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
-              {
-                defaultMessage: 'Key',
-              }
-            )}
-          >
-            <EuiFieldText
+      <Fragment>
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              defaultMessage="Add a new header"
+              id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeader"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id="webhookHeaderKey"
               fullWidth
+              error={headerErrors.keyHeader}
               isInvalid={hasHeaderErrors && headerKey !== undefined}
-              name="keyHeader"
-              value={headerKey}
-              data-test-subj="webhookHeadersKeyInput"
-              onChange={e => {
-                setHeaderKey(e.target.value);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            id="webhookHeaderValue"
-            fullWidth
-            error={headerErrors.valueHeader}
-            isInvalid={hasHeaderErrors && headerValue !== undefined}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
-              {
-                defaultMessage: 'Value',
-              }
-            )}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={hasHeaderErrors && headerValue !== undefined}
-              name="valueHeader"
-              value={headerValue}
-              data-test-subj="webhookHeadersValueInput"
-              onChange={e => {
-                setHeaderValue(e.target.value);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonEmpty
-              isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
-              data-test-subj="webhookAddHeaderButton"
-              onClick={() => addHeader()}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
+                {
+                  defaultMessage: 'Key',
+                }
+              )}
             >
-              <FormattedMessage
-                defaultMessage="Add"
-                id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
+              <EuiFieldText
+                fullWidth
+                isInvalid={hasHeaderErrors && headerKey !== undefined}
+                name="keyHeader"
+                value={headerKey}
+                data-test-subj="webhookHeadersKeyInput"
+                onChange={e => {
+                  setHeaderKey(e.target.value);
+                }}
               />
-            </EuiButtonEmpty>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id="webhookHeaderValue"
+              fullWidth
+              error={headerErrors.valueHeader}
+              isInvalid={hasHeaderErrors && headerValue !== undefined}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
+                {
+                  defaultMessage: 'Value',
+                }
+              )}
+            >
+              <EuiFieldText
+                fullWidth
+                isInvalid={hasHeaderErrors && headerValue !== undefined}
+                name="valueHeader"
+                value={headerValue}
+                data-test-subj="webhookHeadersValueInput"
+                onChange={e => {
+                  setHeaderValue(e.target.value);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiButtonEmpty
+                isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
+                data-test-subj="webhookAddHeaderButton"
+                onClick={() => addHeader()}
+              >
+                <FormattedMessage
+                  defaultMessage="Add"
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
+                />
+              </EuiButtonEmpty>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
     );
   }
 
   const headersList = Object.keys(headers || {}).map((key: string) => {
     return (
-      <EuiFlexGroup key={key} data-test-subj="webhookHeaderText">
+      <EuiFlexGroup key={key} data-test-subj="webhookHeaderText" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label={i18n.translate(
@@ -256,16 +269,16 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 description: 'Delete HTTP header',
               }
             )}
-            iconType="cross"
+            iconType="trash"
             color="danger"
             onClick={() => removeHeader(key)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="m">{key}:</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="m">{headers[key]}</EuiText>
+          <EuiDescriptionList compressed>
+            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{headers[key]}</EuiDescriptionListDescription>
+          </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -402,23 +415,26 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       />
 
       <EuiSpacer size="m" />
-      {headerControl}
-      <EuiSpacer size="m" />
-      <Fragment>
-        {hasHeaders ? (
+      <div>
+        {Object.keys(headers || {}).length > 0 ? (
           <Fragment>
-            <EuiTitle size="xs">
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxs">
               <h5>
                 <FormattedMessage
-                  defaultMessage="HTTP headers:"
+                  defaultMessage="Headers in use"
                   id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.httpHeadersTitle"
                 />
               </h5>
             </EuiTitle>
+            <EuiSpacer size="s" />
             {headersList}
           </Fragment>
         ) : null}
-      </Fragment>
+        <EuiSpacer size="m" />
+        {headerControl}
+        <EuiSpacer size="m" />
+      </div>
     </Fragment>
   );
 };
