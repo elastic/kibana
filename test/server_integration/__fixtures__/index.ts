@@ -17,12 +17,9 @@
  * under the License.
  */
 
-export default function({ getService }) {
-  const supertest = getService('supertest');
+import { resolve } from 'path';
 
-  describe('kibana server with ssl', () => {
-    it('handles requests using ssl with a P12 keystore', async () => {
-      await supertest.get('/').expect(302);
-    });
-  });
-}
+export const CA1_CERT_PATH = resolve(__dirname, './test_root_ca.crt');
+export const CA2_CERT_PATH = resolve(__dirname, './test_intermediate_ca.crt');
+export const EE_P12_PATH = resolve(__dirname, './localhost.p12');
+export const EE_P12_PASSWORD = 'storepass';
