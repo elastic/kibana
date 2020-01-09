@@ -32,6 +32,6 @@ export const of = async <T, E = any>(
   try {
     return [await promise, undefined, true];
   } catch (error) {
-    return [, error, false];
+    return [undefined, error, false];
   }
 };
