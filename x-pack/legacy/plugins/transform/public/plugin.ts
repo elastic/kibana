@@ -33,12 +33,13 @@ export class Plugin {
       docTitle,
       uiSettings,
       savedObjects,
+      overlays,
     } = core;
     const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const AppDependencies = {
-      core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects },
+      core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects, overlays },
       plugins: {
         management: { sections: management.sections },
         savedSearches: coreSavedSearches,
