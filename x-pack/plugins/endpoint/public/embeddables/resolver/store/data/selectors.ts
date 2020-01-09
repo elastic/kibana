@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { rotationTransformation } from '../../lib/transformation';
 import {
   DataState,
   ProcessEvent,
@@ -13,6 +14,7 @@ import {
   ProcessPositions,
   EdgeLineSegment,
   ProcessWithWidthMetadata,
+  Matrix3,
 } from '../../types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
@@ -27,6 +29,13 @@ import {
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
+
+/* prettier-ignore */
+const isometricTransformMatrix: Matrix3 = [
+  Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
+  Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
+  0,                  0,                    1,
+]
 
 /**
  * The distance in pixels (at scale 1) between nodes. Change this to space out nodes more
@@ -346,14 +355,6 @@ function processPositions(
        */
       const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
 
-      /* prettier-ignore */
-      const isometricTransformMatrix = [
-        Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
-        Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
-        0,                  0,                    1,
-      ]
-
-      // positions.set(process, applyMatrix3(position, isometricTransformMatrix));
       positions.set(process, position);
 
       numberOfPrecedingSiblings += 1;
@@ -392,9 +393,27 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
      */
     const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
 
+    /**
+     * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
+     */
+    const transformedEdgeLineSegments: EdgeLineSegment[] = [];
+    const transformedPositions = new Map<ProcessEvent, Vector2>();
+
+    for (const [processEvent, position] of positions) {
+      transformedPositions.set(processEvent, applyMatrix3(position, isometricTransformMatrix));
+    }
+
+    for (const edgeLineSegment of edgeLineSegments) {
+      const transformedSegment = [];
+      for (const point of edgeLineSegment) {
+        transformedSegment.push(applyMatrix3(point, isometricTransformMatrix));
+      }
+      transformedEdgeLineSegments.push(transformedSegment);
+    }
+
     return {
-      processNodePositions: positions,
-      edgeLineSegments,
+      processNodePositions: transformedPositions,
+      edgeLineSegments: transformedEdgeLineSegments,
     };
   }
 );

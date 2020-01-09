@@ -28,7 +28,7 @@ const minimumScale = 0.1;
 /**
  * The maximum allowed value for the camera scale. This is greatest scale that we will ever render something at.
  */
-const maximumScale = 3;
+const maximumScale = 6;
 
 export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   state = initialState(),
