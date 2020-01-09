@@ -82,6 +82,9 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
       path: '/_nodes/settings?filter_path=nodes.*.settings.script',
     })
     .catch(error => {
+      // fall back to assuming that node settings are unset/at their default values.
+      // this will allow the role mappings UI to permit both role template script types,
+      // even if ES will disallow it at mapping evaluation time.
       logger.error(`Error retrieving node settings for role mappings: ${error}`);
       return {};
     });
@@ -92,6 +95,9 @@ async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, log
       path: '/_xpack/usage',
     })
     .catch(error => {
+      // fall back to no external realms configured.
+      // this will cause a warning in the UI about no compatible realms being enabled, but will otherwise allow
+      // the mappings screen to function correctly.
       logger.error(`Error retrieving XPack usage info for role mappings: ${error}`);
       return {
         security: {
