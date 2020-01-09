@@ -9,8 +9,7 @@ import { IndexedProcessTree, ProcessEvent } from '../types';
 import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
 /**
- * Create a new `IndexedProcessTree`
- * TODO, what is this?
+ * Create a new IndexedProcessTree from an array of ProcessEvents
  */
 export function factory(processes: ProcessEvent[]): IndexedProcessTree {
   const idToChildren = new Map<number | undefined, ProcessEvent[]>();

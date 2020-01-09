@@ -9,29 +9,7 @@ import { DataAction } from './action';
 import { dataReducer } from './reducer';
 import { DataState, ProcessEvent } from '../../types';
 import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
-
-type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
-
-function processEvent(
-  parts: {
-    data_buffer: { node_id: ProcessEvent['data_buffer']['node_id'] };
-  } & DeepPartial<ProcessEvent>
-): ProcessEvent {
-  const { data_buffer: dataBuffer } = parts;
-  return {
-    event_timestamp: 1,
-    event_type: 1,
-    machine_id: '',
-    ...parts,
-    data_buffer: {
-      event_subtype_full: 'creation_event',
-      event_type_full: 'process_event',
-      process_name: '',
-      process_path: '',
-      ...dataBuffer,
-    },
-  };
-}
+import { mockProcessEvent } from '../../models/process_event_test_helpers';
 
 describe('resolver graph layout', () => {
   let processA: ProcessEvent;
@@ -58,7 +36,7 @@ describe('resolver graph layout', () => {
      *                   H
      *
      */
-    processA = processEvent({
+    processA = mockProcessEvent({
       data_buffer: {
         process_name: '',
         event_type_full: 'process_event',
@@ -66,7 +44,7 @@ describe('resolver graph layout', () => {
         node_id: 0,
       },
     });
-    processB = processEvent({
+    processB = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'already_running',
@@ -74,7 +52,7 @@ describe('resolver graph layout', () => {
         source_id: 0,
       },
     });
-    processC = processEvent({
+    processC = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -82,7 +60,7 @@ describe('resolver graph layout', () => {
         source_id: 0,
       },
     });
-    processD = processEvent({
+    processD = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -90,7 +68,7 @@ describe('resolver graph layout', () => {
         source_id: 1,
       },
     });
-    processE = processEvent({
+    processE = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -98,7 +76,7 @@ describe('resolver graph layout', () => {
         source_id: 1,
       },
     });
-    processF = processEvent({
+    processF = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -106,7 +84,7 @@ describe('resolver graph layout', () => {
         source_id: 2,
       },
     });
-    processG = processEvent({
+    processG = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -114,7 +92,7 @@ describe('resolver graph layout', () => {
         source_id: 2,
       },
     });
-    processH = processEvent({
+    processH = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
@@ -122,7 +100,7 @@ describe('resolver graph layout', () => {
         source_id: 6,
       },
     });
-    processI = processEvent({
+    processI = mockProcessEvent({
       data_buffer: {
         event_type_full: 'process_event',
         event_subtype_full: 'termination_event',

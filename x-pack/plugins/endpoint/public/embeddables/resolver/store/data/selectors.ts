@@ -103,7 +103,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
 }
 
 /**
- * TODO comments
+ * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 type ProcessWithWidthMetadata = {
   process: ProcessEvent;

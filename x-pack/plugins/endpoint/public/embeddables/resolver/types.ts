@@ -65,7 +65,7 @@ export interface CameraState {
 }
 
 export interface DataState {
-  readonly results: ProcessEvent[];
+  readonly results: readonly ProcessEvent[];
 }
 
 export type Vector2 = readonly [number, number];
@@ -124,11 +124,17 @@ export interface ProcessEvent {
   };
 }
 
+/**
+ * A represention of a process tree with indices for O(1) access to children and values by id.
+ */
 export interface IndexedProcessTree {
   /**
-   * `id` can be undefined because `source_id` can be undefined. Root nodes have no known parent
+   * Map of ID to a process's children
    */
   idToChildren: Map<number | undefined, ProcessEvent[]>;
+  /**
+   * Map of ID to process
+   */
   idToProcess: Map<number, ProcessEvent>;
 }
 
