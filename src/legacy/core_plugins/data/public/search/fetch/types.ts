@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { ISearchStart } from 'src/plugins/data/public';
+import { ISearchStart, LegacyApiCaller } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
-import { SearchRequest, SearchResponse } from '../types';
-
-export interface ApiCaller {
-  search: (searchRequest: SearchRequest) => ApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => ApiCallerResponse;
-}
-
-export interface ApiCallerResponse extends Promise<SearchResponse> {
-  abort: () => void;
-}
 
 export interface FetchOptions {
   abortSignal?: AbortSignal;

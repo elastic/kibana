@@ -55,6 +55,7 @@ export * from './field_formats_provider';
 export * from './index_patterns';
 export * from './search';
 export * from './query';
+export * from './es_client';
 export * from './ui';
 export {
   // es query

@@ -31,8 +31,6 @@ import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
@@ -131,7 +129,6 @@ export function initializeInnerAngularModule(
     createLocalGlobalStateModule();
     createLocalAppStateModule();
     createLocalStorageModule();
-    createElasticSearchModule();
     createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -297,13 +294,6 @@ const createLocalStorageService = function(type: string) {
     return new Storage($window[type]);
   };
 };
-
-function createElasticSearchModule() {
-  angular
-    .module('discoverEs', ['elasticsearch', 'discoverConfig'])
-    // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-    .service('es', createEsService);
-}
 
 function createIndexPatternsModule() {
   angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);

@@ -36,13 +36,12 @@ interface VegaRequestHandlerParams {
 }
 
 export function createVegaRequestHandler({
-  es,
-  plugins,
+  plugins: { data },
   core: { uiSettings },
   serviceSettings,
 }: VegaVisualizationDependencies) {
-  const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
-  const { timefilter } = plugins.data.query.timefilter;
+  const searchCache = new SearchCache(data.__LEGACY.esClient, { max: 10, maxAge: 4 * 1000 });
+  const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
   return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {

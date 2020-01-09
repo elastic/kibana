@@ -27,6 +27,7 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { LegacyApiCaller } from './es_client';
 
 export interface DataSetupDependencies {
   uiActions: IUiActionsSetup;
@@ -41,6 +42,14 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  __LEGACY: {
+    /*
+     * @deprecated
+     * An instance of elasticsearch-browser.
+     * Should be used to run msearch, until data.search implements it or until its no longer suuported.
+     */
+    esClient: LegacyApiCaller;
+  };
 }
 
 export interface DataPublicPluginStart {

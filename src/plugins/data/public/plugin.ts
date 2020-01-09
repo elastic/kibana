@@ -70,6 +70,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       storage: this.storage,
     });
 
+    this.esClient = getEsClient(core.injectedMetadata, core.http);
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -79,6 +81,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       search: this.searchService.setup(core),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      __LEGACY: {
+        esClient: this.esClient,
+      },
     };
   }
 
