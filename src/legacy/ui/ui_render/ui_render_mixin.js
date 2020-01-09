@@ -111,8 +111,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         const regularBundlePath = `${basePath}/bundles`;
         const dllBundlePath = `${basePath}/built_assets/dlls`;
         const styleSheetPaths = [
-          `${dllBundlePath}/vendors2.style.dll.css`,
-          `${dllBundlePath}/vendors3.style.dll.css`,
+          `${dllBundlePath}/vendors_0.style.dll.css`,
+          `${dllBundlePath}/vendors_1.style.dll.css`,
+          `${dllBundlePath}/vendors_2.style.dll.css`,
+          `${dllBundlePath}/vendors_3.style.dll.css`,
           ...(darkMode
             ? [
                 `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,

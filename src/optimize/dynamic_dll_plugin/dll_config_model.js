@@ -139,26 +139,10 @@ function generateDLL(config) {
         filename: dllStyleFilename,
       }),
     ],
-    // optimization: {
-    //   splitChunks: {
-    //     cacheGroups: {
-    //       // commons: {
-    //       //   name: 'commons',
-    //       //   chunks: 'all',
-    //       //   reuseExistingChunk: true,
-    //       //   minChunks: 2,
-    //       // },
-    //       vendors0: {
-    //         name: 'vendors0',
-    //         chunks: 'initial',
-    //         enforce: true,
-    //         minChunks: 2,
-    //       },
-    //     },
-    //   },
-    // },
     optimization: {
-      runtimeChunk: 'single',
+      runtimeChunk: {
+        name: 'vendors_runtime',
+      },
     },
     performance: {
       // NOTE: we are disabling this as those hints

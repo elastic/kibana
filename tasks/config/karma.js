@@ -93,10 +93,16 @@ module.exports = function(grunt) {
       files: [
         'http://localhost:5610/test_bundle/built_css.css',
 
-        'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
+        'http://localhost:5610/built_assets/dlls/vendors_0.bundle.dll.js',
+        'http://localhost:5610/built_assets/dlls/vendors_1.bundle.dll.js',
+        'http://localhost:5610/built_assets/dlls/vendors_2.bundle.dll.js',
+        'http://localhost:5610/built_assets/dlls/vendors_3.bundle.dll.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
-        'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+        'http://localhost:5610/built_assets/dlls/vendors_0.style.dll.css',
+        'http://localhost:5610/built_assets/dlls/vendors_1.style.dll.css',
+        'http://localhost:5610/built_assets/dlls/vendors_2.style.dll.css',
+        'http://localhost:5610/built_assets/dlls/vendors_3.style.dll.css',
         'http://localhost:5610/bundles/tests.style.css',
       ],
 
@@ -184,10 +190,16 @@ module.exports = function(grunt) {
         files: [
           'http://localhost:5610/test_bundle/built_css.css',
 
-          'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
+          'http://localhost:5610/built_assets/dlls/vendors_0.bundle.dll.js',
+          'http://localhost:5610/built_assets/dlls/vendors_1.bundle.dll.js',
+          'http://localhost:5610/built_assets/dlls/vendors_2.bundle.dll.js',
+          'http://localhost:5610/built_assets/dlls/vendors_3.bundle.dll.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
 
-          'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+          'http://localhost:5610/built_assets/dlls/vendors_0.style.dll.css',
+          'http://localhost:5610/built_assets/dlls/vendors_1.style.dll.css',
+          'http://localhost:5610/built_assets/dlls/vendors_2.style.dll.css',
+          'http://localhost:5610/built_assets/dlls/vendors_3.style.dll.css',
           'http://localhost:5610/bundles/tests.style.css',
         ],
       },

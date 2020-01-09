@@ -72,7 +72,7 @@ export class DllCompiler {
       uiBundles,
       uiBundles.getCacheDirectory('babel'),
       threadLoaderPoolConfig,
-      Array.from(Array(numberOfChunks).keys()).map(chunkN => `${chunkN}`)
+      Array.from(Array(numberOfChunks).keys()).map(chunkN => `_${chunkN}`)
     );
     this.logWithMetadata = logWithMetadata || (() => null);
   }
@@ -122,8 +122,10 @@ export class DllCompiler {
     );
   }
 
-  getStylePath() {
-    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.styleExt}`);
+  getStylePaths() {
+    return this.rawDllConfig.chunks.map(chunk =>
+      this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.styleExt}`)
+    );
   }
 
   async ensureEntryFilesExists() {
@@ -150,7 +152,9 @@ export class DllCompiler {
   }
 
   async ensureStyleFileExists() {
-    await this.ensureFileExists(this.getStylePath());
+    const stylePaths = this.getStylePaths();
+
+    await Promise.all(stylePaths.map(async stylePath => await this.ensureFileExists(stylePath)));
   }
 
   async ensureFileExists(filePath, content) {
