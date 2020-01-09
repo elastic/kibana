@@ -112,7 +112,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
           isModalOpen: true,
           field,
           aliases: Boolean(aliasesToDelete.length)
-            ? aliasesToDelete.map(id => byId[id].path).sort()
+            ? aliasesToDelete.map(id => byId[id].path.join(' > ')).sort()
             : undefined,
         });
         return;

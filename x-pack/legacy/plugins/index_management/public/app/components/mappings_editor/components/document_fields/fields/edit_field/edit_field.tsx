@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
@@ -24,6 +23,7 @@ import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
+import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
@@ -115,9 +115,6 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                                   })}
                             </h2>
                           </EuiTitle>
-
-                          {/* Field path */}
-                          <EuiCode>{field.path}</EuiCode>
                         </div>
                       </EuiFlexItem>
 
@@ -142,6 +139,13 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                             }
                           )}
                         </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    {/* Field path */}
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <CodeBlock padding="small">{field.path.join(' > ')}</CodeBlock>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlyoutHeader>
