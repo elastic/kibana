@@ -10,15 +10,20 @@ import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
 import { Plugin } from './server/plugin';
 import { initInfraSource } from './server/lib/logs/init_infra_source';
+import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
+const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+if (KIBANA_ALERTING_ENABLED) {
+  deps.push(...['alerting', 'actions']);
+}
 export const monitoring = kibana =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting', 'actions'],
+    require: deps,
     id: 'monitoring',
     configPrefix: 'xpack.monitoring',
     publicDir: resolve(__dirname, 'public'),
