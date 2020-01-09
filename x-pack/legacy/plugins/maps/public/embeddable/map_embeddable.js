@@ -32,11 +32,12 @@ import {
   hideToolbarOverlay,
   hideLayerControl,
   hideViewControl,
+  setHiddenLayers,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
+import { getMapCenter, getMapZoom, getHiddenLayers } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddable extends Embeddable {
@@ -152,20 +153,10 @@ export class MapEmbeddable extends Embeddable {
       );
     }
 
-    // Use hiddenLayers input to set visibility of layers
-    let layerList = this._layerList;
-
+    this._store.dispatch(replaceLayerList(this._layerList));
     if (this.input.hiddenLayers) {
-      layerList = [...this._layerList];
-      for (const [index, layer] of Object.entries(layerList)) {
-        layerList[index] = {
-          ...layer,
-          visible: !this.input.hiddenLayers.includes(layer.id),
-        };
-      }
+      this._store.dispatch(setHiddenLayers(this.input.hiddenLayers));
     }
-
-    this._store.dispatch(replaceLayerList(layerList));
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
@@ -258,9 +249,7 @@ export class MapEmbeddable extends Embeddable {
       });
     }
 
-    const hiddenLayerIds = this._store
-      .getState()
-      .map.layerList.filter(layer => !layer.visible)
+    const hiddenLayerIds = getHiddenLayers(this._store.getState())
       .map(layer => layer.id)
       .sort();
 
