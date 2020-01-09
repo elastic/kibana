@@ -13,6 +13,7 @@ import { timefilter } from 'ui/timefilter';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -630,7 +631,7 @@ export const Page: FC = () => {
                     setSamplerShardSize={setSamplerShardSize}
                     totalCount={overallStats.totalCount}
                   />
-                  <EuiSpacer size="m" />
+                  <EuiHorizontalRule />
                   <EuiFlexGroup gutterSize="m">
                     <EuiFlexItem>
                       {totalMetricFieldCount > 0 && (
