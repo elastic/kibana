@@ -81,7 +81,7 @@ describe('GET role mappings feature check', () => {
       const headers = { authorization: 'foo' };
       const mockRequest = httpServerMock.createKibanaRequest({
         method: 'get',
-        path: `/internal/security/role_mapping_feature_check`,
+        path: `/internal/security/_check_role_mapping_features`,
         headers,
       });
       const mockContext = ({

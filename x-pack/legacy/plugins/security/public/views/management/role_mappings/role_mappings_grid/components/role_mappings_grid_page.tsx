@@ -446,7 +446,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       const {
         canManageRoleMappings,
         hasCompatibleRealms,
-      } = await this.props.roleMappingsAPI.getRoleMappingFeatures();
+      } = await this.props.roleMappingsAPI.checkRoleMappingFeatures();
 
       this.setState({
         loadState: canManageRoleMappings ? this.state.loadState : 'permissionDenied',

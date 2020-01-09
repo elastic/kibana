@@ -282,7 +282,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   private async loadAppData() {
     try {
       const [features, roleMapping] = await Promise.all([
-        this.props.roleMappingsAPI.getRoleMappingFeatures(),
+        this.props.roleMappingsAPI.checkRoleMappingFeatures(),
         this.editingExistingRoleMapping()
           ? this.props.roleMappingsAPI.getRoleMapping(this.props.name!)
           : Promise.resolve({

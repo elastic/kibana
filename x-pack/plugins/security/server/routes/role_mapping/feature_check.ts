@@ -15,7 +15,7 @@ export function defineRoleMappingFeatureCheckRoute({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/role_mapping_feature_check',
+      path: '/internal/security/_check_role_mapping_features',
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {

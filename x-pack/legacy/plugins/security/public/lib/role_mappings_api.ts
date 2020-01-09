@@ -7,7 +7,7 @@
 import { CoreSetup } from 'src/core/public';
 import { RoleMapping } from '../../common/model';
 
-interface CheckPrivilegesResponse {
+interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
@@ -23,8 +23,8 @@ type DeleteRoleMappingsResponse = Array<{
 export class RoleMappingsAPI {
   constructor(private readonly http: CoreSetup['http']) {}
 
-  public async getRoleMappingFeatures(): Promise<CheckPrivilegesResponse> {
-    return this.http.get(`/internal/security/role_mapping_feature_check`);
+  public async checkRoleMappingFeatures(): Promise<CheckRoleMappingFeaturesResponse> {
+    return this.http.get(`/internal/security/_check_role_mapping_features`);
   }
 
   public async getRoleMappings(): Promise<RoleMapping[]> {
