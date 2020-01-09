@@ -60,15 +60,15 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
             <RulesComponent canUserCRUD={canUserCRUD} />
           </Route>
           {canUserCRUD && (
-            <Route path={`${detectionEnginePath}/rules/create`}>
+            <Route exact path={`${detectionEnginePath}/rules/create`}>
               <CreateRuleComponent />
             </Route>
           )}
-          <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
+          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
             <RuleDetailsComponent signalsIndex={signalIndexName} canUserCRUD={canUserCRUD} />
           </Route>
           {canUserCRUD && (
-            <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
+            <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
               <EditRuleComponent />
             </Route>
           )}

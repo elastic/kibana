@@ -223,7 +223,6 @@ export const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
             ) : (
               <WrapperPage>
                 <HeaderPage border title={i18n.PAGE_TITLE} />
-
                 <DetectionEngineEmptyPage />
               </WrapperPage>
             );
