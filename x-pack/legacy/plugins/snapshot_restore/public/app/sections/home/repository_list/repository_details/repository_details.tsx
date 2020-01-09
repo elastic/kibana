@@ -338,7 +338,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       {cleanup ? (
         <>
           <EuiSpacer size="s" />
-          {cleanup?.cleaned ? (
+          {cleanup.cleaned ? (
             <div>
               <EuiTitle size="xs">
                 <h4>
@@ -363,7 +363,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               <p>
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryErrorMessage"
-                  defaultMessage={JSON.stringify(cleanup.error)}
+                  defaultMessage={`${cleanup.error}`}
                 />
               </p>
             </EuiCallOut>
