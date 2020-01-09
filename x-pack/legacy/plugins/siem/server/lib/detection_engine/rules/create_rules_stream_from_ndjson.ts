@@ -5,7 +5,7 @@
  */
 import { Readable, Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
-import { RuleAlertParamsRest } from '../types';
+import { ImportRuleAlertRest } from '../types';
 import {
   createSplitStream,
   createMapStream,
@@ -32,13 +32,13 @@ export const parseNdjsonStrings = (): Transform => {
 };
 
 export const filterExportedCounts = (): Transform => {
-  return createFilterStream<RuleAlertParamsRest | RulesObjectsExportResultDetails>(
+  return createFilterStream<ImportRuleAlertRest | RulesObjectsExportResultDetails>(
     obj => obj != null && !has('exported_count', obj)
   );
 };
 
 export const validateRules = (): Transform => {
-  return createMapStream((obj: RuleAlertParamsRest) => {
+  return createMapStream((obj: ImportRuleAlertRest) => {
     if (!(obj instanceof Error)) {
       const validated = importRulesSchema.validate(obj);
       if (validated.error != null) {
