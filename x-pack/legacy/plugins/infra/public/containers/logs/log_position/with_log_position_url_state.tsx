@@ -5,11 +5,11 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import datemath from '@elastic/datemath';
 
 import { pickTimeKey } from '../../../../common/time';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
 import { LogPositionState, LogPositionStateParams } from './log_position_state';
+import { isValidDatemath } from '../../../utils/datemath';
 
 /**
  * Url State
@@ -108,14 +108,7 @@ const mapToPositionUrlState = (value: any) =>
 
 const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : false);
 
-const mapToDate = (value: any) => {
-  const parsed = datemath.parse(value);
-  if (!parsed || !parsed.isValid()) {
-    return undefined;
-  }
-  return value;
-};
-
+const mapToDate = (value: any) => (isValidDatemath(value) ? value : undefined);
 export const replaceLogPositionInQueryString = (time: number) =>
   Number.isNaN(time)
     ? (value: string) => value
