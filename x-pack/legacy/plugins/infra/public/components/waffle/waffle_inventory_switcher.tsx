@@ -23,6 +23,8 @@ interface WaffleInventorySwitcherProps {
   changeNodeType: (nodeType: InventoryItemType) => void;
   changeGroupBy: (groupBy: SnapshotGroupBy) => void;
   changeMetric: (metric: SnapshotMetricInput) => void;
+  changeAccount: (id: string) => void;
+  changeRegion: (name: string) => void;
 }
 
 const getDisplayNameForType = (type: InventoryItemType) => {
@@ -34,6 +36,8 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
   changeNodeType,
   changeGroupBy,
   changeMetric,
+  changeAccount,
+  changeRegion,
   nodeType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,12 +48,14 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
       closePopover();
       changeNodeType(targetNodeType);
       changeGroupBy([]);
+      changeAccount('');
+      changeRegion('');
       const inventoryModel = findInventoryModel(targetNodeType);
       changeMetric({
         type: inventoryModel.metrics.defaultSnapshot,
       });
     },
-    [closePopover, changeNodeType, changeGroupBy, changeMetric]
+    [closePopover, changeNodeType, changeGroupBy, changeMetric, changeAccount, changeRegion]
   );
   const goToHost = useCallback(() => goToNodeType('host'), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod'), [goToNodeType]);

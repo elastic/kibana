@@ -181,4 +181,22 @@ export function jobRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
       ...commonRouteConfig,
     },
   });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const options = {
+        jobId: request.params.jobId,
+        categoryId: request.params.categoryId,
+      };
+      return callWithRequest('ml.categories', options)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig,
+    },
+  });
 }

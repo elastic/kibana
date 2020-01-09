@@ -1,0 +1,15 @@
+.visEditor--timelion {
+  vis-options-react-wrapper,
+  .visEditorSidebar__options,
+  .visEditorSidebar__timelionOptions {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .visEditor__sidebar {
+    @include euiBreakpoint('xs', 's', 'm') {
+      width: 100%;
+    }
+  }
+}
