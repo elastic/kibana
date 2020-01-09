@@ -37,6 +37,9 @@ const createClientMock = () => {
     isOverridden: jest.fn(),
   };
   mocked.get.mockResolvedValue(false);
+  mocked.getAll.mockResolvedValue({});
+  mocked.getRegistered.mockReturnValue({});
+  mocked.getUserProvided.mockResolvedValue({});
   return mocked;
 };
 

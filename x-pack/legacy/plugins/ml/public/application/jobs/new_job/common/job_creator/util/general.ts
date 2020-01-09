@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
@@ -269,4 +270,31 @@ export function advancedStartDatafeed(jobCreator: JobCreatorType) {
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
   return afs.some(a => a.agg.dslName === null) === false;
+}
+
+export function getJobCreatorTitle(jobCreator: JobCreatorType) {
+  switch (jobCreator.type) {
+    case JOB_TYPE.SINGLE_METRIC:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.singleMetric', {
+        defaultMessage: 'Single metric',
+      });
+    case JOB_TYPE.MULTI_METRIC:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.multiMetric', {
+        defaultMessage: 'Multi metric',
+      });
+    case JOB_TYPE.POPULATION:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.population', {
+        defaultMessage: 'Population',
+      });
+    case JOB_TYPE.ADVANCED:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.advanced', {
+        defaultMessage: 'Advanced',
+      });
+    // case JOB_TYPE.CATEGORIZATION:
+    //   return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
+    //     defaultMessage: 'Categorization',
+    //   });
+    default:
+      return '';
+  }
 }

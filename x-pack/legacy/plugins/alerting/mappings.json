@@ -54,6 +54,9 @@
       "updatedBy": {
         "type": "keyword"
       },
+      "createdAt": {
+        "type": "date"
+      },
       "apiKey": {
         "type": "binary"
       },

@@ -92,7 +92,7 @@ export const Container: React.FC<Props> = ({
 }: Props) => {
   useEffect(() => {
     loadSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter);
-  }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
+  }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, loadSnapshotCount, statusFilter]);
   return <PresentationalComponent count={count} height={height} loading={loading} />;
 };
 

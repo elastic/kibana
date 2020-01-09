@@ -26,12 +26,13 @@ import {
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl, cronUrl } from '../../../services';
 import { StepError } from './components';
 
-const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
+
+const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 export class StepLogisticsUi extends Component {

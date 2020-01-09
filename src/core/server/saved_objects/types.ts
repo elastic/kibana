@@ -236,7 +236,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  unknown: [{ pluginSpec: { getId: () => unknown }; type: unknown }] | undefined;
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;

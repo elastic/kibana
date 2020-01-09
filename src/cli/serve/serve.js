@@ -140,23 +140,12 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   }
 
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
-
   set(
     'plugins.paths',
     _.compact(
       [].concat(
         get('plugins.paths'),
         opts.pluginPath,
-        opts.runExamples
-          ? [
-              // Ideally this would automatically include all plugins in the examples dir
-              fromRoot('examples/demo_search'),
-              fromRoot('examples/search_explorer'),
-              fromRoot('examples/embeddable_examples'),
-              fromRoot('examples/embeddable_explorer'),
-            ]
-          : [],
-
         XPACK_INSTALLED && !opts.oss ? [XPACK_DIR] : []
       )
     )
@@ -253,6 +242,7 @@ export default function(program) {
         silent: !!opts.silent,
         watch: !!opts.watch,
         repl: !!opts.repl,
+        runExamples: !!opts.runExamples,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
         // We can tell users they only have to run with `yarn start --run-examples` to get those

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { convertLegacyDeprecationProvider } from './legacy_deprecation_adapters';
-import { LegacyConfigDeprecationProvider } from './types';
 import { ConfigDeprecation } from '../../config';
 import { configDeprecationFactory } from '../../config/deprecation/deprecation_factory';
 import { applyDeprecations } from '../../config/deprecation/apply_deprecations';
+import { LegacyConfigDeprecationProvider } from '../types';
+import { convertLegacyDeprecationProvider } from './legacy_deprecation_adapters';
 
 jest.spyOn(configDeprecationFactory, 'unusedFromRoot');
 jest.spyOn(configDeprecationFactory, 'renameFromRoot');
