@@ -16,11 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverIndexPattern } from './discover_index_pattern';
+import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
+
+/**
+ * At initial rendering the angular directive the selectedIndexPattern prop is undefined
+ * This wrapper catches this, had to be introduced to satisfy eslint
+ */
+export function DiscoverIndexPatternWrapper(props: DiscoverIndexPatternProps) {
+  if (!props.selectedIndexPattern || !Array.isArray(props.indexPatternList)) {
+    return null;
+  }
+  return <DiscoverIndexPattern {...props} />;
+}
 
 export function createIndexPatternSelectDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
+  return reactDirective(wrapInI18nContext(DiscoverIndexPatternWrapper), [
     ['indexPatternList', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
