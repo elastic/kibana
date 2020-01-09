@@ -29,12 +29,15 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
   let statusMessage = '';
   let status = '';
   if (downLocations.length === 0) {
+    // for Messaging like 'Up in 1 Location' or 'Up in 2 Locations'
     statusMessage = `${locations.length}`;
     status = 'Up';
   } else if (downLocations.length > 0) {
+    // for Messaging like 'Down in 1/2 Locations'
     status = 'Down';
     statusMessage = `${downLocations.length}/${locations.length}`;
     if (downLocations.length === locations.length) {
+      // for Messaging like 'Down in 2 Locations'
       statusMessage = `${locations.length}`;
     }
   }
