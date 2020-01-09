@@ -92,7 +92,6 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
             path="interval"
             component={ScheduleItem}
             componentProps={{
-              compressed: true,
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
@@ -102,7 +101,6 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
             path="from"
             component={ScheduleItem}
             componentProps={{
-              compressed: true,
               idAria: 'detectionEngineStepScheduleRuleFrom',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleFrom',

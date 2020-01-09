@@ -6,7 +6,6 @@
 
 import Hapi from 'hapi';
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { Services, AlertsConfigType } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
@@ -66,7 +65,7 @@ export class Plugin {
     core: AlertingCoreSetup,
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
     const config = await this.config$.pipe(first()).toPromise();
     this.licenseState = new LicenseState(plugins.licensing.license$);
 

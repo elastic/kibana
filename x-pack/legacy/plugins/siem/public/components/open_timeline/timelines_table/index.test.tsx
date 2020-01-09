@@ -28,10 +28,11 @@ describe('TimelinesTable', () => {
     mockResults = cloneDeep(mockTimelineResults);
   });
 
-  test('it renders the select all timelines header checkbox when showExtendedColumnsAndActions is true', () => {
+  test('it renders the select all timelines header checkbox when actionTimelineToShow has the action selectable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -43,7 +44,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -59,10 +60,11 @@ describe('TimelinesTable', () => {
     ).toBe(true);
   });
 
-  test('it does NOT render the select all timelines header checkbox when showExtendedColumnsAndActions is false', () => {
+  test('it does NOT render the select all timelines header checkbox when actionTimelineToShow has not the action selectable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -74,7 +76,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={false}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -90,10 +92,11 @@ describe('TimelinesTable', () => {
     ).toBe(false);
   });
 
-  test('it renders the Modified By column when showExtendedColumnsAndActions is true ', () => {
+  test('it renders the Modified By column when showExtendedColumns is true ', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -105,7 +108,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -121,10 +124,11 @@ describe('TimelinesTable', () => {
     ).toContain(i18n.MODIFIED_BY);
   });
 
-  test('it renders the notes column in the position of the Modified By column when showExtendedColumnsAndActions is false', () => {
+  test('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -136,7 +140,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={false}
+          showExtendedColumns={false}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -148,16 +152,17 @@ describe('TimelinesTable', () => {
       wrapper
         .find('thead tr th')
         .at(5)
-        .find('[data-test-subj="notes-count-header-icon"]')
+        .find('svg[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()
     ).toBe(true);
   });
 
-  test('it renders the delete timeline (trash icon) when showExtendedColumnsAndActions is true', () => {
+  test('it renders the delete timeline (trash icon) when actionTimelineToShow has the delete action', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -169,7 +174,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={false}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -185,10 +190,11 @@ describe('TimelinesTable', () => {
     ).toBe(true);
   });
 
-  test('it does NOT render the delete timeline (trash icon) when showExtendedColumnsAndActions is false', () => {
+  test('it does NOT render the delete timeline (trash icon) when actionTimelineToShow has NOT the delete action', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -200,7 +206,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={false}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -216,10 +222,11 @@ describe('TimelinesTable', () => {
     ).toBe(false);
   });
 
-  test('it renders the rows per page selector when showExtendedColumnsAndActions is true', () => {
+  test('it renders the rows per page selector when showExtendedColumns is true', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -231,7 +238,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -247,10 +254,11 @@ describe('TimelinesTable', () => {
     ).toBe(true);
   });
 
-  test('it does NOT render the rows per page selector when showExtendedColumnsAndActions is false', () => {
+  test('it does NOT render the rows per page selector when showExtendedColumns is false', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -262,7 +270,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={false}
+          showExtendedColumns={false}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -284,6 +292,7 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={defaultPageSize}
           loading={false}
@@ -295,7 +304,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={defaultPageSize}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -311,10 +320,11 @@ describe('TimelinesTable', () => {
     ).toEqual('Rows per page: 123');
   });
 
-  test('it sorts the Last Modified column in descending order when showExtendedColumnsAndActions is true ', () => {
+  test('it sorts the Last Modified column in descending order when showExtendedColumns is true ', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -326,7 +336,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -342,10 +352,11 @@ describe('TimelinesTable', () => {
     ).toContain(i18n.LAST_MODIFIED);
   });
 
-  test('it sorts the Last Modified column in descending order when showExtendedColumnsAndActions is false ', () => {
+  test('it sorts the Last Modified column in descending order when showExtendedColumns is false ', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -357,7 +368,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={false}
+          showExtendedColumns={false}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -376,6 +387,7 @@ describe('TimelinesTable', () => {
   test('it displays the expected message when no search results are found', () => {
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -387,7 +399,7 @@ describe('TimelinesTable', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={[]}
-        showExtendedColumnsAndActions={false}
+        showExtendedColumns={false}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={0}
@@ -408,6 +420,7 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -419,7 +432,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -446,6 +459,7 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -457,7 +471,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -479,6 +493,7 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={true}
@@ -490,7 +505,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -510,6 +525,7 @@ describe('TimelinesTable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -521,7 +537,7 @@ describe('TimelinesTable', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
