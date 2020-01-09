@@ -29,4 +29,5 @@ export class CustomNumberFormat extends NumeralFormat {
 
   id = CustomNumberFormat.id;
   title = CustomNumberFormat.title;
+  allowsNumericalAggregations = true;
 }

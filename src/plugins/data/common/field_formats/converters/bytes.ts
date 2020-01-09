@@ -33,4 +33,6 @@ export class BytesFormat extends NumeralFormat {
   getParamDefaults = () => ({
     pattern: '0,0.0b',
   });
+
+  allowsNumericalAggregations = true;
 }

@@ -29,6 +29,7 @@ export abstract class IntlNumberFormat extends FieldFormat {
   abstract title: string;
 
   getParamDefaults = () => ({});
+  allowsNumericalAggregations = true;
 
   abstract getArguments: () => Record<string, unknown>;
 
@@ -48,10 +49,6 @@ export abstract class IntlNumberFormat extends FieldFormat {
         ? navigator.languages.concat(['en'])
         : [navigator.language].concat(locales);
     }
-    // const locale = (this.getConfig && this.getConfig('format:defaultLocale')) || 'en';
-    // if (locale === 'detect') {
-    //   locale =
-    // }
 
     const inst = new Intl.NumberFormat(locales, this.getArguments());
 

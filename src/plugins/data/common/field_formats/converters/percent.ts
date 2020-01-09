@@ -29,6 +29,7 @@ export class PercentFormat extends IntlNumberFormat {
 
   id = PercentFormat.id;
   title = PercentFormat.title;
+  allowsNumericalAggregations = true;
 
   getParamDefaults = () => ({
     minDecimals: 0,
