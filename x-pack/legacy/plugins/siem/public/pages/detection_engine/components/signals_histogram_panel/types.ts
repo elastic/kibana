@@ -32,3 +32,8 @@ export interface SignalsGroupBucket {
     buckets: SignalsBucket[];
   };
 }
+
+export interface SignalsTotal {
+  value: number;
+  relation: string;
+}

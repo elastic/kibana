@@ -96,3 +96,21 @@ export const ALL_OTHERS = i18n.translate(
     defaultMessage: 'All others',
   }
 );
+
+export const VIEW_SIGNALS = i18n.translate(
+  'xpack.siem.detectionEngine.signals.histogram.viewSignalsButtonLabel',
+  {
+    defaultMessage: 'View signals',
+  }
+);
+
+export const SHOWING_SIGNALS = (
+  totalSignalsFormatted: string,
+  totalSignals: number,
+  modifier: string
+) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.histogram.showingSignalsTitle', {
+    values: { totalSignalsFormatted, totalSignals, modifier },
+    defaultMessage:
+      'Showing: {modifier}{totalSignalsFormatted} {totalSignals, plural, =1 {signal} other {signals}}',
+  });

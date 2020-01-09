@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiSpacer, EuiPanel, EuiLoadingContent } from '@elastic/eui';
-import React from 'react';
+import { EuiButton, EuiLoadingContent, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { StickyContainer } from 'react-sticky';
 
 import { connect } from 'react-redux';
+import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { SiemSearchBar } from '../../components/search_bar';
@@ -32,11 +33,8 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { HeaderSection } from '../../components/header_section';
-
-interface ReduxProps {
-  filters: esFilters.Filter[];
-  query: Query;
-}
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 
 interface OwnProps {
   loading: boolean;
@@ -45,11 +43,40 @@ interface OwnProps {
   signalsIndex: string | null;
 }
 
-type DetectionEngineComponentProps = OwnProps & ReduxProps;
+interface ReduxProps {
+  filters: esFilters.Filter[];
+  query: Query;
+}
+
+export interface DispatchProps {
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
+}
+
+type DetectionEngineComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({ filters, loading, isSignalIndexExists, isUserAuthenticated, query, signalsIndex }) => {
+  ({
+    filters,
+    loading,
+    isSignalIndexExists,
+    isUserAuthenticated,
+    query,
+    setAbsoluteRangeDatePicker,
+    signalsIndex,
+  }) => {
     const [lastSignals] = useSignalInfo({});
+
+    const updateDateRangeCallback = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
       return (
         <WrapperPage>
@@ -101,10 +128,13 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                         <SignalsHistogramPanel
                           filters={filters}
                           from={from}
+                          loadingInitial={loading}
                           query={query}
                           stackByOptions={signalsHistogramOptions}
                           to={to}
+                          updateDateRange={updateDateRangeCallback}
                         />
+
                         <EuiSpacer />
 
                         {!loading ? (
@@ -151,6 +181,8 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const DetectionEngine = connect(makeMapStateToProps, {})(DetectionEngineComponent);
+export const DetectionEngine = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+})(DetectionEngineComponent);
 
 DetectionEngine.displayName = 'DetectionEngine';

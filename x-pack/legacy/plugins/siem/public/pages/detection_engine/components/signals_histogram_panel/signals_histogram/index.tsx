@@ -16,68 +16,112 @@ import {
 } from '@elastic/charts';
 import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingContent } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import { useQuerySignals } from '../../../../../containers/detection_engine/signals/use_query';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
-import { esFilters } from '../../../../../../../../../../src/plugins/data/common/es_query';
-import { SignalsAggregation } from '../types';
+import { esFilters, esQuery } from '../../../../../../../../../../src/plugins/data/common/es_query';
+import { SignalsAggregation, SignalsTotal } from '../types';
 import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
 import { useTheme } from '../../../../../components/charts/common';
+import { useKibana } from '../../../../../lib/kibana';
 
 interface HistogramSignalsProps {
-  to: number;
+  filters?: esFilters.Filter[];
   from: number;
-  query?: Query; // TODO combine with provided query
-  filters?: esFilters.Filter[]; // TODO combine with provided filters
-  legendPosition?: 'bottom' | 'left'; // TODO for use on new overview design
+  legendPosition?: 'left' | 'right' | 'bottom' | 'top';
+  loadingInitial: boolean;
+  query?: Query;
+  setTotalSignalsCount: React.Dispatch<SignalsTotal>;
   stackByField: string;
-  showLinkToSignals?: boolean; // TODO for use on new overview design
-  showTotalSignalsCount?: boolean; // TODO for use on new overview design
+  to: number;
+  updateDateRange: (min: number, max: number) => void;
 }
 
-export const SignalsHistogram = React.memo<HistogramSignalsProps>(({ to, from, stackByField }) => {
-  const [isLoadingSignals, signalsData, setQueryString] = useQuerySignals<{}, SignalsAggregation>(
-    JSON.stringify(getSignalsHistogramQuery(stackByField, from, to))
-  );
-  const theme = useTheme();
+export const SignalsHistogram = React.memo<HistogramSignalsProps>(
+  ({
+    to,
+    from,
+    query,
+    filters,
+    legendPosition = 'bottom',
+    loadingInitial,
+    setTotalSignalsCount,
+    stackByField,
+    updateDateRange,
+  }) => {
+    const [isLoadingSignals, signalsData, setQueryString] = useQuerySignals<{}, SignalsAggregation>(
+      JSON.stringify(getSignalsHistogramQuery(stackByField, from, to, []))
+    );
+    const theme = useTheme();
+    const kibana = useKibana();
 
-  const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
+    const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
 
-  useEffect(() => {
-    try {
-      setQueryString(JSON.stringify(getSignalsHistogramQuery(stackByField, from, to)));
-    } catch (e) {
-      setQueryString('');
-    }
-  }, [stackByField, from, to]);
+    useEffect(() => {
+      setTotalSignalsCount(
+        signalsData?.hits.total ?? {
+          value: 0,
+          relation: 'eq',
+        }
+      );
+    }, [signalsData]);
 
-  return (
-    <>
-      {isLoadingSignals ? (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-      ) : (
-        <Chart size={['100%', 259]}>
-          <Settings legendPosition="bottom" showLegend theme={theme} />
+    useEffect(() => {
+      const converted = esQuery.buildEsQuery(
+        undefined,
+        query != null ? [query] : [],
+        filters?.filter(f => f.meta.disabled === false) ?? [],
+        {
+          ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          dateFormatTZ: undefined,
+        }
+      );
 
-          <Axis
-            id={getAxisId('signalAxisX')}
-            position="bottom"
-            tickFormat={timeFormatter(niceTimeFormatByDay(1))}
-          />
+      try {
+        setQueryString(
+          JSON.stringify(
+            getSignalsHistogramQuery(stackByField, from, to, !isEmpty(converted) ? [converted] : [])
+          )
+        );
+      } catch (e) {
+        setQueryString('');
+      }
+    }, [stackByField, from, to, query, filters]);
 
-          <Axis id={getAxisId('signalAxisY')} position="left" />
+    return (
+      <>
+        {loadingInitial || isLoadingSignals ? (
+          <EuiLoadingContent data-test-subj="loadingPanelSignalsHistogram" lines={10} />
+        ) : (
+          <Chart size={['100%', 259]}>
+            <Settings
+              legendPosition={legendPosition}
+              onBrushEnd={updateDateRange}
+              showLegend
+              theme={theme}
+            />
 
-          <HistogramBarSeries
-            id={getSpecId('signalBar')}
-            xScaleType="time"
-            yScaleType="linear"
-            xAccessor="x"
-            yAccessors={['y']}
-            splitSeriesAccessors={['g']}
-            data={formattedSignalsData}
-          />
-        </Chart>
-      )}
-    </>
-  );
-});
+            <Axis
+              id={getAxisId('signalsHistogramAxisX')}
+              position="bottom"
+              tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+            />
+
+            <Axis id={getAxisId('signalsHistogramAxisY')} position="left" />
+
+            <HistogramBarSeries
+              id={getSpecId('signalsHistogram')}
+              xScaleType="time"
+              yScaleType="linear"
+              xAccessor="x"
+              yAccessors={['y']}
+              splitSeriesAccessors={['g']}
+              data={formattedSignalsData}
+            />
+          </Chart>
+        )}
+      </>
+    );
+  }
+);
 SignalsHistogram.displayName = 'SignalsHistogram';

@@ -30,12 +30,17 @@ export const formatSignalsData = (
   return result;
 };
 
-export const getSignalsHistogramQuery = (stackByField: string, from: number, to: number) => ({
+export const getSignalsHistogramQuery = (
+  stackByField: string,
+  from: number,
+  to: number,
+  additionalFilters: object[]
+) => ({
   aggs: {
     signalsByGrouping: {
       terms: {
         field: stackByField,
-        missing: i18n.ALL_OTHERS,
+        missing: stackByField.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
         order: {
           _count: 'desc',
         },
@@ -43,9 +48,9 @@ export const getSignalsHistogramQuery = (stackByField: string, from: number, to:
       },
       aggs: {
         signals: {
-          date_histogram: {
+          auto_date_histogram: {
             field: '@timestamp',
-            fixed_interval: '30s',
+            buckets: 36,
           },
         },
       },
@@ -54,6 +59,7 @@ export const getSignalsHistogramQuery = (stackByField: string, from: number, to:
   query: {
     bool: {
       filter: [
+        ...additionalFilters,
         {
           range: {
             '@timestamp': {

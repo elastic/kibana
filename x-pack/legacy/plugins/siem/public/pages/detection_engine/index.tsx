@@ -13,7 +13,7 @@ import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_
 import { CreateRuleComponent } from './rules/create';
 import { DetectionEngine } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
-import { RuleDetailsComponent } from './rules/details';
+import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
 
 const detectionEnginePath = `/:pageName(detection-engine)`;
@@ -60,7 +60,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
             <CreateRuleComponent />
           </Route>
           <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
-            <RuleDetailsComponent signalsIndex={signalIndexName} />
+            <RuleDetails signalsIndex={signalIndexName} />
           </Route>
           <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
             <EditRuleComponent />
