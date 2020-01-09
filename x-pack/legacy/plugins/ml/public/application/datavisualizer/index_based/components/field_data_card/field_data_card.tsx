@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import React, { FC } from 'react';
 
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
@@ -73,13 +74,11 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
   }
 
   return (
-    <div data-test-subj={`mlFieldDataCard ${fieldName} ${type}`}>
-      <div className="mlFieldDataCard">
-        <FieldTitleBar card={config} />
-        <div className="mlFieldDataCard__content">
-          {loading === true ? <LoadingIndicator /> : getCardContent()}
-        </div>
+    <EuiPanel data-test-subj={`mlFieldDataCard ${fieldName} ${type}`} className="mlFieldDataCard">
+      <FieldTitleBar card={config} />
+      <div className="mlFieldDataCard__content">
+        {loading === true ? <LoadingIndicator /> : getCardContent()}
       </div>
-    </div>
+    </EuiPanel>
   );
 };

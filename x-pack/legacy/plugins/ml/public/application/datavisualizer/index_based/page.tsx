@@ -653,7 +653,7 @@ export const Page: FC = () => {
                             setFieldSearchBarQuery={setMetricFieldQuery}
                             fieldVisConfigs={metricConfigs}
                           />
-                          <EuiSpacer size="m" />
+                          <EuiSpacer size="l" />
                         </Fragment>
                       )}
                       <FieldsPanel
