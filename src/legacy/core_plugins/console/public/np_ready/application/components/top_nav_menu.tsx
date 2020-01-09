@@ -29,11 +29,11 @@ export interface TopNavMenuItem {
 }
 
 interface Props {
-  disabled: boolean;
+  disabled?: boolean;
   items: TopNavMenuItem[];
 }
 
-export function TopNavMenu({ items, disabled }: Props) {
+export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {

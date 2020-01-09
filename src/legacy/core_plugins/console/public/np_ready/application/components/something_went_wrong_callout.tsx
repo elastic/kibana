@@ -25,7 +25,7 @@ interface Props {
   error: Error;
 }
 
-export const SomethingWentWrongCallout = ({ error }: Props) => {
+export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error }) => {
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -42,7 +42,7 @@ export const SomethingWentWrongCallout = ({ error }: Props) => {
       <EuiText>
         <p>
           {i18n.translate('console.loadingErrorMessage', {
-            defaultMessage: `Console could not be restored to it's previous state. Text entered in the current session may not be persisted. Try reloading this page.`,
+            defaultMessage: `Console could not be restored to its previous state. Text entered in the current session may not be persisted. Try reloading this page.`,
           })}
         </p>
       </EuiText>
