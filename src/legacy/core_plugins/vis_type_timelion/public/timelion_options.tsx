@@ -20,7 +20,7 @@
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from './legacy_imports';
 import { VisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
 
