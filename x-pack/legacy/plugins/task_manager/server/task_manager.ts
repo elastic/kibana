@@ -27,7 +27,7 @@ import {
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { intervalFromNow } from './lib/intervals';
+import { intervalFromNow } from './scheduling/intervals';
 import {
   TaskDefinition,
   TaskDictionary,

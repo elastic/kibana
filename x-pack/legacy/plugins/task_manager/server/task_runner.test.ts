@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow } from './lib/intervals';
+import { minutesFromNow } from './scheduling/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { ConcreteTaskInstance, TaskStatus } from './task';

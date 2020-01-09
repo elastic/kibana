@@ -16,7 +16,8 @@ import { identity, defaults, flow } from 'lodash';
 
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
-import { intervalFromDate, intervalFromNow } from './lib/intervals';
+import { intervalFromDate, intervalFromNow } from './scheduling/intervals';
+import { nextScheduledRunFromDate } from './scheduling/task_schedule';
 import { Logger } from './types';
 import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
@@ -314,9 +315,9 @@ export class TaskManagerRunner implements TaskRunner {
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(({ runAt, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-        const { startedAt, schedule: { interval = undefined } = {} } = this.instance;
+        const { startedAt, schedule } = this.instance;
         return asOk({
-          runAt: runAt || intervalFromDate(startedAt!, interval)!,
+          runAt: runAt || nextScheduledRunFromDate(startedAt!, schedule),
           state,
           attempts,
           status: TaskStatus.Idle,
