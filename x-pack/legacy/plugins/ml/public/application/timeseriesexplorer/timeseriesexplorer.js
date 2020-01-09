@@ -468,19 +468,20 @@ export class TimeSeriesExplorer extends React.Component {
     this.setState({ entitiesLoading: false, entityValues });
   };
 
+  setForecastId = forecastId => {
+    this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
+  };
+
   loadForForecastId = forecastId => {
-    const { appStateHandler, bounds, selectedJobIds, timefilter } = this.props;
+    const { appStateHandler, bounds, selectedJobIds, setGlobalState } = this.props;
     const { autoZoomDuration, contextChartData } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     mlForecastService
       .getForecastDateRange(selectedJob, forecastId)
       .then(resp => {
-        const earliest = moment(resp.earliest || timefilter.getTime().from);
-        const latest = moment(resp.latest || timefilter.getTime().to);
-
-        // Store forecast ID in the appState.
-        appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
+        const earliest = moment(resp.earliest || bounds.min.valueOf());
+        const latest = moment(resp.latest || bounds.max.valueOf());
 
         // Set the zoom to centre on the start of the forecast range, depending
         // on the time range of the forecast and data.
@@ -503,15 +504,10 @@ export class TimeSeriesExplorer extends React.Component {
         if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
           const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
           const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-
-          // TODO change this to use setGlobalState
-          timefilter.setTime({
+          setGlobalState('time', {
             from: moment(earliestMs).toISOString(),
             to: moment(latestMs).toISOString(),
           });
-        } else {
-          // Refresh to show the requested forecast data.
-          this.refresh();
         }
       })
       .catch(resp => {
@@ -523,11 +519,6 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
-    // Skip the refresh if a 'soft' refresh without a full page reload is already happening.
-    if (this.state.loading && fullRefresh === false) {
-      return;
-    }
-
     const { bounds, selectedDetectorIndex, selectedForecastId, selectedJobIds, zoom } = this.props;
 
     if (selectedJobIds === undefined) {
@@ -1072,7 +1063,7 @@ export class TimeSeriesExplorer extends React.Component {
         return;
       } else if (typeof update === 'string') {
         this.contextChartSelectedInitCallDone = false;
-        this.setState({ fullRefresh: false, loading: true, showForecastCheckbox: false }, () => {
+        this.setState({ fullRefresh: false, loading: true }, () => {
           this.loadForJobId(update);
         });
       }
@@ -1102,11 +1093,22 @@ export class TimeSeriesExplorer extends React.Component {
     ) {
       const fullRefresh =
         previousProps === undefined ||
+        !isEqual(previousProps.bounds, this.props.bounds) ||
         !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
+        !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
         !isEqual(previousProps.selectedJobIds, this.props.selectedJobIds);
       this.loadSingleMetricData(fullRefresh);
+    }
+
+    if (
+      previousProps === undefined ||
+      !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId)
+    ) {
+      if (this.props.selectedForecastId !== undefined) {
+        this.loadForForecastId(this.props.selectedForecastId);
+      }
     }
 
     if (previousProps === undefined) {
@@ -1354,7 +1356,7 @@ export class TimeSeriesExplorer extends React.Component {
                     job={selectedJob}
                     detectorIndex={selectedDetectorIndex}
                     entities={entityControls}
-                    loadForForecastId={this.loadForForecastId}
+                    setForecastId={this.setForecastId}
                     className="forecast-controls"
                   />
                 </EuiFormRow>
