@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { Spaces } from '../../scenarios';
+import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
@@ -19,7 +19,7 @@ import {
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
-export default function alertTests({ getService }: FtrProviderContext) {
+export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
   const retry = getService('retry');
@@ -43,7 +43,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -58,7 +58,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .expect(200);
       indexRecordActionId = createdAction.id;
       alertUtils = new AlertUtils({
-        space: Spaces.space1,
+        space,
         supertestWithoutAuth,
         indexRecordActionId,
         objectRemover,
@@ -68,19 +68,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      objectRemover.add(Spaces.space1.id, indexRecordActionId, 'action');
+      objectRemover.add(space.id, indexRecordActionId, 'action');
       await objectRemover.removeAll();
     });
 
     it('should schedule task, run alert and schedule actions', async () => {
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFiringAction({ reference });
+      const alertId = response.body.id;
 
       expect(response.statusCode).to.eql(200);
       const alertTestRecord = (
         await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
       )[0];
-      expect(alertTestRecord._source).to.eql({
+      const expected = {
         source: 'alert:test.always-firing',
         reference,
         state: {},
@@ -88,7 +89,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
           index: ES_TEST_INDEX_NAME,
           reference,
         },
-      });
+        alertInfo: {
+          alertId,
+          spaceId: space.id,
+          namespace: space.namespace,
+          name: 'abc',
+          tags: [],
+          createdBy: null,
+          updatedBy: null,
+        },
+      };
+      if (expected.alertInfo.namespace === undefined) {
+        delete expected.alertInfo.namespace;
+      }
+      expect(alertTestRecord._source).to.eql(expected);
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.index-record', reference)
       )[0];
@@ -147,7 +161,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const retryDate = new Date(Date.now() + 60000);
 
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Test rate limit',
@@ -155,11 +169,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
           config: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action');
 
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -184,7 +198,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert');
       const scheduledActionTask = await retry.try(async () => {
         const searchResult = await es.search({
           index: '.kibana_task_manager',
@@ -228,7 +242,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -244,7 +258,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert');
       const alertTestRecord = (
         await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
       )[0];
@@ -264,16 +278,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
     it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
       const reference = alertUtils.generateReference();
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action');
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -299,7 +313,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert');
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.authorization', reference)
       )[0];
