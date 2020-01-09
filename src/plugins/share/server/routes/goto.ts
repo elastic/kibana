@@ -23,6 +23,15 @@ import { schema } from '@kbn/config-schema';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 
+const makeUrlEmbeddable = (url: string): string => {
+  const embedQueryParam = '?embed=true';
+  const urlHasQueryString = url.indexOf('?') !== -1;
+  if (urlHasQueryString) {
+    return url.replace('?', `${embedQueryParam}&`);
+  }
+  return `${url}${embedQueryParam}`;
+};
+
 export const createGotoRoute = ({
   router,
   shortUrlLookup,
@@ -37,14 +46,17 @@ export const createGotoRoute = ({
       path: '/goto/{urlId}',
       validate: {
         params: schema.object({ urlId: schema.string() }),
+        query: schema.object({ embed: schema.string() }),
       },
     },
     router.handleLegacyErrors(async function(context, request, response) {
-      const url = await shortUrlLookup.getUrl(request.params.urlId, {
+      let url = await shortUrlLookup.getUrl(request.params.urlId, {
         savedObjects: context.core.savedObjects.client,
       });
       shortUrlAssertValid(url);
-
+      if (request.query && request.query.embed && request.query.embed === 'true') {
+        url = makeUrlEmbeddable(url);
+      }
       const uiSettings = context.core.uiSettings.client;
       const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
       if (!stateStoreInSessionStorage) {
