@@ -118,6 +118,15 @@ const deprecations: ConfigDeprecationProvider = () => [
         `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
       );
     }
+    if (es.ssl?.key && !es.ssl?.certificate) {
+      log(
+        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    } else if (es.ssl?.certificate && !es.ssl?.key) {
+      log(
+        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    }
     return settings;
   },
 ];

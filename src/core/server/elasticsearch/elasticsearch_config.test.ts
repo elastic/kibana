@@ -360,6 +360,24 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({});
     expect(messages).toHaveLength(0);
   });
+
+  it('logs a warning if ssl.key is set and ssl.certificate is not', () => {
+    const { messages } = applyElasticsearchDeprecations({ ssl: { key: 'foo' } });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+      ]
+    `);
+  });
+
+  it('logs a warning if ssl.certificate is set and ssl.key is not', () => {
+    const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: 'foo' } });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+      ]
+    `);
+  });
 });
 
 test('#username throws if equal to "elastic", only while running from source', () => {
