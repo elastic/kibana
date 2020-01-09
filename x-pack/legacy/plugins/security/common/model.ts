@@ -11,15 +11,18 @@ export {
   BuiltinESPrivileges,
   EditUser,
   FeaturesPrivileges,
+  InlineRoleTemplate,
+  InvalidRoleTemplate,
   KibanaPrivileges,
   RawKibanaFeaturePrivileges,
   RawKibanaPrivileges,
   Role,
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
+  RoleMapping,
+  RoleTemplate,
+  StoredRoleTemplate,
   User,
   canUserChangePassword,
   getUserDisplayName,
 } from '../../../../plugins/security/common/model';
-
-export * from './role_mapping';
