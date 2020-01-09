@@ -59,7 +59,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
       return filters;
-    }, [tabName]);
+    }, [tabName, filters]);
+
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });

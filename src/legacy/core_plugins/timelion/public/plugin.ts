@@ -27,6 +27,7 @@ import {
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+import { setIndexPatterns, setSavedObjectsClient } from './services/plugin_services';
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -68,12 +69,15 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: PluginsStart) {
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
+
+    setIndexPatterns(plugins.data.indexPatterns);
+    setSavedObjectsClient(core.savedObjects.client);
   }
 
   public stop(): void {}
