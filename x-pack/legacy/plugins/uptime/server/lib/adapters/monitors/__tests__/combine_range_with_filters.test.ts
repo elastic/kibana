@@ -12,7 +12,28 @@ describe('combineRangeWithFilters', () => {
       combineRangeWithFilters('now-15m', 'now', {
         bool: { should: [{ match: { 'url.port': 80 } }], minimum_should_match: 1 },
       })
-    ).toMatchSnapshot();
+    ).toEqual({
+      bool: {
+        should: [
+          {
+            match: {
+              'url.port': 80,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-15m',
+                lte: 'now',
+              },
+            },
+          },
+        ],
+      },
+    });
   });
 
   it('combines query with filter object', () => {
@@ -24,7 +45,31 @@ describe('combineRangeWithFilters', () => {
           minimum_should_match: 1,
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual({
+      bool: {
+        filter: [
+          {
+            field: 'monitor.id',
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-15m',
+                lte: 'now',
+              },
+            },
+          },
+        ],
+        should: [
+          {
+            match: {
+              'url.port': 80,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   });
 
   it('combines query with filter list', () => {
@@ -36,6 +81,30 @@ describe('combineRangeWithFilters', () => {
           minimum_should_match: 1,
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual({
+      bool: {
+        filter: [
+          {
+            field: 'monitor.id',
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-15m',
+                lte: 'now',
+              },
+            },
+          },
+        ],
+        should: [
+          {
+            match: {
+              'url.port': 80,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   });
 });
