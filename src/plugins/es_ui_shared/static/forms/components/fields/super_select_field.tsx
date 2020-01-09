@@ -47,7 +47,6 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
     >
       <EuiSuperSelect
         fullWidth
-        hasNoInitialSelection
         valueOfSelected={field.value as string}
         onChange={value => {
           field.setValue(value);
