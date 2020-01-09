@@ -417,8 +417,6 @@ export interface SnapshotCount {
 
   down: number;
 
-  mixed: number;
-
   total: number;
 }
 

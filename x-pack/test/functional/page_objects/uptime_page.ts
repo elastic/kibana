@@ -81,5 +81,9 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         }
       }
     }
+
+    public async getSnapshotCount() {
+      return await uptimeService.getSnapshotCount();
+    }
   })();
 }

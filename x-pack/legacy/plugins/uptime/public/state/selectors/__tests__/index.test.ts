@@ -29,7 +29,6 @@ describe('state selectors', () => {
       count: {
         up: 2,
         down: 0,
-        mixed: 0,
         total: 2,
       },
       errors: [],

@@ -4,19 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextArea,
-  EuiLink,
-  EuiText,
-  EuiListGroup,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
-import React, { memo, ReactNode, useState } from 'react';
+import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -25,13 +15,19 @@ import {
   FilterManager,
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
 import { useKibana } from '../../../../../lib/kibana';
-import { FilterLabel } from './filter_label';
-import { FormSchema } from '../shared_imports';
-import * as I18n from './translations';
-
 import { IMitreEnterpriseAttack } from '../../types';
-import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
+import { FieldValueTimeline } from '../pick_timeline';
+import { FormSchema } from '../shared_imports';
+import { ListItems } from './types';
+import {
+  buildQueryBarDescription,
+  buildSeverityDescription,
+  buildStringArrayDescription,
+  buildThreatsDescription,
+  buildUrlsDescription,
+} from './helpers';
 
 interface StepRuleDescriptionProps {
   direction?: 'row' | 'column';
@@ -40,27 +36,8 @@ interface StepRuleDescriptionProps {
   schema: FormSchema;
 }
 
-const EuiBadgeWrap = styled(EuiBadge)`
-  .euiBadge__text {
-    white-space: pre-wrap !important;
-  }
-`;
-
 const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
   ${props => (props.direction === 'row' ? 'width : 50%;' : 'width: 100%;')};
-`;
-
-const MyEuiListGroup = styled(EuiListGroup)`
-  padding: 0px;
-  .euiListGroupItem__button {
-    padding: 0px;
-  }
-`;
-
-const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
-  .euiFlexItem {
-    margin-bottom: 0px;
-  }
 `;
 
 const MyEuiTextArea = styled(EuiTextArea)`
@@ -87,9 +64,9 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   );
   return (
     <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
-      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
+      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
         <EuiFlexItemWidth direction={direction} key={`description-step-rule-${index}`} grow={false}>
-          <EuiDescriptionList listItems={chunckListItems} compressed />
+          <EuiDescriptionList listItems={chunkListItems} />
         </EuiFlexItemWidth>
       ))}
     </EuiFlexGroup>
@@ -97,11 +74,6 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 };
 
 export const StepRuleDescription = memo(StepRuleDescriptionComponent);
-
-interface ListItems {
-  title: NonNullable<ReactNode>;
-  description: NonNullable<ReactNode>;
-}
 
 const buildListItems = (
   data: unknown,
@@ -130,103 +102,23 @@ const getDescriptionItem = (
   filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
-  if (field === 'useIndicesConfig') {
-    return [];
-  } else if (field === 'queryBar') {
+  if (field === 'queryBar') {
     const filters = get('queryBar.filters', value) as esFilters.Filter[];
     const query = get('queryBar.query', value) as Query;
     const savedId = get('queryBar.saved_id', value);
-    let items: ListItems[] = [];
-    if (!isEmpty(filters)) {
-      filterManager.setFilters(filters);
-      items = [
-        ...items,
-        {
-          title: <>{I18n.FILTERS_LABEL}</>,
-          description: (
-            <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-              {filterManager.getFilters().map((filter, index) => (
-                <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
-                  <EuiBadgeWrap color="hollow">
-                    {indexPatterns != null ? (
-                      <FilterLabel
-                        filter={filter}
-                        valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
-                      />
-                    ) : (
-                      <EuiLoadingSpinner size="m" />
-                    )}
-                  </EuiBadgeWrap>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ),
-        },
-      ];
-    }
-    if (!isEmpty(query.query)) {
-      items = [
-        ...items,
-        {
-          title: <>{I18n.QUERY_LABEL}</>,
-          description: <>{query.query}</>,
-        },
-      ];
-    }
-    if (!isEmpty(savedId)) {
-      items = [
-        ...items,
-        {
-          title: <>{I18n.SAVED_ID_LABEL}</>,
-          description: <>{savedId}</>,
-        },
-      ];
-    }
-    return items;
+    return buildQueryBarDescription({
+      field,
+      filters,
+      filterManager,
+      query,
+      savedId,
+      indexPatterns,
+    });
   } else if (field === 'threats') {
     const threats: IMitreEnterpriseAttack[] = get(field, value).filter(
       (threat: IMitreEnterpriseAttack) => threat.tactic.name !== 'none'
     );
-    if (threats.length > 0) {
-      return [
-        {
-          title: label,
-          description: (
-            <ThreatsEuiFlexGroup direction="column">
-              {threats.map((threat, index) => {
-                const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
-                return (
-                  <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
-                    <EuiText grow={false} size="s">
-                      <h5>
-                        <EuiLink href={threat.tactic.reference} target="_blank">
-                          {tactic != null ? tactic.text : ''}
-                        </EuiLink>
-                      </h5>
-                      <MyEuiListGroup
-                        flush={false}
-                        bordered={false}
-                        listItems={threat.techniques.map(technique => {
-                          const myTechnique = techniquesOptions.find(
-                            t => t.name === technique.name
-                          );
-                          return {
-                            label: myTechnique != null ? myTechnique.label : '',
-                            href: technique.reference,
-                            target: '_blank',
-                          };
-                        })}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                );
-              })}
-            </ThreatsEuiFlexGroup>
-          ),
-        },
-      ];
-    }
-    return [];
+    return buildThreatsDescription({ label, threats });
   } else if (field === 'description') {
     return [
       {
@@ -234,27 +126,23 @@ const getDescriptionItem = (
         description: <MyEuiTextArea value={get(field, value)} readOnly={true} />,
       },
     ];
+  } else if (field === 'references') {
+    const urls: string[] = get(field, value);
+    return buildUrlsDescription(label, urls);
   } else if (Array.isArray(get(field, value))) {
     const values: string[] = get(field, value);
-    if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
-      return [
-        {
-          title: label,
-          description: (
-            <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-              {values.map((val: string) =>
-                isEmpty(val) ? null : (
-                  <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                    <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
-                  </EuiFlexItem>
-                )
-              )}
-            </EuiFlexGroup>
-          ),
-        },
-      ];
-    }
-    return [];
+    return buildStringArrayDescription(label, field, values);
+  } else if (field === 'severity') {
+    const val: string = get(field, value);
+    return buildSeverityDescription(label, val);
+  } else if (field === 'timeline') {
+    const timeline = get(field, value) as FieldValueTimeline;
+    return [
+      {
+        title: label,
+        description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
+      },
+    ];
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {
