@@ -25,8 +25,10 @@ export const CategorizationField: FC = () => {
   );
 
   useEffect(() => {
-    jobCreator.categorizationFieldName = categorizationFieldName;
-    jobCreatorUpdate();
+    if (jobCreator.categorizationFieldName !== categorizationFieldName) {
+      jobCreator.categorizationFieldName = categorizationFieldName;
+      jobCreatorUpdate();
+    }
   }, [categorizationFieldName]);
 
   useEffect(() => {

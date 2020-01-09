@@ -626,6 +626,14 @@
         ],
       },
       {
+        groupSlug: 'node-forge',
+        groupName: 'node-forge related packages',
+        packageNames: [
+          'node-forge',
+          '@types/node-forge',
+        ],
+      },
+      {
         groupSlug: 'nodemailer',
         groupName: 'nodemailer related packages',
         packageNames: [
@@ -671,6 +679,14 @@
         packageNames: [
           'parse-link-header',
           '@types/parse-link-header',
+        ],
+      },
+      {
+        groupSlug: 'pegjs',
+        groupName: 'pegjs related packages',
+        packageNames: [
+          'pegjs',
+          '@types/pegjs',
         ],
       },
       {

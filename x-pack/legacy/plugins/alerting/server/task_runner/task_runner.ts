@@ -13,7 +13,7 @@ import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, State } from '../types';
+import { AlertType, RawAlert, IntervalSchedule, Services, State, AlertInfoParams } from '../types';
 import { promiseResult, map } from '../lib/result_type';
 
 type AlertInstances = Record<string, AlertInstance>;
@@ -118,13 +118,25 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    { params, throttle, muteAll, mutedInstanceIds }: SavedObject['attributes'],
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    alertInfoParams: AlertInfoParams,
+    executionHandler: ReturnType<typeof createExecutionHandler>,
+    spaceId: string
   ): Promise<State> {
+    const {
+      params,
+      throttle,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alertInfoParams;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
 
     const alertInstances = mapValues<AlertInstances>(
       alertRawInstances,
@@ -141,6 +153,12 @@ export class TaskRunner {
       state: alertTypeState,
       startedAt: this.taskInstance.startedAt!,
       previousStartedAt,
+      spaceId,
+      namespace,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
     });
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -175,7 +193,7 @@ export class TaskRunner {
   async validateAndRunAlert(
     services: Services,
     apiKey: string | null,
-    attributes: SavedObject['attributes'],
+    attributes: RawAlert,
     references: SavedObject['references']
   ) {
     const {
@@ -191,7 +209,12 @@ export class TaskRunner {
       attributes.actions,
       references
     );
-    return this.executeAlertInstances(services, { ...attributes, params }, executionHandler);
+    return this.executeAlertInstances(
+      services,
+      { ...attributes, params },
+      executionHandler,
+      spaceId
+    );
   }
 
   async run() {

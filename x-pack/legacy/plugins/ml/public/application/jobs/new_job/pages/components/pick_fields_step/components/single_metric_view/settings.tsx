@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
@@ -19,18 +19,7 @@ interface Props {
 }
 
 export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
-
-  useEffect(() => {
-    jobCreator.bucketSpan = bucketSpan;
-    jobCreatorUpdate();
-    setIsValid(bucketSpan !== '');
-  }, [bucketSpan]);
-
-  useEffect(() => {
-    setBucketSpan(jobCreator.bucketSpan);
-  }, [jobCreatorUpdated]);
+  const { jobCreator } = useContext(JobCreatorContext);
 
   const convertToMultiMetric = () => {
     convertToMultiMetricJob(jobCreator);
