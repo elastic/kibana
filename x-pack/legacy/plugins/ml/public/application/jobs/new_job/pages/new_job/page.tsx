@@ -5,13 +5,26 @@
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
-
-import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPageContentBody,
+} from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
+import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import {
+  jobCreatorFactory,
+  isAdvancedJobCreator,
+  isCategorizationJobCreator,
+} from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -25,6 +38,9 @@ import { getTimeFilterRange } from '../../../../components/full_time_range_selec
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
+import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { getNewJobDefaults } from '../../../../services/ml_server_info';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -37,7 +53,6 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
-
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
@@ -58,6 +73,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
     const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    initCategorizationSettings();
     jobCreator.cloneFromExistingJob(job, datafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
@@ -95,7 +111,11 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-    if (jobCreator.type !== JOB_TYPE.POPULATION && jobCreator.type !== JOB_TYPE.ADVANCED) {
+    if (
+      jobCreator.type !== JOB_TYPE.POPULATION &&
+      jobCreator.type !== JOB_TYPE.ADVANCED &&
+      jobCreator.type !== JOB_TYPE.CATEGORIZATION
+    ) {
       // for all other than population or advanced, use 10MB
       jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     }
@@ -112,6 +132,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     // auto set the time range if creating a new advanced job
     autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+    initCategorizationSettings();
   }
 
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
@@ -126,6 +147,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         }),
         text: error,
       });
+    }
+  }
+
+  function initCategorizationSettings() {
+    if (isCategorizationJobCreator(jobCreator)) {
+      // categorization job will always use a count agg, so give it
+      // to the job creator now
+      const count = newJobCapsService.getAggById('count');
+      const rare = newJobCapsService.getAggById('rare');
+      const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
+      jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
+
+      const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
+      jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
     }
   }
 
@@ -149,21 +184,39 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     };
   });
 
+  const jobCreatorTitle = getJobCreatorTitle(jobCreator);
+
   return (
     <Fragment>
       <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiPageBody>
-          <EuiPageContentBody>
-            <Wizard
-              jobCreator={jobCreator}
-              chartLoader={chartLoader}
-              resultsLoader={resultsLoader}
-              chartInterval={chartInterval}
-              jobValidator={jobValidator}
-              existingJobsAndGroups={existingJobsAndGroups}
-              firstWizardStep={firstWizardStep}
-            />
-          </EuiPageContentBody>
+          <EuiPageContent>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.page.createJob"
+                      defaultMessage="Create job"
+                    />
+                    : {jobCreatorTitle}
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+
+            <EuiPageContentBody>
+              <Wizard
+                jobCreator={jobCreator}
+                chartLoader={chartLoader}
+                resultsLoader={resultsLoader}
+                chartInterval={chartInterval}
+                jobValidator={jobValidator}
+                existingJobsAndGroups={existingJobsAndGroups}
+                firstWizardStep={firstWizardStep}
+              />
+            </EuiPageContentBody>
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     </Fragment>

@@ -6,8 +6,6 @@
 
 import { useEffect, useState } from 'react';
 
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-import { useUiSetting$ } from '../../../lib/kibana';
 import { getUserPrivilege } from './api';
 
 type Return = [boolean, boolean | null, boolean | null];
@@ -20,7 +18,6 @@ export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
   const [hasWrite, setHasWrite] = useState<boolean | null>(null);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -30,7 +27,6 @@ export const usePrivilegeUser = (): Return => {
     async function fetchData() {
       try {
         const privilege = await getUserPrivilege({
-          kbnVersion,
           signal: abortCtrl.signal,
         });
 

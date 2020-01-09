@@ -66,12 +66,6 @@ export type ISavedObjectsClientProvider<T = unknown> = Pick<
  * Provider for the Scoped Saved Objects Client.
  *
  * @internal
- *
- * @internalRemarks Because `getClient` is synchronous the Client Provider does
- * not support creating factories that react to new ES clients emitted from
- * elasticsearch.adminClient$. The Client Provider therefore doesn't support
- * configuration changes to the Elasticsearch client. TODO: revisit once we've
- * closed https://github.com/elastic/kibana/pull/45796
  */
 export class SavedObjectsClientProvider<Request = unknown> {
   private readonly _wrapperFactories = new PriorityCollection<{

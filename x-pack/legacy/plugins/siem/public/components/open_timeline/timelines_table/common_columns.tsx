@@ -8,7 +8,7 @@
 
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
@@ -27,11 +27,9 @@ export const getCommonColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
 }: {
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
 }) => [
   {
