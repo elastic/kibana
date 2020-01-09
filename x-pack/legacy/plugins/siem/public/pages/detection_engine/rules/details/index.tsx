@@ -152,7 +152,10 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
                     <WrapperPage>
                       <HeaderPage
-                        backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
+                        backOptions={{
+                          href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
+                          text: i18n.BACK_TO_RULES,
+                        }}
                         badgeOptions={{ text: i18n.EXPERIMENTAL }}
                         border
                         subtitle={subTitle}
@@ -181,7 +184,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                               <EuiFlexItem grow={false}>
                                 <EuiButton
-                                  href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}/edit`}
+                                  href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
                                   iconType="visControls"
                                   isDisabled={rule?.immutable ?? true}
                                 >

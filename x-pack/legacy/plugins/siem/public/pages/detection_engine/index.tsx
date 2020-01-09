@@ -56,13 +56,13 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
           <Route exact path={`${detectionEnginePath}/rules`}>
             <RulesComponent />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/create`}>
+          <Route exact path={`${detectionEnginePath}/rules/create`}>
             <CreateRuleComponent />
           </Route>
-          <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
+          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
             <RuleDetails signalsIndex={signalIndexName} />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
+          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
             <EditRuleComponent />
           </Route>
         </>
