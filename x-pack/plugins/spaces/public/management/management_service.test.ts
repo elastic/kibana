@@ -8,6 +8,12 @@ import { ManagementService } from '.';
 import { coreMock } from 'src/core/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
+const mockSections = {
+  getSection: jest.fn(),
+  getAllSections: jest.fn(),
+  navigateToApp: jest.fn(),
+};
+
 describe('ManagementService', () => {
   describe('#start', () => {
     it('registers the spaces management page under the kibana section', () => {
@@ -20,6 +26,7 @@ describe('ManagementService', () => {
         legacy: {
           getSection: jest.fn().mockReturnValue(mockKibanaSection),
         },
+        sections: mockSections,
       };
 
       const deps = {
@@ -53,6 +60,7 @@ describe('ManagementService', () => {
         legacy: {
           getSection: jest.fn().mockReturnValue(mockKibanaSection),
         },
+        sections: mockSections,
       };
 
       const deps = {
@@ -72,6 +80,7 @@ describe('ManagementService', () => {
         legacy: {
           getSection: jest.fn().mockReturnValue(undefined),
         },
+        sections: mockSections,
       };
 
       const deps = {
@@ -102,6 +111,7 @@ describe('ManagementService', () => {
         legacy: {
           getSection: jest.fn().mockReturnValue(mockKibanaSection),
         },
+        sections: mockSections,
       };
 
       const deps = {

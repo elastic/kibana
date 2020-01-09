@@ -79,6 +79,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -141,6 +142,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -205,6 +207,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -269,6 +272,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -331,6 +335,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -396,6 +401,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -461,6 +467,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -526,6 +533,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
         version: 1,
@@ -642,6 +650,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         version: 1,
       };
       expect(output).toEqual({
@@ -714,6 +723,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         version: 1,
       };
       expect(output).toEqual(expected);
@@ -875,6 +885,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        timeline_title: 'some-timeline-title',
         version: 1,
       };
       expect(output).toEqual(expected);
