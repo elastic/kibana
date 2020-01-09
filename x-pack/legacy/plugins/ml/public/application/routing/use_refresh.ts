@@ -5,7 +5,7 @@
  */
 
 import { useObservable } from 'react-use';
-import { merge } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { annotationsRefresh$ } from '../services/annotations_service';
@@ -19,7 +19,7 @@ interface Refresh {
   lastRefresh: number;
 }
 
-const refresh$ = merge(
+const refresh$: Observable<Refresh> = merge(
   mlTimefilterRefresh$,
   mlTimefilterTimeChange$,
   annotationsRefresh$.pipe(map(d => ({ lastRefresh: d })))

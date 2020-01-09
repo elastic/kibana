@@ -101,7 +101,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         max: moment(globalState.time.to),
       });
     }
-  }, [JSON.stringify(globalState?.time)]);
+  }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
     if (jobIds.length > 0) {
@@ -126,7 +126,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     ) {
       setAppState(explorerAppState);
     }
-  }, [JSON.stringify(explorerAppState)]);
+  }, [explorerAppState]);
 
   const explorerState = useObservable(explorerService.state$);
 

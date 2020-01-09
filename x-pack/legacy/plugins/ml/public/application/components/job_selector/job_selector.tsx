@@ -96,8 +96,8 @@ interface JobSelectorProps {
 export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const selectedJobIds = globalState?.ml?.jobIds || [];
-  const selectedGroups = globalState?.ml?.groups || [];
+  const selectedJobIds = globalState?.ml?.jobIds ?? [];
+  const selectedGroups = globalState?.ml?.groups ?? [];
 
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
@@ -177,7 +177,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
         setMaps({ groupsMap, jobsMap: resp.jobsMap });
       })
       .catch((err: any) => {
-        console.log('Error fetching jobs', err); // eslint-disable-line
+        console.error('Error fetching jobs with time range', err); // eslint-disable-line
         toastNotifications.addDanger({
           title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
             defaultMessage: 'An error occurred fetching jobs. Refresh and try again.',
@@ -363,7 +363,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="cross"
-                  onClick={() => closeFlyout()}
+                  onClick={closeFlyout}
                   data-test-subj="mlFlyoutJobSelectorButtonClose"
                 >
                   {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {

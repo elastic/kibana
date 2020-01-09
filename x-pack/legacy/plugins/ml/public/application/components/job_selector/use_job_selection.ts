@@ -57,11 +57,13 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
   validIds.sort();
 
   jobSelection.jobIds = validIds;
-  jobSelection.selectedGroups = globalState?.ml?.groups || [];
+  jobSelection.selectedGroups = globalState?.ml?.groups ?? [];
 
   useEffect(() => {
     warnAboutInvalidJobIds(invalidIds);
+  }, [invalidIds]);
 
+  useEffect(() => {
     // if there are no valid ids, warn and then select the first job
     if (validIds.length === 0) {
       toastNotifications.addWarning(
@@ -82,7 +84,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
         });
       }
     }
-  }, [jobs, invalidIds, validIds]);
+  }, [jobs, validIds]);
 
   return jobSelection;
 };

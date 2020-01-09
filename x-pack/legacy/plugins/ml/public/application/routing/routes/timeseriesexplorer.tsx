@@ -101,7 +101,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
         to: globalState.time.to,
       });
     }
-  }, [JSON.stringify(globalState?.time)]);
+  }, [globalState?.time?.from, globalState?.time?.to]);
 
   let bounds;
   if (globalState?.time !== undefined) {

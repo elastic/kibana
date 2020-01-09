@@ -32,6 +32,7 @@ export const useSelectedCells = (): [
   }
 
   const setSelectedCells = (swimlaneSelectedCells: AppStateSelectedCells) => {
+    const mlExplorerSwimlane = { ...appState.mlExplorerSwimlane };
     if (swimlaneSelectedCells !== undefined) {
       swimlaneSelectedCells.showTopFieldValues = false;
 
@@ -48,17 +49,17 @@ export const useSelectedCells = (): [
         swimlaneSelectedCells.showTopFieldValues = true;
       }
 
-      appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
-      appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
-      appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-      appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
-      setAppState('mlExplorerSwimlane', appState.mlExplorerSwimlane);
+      mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+      mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+      mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+      mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
     } else {
-      delete appState.mlExplorerSwimlane.selectedType;
-      delete appState.mlExplorerSwimlane.selectedLanes;
-      delete appState.mlExplorerSwimlane.selectedTimes;
-      delete appState.mlExplorerSwimlane.showTopFieldValues;
-      setAppState('mlExplorerSwimlane', appState.mlExplorerSwimlane);
+      delete mlExplorerSwimlane.selectedType;
+      delete mlExplorerSwimlane.selectedLanes;
+      delete mlExplorerSwimlane.selectedTimes;
+      delete mlExplorerSwimlane.showTopFieldValues;
+      setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
     }
   };
 

@@ -263,12 +263,12 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
   );
 }
 
-const loadExplorerData$ = new Subject();
-const loadExplorerDataWithSwitchMap$ = loadExplorerData$.pipe(
-  switchMap((s: any) => loadExplorerData(s))
+const loadExplorerData$ = new Subject<LoadExplorerDataConfig>();
+const explorerData$ = loadExplorerData$.pipe(
+  switchMap((config: LoadExplorerDataConfig) => loadExplorerData(config))
 );
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
-  const explorerData = useObservable(loadExplorerDataWithSwitchMap$);
+  const explorerData = useObservable(explorerData$);
   return [explorerData, c => loadExplorerData$.next(c)];
 };
