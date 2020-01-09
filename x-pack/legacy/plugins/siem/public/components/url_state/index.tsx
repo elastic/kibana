@@ -19,16 +19,12 @@ import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { makeMapStateToProps } from './helpers';
 
-export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
-  (props: UrlStateContainerPropTypes) => {
-    useUrlStateHooks(props);
-    return null;
-  },
-  (prevProps, nextProps) =>
-    prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
-);
-
-UrlStateContainer.displayName = 'UrlStateContainer';
+export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = (
+  props: UrlStateContainerPropTypes
+) => {
+  useUrlStateHooks(props);
+  return null;
+};
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
@@ -39,13 +35,21 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 
 export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
   connect(makeMapStateToProps, mapDispatchToProps)
-)(UrlStateContainer);
+)(
+  React.memo(
+    UrlStateContainer,
+    (prevProps, nextProps) =>
+      prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
+  )
+);
 
-export const UseUrlState = React.memo<UrlStateProps>(props => {
+const UseUrlStateComponent: React.FC<UrlStateProps> = props => {
   const [routeProps] = useRouteSpy();
   const urlStateReduxProps: RouteSpyState & UrlStateProps = {
     ...routeProps,
     ...props,
   };
   return <UrlStateRedux {...urlStateReduxProps} />;
-});
+};
+
+export const UseUrlState = React.memo(UseUrlStateComponent);

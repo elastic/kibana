@@ -11,6 +11,7 @@ import { SingleMetricView } from '../../../pick_fields_step/components/single_me
 import { MultiMetricView } from '../../../pick_fields_step/components/multi_metric_view';
 import { PopulationView } from '../../../pick_fields_step/components/population_view';
 import { AdvancedView } from '../../../pick_fields_step/components/advanced_view';
+import { CategorizationView } from '../../../pick_fields_step/components/categorization_view';
 
 export const DetectorChart: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
@@ -21,6 +22,7 @@ export const DetectorChart: FC = () => {
       {jobCreator.type === JOB_TYPE.MULTI_METRIC && <MultiMetricView isActive={false} />}
       {jobCreator.type === JOB_TYPE.POPULATION && <PopulationView isActive={false} />}
       {jobCreator.type === JOB_TYPE.ADVANCED && <AdvancedView isActive={false} />}
+      {jobCreator.type === JOB_TYPE.CATEGORIZATION && <CategorizationView isActive={false} />}
     </Fragment>
   );
 };
