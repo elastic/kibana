@@ -36,6 +36,11 @@ import {
   SectionLoading,
 } from '../../components';
 import { documentationLinks } from '../../services/documentation_links';
+import {
+  getCreateRoleMappingHref,
+  getEditRoleMappingHref,
+  getEditRoleHref,
+} from '../../../management_urls';
 
 interface Props {
   roleMappingsAPI: RoleMappingsAPI;
@@ -48,15 +53,6 @@ interface State {
   hasCompatibleRealms: boolean;
   error: any;
 }
-
-const path = '#/management/security/';
-
-const getCreateRoleMappingHref = () => `${path}role_mappings/edit`;
-
-const getEditRoleMappingHref = (roleMappingName: string) =>
-  `${path}role_mappings/edit/${encodeURIComponent(roleMappingName)}`;
-
-const getEditRoleHref = (roleName: string) => `${path}roles/edit/${encodeURIComponent(roleName)}`;
 
 export class RoleMappingsGridPage extends Component<Props, State> {
   constructor(props: any) {

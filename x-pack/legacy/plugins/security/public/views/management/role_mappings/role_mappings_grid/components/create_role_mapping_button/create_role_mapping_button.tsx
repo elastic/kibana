@@ -7,11 +7,11 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EDIT_ROLE_MAPPING_PATH } from '../../../../management_urls';
+import { getCreateRoleMappingHref } from '../../../../management_urls';
 
 export const CreateRoleMappingButton = () => {
   return (
-    <EuiButton data-test-subj="createRoleMappingButton" href={`#${EDIT_ROLE_MAPPING_PATH}`} fill>
+    <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()} fill>
       <FormattedMessage
         id="xpack.security.management.roleMappings.createRoleMappingButton"
         defaultMessage="Create role mapping"

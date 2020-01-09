@@ -11,11 +11,11 @@ import { npSetup } from 'ui/new_platform';
 import { RoleMappingsAPI } from '../../../../lib/role_mappings_api';
 // @ts-ignore
 import template from './edit_role_mapping.html';
-import { EDIT_ROLE_MAPPING_PATH } from '../../management_urls';
+import { CREATE_ROLE_MAPPING_PATH } from '../../management_urls';
 import { getEditRoleMappingBreadcrumbs } from '../../breadcrumbs';
 import { EditRoleMappingPage } from './components';
 
-routes.when(`${EDIT_ROLE_MAPPING_PATH}/:name?`, {
+routes.when(`${CREATE_ROLE_MAPPING_PATH}/:name?`, {
   template,
   k7Breadcrumbs: getEditRoleMappingBreadcrumbs,
   controller($scope, $route) {
