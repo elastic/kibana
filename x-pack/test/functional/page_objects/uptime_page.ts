@@ -70,5 +70,9 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         await uptimeService.setStatusFilterDown();
       }
     }
+
+    public async getSnapshotCount() {
+      return await uptimeService.getSnapshotCount();
+    }
   })();
 }

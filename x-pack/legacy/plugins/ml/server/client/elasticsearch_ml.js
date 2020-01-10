@@ -169,7 +169,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST',
   });
 
-  ml.estimateDataFrameAnalyticsMemoryUsage = ca({
+  ml.explainDataFrameAnalytics = ca({
     urls: [
       {
         fmt: '/_ml/data_frame/analytics/_explain',
@@ -747,6 +747,31 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=indexPattern%>/_rollup/data',
         req: {
           indexPattern: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
+
+  ml.categories = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories/<%=categoryId%>',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          categoryId: {
+            type: 'string',
+          },
+        },
+      },
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories',
+        req: {
+          jobId: {
             type: 'string',
           },
         },

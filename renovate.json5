@@ -501,6 +501,14 @@
         ],
       },
       {
+        groupSlug: 'pegjs',
+        groupName: 'pegjs related packages',
+        packageNames: [
+          'pegjs',
+          '@types/pegjs',
+        ],
+      },
+      {
         groupSlug: 'pngjs',
         groupName: 'pngjs related packages',
         packageNames: [
@@ -738,6 +746,14 @@
         packageNames: [
           'node-fetch',
           '@types/node-fetch',
+        ],
+      },
+      {
+        groupSlug: 'node-forge',
+        groupName: 'node-forge related packages',
+        packageNames: [
+          'node-forge',
+          '@types/node-forge',
         ],
       },
       {
