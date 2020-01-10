@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCallOut,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';

@@ -15,11 +15,13 @@ interface FieldWithMeta {
 
 interface SearchData {
   term: string;
+  terms: string[];
   searchRegexArray: RegExp[];
   type?: string;
 }
 
 interface FieldData {
+  name: string;
   path: string;
   type: string;
 }
@@ -35,12 +37,22 @@ const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
   } else if (b.metadata.stringMatch === null) {
     return -1;
   }
+
+  if (a.metadata.stringMatch.length === b.metadata.stringMatch.length) {
+    // The field with the shortest path (less tree "depth") comes first
+    return a.field.path.length - b.field.path.length;
+  }
+
   // With the same score, the longest match string wins.
   return b.metadata.stringMatch.length - a.metadata.stringMatch.length;
 };
 
 const calculateScore = (metadata: Omit<SearchMetadata, 'score' | 'display'>): number => {
   let score = 0;
+
+  if (metadata.matchFieldName) {
+    score += 15;
+  }
 
   if (metadata.matchPath) {
     score += 15;
@@ -107,9 +119,10 @@ const getJSXdisplayFromMeta = (
 };
 
 const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): SearchMetadata => {
-  const { term, type, searchRegexArray } = searchData;
+  const { term, terms, type, searchRegexArray } = searchData;
   const typeToCompare = type ?? term;
 
+  const matchFieldName = new RegExp(terms[terms.length - 1], 'i').test(fieldData.name);
   const matchStartOfPath = fieldData.path.startsWith(term);
   const fullyMatchPath = term === fieldData.path;
   const matchType = fieldData.type.includes(typeToCompare);
@@ -135,6 +148,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
   const matchPath = stringMatch !== null;
 
   const metadata = {
+    matchFieldName,
     matchPath,
     matchStartOfPath,
     fullyMatchPath,
@@ -145,6 +159,8 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
 
   const score = calculateScore(metadata);
   const display = getJSXdisplayFromMeta(searchData, fieldData, metadata);
+
+  // console.log(fieldData.path, score, metadata);
 
   return {
     ...metadata,
@@ -202,22 +218,23 @@ const parseSearchTerm = (term: string): SearchData => {
     type = words[words.length - 1];
   }
 
-  return { term: parsedTerm, type, searchRegexArray };
+  return { term: parsedTerm, terms: words, type, searchRegexArray };
 };
 
 export const searchFields = (term: string, fields: NormalizedFields['byId']): SearchResult[] => {
   const searchData = parseSearchTerm(term);
   return (
     Object.values(fields)
-      // .filter((_, index) => index < 500)
       .map(field => ({
         field,
         metadata: getSearchMetadata(searchData, {
+          name: field.source.name,
           path: field.path.join(' > '),
           type: field.source.type,
         }),
       }))
-      .filter(({ metadata }) => metadata.score > 0)
+      // only show the first 100 results
+      .filter(({ metadata }, index) => metadata.score > 0 && index < 100)
       .sort(sortResult)
       .map(({ field, metadata: { display } }) => ({
         display,

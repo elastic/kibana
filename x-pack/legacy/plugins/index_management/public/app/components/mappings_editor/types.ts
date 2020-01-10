@@ -243,6 +243,10 @@ export interface SearchMetadata {
    */
   matchType: boolean;
   /**
+   * If the last word of the search terms matches the field name
+   */
+  matchFieldName: boolean;
+  /**
    * If the search term matches the beginning of the path we will give it a higher score
    */
   matchStartOfPath: boolean;

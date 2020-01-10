@@ -25,7 +25,10 @@ const getField = (
   id = getUniqueId()
 ): NormalizedField => ({
   id,
-  source,
+  source: {
+    ...source,
+    name: path[path.length - 1],
+  },
   path,
   ...irrelevantProps,
 });
@@ -148,5 +151,25 @@ describe('Search fields', () => {
     expect(result.length).toBe(2);
     expect(result[0].field.path).toEqual(field2.path); // Field 2 first as it matches the type
     expect(result[1].field.path).toEqual(field1.path); // Matches the string "this"
+  });
+
+  test('should sort first match on field name before descendants', () => {
+    const field1 = getField({ type: 'text' }, ['server', 'space', 'myField']);
+    const field2 = getField({ type: 'text' }, ['myObject', 'server']);
+    const field3 = getField({ type: 'text' }, ['server']);
+
+    const allFields = {
+      [field1.id]: field1,
+      [field2.id]: field2,
+      [field3.id]: field3,
+    };
+
+    const searchTerm = 'serve';
+
+    const result = searchFields(searchTerm, allFields);
+    expect(result.length).toBe(3);
+    expect(result[0].field.path).toEqual(field3.path); // Should come first as it has the shortest path
+    expect(result[1].field.path).toEqual(field2.path); // Field 2 name _is_ the search term, comes first
+    expect(result[2].field.path).toEqual(field1.path);
   });
 });
