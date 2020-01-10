@@ -10,18 +10,18 @@ export const getIndexExists = async (
   callWithRequest: CallWithRequest<
     { index: string; size: number; terminate_after: number; allow_no_indices: boolean },
     {},
-    unknown
+    { _shards: { total: number } }
   >,
   index: string
 ): Promise<boolean> => {
   try {
-    callWithRequest('search', {
+    const response = await callWithRequest('search', {
       index,
       size: 0,
       terminate_after: 1,
       allow_no_indices: true,
     });
-    return true;
+    return response._shards.total > 0;
   } catch (err) {
     if (err.statusCode === 404) {
       return false;

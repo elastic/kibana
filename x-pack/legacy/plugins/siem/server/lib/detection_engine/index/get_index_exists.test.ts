@@ -15,10 +15,16 @@ class StatusCode extends Error {
 }
 
 describe('get_index_exists', () => {
-  test('it should return a true if no errors', async () => {
-    const callWithRequest = jest.fn().mockResolvedValue('');
+  test('it should return a true if you have _shards', async () => {
+    const callWithRequest = jest.fn().mockResolvedValue({ _shards: { total: 1 } });
     const indexExists = await getIndexExists(callWithRequest, 'some-index');
     expect(indexExists).toEqual(true);
+  });
+
+  test('it should return a false if you do NOT have _shards', async () => {
+    const callWithRequest = jest.fn().mockResolvedValue({ _shards: { total: 0 } });
+    const indexExists = await getIndexExists(callWithRequest, 'some-index');
+    expect(indexExists).toEqual(false);
   });
 
   test('it should return a false if it encounters a 404', async () => {

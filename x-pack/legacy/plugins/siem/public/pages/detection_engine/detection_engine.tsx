@@ -33,14 +33,7 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-
-interface OwnProps {
-  canUserCRUD: boolean;
-  loading: boolean;
-  isSignalIndexExists: boolean | null;
-  isUserAuthenticated: boolean | null;
-  signalsIndex: string | null;
-}
+import { useUserInfo } from './components/user_info';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -55,19 +48,18 @@ export interface DispatchProps {
   }>;
 }
 
-type DetectionEngineComponentProps = OwnProps & ReduxProps & DispatchProps;
+type DetectionEngineComponentProps = ReduxProps & DispatchProps;
 
 const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({
-    canUserCRUD,
-    filters,
-    loading,
-    isSignalIndexExists,
-    isUserAuthenticated,
-    query,
-    setAbsoluteRangeDatePicker,
-    signalsIndex,
-  }) => {
+  ({ filters, query, setAbsoluteRangeDatePicker }) => {
+    const [
+      loading,
+      isSignalIndexExists,
+      isUserAuthenticated,
+      canUserCRUD,
+      signalIndexName,
+    ] = useUserInfo();
+
     const [lastSignals] = useSignalInfo({});
 
     const updateDateRangeCallback = useCallback(
@@ -138,9 +130,9 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
 
                         <SignalsTable
                           loading={loading}
-                          canUserCRUD={canUserCRUD}
+                          canUserCRUD={canUserCRUD ?? false}
                           from={from}
-                          signalsIndex={signalsIndex ?? ''}
+                          signalsIndex={signalIndexName ?? ''}
                           to={to}
                         />
                       </>
