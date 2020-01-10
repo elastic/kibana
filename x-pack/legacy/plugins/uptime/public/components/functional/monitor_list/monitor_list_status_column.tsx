@@ -20,8 +20,6 @@ const getHealthColor = (status: string): string => {
       return 'success';
     case 'down':
       return 'danger';
-    case 'mixed':
-      return 'warning';
     default:
       return '';
   }
@@ -36,10 +34,6 @@ const getHealthMessage = (status: string): string | null => {
     case 'down':
       return i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
         defaultMessage: 'Down',
-      });
-    case 'mixed':
-      return i18n.translate('xpack.uptime.monitorList.statusColumn.mixedLabel', {
-        defaultMessage: 'Mixed',
       });
     default:
       return null;

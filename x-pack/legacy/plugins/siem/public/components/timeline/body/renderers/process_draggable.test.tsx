@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
@@ -28,7 +27,7 @@ describe('ProcessDraggable', () => {
           processPid={123}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns null if everything is null', () => {
