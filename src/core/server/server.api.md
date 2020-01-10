@@ -1796,7 +1796,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
+    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
