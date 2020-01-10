@@ -20,6 +20,17 @@ const fn = bfetch.batchedFunction({ url: '/my-plugin/something' });
 const result = await fn({ foo: 'bar' });
 ```
 
+Options:
+
+- `url` &mdash; URL endpoint that will receive a batch of requests. This endpoint is expected
+  to receive batch as a serialized JSON array. It should stream responses back
+  in ND-JSON format using `Transfer-Encoding: chunked` HTTP/1 streaming.
+- `fetchStreaming` &mdash; The instance of `fetchStreaming` function that will perform ND-JSON handling.
+  There should be a version of this function available in setup contract of `bfetch` plugin.
+- `flushOnMaxItems` &mdash; The maximum size of function call buffer before sending the batch request.
+- `maxItemAge` &mdash; The maximum timeout in milliseconds of the oldest item in the batch
+  before sending the batch request.
+
 
 ## `fetchStreaming`
 

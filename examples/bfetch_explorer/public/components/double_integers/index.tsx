@@ -33,10 +33,6 @@ interface ResultItem {
 }
 
 const defaultNumbers = [2000, 300, -1, 1000].join('\n');
-300
--1
-1000
-`;
 
 export interface Props {
   double: ExplorerService['double'];
