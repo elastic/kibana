@@ -166,7 +166,11 @@ export class ChromeService {
     const settings = injectedMetadata.getLegacyMetadata().uiSettings;
 
     const navSetting =
-      settings?.user?.pageNavigation.userValue || settings.defaults.pageNavigation.value;
+      settings?.user?.pageNavigation?.userValue || settings.defaults.pageNavigation.value;
+
+    const license = (injectedMetadata.getInjectedVars().xpackInitialInfo as {
+      license: { type: string };
+    }).license.type;
 
     return {
       navControls,
@@ -196,6 +200,7 @@ export class ChromeService {
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
             navSetting={navSetting}
+            license={license}
           />
         </React.Fragment>
       ),

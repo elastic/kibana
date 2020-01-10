@@ -246,6 +246,7 @@ interface Props {
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   navSetting: 'individual' | 'grouped';
+  license: string;
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
@@ -447,7 +448,7 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public renderNavLinks() {
-    const isOSS = false; // TODO@myasonik
+    const isOSS = this.props.license === 'oss';
     const disableGroupedNavSetting = this.props.navSetting === 'individual';
     const showUngroupedNav = isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7;
 
