@@ -33,7 +33,12 @@ def doIt() {
       sleep 30
     } catch(ex) {
       hadError = true
-      sh 'curl --connect-timeout 5 https://github.com/elastic/kibana || true'
+      catchError {
+        sh 'dig github.com'
+      }
+      catchError {
+        sh 'curl --connect-timeout 5 https://github.com/elastic/kibana'
+      }
       catchError {
         throw ex
       }
