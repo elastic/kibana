@@ -167,12 +167,6 @@ export const useExploreData = (
   useEffect(() => {
     if (jobConfig !== undefined) {
       getDefaultSelectedFields();
-      // load table data
-      // loadExploreData({
-      //   field: getPredictedFieldName(jobConfig.dest.results_field, jobConfig.analysis),
-      //   direction: SORT_DIRECTION.DESC,
-      //   searchQuery: defaultSearchQuery,
-      // });
     }
   }, [jobConfig && jobConfig.id]);
 

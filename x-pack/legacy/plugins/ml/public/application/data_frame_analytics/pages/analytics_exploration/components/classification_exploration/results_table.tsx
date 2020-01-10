@@ -87,6 +87,25 @@ export const toggleSelectedFieldClassification = (
   return selectedFields;
 };
 
+export const isKeywordAndTextType = (fieldName: string): boolean => {
+  const { fields } = newJobCapsService;
+
+  const fieldType = fields.find(field => field.name === fieldName)?.type;
+  let isBothTypes = false;
+
+  // If it's a keyword type - check if it has a corresponding text type
+  if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
+    const field = newJobCapsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+  } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
+    //   If text, check if has corresponding keyword type
+    const field = newJobCapsService.getFieldById(`${fieldName}.keyword`);
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
+  }
+
+  return isBothTypes;
+};
+
 export const ResultsTable: FC<Props> = React.memo(
   ({ jobConfig, jobStatus, setEvaluateSearchQuery }) => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -97,6 +116,13 @@ export const ResultsTable: FC<Props> = React.memo(
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
     const [searchError, setSearchError] = useState<any>(undefined);
     const [searchString, setSearchString] = useState<string | undefined>(undefined);
+
+    const predictedFieldName = getPredictedFieldName(
+      jobConfig.dest.results_field,
+      jobConfig.analysis
+    );
+
+    const dependentVariable = getDependentVar(jobConfig.analysis);
 
     function toggleColumnsPopover() {
       setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -192,37 +218,47 @@ export const ResultsTable: FC<Props> = React.memo(
     const docFieldsCount = docFields.length;
 
     useEffect(() => {
+      if (
+        jobConfig !== undefined &&
+        columns.length > 0 &&
+        selectedFields.length > 0 &&
+        sortField !== undefined &&
+        sortDirection !== undefined &&
+        selectedFields.some(field => field.name === sortField)
+      ) {
+        let field = sortField;
+        // If sorting by predictedField use dependentVar type
+        if (predictedFieldName === sortField) {
+          field = dependentVariable;
+        }
+        const requiresKeyword = isKeywordAndTextType(field);
+
+        loadExploreData({
+          field: sortField,
+          direction: sortDirection,
+          searchQuery,
+          requiresKeyword,
+        });
+      }
+    }, [JSON.stringify(searchQuery)]);
+
+    useEffect(() => {
       // By default set sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
       // if that's not available sort ascending on the first column. Check if the current sorting field is still available.
-      if (jobConfig !== undefined && columns.length > 0 && selectedFields.length > 0) {
-        const { fields } = newJobCapsService;
-
-        const predictedFieldName = getPredictedFieldName(
-          jobConfig.dest.results_field,
-          jobConfig.analysis
-        );
-
+      if (
+        jobConfig !== undefined &&
+        columns.length > 0 &&
+        selectedFields.length > 0 &&
+        !selectedFields.some(field => field.name === sortField)
+      ) {
         const predictedFieldSelected = selectedFields.some(
           field => field.name === predictedFieldName
         );
 
         // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
-        let sortByField = predictedFieldSelected
-          ? getDependentVar(jobConfig.analysis)
-          : selectedFields[0].name;
+        let sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0].name;
 
-        const sortByFieldType = fields.find(field => field.name === sortByField)?.type;
-        let requiresKeyword = false;
-
-        // If it's a keyword type - check if it has a corresponding text type
-        if (sortByFieldType !== undefined && sortByFieldType === ES_FIELD_TYPES.KEYWORD) {
-          const field = newJobCapsService.getFieldById(sortByField.replace(/\.keyword$/, ''));
-          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.TEXT;
-        } else if (sortByFieldType !== undefined && sortByFieldType === ES_FIELD_TYPES.TEXT) {
-          //   If text, check if has corresponding keyword type
-          const field = newJobCapsService.getFieldById(`${sortByField}.keyword`);
-          requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
-        }
+        const requiresKeyword = isKeywordAndTextType(sortByField);
 
         sortByField = predictedFieldSelected ? predictedFieldName : sortByField;
 
@@ -236,7 +272,6 @@ export const ResultsTable: FC<Props> = React.memo(
       sortField,
       sortDirection,
       tableItems.length,
-      JSON.stringify(searchQuery),
     ]);
 
     let sorting: SortingPropType = false;
@@ -259,7 +294,17 @@ export const ResultsTable: FC<Props> = React.memo(
         setPageSize(size);
 
         if (sort.field !== sortField || sort.direction !== sortDirection) {
-          loadExploreData({ ...sort, searchQuery });
+          let field = sort.field;
+          // If sorting by predictedField use depVar for type check
+          if (predictedFieldName === sort.field) {
+            field = dependentVariable;
+          }
+
+          loadExploreData({
+            ...sort,
+            searchQuery,
+            requiresKeyword: isKeywordAndTextType(field),
+          });
         }
       };
     }
