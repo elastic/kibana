@@ -33,6 +33,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
 import { getBreadcrumbs } from './breadcrumbs';
+import { npStart } from 'ui/new_platform';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
@@ -82,14 +83,18 @@ uiRoutes.when('/management/kibana/settings/:setting?', {
   },
 });
 
-uiModules.get('apps/management').directive('kbnManagementAdvanced', function(config, $route) {
+uiModules.get('apps/management').directive('kbnManagementAdvanced', function($route) {
   return {
     restrict: 'E',
     link: function($scope) {
-      config.watchAll(() => {
-        updateAdvancedSettings($scope, config, $route.current.params.setting || '');
-      }, $scope);
-
+      updateAdvancedSettings($scope, npStart.core.uiSettings, $route.current.params.setting || '');
+      npStart.core.uiSettings.getUpdate$().subscribe(() => {
+        updateAdvancedSettings(
+          $scope,
+          npStart.core.uiSettings,
+          $route.current.params.setting || ''
+        );
+      });
       $scope.$on('$destroy', () => {
         destroyAdvancedSettings();
       });
