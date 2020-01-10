@@ -123,8 +123,10 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
   const selectedForecastId = appState?.mlTimeSeriesExplorer?.forecastId;
   const zoom = appState?.mlTimeSeriesExplorer?.zoom;
 
+  const selectedJob = mlJobService.getJob(selectedJobIds[0]);
+
   let autoZoomDuration: number | undefined;
-  if (selectedJobIds !== undefined && selectedJobIds.length === 1) {
+  if (selectedJobIds !== undefined && selectedJobIds.length === 1 && selectedJob !== undefined) {
     autoZoomDuration = getAutoZoomDuration(
       createTimeSeriesJobData(mlJobService.jobs),
       mlJobService.getJob(selectedJobIds[0])
@@ -191,10 +193,9 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
       autoZoomDuration !== undefined &&
       boundsMinMs !== undefined &&
       boundsMaxMs !== undefined &&
+      selectedJob !== undefined &&
       selectedForecastId !== undefined
     ) {
-      const selectedJob = mlJobService.getJob(selectedJobIds[0]);
-
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
         .then(resp => {

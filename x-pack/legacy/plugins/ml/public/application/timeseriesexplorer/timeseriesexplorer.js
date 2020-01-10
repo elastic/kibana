@@ -489,6 +489,10 @@ export class TimeSeriesExplorer extends React.Component {
 
     const currentSelectedJob = mlJobService.getJob(selectedJobIds[0]);
 
+    if (currentSelectedJob === undefined) {
+      return;
+    }
+
     this.contextChartSelectedInitCallDone = false;
 
     // Only when `fullRefresh` is true we'll reset all data
@@ -713,11 +717,17 @@ export class TimeSeriesExplorer extends React.Component {
   getControlsForDetector = () => {
     const { selectedDetectorIndex, selectedEntities, selectedJobIds } = this.props;
     const selectedJob = mlJobService.getJob(selectedJobIds[0]);
+
+    const entities = [];
+
+    if (selectedJob === undefined) {
+      return entities;
+    }
+
     // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
     const detectorIndex = selectedDetectorIndex;
     const detector = selectedJob.analysis_config.detectors[detectorIndex];
 
-    const entities = [];
     const entitiesState = selectedEntities;
     const partitionFieldName = get(detector, 'partition_field_name');
     const overFieldName = get(detector, 'over_field_name');
@@ -773,6 +783,11 @@ export class TimeSeriesExplorer extends React.Component {
     const { appStateHandler, selectedDetectorIndex } = this.props;
 
     const selectedJob = mlJobService.getJob(jobId);
+
+    if (selectedJob === undefined) {
+      return;
+    }
+
     const detectors = getViewableDetectors(selectedJob);
 
     // Check the supplied index is valid.
@@ -1203,13 +1218,15 @@ export class TimeSeriesExplorer extends React.Component {
     if (
       selectedJobIds === undefined ||
       selectedJobIds.length > 1 ||
-      selectedDetectorIndex === undefined
+      selectedDetectorIndex === undefined ||
+      mlJobService.getJob(selectedJobIds[0]) === undefined
     ) {
       return (
         <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef} />
       );
     }
 
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
     const entityControls = this.getControlsForDetector();
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
@@ -1221,7 +1238,6 @@ export class TimeSeriesExplorer extends React.Component {
       );
     }
 
-    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
     const fieldNamesWithEmptyValues = entityControls
       .filter(({ fieldValue }) => !fieldValue)
       .map(({ fieldName }) => fieldName);
