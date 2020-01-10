@@ -12,6 +12,8 @@ import {
 } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { ServerFacade } from '../../../../types';
+
 import {
   getFindResult,
   getResult,
@@ -33,7 +35,7 @@ describe('create_rules', () => {
         .mockImplementation((endpoint, params) => ({ _shards: { total: 1 } })),
     }));
 
-    createRulesRoute(server);
+    createRulesRoute((server as unknown) as ServerFacade);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -48,14 +50,14 @@ describe('create_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createRulesRoute(serverWithoutActionClient);
+      createRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(serverWithoutAlertClient);
+      createRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
@@ -64,7 +66,7 @@ describe('create_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      createRulesRoute(serverWithoutActionOrAlertClient);
+      createRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });

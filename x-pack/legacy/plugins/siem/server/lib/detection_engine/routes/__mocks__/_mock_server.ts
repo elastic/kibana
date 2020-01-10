@@ -8,7 +8,6 @@ import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
-
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 
@@ -61,7 +60,13 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
   server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
 
-  return { server, alertsClient, actionsClient, elasticsearch, savedObjectsClient };
+  return {
+    server,
+    alertsClient,
+    actionsClient,
+    elasticsearch,
+    savedObjectsClient,
+  };
 };
 
 export const createMockServerWithoutAlertClientDecoration = (
