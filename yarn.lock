@@ -1361,10 +1361,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^4.7.0"
 
-"@elastic/charts@^16.0.2":
-  version "16.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.0.2.tgz#35068a08a19534da62e9bcad700cc7b2a15bc55a"
-  integrity sha512-0tVyltAmAPOAfiRU1iKYk3b9++4oTn6IXvyM4SSj7Ukh5Y90XXmOtGEUPnZTiRPmup9MJi4srrm9ra9k/Kq4UQ==
+"@elastic/charts@^16.1.0":
+  version "16.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.1.0.tgz#67cf11625dcd7e1c2cf16ef53349e6a68a73f5b1"
+  integrity sha512-0jZ7thhGmYC0ZdEVkxfg6M66epCD7k7BfYIi12FnrmIK+mUD2IPhR8b2TJXvaojPryN4YTNreGRncQ9R58fOoQ==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     classnames "^2.2.6"
@@ -10962,11 +10962,6 @@ enabled@1.0.x:
   integrity sha1-ll9lE9LC0cX0ZStkouM5ZGf8L5M=
   dependencies:
     env-variable "0.0.x"
-
-encode-uri-query@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/encode-uri-query/-/encode-uri-query-1.0.1.tgz#e9c70d3e1aab71b039e55b38a166013508803ba8"
-  integrity sha1-6ccNPhqrcbA55Vs4oWYBNQiAO6g=
 
 encodeurl@^1.0.2, encodeurl@~1.0.1, encodeurl@~1.0.2:
   version "1.0.2"
