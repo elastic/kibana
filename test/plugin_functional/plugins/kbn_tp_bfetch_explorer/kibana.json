@@ -1,8 +1,8 @@
 {
-  "id": "bfetchExplorer",
+  "id": "kbn_tp_bfetch_explorer",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["bfetch_explorer"],
+  "configPath": ["kbn_tp_bfetch_explorer"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["bfetch"],

@@ -1,7 +1,7 @@
 {
-  "name": "bfetch_explorer",
+  "name": "kbn_tp_bfetch_explorer",
   "version": "1.0.0",
-  "main": "target/examples/bfetch_explorer",
+  "main": "target/examples/kbn_tp_bfetch_explorer",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
