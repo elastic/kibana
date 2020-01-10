@@ -47,7 +47,6 @@ uiRoutes.when('/elasticsearch/indices', {
         $scope,
         $injector,
         $scope,
-        $injector,
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
