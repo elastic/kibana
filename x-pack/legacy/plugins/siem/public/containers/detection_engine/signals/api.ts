@@ -42,7 +42,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
       'content-type': 'application/json',
       'kbn-xsrf': 'true',
     },
-    body: query,
+    body: JSON.stringify(query),
     signal,
   });
   await throwIfNotOk(response);

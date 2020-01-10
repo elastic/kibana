@@ -208,4 +208,35 @@ describe('core deprecations', () => {
       ).toEqual([`worker-src blob:`]);
     });
   });
+
+  describe('elasticsearchUsernameDeprecation', () => {
+    it('logs a warning if elasticsearch.username is set to "elastic"', () => {
+      const { messages } = applyCoreDeprecations({
+        elasticsearch: {
+          username: 'elastic',
+        },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "Setting elasticsearch.username to \\"elastic\\" is deprecated. You should use the \\"kibana\\" user instead.",
+        ]
+      `);
+    });
+
+    it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+      const { messages } = applyCoreDeprecations({
+        elasticsearch: {
+          username: 'otheruser',
+        },
+      });
+      expect(messages).toHaveLength(0);
+    });
+
+    it('does not log a warning if elasticsearch.username is unset', () => {
+      const { messages } = applyCoreDeprecations({
+        elasticsearch: {},
+      });
+      expect(messages).toHaveLength(0);
+    });
+  });
 });

@@ -34,6 +34,7 @@ export const buildRule = ({
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,
+    timeline_title: ruleParams.timelineTitle,
     meta: ruleParams.meta,
     max_signals: ruleParams.maxSignals,
     risk_score: ruleParams.riskScore,
