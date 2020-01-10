@@ -11,3 +11,34 @@ An [AppUpdater](./kibana-plugin-public.appupdater.md) observable that can be use
 ```typescript
 updater$?: Observable<AppUpdater>;
 ```
+
+## Example
+
+How to update an application navLink at runtime
+
+```ts
+// inside your plugin's setup function
+export class MyPlugin implements Plugin {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$: this.appUpdater,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+
+  start() {
+     // later, when the navlink needs to be updated
+     appUpdater.next(() => {
+       navLinkStatus: AppNavLinkStatus.disabled,
+     })
+  }
+
+```
+

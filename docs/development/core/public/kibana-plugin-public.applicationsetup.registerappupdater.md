@@ -6,6 +6,8 @@
 
 Register an application updater that can be used to change the [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) fields of all applications at runtime.
 
+This is meant to be used by plugins that needs to updates the whole list of applications. To only updates a specific application, use the `updater$` property of the registered application instead.
+
 <b>Signature:</b>
 
 ```typescript
@@ -21,4 +23,25 @@ registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 <b>Returns:</b>
 
 `void`
+
+## Example
+
+How to register an application updater that disables some applications:
+
+```ts
+// inside your plugin's setup function
+export class MyPlugin implements Plugin {
+  setup({ application }) {
+    application.registerAppUpdater(
+      new BehaviorSubject<AppUpdater>(app => {
+         if (myPluginApi.shouldDisable(app))
+           return {
+             status: AppStatus.inaccessible,
+           };
+       })
+     );
+    }
+}
+
+```
 

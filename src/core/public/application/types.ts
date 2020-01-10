@@ -58,8 +58,36 @@ export interface AppBase {
   navLinkStatus?: AppNavLinkStatus;
 
   /**
-   * An {@link AppUpdater} observable that can be used to update
-   * the application {@link AppUpdatableFields} at runtime.
+   * An {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.
+   *
+   * @example
+   *
+   * How to update an application navLink at runtime
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+   *
+   *   setup({ application }) {
+   *     application.register({
+   *       id: 'my-app',
+   *       title: 'My App',
+   *       updater$: this.appUpdater,
+   *       async mount(params) {
+   *         const { renderApp } = await import('./application');
+   *         return renderApp(params);
+   *       },
+   *     });
+   *   }
+   *
+   *   start() {
+   *      // later, when the navlink needs to be updated
+   *      appUpdater.next(() => {
+   *        navLinkStatus: AppNavLinkStatus.disabled,
+   *      })
+   *   }
+   * ```
    */
   updater$?: Observable<AppUpdater>;
 
@@ -357,7 +385,28 @@ export interface ApplicationSetup {
    * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
    * of all applications at runtime.
    *
-   * @param appUpdater$
+   * This is meant to be used by plugins that needs to updates the whole list of applications.
+   * To only updates a specific application, use the `updater$` property of the registered application instead.
+   *
+   * @example
+   *
+   * How to register an application updater that disables some applications:
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   setup({ application }) {
+   *     application.registerAppUpdater(
+   *       new BehaviorSubject<AppUpdater>(app => {
+   *          if (myPluginApi.shouldDisable(app))
+   *            return {
+   *              status: AppStatus.inaccessible,
+   *            };
+   *        })
+   *      );
+   *     }
+   * }
+   * ```
    */
   registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 
