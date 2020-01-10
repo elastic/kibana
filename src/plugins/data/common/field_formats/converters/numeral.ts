@@ -31,12 +31,6 @@ numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
-const supportedNumeralLanguages = Object.fromEntries(
-  numeralLanguages.map((numeralLanguage: Record<string, any>) => {
-    return [numeralLanguage.id, true];
-  })
-);
-
 export abstract class NumeralFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
 
