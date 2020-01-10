@@ -12,6 +12,7 @@ import {
   getPredictionFieldName,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -24,6 +25,20 @@ export interface EsDoc extends Record<string, any> {
 
 export const MAX_COLUMNS = 20;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
+
+export const BASIC_NUMERICAL_TYPES = new Set([
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.INTEGER,
+  ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.BYTE,
+]);
+
+export const EXTENDED_NUMERICAL_TYPES = new Set([
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.FLOAT,
+  ES_FIELD_TYPES.HALF_FLOAT,
+  ES_FIELD_TYPES.SCALED_FLOAT,
+]);
 
 const ML__ID_COPY = 'ml__id_copy';
 

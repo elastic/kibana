@@ -5,11 +5,11 @@
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
-// import moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
 import {
-  // EuiBadge,
+  EuiBadge,
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
@@ -22,7 +22,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
-  // EuiToolTip,
+  EuiToolTip,
   Query,
 } from '@elastic/eui';
 
@@ -37,13 +37,14 @@ import {
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
 
-// import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { Field } from '../../../../../../../common/types/fields';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
 
 import {
   // toggleSelectedField,
-  // EsDoc,
+  EsDoc,
   DataFrameAnalyticsConfig,
   EsFieldName,
   MAX_COLUMNS,
@@ -122,6 +123,9 @@ export const ResultsTable: FC<Props> = React.memo(
     } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields);
 
     const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
+      const { type } = field;
+      const isNumber = BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type);
+
       const column: ColumnType<TableItem> = {
         field: field.name,
         name: field.name,
@@ -129,106 +133,59 @@ export const ResultsTable: FC<Props> = React.memo(
         truncateText: true,
       };
 
-      // const render = (d: any, fullItem: EsDoc) => {};
-      // const columns: Array<ColumnType<TableItem>> = [];
-      // if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-      //   columns.push(
-      //     ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
-      //       const column: ColumnType<TableItem> = {
-      //         field: k,
-      //         name: k,
-      //         sortable: true,
-      //         truncateText: true,
-      //       };
+      const render = (d: any, fullItem: EsDoc) => {
+        if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+          // If the cells data is an array of strings, return as a comma separated list.
+          // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+          return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
+        } else if (Array.isArray(d)) {
+          // If the cells data is an array of e.g. objects, display a 'array' badge with a
+          // tooltip that explains that this type of field is not supported in this table.
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
+                {
+                  defaultMessage:
+                    'The full content of this array based column cannot be displayed.',
+                }
+              )}
+            >
+              <EuiBadge>
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
+                  {
+                    defaultMessage: 'array',
+                  }
+                )}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        }
 
-      //       const render = (d: any, fullItem: EsDoc) => {
-      //         if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-      //           // If the cells data is an array of strings, return as a comma separated list.
-      //           // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-      //           return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
-      //         } else if (Array.isArray(d)) {
-      //           // If the cells data is an array of e.g. objects, display a 'array' badge with a
-      //           // tooltip that explains that this type of field is not supported in this table.
-      //           return (
-      //             <EuiToolTip
-      //               content={i18n.translate(
-      //                 'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
-      //                 {
-      //                   defaultMessage:
-      //                     'The full content of this array based column cannot be displayed.',
-      //                 }
-      //               )}
-      //             >
-      //               <EuiBadge>
-      //                 {i18n.translate(
-      //                   'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
-      //                   {
-      //                     defaultMessage: 'array',
-      //                   }
-      //                 )}
-      //               </EuiBadge>
-      //             </EuiToolTip>
-      //           );
-      //         } else if (typeof d === 'object' && d !== null) {
-      //           // If the cells data is an object, display a 'object' badge with a
-      //           // tooltip that explains that this type of field is not supported in this table.
-      //           return (
-      //             <EuiToolTip
-      //               content={i18n.translate(
-      //                 'xpack.ml.dataframe.analytics.classificationExploration.indexObjectToolTipContent',
-      //                 {
-      //                   defaultMessage:
-      //                     'The full content of this object based column cannot be displayed.',
-      //                 }
-      //               )}
-      //             >
-      //               <EuiBadge>
-      //                 {i18n.translate(
-      //                   'xpack.ml.dataframe.analytics.classificationExploration.indexObjectBadgeContent',
-      //                   {
-      //                     defaultMessage: 'object',
-      //                   }
-      //                 )}
-      //               </EuiBadge>
-      //             </EuiToolTip>
-      //           );
-      //         }
+        return d;
+      };
 
-      //         return d;
-      //       };
+      if (isNumber) {
+        column.dataType = 'number';
+        column.render = render;
+      } else if (typeof type !== 'undefined') {
+        switch (type) {
+          case ES_FIELD_TYPES.BOOLEAN:
+            column.dataType = ES_FIELD_TYPES.BOOLEAN;
+            break;
+          case ES_FIELD_TYPES.DATE:
+            column.align = 'right';
+            column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+            break;
+          default:
+            column.render = render;
+            break;
+        }
+      } else {
+        column.render = render;
+      }
 
-      //       let columnType;
-
-      //       if (tableItems.length > 0) {
-      //         columnType = typeof tableItems[0][k];
-      //       }
-
-      //       if (typeof columnType !== 'undefined') {
-      //         switch (columnType) {
-      //           case 'boolean':
-      //             column.dataType = 'boolean';
-      //             break;
-      //           case 'Date':
-      //             column.align = 'right';
-      //             column.render = (d: any) =>
-      //               formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-      //             break;
-      //           case 'number':
-      //             column.dataType = 'number';
-      //             column.render = render;
-      //             break;
-      //           default:
-      //             column.render = render;
-      //             break;
-      //         }
-      //       } else {
-      //         column.render = render;
-      //       }
-
-      //       return column;
-      //     })
-      //   );
-      // }
       return column;
     });
 
