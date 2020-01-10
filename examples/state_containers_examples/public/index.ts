@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { StateContainersExamplesPlugin } from './plugin';
+
+export const plugin = () => new StateContainersExamplesPlugin();

@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { parse as _parseUrl } from 'url';
+
+export const parseUrl = (url: string) => _parseUrl(url, true);
+export const parseUrlHash = (url: string) => {
+  const hash = parseUrl(url).hash;
+  return hash ? parseUrl(hash.slice(1)) : null;
+};
+export const getCurrentUrl = () => window.location.href;
+export const parseCurrentUrl = () => parseUrl(getCurrentUrl());
+export const parseCurrentUrlHash = () => parseUrlHash(getCurrentUrl());

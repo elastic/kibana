@@ -17,4 +17,19 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { parseUrlHash } from './parse';
+
+describe('parseUrlHash', () => {
+  it('should return null if no hash', () => {
+    expect(parseUrlHash('http://localhost:5601/oxf/app/kibana')).toBeNull();
+  });
+
+  it('should return parsed hash', () => {
+    expect(parseUrlHash('http://localhost:5601/oxf/app/kibana/#/path?test=test')).toMatchObject({
+      pathname: '/path',
+      query: {
+        test: 'test',
+      },
+    });
+  });
+});
