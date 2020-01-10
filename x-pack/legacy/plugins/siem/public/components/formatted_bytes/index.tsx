@@ -7,8 +7,6 @@
 import React from 'react';
 import numeral from '@elastic/numeral';
 
-import { useUiSetting$ } from '../../lib/kibana';
-
 type Bytes = string | number;
 
 export const formatBytes = (value: Bytes, format: string) => {
