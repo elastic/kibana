@@ -16,17 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-    loadTestFile(require.resolve('./top_nav'));
-    loadTestFile(require.resolve('./application_status'));
-  });
-}
+import { PluginInitializer } from 'kibana/public';
+import { CoreAppStatusPlugin, CoreAppStatusPluginSetup, CoreAppStatusPluginStart } from './plugin';
+
+export const plugin: PluginInitializer<CoreAppStatusPluginSetup, CoreAppStatusPluginStart> = () =>
+  new CoreAppStatusPlugin();
