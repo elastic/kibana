@@ -260,6 +260,7 @@ export class LegacyService implements CoreService {
         dataClient$: setupDeps.core.elasticsearch.dataClient$,
         createClient: setupDeps.core.elasticsearch.createClient,
       },
+      pulse: setupDeps.core.pulse,
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
         registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(
@@ -283,6 +284,7 @@ export class LegacyService implements CoreService {
         register: setupDeps.core.uiSettings.register,
       },
     };
+
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },

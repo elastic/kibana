@@ -47,7 +47,7 @@ import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { PulseServiceSetup, PulseServiceStart } from './pulse';
+import { PulseServiceSetup } from './pulse';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -268,7 +268,6 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
-  pulse: PulseServiceStart;
 }
 
 export {
@@ -278,6 +277,5 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  PulseServiceStart,
   PulseServiceSetup,
 };

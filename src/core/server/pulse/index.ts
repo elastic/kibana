@@ -36,6 +36,9 @@ export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
 }
 
+export type PulseServiceSetup = InternalPulseService;
+export interface PulseServiceStart {};
+
 export interface ChannelResponse {
   id: string;
   instructions: PulseInstruction[];

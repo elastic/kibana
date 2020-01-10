@@ -25,7 +25,6 @@ import { InstructionsResponse } from '../../server/pulse';
 import { PulseChannel, PulseInstruction } from './channel';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
-import { CoreContext } from '../core_system';
 
 export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
@@ -34,14 +33,14 @@ export interface PulseServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
 
-const channelNames = ['default', 'notifications'];
+const channelNames = ['default', 'notifications', 'errors'];
 
 export class PulseService {
   private retriableErrors = 0;
   private readonly channels: Map<string, PulseChannel>;
   private readonly instructions: Map<string, Subject<any>> = new Map();
 
-  constructor(coreContext: CoreContext) {
+  constructor() {
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction>();
