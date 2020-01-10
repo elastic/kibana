@@ -1869,31 +1869,6 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/apm-rum-core@^4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-4.7.0.tgz#b00b58bf7380f2e36652e5333e3ca97608986e40"
-  integrity sha512-/lTZWfA3ces3qoKCx72Sc+w43lZkyktaQlbYoYO86h3tNX7tScc/7YBBHI9oxKMcXweqkKOcpnwNZFy71bb86w==
-  dependencies:
-    error-stack-parser "^1.3.5"
-    es6-promise "^4.2.8"
-    opentracing "^0.14.3"
-    uuid "^3.1.0"
-
-"@elastic/apm-rum-react@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-0.3.2.tgz#134634643e15ebcf97b6f17b2c74a50afdbe1c64"
-  integrity sha512-hU1srW9noygppyrLmipulu30c+LWEie8V/dQjEqLYMx2mRZRwNIue3midYgWa6qrWqgYZhwpAtWrWcXc+AWk2Q==
-  dependencies:
-    "@elastic/apm-rum" "^4.6.0"
-    hoist-non-react-statics "^3.3.0"
-
-"@elastic/apm-rum@^4.6.0":
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-4.6.0.tgz#e2ac560dd4a4761c0e9b08c301418b1d4063bdd2"
-  integrity sha512-hsqvyTm5rT6lKgV06wvm8ID9aMsuJyw8wIOPjRwKmvzlTjayabxKTcr50lJJV8jY9OWfDkqymIqpHyCEChQAHQ==
-  dependencies:
-    "@elastic/apm-rum-core" "^4.7.0"
-
 "@elastic/charts@^16.1.0":
   version "16.1.0"
   resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.1.0.tgz#67cf11625dcd7e1c2cf16ef53349e6a68a73f5b1"
