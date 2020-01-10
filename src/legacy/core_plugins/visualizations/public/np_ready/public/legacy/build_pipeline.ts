@@ -63,7 +63,7 @@ type buildVisFunction = (
   visState: VisState,
   schemas: Schemas,
   uiState: any,
-  meta: { savedObjectId?: string }
+  meta?: { savedObjectId?: string }
 ) => string;
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
@@ -253,10 +253,10 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: (visState, schemas, uiState = {}, { savedObjectId }) => {
+  metrics: (visState, schemas, uiState = {}, meta) => {
     const paramsJson = prepareJson('params', visState.params);
     const uiStateJson = prepareJson('uiState', uiState);
-    const savedObjectIdParam = prepareString('savedObjectId', savedObjectId);
+    const savedObjectIdParam = prepareString('savedObjectId', meta?.savedObjectId);
 
     return `tsvb ${paramsJson} ${uiStateJson} ${savedObjectIdParam}`;
   },
