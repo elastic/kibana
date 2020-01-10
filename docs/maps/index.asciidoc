@@ -18,12 +18,12 @@ With *Elastic Maps*, you can:
 
 *Ready to get started?* Start your tour of *Elastic Maps* with the <<maps-getting-started, getting started tutorial>>.
 
-[role="screenshot"]
-image::maps/images/sample_data_ecommerce.png[]
-
 [float]
 === Create maps with multiple layers and indices
 You can use multiple layers and indices to show all your data in a single map. This enables your map to show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. You can plot individual documents or use aggregations to play any data set, no matter how large.
+
+[role="screenshot"]
+image::maps/images/sample_data_ecommerce.png[]
 
 [float]
 === Upload GeoJSON files into Elasticsearch
@@ -31,7 +31,12 @@ Elastic Maps makes it easy to import geospatial data into the Elastic Stack. Usi
 
 [float]
 === Embed your map in dashboards
-Viewing your data from different angles provides better insights. Dimensions that are obscured in one visualization might be illuminated in another. Add your maps to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.
+Viewing data from different angles provides better insights. Dimensions that are obscured in one visualization might be illuminated in another. Add your map to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.
+
+In the following example, a choropleth map showing San Diego non-emergency service request density by council district is embedded in a dashboard to better understand when services are requested and gain insight into the top requested services.
+
+[role="screenshot"]
+image::maps/images/embed_in_dashboard.jpeg[]
 
 [float]
 === Create choropleth maps
