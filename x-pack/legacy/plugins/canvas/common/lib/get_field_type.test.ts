@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getFieldType } from '../get_field_type';
 import {
   emptyTable,
   testTable,
-} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
+} from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
+import { getFieldType } from './get_field_type';
 
 describe('getFieldType', () => {
   it('returns type of a field in a datatable', () => {
