@@ -141,7 +141,7 @@ export class SavedObjectsRepository {
     callCluster: APICaller,
     extraTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
-  ) {
+  ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
     const allTypes = Object.keys(getRootPropertiesObjects(mappings));
     const serializer = new SavedObjectsSerializer(schema);
