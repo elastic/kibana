@@ -26,6 +26,7 @@ import {
 import {
   dllEntryFileContentArrayToString,
   dllEntryFileContentStringToArray,
+  dllMergeAllEntryFilesContent,
 } from './dll_entry_template';
 import { fromRoot } from '../../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
@@ -35,6 +36,7 @@ import { promisify } from 'util';
 import path from 'path';
 import del from 'del';
 import { chunk } from 'lodash';
+import seedrandom from 'seedrandom';
 
 const readFileAsync = promisify(fs.readFile);
 const mkdirAsync = promisify(fs.mkdir);
@@ -83,8 +85,32 @@ export class DllCompiler {
     await this.ensureOutputPathExists();
   }
 
+  seededShuffle(array) {
+    // Implementation based on https://github.com/TimothyGu/knuth-shuffle-seeded/blob/gh-pages/index.js#L46
+    let currentIndex;
+    let temporaryValue;
+    let randomIndex;
+    const rand = seedrandom('predictable', { global: false });
+
+    if (array.constructor !== Array) throw new Error('Input is not an array');
+    currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+      // Pick a remaining element...
+      randomIndex = Math.floor(rand() * currentIndex--);
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
   async upsertEntryFiles(content) {
-    const arrayContent = dllEntryFileContentStringToArray(content);
+    const arrayContent = this.seededShuffle(dllEntryFileContentStringToArray(content));
     const chunks = chunk(
       arrayContent,
       Math.ceil(arrayContent.length / this.rawDllConfig.chunks.length)
@@ -201,8 +227,9 @@ export class DllCompiler {
       entryPaths.map(async entryPath => await this.readFile(entryPath))
     );
 
-    // join by \n
-    return dllEntryFileContentArrayToString(entryFilesContent);
+    // merge all the module contents from entry files again into
+    // sorted single one
+    return dllMergeAllEntryFilesContent(entryFilesContent);
   }
 
   async readFile(filePath, content) {

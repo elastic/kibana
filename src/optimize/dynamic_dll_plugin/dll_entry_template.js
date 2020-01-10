@@ -31,3 +31,11 @@ export function dllEntryFileContentStringToArray(content = '') {
 export function dllEntryFileContentArrayToString(content = []) {
   return content.join('\n');
 }
+
+export function dllMergeAllEntryFilesContent(content = []) {
+  return content
+    .join('\n')
+    .split('\n')
+    .sort()
+    .join('\n');
+}
