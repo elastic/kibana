@@ -107,7 +107,7 @@ describe('Retrieve ES Fields', () => {
     const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
       .callAsCurrentUser as jest.Mock;
 
-    callAsCurrentUserMock.mockRejectedValueOnce(mockResults);
+    callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
