@@ -1394,8 +1394,8 @@ export class TimeSeriesExplorer extends React.Component {
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
-            <div className="results-container-outer">
-              {/* Make sure ChartTooltip is inside this plain wrapping element so positioning can be infered correctly. */}
+            <div>
+              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be infered correctly. */}
               <ChartTooltip />
               <EuiText className="results-container">
                 <span className="panel-title">
