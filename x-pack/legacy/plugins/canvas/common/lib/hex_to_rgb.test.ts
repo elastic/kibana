@@ -7,18 +7,18 @@
 import { hexToRgb } from './hex_to_rgb';
 
 describe('hexToRgb', () => {
-  it('invalid hex', () => {
+  it('returns null for an invalid hex', () => {
     expect(hexToRgb('hexadecimal')).toBeNull();
     expect(hexToRgb('#00')).toBeNull();
     expect(hexToRgb('#00000')).toBeNull();
   });
-  it('shorthand', () => {
+  it('returns correct value for shorthand hex codes', () => {
     expect(hexToRgb('#000')).toEqual([0, 0, 0]);
     expect(hexToRgb('#FFF')).toEqual([255, 255, 255]);
     expect(hexToRgb('#fff')).toEqual([255, 255, 255]);
     expect(hexToRgb('#fFf')).toEqual([255, 255, 255]);
   });
-  it('longhand', () => {
+  it('returns correct value for longhand hex codes', () => {
     expect(hexToRgb('#000000')).toEqual([0, 0, 0]);
     expect(hexToRgb('#ffffff')).toEqual([255, 255, 255]);
     expect(hexToRgb('#fffFFF')).toEqual([255, 255, 255]);

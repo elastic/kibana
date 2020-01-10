@@ -22,13 +22,13 @@ const RAW_PIXEL =
 
 describe('dataurl', () => {
   describe('isValidDataUrl', () => {
-    it('invalid data url', () => {
+    it('returns false for an invalid data url', () => {
       expect(isValidDataUrl('somestring')).toBe(false);
     });
-    it('empty string returns false', () => {
+    it('returns false for an empty string', () => {
       expect(isValidDataUrl('')).toBe(false);
     });
-    it('valid data urls', () => {
+    it('returns true for valid data urls', () => {
       expect(isValidDataUrl(BASE64_TEXT)).toBe(true);
       expect(isValidDataUrl(BASE64_SVG)).toBe(true);
       expect(isValidDataUrl(BASE64_PIXEL)).toBe(true);
@@ -39,13 +39,13 @@ describe('dataurl', () => {
   });
 
   describe('dataurl.parseDataUrl', () => {
-    it('invalid data url', () => {
+    it('returns null for an invalid data url', () => {
       expect(parseDataUrl('somestring')).toBeNull();
     });
-    it('invalid base64 image returns null', () => {
+    it('returns null for an invalid base64 image', () => {
       expect(parseDataUrl(INVALID_BASE64_PIXEL)).toBeNull();
     });
-    it('text data urls', () => {
+    it('returns correct values for text data urls', () => {
       expect(parseDataUrl(BASE64_TEXT)).toEqual({
         charset: 'utf-8',
         data: null,
@@ -63,7 +63,7 @@ describe('dataurl', () => {
         mimetype: 'text/plain',
       });
     });
-    it('png data urls', () => {
+    it('returns correct values for png data urls', () => {
       expect(parseDataUrl(RAW_PIXEL)).toBeNull();
       expect(parseDataUrl(BASE64_PIXEL)).toEqual({
         charset: undefined,
@@ -74,7 +74,7 @@ describe('dataurl', () => {
         mimetype: 'image/png',
       });
     });
-    it('svg data urls', () => {
+    it('returns correct values for svg data urls', () => {
       expect(parseDataUrl(RAW_SVG)).toEqual({
         charset: undefined,
         data: null,

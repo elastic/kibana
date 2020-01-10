@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { missingImage } from '../../common/lib/missing_asset';
 import { resolveFromArgs, resolveWithMissingImage } from './resolve_dataurl';
-import { missingImage } from './../../common/lib/missing_asset';
 
 describe('resolve_dataurl', () => {
   describe('resolveFromArgs', () => {
