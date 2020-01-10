@@ -15,6 +15,10 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
+const isSnapshotNameLowerCase = (str: string): boolean => {
+  return str !== str.toLowerCase() ? true : false;
+};
+
 export const validatePolicy = (
   policy: SlmPolicyPayload,
   validationHelperData: {
@@ -57,6 +61,14 @@ export const validatePolicy = (
     validation.errors.snapshotName.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameRequiredErrorMessage', {
         defaultMessage: 'Snapshot name is required.',
+      })
+    );
+  }
+
+  if (isSnapshotNameLowerCase(snapshotName)) {
+    validation.errors.snapshotName.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.snapshotNameLowerCaseErrorMessage', {
+        defaultMessage: 'Snapshot name needs to be lowercase.',
       })
     );
   }
