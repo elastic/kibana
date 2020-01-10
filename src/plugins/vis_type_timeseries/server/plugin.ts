@@ -35,9 +35,7 @@ import {
   GetVisData,
   GetVisDataOptions,
 } from '../../../legacy/core_plugins/vis_type_timeseries/server';
-import {
-  ValidationTelemetryService,
-} from './validation_telemetry/validation_telemetry_service';
+import { ValidationTelemetryService } from './validation_telemetry/validation_telemetry_service';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 
 export interface LegacySetup {
@@ -81,7 +79,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
-
 
     const framework: Framework = {
       core,
