@@ -203,8 +203,6 @@ async function installAssets({
 
   if (datasetsRequested) {
     datasetsRequested.forEach(dataset => {
-      // add package name to dataset
-      dataset.package = registryPackageInfo.name;
       const templateRef = installTemplateForDataset({
         pkg: registryPackageInfo,
         callCluster,
