@@ -87,6 +87,7 @@ if (licenseManagementUiEnabled) {
                   const unmountApp = await app.mount({ ...npStart } as any, {
                     element,
                     appBasePath: '',
+                    onAppLeave: () => undefined,
                   });
                   manageAngularLifecycle($scope, $route, unmountApp as any);
                 },
