@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../legacy');
+jest.mock(
+  '../../../../../../../../src/legacy/ui/public/state_management/state_storage/hashed_item_store.js'
+);
 jest.mock('ui/new_platform'); // actions/elements has some dependencies on ui/new_platform.
 jest.mock('../../../lib/app_state');
 
