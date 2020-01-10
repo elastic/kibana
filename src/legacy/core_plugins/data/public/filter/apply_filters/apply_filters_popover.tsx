@@ -35,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPattern } from '../../index_patterns';
 import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/filter_editor_utils';
-import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
+import { FilterLabel } from '../filter_bar/filter_editor/lib/filter_label';
 import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
 
 interface Props {
@@ -62,8 +62,8 @@ export class ApplyFiltersPopover extends Component<Props, State> {
   }
 
   private getLabel(filter: Filter) {
-    const filterDisplayValue = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    return getFilterDisplayText(filter, filterDisplayValue);
+    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    return <FilterLabel filter={filter} valueLabel={valueLabel} />;
   }
 
   public render() {
