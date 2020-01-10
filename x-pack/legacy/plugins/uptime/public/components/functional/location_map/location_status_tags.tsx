@@ -25,6 +25,7 @@ const BadgeItem = styled.div`
   margin-bottom: 5px;
 `;
 
+// Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
   padding: 10px;
   max-height: 229px;

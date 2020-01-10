@@ -10,6 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations } from '../../../../common/runtime_types';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { LocationMissingWarning } from './location_missing';
 
 // These height/width values are used to make sure map is in center of panel
 // And to make sure, it doesn't take too much space
@@ -29,10 +31,12 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
 
   if (monitorLocations?.locations) {
     monitorLocations.locations.forEach((item: any) => {
-      if (item.summary.down === 0) {
-        upPoints.push(item.geo.location);
-      } else {
-        downPoints.push(item.geo.location);
+      if (item.geo?.name !== UNNAMED_LOCATION) {
+        if (item.summary.down === 0) {
+          upPoints.push(item.geo.location);
+        } else {
+          downPoints.push(item.geo.location);
+        }
       }
     });
   }
@@ -43,6 +47,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <MapPanel>
+          <LocationMissingWarning />
           <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
         </MapPanel>
       </EuiFlexItem>
