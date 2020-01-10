@@ -29,6 +29,8 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
   const upPoints: LocationPoint[] = [];
   const downPoints: LocationPoint[] = [];
 
+  let isGeoInfoMissing = false;
+
   if (monitorLocations?.locations) {
     monitorLocations.locations.forEach((item: any) => {
       if (item.geo?.name !== UNNAMED_LOCATION) {
@@ -37,6 +39,8 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         } else {
           downPoints.push(item.geo.location);
         }
+      } else if (item.geo?.name === UNNAMED_LOCATION) {
+        isGeoInfoMissing = true;
       }
     });
   }
@@ -46,8 +50,8 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         <LocationStatusTags locations={monitorLocations?.locations || []} />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
+        {isGeoInfoMissing && <LocationMissingWarning />}
         <MapPanel>
-          <LocationMissingWarning />
           <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
         </MapPanel>
       </EuiFlexItem>
