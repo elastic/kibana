@@ -66,6 +66,10 @@ function mapToEndpointResultList(
   queryParams: Record<string, any>,
   searchResponse: SearchResponse<EndpointData>
 ): EndpointResultList {
+  let totalNumberOfEndpoints = 0;
+  if (searchResponse?.aggregations?.total?.value) {
+    totalNumberOfEndpoints = searchResponse.aggregations.total.value;
+  }
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
@@ -74,13 +78,13 @@ function mapToEndpointResultList(
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
         .map(entry => entry._source),
-      total: searchResponse.aggregations.total.value,
+      total: totalNumberOfEndpoints,
     };
   } else {
     return {
       request_page_size: queryParams.size,
       request_index: queryParams.from,
-      total: 0,
+      total: totalNumberOfEndpoints,
       endpoints: [],
     };
   }
