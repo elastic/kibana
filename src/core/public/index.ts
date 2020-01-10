@@ -84,6 +84,7 @@ export {
   ApplicationStart,
   App,
   AppBase,
+  AppCategory,
   AppMount,
   AppMountDeprecated,
   AppUnmount,

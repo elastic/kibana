@@ -22,6 +22,7 @@ export { Capabilities } from './capabilities';
 export {
   App,
   AppBase,
+  AppCategory,
   AppMount,
   AppMountDeprecated,
   AppUnmount,

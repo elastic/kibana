@@ -163,6 +163,11 @@ export class ChromeService {
       );
     }
 
+    const settings = injectedMetadata.getLegacyMetadata().uiSettings;
+
+    const navSetting =
+      settings?.user?.pageNavigation.userValue || settings.defaults.pageNavigation.value;
+
     return {
       navControls,
       navLinks,
@@ -172,7 +177,6 @@ export class ChromeService {
       getHeaderComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
-
           <Header
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
@@ -191,6 +195,7 @@ export class ChromeService {
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
+            navSetting={navSetting}
           />
         </React.Fragment>
       ),

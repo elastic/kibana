@@ -63,6 +63,7 @@ function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: Le
 
     return {
       id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       icon: spec.icon,
