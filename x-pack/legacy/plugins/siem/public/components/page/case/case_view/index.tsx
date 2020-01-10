@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CaseQuery } from '../../containers/case/get_case';
+import { CaseQuery } from '../../../../containers/case/get_case';
 
 export const CaseView = React.memo(() => (
   <EuiFlexItem>

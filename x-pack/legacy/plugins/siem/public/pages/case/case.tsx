@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
 
@@ -14,8 +14,8 @@ import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { CaseList } from './case_list';
-import { CaseView } from './case_view';
+import { CasesTable } from '../../components/page/case/cases_table';
+import { CaseView } from '../../components/page/case/case_view';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -42,9 +42,7 @@ export const CaseComponent = React.memo(() => {
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <EuiFlexGroup>
                 <CaseView />
-                <EuiFlexItem>
-                  <CaseList />
-                </EuiFlexItem>
+                <CasesTable />
               </EuiFlexGroup>
             ) : (
               <EmptyPage
