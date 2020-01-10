@@ -95,7 +95,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
       try {
         let responsesReceived = 0;
         const batch = items.map(({ payload }) => payload);
-        const { promise, stream } = fetchStreamingInjected({
+        const { stream } = fetchStreamingInjected({
           url,
           body: JSON.stringify({ batch }),
           method: 'POST',
@@ -127,7 +127,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
             }
           },
         });
-        await promise;
+        await stream.toPromise();
       } catch (error) {
         for (const item of items) item.future.reject(error);
       }
