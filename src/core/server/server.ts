@@ -18,7 +18,6 @@
  */
 
 import { filter, take } from 'rxjs/operators';
-import { merge } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
 import {
