@@ -25,7 +25,6 @@ export interface GetSnapshotCountParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string | null;
-  statusFilter?: string;
 }
 
 export interface UMMonitorStatesAdapter {

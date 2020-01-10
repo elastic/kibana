@@ -86,6 +86,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
+    const expectedCounts = { up: '93', down: '7' };
+
     describe('snapshot counts', () => {
       it('updates the snapshot count when status filter is set to down', async () => {
         await pageObjects.uptime.goToUptimePageAndSetDateRange(
@@ -94,7 +96,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         );
         await pageObjects.uptime.setStatusFilter('down');
         const counts = await pageObjects.uptime.getSnapshotCount();
-        expect(counts).to.eql({ up: '0', down: '7' });
+        expect(counts).to.eql(expectedCounts);
       });
 
       it('updates the snapshot count when status filter is set to up', async () => {
@@ -104,7 +106,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         );
         await pageObjects.uptime.setStatusFilter('up');
         const counts = await pageObjects.uptime.getSnapshotCount();
-        expect(counts).to.eql({ up: '93', down: '0' });
+        expect(counts).to.eql(expectedCounts);
       });
     });
   });

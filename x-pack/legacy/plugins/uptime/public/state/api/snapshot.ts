@@ -29,7 +29,6 @@ export const fetchSnapshotCount = async ({
     dateRangeStart,
     dateRangeEnd,
     ...(filters && { filters }),
-    ...(statusFilter && { statusFilter }),
   };
   const urlParams = new URLSearchParams(params).toString();
   const response = await fetch(`${url}?${urlParams}`);
