@@ -25,7 +25,13 @@ import * as i18n from './translations';
 export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
-  const [loading, isSignalIndexExists, isAuthenticated, canUserCRUD] = useUserInfo();
+  const [
+    loading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
+    hasWriteToChangeActivation,
+  ] = useUserInfo();
 
   if (
     isSignalIndexExists != null &&
@@ -91,6 +97,7 @@ export const RulesComponent = React.memo(() => {
         </HeaderPage>
         <AllRules
           loading={loading}
+          hasWriteToChangeActivation={hasWriteToChangeActivation}
           importCompleteToggle={importCompleteToggle}
           canUserCRUD={canUserCRUD ?? false}
         />

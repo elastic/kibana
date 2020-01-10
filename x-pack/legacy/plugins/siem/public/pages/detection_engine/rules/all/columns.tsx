@@ -74,7 +74,8 @@ type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<T
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
   history: H.History,
-  canUserCRUD: boolean
+  canUserCRUD: boolean,
+  hasWriteToChangeActivation: boolean
 ): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
@@ -169,7 +170,7 @@ export const getColumns = (
           dispatch={dispatch}
           id={item.id}
           enabled={item.activate}
-          isDisabled={!canUserCRUD}
+          isDisabled={!canUserCRUD || !hasWriteToChangeActivation}
           isLoading={item.isLoading}
         />
       ),

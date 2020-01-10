@@ -62,9 +62,10 @@ const initialState: State = {
  */
 export const AllRules = React.memo<{
   canUserCRUD: boolean;
+  hasWriteToChangeActivation: boolean;
   importCompleteToggle: boolean;
   loading: boolean;
-}>(({ canUserCRUD, importCompleteToggle, loading }) => {
+}>(({ canUserCRUD, hasWriteToChangeActivation, importCompleteToggle, loading }) => {
   const [
     {
       exportPayload,
@@ -195,7 +196,7 @@ export const AllRules = React.memo<{
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, history, canUserCRUD)}
+              columns={getColumns(dispatch, history, canUserCRUD, hasWriteToChangeActivation)}
               isSelectable={canUserCRUD ?? false}
               itemId="rule_id"
               items={tableData}

@@ -74,6 +74,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       isAuthenticated,
       canUserCRUD,
       signalIndexName,
+      hasWriteToChangeActivation,
     ] = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
@@ -187,7 +188,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           <EuiFlexItem grow={false}>
                             <RuleSwitch
                               id={rule?.id ?? '-1'}
-                              isDisabled={!canUserCRUD}
+                              isDisabled={!canUserCRUD || !hasWriteToChangeActivation}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
                             />
