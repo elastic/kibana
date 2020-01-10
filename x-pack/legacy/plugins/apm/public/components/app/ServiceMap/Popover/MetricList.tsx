@@ -8,6 +8,8 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { isNumber } from 'lodash';
+import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
 import {
   asDuration,
   asPercent,
@@ -28,14 +30,6 @@ const ItemDescription = styled('td')`
   text-align: right;
 `;
 
-interface MetricListProps {
-  avgCpuUsage?: number;
-  avgErrorsPerMinute?: number;
-  avgMemoryUsage?: number;
-  avgReqPerMinute?: number;
-  avgTransDurationMs?: number;
-}
-
 const na = i18n.translate('xpack.apm.serviceMap.NotAvailableMetric', {
   defaultMessage: 'N/A'
 });
@@ -44,9 +38,9 @@ export function MetricList({
   avgCpuUsage,
   avgErrorsPerMinute,
   avgMemoryUsage,
-  avgReqPerMinute,
-  avgTransDurationMs
-}: MetricListProps) {
+  avgRequestsPerMinute,
+  avgTransactionDuration
+}: ServiceNodeMetrics) {
   const listItems = [
     {
       title: i18n.translate(
@@ -55,8 +49,8 @@ export function MetricList({
           defaultMessage: 'Trans. duration (avg.)'
         }
       ),
-      description: avgTransDurationMs
-        ? asDuration(toMicroseconds(avgTransDurationMs, 'milliseconds'))
+      description: isNumber(avgTransactionDuration)
+        ? asDuration(toMicroseconds(avgTransactionDuration, 'milliseconds'))
         : na
     },
     {
@@ -66,8 +60,8 @@ export function MetricList({
           defaultMessage: 'Req. per minute (avg.)'
         }
       ),
-      description: avgReqPerMinute
-        ? `${avgReqPerMinute} ${tpmUnit('request')}`
+      description: isNumber(avgRequestsPerMinute)
+        ? `${avgRequestsPerMinute} ${tpmUnit('request')}`
         : na
     },
     {
@@ -83,13 +77,13 @@ export function MetricList({
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
         defaultMessage: 'CPU usage (avg.)'
       }),
-      description: avgCpuUsage ? asPercent(avgCpuUsage, 1) : na
+      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : na
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
         defaultMessage: 'Memory usage (avg.)'
       }),
-      description: avgMemoryUsage ? asPercent(avgMemoryUsage, 1) : na
+      description: isNumber(avgMemoryUsage) ? asPercent(avgMemoryUsage, 1) : na
     }
   ];
   return (

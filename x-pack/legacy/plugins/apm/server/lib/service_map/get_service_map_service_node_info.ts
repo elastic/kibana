@@ -14,9 +14,11 @@ import {
   TRANSACTION_DURATION,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY
+  METRIC_SYSTEM_TOTAL_MEMORY,
+  SERVICE_NODE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
+import { PromiseReturnType } from '../../../typings/common';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -29,6 +31,10 @@ interface TaskParameters {
   minutes: number;
   filter: ESFilter[];
 }
+
+export type ServiceNodeMetrics = PromiseReturnType<
+  typeof getServiceMapServiceNodeInfo
+>;
 
 export async function getServiceMapServiceNodeInfo({
   serviceName,
@@ -57,19 +63,22 @@ export async function getServiceMapServiceNodeInfo({
     errorMetrics,
     transactionMetrics,
     cpuMetrics,
-    memoryMetrics
+    memoryMetrics,
+    instanceMetrics
   ] = await Promise.all([
     getErrorMetrics(taskParams),
     getTransactionMetrics(taskParams),
     getCpuMetrics(taskParams),
-    getMemoryMetrics(taskParams)
+    getMemoryMetrics(taskParams),
+    getNumInstances(taskParams)
   ]);
 
   return {
     ...errorMetrics,
     ...transactionMetrics,
     ...cpuMetrics,
-    ...memoryMetrics
+    ...memoryMetrics,
+    ...instanceMetrics
   };
 }
 
@@ -213,5 +222,46 @@ async function getMemoryMetrics({ setup, filter }: TaskParameters) {
 
   return {
     avgMemoryUsage: response.aggregations?.avgMemoryUsage.value
+  };
+}
+
+async function getNumInstances({ setup, filter }: TaskParameters) {
+  const { client, indices } = setup;
+  const response = await client.search({
+    index: indices['apm_oss.transactionIndices'],
+    body: {
+      query: {
+        bool: {
+          filter: filter.concat([
+            {
+              term: {
+                [PROCESSOR_EVENT]: 'transaction'
+              }
+            },
+            {
+              exists: {
+                field: SERVICE_NODE_NAME
+              }
+            },
+            {
+              exists: {
+                field: METRIC_SYSTEM_TOTAL_MEMORY
+              }
+            }
+          ])
+        }
+      },
+      aggs: {
+        instances: {
+          cardinality: {
+            field: SERVICE_NODE_NAME
+          }
+        }
+      }
+    }
+  });
+
+  return {
+    numInstances: response.aggregations?.instances.value || 1
   };
 }

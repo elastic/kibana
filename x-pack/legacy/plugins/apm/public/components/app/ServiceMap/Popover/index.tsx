@@ -15,9 +15,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { CSSProperties, useContext, useEffect, useState } from 'react';
+import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
 import { CytoscapeContext } from '../Cytoscape';
 import { Buttons } from './Buttons';
 import { MetricList } from './MetricList';
+import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -28,6 +31,38 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
+
+  const {
+    urlParams: { start, end, environment }
+  } = useUrlParams();
+
+  const serviceName = selectedNode?.data('isService')
+    ? (selectedNode.data('id') as string)
+    : null;
+
+  const { data = {} as ServiceNodeMetrics } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/service-map/service/{serviceName}',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              environment
+            }
+          }
+        });
+      }
+    },
+    [serviceName, start, end, environment],
+    {
+      preservePreviousData: false
+    }
+  );
 
   useEffect(() => {
     const selectHandler: cytoscape.EventHandler = event => {
@@ -68,9 +103,8 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
   const isOpen = !!selectedNode;
-  const selectedNodeServiceName = selectedNode?.data('id');
-  const instanceCount = selectedNode?.data('instanceCount');
-  const isService = selectedNode?.data('isService');
+  const selectedNodeServiceName: string = selectedNode?.data('id');
+  const isService = !!selectedNode?.data('isService');
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -86,6 +120,8 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`
   };
+
+  const instanceCount = data.numInstances;
 
   return (
     <EuiPopover
@@ -117,7 +153,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
         )}
 
         <EuiFlexItem>
-          <MetricList {...selectedNode?.data()} />
+          <MetricList {...data} />
         </EuiFlexItem>
         {isService && (
           <Buttons
