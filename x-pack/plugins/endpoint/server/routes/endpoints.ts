@@ -66,10 +66,7 @@ function mapToEndpointResultList(
   queryParams: Record<string, any>,
   searchResponse: SearchResponse<EndpointData>
 ): EndpointResultList {
-  let totalNumberOfEndpoints = 0;
-  if (searchResponse?.aggregations?.total?.value) {
-    totalNumberOfEndpoints = searchResponse.aggregations.total.value;
-  }
+  const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
