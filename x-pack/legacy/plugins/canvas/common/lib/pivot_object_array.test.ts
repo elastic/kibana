@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pivotObjectArray } from '../pivot_object_array';
+import { pivotObjectArray } from './pivot_object_array';
 
 interface Car {
   make: string;
