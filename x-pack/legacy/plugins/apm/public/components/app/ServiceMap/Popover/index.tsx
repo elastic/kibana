@@ -5,22 +5,20 @@
  */
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
   EuiTitle
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { CSSProperties, useContext, useEffect, useState } from 'react';
-import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CytoscapeContext } from '../Cytoscape';
 import { Buttons } from './Buttons';
-import { MetricList } from './MetricList';
+import { Info } from './Info';
+import { ServiceMetricList } from './ServiceMetricList';
+
+const popoverMinWidth = 280;
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -31,39 +29,6 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
-
-  const {
-    urlParams: { start, end, environment }
-  } = useUrlParams();
-
-  const serviceName =
-    selectedNode?.data('type') === 'service'
-      ? (selectedNode.data('id') as string)
-      : null;
-
-  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
-    callApmApi => {
-      if (serviceName && start && end) {
-        return callApmApi({
-          pathname: '/api/apm/service-map/service/{serviceName}',
-          params: {
-            path: {
-              serviceName
-            },
-            query: {
-              start,
-              end,
-              environment
-            }
-          }
-        });
-      }
-    },
-    [serviceName, start, end, environment],
-    {
-      preservePreviousData: false
-    }
-  );
 
   useEffect(() => {
     const selectHandler: cytoscape.EventHandler = event => {
@@ -121,8 +86,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`
   };
-
-  const instanceCount = data.numInstances;
+  const data = selectedNode?.data() ?? {};
 
   return (
     <EuiPopover
@@ -132,7 +96,11 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       isOpen={isOpen}
       style={popoverStyle}
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        style={{ minWidth: popoverMinWidth }}
+      >
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3>{selectedNodeServiceName}</h3>
@@ -140,21 +108,12 @@ export function Popover({ focusedServiceName }: PopoverProps) {
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
 
-        {instanceCount && instanceCount > 1 && (
-          <EuiFlexItem>
-            <div>
-              <EuiBadge iconType="apps" color="hollow">
-                {i18n.translate('xpack.apm.serviceMap.instanceCount', {
-                  values: { instanceCount },
-                  defaultMessage: '{instanceCount} instances'
-                })}
-              </EuiBadge>
-            </div>
-          </EuiFlexItem>
-        )}
-
         <EuiFlexItem>
-          <MetricList {...data} isLoading={status === 'loading'} />
+          {isService ? (
+            <ServiceMetricList serviceName={selectedNodeServiceName} />
+          ) : (
+            <Info {...data} />
+          )}
         </EuiFlexItem>
         {isService && (
           <Buttons

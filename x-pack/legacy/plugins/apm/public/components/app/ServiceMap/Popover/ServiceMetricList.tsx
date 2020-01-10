@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiFlexItem,
+  EuiBadge
+} from '@elastic/eui';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
@@ -17,13 +22,15 @@ import {
   toMicroseconds,
   tpmUnit
 } from '../../../../utils/formatters';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useFetcher } from '../../../../hooks/useFetcher';
 
 function LoadingSpinner() {
   return (
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceAround"
-      style={{ width: 280, height: 170 }}
+      style={{ height: 170 }}
     >
       <EuiLoadingSpinner size="xl" />
     </EuiFlexGroup>
@@ -47,18 +54,51 @@ const na = i18n.translate('xpack.apm.serviceMap.NotAvailableMetric', {
   defaultMessage: 'N/A'
 });
 
-interface MetricListProps extends ServiceNodeMetrics {
-  isLoading: boolean;
+interface MetricListProps {
+  serviceName: string;
 }
 
-export function MetricList({
-  avgCpuUsage,
-  avgErrorsPerMinute,
-  avgMemoryUsage,
-  avgRequestsPerMinute,
-  avgTransactionDuration,
-  isLoading
-}: MetricListProps) {
+export function ServiceMetricList({ serviceName }: MetricListProps) {
+  const {
+    urlParams: { start, end, environment }
+  } = useUrlParams();
+
+  // FIXME: Don't fetch if it's not a service. Perhaps this fetching should go
+  // in ServiceMetricList instead.
+  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/service-map/service/{serviceName}',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              environment
+            }
+          }
+        });
+      }
+    },
+    [serviceName, start, end, environment],
+    {
+      preservePreviousData: false
+    }
+  );
+
+  const {
+    avgTransactionDuration,
+    avgRequestsPerMinute,
+    avgErrorsPerMinute,
+    avgCpuUsage,
+    avgMemoryUsage,
+    numInstances
+  } = data;
+  const isLoading = status === 'loading';
+
   const listItems = [
     {
       title: i18n.translate(
@@ -107,15 +147,30 @@ export function MetricList({
   return isLoading ? (
     <LoadingSpinner />
   ) : (
-    <table>
-      <tbody>
-        {listItems.map(({ title, description }) => (
-          <ItemRow key={title}>
-            <ItemTitle>{title}</ItemTitle>
-            <ItemDescription>{description}</ItemDescription>
-          </ItemRow>
-        ))}
-      </tbody>
-    </table>
+    <>
+      {numInstances && numInstances > 1 && (
+        <EuiFlexItem>
+          <div>
+            <EuiBadge iconType="apps" color="hollow">
+              {i18n.translate('xpack.apm.serviceMap.instanceCount', {
+                values: { numInstances },
+                defaultMessage: '{numInstances} instances'
+              })}
+            </EuiBadge>
+          </div>
+        </EuiFlexItem>
+      )}
+
+      <table>
+        <tbody>
+          {listItems.map(({ title, description }) => (
+            <ItemRow key={title}>
+              <ItemTitle>{title}</ItemTitle>
+              <ItemDescription>{description}</ItemDescription>
+            </ItemRow>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }

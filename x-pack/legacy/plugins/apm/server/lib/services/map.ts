@@ -18,7 +18,7 @@ export async function getServiceMap(): Promise<cytoscape.ElementDefinition[]> {
     { data: { id: 'opbeans-go', agentName: 'go', type: 'service' } },
     { data: { id: 'opbeans-go-2', agentName: 'go', type: 'service' } },
     { data: { id: 'opbeans-dotnet', agentName: 'dotnet', type: 'service' } },
-    { data: { id: 'database', agentName: 'database', type: 'database' } },
+    { data: { id: 'database', type: 'database', subtype: 'postgresql' } },
     { data: { id: 'external API', type: 'external' } },
     { data: { id: 'Active MQ', type: 'messaging' } },
     {
