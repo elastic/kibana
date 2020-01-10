@@ -17,11 +17,25 @@
  * under the License.
  */
 
-export function buildProcessorFunction(chain, ...args) {
-  return chain.reduceRight(
-    (next, fn) => {
-      return fn(...args)(next);
-    },
-    doc => doc
-  );
+import { buildProcessorFunction } from '../build_processor_function';
+// @ts-ignore
+import { processors } from '../request_processors/series';
+
+/**
+ * Builds series request body
+ *
+ * @param {...args}: [
+ *   req: {Object} - a request object,
+ *   panel: {Object} - a panel object,
+ *   series: {Object} - an series object,
+ *   esQueryConfig: {Object} - es query config object,
+ *   indexPatternObject: {Object} - an index pattern object,
+ *   capabilities: {Object} - a search capabilities object
+ * ]
+ * @returns {Object} doc - processed body
+ */
+export function buildRequestBody(...args: any[]) {
+  const processor = buildProcessorFunction(processors, ...args);
+  const doc = processor({});
+  return doc;
 }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { buildRequestBody } from './build_request_body';
+
 const body = JSON.parse(`
 {
     "filters": [
@@ -75,15 +77,11 @@ const body = JSON.parse(`
 }
 `);
 
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { buildRequestBody } from '../build_request_body';
-
 describe('buildRequestBody(req)', () => {
-  it('returns a valid body', () => {
+  test('returns a valid body', () => {
     const panel = body.panels[0];
     const series = panel.series[0];
-    const getValidTimeInterval = sinon.spy(() => '10s');
+    const getValidTimeInterval = jest.fn(() => '10s');
     const capabilities = {
       searchTimezone: 'UTC',
       getValidTimeInterval,
@@ -102,7 +100,7 @@ describe('buildRequestBody(req)', () => {
       capabilities
     );
 
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
