@@ -10,13 +10,13 @@ import { autocomplete, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
 
 const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
+  npStart.plugins.data.autocomplete.getQuerySyntaxProvider(language);
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.AutocompleteSuggestion[];
+    suggestions: autocomplete.QuerySyntaxSuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -28,7 +28,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySyntaxSuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<

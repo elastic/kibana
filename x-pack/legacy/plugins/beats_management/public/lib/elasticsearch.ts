@@ -35,7 +35,7 @@ export class ElasticsearchLib {
     kuery: string,
     selectionStart: any,
     fieldPrefix?: string
-  ): Promise<autocomplete.AutocompleteSuggestion[]> {
+  ): Promise<autocomplete.QuerySyntaxSuggestion[]> {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
     const filteredSuggestions = suggestions.filter(suggestion => {

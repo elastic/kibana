@@ -17,40 +17,44 @@
  * under the License.
  */
 
-import { AutocompleteProvider } from './types';
+import { QuerySyntaxProvider, SuggestionsProvider } from './types';
 
 export class AutocompleteProviderRegister {
-  private readonly registeredProviders: Map<string, AutocompleteProvider> = new Map();
+  private readonly querySyntaxProviders: Map<string, QuerySyntaxProvider> = new Map();
 
   /** @internal **/
   public clearProviders(): void {
-    this.registeredProviders.clear();
+    this.querySyntaxProviders.clear();
   }
 
-  private addProvider = (language: string, provider: AutocompleteProvider): void => {
+  private addQuerySyntaxProvider = (language: string, provider: QuerySyntaxProvider): void => {
     if (language && provider) {
-      this.registeredProviders.set(language, provider);
+      this.querySyntaxProviders.set(language, provider);
     }
   };
 
-  private getProvider = (language: string): AutocompleteProvider | undefined =>
-    this.registeredProviders.get(language);
+  private getQuerySyntaxProvider = (language: string): QuerySyntaxProvider | undefined =>
+    this.querySyntaxProviders.get(language);
+
+  private getSuggestionsProvider = (): SuggestionsProvider =>
+    (() => 'todo' as unknown) as SuggestionsProvider;
 
   /** @public **/
   public setup() {
     return {
-      addProvider: this.addProvider,
+      addQuerySyntaxProvider: this.addQuerySyntaxProvider,
 
       /** @obsolete **/
       /** please use "getProvider" only from the start contract **/
-      getProvider: this.getProvider,
+      getQuerySyntaxProvider: this.getQuerySyntaxProvider,
     };
   }
 
   /** @public **/
   public start() {
     return {
-      getProvider: this.getProvider,
+      getQuerySyntaxProvider: this.getQuerySyntaxProvider,
+      getSuggestionsProvider: this.getSuggestionsProvider,
     };
   }
 }

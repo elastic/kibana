@@ -16,31 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IIndexPattern } from '../../../common/index_patterns';
 
-import { AutocompleteProviderRegister } from '.';
-
-import {
-  QuerySyntaxSuggestionType,
-  QuerySyntaxGetSuggestions,
-  QuerySyntaxSuggestion,
-  QuerySyntaxProvider,
-} from './providers/query_syntax_provider';
-
-import { SuggestionsProvider } from './providers/suggestions_provider';
-
-/** @public **/
-export type AutocompletePublicPluginSetup = ReturnType<AutocompleteProviderRegister['setup']>;
-
-/** @public **/
-export type AutocompletePublicPluginStart = ReturnType<AutocompleteProviderRegister['start']>;
-
-/** @public **/
-export {
-  QuerySyntaxSuggestionType,
-  QuerySyntaxSuggestion,
-  QuerySyntaxGetSuggestions,
-  QuerySyntaxProvider,
-};
-
-/** @public **/
-export { SuggestionsProvider };
+export type SuggestionsProvider = (args: { indexPatterns: IIndexPattern[] }) => Function;

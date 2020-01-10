@@ -24,7 +24,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocompleteNamespace.AutocompleteSuggestion[];
+  suggestions: autocompleteNamespace.QuerySyntaxSuggestion[];
   isLoadingIndexPattern: boolean;
 }
 
@@ -39,7 +39,7 @@ function getSuggestions(
   apmIndexPattern: IIndexPattern,
   autocomplete: autocompleteNamespace.AutocompletePublicPluginStart
 ) {
-  const autocompleteProvider = autocomplete.getProvider('kuery');
+  const autocompleteProvider = autocomplete.getQuerySyntaxProvider('kuery');
   if (!autocompleteProvider) {
     return [];
   }
@@ -102,7 +102,7 @@ export function KueryBar({ autocomplete }: Props) {
       );
       suggestions = suggestions
         .filter(
-          (suggestion: autocompleteNamespace.AutocompleteSuggestion) =>
+          (suggestion: autocompleteNamespace.QuerySyntaxSuggestion) =>
             !startsWith(suggestion.text, 'span.')
         )
         .slice(0, 15);

@@ -28,7 +28,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocompleteNamespace.AutocompleteSuggestion[];
+  suggestions: autocompleteNamespace.QuerySyntaxSuggestion[];
   isLoadingSuggestions: boolean;
 }
 
@@ -42,7 +42,7 @@ function getSuggestions(
   selectionStart: number,
   indexPattern: IIndexPattern,
   boolFilter: unknown,
-  autocompleteProvider?: autocompleteNamespace.AutocompleteProvider
+  autocompleteProvider?: autocompleteNamespace.QuerySyntaxProvider
 ) {
   if (!autocompleteProvider) {
     return [];
@@ -67,7 +67,9 @@ export function KueryBar() {
   const { urlParams } = useUrlParams();
   const location = useLocation();
   const { data } = useApmPluginContext().plugins;
-  const autocompleteProvider = data.autocomplete.getProvider('kuery');
+  const autocompleteProvider = data.autocomplete.getQuerySyntaxProvider(
+    'kuery'
+  );
 
   let currentRequestCheck;
 
@@ -106,7 +108,9 @@ export function KueryBar() {
           autocompleteProvider
         )
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter(
+          suggestion => suggestion && !startsWith(suggestion.text, 'span.')
+        )
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

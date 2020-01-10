@@ -10,6 +10,6 @@ export interface ElasticsearchAdapter {
   getSuggestions: (
     kuery: string,
     selectionStart: any
-  ) => Promise<autocomplete.AutocompleteSuggestion[]>;
+  ) => Promise<autocomplete.QuerySyntaxSuggestion[]>;
   isKueryValid(kuery: string): boolean;
 }

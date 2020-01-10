@@ -11,7 +11,7 @@ export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {
   constructor(
     private readonly mockIsKueryValid: (kuery: string) => boolean,
     private readonly mockKueryToEsQuery: (kuery: string) => string,
-    private readonly suggestions: autocomplete.AutocompleteSuggestion[]
+    private readonly suggestions: autocomplete.QuerySyntaxSuggestion[]
   ) {}
 
   public isKueryValid(kuery: string): boolean {
@@ -23,7 +23,7 @@ export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {
   public async getSuggestions(
     kuery: string,
     selectionStart: any
-  ): Promise<autocomplete.AutocompleteSuggestion[]> {
+  ): Promise<autocomplete.QuerySyntaxSuggestion[]> {
     return this.suggestions;
   }
 }

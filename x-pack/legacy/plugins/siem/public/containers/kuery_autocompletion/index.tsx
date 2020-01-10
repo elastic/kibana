@@ -15,7 +15,7 @@ interface KueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.AutocompleteSuggestion[];
+    suggestions: autocomplete.QuerySyntaxSuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -30,14 +30,16 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
     const [currentRequest, setCurrentRequest] = useState<KueryAutocompletionCurrentRequest | null>(
       null
     );
-    const [suggestions, setSuggestions] = useState<autocomplete.AutocompleteSuggestion[]>([]);
+    const [suggestions, setSuggestions] = useState<autocomplete.QuerySyntaxSuggestion[]>([]);
     const kibana = useKibana();
     const loadSuggestions = async (
       expression: string,
       cursorPosition: number,
       maxSuggestions?: number
     ) => {
-      const autocompletionProvider = kibana.services.data.autocomplete.getProvider('kuery');
+      const autocompletionProvider = kibana.services.data.autocomplete.getQuerySyntaxProvider(
+        'kuery'
+      );
 
       if (!autocompletionProvider) {
         return;

@@ -24,10 +24,10 @@ import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
   index: number | null;
-  onClick: (suggestion: autocomplete.AutocompleteSuggestion) => void;
+  onClick: (suggestion: autocomplete.QuerySyntaxSuggestion) => void;
   onMouseEnter: (index: number) => void;
   show: boolean;
-  suggestions: autocomplete.AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySyntaxSuggestion[];
   loadMore: () => void;
 }
 

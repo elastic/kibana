@@ -70,7 +70,7 @@ interface Props {
 interface State {
   isSuggestionsVisible: boolean;
   index: number | null;
-  suggestions: autocomplete.AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySyntaxSuggestion[];
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -89,7 +89,7 @@ const KEY_CODES = {
   END: 35,
 };
 
-const recentSearchType: autocomplete.AutocompleteSuggestionType = 'recentSearch';
+const recentSearchType: autocomplete.QuerySyntaxSuggestionType = 'recentSearch';
 
 export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -141,7 +141,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
+    const autocompleteProvider = this.services.data.autocomplete.getQuerySyntaxProvider(language);
 
     if (
       !autocompleteProvider ||
@@ -162,7 +162,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     try {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
-      const suggestions: autocomplete.AutocompleteSuggestion[] = await getAutocompleteSuggestions({
+      const suggestions = await getAutocompleteSuggestions({
         query: queryString,
         selectionStart,
         selectionEnd,
@@ -316,7 +316,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: autocomplete.AutocompleteSuggestion) => {
+  private selectSuggestion = (suggestion: autocomplete.QuerySyntaxSuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -347,7 +347,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   };
 
   private handleNestedFieldSyntaxNotification = (
-    suggestion: autocomplete.AutocompleteSuggestion
+    suggestion: autocomplete.QuerySyntaxSuggestion
   ) => {
     if (
       'field' in suggestion &&
@@ -450,7 +450,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: autocomplete.AutocompleteSuggestion) => {
+  private onClickSuggestion = (suggestion: autocomplete.QuerySyntaxSuggestion) => {
     if (!this.inputRef) {
       return;
     }

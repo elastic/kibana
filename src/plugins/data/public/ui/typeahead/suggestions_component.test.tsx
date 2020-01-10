@@ -27,7 +27,7 @@ const noop = () => {
   return;
 };
 
-const mockSuggestions: autocomplete.AutocompleteSuggestion[] = [
+const mockSuggestions: autocomplete.QuerySyntaxSuggestion[] = [
   {
     description: 'This is not a helpful suggestion',
     end: 0,

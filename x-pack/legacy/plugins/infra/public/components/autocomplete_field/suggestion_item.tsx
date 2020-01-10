@@ -15,7 +15,7 @@ interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: autocomplete.AutocompleteSuggestion;
+  suggestion: autocomplete.QuerySyntaxSuggestion;
 }
 
 export const SuggestionItem: React.FC<Props> = props => {

@@ -25,7 +25,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: autocomplete.AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySyntaxSuggestion[];
   value: string;
   autoFocus?: boolean;
   'aria-label'?: string;
