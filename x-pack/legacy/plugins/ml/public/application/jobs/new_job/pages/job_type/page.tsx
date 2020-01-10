@@ -151,6 +151,22 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkAdvancedJob',
     },
+    {
+      href: getUrl('#jobs/new_job/categorization'),
+      icon: {
+        type: 'createAdvancedJob',
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
+          defaultMessage: 'Categorization job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
+        defaultMessage: 'Categorization',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationDescription', {
+        defaultMessage: 'Group log messages into categories and detect anomalies within them.',
+      }),
+      id: 'mlJobTypeLinkCategorizationJob',
+    },
   ];
 
   return (

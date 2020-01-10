@@ -34,17 +34,19 @@ export const DonutChartLegend = ({ down, up }: Props) => {
       <DonutChartLegendRow
         color={danger}
         content={down}
-        message={i18n.translate('xpack.uptime.donutChart.legend.downRowLabel', {
+        message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.downRowLabel', {
           defaultMessage: 'Down',
         })}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
         color={gray}
         content={up}
-        message={i18n.translate('xpack.uptime.donutChart.legend.upRowLabel', {
+        message={i18n.translate('xpack.uptime.snapshot.donutChart.legend.upRowLabel', {
           defaultMessage: 'Up',
         })}
+        data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
       />
     </LegendContainer>
   );
