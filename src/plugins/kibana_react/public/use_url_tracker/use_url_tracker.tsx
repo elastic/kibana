@@ -17,33 +17,36 @@
  * under the License.
  */
 
-import { createBrowserHistory, History, Location } from 'history';
-import { getRelativeToHistoryPath } from './kbn_url_storage';
+import { History } from 'history';
+import { useLayoutEffect } from 'react';
+import { createUrlTracker } from '../../../kibana_utils/public/';
 
-export interface IUrlTracker {
-  startTrackingUrl: (history?: History) => () => void;
-  getTrackedUrl: () => string | null;
-  trackUrl: (url: string) => void;
-}
 /**
+ * State management url_tracker in react hook form
+ *
  * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
  * Persists the url in sessionStorage so it could be restored if navigated back to the app
+ *
+ * @param key - key to use in storage
+ * @param history - history instance to use
+ * @param shouldRestoreUrl - cb if url should be restored
+ * @param storage - storage to use. window.sessionStorage is default
  */
-export function createUrlTracker(key: string, storage: Storage = sessionStorage): IUrlTracker {
-  return {
-    startTrackingUrl(history: History = createBrowserHistory()) {
-      const track = (location: Location<any>) => {
-        const url = getRelativeToHistoryPath(history.createHref(location), history);
-        storage.setItem(key, url);
-      };
-      track(history.location);
-      return history.listen(track);
-    },
-    getTrackedUrl() {
-      return storage.getItem(key);
-    },
-    trackUrl(url: string) {
-      storage.setItem(key, url);
-    },
-  };
+export function useUrlTracker(
+  key: string,
+  history: History,
+  shouldRestoreUrl: (urlToRestore: string) => boolean = () => true,
+  storage: Storage = sessionStorage
+) {
+  useLayoutEffect(() => {
+    const urlTracker = createUrlTracker(key, storage);
+    const urlToRestore = urlTracker.getTrackedUrl();
+    if (urlToRestore && shouldRestoreUrl(urlToRestore)) {
+      history.replace(urlToRestore);
+    }
+    const stopTrackingUrl = urlTracker.startTrackingUrl(history);
+    return () => {
+      stopTrackingUrl();
+    };
+  }, [key, history]);
 }

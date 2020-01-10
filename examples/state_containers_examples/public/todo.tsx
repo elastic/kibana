@@ -40,9 +40,9 @@ import {
   createStateContainerReactHelpers,
   PureTransition,
   syncStates,
-  useUrlTracker,
   getStateFromKbnUrl,
 } from '../../../src/plugins/kibana_utils/public';
+import { useUrlTracker } from '../../../src/plugins/kibana_react/public';
 import {
   defaultState,
   pureTransitions,

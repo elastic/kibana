@@ -40,7 +40,6 @@ export {
   unhashUrl,
   unhashQuery,
   createUrlTracker,
-  useUrlTracker,
   createKbnUrlControls,
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
