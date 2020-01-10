@@ -138,9 +138,12 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
       description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : na
     },
     {
-      title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
-        defaultMessage: 'Memory usage (avg.)'
-      }),
+      title: i18n.translate(
+        'xpack.apm.serviceMap.avgMemoryUsagePopoverMetric',
+        {
+          defaultMessage: 'Memory usage (avg.)'
+        }
+      ),
       description: isNumber(avgMemoryUsage) ? asPercent(avgMemoryUsage, 1) : na
     }
   ];
@@ -152,7 +155,7 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
         <EuiFlexItem>
           <div>
             <EuiBadge iconType="apps" color="hollow">
-              {i18n.translate('xpack.apm.serviceMap.instanceCount', {
+              {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
                 values: { numInstances },
                 defaultMessage: '{numInstances} instances'
               })}
