@@ -175,7 +175,7 @@ describe('Policies Lib', () => {
   });
 
   describe('delete', () => {
-    it('Should delete the by the ID', async () => {
+    it('Should delete policy by ID', async () => {
       const newPolicy = await libs.policy.create(
         TestUser,
         'test',

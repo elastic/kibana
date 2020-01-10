@@ -124,7 +124,7 @@ describe('Datasources Lib', () => {
   });
 
   describe('delete', () => {
-    it('Should delete the by the ID', async () => {
+    it('Should delete datasource by ID', async () => {
       const newDatasource = await libs.datasources.create(TestUser, exampleStoredDatasource);
 
       try {

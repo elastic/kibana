@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Policy } from '../../common/types/domain_data';
 
 interface ValidationResults {
-  [key: string]: React.ReactNode[];
+  [key: string]: JSX.Element[];
 }
 
 export const policyFormValidation = (policy: Partial<Policy>): ValidationResults => {
@@ -36,38 +36,43 @@ interface Props {
 
 export const PolicyForm: React.FC<Props> = ({ policy, updatePolicy, validation }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+  const fields: Array<{ name: 'name' | 'description' | 'label'; label: JSX.Element }> = [
+    {
+      name: 'name',
+      label: <FormattedMessage id="xpack.fleet.policyForm.nameFieldLabel" defaultMessage="Name" />,
+    },
+    {
+      name: 'description',
+      label: (
+        <FormattedMessage
+          id="xpack.fleet.policyForm.descriptionFieldLabel"
+          defaultMessage="Description"
+        />
+      ),
+    },
+    {
+      name: 'label',
+      label: (
+        <FormattedMessage id="xpack.fleet.policyForm.labelFieldLabel" defaultMessage="Label" />
+      ),
+    },
+  ];
 
   return (
     <EuiForm>
-      {[
-        [
-          'name',
-          <FormattedMessage id="xpack.fleet.policyForm.nameFieldLabel" defaultMessage="Name" />,
-        ],
-        [
-          'description',
-          <FormattedMessage
-            id="xpack.fleet.policyForm.descriptionFieldLabel"
-            defaultMessage="Description"
-          />,
-        ],
-        [
-          'label',
-          <FormattedMessage id="xpack.fleet.policyForm.labelFieldLabel" defaultMessage="Label" />,
-        ],
-      ].map(field => {
-        const [fieldName, label] = field as ['name' | 'description' | 'label', JSX.Element];
+      {fields.map(({ name, label }) => {
         return (
           <EuiFormRow
+            key={name}
             label={label}
-            error={touchedFields[fieldName] && validation[fieldName] ? validation[fieldName] : null}
-            isInvalid={Boolean(touchedFields[fieldName] && validation[fieldName])}
+            error={touchedFields[name] && validation[name] ? validation[name] : null}
+            isInvalid={Boolean(touchedFields[name] && validation[name])}
           >
             <EuiFieldText
-              value={policy[fieldName]}
-              onChange={e => updatePolicy({ [fieldName]: e.target.value })}
-              isInvalid={Boolean(touchedFields[fieldName] && validation[fieldName])}
-              onBlur={() => setTouchedFields({ ...touchedFields, [fieldName]: true })}
+              value={policy[name]}
+              onChange={e => updatePolicy({ [name]: e.target.value })}
+              isInvalid={Boolean(touchedFields[name] && validation[name])}
+              onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
             />
           </EuiFormRow>
         );
