@@ -5,7 +5,7 @@
  */
 
 import { uniqBy } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { NotePreview } from './note_preview';
