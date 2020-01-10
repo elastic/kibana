@@ -142,6 +142,61 @@ describe('Handler', () => {
       statusCode: 400,
     });
   });
+
+  it('accept to receive an array payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.arrayOf(schema.object({ foo: schema.string() })),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send([{ foo: 'bar' }, { foo: 'dolly' }])
+      .expect(200);
+
+    expect(body).toEqual([{ foo: 'bar' }, { foo: 'dolly' }]);
+  });
+
+  it('accept to receive a json primitive payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.number(),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .type('json')
+      .send('12')
+      .expect(200);
+
+    expect(body).toEqual(12);
+  });
 });
 
 describe('handleLegacyErrors', () => {
