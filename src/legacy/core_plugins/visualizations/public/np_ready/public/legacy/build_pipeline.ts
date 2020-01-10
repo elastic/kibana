@@ -258,7 +258,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const uiStateJson = prepareJson('uiState', uiState);
     const savedObjectIdParam = prepareString('savedObjectId', meta?.savedObjectId);
 
-    return `tsvb ${paramsJson} ${uiStateJson} ${savedObjectIdParam}`;
+    const params = [paramsJson, uiStateJson, savedObjectIdParam].filter(param => Boolean(param));
+    return `tsvb ${params.join(' ')}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);

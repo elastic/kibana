@@ -18,7 +18,6 @@
  */
 
 import { APICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { get } from 'lodash';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 
 export interface ValidationTelemetryServiceSetup {
@@ -53,11 +52,8 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
                 ignore: [404],
               });
               return {
-                failed_validations: get(
-                  response,
-                  '_source.tsvb-validation-telemetry.failedRequests',
-                  0
-                ),
+                failed_validations:
+                  response?._source?.['tsvb-validation-telemetry']?.failedRequests || 0,
               };
             } catch (err) {
               return {
