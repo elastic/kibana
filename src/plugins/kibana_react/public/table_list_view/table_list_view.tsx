@@ -503,7 +503,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody aria-labelledby={this.props.headingId}>
+        <EuiPageBody aria-labelledby={this.state.hasInitialFetchReturned && this.props.headingId}>
           {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>
