@@ -20,17 +20,13 @@ export class WebhookAction extends BaseAction {
     this.method = get(props, 'method');
     this.host = get(props, 'host');
     this.port = get(props, 'port');
-    this.scheme = get(props, 'scheme');
+    this.scheme = get(props, 'scheme', 'http');
     this.path = get(props, 'path');
     this.username = get(props, 'username');
     this.password = get(props, 'password');
     this.contentType = get(props, 'contentType');
-
-    if (typeof this.path !== 'undefined') {
-      this.fullPath = `${this.host}:${this.port}/${this.path}`;
-    } else {
-      this.fullPath = `${this.host}:${this.port}`;
-    }
+    
+    this.fullPath = `${this.host}:${this.port}${this.path ? '/' + this.path : ''}`;
   }
 
   validate() {

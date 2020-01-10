@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'encode-uri-query' {
-  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
-  // eslint-disable-next-line import/no-default-export
-  export default encodeUriQuery;
-}
+export const parameterizeValues = (
+  params: URLSearchParams,
+  obj: Record<string, string[]>
+): void => {
+  Object.keys(obj).forEach(key => {
+    obj[key].forEach(val => {
+      params.append(key, val);
+    });
+  });
+};

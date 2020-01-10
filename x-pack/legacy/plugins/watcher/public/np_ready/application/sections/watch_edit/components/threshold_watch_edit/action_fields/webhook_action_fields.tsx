@@ -29,7 +29,7 @@ interface Props {
 
 const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
-const SCHEME_VERBS = ['', 'http', 'https'];
+const SCHEME = ['http', 'https'];
 
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
@@ -70,7 +70,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.watcher.sections.watchEdit.threshold.webhookAction.SchemeFieldLabel',
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.schemeFieldLabel',
               {
                 defaultMessage: 'Scheme',
               }
@@ -80,7 +80,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               name="scheme"
               value={scheme}
               data-test-subj="webhookSchemeSelect"
-              options={SCHEME_VERBS.map(verb => ({ text: verb, value: verb }))}
+              options={SCHEME.map(verb => ({ text: verb, value: verb }))}
               onChange={e => {
                 editAction({ key: 'scheme', value: e.target.value });
               }}
