@@ -16,7 +16,7 @@ export const ADD_REFERENCE = i18n.translate(
 export const ADD_FALSE_POSITIVE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addFalsePositiveDescription',
   {
-    defaultMessage: 'Add false positive',
+    defaultMessage: 'Add false positive exmaple',
   }
 );
 
