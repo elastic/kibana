@@ -68,7 +68,7 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const [, setAppState] = useUrlState('_a');
+  const [appState, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
 
@@ -88,6 +88,16 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
+
+    const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
+    if (viewByFieldName !== undefined) {
+      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
+    }
+
+    const filterData = appState?.mlExplorerFilter;
+    if (filterData !== undefined) {
+      explorerService.setFilterData(filterData);
+    }
   }, []);
 
   useEffect(() => {

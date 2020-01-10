@@ -177,7 +177,7 @@ export declare const loadViewByTopFieldValuesForSelectedTime: (
   noInfluencersConfigured: boolean
 ) => Promise<any>;
 
-declare interface FilterData {
+export declare interface FilterData {
   influencersFilterQuery: any;
   filterActive: boolean;
   filteredFields: string[];
@@ -191,11 +191,3 @@ export declare interface AppStateSelectedCells {
   showTopFieldValues: boolean;
   viewByFieldName: string;
 }
-
-export declare interface RestoredAppState {
-  selectedCells?: AppStateSelectedCells;
-  filterData: {} | FilterData;
-  viewBySwimlaneFieldName: string;
-}
-
-export declare const restoreAppState: (appState: any) => RestoredAppState;

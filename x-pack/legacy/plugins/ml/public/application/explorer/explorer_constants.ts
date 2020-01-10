@@ -23,6 +23,7 @@ export const EXPLORER_ACTION = {
   SET_BOUNDS: 'setBounds',
   SET_CHARTS: 'setCharts',
   SET_EXPLORER_DATA: 'setExplorerData',
+  SET_FILTER_DATA: 'setFilterData',
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
   SET_SELECTED_CELLS: 'setSelectedCells',
   SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',

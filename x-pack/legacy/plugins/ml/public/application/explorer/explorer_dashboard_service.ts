@@ -102,6 +102,10 @@ const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
   type: EXPLORER_ACTION.SET_EXPLORER_DATA,
   payload,
 });
+const setFilterDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
+  type: EXPLORER_ACTION.SET_FILTER_DATA,
+  payload,
+});
 
 // Export observable state and action dispatchers as service
 export const explorerService = {
@@ -136,6 +140,9 @@ export const explorerService = {
   },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));
+  },
+  setFilterData: (payload: DeepPartial<ExplorerState>) => {
+    explorerAction$.next(setFilterDataActionCreator(payload));
   },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({
