@@ -42,7 +42,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="m" aria-label={title}>
-            <h2>{title}</h2>
+            <h1>{title}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
