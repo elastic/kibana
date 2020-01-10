@@ -16,7 +16,8 @@ const isStringEmpty = (str: string | null): boolean => {
 };
 
 const isSnapshotNameLowerCase = (str: string): boolean => {
-  var strExcludeDate = str.substring(0,str.search("{")) + str.substring(str.search("}}")+2,str.length)
+  const strExcludeDate =
+    str.substring(0, str.search('{')) + str.substring(str.search('}}') + 2, str.length);
   return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
 };
 

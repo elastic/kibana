@@ -78,15 +78,6 @@ describe('<PolicyAdd />', () => {
           expect(form.getErrorsMessages()).toEqual(['Snapshot name is required.']);
         });
 
-        test('snapshot name should be lowercase', () => {
-          const { form, find } = testBed;
-
-          form.setInputValue('snapshotNameInput', '');
-          find('snapshotNameInput').simulate('blur');
-
-          expect(form.getErrorsMessages()).toEqual(['Snapshot name needs to be lowercase.']);
-        });
-
         it('should require a schedule', () => {
           const { form, find } = testBed;
 
