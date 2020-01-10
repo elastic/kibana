@@ -129,6 +129,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
+    async closeLoadSavedSearchPanel() {
+      await testSubjects.click('euiFlyoutCloseButton');
+    }
+
     async getChartCanvas() {
       return await find.byCssSelector('.echChart canvas:last-of-type');
     }
