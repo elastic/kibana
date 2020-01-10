@@ -290,7 +290,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                   (t, index) =>
                     ({
                       description: t.description,
-                      favorite: t.favorite?.length > 0 ?? false,
+                      favorite: !isEmpty(t.favorite),
                       label: t.title,
                       id: t.savedObjectId,
                       key: `${t.title}-${index}`,
