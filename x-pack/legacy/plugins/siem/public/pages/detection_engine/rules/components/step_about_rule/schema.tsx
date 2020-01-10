@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import * as RuleI18n from '../../translations';
@@ -18,6 +17,8 @@ import {
   ValidationFunc,
   ERROR_CODE,
 } from '../shared_imports';
+import { isMitreAttackInvalid } from '../mitre/helpers';
+import { isUrlInvalid } from './helpers';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -63,7 +64,7 @@ export const schema: FormSchema = {
     ],
   },
   severity: {
-    type: FIELD_TYPES.SELECT,
+    type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel',
       {
@@ -92,6 +93,14 @@ export const schema: FormSchema = {
       }
     ),
   },
+  timeline: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      {
+        defaultMessage: 'Timeline template',
+      }
+    ),
+  },
   references: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',
@@ -100,6 +109,28 @@ export const schema: FormSchema = {
       }
     ),
     labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          let hasError = false;
+          (value as string[]).forEach(url => {
+            if (isUrlInvalid(url)) {
+              hasError = true;
+            }
+          });
+          return hasError
+            ? {
+                code: 'ERR_FIELD_FORMAT',
+                path,
+                message: I18n.URL_FORMAT_INVALID,
+              }
+            : undefined;
+        },
+      },
+    ],
   },
   falsePositives: {
     label: i18n.translate(
@@ -126,7 +157,7 @@ export const schema: FormSchema = {
           const [{ value, path }] = args;
           let hasError = false;
           (value as IMitreEnterpriseAttack[]).forEach(v => {
-            if (isEmpty(v.tactic.name) || (v.tactic.name !== 'none' && isEmpty(v.techniques))) {
+            if (isMitreAttackInvalid(v.tactic.name, v.techniques)) {
               hasError = true;
             }
           });
@@ -146,6 +177,13 @@ export const schema: FormSchema = {
     label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsLabel', {
       defaultMessage: 'Tags',
     }),
+    helpText: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
+      {
+        defaultMessage:
+          'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
+      }
+    ),
     labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
   },
 };
