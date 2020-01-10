@@ -257,9 +257,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -324,9 +326,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -387,9 +391,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -461,9 +467,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -554,9 +562,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -642,9 +652,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -710,9 +722,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
@@ -762,9 +776,11 @@ describe('<ThresholdWatchEdit /> create route', () => {
             triggerIntervalUnit: 'm',
             aggType: 'count',
             termSize: 5,
+            termOrder: 'desc',
             thresholdComparator: '>',
             timeWindowSize: 5,
             timeWindowUnit: 'm',
+            hasTermsAgg: false,
             threshold: 1000,
           };
 
