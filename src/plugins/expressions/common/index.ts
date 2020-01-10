@@ -18,6 +18,6 @@
  */
 
 export * from './expression_types';
-export * from './registries';
-export * from './type';
 export * from './types';
+export * from './executor';
+export * from './util';

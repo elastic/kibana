@@ -23,7 +23,7 @@ import { TypeToString, UnwrapPromise } from './common';
 /**
  * A generic type which represents an Expression Function definition.
  */
-export interface ExpressionFunction<Name extends string, Context, Arguments, Return> {
+export interface IExpressionFunction<Name extends string, Context, Arguments, Return> {
   /** Arguments for the Function */
   args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
   aliases?: string[];
@@ -46,4 +46,4 @@ export interface FunctionHandlers {
   [key: string]: (...args: any) => any;
 }
 
-export type AnyExpressionFunction = ExpressionFunction<string, any, any, any>;
+export type AnyExpressionFunction = IExpressionFunction<string, any, any, any>;
