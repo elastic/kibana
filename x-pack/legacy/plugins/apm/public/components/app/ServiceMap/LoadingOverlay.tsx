@@ -8,6 +8,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { EuiProgress, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 
 const Container = styled.div`
   position: relative;
@@ -29,26 +30,43 @@ const ProgressBarContainer = styled.div`
   max-width: 600px;
 `;
 
-const Content = styled.div<{ isLoading: boolean }>`
-  ${props =>
-    props.isLoading
-      ? `
-      pointer-events: none;
-      opacity: 0.5;
-    `
-      : ''}
-`;
+function Content({
+  isInteractive,
+  children
+}: {
+  isInteractive: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={
+        // Necessary because React should only update the style of the DOM node,
+        // otherwise Cytoscape rendering repaints with visual bugs.
+        isInteractive
+          ? undefined
+          : {
+              pointerEvents: 'none',
+              opacity: 0.5
+            }
+      }
+    >
+      {children}
+    </div>
+  );
+}
 
 interface Props {
   children: React.ReactNode;
   isLoading: boolean;
   percentageLoaded: number;
+  isInteractive: boolean;
 }
 
 export const LoadingOverlay = ({
   children,
   isLoading,
-  percentageLoaded
+  percentageLoaded,
+  isInteractive
 }: Props) => (
   <Container>
     {isLoading && (
@@ -63,10 +81,13 @@ export const LoadingOverlay = ({
         </ProgressBarContainer>
         <EuiSpacer size="s" />
         <EuiText size="s" textAlign="center">
-          {'Loading service map... This might take a short while.'}
+          {i18n.translate('xpack.apm.loadingServiceMap', {
+            defaultMessage:
+              'Loading service map... This might take a short while.'
+          })}
         </EuiText>
       </Overlay>
     )}
-    <Content isLoading={isLoading}>{children}</Content>
+    <Content isInteractive={isInteractive}>{children}</Content>
   </Container>
 );
