@@ -84,4 +84,9 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   updated_by: string | undefined | null;
 };
 
+export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
+  id: string | undefined | null;
+  rule_id: string;
+};
+
 export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;

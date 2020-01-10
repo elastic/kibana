@@ -97,6 +97,7 @@
     "packages": [
       "packages/*",
       "x-pack",
+      "x-pack/plugins/*",
       "x-pack/legacy/plugins/*",
       "examples/*",
       "test/plugin_functional/plugins/*",
@@ -169,7 +170,6 @@
     "elastic-apm-node": "^3.2.0",
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
-    "encode-uri-query": "1.0.1",
     "execa": "^3.2.0",
     "expiry-js": "0.1.7",
     "fast-deep-equal": "^3.1.1",

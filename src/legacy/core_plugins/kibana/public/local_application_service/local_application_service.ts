@@ -68,7 +68,7 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            const params = { element, appBasePath: '' };
+            const params = { element, appBasePath: '', onAppLeave: () => undefined };
             unmountHandler = isAppMountDeprecated(app.mount)
               ? await app.mount({ core: npStart.core }, params)
               : await app.mount(params);
