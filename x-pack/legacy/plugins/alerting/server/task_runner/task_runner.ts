@@ -15,6 +15,7 @@ import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
 import { AlertType, RawAlert, IntervalSchedule, Services, State } from '../types';
 import { promiseResult, map } from '../lib/result_type';
+import { incrementAlertsExecutionsCount } from '../usage/alerts_telemetry';
 
 type AlertInstances = Record<string, AlertInstance>;
 
@@ -154,6 +155,8 @@ export class TaskRunner {
         instancesWithScheduledActions,
         ...mutedInstanceIds
       );
+
+      incrementAlertsExecutionsCount(services.savedObjectsClient, this.alertType.name);
 
       await Promise.all(
         Object.entries(enabledAlertInstances)

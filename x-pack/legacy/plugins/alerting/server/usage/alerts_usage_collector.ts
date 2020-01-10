@@ -7,8 +7,9 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsLegacyService } from 'kibana/server';
-import { AlertsUsage } from './types';
+import { AlertsUsage, AlertsTelemetrySavedObject } from './types';
 import { AlertTypeRegistry } from '../alert_type_registry';
+import { ALERTS_TELEMETRY_DOC_ID, createAlertsTelemetry } from './alerts_telemetry';
 
 interface Config {
   isAlertsEnabled: boolean;
@@ -93,13 +94,35 @@ async function getTotalInUseCountByAlertType(savedObjectsClient: any, alertTypeI
     .length;
 }
 
+async function getExecutions(savedObjectsClient: any) {
+  try {
+    const mlTelemetrySavedObject = (await savedObjectsClient.get(
+      'actions-telemetry',
+      ALERTS_TELEMETRY_DOC_ID
+    )) as AlertsTelemetrySavedObject;
+    return mlTelemetrySavedObject.attributes;
+  } catch (err) {
+    return createAlertsTelemetry();
+  }
+}
+
+async function getExecutionsCount(savedObjectsClient: any) {
+  const actionExecutions = await getExecutions(savedObjectsClient);
+  return actionExecutions.executions_total;
+}
+
 async function getExecutionsCountByAlertTypes(
   savedObjectsClient: any,
   alertTypeRegistry: AlertTypeRegistry
 ) {
-  const totalByAlertType = alertTypeRegistry
-    .list()
-    .reduce((res: any, alertType) => ({ ...res, [alertType.name]: 0 }), {});
+  const alertExecutions = await getExecutions(savedObjectsClient);
+  const totalByAlertType = alertTypeRegistry.list().reduce(
+    (res: any, alertType) => ({
+      ...res,
+      [alertType.name]: alertExecutions.excutions_count_by_type[alertType.name] ?? 0,
+    }),
+    {}
+  );
   return totalByAlertType;
 }
 
@@ -119,7 +142,7 @@ export function createAlertsUsageCollector(
         enabled: isAlertsEnabled,
         count_total: await getTotalCount(savedObjectsClient),
         count_active_total: await getInUseTotalCount(savedObjectsClient),
-        executions_total: 0,
+        executions_total: await getExecutionsCount(savedObjectsClient),
         count_active_by_type: await getTotalInUseCountByAlertTypes(
           savedObjectsClient,
           alertTypeRegistry

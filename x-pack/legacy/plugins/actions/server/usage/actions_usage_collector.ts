@@ -7,8 +7,11 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsLegacyService } from 'kibana/server';
-import { ActionsUsage } from './types';
+import { ActionsUsage, ActionsTelemetrySavedObject } from './types';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { createActionsTelemetry } from './actions_telemetry';
+
+export const ACTIONS_TELEMETRY_DOC_ID = 'actions-telemetry';
 
 interface Config {
   isActionsEnabled: boolean;
@@ -66,6 +69,23 @@ async function getTotalCountByActionTypes(
   return totalByActionType;
 }
 
+async function getExecutions(savedObjectsClient: any) {
+  try {
+    const mlTelemetrySavedObject = (await savedObjectsClient.get(
+      'actions-telemetry',
+      ACTIONS_TELEMETRY_DOC_ID
+    )) as ActionsTelemetrySavedObject;
+    return mlTelemetrySavedObject.attributes;
+  } catch (err) {
+    return createActionsTelemetry();
+  }
+}
+
+async function getExecutionsCount(savedObjectsClient: any) {
+  const actionExecutions = await getExecutions(savedObjectsClient);
+  return actionExecutions.executions_total;
+}
+
 async function getTotalCountByActionType(savedObjectsClient: any, actionTypeId: string) {
   const findResult = await savedObjectsClient.find({
     type: 'action',
@@ -118,9 +138,14 @@ async function getExecutionsCountByActionTypes(
   savedObjectsClient: any,
   actionTypeRegistry: ActionTypeRegistry
 ) {
-  const totalByActionType = actionTypeRegistry
-    .list()
-    .reduce((res: any, actionType) => ({ ...res, [actionType.name]: 0 }), {});
+  const actionExecutions = await getExecutions(savedObjectsClient);
+  const totalByActionType = actionTypeRegistry.list().reduce(
+    (res: any, actionType) => ({
+      ...res,
+      [actionType.name]: actionExecutions.excutions_count_by_type[actionType.name] ?? 0,
+    }),
+    {}
+  );
   return totalByActionType;
 }
 
@@ -140,7 +165,7 @@ export function createActionsUsageCollector(
         enabled: isActionsEnabled,
         count_total: await getTotalCount(savedObjectsClient),
         count_active_total: await getInUseTotalCount(savedObjectsClient),
-        executions_total: 0,
+        executions_total: await getExecutionsCount(savedObjectsClient),
         count_active_by_type: await getTotalInUseCountByActionTypes(
           savedObjectsClient,
           actionTypeRegistry

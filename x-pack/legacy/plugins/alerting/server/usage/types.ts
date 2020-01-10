@@ -13,3 +13,12 @@ export interface AlertsUsage {
   count_active_by_type: Record<string, number>;
   executions_by_type: Record<string, number>;
 }
+
+export interface AlertsTelemetry {
+  executions_total: number;
+  excutions_count_by_type: Record<string, number>;
+}
+
+export interface AlertsTelemetrySavedObject {
+  attributes: AlertsTelemetry;
+}

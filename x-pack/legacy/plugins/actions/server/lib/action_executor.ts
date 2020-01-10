@@ -15,6 +15,7 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
+import { incrementActionExecutionsCount } from '../usage/actions_telemetry';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -118,6 +119,8 @@ export class ActionExecutor {
     }
 
     logger.debug(`action executed successfully: ${actionLabel}`);
+
+    incrementActionExecutionsCount(services.savedObjectsClient, actionType.name);
 
     // return basic response if none provided
     if (result == null) return { status: 'ok', actionId };
