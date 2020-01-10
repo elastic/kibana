@@ -17,4 +17,29 @@
  * under the License.
  */
 
-module.exports = require('../node_modules/moment/min/moment-with-locales.min.js');
+/**
+ * Absolute path to the distributable directory
+ */
+export const distDir: string;
+
+/**
+ * Filename of the main bundle file in the distributable directory
+ */
+export const distFilename: string;
+
+/**
+ * Filename of the dark-theme css file in the distributable directory
+ */
+export const darkCssDistFilename: string;
+
+/**
+ * Filename of the light-theme css file in the distributable directory
+ */
+export const lightCssDistFilename: string;
+
+/**
+ * Externals mapping inteded to be used in a webpack config
+ */
+export const externals: {
+  [key: string]: string;
+};
