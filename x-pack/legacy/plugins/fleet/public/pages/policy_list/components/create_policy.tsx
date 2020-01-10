@@ -18,7 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { Policy } from '../../../../common/types/domain_data';
-import { PolicyForm } from '../../../components';
+import { PolicyForm, policyFormValidation } from '../../../components';
 import { useLibs } from '../../../hooks';
 
 interface RouterProps {
@@ -28,7 +28,7 @@ interface RouterProps {
 export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
   const libs = useLibs();
 
-  const [policy, setPolicy] = useState<Partial<Policy>>({ name: '', description: '' });
+  const [policy, setPolicy] = useState<Partial<Policy>>({ name: '', description: '', label: '' });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const updatePolicy = (updatedFields: Partial<Policy>) => {
     setPolicy({
@@ -36,6 +36,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
       ...updatedFields,
     });
   };
+  const validation = policyFormValidation(policy);
 
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetCreatePolicyFlyoutTitle">
@@ -52,7 +53,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
 
   const body = (
     <EuiFlyoutBody>
-      <PolicyForm policy={policy} updatePolicy={updatePolicy} />
+      <PolicyForm policy={policy} updatePolicy={updatePolicy} validation={validation} />
     </EuiFlyoutBody>
   );
 
@@ -71,6 +72,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
           <EuiButton
             fill
             isLoading={isLoading}
+            disabled={isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {

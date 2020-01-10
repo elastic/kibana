@@ -65,7 +65,12 @@ describe('Policies Lib', () => {
 
   describe('create', () => {
     it('should create a new policy', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+      const newPolicy = await libs.policy.create(
+        TestUser,
+        'test',
+        'test description',
+        'test label'
+      );
 
       expect(typeof newPolicy.id).toBe('string');
 
@@ -95,9 +100,24 @@ describe('Policies Lib', () => {
 
   describe('list', () => {
     it('should list all active policies', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-      const newPolicy2 = await libs.policy.create(TestUser, 'test2', 'test description');
-      const newPolicy3 = await libs.policy.create(TestUser, 'test3', 'test description');
+      const newPolicy = await libs.policy.create(
+        TestUser,
+        'test',
+        'test description',
+        'test label'
+      );
+      const newPolicy2 = await libs.policy.create(
+        TestUser,
+        'test2',
+        'test description',
+        'test label'
+      );
+      const newPolicy3 = await libs.policy.create(
+        TestUser,
+        'test3',
+        'test description',
+        'test label'
+      );
 
       expect(typeof newPolicy.id).toBe('string');
 
@@ -111,7 +131,12 @@ describe('Policies Lib', () => {
 
   describe('update', () => {
     it('should update a policy and invalidate the original', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+      const newPolicy = await libs.policy.create(
+        TestUser,
+        'test',
+        'test description',
+        'test label'
+      );
       const updated = await libs.policy.update(TestUser, newPolicy.id as string, {
         name: 'foo',
       });
@@ -122,7 +147,12 @@ describe('Policies Lib', () => {
     });
 
     it('should assign and unassign data sources to policy', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+      const newPolicy = await libs.policy.create(
+        TestUser,
+        'test',
+        'test description',
+        'test label'
+      );
       const firstAssign = await libs.policy.assignDatasource(TestUser, newPolicy.id as string, [
         'foo',
         'bar',
@@ -145,8 +175,13 @@ describe('Policies Lib', () => {
   });
 
   describe('delete', () => {
-    it('Should delete the by the ID', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+    it('Should delete policy by ID', async () => {
+      const newPolicy = await libs.policy.create(
+        TestUser,
+        'test',
+        'test description',
+        'test label'
+      );
 
       try {
         await libs.policy.delete(TestUser, [newPolicy.id as string]);

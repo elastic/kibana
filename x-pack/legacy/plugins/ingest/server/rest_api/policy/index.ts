@@ -84,12 +84,17 @@ export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
     validate: {
       payload: {
         name: Joi.string().required(),
-        description: Joi.string().optional(),
+        description: Joi.string()
+          .optional()
+          .allow(''),
+        label: Joi.string()
+          .optional()
+          .allow(''),
       },
     },
   },
   handler: (async (
-    request: FrameworkRequest<{ payload: { name: string; description?: string } }>
+    request: FrameworkRequest<{ payload: { name: string; description?: string; label?: string } }>
   ): Promise<ReturnTypeCreate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
       throw Boom.unauthorized('Only authenticated users can create a policy');
@@ -97,7 +102,8 @@ export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
     const policy = await libs.policy.create(
       request.user,
       request.payload.name,
-      request.payload.description
+      request.payload.description,
+      request.payload.label
     );
 
     return { item: policy, success: true, action: 'created' };
@@ -111,14 +117,19 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
     validate: {
       payload: {
         name: Joi.string().required(),
-        description: Joi.string().optional(),
+        description: Joi.string()
+          .optional()
+          .allow(''),
+        label: Joi.string()
+          .optional()
+          .allow(''),
       },
     },
   },
   handler: (async (
     request: FrameworkRequest<{
       params: { policyId: string };
-      payload: { name: string; description?: string };
+      payload: { name: string; description?: string; label?: string };
     }>
   ): Promise<ReturnTypeUpdate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
@@ -127,6 +138,7 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
     const policy = await libs.policy.update(request.user, request.params.policyId, {
       name: request.payload.name,
       description: request.payload.description,
+      label: request.payload.label,
     });
 
     return { item: policy, success: true, action: 'updated' };

@@ -18,6 +18,7 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiLink,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -68,9 +69,16 @@ export const PolicyListPage: React.FC<{}> = () => {
     {
       field: 'name',
       name: i18n.translate('xpack.fleet.policyList.nameColumnTitle', {
-        defaultMessage: 'Name/ID',
+        defaultMessage: 'Name',
       }),
       render: (name: string, policy: Policy) => name || policy.id,
+    },
+    {
+      field: 'label',
+      name: i18n.translate('xpack.fleet.policyList.labelColumnTitle', {
+        defaultMessage: 'Label',
+      }),
+      render: (label: string) => (label ? <EuiBadge>{label}</EuiBadge> : null),
     },
     {
       field: 'description',

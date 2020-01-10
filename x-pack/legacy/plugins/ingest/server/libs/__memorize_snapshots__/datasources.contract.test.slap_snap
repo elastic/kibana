@@ -7,7 +7,7 @@ exports['Datasources Lib create should create a datasource - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -23,7 +23,7 @@ exports['Datasources Lib create should create a datasource - get info (1)'] = {
 
 exports['Datasources Lib create should create a datasource - create - {"name":"prod_west","package":"coredns"} (2)'] = {
   "results": {
-    "id": "1c24eb30-1bba-11ea-bb43-a3136d820c76",
+    "id": "4a96efe0-33e3-11ea-9467-4fb57da8b45e",
     "name": "prod_west",
     "package": {
       "name": "coredns",
@@ -71,9 +71,9 @@ exports['Datasources Lib create should create a datasource - create - {"name":"p
   }
 }
 
-exports['Datasources Lib create should create a datasource - get - "1c24eb30-1bba-11ea-bb43-a3136d820c76" (3)'] = {
+exports['Datasources Lib create should create a datasource - get - "4a96efe0-33e3-11ea-9467-4fb57da8b45e" (3)'] = {
   "results": {
-    "id": "1c24eb30-1bba-11ea-bb43-a3136d820c76",
+    "id": "4a96efe0-33e3-11ea-9467-4fb57da8b45e",
     "name": "prod_west",
     "package": {
       "name": "coredns",
@@ -129,7 +129,7 @@ exports['Datasources Lib list should list all datasources - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -145,7 +145,7 @@ exports['Datasources Lib list should list all datasources - get info (1)'] = {
 
 exports['Datasources Lib list should list all datasources - create - {"name":"test1","package":"coredns"} (2)'] = {
   "results": {
-    "id": "1c76dbc0-1bba-11ea-bb43-a3136d820c76",
+    "id": "4b18a300-33e3-11ea-9467-4fb57da8b45e",
     "name": "test1",
     "package": {
       "name": "coredns",
@@ -201,7 +201,7 @@ exports['Datasources Lib list should list all datasources - get info (3)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -217,7 +217,7 @@ exports['Datasources Lib list should list all datasources - get info (3)'] = {
 
 exports['Datasources Lib list should list all datasources - create - {"name":"test2","package":"coredns"} (4)'] = {
   "results": {
-    "id": "1d0f4b30-1bba-11ea-bb43-a3136d820c76",
+    "id": "4bbea700-33e3-11ea-9467-4fb57da8b45e",
     "name": "test2",
     "package": {
       "name": "coredns",
@@ -273,7 +273,7 @@ exports['Datasources Lib list should list all datasources - get info (5)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -289,7 +289,7 @@ exports['Datasources Lib list should list all datasources - get info (5)'] = {
 
 exports['Datasources Lib list should list all datasources - create - {"name":"test3","package":"coredns"} (6)'] = {
   "results": {
-    "id": "1dac7590-1bba-11ea-bb43-a3136d820c76",
+    "id": "4c5541b0-33e3-11ea-9467-4fb57da8b45e",
     "name": "test3",
     "package": {
       "name": "coredns",
@@ -341,7 +341,7 @@ exports['Datasources Lib list should list all datasources - list - {"username":"
   "results": {
     "items": [
       {
-        "id": "1c76dbc0-1bba-11ea-bb43-a3136d820c76",
+        "id": "4b18a300-33e3-11ea-9467-4fb57da8b45e",
         "name": "test1",
         "package": {
           "name": "coredns",
@@ -388,7 +388,7 @@ exports['Datasources Lib list should list all datasources - list - {"username":"
         "read_alias": "string"
       },
       {
-        "id": "1d0f4b30-1bba-11ea-bb43-a3136d820c76",
+        "id": "4bbea700-33e3-11ea-9467-4fb57da8b45e",
         "name": "test2",
         "package": {
           "name": "coredns",
@@ -435,7 +435,7 @@ exports['Datasources Lib list should list all datasources - list - {"username":"
         "read_alias": "string"
       },
       {
-        "id": "1dac7590-1bba-11ea-bb43-a3136d820c76",
+        "id": "4c5541b0-33e3-11ea-9467-4fb57da8b45e",
         "name": "test3",
         "package": {
           "name": "coredns",
@@ -496,7 +496,7 @@ exports['Datasources Lib update should update a datasource - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -512,7 +512,7 @@ exports['Datasources Lib update should update a datasource - get info (1)'] = {
 
 exports['Datasources Lib update should update a datasource - create - {"name":"prod_west","package":"coredns"} (2)'] = {
   "results": {
-    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "id": "4cf61590-33e3-11ea-9467-4fb57da8b45e",
     "name": "prod_west",
     "package": {
       "name": "coredns",
@@ -560,9 +560,9 @@ exports['Datasources Lib update should update a datasource - create - {"name":"p
   }
 }
 
-exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bba-11ea-bb43-a3136d820c76" (3)'] = {
+exports['Datasources Lib update should update a datasource - get - "4cf61590-33e3-11ea-9467-4fb57da8b45e" (3)'] = {
   "results": {
-    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "id": "4cf61590-33e3-11ea-9467-4fb57da8b45e",
     "name": "prod_west",
     "package": {
       "name": "coredns",
@@ -612,7 +612,7 @@ exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bb
 
 exports['Datasources Lib update should update a datasource - update - {"name":"foo","package":"coredns"} (4)'] = {
   "results": {
-    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "id": "4cf61590-33e3-11ea-9467-4fb57da8b45e",
     "name": "foo",
     "package": {
       "name": "coredns",
@@ -660,9 +660,9 @@ exports['Datasources Lib update should update a datasource - update - {"name":"f
   }
 }
 
-exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bba-11ea-bb43-a3136d820c76" (5)'] = {
+exports['Datasources Lib update should update a datasource - get - "4cf61590-33e3-11ea-9467-4fb57da8b45e" (5)'] = {
   "results": {
-    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "id": "4cf61590-33e3-11ea-9467-4fb57da8b45e",
     "name": "foo",
     "package": {
       "name": "coredns",
@@ -710,7 +710,7 @@ exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bb
   }
 }
 
-exports['Datasources Lib delete Should delete the by the ID - get info (1)'] = {
+exports['Datasources Lib delete Should delete datasource by ID - get info (1)'] = {
   "results": {
     "kibana": {
       "version": "8.0.0"
@@ -718,7 +718,7 @@ exports['Datasources Lib delete Should delete the by the ID - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578621628829
+      "expiry_date_in_millis": 1581278152997
     },
     "security": {
       "enabled": true,
@@ -732,9 +732,9 @@ exports['Datasources Lib delete Should delete the by the ID - get info (1)'] = {
   "thrownError": null
 }
 
-exports['Datasources Lib delete Should delete the by the ID - create - {"name":"prod_west","package":"coredns"} (2)'] = {
+exports['Datasources Lib delete Should delete datasource by ID - create - {"name":"prod_west","package":"coredns"} (2)'] = {
   "results": {
-    "id": "1f861790-1bba-11ea-bb43-a3136d820c76",
+    "id": "4e304340-33e3-11ea-9467-4fb57da8b45e",
     "name": "prod_west",
     "package": {
       "name": "coredns",
@@ -782,9 +782,9 @@ exports['Datasources Lib delete Should delete the by the ID - create - {"name":"
   }
 }
 
-exports['Datasources Lib delete Should delete the by the ID - delete - 1f861790-1bba-11ea-bb43-a3136d820c76'] = {}
+exports['Datasources Lib delete Should delete datasource by ID - delete - 4e304340-33e3-11ea-9467-4fb57da8b45e'] = {}
 
-exports['Datasources Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
+exports['Datasources Lib delete Should delete datasource by ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
   "results": {
     "items": [],
     "total": 0,

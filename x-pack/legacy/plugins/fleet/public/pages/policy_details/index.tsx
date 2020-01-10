@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiBadge,
 } from '@elastic/eui';
 import { RouteComponentProps, Redirect } from 'react-router-dom';
 import { DEFAULT_POLICY_ID } from '../../../common/constants';
@@ -175,19 +176,28 @@ export const PolicyDetailsPage: React.FC<Props> = ({
           ) : null}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>
-                  {policy.name || (
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.policyDetailsTitle"
-                      defaultMessage="Policy '{id}'"
-                      values={{
-                        id: policyId,
-                      }}
-                    />
-                  )}
-                </h1>
-              </EuiTitle>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>
+                      {policy.name || (
+                        <FormattedMessage
+                          id="xpack.fleet.policyDetails.policyDetailsTitle"
+                          defaultMessage="Policy '{id}'"
+                          values={{
+                            id: policyId,
+                          }}
+                        />
+                      )}
+                    </h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {policy.label ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{policy.label}</EuiBadge>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
               {policy.description ? (
                 <Fragment>
                   <EuiSpacer size="s" />
