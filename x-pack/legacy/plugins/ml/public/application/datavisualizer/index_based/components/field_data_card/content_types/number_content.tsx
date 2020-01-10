@@ -87,9 +87,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           }}
         />
       </div>
-
       <EuiSpacer size="xs" />
-
       <div>
         <EuiIcon type="database" />
         &nbsp;
@@ -101,9 +99,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           }}
         />
       </div>
-
       <EuiSpacer size="m" />
-
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={1}>
           <EuiText color="subdued" size="xs">
@@ -130,7 +126,6 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={1} className="eui-textTruncate">
           <DisplayValue value={kibanaFieldFormat(min, fieldFormat)} />
@@ -142,12 +137,8 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           <DisplayValue value={kibanaFieldFormat(max, fieldFormat)} />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
+      <EuiSpacer size="s" />
       <EuiButtonGroup
-        buttonSize="compressed"
-        isFullWidth
         options={detailsOptions}
         idSelected={detailsMode}
         onChange={optionId => setDetailsMode(optionId as DETAILS_MODE)}
@@ -158,10 +149,10 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           }
         )}
         data-test-subj="mlFieldDataCardNumberDetailsSelect"
+        isFullWidth={true}
+        buttonSize="compressed"
       />
-
-      <EuiSpacer size="m" />
-
+      <EuiSpacer size="s" />
       {detailsMode === DETAILS_MODE.DISTRIBUTION && (
         <Fragment>
           <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">
@@ -190,7 +181,6 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiFlexGroup>
         </Fragment>
       )}
-
       {detailsMode === DETAILS_MODE.TOP_VALUES && (
         <EuiFlexGroup>
           <EuiFlexItem>

@@ -81,7 +81,7 @@ export const FieldsPanel: FC<Props> = ({
   return (
     <div data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
@@ -93,7 +93,7 @@ export const FieldsPanel: FC<Props> = ({
                 <b>{fieldVisConfigs.length}</b>
               </EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.fieldsPanel.totalFieldLabel"
@@ -104,23 +104,26 @@ export const FieldsPanel: FC<Props> = ({
                 />
               </EuiText>
             </EuiFlexItem>
+            {populatedFieldCount < totalFieldCount && (
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  id={`${title}_show_empty_fields`}
+                  label={i18n.translate(
+                    'xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel',
+                    {
+                      defaultMessage: 'Show empty fields',
+                    }
+                  )}
+                  checked={showAllFields}
+                  onChange={onShowAllFieldsChange}
+                  data-test-subj="mlDataVisualizerShowEmptyFieldsCheckbox"
+                  compressed
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {populatedFieldCount < totalFieldCount && (
-          <EuiFlexItem>
-            <EuiSwitch
-              compressed
-              id={`${title}_show_empty_fields`}
-              label={i18n.translate('xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel', {
-                defaultMessage: 'Show empty fields',
-              })}
-              checked={showAllFields}
-              onChange={onShowAllFieldsChange}
-              data-test-subj="mlDataVisualizerShowEmptyFieldsCheckbox"
-            />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={true}>
           <EuiFlexGroup alignItems="center" gutterSize="m" direction="rowReverse">
             <EuiFlexItem
@@ -133,9 +136,7 @@ export const FieldsPanel: FC<Props> = ({
                 box={{
                   placeholder: i18n.translate(
                     'xpack.ml.datavisualizer.fieldsPanel.filterFieldsPlaceholder',
-                    {
-                      defaultMessage: `Filter ${title}`,
-                    }
+                    { defaultMessage: 'Filter {type}', values: { type: title } }
                   ),
                 }}
                 onChange={onSearchBarChange}
