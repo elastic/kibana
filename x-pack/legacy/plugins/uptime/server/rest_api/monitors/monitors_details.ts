@@ -13,18 +13,24 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
   path: '/api/uptime/monitor/details',
   validate: {
     query: schema.object({
-      monitorId: schema.maybe(schema.string()),
+      monitorId: schema.string(),
+      dateStart: schema.maybe(schema.string()),
+      dateEnd: schema.maybe(schema.string()),
     }),
   },
   options: {
     tags: ['access:uptime'],
   },
   handler: async ({ callES }, _context, request, response): Promise<any> => {
-    const { monitorId } = request.query;
-
+    const { monitorId, dateStart, dateEnd } = request.query;
     return response.ok({
       body: {
-        ...(await libs.monitors.getMonitorDetails({ callES, monitorId })),
+        ...(await libs.monitors.getMonitorDetails({
+          callES,
+          monitorId,
+          dateStart,
+          dateEnd,
+        })),
       },
     });
   },

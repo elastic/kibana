@@ -18,33 +18,67 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IClusterClient } from './cluster_client';
+import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { InternalElasticsearchServiceSetup } from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceSetup } from './types';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
   callAsCurrentUser: jest.fn(),
 });
 
-const createClusterClientMock = (): jest.Mocked<IClusterClient> => ({
-  callAsInternalUser: jest.fn(),
-  asScoped: jest.fn().mockImplementation(createScopedClusterClientMock),
+const createCustomClusterClientMock = (): jest.Mocked<ICustomClusterClient> => ({
+  ...createClusterClientMock(),
   close: jest.fn(),
 });
 
+function createClusterClientMock() {
+  const client: jest.Mocked<IClusterClient> = {
+    callAsInternalUser: jest.fn(),
+    asScoped: jest.fn(),
+  };
+  client.asScoped.mockReturnValue(createScopedClusterClientMock());
+  return client;
+}
+
+type MockedElasticSearchServiceSetup = jest.Mocked<
+  ElasticsearchServiceSetup & {
+    adminClient: jest.Mocked<IClusterClient>;
+    dataClient: jest.Mocked<IClusterClient>;
+  }
+>;
+
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalElasticsearchServiceSetup> = {
+  const setupContract: MockedElasticSearchServiceSetup = {
+    createClient: jest.fn(),
+    adminClient: createClusterClientMock(),
+    dataClient: createClusterClientMock(),
+  };
+  setupContract.createClient.mockReturnValue(createCustomClusterClientMock());
+  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  return setupContract;
+};
+
+type MockedInternalElasticSearchServiceSetup = jest.Mocked<
+  InternalElasticsearchServiceSetup & {
+    adminClient: jest.Mocked<IClusterClient>;
+    dataClient: jest.Mocked<IClusterClient>;
+  }
+>;
+const createInternalSetupContractMock = () => {
+  const setupContract: MockedInternalElasticSearchServiceSetup = {
+    ...createSetupContractMock(),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
-
-    createClient: jest.fn().mockImplementation(createClusterClientMock),
-    adminClient$: new BehaviorSubject((createClusterClientMock() as unknown) as IClusterClient),
-    dataClient$: new BehaviorSubject((createClusterClientMock() as unknown) as IClusterClient),
+    adminClient$: new BehaviorSubject(createClusterClientMock()),
+    dataClient$: new BehaviorSubject(createClusterClientMock()),
   };
+  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
   return setupContract;
 };
 
@@ -55,14 +89,16 @@ const createMock = () => {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
 
 export const elasticsearchServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createInternalSetup: createInternalSetupContractMock,
+  createSetup: createSetupContractMock,
   createClusterClient: createClusterClientMock,
+  createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
 };
