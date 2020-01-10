@@ -8,8 +8,9 @@ for(def i = 0; i < NUMBER_OF_NODES; i++) {
     node('linux && immutable') {
       def innerWork = [:]
       for(def j = 0; j < 5; j++) {
-        innerWork["work-${j}"] = {
-          dir("dir-${j}") {
+        def x = j
+        innerWork["work-${x}"] = {
+          dir("dir-${x}") {
             doIt()
           }
         }
