@@ -67,9 +67,7 @@ describe('useUrlParams', () => {
 
   it('accepts router props, updates URL params, and returns the current params', () => {
     const component = mountWithIntl(
-      <UptimeRefreshContext.Provider
-        value={{ lastRefresh: 123, history: mockRouter.history, location: mockRouter.location }}
-      >
+      <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
         <UseUrlParamsTestComponent hook={useUrlParams} />
       </UptimeRefreshContext.Provider>
     );
@@ -88,11 +86,7 @@ describe('useUrlParams', () => {
       <UptimeRefreshContext.Provider
         value={{
           lastRefresh: 123,
-          history: mockRouter.history,
-          location: {
-            ...mockRouter.location,
-            search: 'g=%22%22&dateRangeStart=now-19d&dateRangeEnd=now-1m',
-          },
+          refreshApp: jest.fn(),
         }}
       >
         <UseUrlParamsTestComponent hook={useUrlParams} />
@@ -111,8 +105,7 @@ describe('useUrlParams', () => {
       <UptimeRefreshContext.Provider
         value={{
           lastRefresh: 123,
-          history: mockRouter.history,
-          location: mockRouter.location,
+          refreshApp: jest.fn(),
         }}
       >
         <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />

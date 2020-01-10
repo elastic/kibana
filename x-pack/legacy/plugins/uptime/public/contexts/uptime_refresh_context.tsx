@@ -5,27 +5,17 @@
  */
 
 import React, { createContext, useMemo, useState } from 'react';
-import { History } from 'history';
 import { useHistory, useLocation } from 'react-router-dom';
 import { store } from '../state';
 import { triggerAppRefresh } from '../state/actions';
 
-interface Location {
-  pathname: string;
-  search: string;
-}
-
 interface UMRefreshContext {
   lastRefresh: number;
-  history: History | undefined;
-  location: Location | undefined;
   refreshApp: () => void;
 }
 
 const defaultContext: UMRefreshContext = {
   lastRefresh: 0,
-  history: undefined,
-  location: undefined,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },
@@ -33,11 +23,7 @@ const defaultContext: UMRefreshContext = {
 
 export const UptimeRefreshContext = createContext(defaultContext);
 
-interface ContextProps {
-  lastRefresh: number;
-}
-
-export const UptimeRefreshContextProvider: React.FC<ContextProps> = ({ children }) => {
+export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
   const history = useHistory();
   const location = useLocation();
 
