@@ -114,7 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should delete a connector', async () => {
+    it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
@@ -141,6 +141,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const deleteConnectorBtn = await testSubjects.find('deleteConnector');
       await deleteConnectorBtn.click();
+      await testSubjects.existOrFail('deleteConnectorsConfirmation');
+      await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteConnectorsConfirmation', { timeout: 30 * 1000 });
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
