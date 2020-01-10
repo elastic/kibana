@@ -16,6 +16,7 @@ your services or apps.
 ## Example
 
 ```ts
+import { createStateContainer } from 'src/plugins/kibana_utils';
 
 const container = createStateContainer(
   { count: 0 },
