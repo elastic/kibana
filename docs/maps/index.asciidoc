@@ -32,7 +32,7 @@ Elastic Maps makes it easy to import geospatial data into the Elastic Stack. Usi
 
 [float]
 === Embed your map in Dashboards
-Viewing your data from different angles provides better insights. Dimensions that are obscured in one visualization may be illuminated from another. Add your maps to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.
+Viewing your data from different angles provides better insights. Dimensions that are obscured in one visualization might be illuminated in another. Add your maps to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.
 
 [float]
 === Create choropleth maps
