@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "date_nanos_test_custom_timestamp",
+    "index": "date_nanos_custom_timestamp",
     "mappings": {
       "properties": {
         "test": {
