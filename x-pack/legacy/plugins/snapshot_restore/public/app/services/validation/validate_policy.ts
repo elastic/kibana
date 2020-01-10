@@ -16,11 +16,12 @@ const isStringEmpty = (str: string | null): boolean => {
 };
 
 // strExcludeDate is the concat results of the SnapshotName ...{...}>... without the date
-// This way we can check only the SnapshotName portion for lowercasing 
+// This way we can check only the SnapshotName portion for lowercasing
 // For example: <logstash-{now/d}> would give strExcludeDate = <logstash->
 
 const isSnapshotNameNotLowerCase = (str: string): boolean => {
-  const strExcludeDate = str.substring(0, str.search('{')) + str.substring(str.search('}>')+1, str.length);
+  const strExcludeDate =
+    str.substring(0, str.search('{')) + str.substring(str.search('}>') + 1, str.length);
   return strExcludeDate !== strExcludeDate.toLowerCase() ? true : false;
 };
 
