@@ -46,13 +46,8 @@ describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
-      saveCookies();
       populateTimeline();
       openTimelineFieldsBrowser();
-    });
-
-    beforeEach(() => {
-      loadCookies();
     });
 
     afterEach(() => {
