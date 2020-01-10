@@ -44,11 +44,10 @@ import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from '../types';
 import {
-  getKibanaBasePathFromDashboardUrl,
   addEmbeddableToDashboardUrl,
-  getDashboardUrlWithQueryParams,
   getUrlVars,
-} from './url_helper';
+  getLensUrlFromDashboardAbsoluteUrl,
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -95,7 +94,6 @@ export class AppPlugin {
         }
         const { data, savedObjectsClient, editorFrame } = this.startDependencies;
         addHelpMenuToAppChrome(context.core.chrome);
-
         const instance = editorFrame.createInstance({});
 
         setReportManager(
@@ -126,25 +124,31 @@ export class AppPlugin {
             routeProps.history.push(`/lens/edit/${id}`);
             const url = context.core.chrome.navLinks.get('kibana:dashboard');
             if (!url) {
-              return;
+              throw new Error('Cannot get last dashboard url');
             }
             const lastDashboardAbsoluteUrl = url.url;
-            const lensUrl = `${getKibanaBasePathFromDashboardUrl(
-              lastDashboardAbsoluteUrl
-            )}/lens/edit/${id}`;
-            if (lastDashboardAbsoluteUrl && lensUrl) {
-              const urlVars = getUrlVars(lastDashboardAbsoluteUrl);
-              updateUrlTime(urlVars);
-              window.history.pushState({}, '', lensUrl);
-              const dashboardUrl = getDashboardUrlWithQueryParams(
-                lastDashboardAbsoluteUrl,
-                urlVars
-              );
-              const dashboardParsedUrl = addEmbeddableToDashboardUrl(dashboardUrl, id, 'lens');
-              if (dashboardParsedUrl) {
-                window.history.pushState({}, '', dashboardParsedUrl);
-              }
+            const basePath = context.core.http.basePath.get();
+            const lensUrl = getLensUrlFromDashboardAbsoluteUrl(
+              lastDashboardAbsoluteUrl,
+              basePath,
+              id
+            );
+            if (!lastDashboardAbsoluteUrl || !lensUrl) {
+              throw new Error('Cannot get last dashboard url');
             }
+            window.history.pushState({}, '', lensUrl);
+            const urlVars = getUrlVars(lastDashboardAbsoluteUrl);
+            updateUrlTime(urlVars); // we need to pass in timerange in query params directly
+            const dashboardParsedUrl = addEmbeddableToDashboardUrl(
+              lastDashboardAbsoluteUrl,
+              basePath,
+              id,
+              urlVars
+            );
+            if (!dashboardParsedUrl) {
+              throw new Error('Problem parsing dashboard url');
+            }
+            window.history.pushState({}, '', dashboardParsedUrl);
           }
         };
 
