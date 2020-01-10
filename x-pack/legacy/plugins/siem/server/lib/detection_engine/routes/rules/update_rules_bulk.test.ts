@@ -23,6 +23,7 @@ import {
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
+import { BulkError } from '../utils';
 
 describe('update_rules_bulk', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -58,10 +59,14 @@ describe('update_rules_bulk', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const { payload } = await server.inject(getUpdateBulkRequest());
-      const parsed = JSON.parse(payload);
-      expect(parsed).toEqual([
-        { error: { message: 'rule_id: "rule-1" not found', statusCode: 404 }, id: 'rule-1' },
-      ]);
+      const parsed: BulkError[] = JSON.parse(payload);
+      const expected: BulkError[] = [
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ];
+      expect(parsed).toEqual(expected);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
@@ -125,10 +130,14 @@ describe('update_rules_bulk', () => {
         payload: [typicalPayload()],
       };
       const { payload } = await server.inject(request);
-      const parsed = JSON.parse(payload);
-      expect(parsed).toEqual([
-        { error: { message: 'rule_id: "rule-1" not found', statusCode: 404 }, id: 'rule-1' },
-      ]);
+      const parsed: BulkError[] = JSON.parse(payload);
+      const expected: BulkError[] = [
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ];
+      expect(parsed).toEqual(expected);
     });
 
     test('returns 200 if type is query', async () => {
