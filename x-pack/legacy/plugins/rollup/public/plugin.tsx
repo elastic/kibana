@@ -40,7 +40,7 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { setHttp } from './crud_app/services';
+import { setHttp, setApiPrefix } from './crud_app/services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -112,6 +112,7 @@ export class RollupPlugin implements Plugin {
 
   start(core: CoreStart, { management }: RollupPluginStartDependencies) {
     setHttp(core.http);
+    setApiPrefix(core.http.basePath.prepend('/api/rollup'));
     const esSection = management.sections.getSection('elasticsearch');
 
     const I18nContext = core.i18n.Context;
@@ -137,6 +138,7 @@ export class RollupPlugin implements Plugin {
                   http: core.http,
                   notifications: core.notifications,
                   chrome: core.chrome,
+                  setBreadcrumbs: params.setBreadcrumbs,
                 }}
               >
                 <Provider store={rollupJobsStore}>

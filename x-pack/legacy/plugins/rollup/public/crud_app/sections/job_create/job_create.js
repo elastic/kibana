@@ -12,9 +12,9 @@ import debounce from 'lodash/function/debounce';
 import first from 'lodash/array/first';
 
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 
 import {
   EuiCallOut,
@@ -92,7 +92,7 @@ export class JobCreateUi extends Component {
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb]);
+    props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
     const { jobToClone: stepDefaultOverrides } = props;
     const stepsFields = mapValues(stepIdToStepConfigMap, step =>
       cloneDeep(step.getDefaultFields(stepDefaultOverrides))
@@ -689,4 +689,4 @@ export class JobCreateUi extends Component {
   }
 }
 
-export const JobCreate = injectI18n(JobCreateUi);
+export const JobCreate = withKibana(JobCreateUi);

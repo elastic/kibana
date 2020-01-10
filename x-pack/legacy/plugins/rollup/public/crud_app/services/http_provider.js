@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// This is an Angular service, which is why we use this provider pattern to access it within
-// our React app.
 let _http;
 
 export function setHttp(http) {

@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createJob, deleteJobs, loadJobs, startJobs, stopJobs, validateIndexPattern } from './api';
+export {
+  createJob,
+  deleteJobs,
+  loadJobs,
+  startJobs,
+  stopJobs,
+  validateIndexPattern,
+  setApiPrefix,
+} from './api';
 
 export { showApiError, showApiWarning } from './api_errors';
 
@@ -34,13 +42,7 @@ export { createNoticeableDelay } from './noticeable_delay';
 
 export { extractQueryParams } from './query_params';
 
-export {
-  setUserHasLeftApp,
-  getUserHasLeftApp,
-  registerRouter,
-  getRouter,
-  getRouterLinkProps,
-} from './routing';
+export { registerRouter, getRouter, getRouterLinkProps } from './routing';
 
 export { sortTable } from './sort_table';
 
