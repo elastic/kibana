@@ -215,9 +215,16 @@ const getRegexArrayFromSearchTerms = (searchTerms: string[]): RegExp[] => {
  */
 const parseSearchTerm = (term: string): SearchData => {
   let type: string | undefined;
-  const parsedTerm = term.replace(/\s+/g, ' ').trim(); // Remove multiple spaces with 1 single space
+  let parsedTerm = term.replace(/\s+/g, ' ').trim(); // Remove multiple spaces with 1 single space
 
   const words = parsedTerm.split(' ');
+
+  // We don't take into account if the last word is a ">" char
+  if (words[words.length - 1] === '>') {
+    words.pop();
+    parsedTerm = words.join(' ');
+  }
+
   const searchRegexArray = getRegexArrayFromSearchTerms(words);
 
   const firstWordIsType = ALL_DATA_TYPES.includes(words[0]);
@@ -234,6 +241,13 @@ const parseSearchTerm = (term: string): SearchData => {
 
 export const searchFields = (term: string, fields: NormalizedFields['byId']): SearchResult[] => {
   const searchData = parseSearchTerm(term);
+
+  // An empty string means that we have searched for ">" and that is has been
+  // stripped out. So we exit early with an empty result.
+  if (searchData.term === '') {
+    return [];
+  }
+
   return Object.values(fields)
     .map(field => ({
       field,
@@ -244,7 +258,6 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
       }),
     }))
     .filter(({ metadata }) => metadata.score > 0)
-    .filter((_, index) => index < 100) // only return the first 100 results
     .sort(sortResult)
     .map(({ field, metadata: { display } }) => ({
       display,

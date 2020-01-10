@@ -189,4 +189,17 @@ describe('Search fields', () => {
     expect(result[0].field.path).toEqual(field2.path); // Field 2 name fully matches
     expect(result[1].field.path).toEqual(field1.path);
   });
+
+  test('should return empty result if searching for ">"', () => {
+    const field1 = getField({ type: 'text' }, ['aerospke', 'namespace']);
+
+    const allFields = {
+      [field1.id]: field1,
+    };
+
+    const searchTerm = '>';
+
+    const result = searchFields(searchTerm, allFields);
+    expect(result.length).toBe(0);
+  });
 });
