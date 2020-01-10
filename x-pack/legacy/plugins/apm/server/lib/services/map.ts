@@ -10,17 +10,17 @@ import { PromiseReturnType } from '../../../typings/common';
 export type ServiceMapResponse = PromiseReturnType<typeof getServiceMap>;
 export async function getServiceMap(): Promise<cytoscape.ElementDefinition[]> {
   return [
-    { data: { id: 'client', agentName: 'js-base', isService: true } },
-    { data: { id: 'opbeans-node', agentName: 'nodejs', isService: true } },
-    { data: { id: 'opbeans-python', agentName: 'python', isService: true } },
-    { data: { id: 'opbeans-java', agentName: 'java', isService: true } },
-    { data: { id: 'opbeans-ruby', agentName: 'ruby', isService: true } },
-    { data: { id: 'opbeans-go', agentName: 'go', isService: true } },
-    { data: { id: 'opbeans-go-2', agentName: 'go', isService: true } },
-    { data: { id: 'opbeans-dotnet', agentName: 'dotnet', isService: true } },
-    { data: { id: 'database', agentName: 'database', isService: false } },
-    { data: { id: 'external API', agentName: 'external', isService: false } },
-
+    { data: { id: 'client', agentName: 'js-base', type: 'service' } },
+    { data: { id: 'opbeans-node', agentName: 'nodejs', type: 'service' } },
+    { data: { id: 'opbeans-python', agentName: 'python', type: 'service' } },
+    { data: { id: 'opbeans-java', agentName: 'java', type: 'service' } },
+    { data: { id: 'opbeans-ruby', agentName: 'ruby', type: 'service' } },
+    { data: { id: 'opbeans-go', agentName: 'go', type: 'service' } },
+    { data: { id: 'opbeans-go-2', agentName: 'go', type: 'service' } },
+    { data: { id: 'opbeans-dotnet', agentName: 'dotnet', type: 'service' } },
+    { data: { id: 'database', agentName: 'database', type: 'database' } },
+    { data: { id: 'external API', type: 'external' } },
+    { data: { id: 'Active MQ', type: 'messaging' } },
     {
       data: {
         id: 'opbeans-client~opbeans-node',
@@ -82,6 +82,13 @@ export async function getServiceMap(): Promise<cytoscape.ElementDefinition[]> {
         id: 'opbeans-go-2~external API',
         source: 'opbeans-go-2',
         target: 'external API'
+      }
+    },
+    {
+      data: {
+        id: 'opbeans-java~Active MQ',
+        source: 'opbeans-java',
+        target: 'Active MQ'
       }
     }
   ];

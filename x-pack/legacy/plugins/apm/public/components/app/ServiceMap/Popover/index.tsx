@@ -10,18 +10,17 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
-  EuiTitle,
-  EuiLoadingContent
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { CSSProperties, useContext, useEffect, useState } from 'react';
 import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
+import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CytoscapeContext } from '../Cytoscape';
 import { Buttons } from './Buttons';
 import { MetricList } from './MetricList';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -37,9 +36,10 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     urlParams: { start, end, environment }
   } = useUrlParams();
 
-  const serviceName = selectedNode?.data('isService')
-    ? (selectedNode.data('id') as string)
-    : null;
+  const serviceName =
+    selectedNode?.data('type') === 'service'
+      ? (selectedNode.data('id') as string)
+      : null;
 
   const { data = {} as ServiceNodeMetrics, status } = useFetcher(
     callApmApi => {
@@ -105,7 +105,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
   const isOpen = !!selectedNode;
   const selectedNodeServiceName: string = selectedNode?.data('id');
-  const isService = !!selectedNode?.data('isService');
+  const isService = selectedNode?.data('type') === 'service';
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
