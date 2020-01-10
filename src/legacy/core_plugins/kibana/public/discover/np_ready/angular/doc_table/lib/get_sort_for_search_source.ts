@@ -29,6 +29,8 @@ import { getSort } from './get_sort';
 export function getSortForSearchSource(sort?: SortOrder[], indexPattern?: IndexPattern) {
   if (!sort || !indexPattern) {
     return [];
+  } else if (Array.isArray(sort) && sort.length === 0) {
+    return [{ _score: 'desc' }];
   }
   const { timeFieldName } = indexPattern;
   return getSort(sort, indexPattern).map((sortPair: Record<string, string>) => {

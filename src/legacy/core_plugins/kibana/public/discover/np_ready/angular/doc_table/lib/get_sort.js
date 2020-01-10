@@ -39,6 +39,7 @@ function createSortObject(sortPair, indexPattern) {
  * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
  *  or an array of objects [{fieldToSort: directionToSort}]
  * @param {object} indexPattern used for determining default sort
+ * @param {string} defaultSortOrder
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
 export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
@@ -52,7 +53,7 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
   } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [{ [indexPattern.timeFieldName]: defaultSortOrder }];
   } else {
-    return [{ _score: 'desc' }];
+    return [];
   }
 }
 
