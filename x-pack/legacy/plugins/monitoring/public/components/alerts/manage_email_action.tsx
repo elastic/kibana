@@ -28,7 +28,7 @@ import { ALERT_EMAIL_SERVICES } from '../../../common/constants';
 export interface EmailActionData {
   service: string;
   host: string;
-  port: number | string; // support a string to ensure the user can backspace to an empty field
+  port: number | ''; // support a string to ensure the user can backspace to an empty field
   secure: boolean;
   from: string;
   user: string;

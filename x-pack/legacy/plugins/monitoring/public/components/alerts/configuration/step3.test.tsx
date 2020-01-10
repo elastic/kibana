@@ -14,6 +14,7 @@ describe('Step3', () => {
     isSaving: false,
     isDisabled: false,
     save: jest.fn(),
+    error: null,
   };
 
   it('should render normally', () => {
@@ -35,6 +36,12 @@ describe('Step3', () => {
 
   it('should show a disabled state', () => {
     const customProps = { isDisabled: true };
+    const component = shallow(<Step3 {...defaultProps} {...customProps} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show an error', () => {
+    const customProps = { error: 'Test error' };
     const component = shallow(<Step3 {...defaultProps} {...customProps} />);
     expect(component).toMatchSnapshot();
   });

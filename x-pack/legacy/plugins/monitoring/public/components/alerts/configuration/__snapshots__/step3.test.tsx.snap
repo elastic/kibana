@@ -59,3 +59,37 @@ exports[`Step3 should show a saving state 1`] = `
   </EuiButton>
 </Fragment>
 `;
+
+exports[`Step3 should show an error 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="danger"
+    iconType="alert"
+    title="Unable to save"
+  >
+    <p>
+      Test error
+    </p>
+  </EuiCallOut>
+  <EuiSpacer />
+  <EuiButton
+    isDisabled={false}
+    isLoading={false}
+    onClick={
+      [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  >
+    Save
+  </EuiButton>
+</Fragment>
+`;

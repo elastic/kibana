@@ -11,8 +11,14 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
+import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { CloudSetup } from '../../../../../plugins/cloud/public';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
+
+interface PluginsSetupWithCloud extends PluginsSetup {
+  cloud: CloudSetup;
+}
 
 function isOnPage(hash: string) {
   return contains(window.location.hash, hash);
@@ -95,7 +101,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  const { cloud } = npSetup.plugins;
+  const { cloud } = npSetup.plugins as PluginsSetupWithCloud;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const hasPermissions = get(data, '_meta.hasPermissions', false);
   if (isCloudEnabled || !hasPermissions) {
@@ -176,7 +182,7 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const { cloud } = npSetup.plugins;
+  const { cloud } = npSetup.plugins as PluginsSetupWithCloud;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const enabled = !globalState.inSetupMode && !isCloudEnabled;
 
