@@ -104,6 +104,8 @@ describe('initXAxis', function() {
 
   it('reads the date interval param from the x agg', function() {
     chart.aspects.x[0].params.interval = 'P1D';
+    chart.aspects.x[0].params.intervalESValue = 1;
+    chart.aspects.x[0].params.intervalESUnit = 'd';
     chart.aspects.x[0].params.date = true;
     initXAxis(chart, table);
     expect(chart)
@@ -113,6 +115,8 @@ describe('initXAxis', function() {
 
     expect(moment.isDuration(chart.ordered.interval)).to.be(true);
     expect(chart.ordered.interval.toISOString()).to.eql('P1D');
+    expect(chart.ordered.intervalESValue).to.be(1);
+    expect(chart.ordered.intervalESUnit).to.be('d');
   });
 
   it('reads the numeric interval param from the x agg', function() {
