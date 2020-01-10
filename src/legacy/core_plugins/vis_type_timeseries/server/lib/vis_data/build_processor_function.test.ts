@@ -17,43 +17,41 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { buildProcessorFunction } from '../build_processor_function';
+import { buildProcessorFunction } from './build_processor_function';
 
 describe('buildProcessorFunction(chain, ...args)', () => {
   const req = {};
   const panel = {};
   const series = {};
 
-  it('should call each processor', () => {
-    const first = sinon.spy(() => next => doc => next(doc));
-    const second = sinon.spy(() => next => doc => next(doc));
+  test('should call each processor', () => {
+    const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
+    const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
     buildProcessorFunction([first, second], req, panel, series);
-    expect(first.calledOnce).to.equal(true);
-    expect(second.calledOnce).to.equal(true);
+    expect(first.mock.calls.length).toEqual(1);
+    expect(second.mock.calls.length).toEqual(1);
   });
 
-  it('should chain each processor', () => {
-    const first = sinon.spy(next => doc => next(doc));
-    const second = sinon.spy(next => doc => next(doc));
+  test('should chain each processor', () => {
+    const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
+    const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
 
     buildProcessorFunction([() => first, () => second], req, panel, series);
 
-    expect(first.calledOnce).to.equal(true);
-    expect(second.calledOnce).to.equal(true);
+    expect(first.mock.calls.length).toEqual(1);
+    expect(second.mock.calls.length).toEqual(1);
   });
 
-  it('should next of each processor', () => {
-    const first = sinon.spy();
-    const second = sinon.spy();
+  test('should next of each processor', () => {
+    const first = jest.fn();
+    const second = jest.fn();
     const fn = buildProcessorFunction(
       [
-        () => next => doc => {
+        () => (next: any) => (doc: any) => {
           first();
           next(doc);
         },
-        () => next => doc => {
+        () => (next: any) => (doc: any) => {
           second();
           next(doc);
         },
@@ -63,7 +61,7 @@ describe('buildProcessorFunction(chain, ...args)', () => {
       series
     );
     fn({});
-    expect(first.calledOnce).to.equal(true);
-    expect(second.calledOnce).to.equal(true);
+    expect(first.mock.calls.length).toEqual(1);
+    expect(second.mock.calls.length).toEqual(1);
   });
 });
