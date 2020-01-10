@@ -19,10 +19,9 @@
 
 import { TimedItemBuffer } from '../timed_item_buffer';
 import { runItemBufferTests } from './run_item_buffer_tests';
-import { ItemBuffer } from '../item_buffer';
 
 describe('TimedItemBuffer', () => {
-  runItemBufferTests((TimedItemBuffer as unknown) as new () => ItemBuffer<any>);
+  runItemBufferTests(TimedItemBuffer);
 
   test('does not do unnecessary flushes', async () => {
     const onFlush = jest.fn();

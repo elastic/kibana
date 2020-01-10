@@ -24,7 +24,7 @@ export interface TimedItemBufferParams<Item> extends ItemBufferParams<Item> {
    * Flushes buffer when oldest item reaches age specified by this parameter,
    * in milliseconds.
    */
-  maxItemAge: number;
+  maxItemAge?: number;
 }
 
 export class TimedItemBuffer<Item> extends ItemBuffer<Item> {
@@ -37,7 +37,7 @@ export class TimedItemBuffer<Item> extends ItemBuffer<Item> {
   public write(item: Item) {
     super.write(item);
 
-    if (this.length === 1) {
+    if (this.params.maxItemAge && this.length === 1) {
       this.timer = setTimeout(this.onTimeout, this.params.maxItemAge);
     }
   }
