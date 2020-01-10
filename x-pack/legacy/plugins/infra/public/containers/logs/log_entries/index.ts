@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState, useReducer, useCallback } from 'react';
+import { useEffect, useState, useReducer, useCallback, useMemo } from 'react';
 import createContainer from 'constate';
-import { pick, throttle, omit } from 'lodash';
-import { useGraphQLQueries } from './gql_queries';
+import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { InfraLogEntry } from './types';
+import { LogEntriesResponse, LogEntry, LogEntriesRequest } from '../../../../common/http_api';
+import { fetchLogEntries } from './api/fetch_log_entries';
+import { datemathToEpochMillis } from '../../../utils/datemath';
+import { InfraLogEntry, InfraLogEntryColumn } from './types';
 
 const DESIRED_BUFFER_PAGES = 2;
 
@@ -29,7 +31,7 @@ type ReceiveActions =
 
 interface ReceiveEntriesAction {
   type: ReceiveActions;
-  payload: LogEntriesResponseLEGACY;
+  payload: LogEntriesResponse['data'];
 }
 interface FetchOrErrorAction {
   type: Exclude<Action, ReceiveActions>;
@@ -39,6 +41,8 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
+  startDate: string | null;
+  endDate: string | null;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
@@ -51,20 +55,14 @@ interface LogEntriesProps {
 type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
 type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
-/** @deprecated */
-export interface LogEntriesResponseLEGACY {
-  entries: InfraLogEntry[];
-  entriesStart: TimeKey | null;
-  entriesEnd: TimeKey | null;
-  hasMoreAfterEnd: boolean;
-  hasMoreBeforeStart: boolean;
-  lastLoadedTime: Date | null;
-}
-
-export type LogEntriesStateParams = {
+export interface LogEntriesStateParams {
+  entries: LogEntriesResponse['data']['entries'];
+  topCursor: LogEntriesResponse['data']['topCursor'] | null;
+  bottomCursor: LogEntriesResponse['data']['bottomCursor'] | null;
   isReloading: boolean;
   isLoadingMore: boolean;
-} & LogEntriesResponseLEGACY;
+  lastLoadedTime: Date | null;
+}
 
 export interface LogEntriesCallbacks {
   fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
@@ -76,10 +74,8 @@ export const logEntriesInitialCallbacks = {
 
 export const logEntriesInitialState: LogEntriesStateParams = {
   entries: [],
-  entriesStart: null,
-  entriesEnd: null,
-  hasMoreAfterEnd: false,
-  hasMoreBeforeStart: false,
+  topCursor: null,
+  bottomCursor: null,
   isReloading: true,
   isLoadingMore: false,
   lastLoadedTime: null,
@@ -125,17 +121,32 @@ const useFetchEntriesEffect = (
   dispatch: Dispatch,
   props: LogEntriesProps
 ) => {
-  const { getLogEntriesAround, getLogEntriesBefore, getLogEntriesAfter } = useGraphQLQueries();
-
   const [prevParams, cachePrevParams] = useState(props);
   const [startedStreaming, setStartedStreaming] = useState(false);
 
+  const startTimestamp = useMemo(
+    () => (props.startDate ? datemathToEpochMillis(props.startDate) : null),
+    [props.startDate]
+  );
+  const endTimestamp = useMemo(
+    () => (props.endDate ? datemathToEpochMillis(props.endDate) : null),
+    [props.endDate]
+  );
+
   const runFetchNewEntriesRequest = async (override = {}) => {
+    if (!startTimestamp || !endTimestamp) {
+      return;
+    }
+
     dispatch({ type: Action.FetchingNewEntries });
+
     try {
-      const payload = await getLogEntriesAround({
-        ...omit(props, 'jumpToTargetPosition'),
-        ...override,
+      const { data: payload } = await fetchLogEntries({
+        sourceId: props.sourceId,
+        startDate: startTimestamp,
+        endDate: endTimestamp,
+        before: 'last', // TODO distinguish between first load and position-load
+        query: props.filterQuery || undefined, // FIXME
       });
       dispatch({ type: Action.ReceiveNewEntries, payload });
     } catch (e) {
@@ -144,26 +155,43 @@ const useFetchEntriesEffect = (
   };
 
   const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
+    if (!startTimestamp || !endTimestamp) {
+      return;
+    }
+
     dispatch({ type: Action.FetchingMoreEntries });
+
     const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
-    const timeKey = getEntriesBefore
-      ? state.entries[0].key
-      : state.entries[state.entries.length - 1].key;
-    const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
+
     try {
-      const payload = await getMoreLogEntries({ ...props, timeKey });
+      const fetchArgs: LogEntriesRequest = {
+        sourceId: props.sourceId,
+        startDate: startTimestamp,
+        endDate: endTimestamp,
+        query: props.filterQuery || undefined, // FIXME
+      };
+
+      if (getEntriesBefore) {
+        fetchArgs.before = state.topCursor;
+      } else {
+        fetchArgs.after = state.bottomCursor;
+      }
+
+      const { data: payload } = await fetchLogEntries(fetchArgs);
+
       dispatch({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
       });
-      return payload.entriesEnd;
+
+      return payload.bottomCursor;
     } catch (e) {
       dispatch({ type: Action.ErrorOnMoreEntries });
     }
   };
 
   const fetchNewEntriesEffectDependencies = Object.values(
-    pick(props, ['sourceId', 'filterQuery', 'timeKey'])
+    pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startDate', 'endDate'])
   );
   const fetchNewEntriesEffect = () => {
     if (props.isAutoReloading) return;
@@ -250,31 +278,37 @@ export const useLogEntriesState: (
 const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: ActionObj) => {
   switch (action.type) {
     case Action.ReceiveNewEntries:
-      return { ...prevState, ...action.payload, isReloading: false };
-    case Action.ReceiveEntriesBefore: {
-      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
-      const newEntries = [...action.payload.entries, ...prevEntries];
-      const { hasMoreBeforeStart, entriesStart, lastLoadedTime } = action.payload;
-      const update = {
-        entries: newEntries,
-        isLoadingMore: false,
-        hasMoreBeforeStart,
-        entriesStart,
-        lastLoadedTime,
+      return {
+        ...prevState,
+        ...action.payload,
+        entries: newEntriesToOldEntries(action.payload.entries),
+        lastLoadedTime: new Date(),
+        isReloading: false,
       };
+    case Action.ReceiveEntriesBefore: {
+      const newEntries = newEntriesToOldEntries(action.payload.entries);
+      const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+
+      const update = {
+        entries: [...newEntries, ...prevEntries],
+        isLoadingMore: false,
+        topCursor: action.payload.topCursor,
+        lastLoadedTime: new Date(),
+      };
+
       return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
-      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
-      const newEntries = [...prevEntries, ...action.payload.entries];
-      const { hasMoreAfterEnd, entriesEnd, lastLoadedTime } = action.payload;
+      const newEntries = newEntriesToOldEntries(action.payload.entries);
+      const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+
       const update = {
-        entries: newEntries,
+        entries: [...prevEntries, ...newEntries],
         isLoadingMore: false,
-        hasMoreAfterEnd,
-        entriesEnd,
-        lastLoadedTime,
+        bottomCursor: action.payload.bottomCursor,
+        lastLoadedTime: new Date(),
       };
+
       return { ...prevState, ...update };
     }
     case Action.FetchingNewEntries:
@@ -291,3 +325,15 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
 };
 
 export const LogEntriesState = createContainer(useLogEntriesState);
+
+// FIXME temporal helper function to make it work while we adjust the types
+function newEntriesToOldEntries(entries: LogEntry[]): InfraLogEntry[] {
+  return entries.map(entry => {
+    return {
+      gid: entry.id,
+      key: entry.cursor,
+      columns: entry.columns as InfraLogEntryColumn[],
+      source: 'default',
+    };
+  });
+}

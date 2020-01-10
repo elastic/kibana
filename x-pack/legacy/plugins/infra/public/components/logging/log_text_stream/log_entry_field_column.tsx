@@ -35,9 +35,17 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isHovered,
   isWrapped,
 }) => {
-  const value = useMemo(() => (isFieldColumn(columnValue) ? JSON.parse(columnValue.value) : null), [
-    columnValue,
-  ]);
+  const value = useMemo(() => {
+    if (isFieldColumn(columnValue)) {
+      // FIXME
+      try {
+        return JSON.parse(columnValue.value);
+      } catch (e) {
+        return columnValue.value;
+      }
+    }
+    return null;
+  }, [columnValue]);
   const formattedValue = Array.isArray(value) ? (
     <ul>
       {value.map((entry, i) => (
