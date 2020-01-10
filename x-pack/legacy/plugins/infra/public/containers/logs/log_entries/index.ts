@@ -29,7 +29,7 @@ type ReceiveActions =
 
 interface ReceiveEntriesAction {
   type: ReceiveActions;
-  payload: LogEntriesResponse;
+  payload: LogEntriesResponseLEGACY;
 }
 interface FetchOrErrorAction {
   type: Exclude<Action, ReceiveActions>;
@@ -51,7 +51,8 @@ interface LogEntriesProps {
 type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
 type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
-export interface LogEntriesResponse {
+/** @deprecated */
+export interface LogEntriesResponseLEGACY {
   entries: InfraLogEntry[];
   entriesStart: TimeKey | null;
   entriesEnd: TimeKey | null;
@@ -63,7 +64,7 @@ export interface LogEntriesResponse {
 export type LogEntriesStateParams = {
   isReloading: boolean;
   isLoadingMore: boolean;
-} & LogEntriesResponse;
+} & LogEntriesResponseLEGACY;
 
 export interface LogEntriesCallbacks {
   fetchNewerEntries: () => Promise<TimeKey | null | undefined>;

@@ -7,7 +7,7 @@ import { ApolloClient } from 'apollo-client';
 import { TimeKey } from '../../../../common/time';
 import { logEntriesQuery } from '../../../graphql/log_entries.gql_query';
 import { useApolloClient } from '../../../utils/apollo_context';
-import { LogEntriesResponse } from '.';
+import { LogEntriesResponseLEGACY } from '.';
 
 const LOAD_CHUNK_SIZE = 200;
 
@@ -19,7 +19,7 @@ type LogEntriesGetter = (
   sourceId: string;
   timeKey: TimeKey | null;
   filterQuery: string | null;
-}) => Promise<LogEntriesResponse>;
+}) => Promise<LogEntriesResponseLEGACY>;
 
 const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => async ({
   sourceId,
