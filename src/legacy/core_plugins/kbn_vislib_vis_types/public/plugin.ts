@@ -81,7 +81,6 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
     core: KbnVislibVisTypesCoreSetup,
     { expressions, visualizations, __LEGACY }: KbnVislibVisTypesPluginSetupDependencies
   ) {
-    // @ts-ignore
     const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {
       ...__LEGACY,
       uiSettings: core.uiSettings,
