@@ -36,3 +36,9 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
 /** The body of the timeline flyout */
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
+
+export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
+
+export const CLOSE_PROVIDER_BADGE_BTN = '[data-test-subj="closeProviderBadge"]';
+
+export const TIMELINE_QUERY_INPUT = '[data-test-subj="timelineQueryInput"]';
