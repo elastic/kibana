@@ -34,9 +34,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickNavigation() {
       find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
+
     async clickLinkText(text) {
       await find.clickByDisplayedLinkText(text);
     }
+
     async clickKibanaSettings() {
       await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -85,11 +87,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
       await find.clickByCssSelector(
-        `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
+        `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`,
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setPageSize(size) {
+      await find
+        .clickByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]');
+      await PageObjects.header.getSpinnerDone();
     }
 
     async setAdvancedSettingsInput(propertyName, propertyValue) {
@@ -189,7 +197,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector(
         'table.euiTable tbody tr:nth-child(' +
         (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-        (colNumber + 1) + ')'
+        (colNumber + 1) + ')',
       );
     }
 
@@ -232,7 +240,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setFieldTypeFilter(type) {
       await find.clickByCssSelector(
-        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]'
+        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]',
       );
     }
 
@@ -240,7 +248,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
         language +
-        '"]'
+        '"]',
       );
     }
 
@@ -253,12 +261,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async openControlsByName(name) {
       await this.filterField(name);
       const tableFields = await (await find.byCssSelector(
-        'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child'
+        'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child',
       )).getVisibleText();
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-          td:last-child button`
+          td:last-child button`,
       );
     }
 
@@ -469,35 +477,35 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguage(language) {
       log.debug('set scripted field language = ' + language);
       await find.clickByCssSelector(
-        'select[data-test-subj="editorFieldLang"] > option[value="' + language + '"]'
+        'select[data-test-subj="editorFieldLang"] > option[value="' + language + '"]',
       );
     }
 
     async setScriptedFieldType(type) {
       log.debug('set scripted field type = ' + type);
       await find.clickByCssSelector(
-        'select[data-test-subj="editorFieldType"] > option[value="' + type + '"]'
+        'select[data-test-subj="editorFieldType"] > option[value="' + type + '"]',
       );
     }
 
     async setFieldFormat(format) {
       log.debug('set scripted field format = ' + format);
       await find.clickByCssSelector(
-        'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
+        'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]',
       );
     }
 
     async setScriptedFieldUrlType(type) {
       log.debug('set scripted field Url type = ' + type);
       await find.clickByCssSelector(
-        'select[data-test-subj="urlEditorType"] > option[value="' + type + '"]'
+        'select[data-test-subj="urlEditorType"] > option[value="' + type + '"]',
       );
     }
 
     async setScriptedFieldUrlTemplate(template) {
       log.debug('set scripted field Url Template = ' + template);
       const urlTemplateField = await find.byCssSelector(
-        'input[data-test-subj="urlEditorUrlTemplate"]'
+        'input[data-test-subj="urlEditorUrlTemplate"]',
       );
       await urlTemplateField.type(template);
     }
@@ -505,7 +513,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldUrlLabelTemplate(labelTemplate) {
       log.debug('set scripted field Url Label Template = ' + labelTemplate);
       const urlEditorLabelTemplate = await find.byCssSelector(
-        'input[data-test-subj="urlEditorLabelTemplate"]'
+        'input[data-test-subj="urlEditorLabelTemplate"]',
       );
       await urlEditorLabelTemplate.type(labelTemplate);
     }
@@ -513,7 +521,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldDatePattern(datePattern) {
       log.debug('set scripted field Date Pattern = ' + datePattern);
       const datePatternField = await find.byCssSelector(
-        'input[data-test-subj="dateEditorPattern"]'
+        'input[data-test-subj="dateEditorPattern"]',
       );
       // clearValue does not work here
       // Send Backspace event for each char in value string to clear field
@@ -524,7 +532,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldStringTransform(stringTransform) {
       log.debug('set scripted field string Transform = ' + stringTransform);
       await find.clickByCssSelector(
-        'select[data-test-subj="stringEditorTransform"] > option[value="' + stringTransform + '"]'
+        'select[data-test-subj="stringEditorTransform"] > option[value="' + stringTransform + '"]',
       );
     }
 
@@ -638,7 +646,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async associateIndexPattern(oldIndexPatternId, newIndexPatternTitle) {
       await find.clickByCssSelector(
         `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
-        [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
+        [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`,
       );
     }
 
@@ -649,7 +657,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async waitUntilSavedObjectsTableIsNotLoading() {
       return retry.try(async () => {
         const exists = await find.existsByDisplayedByCssSelector(
-          '*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading'
+          '*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading',
         );
         if (exists) {
           throw new Error('Waiting');
@@ -678,7 +686,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       for (const row of rows) {
         const titleCell = await row.findByCssSelector('td:nth-child(3)');
         const title = await titleCell.getVisibleText();
-
 
         const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);

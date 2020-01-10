@@ -696,6 +696,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
 
+    async clickColumns() {
+      await find.clickByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)');
+    }
+
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
@@ -854,6 +858,59 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickEditorSidebarCollapse();
       await this.waitForVisualizationRenderingStabilized();
       expect(percentDifference).to.be.lessThan(opts.threshold);
+    }
+
+    async getTileMapData() {
+      await find.allByCssSelector('path.leaflet-clickable')
+        .then((chartTypes) => {
+
+          function getChartType(chart) {
+            let color;
+            let radius;
+            return chart.getAttribute('stroke')
+              .then((stroke) => {
+                color = stroke;
+              })
+              .then(() => {
+                return chart.getAttribute('d');
+              })
+              .then((d) => {
+                // scale the radius up (sometimes less than 1) and then round to int
+                radius = d.replace(/.*A(\d+\.\d+),.*/, '$1') * 10;
+                radius = Math.round(radius);
+              })
+              .then(() => {
+                return { color: color, radius: radius };
+              });
+          }
+          const getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then((circles) => {
+          return circles;
+        });
+    }
+
+    async getDataTableData() {
+      const twoXLonger = config.get('timeouts.waitFor') * 2;
+      await find.byCssSelector('table.table.table-condensed tbody', twoXLonger)
+        .getVisibleText();
+    }
+
+    async collapseChart() {
+      await find.clickByCssSelector('div.visualize-show-spy > div > i');
+    }
+
+    async waitForToastMessageGone() {
+      return find.allByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+        .then(function toastMessage(messages) {
+          if (messages.length > 0) {
+            throw new Error('waiting for toast message to clear');
+          } else {
+            log.debug('now messages = 0 "' + messages + '"');
+            return messages;
+          }
+        });
     }
 
     /*
