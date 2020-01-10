@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../monitor_list/monitor_list_drawer';
 
 export const LocationMissingWarning = () => {
@@ -31,9 +32,15 @@ export const LocationMissingWarning = () => {
           closePopover={togglePopover}
         >
           <EuiText style={{ width: '300px' }}>
-            Important geo location configuration is missing. You can use the observer.geo.?? field
+            <FormattedMessage
+              id="xpack.uptime.locationMap.locations.missing.message"
+              defaultMessage="Important geo location configuration is missing. You can use the observer.geo.?? field
             to create distinctive geographic regions for your uptime checks. Get more information in
-            our documentation. <LocationLink />
+            our documentation. {locationLink}"
+              values={{
+                locationLink: <LocationLink />,
+              }}
+            />
           </EuiText>
         </EuiPopover>
       </EuiFlexItem>
