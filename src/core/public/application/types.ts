@@ -242,6 +242,117 @@ export interface AppMountParameters {
    * ```
    */
   appBasePath: string;
+
+  /**
+   * A function that can be used to register a handler that will be called
+   * when the user is leaving the current application, allowing to
+   * prompt a confirmation message before actually changing the page.
+   *
+   * This will be called either when the user goes to another application, or when
+   * trying to close the tab or manually changing the url.
+   *
+   * @example
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { BrowserRouter, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+   *    const { renderApp, hasUnsavedChanges } = await import('./application');
+   *    onAppLeave(actions => {
+   *      if(hasUnsavedChanges()) {
+   *        return actions.confirm('Some changes were not saved. Are you sure you want to leave?');
+   *      }
+   *      return actions.default();
+   *    });
+   *    return renderApp(params);
+   * }
+   * ```
+   */
+  onAppLeave: (handler: AppLeaveHandler) => void;
+}
+
+/**
+ * A handler that will be executed before leaving the application, either when
+ * going to another application or when closing the browser tab or manually changing
+ * the url.
+ * Should return `confirm` to to prompt a message to the user before leaving the page, or `default`
+ * to keep the default behavior (doing nothing).
+ *
+ * See {@link AppMountParameters} for detailed usage examples.
+ *
+ * @public
+ */
+export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+
+/**
+ * Possible type of actions on application leave.
+ *
+ * @public
+ */
+export enum AppLeaveActionType {
+  confirm = 'confirm',
+  default = 'default',
+}
+
+/**
+ * Action to return from a {@link AppLeaveHandler} to execute the default
+ * behaviour when leaving the application.
+ *
+ * See {@link AppLeaveActionFactory}
+ *
+ * @public
+ */
+export interface AppLeaveDefaultAction {
+  type: AppLeaveActionType.default;
+}
+
+/**
+ * Action to return from a {@link AppLeaveHandler} to show a confirmation
+ * message when trying to leave an application.
+ *
+ * See {@link AppLeaveActionFactory}
+ *
+ * @public
+ */
+export interface AppLeaveConfirmAction {
+  type: AppLeaveActionType.confirm;
+  text: string;
+  title?: string;
+}
+
+/**
+ * Possible actions to return from a {@link AppLeaveHandler}
+ *
+ * See {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}
+ *
+ * @public
+ * */
+export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
+
+/**
+ * Factory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute.
+ */
+export interface AppLeaveActionFactory {
+  /**
+   * Returns a confirm action, resulting on prompting a message to the user before leaving the
+   * application, allowing him to choose if he wants to stay on the app or confirm that he
+   * wants to leave.
+   *
+   * @param text The text to display in the confirmation message
+   * @param title (optional) title to display in the confirmation message
+   */
+  confirm(text: string, title?: string): AppLeaveConfirmAction;
+  /**
+   * Returns a default action, resulting on executing the default behavior when
+   * the user tries to leave an application
+   */
+  default(): AppLeaveDefaultAction;
 }
 
 /**
@@ -329,13 +440,13 @@ export interface ApplicationStart {
   capabilities: RecursiveReadonly<Capabilities>;
 
   /**
-   * Navigiate to a given app
+   * Navigate to a given app
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to
    * @param options.state - optional state to forward to the application
    */
-  navigateToApp(appId: string, options?: { path?: string; state?: any }): void;
+  navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
 
   /**
    * Returns a relative URL to a given app, including the global base path.

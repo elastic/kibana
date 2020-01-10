@@ -40,14 +40,14 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, useIndicesConfig, isNew, ...rest } = defineStepData;
+  const { queryBar, isNew, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,
     language: query.language,
     filters,
     query: query.query as string,
-    ...(savedId != null ? { saved_id: savedId } : {}),
+    ...(savedId != null && savedId !== '' ? { saved_id: savedId } : {}),
   };
 };
 
@@ -72,11 +72,21 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
 };
 
 const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, references, riskScore, threats, isNew, ...rest } = aboutStepData;
+  const {
+    falsePositives,
+    references,
+    riskScore,
+    threats,
+    timeline,
+    isNew,
+    ...rest
+  } = aboutStepData;
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
+    timeline_id: timeline.id,
+    timeline_title: timeline.title,
     threats: threats
       .filter(threat => threat.tactic.name !== 'none')
       .map(threat => ({
@@ -97,7 +107,7 @@ export const formatRule = (
   scheduleData: ScheduleStepRule,
   ruleId?: string
 ): NewRule => {
-  const type: FormatRuleType = defineStepData.queryBar.saved_id != null ? 'saved_query' : 'query';
+  const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';
   const persistData = {
     type,
     ...formatDefineStepData(defineStepData),

@@ -10,8 +10,7 @@ import {
   InfraWaffleMapLegendMode,
   InfraFormatterType,
 } from '../../../lib/lib';
-import { InfraNodeType } from '../../../../common/graphql/types';
-import { InfraSnapshotMetricType } from '../../../graphql/types';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 const options: InfraWaffleMapOptions = {
   fields: {
@@ -24,7 +23,7 @@ const options: InfraWaffleMapOptions = {
   },
   formatter: InfraFormatterType.percent,
   formatTemplate: '{{value}}',
-  metric: { type: InfraSnapshotMetricType.cpu },
+  metric: { type: 'cpu' },
   groupBy: [],
   legend: {
     type: InfraWaffleMapLegendMode.gradient,
@@ -41,13 +40,13 @@ describe('createUptimeLink()', () => {
       ip: '10.0.1.2',
       path: [],
       metric: {
-        name: InfraSnapshotMetricType.cpu,
+        name: 'cpu' as SnapshotMetricType,
         value: 0.5,
         max: 0.8,
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, InfraNodeType.host, node)).toBe(
+    expect(createUptimeLink(options, 'host', node)).toBe(
       '../app/uptime#/?search=host.ip:"10.0.1.2"'
     );
   });
@@ -59,13 +58,13 @@ describe('createUptimeLink()', () => {
       name: 'host-01',
       path: [],
       metric: {
-        name: InfraSnapshotMetricType.cpu,
+        name: 'cpu' as SnapshotMetricType,
         value: 0.5,
         max: 0.8,
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, InfraNodeType.host, node)).toBe(
+    expect(createUptimeLink(options, 'host', node)).toBe(
       '../app/uptime#/?search=host.name:"host-01"'
     );
   });
@@ -77,13 +76,13 @@ describe('createUptimeLink()', () => {
       name: 'pod-01',
       path: [],
       metric: {
-        name: InfraSnapshotMetricType.cpu,
+        name: 'cpu' as SnapshotMetricType,
         value: 0.5,
         max: 0.8,
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, InfraNodeType.pod, node)).toBe(
+    expect(createUptimeLink(options, 'pod', node)).toBe(
       '../app/uptime#/?search=kubernetes.pod.uid:"29193-pod-02939"'
     );
   });
@@ -95,13 +94,13 @@ describe('createUptimeLink()', () => {
       name: 'docker-01',
       path: [],
       metric: {
-        name: InfraSnapshotMetricType.cpu,
+        name: 'cpu' as SnapshotMetricType,
         value: 0.5,
         max: 0.8,
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, InfraNodeType.container, node)).toBe(
+    expect(createUptimeLink(options, 'container', node)).toBe(
       '../app/uptime#/?search=container.id:"docker-1234"'
     );
   });

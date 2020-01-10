@@ -78,5 +78,6 @@
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
   "saved_id": "test-saved-id",
-  "timeline_id": "test-timeline-id"
+  "timeline_id": "test-timeline-id",
+  "timeline_title": "test-timeline-title"
 }

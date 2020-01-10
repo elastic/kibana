@@ -41,7 +41,7 @@ import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-const HostsComponent = React.memo<HostsComponentProps>(
+export const HostsComponent = React.memo<HostsComponentProps>(
   ({
     deleteQuery,
     isInitializing,
@@ -56,13 +56,12 @@ const HostsComponent = React.memo<HostsComponentProps>(
     const capabilities = React.useContext(MlCapabilitiesContext);
     const kibana = useKibana();
     const { tabName } = useParams();
-
     const hostsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
       }
       return filters;
-    }, [tabName]);
+    }, [tabName, filters]);
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
