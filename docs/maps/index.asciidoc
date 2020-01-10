@@ -31,7 +31,7 @@ Create maps with multiple layers and indices to show all of your data in a singl
 Elastic Maps makes it easy to import geospatial data into the Elastic Stack. Using the GeoJSON Upload feature, you can drag and drop your point and shape data files directly into Elasticsearch, and then use them as layers in the map.
 
 [float]
-=== Embed your map in Dashboards
+=== Embed your map in dashboards
 Viewing your data from different angles provides better insights. Dimensions that are obscured in one visualization might be illuminated in another. Add your maps to a dashboard and view your geospatial data alongside bar charts, pie charts, tag clouds, and more.
 
 [float]
