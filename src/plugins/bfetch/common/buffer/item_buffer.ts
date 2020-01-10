@@ -30,7 +30,7 @@ export interface ItemBufferParams<Item> {
    * argument which is a list of all buffered items. If `.flush()` is called
    * when buffer is empty, `.onflush` is called with empty array.
    */
-  onflush: (items: Item[]) => void;
+  onFlush: (items: Item[]) => void;
 }
 
 /**
@@ -76,6 +76,6 @@ export class ItemBuffer<Item> {
   public flush() {
     let list;
     [list, this.list] = [this.list, []];
-    this.params.onflush(list);
+    this.params.onFlush(list);
   }
 }

@@ -34,7 +34,7 @@ export const createBatchedFunction = <Func extends Fn, BatchEntry>(
 ): [Func, TimedItemBuffer<BatchEntry>] => {
   const { onCall, onBatch, maxItemAge = 10, flushOnMaxItems = 25 } = params;
   const buffer = new TimedItemBuffer<BatchEntry>({
-    onflush: onBatch,
+    onFlush: onBatch,
     maxItemAge,
     flushOnMaxItems,
   });

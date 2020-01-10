@@ -25,19 +25,19 @@ export const runItemBufferTests = (
   describe('ItemBuffer', () => {
     test('can create with or without optional "flushOnMaxItems" param', () => {
       new Buffer({
-        onflush: () => {},
+        onFlush: () => {},
       });
 
       new Buffer({
-        onflush: () => {},
+        onFlush: () => {},
         flushOnMaxItems: 123,
       });
     });
 
     test('can add items to the buffer', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.write('a');
@@ -46,9 +46,9 @@ export const runItemBufferTests = (
     });
 
     test('returns number of items in the buffer', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       expect(buf.length).toBe(0);
@@ -61,9 +61,9 @@ export const runItemBufferTests = (
     });
 
     test('returns correct number of items after .clear() was called', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       expect(buf.length).toBe(0);
@@ -77,9 +77,9 @@ export const runItemBufferTests = (
     });
 
     test('returns correct number of items after .flush() was called', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       expect(buf.length).toBe(0);
@@ -93,9 +93,9 @@ export const runItemBufferTests = (
     });
 
     test('can flush buffer and receive items in chronological order', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.write('a');
@@ -104,14 +104,14 @@ export const runItemBufferTests = (
 
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(1);
-      expect(onflush.mock.calls[0][0]).toEqual(['a', 'b', 'c']);
+      expect(onFlush).toHaveBeenCalledTimes(1);
+      expect(onFlush.mock.calls[0][0]).toEqual(['a', 'b', 'c']);
     });
 
     test('clears buffer after flush', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.write('a');
@@ -120,21 +120,21 @@ export const runItemBufferTests = (
 
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(1);
-      expect(onflush.mock.calls[0][0]).toEqual(['a', 'b', 'c']);
+      expect(onFlush).toHaveBeenCalledTimes(1);
+      expect(onFlush.mock.calls[0][0]).toEqual(['a', 'b', 'c']);
 
       buf.write('d');
 
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(2);
-      expect(onflush.mock.calls[1][0]).toEqual(['d']);
+      expect(onFlush).toHaveBeenCalledTimes(2);
+      expect(onFlush.mock.calls[1][0]).toEqual(['d']);
     });
 
     test('can call .flush() any time as many times as needed', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.flush();
@@ -143,17 +143,17 @@ export const runItemBufferTests = (
       buf.flush();
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(4);
-      expect(onflush.mock.calls[0][0]).toEqual([]);
-      expect(onflush.mock.calls[1][0]).toEqual([123]);
-      expect(onflush.mock.calls[2][0]).toEqual([]);
-      expect(onflush.mock.calls[3][0]).toEqual([]);
+      expect(onFlush).toHaveBeenCalledTimes(4);
+      expect(onFlush.mock.calls[0][0]).toEqual([]);
+      expect(onFlush.mock.calls[1][0]).toEqual([123]);
+      expect(onFlush.mock.calls[2][0]).toEqual([]);
+      expect(onFlush.mock.calls[3][0]).toEqual([]);
     });
 
     test('calling .clear() before .flush() cases to return empty list', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.write(1);
@@ -161,14 +161,14 @@ export const runItemBufferTests = (
       buf.clear();
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(1);
-      expect(onflush.mock.calls[0][0]).toEqual([]);
+      expect(onFlush).toHaveBeenCalledTimes(1);
+      expect(onFlush.mock.calls[0][0]).toEqual([]);
     });
 
     test('can call .clear() any time as many times as needed', () => {
-      const onflush = jest.fn();
+      const onFlush = jest.fn();
       const buf = new Buffer({
-        onflush,
+        onFlush,
       });
 
       buf.clear();
@@ -181,44 +181,44 @@ export const runItemBufferTests = (
       buf.flush();
       buf.flush();
 
-      expect(onflush).toHaveBeenCalledTimes(4);
-      expect(onflush.mock.calls[0][0]).toEqual([]);
-      expect(onflush.mock.calls[1][0]).toEqual([]);
-      expect(onflush.mock.calls[2][0]).toEqual([]);
-      expect(onflush.mock.calls[3][0]).toEqual([]);
+      expect(onFlush).toHaveBeenCalledTimes(4);
+      expect(onFlush.mock.calls[0][0]).toEqual([]);
+      expect(onFlush.mock.calls[1][0]).toEqual([]);
+      expect(onFlush.mock.calls[2][0]).toEqual([]);
+      expect(onFlush.mock.calls[3][0]).toEqual([]);
     });
 
     describe('when `flushOnMaxItems` is set', () => {
       test('does not flush automatically before `flushOnMaxItems` is reached', () => {
-        const onflush = jest.fn();
+        const onFlush = jest.fn();
         const buf = new Buffer({
-          onflush,
+          onFlush,
           flushOnMaxItems: 2,
         });
 
         buf.write(1);
 
-        expect(onflush).toHaveBeenCalledTimes(0);
+        expect(onFlush).toHaveBeenCalledTimes(0);
       });
 
       test('automatically flushes buffer when `flushOnMaxItems` is reached', () => {
-        const onflush = jest.fn();
+        const onFlush = jest.fn();
         const buf = new Buffer({
-          onflush,
+          onFlush,
           flushOnMaxItems: 2,
         });
 
         buf.write(1);
         buf.write(2);
 
-        expect(onflush).toHaveBeenCalledTimes(1);
-        expect(onflush.mock.calls[0][0]).toEqual([1, 2]);
+        expect(onFlush).toHaveBeenCalledTimes(1);
+        expect(onFlush.mock.calls[0][0]).toEqual([1, 2]);
       });
 
       test('flushes again when `flushOnMaxItems` limit is reached the second time', () => {
-        const onflush = jest.fn();
+        const onFlush = jest.fn();
         const buf = new Buffer({
-          onflush,
+          onFlush,
           flushOnMaxItems: 2,
         });
 
@@ -229,10 +229,10 @@ export const runItemBufferTests = (
         buf.write(5);
         buf.flush();
 
-        expect(onflush).toHaveBeenCalledTimes(3);
-        expect(onflush.mock.calls[0][0]).toEqual([1, 2]);
-        expect(onflush.mock.calls[1][0]).toEqual([3, 4]);
-        expect(onflush.mock.calls[2][0]).toEqual([5]);
+        expect(onFlush).toHaveBeenCalledTimes(3);
+        expect(onFlush.mock.calls[0][0]).toEqual([1, 2]);
+        expect(onFlush.mock.calls[1][0]).toEqual([3, 4]);
+        expect(onFlush.mock.calls[2][0]).toEqual([5]);
       });
     });
   });
