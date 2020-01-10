@@ -11,8 +11,16 @@ export interface MlServerDefaults {
     categorization_examples_limit?: number;
     model_memory_limit?: string;
     model_snapshot_retention_days?: number;
+    categorization_analyzer?: CategorizationAnalyzer;
   };
   datafeeds: { scroll_size?: number };
+}
+
+export interface CategorizationAnalyzer {
+  char_filter?: any[];
+  tokenizer?: string;
+  filter?: any[];
+  analyzer?: string;
 }
 
 export interface MlServerLimits {
