@@ -27,6 +27,7 @@ import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 import { ColorSchemaVislibParams } from '../../../types';
 import { Gauge } from '../../../gauge';
+import { SetColorRangeValue } from '../../common/color_ranges';
 
 function RangesPanel({
   setGaugeValue,
@@ -68,7 +69,7 @@ function RangesPanel({
       <ColorRanges
         data-test-subj="gaugeColorRange"
         colorsRange={stateParams.gauge.colorsRange}
-        setValue={setGaugeValue}
+        setValue={setGaugeValue as SetColorRangeValue}
         setTouched={setTouched}
         setValidity={setValidity}
       />
