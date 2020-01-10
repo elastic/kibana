@@ -63,7 +63,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncHaloWidthWithMb(mbLayerId, mbMap) {
-    const haloWidth = this._getMbSize();
+    const haloWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
@@ -94,26 +94,26 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {
-    const circleRadius = this._getMbSize();
+    const circleRadius = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 
   syncLineWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
   syncLabelSizeWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
-  _getMbSize() {
+  getMbSizeExpression() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({
         targetName: this.getComputedFieldName(),

@@ -35,10 +35,10 @@ export class LabelBorderSizeProperty extends AbstractStyleProperty {
     if (this.getOptions().size === LABEL_BORDER_SIZES.NONE) {
       mbMap.setPaintProperty(mbLayerId, 'text-halo-width', 0);
     } else if (this._labelSizeProperty.isDynamic() && this._labelSizeProperty.isComplete()) {
-      const labelSizeKey = this._labelSizeProperty.getComputedFieldName();
+      const labelSizeExpression = this._labelSizeProperty.getMbSizeExpression();
       mbMap.setPaintProperty(mbLayerId, 'text-halo-width', [
         'max',
-        ['*', ['coalesce', ['get', labelSizeKey], 0], widthRatio],
+        ['*', labelSizeExpression, widthRatio],
         1,
       ]);
     } else {
