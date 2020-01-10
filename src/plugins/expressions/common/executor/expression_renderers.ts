@@ -19,7 +19,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Registry } from './registry';
+import { IRegistry } from './types';
+import { Executor } from './executor';
 
 export interface ExpressionRenderDefinition<Config = any> {
   name: string;
@@ -73,11 +74,22 @@ export class ExpressionRenderFunction {
   }
 }
 
-export class RenderFunctionsRegistry extends Registry<ExpressionRenderFunction> {
+export class RenderFunctionsRegistry implements IRegistry<ExpressionRenderFunction> {
+  constructor(private readonly executor: Executor) {}
+
   register(definition: ExpressionRenderDefinition | (() => ExpressionRenderDefinition)) {
-    const renderFunction = new ExpressionRenderFunction(
-      typeof definition === 'object' ? definition : definition()
-    );
-    this.set(renderFunction.name, renderFunction);
+    this.executor.registerRenderer(definition);
+  }
+
+  public get(id: string): ExpressionRenderFunction | null {
+    return this.executor.state.selectors.getRenderer(id);
+  }
+
+  public toJS(): Record<string, ExpressionRenderFunction> {
+    return this.executor.getRenderers();
+  }
+
+  public toArray(): ExpressionRenderFunction[] {
+    return Object.values(this.toJS());
   }
 }

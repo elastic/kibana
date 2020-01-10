@@ -20,9 +20,10 @@
 /* eslint-disable max-classes-per-file */
 
 import { ArgumentType, ExpressionValue, AnyExpressionFunction, FunctionHandlers } from '../types';
-import { Registry } from './registry';
+import { IRegistry } from './types';
+import { Executor } from './executor';
 
-export class FunctionParameter {
+export class ExpressionFunctionParameter {
   name: string;
   required: boolean;
   help: string;
@@ -57,7 +58,7 @@ export class FunctionParameter {
   }
 }
 
-export class Function {
+export class ExpressionFunction {
   /**
    * Name of function
    */
@@ -89,7 +90,7 @@ export class Function {
    */
   help: string;
 
-  args: Record<string, FunctionParameter> = {};
+  args: Record<string, ExpressionFunctionParameter> = {};
 
   context: { types?: string[] };
 
@@ -104,7 +105,7 @@ export class Function {
     this.context = context || {};
 
     for (const [key, arg] of Object.entries(args || {})) {
-      this.args[key] = new FunctionParameter(key, arg);
+      this.args[key] = new ExpressionFunctionParameter(key, arg);
     }
   }
 
@@ -115,11 +116,22 @@ export class Function {
   };
 }
 
-export class FunctionsRegistry extends Registry<Function> {
-  register(functionDefinition: AnyExpressionFunction | (() => AnyExpressionFunction)) {
-    const fn = new Function(
-      typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
-    );
-    this.set(fn.name, fn);
+export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
+  constructor(private readonly executor: Executor) {}
+
+  public register(functionDefinition: AnyExpressionFunction | (() => AnyExpressionFunction)) {
+    this.executor.registerFunction(functionDefinition);
+  }
+
+  public get(id: string): ExpressionFunction | null {
+    return this.executor.state.selectors.getFunction(id);
+  }
+
+  public toJS(): Record<string, ExpressionFunction> {
+    return { ...this.executor.state.get().functions };
+  }
+
+  public toArray(): ExpressionFunction[] {
+    return Object.values(this.executor.state.get().functions);
   }
 }

@@ -17,35 +17,84 @@
  * under the License.
  */
 
-import { ExecutorState, ExecutorContainer } from './state/types';
-import { createExecutorContainer } from './state/container';
-import { Function, ExpressionRenderDefinition, ExpressionRenderFunction } from '../registries';
-import { AnyExpressionFunction, AnyExpressionType } from '../types';
-import { Type } from '../type';
+import { ExecutorState, ExecutorContainer } from './container';
+import { createExecutorContainer } from './container';
+import { FunctionsRegistry, ExpressionFunction } from './expression_functions';
+import { TypesRegistry, Type, getType } from './expression_types';
+import { AnyExpressionFunction, AnyExpressionType, ExpressionAST } from '../types';
+import {
+  ExpressionRenderFunction,
+  ExpressionRenderDefinition,
+  RenderFunctionsRegistry,
+} from './expression_renderers';
+import { Execution } from '../execution/execution';
 
 export class Executor {
-  public readonly container: ExecutorContainer;
+  public readonly state: ExecutorContainer;
+  public readonly functions: FunctionsRegistry;
+  public readonly types: TypesRegistry;
+  public readonly renderers: RenderFunctionsRegistry;
 
   constructor(state?: ExecutorState) {
-    this.container = createExecutorContainer(state);
+    this.state = createExecutorContainer(state);
+    this.functions = new FunctionsRegistry(this);
+    this.types = new TypesRegistry(this);
+    this.renderers = new RenderFunctionsRegistry(this);
   }
 
-  registerType = (typeDefinition: AnyExpressionType | (() => AnyExpressionType)) => {
+  public registerFunction(
+    functionDefinition: AnyExpressionFunction | (() => AnyExpressionFunction)
+  ) {
+    const fn = new ExpressionFunction(
+      typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
+    );
+    this.state.transitions.addFunction(fn);
+  }
+
+  public getFunctions(): Record<string, undefined | ExpressionFunction> {
+    return { ...this.state.get().functions };
+  }
+
+  public registerType(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
     const type = new Type(typeof typeDefinition === 'object' ? typeDefinition : typeDefinition());
-    this.container.transitions.addType(type);
-  };
+    this.state.transitions.addType(type);
+  }
 
-  registerFunction = (definition: AnyExpressionFunction | (() => AnyExpressionFunction)) => {
-    const fn = new Function(typeof definition === 'object' ? definition : definition());
-    this.container.transitions.addFunction(fn);
-  };
+  public getTypes(): Record<string, undefined | Type> {
+    return { ...(this.state.get().types as Record<string, undefined | Type>) };
+  }
 
-  registerRenderer = (
+  public registerRenderer(
     definition: ExpressionRenderDefinition | (() => ExpressionRenderDefinition)
-  ) => {
-    const renderer = new ExpressionRenderFunction(
+  ) {
+    const renderFunction = new ExpressionRenderFunction(
       typeof definition === 'object' ? definition : definition()
     );
-    this.container.transitions.addRenderer(renderer);
-  };
+    this.state.transitions.addRenderer(renderFunction);
+  }
+
+  public getRenderers(): Record<string, undefined | ExpressionRenderFunction> {
+    return { ...this.state.get().renderers };
+  }
+
+  public executeExpression<T>(ast: ExpressionAST, input: T): Execution {
+    const execution = new Execution(this, ast);
+    return execution;
+  }
+
+  public interpret<T>(ast: ExpressionAST, input: T) {
+    // const handlers = { ...config.handlers, types };
+    const type = getType(ast);
+    switch (type) {
+      case 'expression':
+        return this.executeExpression<T>(ast, input);
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
+  }
 }
