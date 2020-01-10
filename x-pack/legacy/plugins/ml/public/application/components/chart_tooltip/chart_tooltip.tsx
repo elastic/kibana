@@ -37,8 +37,7 @@ function useRefWithCallback() {
       if (left + tooltipWidth > contentWidth) {
         // the tooltip is hanging off the side of the page,
         // so move it to the other side of the target
-        const markerWidthAdjustment = 25;
-        left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
+        left = left - (tooltipWidth + offset.x);
       }
 
       const top = targetPosition.top + offset.y - parentBounding.top;

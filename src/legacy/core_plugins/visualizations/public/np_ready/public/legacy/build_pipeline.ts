@@ -445,6 +445,8 @@ export const buildVislibDimensions = async (
       dimensions.x.params.date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
+      dimensions.x.params.intervalESValue = esValue;
+      dimensions.x.params.intervalESUnit = esUnit;
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
