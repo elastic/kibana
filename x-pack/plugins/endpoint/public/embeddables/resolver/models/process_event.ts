@@ -6,10 +6,17 @@
 
 import { ProcessEvent } from '../types';
 
+/*
+ * Returns true is the process's eventType is either 'processCreated' or 'processRan'.
+ * Resolver will only render 'graphable' process events.
+ */
 export function isGraphableProcess(event: ProcessEvent) {
   return eventType(event) === 'processCreated' || eventType(event) === 'processRan';
 }
 
+/*
+ * Returns a custom event type for a process event based on the event's metadata.
+ */
 export function eventType(event: ProcessEvent) {
   const {
     data_buffer: { event_type_full: type, event_subtype_full: subType },
@@ -31,10 +38,16 @@ export function eventType(event: ProcessEvent) {
   return 'unknownEvent';
 }
 
+/*
+ * Returns the process event's pid
+ */
 export function uniquePidForProcess(event: ProcessEvent) {
   return event.data_buffer.node_id;
 }
 
+/*
+ * Returns the process event's parent pid
+ */
 export function uniqueParentPidForProcess(event: ProcessEvent) {
   return event.data_buffer.source_id;
 }

@@ -29,6 +29,23 @@ import {
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
 
+/* An isometric projection is a method for representing three dimensional objects in 2 dimensions.
+ * More information about isometric projections can be found here https://en.wikipedia.org/wiki/Isometric_projection.
+ * In our case, we obtain the isometric projection by rotating the objects 45 degrees in the plane of the screen
+ * and arctan(1/sqrt(2)) (~35.3 degrees) through the horizontal axis.
+ *
+ * A rotation by 45 degrees in the plane of the screen is given by:
+ * [ sqrt(2)/2   -sqrt(2)/2   0
+ *   sqrt(2)/2    sqrt(2)/2   0
+ *   0            0           1]
+ *
+ * A rotation by arctan(1/sqrt(2)) through the horizantal axis is given by:
+ * [ 1      0          0
+ *   0      sqrt(3)/3  -sqrt(6)/3
+ *   0      sqrt(6)/3  sqrt(3)/3]
+ *
+ * We can multiply both of these matrices to get the final transformation below.
+ */
 /* prettier-ignore */
 const isometricTransformMatrix: Matrix3 = [
   Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
