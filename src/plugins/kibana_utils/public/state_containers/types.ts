@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { Ensure, RecursiveReadonly } from '@kbn/utility-types';
 
-export type BaseState = Record<string, any>;
+export type BaseState = object;
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
   type: Type;
   args: Args;
