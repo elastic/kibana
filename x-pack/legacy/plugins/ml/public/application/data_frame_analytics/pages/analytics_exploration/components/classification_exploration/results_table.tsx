@@ -225,10 +225,9 @@ export const ResultsTable: FC<Props> = React.memo(
         }
 
         sortByField = predictedFieldSelected ? predictedFieldName : sortByField;
-        const field = requiresKeyword ? `${sortByField}.keyword` : sortByField;
 
         const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-        loadExploreData({ field, direction, searchQuery });
+        loadExploreData({ field: sortByField, direction, searchQuery, requiresKeyword });
       }
     }, [
       jobConfig,

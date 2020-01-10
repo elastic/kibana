@@ -111,10 +111,10 @@ export const sortRegressionResultsFields = (
   if (b === predictedField) {
     return 1;
   }
-  if (a === dependentVariable) {
+  if (a === dependentVariable || a === dependentVariable.replace(/\.keyword$/, '')) {
     return -1;
   }
-  if (b === dependentVariable) {
+  if (b === dependentVariable || b === dependentVariable.replace(/\.keyword$/, '')) {
     return 1;
   }
 
@@ -239,16 +239,27 @@ export const getDefaultClassificationFieldsFromJobCaps = (
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
-
-  // TODO: ES_FIELD_TYPES.BOOLEAN and update type
+  // TODO: update type
   const allFields: any = [
-    { id: `${resultsField}.is_training`, name: `${resultsField}.is_training`, type: 'boolean' },
+    {
+      id: `${resultsField}.is_training`,
+      name: `${resultsField}.is_training`,
+      type: ES_FIELD_TYPES.BOOLEAN,
+    },
     { id: predictedField, name: predictedField },
     ...fields,
   ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
 
+  let selectedFields = allFields
+    .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
+    .filter((field: any) => field.name === predictedField || !field.name.includes('.keyword'));
+
+  if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {
+    selectedFields = selectedFields.slice(0, DEFAULT_REGRESSION_COLUMNS);
+  }
+
   return {
-    selectedFields: allFields.slice(0, DEFAULT_REGRESSION_COLUMNS),
+    selectedFields,
     docFields: allFields,
   };
 };

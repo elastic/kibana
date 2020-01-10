@@ -43,6 +43,7 @@ interface LoadExploreDataArg {
   field: string;
   direction: SortDirection;
   searchQuery: SavedSearchQuery;
+  requiresKeyword?: boolean;
 }
 export interface UseExploreDataReturnType {
   errorMessage: string;
@@ -79,7 +80,12 @@ export const useExploreData = (
     }
   };
 
-  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
+  const loadExploreData = async ({
+    field,
+    direction,
+    searchQuery,
+    requiresKeyword,
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -93,7 +99,7 @@ export const useExploreData = (
         if (field !== undefined) {
           body.sort = [
             {
-              [field]: {
+              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
                 order: direction,
               },
             },
