@@ -13,17 +13,23 @@ import { uncovertMetricNames } from '../../convert_metric_names';
  * Process the response from the get_nodes query
  * @param {Object} response: response data from get_nodes
  * @param {Object} clusterStats: cluster stats from cluster state document
- * @param {Object} shardStats: per-node information about shards
+ * @param {Object} nodesShardCount: per-node information about shards
  * @param {Object} timeOptions: min, max, and bucketSize needed for date histogram creation
  * @return {Array} node info combined with metrics for each node
  */
-export function handleResponse(response, clusterStats, shardStats, pageOfNodes, timeOptions = {}) {
+export function handleResponse(
+  response,
+  clusterStats,
+  nodesShardCount,
+  pageOfNodes,
+  timeOptions = {}
+) {
   if (!get(response, 'hits.hits')) {
     return [];
   }
 
   const nodeHits = get(response, 'hits.hits', []);
-  const nodesInfo = mapNodesInfo(nodeHits, clusterStats, shardStats);
+  const nodesInfo = mapNodesInfo(nodeHits, clusterStats, nodesShardCount);
 
   /*
    * Every node bucket is an object with a field for nodeId and fields for
