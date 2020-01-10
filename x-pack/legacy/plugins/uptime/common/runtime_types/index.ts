@@ -5,6 +5,6 @@
  */
 
 export * from './common';
+export * from './monitor';
+export * from './overview_filters';
 export * from './snapshot';
-export * from './monitor/monitor_details';
-export * from './monitor/monitor_locations';

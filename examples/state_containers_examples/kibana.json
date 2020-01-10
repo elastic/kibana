@@ -1,0 +1,10 @@
+{
+  "id": "stateContainersExamples",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["state_containers_examples"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
