@@ -43,9 +43,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateCreate />', () => {
+describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -71,7 +69,6 @@ describe.skip('<TemplateCreate />', () => {
 
       expect(find('nextButton').props().disabled).toEqual(false);
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickNextButton();
         await nextTick();
@@ -90,7 +87,6 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -107,7 +103,6 @@ describe.skip('<TemplateCreate />', () => {
         it('should not allow invalid json', async () => {
           const { form, actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.completeStepTwo('{ invalidJsonString ');
           });
@@ -120,7 +115,6 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -140,7 +134,6 @@ describe.skip('<TemplateCreate />', () => {
         it('should not allow invalid json', async () => {
           const { actions, form } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 3 (mappings) with invalid json
             await actions.completeStepThree('{ invalidJsonString ');
@@ -154,7 +147,6 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -177,7 +169,6 @@ describe.skip('<TemplateCreate />', () => {
         it('should not allow invalid json', async () => {
           const { actions, form } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 4 (aliases) with invalid json
             await actions.completeStepFour('{ invalidJsonString ');
@@ -194,7 +185,6 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -249,7 +239,6 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions, exists, find } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -280,7 +269,6 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -302,7 +290,6 @@ describe.skip('<TemplateCreate />', () => {
       it('should send the correct payload', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -333,7 +320,6 @@ describe.skip('<TemplateCreate />', () => {
 
         httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

@@ -32,4 +32,5 @@ export type IUrlParams = {
   serviceNodeName?: string;
   searchTerm?: string;
   processorEvent?: ProcessorEvent;
+  traceIdLink?: string;
 } & Partial<Record<LocalUIFilterName, string>>;

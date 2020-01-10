@@ -4,73 +4,120 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  IClusterClient,
   IRouter,
+  IScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
 } from 'kibana/server';
-import { httpServiceMock } from '../../../../../src/core/server/http/http_service.mock';
-import { httpServerMock } from '../../../../../src/core/server/http/http_server.mocks';
-import { registerEndpointRoutes } from './endpoints';
-import { EndpointRequestContext } from '../handlers/endpoint_handler';
-import { SearchResponse } from 'elasticsearch';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { EndpointData } from '../types';
+import { SearchResponse } from 'elasticsearch';
+import { EndpointResultList, registerEndpointRoutes } from './endpoints';
+import { EndpointConfigSchema } from '../config';
+import * as data from '../test_data/all_endpoints_data.json';
 
-describe('endpoints route test', () => {
+describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
-  let routeConfig: RouteConfig<any, any, any>;
+  let routeConfig: RouteConfig<any, any, any, any>;
 
   beforeEach(() => {
+    mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
+      IClusterClient
+    >;
+    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
+    registerEndpointRoutes(routerMock, {
+      logFactory: loggingServiceMock.create(),
+      config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+    });
   });
 
-  it('route find specific endpoint', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: {},
-      params: { id: 'endpoint_id' },
-    });
-    const response: SearchResponse<EndpointData> = ({
-      id: 'endpoint_id',
-    } as unknown) as SearchResponse<EndpointData>;
-    const endpointHandler: jest.Mocked<EndpointRequestContext> = {
-      findEndpoint: jest.fn(),
-      findLatestOfAllEndpoints: jest.fn(),
-    };
-    endpointHandler.findEndpoint.mockReturnValue(Promise.resolve(response));
-    registerEndpointRoutes(routerMock, endpointHandler);
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+  it('test find the latest of all endpoints', async () => {
+    const mockRequest = httpServerMock.createKibanaRequest({});
+
+    const response: SearchResponse<EndpointData> = (data as unknown) as SearchResponse<
+      EndpointData
+    >;
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/endpoints')
     )!;
-    await routeHandler(({} as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    await routeHandler(
+      ({
+        core: {
+          elasticsearch: {
+            dataClient: mockScopedClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: { id: 'endpoint_id' } });
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
+    expect(endpointResultList.endpoints.length).toEqual(3);
+    expect(endpointResultList.total).toEqual(3);
+    expect(endpointResultList.request_index).toEqual(0);
+    expect(endpointResultList.request_page_size).toEqual(10);
   });
 
-  it('route find all endpoints', async () => {
+  it('test find the latest of all endpoints with params', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      body: {},
-      params: {},
+      body: {
+        paging_properties: [
+          {
+            page_size: 10,
+          },
+          {
+            page_index: 1,
+          },
+        ],
+      },
     });
-    const response: SearchResponse<EndpointData> = ({
-      id: 'all',
-    } as unknown) as SearchResponse<EndpointData>;
-    const endpointHandler: jest.Mocked<EndpointRequestContext> = {
-      findEndpoint: jest.fn(),
-      findLatestOfAllEndpoints: jest.fn(),
-    };
-    endpointHandler.findLatestOfAllEndpoints.mockReturnValue(Promise.resolve(response));
-    registerEndpointRoutes(routerMock, endpointHandler);
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(
-      ([{ path }]) => path === '/api/endpoint/endpoints'
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+      Promise.resolve((data as unknown) as SearchResponse<EndpointData>)
+    );
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/endpoints')
     )!;
-    await routeHandler(({} as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    await routeHandler(
+      ({
+        core: {
+          elasticsearch: {
+            dataClient: mockScopedClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: { id: 'all' } });
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
+    expect(endpointResultList.endpoints.length).toEqual(3);
+    expect(endpointResultList.total).toEqual(3);
+    expect(endpointResultList.request_index).toEqual(10);
+    expect(endpointResultList.request_page_size).toEqual(10);
   });
 });

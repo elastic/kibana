@@ -22,3 +22,4 @@
  * types are stripped.
  */
 export * from './core_service';
+export * from './capabilities';

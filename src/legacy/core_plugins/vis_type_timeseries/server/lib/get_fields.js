@@ -28,11 +28,9 @@ export async function getFields(req) {
     indexPatternString
   );
 
-  const fields = (await searchStrategy.getFieldsForWildcard(
-    req,
-    indexPatternString,
-    capabilities
-  )).filter(field => field.aggregatable);
+  const fields = (
+    await searchStrategy.getFieldsForWildcard(req, indexPatternString, capabilities)
+  ).filter(field => field.aggregatable);
 
   return uniq(fields, field => field.name);
 }

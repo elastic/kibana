@@ -20,7 +20,7 @@ export class PagerDutyAction extends BaseAction {
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
-      description: this.description
+      description: this.description,
     });
 
     return result;
@@ -32,7 +32,7 @@ export class PagerDutyAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      description: json.description
+      description: json.description,
     });
 
     const action = new PagerDutyAction(props, errors);
@@ -45,8 +45,8 @@ export class PagerDutyAction extends BaseAction {
 
     result[this.id] = {
       pagerduty: {
-        description: this.description
-      }
+        description: this.description,
+      },
     };
 
     return result;
@@ -58,7 +58,7 @@ export class PagerDutyAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      description: json.actionJson.pagerduty.description
+      description: json.actionJson.pagerduty.description,
     });
 
     const action = new PagerDutyAction(props, errors);
@@ -71,24 +71,30 @@ export class PagerDutyAction extends BaseAction {
     if (!json.pagerduty) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonPagerDuty} property',
-          values: {
-            actionJsonPagerDuty: 'actionJson.pagerduty'
+        message: i18n.translate(
+          'xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonPagerDuty} property',
+            values: {
+              actionJsonPagerDuty: 'actionJson.pagerduty',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (json.pagerduty && !json.pagerduty.description) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyDescriptionPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonPagerDutyText} property',
-          values: {
-            actionJsonPagerDutyText: 'actionJson.pagerduty.description'
+        message: i18n.translate(
+          'xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyDescriptionPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonPagerDutyText} property',
+            values: {
+              actionJsonPagerDutyText: 'actionJson.pagerduty.description',
+            },
           }
-        }),
+        ),
       });
     }
 

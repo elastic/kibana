@@ -48,7 +48,7 @@ function _getSpec(dirname = __dirname) {
 }
 export function getSpec() {
   const result = _getSpec();
-  extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
+  extensionSpecFilePaths.forEach(extensionSpecFilePath => {
     merge(result, _getSpec(extensionSpecFilePath));
   });
   return result;

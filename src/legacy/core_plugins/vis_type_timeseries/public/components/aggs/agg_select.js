@@ -26,7 +26,9 @@ import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 
 const metricAggs = [
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.averageLabel', { defaultMessage: 'Average' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.averageLabel', {
+      defaultMessage: 'Average',
+    }),
     value: 'avg',
   },
   {
@@ -36,7 +38,9 @@ const metricAggs = [
     value: 'cardinality',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.countLabel', { defaultMessage: 'Count' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.countLabel', {
+      defaultMessage: 'Count',
+    }),
     value: 'count',
   },
   {
@@ -46,11 +50,15 @@ const metricAggs = [
     value: 'filter_ratio',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.maxLabel', { defaultMessage: 'Max' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.maxLabel', {
+      defaultMessage: 'Max',
+    }),
     value: 'max',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.minLabel', { defaultMessage: 'Min' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.minLabel', {
+      defaultMessage: 'Min',
+    }),
     value: 'min',
   },
   {
@@ -78,7 +86,9 @@ const metricAggs = [
     value: 'std_deviation',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.sumLabel', { defaultMessage: 'Sum' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.sumLabel', {
+      defaultMessage: 'Sum',
+    }),
     value: 'sum',
   },
   {
@@ -88,7 +98,9 @@ const metricAggs = [
     value: 'sum_of_squares',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.topHitLabel', { defaultMessage: 'Top Hit' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.topHitLabel', {
+      defaultMessage: 'Top Hit',
+    }),
     value: 'top_hit',
   },
   {
@@ -197,7 +209,9 @@ const specialAggs = [
     value: 'series_agg',
   },
   {
-    label: i18n.translate('visTypeTimeseries.aggSelect.specialAggs.mathLabel', { defaultMessage: 'Math' }),
+    label: i18n.translate('visTypeTimeseries.aggSelect.specialAggs.mathLabel', {
+      defaultMessage: 'Math',
+    }),
     value: 'math',
   },
 ];

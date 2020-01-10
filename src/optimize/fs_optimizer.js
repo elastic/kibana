@@ -32,8 +32,7 @@ export default class FsOptimizer extends BaseOptimizer {
 
         if (this.isFailure(stats)) {
           return cb(this.failedStatsToError(stats));
-        }
-        else {
+        } else {
           cb(null, stats);
         }
       });

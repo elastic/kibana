@@ -5,5 +5,5 @@
  */
 
 export const TRANSACTION_PAGE_LOAD = 'page-load';
-export const TRANSACTION_ROUTE_CHANGE = 'route-change';
 export const TRANSACTION_REQUEST = 'request';
+export const TRANSACTION_ROUTE_CHANGE = 'route-change';

@@ -17,29 +17,33 @@
  * under the License.
  */
 
-import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../../vis';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AggType, AggTypeConfig } from '../agg_type';
+import { AggParamType } from '../param_types/agg';
 
-export type IBucketAggConfig = AggConfig;
+export interface IBucketAggConfig extends AggConfig {
+  type: InstanceType<typeof BucketAggType>;
+}
 
-export interface BucketAggParam extends AggParamType {
+export interface BucketAggParam<TBucketAggConfig extends AggConfig>
+  extends AggParamType<TBucketAggConfig> {
   scriptable?: boolean;
   filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 }
 
-export interface BucketAggTypeConfig<TBucketAggConfig extends IBucketAggConfig>
-  extends AggTypeConfig<TBucketAggConfig, BucketAggParam> {
+const bucketType = 'buckets';
+
+interface BucketAggTypeConfig<TBucketAggConfig extends AggConfig>
+  extends AggTypeConfig<TBucketAggConfig, BucketAggParam<TBucketAggConfig>> {
   getKey?: (bucket: any, key: any, agg: AggConfig) => any;
 }
 
-const bucketType = 'buckets';
-
-export class BucketAggType<
-  TBucketAggConfig extends IBucketAggConfig = IBucketAggConfig
-> extends AggType<TBucketAggConfig, BucketAggParam> {
-  getKey: (bucket: any, key: any, agg: IBucketAggConfig) => any;
+export class BucketAggType<TBucketAggConfig extends AggConfig = IBucketAggConfig> extends AggType<
+  TBucketAggConfig,
+  BucketAggParam<TBucketAggConfig>
+> {
+  getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
   type = bucketType;
 
   constructor(config: BucketAggTypeConfig<TBucketAggConfig>) {

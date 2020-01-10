@@ -6,11 +6,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiCode,
-  EuiText,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiCode, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { ChangesNeeded, CloudDeployment } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -27,9 +23,9 @@ export function ExplainExporters({ reason }) {
             defaultMessage="We checked the {context} settings for
             {property}, and found the reason: {data}."
             values={{
-              context: (<EuiCode>{context}</EuiCode>),
-              property: (<EuiCode>{property}</EuiCode>),
-              data: (<EuiCode>{data}</EuiCode>)
+              context: <EuiCode>{context}</EuiCode>,
+              property: <EuiCode>{property}</EuiCode>,
+              data: <EuiCode>{data}</EuiCode>,
             }}
           />
         </p>
@@ -44,9 +40,9 @@ export function ExplainExporters({ reason }) {
             monitoring data, there seems to be a problem with the {property} configuration,
             or the {monitoringEs} settings in {kibanaConfig}."
             values={{
-              property: (<EuiCode>{property}</EuiCode>),
-              monitoringEs: (<EuiCode>xpack.monitoring.elasticsearch</EuiCode>),
-              kibanaConfig: (<EuiCode>kibana.yml</EuiCode>)
+              property: <EuiCode>{property}</EuiCode>,
+              monitoringEs: <EuiCode>xpack.monitoring.elasticsearch</EuiCode>,
+              kibanaConfig: <EuiCode>kibana.yml</EuiCode>,
             }}
           />
         </p>
@@ -58,8 +54,8 @@ export function ExplainExporters({ reason }) {
             the monitoring cluster, and that the monitoring cluster host matches the {monitoringEs}
             setting in {kibanaConfig} to see monitoring data in this instance of Kibana."
             values={{
-              monitoringEs: (<EuiCode>xpack.monitoring.elasticsearch</EuiCode>),
-              kibanaConfig: (<EuiCode>kibana.yml</EuiCode>)
+              monitoringEs: <EuiCode>xpack.monitoring.elasticsearch</EuiCode>,
+              kibanaConfig: <EuiCode>kibana.yml</EuiCode>,
             }}
           />
         </p>

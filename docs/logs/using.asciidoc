@@ -78,8 +78,19 @@ This opens the *Log event document details* fly-out that shows the fields associ
 To quickly filter the logs stream by one of the field values, in the log event details, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
 
-To see other actions related to the event, in the log event details, click *Actions*.
-Depending on the event and the features you have installed and configured, you may also be able to:
+[float]
+[[view-log-anomalies]]
+=== View log anomalies
+
+When the machine learning anomaly detection features are enabled, click *Log rate*, which allows you to
+<<xpack-logs-analysis,use machine learning to detect and inspect anomalies>> in your log data.
+
+[float]
+[[logs-integrations]]
+=== Logs app integrations
+
+To see other actions related to the event, click *Actions* in the log event details.
+Depending on the event and the features you have configured, you may also be able to:
 
 * Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
 * Select *View in APM* to <<traces, view related APM traces>> in the *APM* app.

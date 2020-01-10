@@ -55,13 +55,16 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
           body: {
             settings,
             mappings,
-            aliases
+            aliases,
           },
         });
 
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          get(err, 'body.error.type') !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 
@@ -103,6 +106,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

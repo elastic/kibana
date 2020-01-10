@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, IClusterClient } from 'kibana/server';
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
-import { EndpointPlugin } from './plugin';
+import { CoreSetup } from 'kibana/server';
+import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { PluginSetupContract } from '../../features/server';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockedEndpointPluginSetupDependencies: jest.Mocked<EndpointPluginSetupDependencies>;
+  let mockedPluginSetupContract: jest.Mocked<PluginSetupContract>;
   beforeEach(() => {
     plugin = new EndpointPlugin(
       coreMock.createPluginInitializerContext({
@@ -20,31 +22,18 @@ describe('test endpoint plugin', () => {
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTlsEnabled = true;
-
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<IClusterClient>
-    );
-  });
-  describe('test setup()', () => {
-    it('test properly create plugin', async () => {
-      await plugin.setup(mockCoreSetup, {});
-      expect(mockCoreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.http.registerRouteHandlerContext).toBeCalledWith(
-        'endpointPlugin',
-        expect.any(Function)
-      );
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('endpoint-plugin');
-    });
+    mockedPluginSetupContract = {
+      registerFeature: jest.fn(),
+      getFeatures: jest.fn(),
+      getFeaturesUICapabilities: jest.fn(),
+      registerLegacyAPI: jest.fn(),
+    };
+    mockedEndpointPluginSetupDependencies = { features: mockedPluginSetupContract };
   });
 
-  describe('test stop()', () => {
-    it('test properly stop plugin', async () => {
-      await plugin.setup(mockCoreSetup, {});
-      await plugin.stop();
-      expect(mockClusterClient.close).toBeCalledTimes(1);
-    });
+  it('test properly setup plugin', async () => {
+    await plugin.setup(mockCoreSetup, mockedEndpointPluginSetupDependencies);
+    expect(mockedPluginSetupContract.registerFeature).toBeCalledTimes(1);
+    expect(mockCoreSetup.http.createRouter).toBeCalledTimes(1);
   });
 });

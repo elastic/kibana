@@ -4,29 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore No typings for EuiSpacer
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
-import {
-  MonitorCharts,
-  MonitorPageTitle,
-  MonitorStatusBar,
-  PingList,
-} from '../components/functional';
+import { MonitorCharts, MonitorPageTitle, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
+import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 
 interface MonitorPageProps {
-  logMonitorPageLoad: () => void;
   match: { params: { monitorId: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
@@ -35,12 +27,7 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({
-  logMonitorPageLoad,
-  query,
-  setBreadcrumbs,
-  match,
-}: MonitorPageProps) => {
+export const MonitorPage = ({ query, setBreadcrumbs, match }: MonitorPageProps) => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   const monitorId = atob(match.params.monitorId);
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
@@ -70,7 +57,7 @@ export const MonitorPage = ({
         setHeadingText(heading);
       }
     });
-  }, [params]);
+  }, [monitorId, params, query, setBreadcrumbs, setHeadingText]);
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
 
@@ -81,9 +68,7 @@ export const MonitorPage = ({
     monitorId,
   };
 
-  useEffect(() => {
-    logMonitorPageLoad();
-  }, []);
+  useUptimeTelemetry(UptimePage.Monitor);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
@@ -92,7 +77,12 @@ export const MonitorPage = ({
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
-      <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
+      <MonitorStatusDetails
+        monitorId={monitorId}
+        variables={sharedVariables}
+        dateStart={absoluteDateRangeStart}
+        dateEnd={absoluteDateRangeEnd}
+      />
       <EuiSpacer size="s" />
       <MonitorCharts
         {...colors}
@@ -105,10 +95,10 @@ export const MonitorPage = ({
       <PingList
         onPageCountChange={setPingListPageCount}
         onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | undefined) =>
-          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
-        }
-        onUpdateApp={refreshApp}
+        onSelectedStatusChange={(selectedStatus: string | undefined) => {
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' });
+          refreshApp();
+        }}
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}

@@ -12,7 +12,7 @@ import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     bulkCreateTest,

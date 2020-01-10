@@ -22,31 +22,27 @@ import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IIndexPattern } from '../../index_patterns';
 
-/** @deprecated
- * see https://github.com/elastic/elasticsearch/pull/17508
- * */
 export interface DeprecatedMatchPhraseFilter extends Filter {
-  match: {
-    [field: string]: {
-      query: any;
-      type: 'phrase';
+  query: {
+    match: {
+      [field: string]: {
+        query: any;
+        type: 'phrase';
+      };
     };
   };
 }
 
-/** @deprecated
- * see https://github.com/elastic/elasticsearch/pull/17508
- * */
-function isMatchPhraseFilter(filter: any): filter is DeprecatedMatchPhraseFilter {
-  const fieldName = filter.match && Object.keys(filter.match)[0];
+function isDeprecatedMatchPhraseFilter(filter: any): filter is DeprecatedMatchPhraseFilter {
+  const fieldName = filter.query && filter.query.match && Object.keys(filter.query.match)[0];
 
-  return Boolean(fieldName && get(filter, ['match', fieldName, 'type']) === 'phrase');
+  return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
 }
 
-export function migrateFilter(filter: Filter, indexPattern: IIndexPattern | null) {
-  if (isMatchPhraseFilter(filter)) {
-    const fieldName = Object.keys(filter.match)[0];
-    const params: Record<string, any> = get(filter, ['match', fieldName]);
+export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
+  if (isDeprecatedMatchPhraseFilter(filter)) {
+    const fieldName = Object.keys(filter.query.match)[0];
+    const params: Record<string, any> = get(filter, ['query', 'match', fieldName]);
     if (indexPattern) {
       const field = indexPattern.fields.find(f => f.name === fieldName);
 
@@ -55,8 +51,11 @@ export function migrateFilter(filter: Filter, indexPattern: IIndexPattern | null
       }
     }
     return {
-      match_phrase: {
-        [fieldName]: omit(params, 'type'),
+      ...filter,
+      query: {
+        match_phrase: {
+          [fieldName]: omit(params, 'type'),
+        },
       },
     };
   }

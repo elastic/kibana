@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Firefox UI Functional Tests'
+      reportName: 'Firefox UI Functional Tests',
     },
   };
 }

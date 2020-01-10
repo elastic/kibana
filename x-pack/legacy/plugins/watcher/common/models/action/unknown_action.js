@@ -21,7 +21,7 @@ export class UnknownAction extends BaseAction {
     const result = super.downstreamJson;
 
     Object.assign(result, {
-      actionJson: this.actionJson
+      actionJson: this.actionJson,
     });
 
     return result;
@@ -32,7 +32,7 @@ export class UnknownAction extends BaseAction {
     const props = super.getPropsFromDownstreamJson(json);
 
     Object.assign(props, {
-      actionJson: json.actionJson
+      actionJson: json.actionJson,
     });
 
     return new UnknownAction(props);
@@ -53,7 +53,7 @@ export class UnknownAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      actionJson: json.actionJson
+      actionJson: json.actionJson,
     });
 
     const action = new UnknownAction(props, errors);
@@ -67,12 +67,15 @@ export class UnknownAction extends BaseAction {
     if (!json.actionJson) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.unknownAction.actionJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJson} property',
-          values: {
-            actionJson: 'actionJson'
+        message: i18n.translate(
+          'xpack.watcher.models.unknownAction.actionJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJson} property',
+            values: {
+              actionJson: 'actionJson',
+            },
           }
-        }),
+        ),
       });
     }
 

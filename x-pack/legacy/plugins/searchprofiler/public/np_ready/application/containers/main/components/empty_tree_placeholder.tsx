@@ -15,13 +15,12 @@ export const EmptyTreePlaceHolder = () => {
         {/* TODO: translations */}
         <h1>
           {i18n.translate('xpack.searchProfiler.emptyProfileTreeTitle', {
-            defaultMessage: 'Nothing to see here yet.',
+            defaultMessage: 'No queries to profile',
           })}
         </h1>
         <p>
           {i18n.translate('xpack.searchProfiler.emptyProfileTreeDescription', {
-            defaultMessage:
-              'Enter a query and press the "Profile" button or provide profile data in the editor.',
+            defaultMessage: 'Enter a query, click Profile, and see the results here.',
           })}
         </p>
       </EuiText>

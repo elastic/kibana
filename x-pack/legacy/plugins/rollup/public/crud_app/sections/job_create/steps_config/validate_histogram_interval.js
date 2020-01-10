@@ -14,30 +14,30 @@ export function validateHistogramInterval(histogram, histogramInterval) {
   }
 
   if (histogramInterval <= 0) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalZero"
         defaultMessage="Interval must be greater than zero."
-      />
-    )];
+      />,
+    ];
   }
 
   if (Math.round(histogramInterval) !== Number(histogramInterval)) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalWholeNumber"
         defaultMessage="Interval must be a whole number."
-      />
-    )];
+      />,
+    ];
   }
 
   if (!histogramInterval) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalMissing"
         defaultMessage="An interval is required to roll up these histogram fields."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

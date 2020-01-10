@@ -21,11 +21,11 @@ import { isObject, isNumber } from 'lodash';
 import { flattenData } from './flatten_data';
 
 /*
-  * Accepts a Kibana data object.
-  * Returns an object with unique x axis values as keys with an object of
-  * their index numbers and an isNumber boolean as their values.
-  * e.g. { 'xAxisValue': { index: 1, isNumber: false }}, ...
-  */
+ * Accepts a Kibana data object.
+ * Returns an object with unique x axis values as keys with an object of
+ * their index numbers and an isNumber boolean as their values.
+ * e.g. { 'xAxisValue': { index: 1, isNumber: false }}, ...
+ */
 export function getUniqKeys(obj) {
   if (!isObject(obj)) {
     throw new TypeError('getUniqKeys expects an object');

@@ -9,7 +9,7 @@ import { DetailPanel as PresentationComponent } from './detail_panel';
 import {
   getDetailPanelType,
   getDetailPanelIndexName,
-  getIndexByIndexName
+  getIndexByIndexName,
 } from '../../../../store/selectors';
 import {
   openDetailPanel,
@@ -20,43 +20,43 @@ import {
   flushIndices,
   forcemergeIndices,
   openIndices,
-  refreshIndices
+  refreshIndices,
 } from '../../../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   const indexName = getDetailPanelIndexName(state);
   return {
     panelType: getDetailPanelType(state),
     indexName,
-    index: getIndexByIndexName(state, indexName)
+    index: getIndexByIndexName(state, indexName),
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    clearCacheIndex: (indexName) => {
-      dispatch(clearCacheIndices({ indexNames: [ indexName ] }));
+    clearCacheIndex: indexName => {
+      dispatch(clearCacheIndices({ indexNames: [indexName] }));
     },
-    closeIndex: (indexName) => {
-      dispatch(closeIndices({ indexNames: [ indexName ] }));
+    closeIndex: indexName => {
+      dispatch(closeIndices({ indexNames: [indexName] }));
     },
-    flushIndex: (indexName) => {
-      dispatch(flushIndices({ indexNames: [ indexName ] }));
+    flushIndex: indexName => {
+      dispatch(flushIndices({ indexNames: [indexName] }));
     },
-    openIndex: (indexName) => {
-      dispatch(openIndices({ indexNames: [ indexName ] }));
+    openIndex: indexName => {
+      dispatch(openIndices({ indexNames: [indexName] }));
     },
-    refreshIndex: (indexName) => {
-      dispatch(refreshIndices({ indexNames: [ indexName ] }));
+    refreshIndex: indexName => {
+      dispatch(refreshIndices({ indexNames: [indexName] }));
     },
-    forcemergeIndex: (indexName) => {
-      dispatch(forcemergeIndices({ indexNames: [ indexName ] }));
+    forcemergeIndex: indexName => {
+      dispatch(forcemergeIndices({ indexNames: [indexName] }));
     },
-    deleteIndex: (indexName) => {
-      dispatch(deleteIndices({ indexNames: [ indexName ] }));
+    deleteIndex: indexName => {
+      dispatch(deleteIndices({ indexNames: [indexName] }));
     },
     closeDetailPanel: () => dispatch(closeDetailPanel()),
-    openDetailPanel: (indexName, panelType) => dispatch(openDetailPanel(indexName, panelType))
+    openDetailPanel: (indexName, panelType) => dispatch(openDetailPanel(indexName, panelType)),
   };
 };
 

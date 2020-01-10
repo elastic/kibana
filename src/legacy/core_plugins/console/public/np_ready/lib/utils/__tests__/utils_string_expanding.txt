@@ -1,0 +1,54 @@
+==========
+Scripts in requests
+-------------------------------------
+{
+  "f": { "script": { "source": "\ntest\ntest\\\\\\\\\\\\\\\\2\n" } },
+  "g": { "script": "second + \"\\\";" },
+  "a": "short with \\",
+  "\\\\h": 1,
+  "script": "a + 2"
+}
+-------------------------------------
+{
+  "f": { "script": { "source": """
+test
+test\\\\\\\\2
+""" } },
+  "g": { "script": """second + "\";""" },
+  "a": """short with \""",
+  "\\\\h": 1,
+  "script": "a + 2"
+}
+==========
+Preserve triple quotes
+-------------------------------------
+{
+  "content\\\": "tri\"ple",
+}
+-------------------------------------
+{
+  "content\\\": """tri"ple""",
+}
+==========
+Correctly parse with JSON embedded inside values
+-------------------------------------
+{
+  "content\\\\": " { \"json\": \"inside\\\\\" ok!  1\n  \"  } "
+}
+-------------------------------------
+{
+  "content\\\\": """ { "json": "inside\\" ok!  1
+  "  } """
+}
+==========
+Correctly handle new lines in triple quotes
+-------------------------------------
+{
+  "query": "\n    SELECT * FROM \"TABLE\"\n    "
+}
+-------------------------------------
+{
+  "query": """
+    SELECT * FROM "TABLE"
+    """
+}

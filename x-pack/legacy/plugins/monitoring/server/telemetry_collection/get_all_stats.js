@@ -6,11 +6,7 @@
 
 import { get, set, merge } from 'lodash';
 
-import {
-  LOGSTASH_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-} from '../../common/constants';
+import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
 import { getElasticsearchStats } from './get_es_stats';
 import { getKibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
@@ -29,10 +25,10 @@ export async function getAllStats(clustersDetails, { server, callCluster, start,
   const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
-    getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-    getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana
+    getElasticsearchStats(server, callCluster, clusterUuids), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getKibanaStats(server, callCluster, clusterUuids, start, end), // stack_stats.kibana
     getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
-    getBeatsStats(server, callCluster, clusterUuids, start, end),      // stack_stats.beats
+    getBeatsStats(server, callCluster, clusterUuids, start, end), // stack_stats.beats
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
@@ -47,7 +43,7 @@ export async function getAllStats(clustersDetails, { server, callCluster, start,
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
  * @return {Array} The clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
-export function handleAllStats(clusters, { kibana, logstash,  beats }) {
+export function handleAllStats(clusters, { kibana, logstash, beats }) {
   return clusters.map(cluster => {
     // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
     addStackStats(cluster, kibana, KIBANA_SYSTEM_ID);
@@ -72,7 +68,7 @@ export function addStackStats(cluster, allProductStats, product) {
   // Don't add it if they're not using (or configured to report stats) this product for this cluster
   if (productStats) {
     if (!cluster.stack_stats) {
-      cluster.stack_stats = { };
+      cluster.stack_stats = {};
     }
 
     cluster.stack_stats[product] = productStats;

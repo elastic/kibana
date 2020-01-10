@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from './code_editor';
 export * from './saved_objects';
 export * from './exit_full_screen_button';
 export * from './context';

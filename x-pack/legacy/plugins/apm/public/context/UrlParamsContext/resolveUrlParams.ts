@@ -30,7 +30,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     serviceNodeName,
-    errorGroupId
+    errorGroupId,
+    traceId: traceIdLink
   } = getPathParams(location.pathname);
 
   const query = toQuery(location.search);
@@ -87,6 +88,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     // path params
     processorEvent,
     serviceName,
+    traceIdLink,
     errorGroupId,
     serviceNodeName: serviceNodeName
       ? decodeURIComponent(serviceNodeName)

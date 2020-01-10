@@ -18,5 +18,5 @@ export const DEFAULT_RGB_HEATMAP_COLOR_RAMP = [
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
 export const HEATMAP_COLOR_RAMP_LABEL = i18n.translate('xpack.maps.heatmap.colorRampLabel', {
-  defaultMessage: 'Color range'
+  defaultMessage: 'Color range',
 });

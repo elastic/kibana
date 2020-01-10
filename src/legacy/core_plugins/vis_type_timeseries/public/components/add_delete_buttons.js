@@ -140,9 +140,12 @@ AddDeleteButtons.defaultProps = {
   activatePanelTooltip: i18n.translate('visTypeTimeseries.addDeleteButtons.reEnableTooltip', {
     defaultMessage: 'Re-enable',
   }),
-  deactivatePanelTooltip: i18n.translate('visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip', {
-    defaultMessage: 'Temporarily Disable',
-  }),
+  deactivatePanelTooltip: i18n.translate(
+    'visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip',
+    {
+      defaultMessage: 'Temporarily Disable',
+    }
+  ),
 };
 
 AddDeleteButtons.propTypes = {

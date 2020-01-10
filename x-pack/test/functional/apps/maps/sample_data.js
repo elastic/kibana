@@ -6,13 +6,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService, updateBaselines }) {
+export default function({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38137
   describe.skip('maps loaded from sample data', () => {
-
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
     // Setting the time range to a window larger than the sample data set
@@ -52,7 +51,10 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'ecommerce_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.05);
       });
     });
@@ -76,7 +78,10 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('flights_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'flights_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.05);
       });
     });
@@ -102,10 +107,12 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'web_logs_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.06);
       });
     });
-
   });
 }

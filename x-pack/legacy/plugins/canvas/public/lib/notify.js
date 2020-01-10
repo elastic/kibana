@@ -5,8 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { toastNotifications } from 'ui/notify';
-import { formatMsg } from 'ui/notify/lib/format_msg';
+import { getCoreStart, getStartPlugins } from '../legacy';
+
+const getToastNotifications = function() {
+  return getCoreStart().notifications.toasts;
+};
+
+const formatMsg = function(...args) {
+  return getStartPlugins().__LEGACY.formatMsg(...args);
+};
 
 const getToast = (err, opts = {}) => {
   const errData = get(err, 'response') || err;
@@ -31,15 +38,15 @@ export const notify = {
    * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
    */
   error(err, opts) {
-    toastNotifications.addDanger(getToast(err, opts));
+    getToastNotifications().addDanger(getToast(err, opts));
   },
   warning(err, opts) {
-    toastNotifications.addWarning(getToast(err, opts));
+    getToastNotifications().addWarning(getToast(err, opts));
   },
   info(err, opts) {
-    toastNotifications.add(getToast(err, opts));
+    getToastNotifications().add(getToast(err, opts));
   },
   success(err, opts) {
-    toastNotifications.addSuccess(getToast(err, opts));
+    getToastNotifications().addSuccess(getToast(err, opts));
   },
 };

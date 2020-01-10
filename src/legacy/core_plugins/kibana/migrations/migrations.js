@@ -423,7 +423,7 @@ function migrateSearchSortToNestedArray(doc) {
     attributes: {
       ...doc.attributes,
       sort: [doc.attributes.sort],
-    }
+    },
   };
 }
 
@@ -457,7 +457,6 @@ function migrateFiltersAggQueryStringQueries(doc) {
     }
   }
   return doc;
-
 }
 
 function migrateSubTypeAndParentFieldProperties(doc) {
@@ -469,7 +468,7 @@ function migrateSubTypeAndParentFieldProperties(doc) {
     if (field.subType === 'multi') {
       return {
         ...omit(field, 'parent'),
-        subType: { multi: { parent: field.parent } }
+        subType: { multi: { parent: field.parent } },
       };
     }
 
@@ -481,7 +480,7 @@ function migrateSubTypeAndParentFieldProperties(doc) {
     attributes: {
       ...doc.attributes,
       fields: JSON.stringify(migratedFields),
-    }
+    },
   };
 }
 
@@ -496,17 +495,11 @@ const executeMigrations730 = flow(
   replaceMovAvgToMovFn
 );
 
-const executeVisualizationMigrations731 = flow(
-  migrateFiltersAggQueryStringQueries,
-);
+const executeVisualizationMigrations731 = flow(migrateFiltersAggQueryStringQueries);
 
-const executeSearchMigrations740 = flow(
-  migrateSearchSortToNestedArray,
-);
+const executeSearchMigrations740 = flow(migrateSearchSortToNestedArray);
 
-const executeMigrations742 = flow(
-  transformSplitFiltersStringToQueryObject
-);
+const executeMigrations742 = flow(transformSplitFiltersStringToQueryObject);
 
 export const migrations = {
   'index-pattern': {
@@ -515,9 +508,7 @@ export const migrations = {
       doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
       return doc;
     },
-    '7.6.0': flow(
-      migrateSubTypeAndParentFieldProperties
-    )
+    '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
   },
   visualization: {
     /**
@@ -658,7 +649,7 @@ export const migrations = {
       doc.attributes.panelsJSON = JSON.stringify(panels);
       return doc;
     },
-    '7.3.0': dashboardMigrations730
+    '7.3.0': dashboardMigrations730,
   },
   search: {
     '7.0.0': doc => {

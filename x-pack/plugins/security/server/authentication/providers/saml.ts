@@ -228,7 +228,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo('/logged_out');
+      return DeauthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/logged_out`
+      );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

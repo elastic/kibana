@@ -23,31 +23,35 @@ import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/
 import percentileTestdata from './testdata_linechart_percentile.json';
 import percentileTestdataResult from './testdata_linechart_percentile_result.json';
 
-describe('Point Series Config Type Class Test Suite', function () {
+describe('Point Series Config Type Class Test Suite', function() {
   let parsedConfig;
   const histogramConfig = {
     type: 'histogram',
     addLegend: true,
     tooltip: {
-      show: true
+      show: true,
     },
     categoryAxes: [
       {
         id: 'CategoryAxis-1',
         type: 'category',
-        title: {}
-      }
+        title: {},
+      },
     ],
-    valueAxes: [{
-      id: 'ValueAxis-1',
-      type: 'value',
-      labels: {},
-      title: {}
-    }]
+    valueAxes: [
+      {
+        id: 'ValueAxis-1',
+        type: 'value',
+        labels: {},
+        title: {},
+      },
+    ],
   };
 
   const data = {
-    get: (prop) => { return data[prop] || data.data[prop] ||  null; },
+    get: prop => {
+      return data[prop] || data.data[prop] || null;
+    },
     getLabels: () => [],
     data: {
       hits: 621,
@@ -55,7 +59,7 @@ describe('Point Series Config Type Class Test Suite', function () {
         date: true,
         interval: 30000,
         max: 1408734982458,
-        min: 1408734082458
+        min: 1408734082458,
       },
       series: [
         { label: 's1', values: [{ x: 1408734060000, y: 8 }] },
@@ -83,22 +87,21 @@ describe('Point Series Config Type Class Test Suite', function () {
         { label: 's23', values: [{ x: 1408734060000, y: 8 }] },
         { label: 's24', values: [{ x: 1408734060000, y: 8 }] },
         { label: 's25', values: [{ x: 1408734060000, y: 8 }] },
-        { label: 's26', values: [{ x: 1408734060000, y: 8 }] }
+        { label: 's26', values: [{ x: 1408734060000, y: 8 }] },
       ],
       xAxisLabel: 'Date Histogram',
       yAxisLabel: 'series',
-      yAxisFormatter: () => 'test'
-    }
-
+      yAxisFormatter: () => 'test',
+    },
   };
 
   beforeEach(ngMock.module('kibana'));
 
-  describe('histogram chart', function () {
-    beforeEach(function () {
+  describe('histogram chart', function() {
+    beforeEach(function() {
       parsedConfig = pointSeriesConfig.column(histogramConfig, data);
     });
-    it('should not throw an error when more than 25 series are provided', function () {
+    it('should not throw an error when more than 25 series are provided', function() {
       expect(parsedConfig.error).to.be.undefined;
     });
 
@@ -108,18 +111,19 @@ describe('Point Series Config Type Class Test Suite', function () {
     });
   });
 
-  describe('line chart', function () {
-    beforeEach(function () {
+  describe('line chart', function() {
+    beforeEach(function() {
       const percentileDataObj = {
-        get: (prop) => { return data[prop] || data.data[prop] ||  null; },
+        get: prop => {
+          return data[prop] || data.data[prop] || null;
+        },
         getLabels: () => [],
-        data: percentileTestdata.data
+        data: percentileTestdata.data,
       };
       parsedConfig = pointSeriesConfig.line(percentileTestdata.cfg, percentileDataObj);
     });
-    it('should render a percentile line chart', function () {
+    it('should render a percentile line chart', function() {
       expect(JSON.stringify(parsedConfig)).to.eql(JSON.stringify(percentileTestdataResult));
     });
   });
-
 });

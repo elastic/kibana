@@ -50,6 +50,7 @@ describe('BasicLoginForm', () => {
           loginState={loginState}
           next={''}
           intl={null as any}
+          loginAssistanceMessage=""
         />
       )
     ).toMatchSnapshot();
@@ -68,6 +69,7 @@ describe('BasicLoginForm', () => {
         next={''}
         infoMessage={'Hey this is an info message'}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 
@@ -86,6 +88,7 @@ describe('BasicLoginForm', () => {
         loginState={loginState}
         next={''}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 

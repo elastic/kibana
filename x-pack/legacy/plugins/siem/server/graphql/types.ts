@@ -458,6 +458,10 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+
+  AlertsHistogram: AlertsOverTimeData;
+
+  AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -556,6 +560,36 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+}
+
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -692,26 +726,12 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
   authenticationsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface TimelineData {
@@ -1628,6 +1648,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -1648,6 +1670,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x: string;
+
+  y: number;
+
+  g: string;
 }
 
 export interface NetworkHttpData {
@@ -2118,6 +2148,20 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+}
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+}
+export interface AnomaliesOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2753,6 +2797,10 @@ export namespace SourceResolvers {
     configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, TContext>;
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, TContext>;
+
+    AlertsHistogram?: AlertsHistogramResolver<AlertsOverTimeData, TypeParent, TContext>;
+
+    AnomaliesOverTime?: AnomaliesOverTimeResolver<AnomaliesOverTimeData, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
@@ -2824,6 +2872,32 @@ export namespace SourceResolvers {
     Parent,
     TContext
   >;
+  export type AlertsHistogramResolver<
+    R = AlertsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AlertsHistogramArgs>;
+  export interface AlertsHistogramArgs {
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+
+    timerange: TimerangeInput;
+  }
+
+  export type AnomaliesOverTimeResolver<
+    R = AnomaliesOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AnomaliesOverTimeArgs>;
+  export interface AnomaliesOverTimeArgs {
+    timerange: TimerangeInput;
+
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
   export type AuthenticationsResolver<
     R = AuthenticationsData,
     Parent = Source,
@@ -3365,6 +3439,111 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace AlertsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    alertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AlertsOverTimeByModuleResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace InspectResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = Inspect> {
+    dsl?: DslResolver<string[], TypeParent, TContext>;
+
+    response?: ResponseResolver<string[], TypeParent, TContext>;
+  }
+
+  export type DslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type ResponseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, TContext>;
+
+    y?: YResolver<number, TypeParent, TContext>;
+
+    g?: GResolver<string, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace AnomaliesOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    anomaliesOverTime?: AnomaliesOverTimeResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AnomaliesOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AnomaliesOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AnomaliesOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AnomaliesOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace AuthenticationsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsData> {
     edges?: EdgesResolver<AuthenticationsEdges[], TypeParent, TContext>;
@@ -3810,25 +3989,6 @@ export namespace PageInfoPaginatedResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace InspectResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = Inspect> {
-    dsl?: DslResolver<string[], TypeParent, TContext>;
-
-    response?: ResponseResolver<string[], TypeParent, TContext>;
-  }
-
-  export type DslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type ResponseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-}
-
 export namespace AuthenticationsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
@@ -3855,32 +4015,6 @@ export namespace AuthenticationsOverTimeDataResolvers {
   export type TotalCountResolver<
     R = number,
     Parent = AuthenticationsOverTimeData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace MatrixOverTimeHistogramDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
-
-    y?: YResolver<number, TypeParent, TContext>;
-
-    g?: GResolver<string, TypeParent, TContext>;
-  }
-
-  export type XResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type YResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GResolver<
-    R = string,
-    Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6949,6 +7083,8 @@ export namespace NetworkDnsDataResolvers {
     pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    histogram?: HistogramResolver<Maybe<MatrixOverOrdinalHistogramData[]>, TypeParent, TContext>;
   }
 
   export type EdgesResolver<
@@ -6968,6 +7104,11 @@ export namespace NetworkDnsDataResolvers {
   > = Resolver<R, Parent, TContext>;
   export type InspectResolver<
     R = Maybe<Inspect>,
+    Parent = NetworkDnsData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type HistogramResolver<
+    R = Maybe<MatrixOverOrdinalHistogramData[]>,
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7035,6 +7176,32 @@ export namespace NetworkDnsItemResolvers {
   export type UniqueDomainsResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverOrdinalHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverOrdinalHistogramData> {
+    x?: XResolver<string, TypeParent, TContext>;
+
+    y?: YResolver<number, TypeParent, TContext>;
+
+    g?: GResolver<string, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = string,
+    Parent = MatrixOverOrdinalHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverOrdinalHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverOrdinalHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8602,6 +8769,10 @@ export type IResolvers<TContext = SiemContext> = {
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
+  AlertsOverTimeData?: AlertsOverTimeDataResolvers.Resolvers<TContext>;
+  Inspect?: InspectResolvers.Resolvers<TContext>;
+  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
+  AnomaliesOverTimeData?: AnomaliesOverTimeDataResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
@@ -8614,9 +8785,7 @@ export type IResolvers<TContext = SiemContext> = {
   OsEcsFields?: OsEcsFieldsResolvers.Resolvers<TContext>;
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
-  Inspect?: InspectResolvers.Resolvers<TContext>;
   AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers.Resolvers<TContext>;
-  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   TimelineData?: TimelineDataResolvers.Resolvers<TContext>;
   TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
@@ -8704,6 +8873,7 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsData?: NetworkDnsDataResolvers.Resolvers<TContext>;
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
+  MatrixOverOrdinalHistogramData?: MatrixOverOrdinalHistogramDataResolvers.Resolvers<TContext>;
   NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
   NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;

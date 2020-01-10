@@ -10,10 +10,11 @@ export function getTestAlertData(overwrites = {}) {
     name: 'abc',
     tags: ['foo'],
     alertTypeId: 'test.noop',
-    interval: '1m',
+    consumer: 'bar',
+    schedule: { interval: '1m' },
     throttle: '1m',
     actions: [],
-    alertTypeParams: {},
+    params: {},
     ...overwrites,
   };
 }

@@ -21,7 +21,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import $ from 'jquery';
 
-describe('fancy forms', function () {
+describe('fancy forms', function() {
   let $el;
   let $scope;
   let $compile;
@@ -29,31 +29,31 @@ describe('fancy forms', function () {
   let ngForm;
 
   function generateEl() {
-    return $('<form>').html(
-      $('<input ng-model="val" required>')
-    );
+    return $('<form>').html($('<input ng-model="val" required>'));
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    $rootScope = $injector.get('$rootScope');
-    $compile = $injector.get('$compile');
+  beforeEach(
+    ngMock.inject(function($injector) {
+      $rootScope = $injector.get('$rootScope');
+      $compile = $injector.get('$compile');
 
-    $scope = $rootScope.$new();
-    $el = generateEl();
+      $scope = $rootScope.$new();
+      $el = generateEl();
 
-    $compile($el)($scope);
-    $scope.$apply();
+      $compile($el)($scope);
+      $scope.$apply();
 
-    ngForm = $el.controller('form');
-  }));
+      ngForm = $el.controller('form');
+    })
+  );
 
-  describe('ngFormController', function () {
-    it('counts errors', function () {
+  describe('ngFormController', function() {
+    it('counts errors', function() {
       expect(ngForm.errorCount()).to.be(1);
     });
 
-    it('clears errors', function () {
+    it('clears errors', function() {
       $scope.val = 'something';
       $scope.$apply();
       expect(ngForm.errorCount()).to.be(0);

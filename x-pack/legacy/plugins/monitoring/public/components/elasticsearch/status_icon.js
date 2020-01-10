@@ -20,10 +20,9 @@ export function ElasticsearchStatusIcon({ status }) {
       label={i18n.translate('xpack.monitoring.elasticsearch.healthStatusLabel', {
         defaultMessage: 'Health: {status}',
         values: {
-          status
-        }
-      })
-      }
+          status,
+        },
+      })}
     />
   );
 }

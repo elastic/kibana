@@ -17,21 +17,21 @@ import { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
 export const CountriesQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   setQuery,
   indexPattern,
   flowTarget,
 }: CountriesQueryTabBodyProps) => (
   <NetworkTopCountriesQuery
-    endDate={to}
+    endDate={endDate}
     flowTarget={flowTarget}
     filterQuery={filterQuery}
-    skip={isInitializing}
+    skip={skip}
     sourceId="default"
-    startDate={from}
+    startDate={startDate}
     type={networkModel.NetworkType.page}
   >
     {({

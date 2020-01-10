@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -87,6 +87,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -199,7 +200,7 @@ export default async function ({ readConfigFile }) {
         hash: '/management/elasticsearch/transform',
       },
       endpoint: {
-        pathname: '/app/endpoint/',
+        pathname: '/app/endpoint',
       },
     },
 

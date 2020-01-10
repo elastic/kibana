@@ -6,10 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function fooTests({ getService }: FtrProviderContext) {
@@ -61,16 +58,6 @@ export default function fooTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('foo');
-            expect(uiCapabilities.value!.foo).to.eql({
-              create: false,
-              edit: false,
-              delete: false,
-              show: false,
-            });
-            break;
-          // if we don't have access at the space itself, security interceptor responds with 404.
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -79,8 +66,14 @@ export default function fooTests({ getService }: FtrProviderContext) {
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
+              show: false,
+            });
             break;
           default:
             throw new UnreachableError(scenario);

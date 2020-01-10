@@ -17,12 +17,12 @@ import { LogEntryHighlights } from './log_entry_highlights';
 
 export const useNextAndPrevious = ({
   highlightTerms,
-  jumpToTarget,
+  jumpToTargetPosition,
   logEntryHighlights,
   visibleMidpoint,
 }: {
   highlightTerms: string[];
-  jumpToTarget: (target: TimeKey) => void;
+  jumpToTargetPosition: (target: TimeKey) => void;
   logEntryHighlights: LogEntryHighlights | undefined;
   visibleMidpoint: TimeKey | null;
 }) => {
@@ -41,9 +41,9 @@ export const useNextAndPrevious = ({
 
   useEffect(() => {
     if (currentTimeKey) {
-      jumpToTarget(currentTimeKey);
+      jumpToTargetPosition(currentTimeKey);
     }
-  }, [currentTimeKey, jumpToTarget]);
+  }, [currentTimeKey, jumpToTargetPosition]);
 
   useEffect(() => {
     if (currentTimeKey === null && entries.length > 0) {
@@ -53,7 +53,7 @@ export const useNextAndPrevious = ({
       const initialTimeKey = getUniqueLogEntryKey(entries[initialIndex]);
       setCurrentTimeKey(initialTimeKey);
     }
-  }, [currentTimeKey, entries, setCurrentTimeKey]);
+  }, [currentTimeKey, entries, setCurrentTimeKey, visibleMidpoint]);
 
   const indexOfCurrentTimeKey = useMemo(() => {
     if (currentTimeKey && entries.length > 0) {

@@ -8,16 +8,14 @@ import React from 'react';
 
 import { FieldList } from '../../field_list';
 
-const columns = [{
-  field: 'name',
-  name: 'Field',
-  sortable: true,
-}];
+const columns = [
+  {
+    field: 'name',
+    name: 'Field',
+    sortable: true,
+  },
+];
 
 export const TabTerms = ({ terms }) => (
-  <FieldList
-    columns={columns}
-    fields={terms}
-    dataTestSubj="detailPanelTermsTabTable"
-  />
+  <FieldList columns={columns} fields={terms} dataTestSubj="detailPanelTermsTabTable" />
 );

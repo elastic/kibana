@@ -59,7 +59,7 @@ export function onPremInstructions(config) {
             defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
             You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
           }),
-          iconType: 'alert'
+          iconType: 'alert',
         },
         instructionVariants: [
           {

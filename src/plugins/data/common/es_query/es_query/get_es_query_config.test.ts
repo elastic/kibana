@@ -18,7 +18,7 @@
  */
 import { get } from 'lodash';
 import { getEsQueryConfig } from './get_es_query_config';
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 const config = ({
   get(item: string) {
@@ -36,7 +36,7 @@ const config = ({
   'dateFormat:tz': {
     dateFormatTZ: 'Browser',
   },
-} as unknown) as UiSettingsClientContract;
+} as unknown) as IUiSettingsClient;
 
 describe('getEsQueryConfig', () => {
   test('should return the parameters of an Elasticsearch query config requested', () => {

@@ -18,6 +18,7 @@
  */
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -56,7 +57,7 @@ describe('AggConfig Filters', () => {
     };
     it('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterFilters(aggConfigs.aggs[0], 'type:nginx');
+      const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
 
       expect(filter!.query.bool.must[0].query_string.query).toBe('type:nginx');
       expect(filter!.meta).toHaveProperty('index', '1234');

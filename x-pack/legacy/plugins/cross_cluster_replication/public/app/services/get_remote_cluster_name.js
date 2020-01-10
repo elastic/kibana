@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const getFirstConnectedCluster = (clusters) => {
+const getFirstConnectedCluster = clusters => {
   for (let i = 0; i < clusters.length; i++) {
     if (clusters[i].isConnected) {
       return clusters[i];

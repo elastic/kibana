@@ -7,14 +7,13 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const overview = getService('monitoringClusterOverview');
   const indicesList = getService('monitoringElasticsearchIndices');
   const indexDetail = getService('monitoringElasticsearchIndexDetail');
 
   describe('Elasticsearch index detail', () => {
-
     afterEach(async () => {
       await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       await indicesList.clearFilter();
@@ -25,8 +24,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176'
+          from: 'Oct 5, 2017 @ 20:31:48.354',
+          to: 'Oct 5, 2017 @ 20:35:12.176',
         });
 
         // go to indices listing
@@ -77,39 +76,5 @@ export default function ({ getService, getPageObjects }) {
         });
       });
     });
-
-    describe('Deleted Index', () => {
-      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
-
-      before(async () => {
-        await setup('monitoring/singlecluster-red-platinum', {
-          from: '2017-10-06 19:53:06.748',
-          to: '2017-10-06 20:15:30.212'
-        });
-
-        // go to indices listing
-        await overview.clickEsIndices();
-        expect(await indicesList.isOnListing()).to.be(true);
-      });
-
-      after(async () => {
-        await tearDown();
-      });
-
-      it.skip('should have an index summary with NA for deleted index', async () => {
-        await indicesList.setFilter('deleted');
-        await indicesList.clickRowByName('many-0001_clruksahirti');
-
-        expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n3.6 KB',
-          dataSizePrimaries: 'Primaries:\n3.6 KB',
-          documentCount: 'Documents:\n1',
-          totalShards: 'Total Shards:\nN/A',
-          unassignedShards: 'Unassigned Shards:\nN/A',
-          health: 'Health: Not Available',
-        });
-      });
-    });
-
   });
 }

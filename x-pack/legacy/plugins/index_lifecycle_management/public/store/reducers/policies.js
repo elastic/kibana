@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { handleActions } from 'redux-actions';
 import {
   fetchedPolicies,
@@ -43,8 +40,8 @@ export const defaultPolicy = {
     [PHASE_HOT]: defaultHotPhase,
     [PHASE_WARM]: defaultWarmPhase,
     [PHASE_COLD]: defaultColdPhase,
-    [PHASE_DELETE]: defaultDeletePhase
-  }
+    [PHASE_DELETE]: defaultDeletePhase,
+  },
 };
 
 const defaultState = {
@@ -56,11 +53,11 @@ const defaultState = {
   policies: [],
   sort: {
     sortField: 'name',
-    isSortAscending: true
+    isSortAscending: true,
   },
   pageSize: 10,
   currentPage: 0,
-  filter: ''
+  filter: '',
 };
 
 export const policies = handleActions(
@@ -70,7 +67,7 @@ export const policies = handleActions(
         ...state,
         isLoading: false,
         isLoaded: true,
-        policies
+        policies,
       };
     },
     [setSelectedPolicy](state, { payload: selectedPolicy }) {
@@ -88,8 +85,8 @@ export const policies = handleActions(
         selectedPolicySet: true,
         selectedPolicy: {
           ...defaultPolicy,
-          ...policyFromES(selectedPolicy)
-        }
+          ...policyFromES(selectedPolicy),
+        },
       };
     },
     [unsetSelectedPolicy]() {
@@ -100,8 +97,8 @@ export const policies = handleActions(
         ...state,
         selectedPolicy: {
           ...state.selectedPolicy,
-          name
-        }
+          name,
+        },
       };
     },
     [setSaveAsNewPolicy](state, { payload: saveAsNew }) {
@@ -109,8 +106,8 @@ export const policies = handleActions(
         ...state,
         selectedPolicy: {
           ...state.selectedPolicy,
-          saveAsNew
-        }
+          saveAsNew,
+        },
       };
     },
     [setPhaseData](state, { payload }) {
@@ -132,10 +129,10 @@ export const policies = handleActions(
             ...state.selectedPolicy.phases,
             [phase]: {
               ...state.selectedPolicy.phases[phase],
-              [key]: value
-            }
-          }
-        }
+              [key]: value,
+            },
+          },
+        },
       };
     },
     [policyFilterChanged](state, action) {
@@ -143,7 +140,7 @@ export const policies = handleActions(
       return {
         ...state,
         filter,
-        currentPage: 0
+        currentPage: 0,
       };
     },
     [policySortChanged](state, action) {
@@ -154,7 +151,7 @@ export const policies = handleActions(
         sort: {
           sortField,
           isSortAscending,
-        }
+        },
       };
     },
     [policyPageChanged](state, action) {
@@ -168,9 +165,9 @@ export const policies = handleActions(
       const { pageSize } = action.payload;
       return {
         ...state,
-        pageSize
+        pageSize,
       };
-    }
+    },
   },
   defaultState
 );

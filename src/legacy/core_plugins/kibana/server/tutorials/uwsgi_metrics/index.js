@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function uwsgiMetricsSpecProvider(context) {
   const moduleName = 'uwsgi';
@@ -33,7 +37,8 @@ export function uwsgiMetricsSpecProvider(context) {
       defaultMessage: 'Fetch internal metrics from the uWSGI server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.uwsgiMetrics.longDescription', {
-      defaultMessage: 'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server. \
+      defaultMessage:
+        'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
@@ -45,20 +50,23 @@ export function uwsgiMetricsSpecProvider(context) {
       dashboards: [
         {
           id: '32fca290-f0af-11e7-b9ff-9f96241065de-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.uwsgiMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'uWSGI metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.uwsgiMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'uWSGI metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-uwsgi.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-uwsgi.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/uwsgi_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

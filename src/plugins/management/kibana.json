@@ -1,0 +1,7 @@
+{
+  "id": "management",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["kibana_legacy"]
+}

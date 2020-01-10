@@ -8,12 +8,9 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-
-const sortByLabel  = (a, b) => {
+const sortByLabel = (a, b) => {
   if (a.label < b.label) return -1;
   if (a.label > b.label) return 1;
   return 0;
@@ -27,32 +24,26 @@ export const getGroupedFieldOptions = (fields, filterField) => {
 
   const fieldsByTypeMap = new Map();
 
-  fields
-    .filter(filterField)
-    .forEach(field => {
-      const fieldLabel = 'label' in field ? field.label : field.name;
-      if (fieldsByTypeMap.has(field.type)) {
-        const fieldsList = fieldsByTypeMap.get(field.type);
-        fieldsList.push({ value: field.name, label: fieldLabel });
-        fieldsByTypeMap.set(field.type, fieldsList);
-      } else {
-        fieldsByTypeMap.set(field.type, [{ value: field.name, label: fieldLabel }]);
-      }
-    });
-
+  fields.filter(filterField).forEach(field => {
+    const fieldLabel = 'label' in field ? field.label : field.name;
+    if (fieldsByTypeMap.has(field.type)) {
+      const fieldsList = fieldsByTypeMap.get(field.type);
+      fieldsList.push({ value: field.name, label: fieldLabel });
+      fieldsByTypeMap.set(field.type, fieldsList);
+    } else {
+      fieldsByTypeMap.set(field.type, [{ value: field.name, label: fieldLabel }]);
+    }
+  });
 
   const groupedFieldOptions = [];
   fieldsByTypeMap.forEach((fieldsList, fieldType) => {
-
-    const sortedOptions = fieldsList
-      .sort(sortByLabel)
-      .map(({ value, label }) => {
-        return { value: value, label: label };
-      });
+    const sortedOptions = fieldsList.sort(sortByLabel).map(({ value, label }) => {
+      return { value: value, label: label };
+    });
 
     groupedFieldOptions.push({
       label: fieldType,
-      options: sortedOptions
+      options: sortedOptions,
     });
   });
 
@@ -61,14 +52,8 @@ export const getGroupedFieldOptions = (fields, filterField) => {
   return groupedFieldOptions;
 };
 
-export function SingleFieldSelect({ fields,
-  filterField,
-  onChange,
-  value,
-  placeholder,
-  ...rest
-}) {
-  const onSelection = (selectedOptions) => {
+export function SingleFieldSelect({ fields, filterField, onChange, value, placeholder, ...rest }) {
+  const onSelection = selectedOptions => {
     onChange(_.get(selectedOptions, '0.value'));
   };
 
@@ -94,5 +79,7 @@ SingleFieldSelect.propTypes = {
 };
 
 SingleFieldSelect.defaultProps = {
-  filterField: () => { return true; }
+  filterField: () => {
+    return true;
+  },
 };

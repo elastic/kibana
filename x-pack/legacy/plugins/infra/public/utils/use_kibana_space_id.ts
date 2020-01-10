@@ -11,6 +11,7 @@ import * as rt from 'io-ts';
 import { useKibanaInjectedVar } from './use_kibana_injected_var';
 
 export const useKibanaSpaceId = (): string => {
+  // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
   const activeSpace = useKibanaInjectedVar('activeSpace');
 
   return pipe(

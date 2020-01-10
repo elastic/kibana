@@ -1,220 +1,126 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <DefaultDraggable
-        field="source.as.organization.name"
-        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
-        value="Test Org"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      /
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <DefaultDraggable
-        field="source.as.number"
-        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
-        value="12345"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Component>
+    <DefaultDraggable
+      field="source.as.organization.name"
+      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
+      value="Test Org"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    /
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.as.number"
+      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+      value="12345"
+    />
+  </EuiFlexItem>
+</div>
 `;
 
 exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <FormattedRelativePreferenceDate
-    value="2019-02-07T17:19:41.636Z"
+<LocalizedDateTooltip
+  date={2019-02-07T17:19:41.636Z}
+>
+  <PreferenceFormattedDate
+    data-test-subj="preference-time"
+    value={2019-02-07T17:19:41.636Z}
   />
-</Component>
+</LocalizedDateTooltip>
 `;
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <DefaultDraggable
-    field="host.name"
-    id="host-name-renderer-default-draggable-ip-overview-host-name"
-    value="raspberrypi"
-  >
-    <HostDetailsLink
-      hostName="raspberrypi"
-    >
-      raspberrypi
-    </HostDetailsLink>
-  </DefaultDraggable>
-</Component>
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
+      "kqlQuery": "",
+      "name": "raspberrypi",
+      "queryMatch": Object {
+        "field": "host.name",
+        "operator": ":",
+        "value": "raspberrypi",
+      },
+    }
+  }
+  render={[Function]}
+/>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <DefaultDraggable
-    field="host.name"
-    id="host-name-renderer-default-draggable-ip-overview-host-name"
-    value="raspberrypi"
-  >
-    <HostDetailsLink
-      hostName="raspberrypi"
-    >
-      raspberrypi
-    </HostDetailsLink>
-  </DefaultDraggable>
-</Component>
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
+      "kqlQuery": "",
+      "name": "raspberrypi",
+      "queryMatch": Object {
+        "field": "host.name",
+        "operator": ":",
+        "value": "raspberrypi",
+      },
+    }
+  }
+  render={[Function]}
+/>
 `;
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <EuiFlexGroup
-    alignItems="center"
-    data-test-subj="location-field"
-    gutterSize="none"
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  data-test-subj="location-field"
+>
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <DefaultDraggable
-        field="source.geo.city_name"
-        id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
-        value={
-          Array [
-            "New York",
-          ]
-        }
-      />
-    </EuiFlexItem>
-    , 
-    <EuiFlexItem
-      grow={false}
-    >
-      <DefaultDraggable
-        field="source.geo.region_name"
-        id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
-        value={
-          Array [
-            "New York",
-          ]
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Component>
+    <DefaultDraggable
+      field="source.geo.city_name"
+      id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
+      value={
+        Array [
+          "New York",
+        ]
+      }
+    />
+  </EuiFlexItem>
+  , 
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.geo.region_name"
+      id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
+      value={
+        Array [
+          "New York",
+        ]
+      }
+    />
+  </EuiFlexItem>
+</div>
 `;
 
 exports[`Field Renderers #reputationRenderer it renders correctly against snapshot 1`] = `
-<Component
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
+<DragDropContext
+  onDragEnd={[MockFunction]}
 >
   <VirusTotalLink
     link="10.10.10.10"
@@ -227,118 +133,14 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   >
     talosIntelligence.com
   </ReputationLink>
-</Component>
+</DragDropContext>
 `;
 
 exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
-<Component
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
+<EuiLink
+  href="https://www.iana.org/whois?q=10.10.10.10"
+  target="_blank"
 >
-  <WhoIsLink
-    domain="10.10.10.10"
-  >
-    iana.org
-  </WhoIsLink>
-</Component>
+  iana.org
+</EuiLink>
 `;

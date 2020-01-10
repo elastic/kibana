@@ -22,7 +22,9 @@ routes.when(API_KEYS_PATH, {
       render(
         <I18nContext>
           <ApiKeysGridPage />
-        </I18nContext>, domNode);
+        </I18nContext>,
+        domNode
+      );
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

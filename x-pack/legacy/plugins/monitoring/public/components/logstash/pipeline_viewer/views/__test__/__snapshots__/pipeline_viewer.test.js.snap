@@ -1,17 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineViewer component passes expected props 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+<EuiPage>
+  <EuiPageBody>
     <EuiPageContent
       className="monPipelineViewer"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <StatementSection
@@ -75,17 +69,11 @@ exports[`PipelineViewer component passes expected props 1`] = `
 `;
 
 exports[`PipelineViewer component renders DetailDrawer when selected vertex is not null 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+<EuiPage>
+  <EuiPageBody>
     <EuiPageContent
       className="monPipelineViewer"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <StatementSection

@@ -6,13 +6,15 @@
 
 import { useEffect, useState } from 'react';
 
-import { IndexPattern } from 'ui/index_patterns';
-
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import { useApi } from '../../../../hooks/use_api';
 
 import { Dictionary } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  ES_FIELD_TYPES,
+} from '../../../../../../../../../../src/plugins/data/public';
+
 import {
   getPreviewRequestBody,
   PreviewRequestBody,
@@ -32,7 +34,8 @@ interface EsMappingType {
   type: ES_FIELD_TYPES;
 }
 
-type PreviewData = Array<Dictionary<any>>;
+export type PreviewItem = Dictionary<any>;
+type PreviewData = PreviewItem[];
 interface PreviewMappings {
   properties: Dictionary<EsMappingType>;
 }

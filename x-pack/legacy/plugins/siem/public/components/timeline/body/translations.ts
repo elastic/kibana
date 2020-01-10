@@ -21,11 +21,11 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
 );
 
 export const UNPINNED = i18n.translate('xpack.siem.timeline.body.pinning.unpinnedTooltip', {
-  defaultMessage: 'This is event is NOT persisted with the timeline',
+  defaultMessage: 'Unpinned event',
 });
 
 export const PINNED = i18n.translate('xpack.siem.timeline.body.pinning.pinnedTooltip', {
-  defaultMessage: 'This event is persisted with the timeline',
+  defaultMessage: 'Pinned event',
 });
 
 export const PINNED_WITH_NOTES = i18n.translate(

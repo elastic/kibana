@@ -46,8 +46,8 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector({ config, collectorSet }) {
-  return collectorSet.makeStatsCollector({
+export function getSettingsCollector(usageCollection, config) {
+  return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
     async fetch(callCluster) {
@@ -57,9 +57,13 @@ export function getSettingsCollector({ config, collectorSet }) {
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
         kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
-        this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
+        this.log.debug(
+          `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
+        );
       } else {
-        this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
+        this.log.debug(
+          `not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`
+        );
       }
 
       // remember the current email so that we can mark it as successful if the bulk does not error out
@@ -71,9 +75,9 @@ export function getSettingsCollector({ config, collectorSet }) {
     getEmailValueStructure(email) {
       return {
         xpack: {
-          default_admin_email: email
-        }
+          default_admin_email: email,
+        },
       };
-    }
+    },
   });
 }

@@ -10,7 +10,6 @@ import { getRouter } from '../../public/crud_app/services/routing';
 import { CRUD_APP_BASE_PATH } from '../../public/crud_app/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

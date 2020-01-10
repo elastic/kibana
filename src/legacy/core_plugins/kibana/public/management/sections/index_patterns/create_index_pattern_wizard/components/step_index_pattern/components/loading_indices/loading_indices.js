@@ -19,22 +19,12 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor, EuiLoadingSpinner } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const LoadingIndices = ({ ...rest }) => (
-  <EuiFlexGroup
-    justifyContent="center"
-    alignItems="center"
-    {...rest}
-  >
+  <EuiFlexGroup justifyContent="center" alignItems="center" {...rest}>
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="m" />
     </EuiFlexItem>

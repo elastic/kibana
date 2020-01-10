@@ -101,11 +101,6 @@ aggregation.
 The remaining default settings are good, but there are a couple of
 settings that you might want to change.
 
-. Under *Source settings* > *Grid resolution*, select from the different heat map resolutions.
-+
-The default "Coarse" looks
-good, but feel free to select a different resolution.
-
 . Play around with the *Layer Style* >
 *Color range* setting.
 +

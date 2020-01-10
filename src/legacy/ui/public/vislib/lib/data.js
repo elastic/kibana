@@ -67,7 +67,7 @@ export class Data {
                 return newVal;
               }),
               yAxisFormatter: val => converter.convert(val),
-              zAxisFormatter: val => zConverter.convert(val)
+              zAxisFormatter: val => zConverter.convert(val),
             };
           });
         }
@@ -88,8 +88,7 @@ export class Data {
       Object.keys(data).forEach(key => {
         if (!['rows', 'columns'].includes(key)) {
           newData[key] = data[key];
-        }
-        else {
+        } else {
           newData[key] = data[key].map(chart => {
             return copyChart(chart);
           });
@@ -111,7 +110,7 @@ export class Data {
     const data = this.getVisData();
     let type;
 
-    data.forEach(function (obj) {
+    data.forEach(function(obj) {
       if (obj.series) {
         type = 'series';
       } else if (obj.slices) {
@@ -141,14 +140,18 @@ export class Data {
 
   shouldBeStacked(seriesConfig) {
     if (!seriesConfig) return false;
-    return (seriesConfig.mode === 'stacked');
+    return seriesConfig.mode === 'stacked';
   }
 
   getStackedSeries(chartConfig, axis, series, first = false) {
     const matchingSeries = [];
     chartConfig.series.forEach((seriArgs, i) => {
-      const matchingAxis = seriArgs.valueAxis === axis.axisConfig.get('id') || (!seriArgs.valueAxis && first);
-      if (matchingAxis && (this.shouldBeStacked(seriArgs) || axis.axisConfig.get('scale.stacked'))) {
+      const matchingAxis =
+        seriArgs.valueAxis === axis.axisConfig.get('id') || (!seriArgs.valueAxis && first);
+      if (
+        matchingAxis &&
+        (this.shouldBeStacked(seriArgs) || axis.axisConfig.get('scale.stacked'))
+      ) {
         matchingSeries.push(series[i]);
       }
     });
@@ -160,7 +163,10 @@ export class Data {
     handler.valueAxes.forEach((axis, i) => {
       const id = axis.axisConfig.get('id');
       stackedData[id] = this.getStackedSeries(chartConfig, axis, data, i === 0);
-      stackedData[id] = this.injectZeros(stackedData[id], handler.visConfig.get('orderBucketsBySum', false));
+      stackedData[id] = this.injectZeros(
+        stackedData[id],
+        handler.visConfig.get('orderBucketsBySum', false)
+      );
       axis.axisConfig.set('stackedSeries', stackedData[id].length);
       axis.stack(_.map(stackedData[id], 'values'));
     });
@@ -208,12 +214,16 @@ export class Data {
   getGeoExtents() {
     const visData = this.getVisData();
 
-    return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
-      return {
-        min: Math.min(props.min, minMax.min),
-        max: Math.max(props.max, minMax.max)
-      };
-    }, { min: Infinity, max: -Infinity });
+    return _.reduce(
+      _.pluck(visData, 'geoJson.properties'),
+      function(minMax, props) {
+        return {
+          min: Math.min(props.min, minMax.min),
+          max: Math.max(props.max, minMax.max),
+        };
+      },
+      { min: Infinity, max: -Infinity }
+    );
   }
 
   /**
@@ -251,9 +261,9 @@ export class Data {
   hasNullValues() {
     const chartData = this.chartData();
 
-    return chartData.some(function (chart) {
-      return chart.series.some(function (obj) {
-        return obj.values.some(function (d) {
+    return chartData.some(function(chart) {
+      return chart.series.some(function(obj) {
+        return obj.values.some(function(d) {
           return d.y === null;
         });
       });
@@ -306,17 +316,17 @@ export class Data {
     const names = [];
     const self = this;
 
-    _.forEach(array, function (obj) {
+    _.forEach(array, function(obj) {
       names.push({
         label: obj.name,
         values: [obj.rawData],
-        index: index
+        index: index,
       });
 
       if (obj.children) {
         const plusIndex = index + 1;
 
-        _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
+        _.forEach(self.returnNames(obj.children, plusIndex, columns), function(namedObj) {
           names.push(namedObj);
         });
       }
@@ -342,10 +352,10 @@ export class Data {
       const namedObj = this.returnNames(slices.children, 0, columns);
 
       return _(namedObj)
-        .sortBy(function (obj) {
+        .sortBy(function(obj) {
           return obj.index;
         })
-        .unique(function (d) {
+        .unique(function(d) {
           return d.label;
         })
         .value();
@@ -370,7 +380,7 @@ export class Data {
    * @param {Array} data
    */
   _cleanPieChartData(data) {
-    _.forEach(data, (obj) => {
+    _.forEach(data, obj => {
       obj.slices = this._removeZeroSlices(obj.slices);
     });
   }
@@ -407,9 +417,9 @@ export class Data {
     const self = this;
     const names = [];
 
-    _.forEach(data, function (obj) {
+    _.forEach(data, function(obj) {
       const columns = obj.raw ? obj.raw.columns : undefined;
-      _.forEach(self.getNames(obj, columns), function (name) {
+      _.forEach(self.getNames(obj, columns), function(name) {
         names.push(name);
       });
     });
@@ -472,9 +482,12 @@ export class Data {
    * @returns {Function} Performs lookup on string and returns hex color
    */
   getPieColorFunc() {
-    return vislibColor(this.pieNames(this.getVisData()).map(function (d) {
-      return d.label;
-    }), this.uiState.get('vis.colors'));
+    return vislibColor(
+      this.pieNames(this.getVisData()).map(function(d) {
+        return d.label;
+      }),
+      this.uiState.get('vis.colors')
+    );
   }
 
   /**
@@ -487,7 +500,7 @@ export class Data {
     const data = this.getVisData();
     const self = this;
 
-    data.forEach(function (d) {
+    data.forEach(function(d) {
       if (!d.ordered || !d.ordered.date) return;
 
       const missingMin = d.ordered.min == null;
@@ -512,7 +525,7 @@ export class Data {
    * @returns {Array} min and max values
    */
   mapDataExtents(series) {
-    const values = _.map(series.rows, function (row) {
+    const values = _.map(series.rows, function(row) {
       return row[row.length - 1];
     });
     return [_.min(values), _.max(values)];
@@ -525,7 +538,7 @@ export class Data {
    * @return {number} - the largest number of series from all charts
    */
   maxNumberOfSeries() {
-    return this.chartData().reduce(function (max, chart) {
+    return this.chartData().reduce(function(max, chart) {
       return Math.max(max, chart.series.length);
     }, 0);
   }

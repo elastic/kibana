@@ -15,11 +15,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
 
   const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} > clusterRow_`;
 
-  return new class ClusterList {
-
+  return new (class ClusterList {
     async assertDefaults() {
       await retry.try(async () => {
-        if (!await testSubjects.exists(SUBJ_TABLE_CONTAINER)) {
+        if (!(await testSubjects.exists(SUBJ_TABLE_CONTAINER))) {
           throw new Error('Expected to find the cluster list');
         }
       });
@@ -60,13 +59,17 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > dataSize`);
     }
     getClusterLogstashCount(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > logstashCount`);
+      return testSubjects.getVisibleText(
+        `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > logstashCount`
+      );
     }
     getClusterKibanaCount(clusterUuid) {
       return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > kibanaCount`);
     }
     getClusterLicense(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`);
+      return testSubjects.getVisibleText(
+        `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`
+      );
     }
-  };
+  })();
 }

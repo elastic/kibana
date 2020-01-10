@@ -24,10 +24,14 @@ export function parseTileKey(tileKey) {
   const tileCount = Math.pow(2, zoom);
 
   if (x >= tileCount) {
-    throw new Error(`Tile key is malformed, expected x to be less than ${tileCount}, you provided ${x}`);
+    throw new Error(
+      `Tile key is malformed, expected x to be less than ${tileCount}, you provided ${x}`
+    );
   }
   if (y >= tileCount) {
-    throw new Error(`Tile key is malformed, expected y to be less than ${tileCount}, you provided ${y}`);
+    throw new Error(
+      `Tile key is malformed, expected y to be less than ${tileCount}, you provided ${y}`
+    );
   }
 
   return { x, y, zoom, tileCount };
@@ -53,14 +57,14 @@ function precisionRounding(v, minPrecision, binSize) {
 }
 
 function tileToLatitude(y, tileCount) {
-  const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y / tileCount)));
-  const lat = 180 / Math.PI * radians;
-  return precisionRounding(lat, DECIMAL_DEGREES_PRECISION, (180 / tileCount));
+  const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y) / tileCount));
+  const lat = (180 / Math.PI) * radians;
+  return precisionRounding(lat, DECIMAL_DEGREES_PRECISION, 180 / tileCount);
 }
 
 function tileToLongitude(x, tileCount) {
-  const lon = (x / tileCount * 360) - 180;
-  return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, (360 / tileCount));
+  const lon = (x / tileCount) * 360 - 180;
+  return precisionRounding(lon, DECIMAL_DEGREES_PRECISION, 360 / tileCount);
 }
 
 export function getTileBoundingBox(tileKey) {

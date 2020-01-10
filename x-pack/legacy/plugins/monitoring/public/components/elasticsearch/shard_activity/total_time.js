@@ -16,7 +16,7 @@ export const TotalTime = ({ startTime, totalTime }) => {
           id="xpack.monitoring.elasticsearch.shardActivity.totalTimeTooltip"
           defaultMessage="Started: {startTime}"
           values={{
-            startTime
+            startTime,
           }}
         />
       }

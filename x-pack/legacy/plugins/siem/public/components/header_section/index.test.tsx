@@ -6,25 +6,16 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 import { HeaderSection } from './index';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('HeaderSection', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <HeaderSection title="Test title" />
-      </TestProviders>
-    );
+    const wrapper = shallow(<HeaderSection title="Test title" />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the title', () => {

@@ -15,7 +15,7 @@ export function nodesSettingsCheckRoute(server) {
     method: 'GET',
     path: '/api/monitoring/v1/elasticsearch_settings/check/nodes',
     config: {
-      validate: {}
+      validate: {},
     },
     async handler(req) {
       try {
@@ -24,6 +24,6 @@ export function nodesSettingsCheckRoute(server) {
       } catch (err) {
         throw handleSettingsError(err);
       }
-    }
+    },
   });
 }

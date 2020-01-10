@@ -75,7 +75,7 @@ function runServerFunctions(server: any) {
 
       // Send the initial headers.
       res.writeHead(200, {
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/x-ndjson',
         Connection: 'keep-alive',
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache',
@@ -83,8 +83,7 @@ function runServerFunctions(server: any) {
 
       // Write a length-delimited response
       const streamResult = (result: any) => {
-        const payload = JSON.stringify(result) + '\n';
-        res.write(`${payload.length}:${payload}`);
+        res.write(JSON.stringify(result) + '\n');
       };
 
       // Tries to run an interpreter function, and ensures a consistent error payload on failure.

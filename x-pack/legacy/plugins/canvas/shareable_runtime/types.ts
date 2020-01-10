@@ -7,7 +7,7 @@
 import { RefObject } from 'react';
 // @ts-ignore Unlinked Webpack Type
 import ContainerStyle from 'types/interpreter';
-import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
 

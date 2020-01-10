@@ -25,6 +25,7 @@ const setupHttp = (basePath: string) => {
   });
   return http;
 };
+const tenant = '';
 
 afterEach(() => {
   fetchMock.restore();
@@ -32,7 +33,7 @@ afterEach(() => {
 
 it(`logs out 401 responses`, async () => {
   const http = setupHttp('/foo');
-  const sessionExpired = new SessionExpired(http.basePath);
+  const sessionExpired = new SessionExpired(http.basePath, tenant);
   const logoutPromise = new Promise(resolve => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
@@ -58,7 +59,7 @@ it(`ignores anonymous paths`, async () => {
   const http = setupHttp('/foo');
   const { anonymousPaths } = http;
   anonymousPaths.register('/bar');
-  const sessionExpired = new SessionExpired(http.basePath);
+  const sessionExpired = new SessionExpired(http.basePath, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', 401);
@@ -69,7 +70,7 @@ it(`ignores anonymous paths`, async () => {
 
 it(`ignores errors which don't have a response, for example network connectivity issues`, async () => {
   const http = setupHttp('/foo');
-  const sessionExpired = new SessionExpired(http.basePath);
+  const sessionExpired = new SessionExpired(http.basePath, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', new Promise((resolve, reject) => reject(new Error('Network is down'))));
@@ -80,7 +81,7 @@ it(`ignores errors which don't have a response, for example network connectivity
 
 it(`ignores requests which omit credentials`, async () => {
   const http = setupHttp('/foo');
-  const sessionExpired = new SessionExpired(http.basePath);
+  const sessionExpired = new SessionExpired(http.basePath, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', 401);

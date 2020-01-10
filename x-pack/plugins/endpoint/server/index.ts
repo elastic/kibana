@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { EndpointPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/server';
+import {
+  EndpointPlugin,
+  EndpointPluginStart,
+  EndpointPluginSetup,
+  EndpointPluginStartDependencies,
+  EndpointPluginSetupDependencies,
+} from './plugin';
 import { EndpointConfigSchema } from './config';
 
-export const config = { schema: EndpointConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new EndpointPlugin(initializerContext);
+export const config = {
+  schema: EndpointConfigSchema,
+};
+
+export const plugin: PluginInitializer<
+  EndpointPluginSetup,
+  EndpointPluginStart,
+  EndpointPluginSetupDependencies,
+  EndpointPluginStartDependencies
+> = (initializerContext: PluginInitializerContext) => new EndpointPlugin(initializerContext);

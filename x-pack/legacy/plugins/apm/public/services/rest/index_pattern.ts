@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { createCallApmApi } from './createCallApmApi';
 
-export const createStaticIndexPattern = async (http: HttpServiceBase) => {
+export const createStaticIndexPattern = async (http: HttpSetup) => {
   const callApmApi = createCallApmApi(http);
   return await callApmApi({
     method: 'POST',

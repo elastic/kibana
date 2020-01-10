@@ -17,7 +17,7 @@ export function getNodeTypeClassLabel(node, type) {
   const returnObj = {
     nodeType,
     nodeTypeLabel: nodeTypeLabel[nodeType],
-    nodeTypeClass: nodeTypeClass[nodeType]
+    nodeTypeClass: nodeTypeClass[nodeType],
   };
   return returnObj;
 }

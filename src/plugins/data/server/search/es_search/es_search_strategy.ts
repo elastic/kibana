@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
 import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../../common/search';
+import { ES_SEARCH_STRATEGY } from '../../../common/search';
 import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
 import { ISearchContext } from '..';
 
@@ -27,16 +28,19 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
   caller: APICaller
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
-    search: async (request: IEsSearchRequest) => {
+    search: async (request, options) => {
+      const config = await context.config$.pipe(first()).toPromise();
+      const params = {
+        timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
+        ignoreUnavailable: true, // Don't fail if the index/indices don't exist
+        restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+        ...request.params,
+      };
       if (request.debug) {
         // eslint-disable-next-line
-        console.log(JSON.stringify(request, null, 2));
+        console.log(JSON.stringify(params, null, 2));
       }
-      const esSearchResponse = (await caller('search', {
-        ...request.params,
-        // TODO: could do something like this here?
-        // ...getCurrentSearchParams(context),
-      })) as SearchResponse<any>;
+      const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.

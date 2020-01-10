@@ -8,12 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
@@ -37,7 +36,7 @@ export interface KpiNetworkProps extends QueryTemplateProps {
   children: (args: KpiNetworkArgs) => React.ReactNode;
 }
 
-const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
+const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & KpiNetworkReducer>(
   ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
@@ -52,7 +51,7 @@ const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >

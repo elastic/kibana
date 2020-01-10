@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('elasticsearch_settings', () => {
     loadTestFile(require.resolve('./check_cluster'));
     loadTestFile(require.resolve('./check_nodes'));

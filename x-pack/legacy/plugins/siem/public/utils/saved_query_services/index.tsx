@@ -8,18 +8,20 @@ import { useState, useEffect } from 'react';
 import {
   SavedQueryService,
   createSavedQueryService,
-} from '../../../../../../../src/legacy/core_plugins/data/public/search/search_bar/lib/saved_query_service';
+} from '../../../../../../../src/plugins/data/public';
 
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 
 export const useSavedQueryServices = () => {
-  const core = useKibanaCore();
+  const kibana = useKibana();
+  const client = kibana.services.savedObjects.client;
+
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
-    createSavedQueryService(core.savedObjects.client)
+    createSavedQueryService(client)
   );
 
   useEffect(() => {
-    setSavedQueryService(createSavedQueryService(core.savedObjects.client));
-  }, [core.savedObjects.client]);
+    setSavedQueryService(createSavedQueryService(client));
+  }, [client]);
   return savedQueryService;
 };

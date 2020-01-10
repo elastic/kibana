@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-method: RouteMethod | 'patch' | 'options';
+method: Method;
 ```

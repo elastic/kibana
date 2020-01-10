@@ -16,6 +16,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, TimelineModel } from './model';
+import { TimelineNonEcsData } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -49,10 +50,21 @@ export const applyDeltaToColumnWidth = actionCreator<{
 
 export const createTimeline = actionCreator<{
   id: string;
+  dateRange?: {
+    start: number;
+    end: number;
+  };
+  filters?: esFilters.Filter[];
   columns: ColumnHeader[];
   itemsPerPage?: number;
+  kqlQuery?: {
+    filterQuery: SerializedFilterQuery | null;
+    filterQueryDraft: KueryFilterQuery | null;
+  };
   show?: boolean;
   sort?: Sort;
+  showCheckboxes?: boolean;
+  showRowRenderers?: boolean;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -198,3 +210,34 @@ export const setFilters = actionCreator<{
   id: string;
   filters: esFilters.Filter[];
 }>('SET_TIMELINE_FILTERS');
+
+export const setSelected = actionCreator<{
+  id: string;
+  eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  isSelected: boolean;
+  isSelectAllChecked: boolean;
+}>('SET_TIMELINE_SELECTED');
+
+export const clearSelected = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_SELECTED');
+
+export const setEventsLoading = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+}>('SET_TIMELINE_EVENTS_LOADING');
+
+export const clearEventsLoading = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_LOADING');
+
+export const setEventsDeleted = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+}>('SET_TIMELINE_EVENTS_DELETED');
+
+export const clearEventsDeleted = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_DELETED');

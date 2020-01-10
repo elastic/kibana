@@ -18,88 +18,80 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Vis } from 'ui/vis';
-// @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
-
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-// @ts-ignore
-import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
-import { AggGroupNames } from 'ui/vis/editors/default';
+import { AggGroupNames, Schemas } from './legacy_imports';
+import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';
+import { TableVisualizationController } from './vis_controller';
 
-export const createTableVisTypeDefinition = () => {
-  return visFactory.createBaseVisualization({
-    type: 'table',
-    name: 'table',
-    title: i18n.translate('visTypeTable.tableVisTitle', {
-      defaultMessage: 'Data Table',
-    }),
-    icon: 'visTable',
-    description: i18n.translate('visTypeTable.tableVisDescription', {
-      defaultMessage: 'Display values in a table',
-    }),
-    visualization: AngularVisController,
-    visConfig: {
-      defaults: {
-        perPage: 10,
-        showPartialRows: false,
-        showMetricsAtAllLevels: false,
-        sort: {
-          columnIndex: null,
-          direction: null,
-        },
-        showTotal: false,
-        totalFunc: 'sum',
-        percentageCol: '',
+export const tableVisTypeDefinition = {
+  type: 'table',
+  name: 'table',
+  title: i18n.translate('visTypeTable.tableVisTitle', {
+    defaultMessage: 'Data Table',
+  }),
+  icon: 'visTable',
+  description: i18n.translate('visTypeTable.tableVisDescription', {
+    defaultMessage: 'Display values in a table',
+  }),
+  visualization: TableVisualizationController,
+  visConfig: {
+    defaults: {
+      perPage: 10,
+      showPartialRows: false,
+      showMetricsAtAllLevels: false,
+      sort: {
+        columnIndex: null,
+        direction: null,
       },
-      template: tableVisTemplate,
+      showTotal: false,
+      totalFunc: 'sum',
+      percentageCol: '',
     },
-    editorConfig: {
-      optionsTemplate: TableOptions,
-      schemas: new Schemas([
-        {
-          group: AggGroupNames.Metrics,
-          name: 'metric',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
-            defaultMessage: 'Metric',
-          }),
-          aggFilter: ['!geo_centroid', '!geo_bounds'],
-          aggSettings: {
-            top_hits: {
-              allowStrings: true,
-            },
+    template: tableVisTemplate,
+  },
+  editorConfig: {
+    optionsTemplate: TableOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
+          defaultMessage: 'Metric',
+        }),
+        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggSettings: {
+          top_hits: {
+            allowStrings: true,
           },
-          min: 1,
-          defaults: [{ type: 'count', schema: 'metric' }],
         },
-        {
-          group: AggGroupNames.Buckets,
-          name: 'bucket',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
-            defaultMessage: 'Split rows',
-          }),
-          aggFilter: ['!filter'],
-        },
-        {
-          group: AggGroupNames.Buckets,
-          name: 'split',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
-            defaultMessage: 'Split table',
-          }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!filter'],
-        },
-      ]),
-    },
-    responseHandler: tableVisResponseHandler,
-    hierarchicalData: (vis: Vis) => {
-      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-    },
-  });
+        min: 1,
+        defaults: [{ type: 'count', schema: 'metric' }],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'bucket',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
+          defaultMessage: 'Split rows',
+        }),
+        aggFilter: ['!filter'],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
+          defaultMessage: 'Split table',
+        }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!filter'],
+      },
+    ]),
+  },
+  responseHandler: tableVisResponseHandler,
+  hierarchicalData: (vis: Vis) => {
+    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
+  },
 };

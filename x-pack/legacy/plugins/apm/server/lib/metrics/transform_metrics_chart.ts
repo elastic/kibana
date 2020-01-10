@@ -11,16 +11,7 @@ import {
   ESSearchRequest
 } from '../../../typings/elasticsearch';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
-
-const colors = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6
-];
+import { getVizColorForIndex } from '../../../common/viz_colors';
 
 export type GenericMetricsChart = ReturnType<
   typeof transformDataToMetricsChart
@@ -66,7 +57,8 @@ export function transformDataToMetricsChart(
         title: chartBase.series[seriesKey].title,
         key: seriesKey,
         type: chartBase.type,
-        color: chartBase.series[seriesKey].color || colors[i],
+        color:
+          chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
         overallValue,
         data:
           timeseriesData?.buckets.map(bucket => {

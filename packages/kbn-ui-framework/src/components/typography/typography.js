@@ -33,7 +33,7 @@ export const KuiTitle = ({ size, children, className, ...rest }) => {
 
   const props = {
     className: classes,
-    ...rest
+    ...rest,
   };
 
   return cloneElement(children, props);
@@ -49,7 +49,7 @@ export const KuiText = ({ children, className, ...rest }) => {
 
   const props = {
     className: classes,
-    ...rest
+    ...rest,
   };
 
   return cloneElement(children, props);

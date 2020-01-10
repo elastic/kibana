@@ -30,10 +30,12 @@ describe('kbnAccessibleClick directive', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
-    $compile = _$compile_;
-    $rootScope = _$rootScope_;
-  }));
+  beforeEach(
+    ngMock.inject(function(_$compile_, _$rootScope_) {
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+    })
+  );
 
   describe('throws an error', () => {
     it('when the element is a button', () => {
@@ -47,7 +49,9 @@ describe('kbnAccessibleClick directive', () => {
       const html = `<a href="#" kbn-accessible-click></a>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).to.throwError(/kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./);
+      }).to.throwError(
+        /kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./
+      );
     });
 
     it(`when the element doesn't have an ng-click`, () => {
@@ -99,7 +103,7 @@ describe('kbnAccessibleClick directive', () => {
     let scope;
     let element;
 
-    beforeEach(function () {
+    beforeEach(function() {
       scope = $rootScope.$new();
       scope.handleClick = sinon.stub();
       const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;

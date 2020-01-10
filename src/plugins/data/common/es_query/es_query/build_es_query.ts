@@ -41,7 +41,7 @@ export interface EsQueryConfig {
  * config contains dateformat:tz
  */
 export function buildEsQuery(
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {

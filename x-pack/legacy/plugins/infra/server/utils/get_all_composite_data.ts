@@ -4,25 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-  InfraDatabaseSearchResponse,
-} from '../lib/adapters/framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
   Aggregation = undefined,
   Bucket = {},
   Options extends object = {}
 >(
-  framework: InfraBackendFrameworkAdapter,
-  request: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],
   onAfterKey: (options: Options, response: InfraDatabaseSearchResponse<{}, Aggregation>) => Options,
   previousBuckets: Bucket[] = []
 ): Promise<Bucket[]> => {
-  const response = await framework.callWithRequest<{}, Aggregation>(request, 'search', options);
+  const response = await framework.callWithRequest<{}, Aggregation>(
+    requestContext,
+    'search',
+    options
+  );
 
   // Nothing available, return the previous buckets.
   if (response.hits.total.value === 0) {
@@ -45,7 +47,7 @@ export const getAllCompositeData = async <
   const newOptions = onAfterKey(options, response);
   return getAllCompositeData(
     framework,
-    request,
+    requestContext,
     newOptions,
     bucketSelector,
     onAfterKey,

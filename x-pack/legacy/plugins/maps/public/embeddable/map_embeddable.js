@@ -10,7 +10,10 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import {
+  Embeddable,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
@@ -24,12 +27,13 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
+  disableInteractive,
+  disableTooltipControl,
+  hideToolbarOverlay,
+  hideLayerControl,
+  hideViewControl,
 } from '../actions/map_actions';
-import {
-  setReadOnly,
-  setIsLayerTOCOpen,
-  setOpenTOCDetails,
-} from '../actions/ui_actions';
+import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
@@ -47,14 +51,15 @@ export class MapEmbeddable extends Embeddable {
         editable: config.editable,
         defaultTitle: config.title,
       },
-      parent);
+      parent
+    );
 
     this._renderTooltipContent = renderTooltipContent;
     this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
   getInspectorAdapters() {
@@ -62,9 +67,11 @@ export class MapEmbeddable extends Embeddable {
   }
 
   onContainerStateChanged(containerState) {
-    if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-        !_.isEqual(containerState.query, this._prevQuery) ||
-        !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)) {
+    if (
+      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
+      !_.isEqual(containerState.query, this._prevQuery) ||
+      !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+    ) {
       this._dispatchSetQuery(containerState);
     }
 
@@ -77,20 +84,24 @@ export class MapEmbeddable extends Embeddable {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch(setQuery({
-      filters: filters.filter(filter => !filter.meta.disabled),
-      query,
-      timeFilters: timeRange,
-      refresh,
-    }));
+    this._store.dispatch(
+      setQuery({
+        filters: filters.filter(filter => !filter.meta.disabled),
+        query,
+        timeFilters: timeRange,
+        refresh,
+      })
+    );
   }
 
   _dispatchSetRefreshConfig({ refreshConfig }) {
     this._prevRefreshConfig = refreshConfig;
-    this._store.dispatch(setRefreshConfig({
-      isPaused: refreshConfig.pause,
-      interval: refreshConfig.value,
-    }));
+    this._store.dispatch(
+      setRefreshConfig({
+        isPaused: refreshConfig.pause,
+        interval: refreshConfig.value,
+      })
+    );
   }
 
   /**
@@ -111,12 +122,34 @@ export class MapEmbeddable extends Embeddable {
       this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
     }
 
+    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
+      this._store.dispatch(disableInteractive(this.input.disableInteractive));
+    }
+
+    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
+      this._store.dispatch(disableTooltipControl(this.input.disableTooltipControl));
+    }
+
+    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
+      this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
+    }
+
+    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
+      this._store.dispatch(hideLayerControl(this.input.hideLayerControl));
+    }
+
+    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
+      this._store.dispatch(hideViewControl(this.input.hideViewControl));
+    }
+
     if (this.input.mapCenter) {
-      this._store.dispatch(setGotoWithCenter({
-        lat: this.input.mapCenter.lat,
-        lon: this.input.mapCenter.lon,
-        zoom: this.input.mapCenter.zoom,
-      }));
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: this.input.mapCenter.lat,
+          lon: this.input.mapCenter.lon,
+          zoom: this.input.mapCenter.zoom,
+        })
+      );
     }
 
     this._store.dispatch(replaceLayerList(this._layerList));
@@ -142,12 +175,17 @@ export class MapEmbeddable extends Embeddable {
     });
   }
 
+  async setLayerList(layerList) {
+    this._layerList = layerList;
+    return await this._store.dispatch(replaceLayerList(this._layerList));
+  }
+
   addFilters = filters => {
     npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters,
     });
-  }
+  };
 
   destroy() {
     super.destroy();
@@ -169,41 +207,41 @@ export class MapEmbeddable extends Embeddable {
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
       filters: this._prevFilters,
-      refresh: true
+      refresh: true,
     });
   }
 
   _handleStoreChanges() {
-
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
 
-
     const mapCenter = this.input.mapCenter || {};
-    if (!mapCenter
-      || mapCenter.lat !== center.lat
-      || mapCenter.lon !== center.lon
-      || mapCenter.zoom !== zoom) {
+    if (
+      !mapCenter ||
+      mapCenter.lat !== center.lat ||
+      mapCenter.lon !== center.lon ||
+      mapCenter.zoom !== zoom
+    ) {
       this.updateInput({
         mapCenter: {
           lat: center.lat,
           lon: center.lon,
           zoom: zoom,
-        }
+        },
       });
     }
 
     const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
     if (this.input.isLayerTOCOpen !== isLayerTOCOpen) {
       this.updateInput({
-        isLayerTOCOpen
+        isLayerTOCOpen,
       });
     }
 
     const openTOCDetails = getOpenTOCDetails(this._store.getState());
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
-        openTOCDetails
+        openTOCDetails,
       });
     }
   }

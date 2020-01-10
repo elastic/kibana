@@ -28,18 +28,23 @@ export function createProxy(server) {
     path: '/elasticsearch/_msearch',
     config: {
       payload: {
-        parse: 'gunzip'
-      }
+        parse: 'gunzip',
+      },
     },
     handler: abortableRequestHandler((signal, req, h) => {
       const { query, payload } = req;
-      return callWithRequest(req, 'transport.request', {
-        path: '/_msearch',
-        method: 'POST',
-        query,
-        body: payload.toString('utf8')
-      }, { signal }).finally(r => h.response(r));
-    })
+      return callWithRequest(
+        req,
+        'transport.request',
+        {
+          path: '/_msearch',
+          method: 'POST',
+          query,
+          body: payload.toString('utf8'),
+        },
+        { signal }
+      ).finally(r => h.response(r));
+    }),
   });
 
   server.route({
@@ -48,22 +53,27 @@ export function createProxy(server) {
     config: {
       validate: {
         params: Joi.object().keys({
-          index: Joi.string().required()
-        })
-      }
+          index: Joi.string().required(),
+        }),
+      },
     },
     handler: abortableRequestHandler(async (signal, req) => {
       const { query, payload: body } = req;
       try {
-        return await callWithRequest(req, 'transport.request', {
-          path: `/${encodeURIComponent(req.params.index)}/_search`,
-          method: 'POST',
-          query,
-          body
-        }, { signal });
+        return await callWithRequest(
+          req,
+          'transport.request',
+          {
+            path: `/${encodeURIComponent(req.params.index)}/_search`,
+            method: 'POST',
+            query,
+            body,
+          },
+          { signal }
+        );
       } catch (error) {
         return JSON.parse(error.response);
       }
-    })
+    }),
   });
 }

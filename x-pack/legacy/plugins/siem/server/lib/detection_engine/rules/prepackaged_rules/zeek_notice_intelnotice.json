@@ -1,0 +1,17 @@
+{
+  "rule_id": "122e153a-78f3-4e7e-a5b5-cfe0b917f109",
+  "risk_score": 50,
+  "description": "This notice is generated when an intelligence indicator is denoted to be notice-worthy.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Intel::Notice",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Intel::Notice\" or rule.name: \"Intel::Notice\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

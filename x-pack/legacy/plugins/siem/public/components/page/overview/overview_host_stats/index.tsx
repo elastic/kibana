@@ -14,7 +14,6 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OverviewHostData } from '../../../../graphql/types';
@@ -221,7 +220,7 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
 
 DescriptionListDescription.displayName = 'DescriptionListDescription';
 
-const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
+const StatValue = React.memo<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
   ({ isLoading, value }) => (
     <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
   )
@@ -229,7 +228,7 @@ const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | und
 
 StatValue.displayName = 'StatValue';
 
-export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => (
+export const OverviewHostStats = React.memo<OverviewHostProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewHostStats(data).map((item, index) => (
       <React.Fragment key={index}>

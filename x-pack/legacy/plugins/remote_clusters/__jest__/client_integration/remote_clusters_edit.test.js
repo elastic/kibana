@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('ui/new_platform');
 import { RemoteClusterForm } from '../../public/app/sections/components/remote_cluster_form';
 import { pageHelpers, setupEnvironment, nextTick } from './helpers';
 import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
@@ -44,10 +45,10 @@ describe('Edit Remote cluster', () => {
   });
 
   /**
-     * As the "edit" remote cluster component uses the same form underneath that
-     * the "create" remote cluster, we won't test it again but simply make sure that
-     * the form component is indeed shared between the 2 app sections.
-     */
+   * As the "edit" remote cluster component uses the same form underneath that
+   * the "create" remote cluster, we won't test it again but simply make sure that
+   * the form component is indeed shared between the 2 app sections.
+   */
   test('should use the same Form component as the "<RemoteClusterEdit />" component', async () => {
     const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
 
@@ -64,7 +65,9 @@ describe('Edit Remote cluster', () => {
   test('should populate the form fields with the values from the remote cluster loaded', () => {
     expect(find('remoteClusterFormNameInput').props().value).toBe(REMOTE_CLUSTER_EDIT_NAME);
     expect(find('remoteClusterFormSeedsInput').text()).toBe(REMOTE_CLUSTER_EDIT.seeds.join(''));
-    expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
+    expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(
+      REMOTE_CLUSTER_EDIT.skipUnavailable
+    );
   });
 
   test('should disable the form name input', () => {

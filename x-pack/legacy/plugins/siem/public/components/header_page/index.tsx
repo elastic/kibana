@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBetaBadge, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -14,6 +21,7 @@ import { Subtitle, SubtitleProps } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;
+  isLoading?: boolean;
 }
 
 const Header = styled.header.attrs({
@@ -26,6 +34,9 @@ const Header = styled.header.attrs({
       css`
         border-bottom: ${theme.eui.euiBorderThin};
         padding-bottom: ${theme.eui.paddingSizes.l};
+        .euiProgress {
+          top: ${theme.eui.paddingSizes.l};
+        }
       `}
   `}
 `;
@@ -85,6 +96,7 @@ export const HeaderPage = React.memo<HeaderPageProps>(
     border,
     children,
     draggableArguments,
+    isLoading,
     subtitle,
     subtitle2,
     title,
@@ -132,6 +144,7 @@ export const HeaderPage = React.memo<HeaderPageProps>(
 
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+          {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </FlexItem>
 
         {children && (

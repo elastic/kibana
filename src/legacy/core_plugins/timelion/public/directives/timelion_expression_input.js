@@ -67,7 +67,7 @@ export function TimelionExpInput($http, $timeout, Private) {
     },
     replace: true,
     template: timelionExpressionInputTemplate,
-    link: function (scope, elem) {
+    link: function(scope, elem) {
       const argValueSuggestions = Private(ArgValueSuggestionsProvider);
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
@@ -76,7 +76,7 @@ export function TimelionExpInput($http, $timeout, Private) {
       scope.suggestions = new Suggestions();
 
       function init() {
-        $http.get('../api/timelion/functions').then(function (resp) {
+        $http.get('../api/timelion/functions').then(function(resp) {
           Object.assign(functionReference, {
             byName: _.indexBy(resp.data, 'name'),
             list: resp.data,
@@ -124,7 +124,12 @@ export function TimelionExpInput($http, $timeout, Private) {
           }
         }
 
-        const updatedExpression = insertAtLocation(insertedValue, scope.sheet, min + insertPositionMinOffset, max);
+        const updatedExpression = insertAtLocation(
+          insertedValue,
+          scope.sheet,
+          min + insertPositionMinOffset,
+          max
+        );
         scope.sheet = updatedExpression;
 
         const newCaretOffset = min + insertedValue.length;
@@ -264,13 +269,13 @@ export function TimelionExpInput($http, $timeout, Private) {
       };
 
       scope.getActiveSuggestionId = () => {
-        if(scope.suggestions.isVisible && scope.suggestions.index > -1) {
+        if (scope.suggestions.isVisible && scope.suggestions.index > -1) {
           return `timelionSuggestion${scope.suggestions.index}`;
         }
         return '';
       };
 
       init();
-    }
+    },
   };
 }

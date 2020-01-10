@@ -22,7 +22,7 @@ import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressio
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
-import { createTagCloudTypeDefinition } from './tag_cloud_type';
+import { tagcloudVisDefinition } from './tag_cloud_type';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
@@ -40,7 +40,7 @@ export class TagCloudPlugin implements Plugin<void, void> {
 
   public setup(core: CoreSetup, { expressions, visualizations }: TagCloudPluginSetupDependencies) {
     expressions.registerFunction(createTagCloudFn);
-    visualizations.types.registerVisualization(createTagCloudTypeDefinition);
+    visualizations.types.createBaseVisualization(tagcloudVisDefinition);
   }
 
   public start(core: CoreStart) {

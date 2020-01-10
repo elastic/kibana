@@ -22,14 +22,9 @@ import React, { Component } from 'react';
 
 import classNames from 'classnames';
 
-import {
-  Routes,
-} from '../services';
+import { Routes } from '../services';
 
-import {
-  GuideCodeViewer,
-  GuideNav,
-} from '../components';
+import { GuideCodeViewer, GuideNav } from '../components';
 
 // Inject version into header.
 const pkg = require('../../../../../package.json');
@@ -81,7 +76,7 @@ export class AppView extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Only force the chrome to be hidden if we're navigating from a non-sandbox to a sandbox.
     if (!this.props.isSandbox && nextProps.isSandbox) {
       this.setState({
@@ -114,9 +109,7 @@ export class AppView extends Component {
           sandboxes={Routes.sandboxes}
         />
 
-        <div className={contentClasses}>
-          {this.props.children}
-        </div>
+        <div className={contentClasses}>{this.props.children}</div>
 
         <GuideCodeViewer
           isOpen={this.props.isCodeViewerOpen}

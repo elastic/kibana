@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
-import { mockUiSettings } from '../../mock/ui_settings';
 import { flyoutHeaderHeight } from '../flyout';
 
 import {
@@ -23,18 +20,14 @@ import {
   ENABLE_CLASS_NAME,
   EXCLUDE_CLASS_NAME,
 } from './data_providers/provider_item_actions';
-import { Timeline } from './timeline';
+import { TimelineComponent } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const testFlyoutHeight = 980;
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-  savedObjects: {},
-}));
+jest.mock('../../lib/kibana');
 
 describe('Timeline', () => {
   const sort: Sort = {
@@ -50,10 +43,12 @@ describe('Timeline', () => {
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
   ];
 
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <Timeline
+        <TimelineComponent
           browserFields={mockBrowserFields}
           columns={defaultHeaders}
           id="foo"
@@ -82,14 +77,14 @@ describe('Timeline', () => {
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
@@ -128,7 +123,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
@@ -167,7 +162,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
@@ -211,7 +206,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -257,7 +252,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -311,7 +306,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -369,7 +364,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -430,7 +425,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -481,7 +476,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -538,7 +533,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
@@ -599,7 +594,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"

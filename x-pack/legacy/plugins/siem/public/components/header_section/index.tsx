@@ -15,19 +15,18 @@ interface HeaderProps {
   border?: boolean;
 }
 
-const Header = styled.header.attrs({
+const Header = styled.header.attrs(() => ({
   className: 'siemHeaderSection',
-})<HeaderProps>`
-  ${({ border, theme }) => css`
-    margin-bottom: ${theme.eui.euiSizeL};
-    user-select: text;
+}))<HeaderProps>`
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
+  user-select: text;
 
-    ${border &&
-      css`
-        border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.paddingSizes.l};
-      `}
-  `}
+  ${({ border }) =>
+    border &&
+    css`
+      border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+      padding-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
+    `}
 `;
 Header.displayName = 'Header';
 

@@ -13,31 +13,8 @@ import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
-import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
 
 describe('DiscoverLinks', () => {
-  beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
-
-    const coreMock = ({
-      http: {
-        notifications: {
-          toasts: {}
-        },
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
-    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('produces the correct URL for a transaction', async () => {
     const transaction = {
       transaction: {

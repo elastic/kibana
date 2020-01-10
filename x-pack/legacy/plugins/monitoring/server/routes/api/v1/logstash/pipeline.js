@@ -13,9 +13,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 function getPipelineVersion(versions, pipelineHash) {
-  return pipelineHash
-    ? versions.find(({ hash }) => hash === pipelineHash)
-    : versions[0];
+  return pipelineHash ? versions.find(({ hash }) => hash === pipelineHash) : versions[0];
 }
 
 /*
@@ -33,21 +31,22 @@ export function logstashPipelineRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
+    path:
+      '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
     config: {
       validate: {
         params: Joi.object({
           clusterUuid: Joi.string().required(),
           pipelineId: Joi.string().required(),
-          pipelineHash: Joi.string().optional()
+          pipelineHash: Joi.string().optional(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
-          detailVertexId: Joi.string().optional()
-        })
-      }
+          detailVertexId: Joi.string().optional(),
+        }),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -67,21 +66,31 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
-      const promises = [ getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version) ];
+      const promises = [getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version)];
       if (detailVertexId) {
-        promises.push(getPipelineVertex(req, config, lsIndexPattern, clusterUuid, pipelineId, version, detailVertexId));
+        promises.push(
+          getPipelineVertex(
+            req,
+            config,
+            lsIndexPattern,
+            clusterUuid,
+            pipelineId,
+            version,
+            detailVertexId
+          )
+        );
       }
 
       try {
-        const [ pipeline, vertex ] = await Promise.all(promises);
+        const [pipeline, vertex] = await Promise.all(promises);
         return {
           versions,
           pipeline,
-          vertex
+          vertex,
         };
       } catch (err) {
         return handleError(err, req);
       }
-    }
+    },
   });
 }

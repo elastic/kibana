@@ -43,6 +43,7 @@ const indexPatternsService = {
   make: async () => ({
     fieldsFetcher: {
       fetch: noop,
+      fetchForWildcard: noop,
     },
   }),
 };

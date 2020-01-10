@@ -5,25 +5,15 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { mockGlobalState, apolloClientObservable } from '../../../mock';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
-
-jest.mock('ui/vis/lib/timezone', () => ({
-  timezoneProvider: () => () => 'America/New_York',
-}));
+jest.mock('../../../lib/kibana');
 
 describe('Properties', () => {
   const usersViewing = ['elastic'];

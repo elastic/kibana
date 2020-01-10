@@ -17,9 +17,9 @@ export const App = () => {
   return (
     <HashRouter>
       <Switch>
-        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`}/>
-        <Route exact path={`${BASE_PATH}policies`} component={PolicyTable}/>
-        <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy}/>
+        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`} />
+        <Route exact path={`${BASE_PATH}policies`} component={PolicyTable} />
+        <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy} />
       </Switch>
     </HashRouter>
   );

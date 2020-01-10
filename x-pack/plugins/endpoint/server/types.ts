@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, LoggerFactory } from 'kibana/server';
+import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
 
 export interface EndpointAppContext {
-  clusterClient: IClusterClient;
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
+}
+
+export class EndpointAppConstants {
+  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
 }
 
 export interface EndpointData {
@@ -35,7 +38,7 @@ export interface EndpointData {
       updated_at?: Date;
     };
     isolation: {
-      status: false;
+      status: boolean;
       request_status?: string | boolean;
       updated_at?: Date;
     };
@@ -44,7 +47,7 @@ export interface EndpointData {
       id: string;
     };
     sensor: {
-      persistence: true;
+      persistence: boolean;
       status: object;
     };
   };

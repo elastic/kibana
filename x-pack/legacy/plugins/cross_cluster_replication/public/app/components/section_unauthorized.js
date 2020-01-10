@@ -11,11 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 export function SectionUnauthorized({ title, children }) {
   return (
     <Fragment>
-      <EuiCallOut
-        title={title}
-        color="warning"
-        iconType="help"
-      >
+      <EuiCallOut title={title} color="warning" iconType="help">
         {children}
       </EuiCallOut>
     </Fragment>

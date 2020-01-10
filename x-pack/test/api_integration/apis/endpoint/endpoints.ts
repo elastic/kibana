@@ -9,37 +9,59 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('`endpoint` test endpoints api', () => {
+  describe('test endpoints api', () => {
     before(() => esArchiver.load('endpoint/endpoints'));
     after(() => esArchiver.unload('endpoint/endpoints'));
-    describe('POST /api/endpoint/endpoints', () => {
-      it('endpoints should return one entry for each endpoint', async () => {
-        await supertest
+    describe('GET /api/endpoint/endpoints', () => {
+      it('endpoints api should return one entry for each endpoint with default paging', async () => {
+        const { body } = await supertest
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send()
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            expect(response.body.hits.total.value).to.eql(9);
-            expect(response.body.hits.hits.length).to.eql(3);
-            expect(response.body.aggregations.total.value).to.eql(3);
-          });
+          .expect(200);
+        expect(body.total).to.eql(3);
+        expect(body.endpoints.length).to.eql(3);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_index).to.eql(0);
       });
-    });
-    describe('GET /api/endpoint/endpoints/[machine_id]', () => {
-      it('endpoints should return one entry for endpoint with machine id bbac0ffe-db76-4864-bb8c-13b46fa524c3', async () => {
-        await supertest
-          .get('/api/endpoint/endpoints/bbac0ffe-db76-4864-bb8c-13b46fa524c3')
+
+      it('endpoints api should return page based on params passed.', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
-          .send()
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            expect(response.body.hits.total.value).to.eql(3);
-            expect(response.body.hits.hits.length).to.eql(1);
-            expect(response.body.hits.hits[0]._source.machine_id).to.equal(
-              'bbac0ffe-db76-4864-bb8c-13b46fa524c3'
-            );
-          });
+          .send({
+            paging_properties: [
+              {
+                page_size: 1,
+              },
+              {
+                page_index: 1,
+              },
+            ],
+          })
+          .expect(200);
+        expect(body.total).to.eql(3);
+        expect(body.endpoints.length).to.eql(1);
+        expect(body.request_page_size).to.eql(1);
+        expect(body.request_index).to.eql(1);
+      });
+
+      it('endpoints api should return 400 when pagingProperties is below boundaries.', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            paging_properties: [
+              {
+                page_size: 0,
+              },
+              {
+                page_index: 1,
+              },
+            ],
+          })
+          .expect(400);
+        expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
       });
     });
   });

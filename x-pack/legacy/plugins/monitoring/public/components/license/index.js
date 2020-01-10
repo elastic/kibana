@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiLink,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -45,7 +45,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
           defaultMessage="To update the license for this cluster, provide the license file through
           the Elasticsearch {apiText}:"
           values={{
-            apiText: 'API'
+            apiText: 'API',
           }}
         />
       </p>
@@ -62,12 +62,7 @@ export function License(props) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <LicenseStatus
-          isExpired={isExpired}
-          status={status}
-          type={type}
-          expiryDate={expiryDate}
-        />
+        <LicenseStatus isExpired={isExpired} status={status} type={type} expiryDate={expiryDate} />
         <EuiSpacer />
 
         <EuiFlexGroup justifyContent="center">
@@ -81,9 +76,7 @@ export function License(props) {
         <EuiText size="s" textAlign="center">
           <p>
             For more license options please visit&nbsp;
-            <EuiLink href={licenseManagement}>
-              License Management
-            </EuiLink>.
+            <EuiLink href={licenseManagement}>License Management</EuiLink>.
           </p>
         </EuiText>
       </EuiPageBody>

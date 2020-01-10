@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'src/core/server';
 import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 
@@ -18,8 +18,8 @@ export interface InfraCloudMetricsAdapterResponse {
 }
 
 export const getCloudMetricsMetadata = async (
-  framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   instanceId: string
 ): Promise<InfraCloudMetricsAdapterResponse> => {
@@ -51,7 +51,7 @@ export const getCloudMetricsMetadata = async (
     {
       metrics?: InfraMetadataAggregationResponse;
     }
-  >(req, 'search', metricQuery);
+  >(requestContext, 'search', metricQuery);
 
   const buckets =
     response.aggregations && response.aggregations.metrics

@@ -25,7 +25,7 @@ export async function getExistingEnvironmentsForService({
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex'],
+    index: indices.apmAgentConfigurationIndex,
     body: {
       size: 0,
       query: { bool },

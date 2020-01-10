@@ -26,7 +26,7 @@ describe('get_beat_summary', () => {
       configReloads: null,
       uptime: null,
       handlesHardLimit: null,
-      handlesSoftLimit: null
+      handlesSoftLimit: null,
     });
   });
 
@@ -48,35 +48,35 @@ describe('get_beat_summary', () => {
                     info: {
                       uptime: {
                         ms: 32 * 1000 * 1000 * 1000,
-                      }
+                      },
                     },
                     handles: {
                       limit: {
                         hard: 14000,
-                        soft: 14000
-                      }
-                    }
+                        soft: 14000,
+                      },
+                    },
                   },
                   libbeat: {
                     output: {
                       type: 'kafka',
                       write: {
                         bytes: 293845923,
-                      }
+                      },
                     },
                     pipeline: {
                       events: {
                         published: 2300,
                         total: 2320,
                         dropped: 1,
-                      }
+                      },
                     },
                     config: {
-                      reloads: 17
-                    }
-                  }
-                }
-              }
+                      reloads: 17,
+                    },
+                  },
+                },
+              },
             },
             inner_hits: {
               first_hit: {
@@ -90,27 +90,27 @@ describe('get_beat_summary', () => {
                               output: {
                                 write: {
                                   bytes: 277845923,
-                                }
+                                },
                               },
                               pipeline: {
                                 events: {
                                   published: 2100,
                                   total: 2020,
                                   dropped: 0,
-                                }
+                                },
                               },
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      }
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
     };
     const beatUuid = 'fooUuid';
 
@@ -128,7 +128,7 @@ describe('get_beat_summary', () => {
       configReloads: 17,
       uptime: 32000000000,
       handlesHardLimit: 14000,
-      handlesSoftLimit: 14000
+      handlesSoftLimit: 14000,
     });
   });
 
@@ -149,36 +149,36 @@ describe('get_beat_summary', () => {
                   beat: {
                     info: {
                       uptime: {
-                        ms: 32 * 1000 * 1000
-                      }
+                        ms: 32 * 1000 * 1000,
+                      },
                     },
                     handles: {
                       limit: {
                         hard: 14000,
-                        soft: 14000
-                      }
-                    }
+                        soft: 14000,
+                      },
+                    },
                   },
                   libbeat: {
                     output: {
                       type: 'kafka',
                       write: {
                         bytes: 6645923,
-                      }
+                      },
                     },
                     pipeline: {
                       events: {
                         published: 100,
                         total: 20,
                         dropped: 0,
-                      }
+                      },
                     },
                     config: {
-                      reloads: 18
-                    }
-                  }
-                }
-              }
+                      reloads: 18,
+                    },
+                  },
+                },
+              },
             },
             inner_hits: {
               first_hit: {
@@ -192,27 +192,27 @@ describe('get_beat_summary', () => {
                               output: {
                                 write: {
                                   bytes: 277845923,
-                                }
+                                },
                               },
                               pipeline: {
                                 events: {
                                   published: 2100,
                                   total: 2020,
                                   dropped: 0,
-                                }
+                                },
                               },
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      }
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
     };
     const beatUuid = 'fooUuid';
 
@@ -230,7 +230,7 @@ describe('get_beat_summary', () => {
       configReloads: 18,
       uptime: 32000000,
       handlesHardLimit: 14000,
-      handlesSoftLimit: 14000
+      handlesSoftLimit: 14000,
     });
   });
 });

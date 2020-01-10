@@ -16,12 +16,15 @@ import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable
 import { CustomTimeRangeAction } from './custom_time_range_action';
 /* eslint-disable */
 import {
-  HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-  HelloWorldEmbeddable,
   HelloWorldContainer,
 } from '../../../../src/plugins/embeddable/public/lib/test_samples';
 /* eslint-enable */
+
+import {
+  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddable,
+  HELLO_WORLD_EMBEDDABLE,
+} from '../../../../examples/embeddable_examples/public';
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';
@@ -277,13 +280,13 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 // TODO: uncomment when https://github.com/elastic/kibana/issues/43271 is fixed.
 // test('Embeddable that does not use time range in a container that has time range is incompatible', async () => {
 //   const embeddableFactories = new Map<string, EmbeddableFactory>();
-//   embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+//   embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
 // const container = new TimeRangeContainer(
 //   {
 //     timeRange: { from: 'now-15m', to: 'now' },
 //     panels: {
 //       '1': {
-//         type: HELLO_WORLD_EMBEDDABLE_TYPE,
+//         type: HELLO_WORLD_EMBEDDABLE,
 //         explicitInput: {
 //           id: '1',
 //         },
@@ -313,12 +316,12 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 
 test('Attempting to execute on incompatible embeddable throws an error', async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
   const container = new HelloWorldContainer(
     {
       panels: {
         '1': {
-          type: HELLO_WORLD_EMBEDDABLE_TYPE,
+          type: HELLO_WORLD_EMBEDDABLE,
           explicitInput: {
             id: '1',
           },

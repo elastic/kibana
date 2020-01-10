@@ -456,6 +456,10 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+
+  AlertsHistogram: AlertsOverTimeData;
+
+  AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -554,6 +558,36 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+}
+
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -690,26 +724,12 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
   authenticationsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface TimelineData {
@@ -1626,6 +1646,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -1646,6 +1668,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x: string;
+
+  y: number;
+
+  g: string;
 }
 
 export interface NetworkHttpData {
@@ -2117,6 +2147,20 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+}
+export interface AnomaliesOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
@@ -2410,6 +2454,110 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAlertsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AlertsHistogram: AlertsHistogram;
+  };
+
+  export type AlertsHistogram = {
+    __typename?: 'AlertsOverTimeData';
+
+    alertsOverTimeByModule: AlertsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type AlertsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetAnomaliesOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AnomaliesOverTime: AnomaliesOverTime;
+  };
+
+  export type AnomaliesOverTime = {
+    __typename?: 'AnomaliesOverTimeData';
+
+    anomaliesOverTime: _AnomaliesOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AnomaliesOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsOverTimeQuery {
   export type Variables = {
@@ -3311,6 +3459,8 @@ export namespace GetNetworkDnsQuery {
     pageInfo: PageInfo;
 
     inspect: Maybe<Inspect>;
+
+    histogram: Maybe<Histogram[]>;
   };
 
   export type Edges = {
@@ -3359,6 +3509,16 @@ export namespace GetNetworkDnsQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Histogram = {
+    __typename?: 'MatrixOverOrdinalHistogramData';
+
+    x: string;
+
+    y: number;
+
+    g: string;
   };
 }
 

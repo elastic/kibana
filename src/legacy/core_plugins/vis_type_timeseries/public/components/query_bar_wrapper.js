@@ -19,10 +19,10 @@
 
 import React, { useContext } from 'react';
 import { CoreStartContext } from '../contexts/query_input_bar_context';
-import { QueryBarInput } from 'plugins/data';
+import { QueryStringInput } from '../../../../../plugins/data/public';
 
 export function QueryBarWrapper(props) {
   const coreStartContext = useContext(CoreStartContext);
 
-  return <QueryBarInput {...props} {...coreStartContext} />;
+  return <QueryStringInput {...props} {...coreStartContext} />;
 }

@@ -15,7 +15,6 @@ import {
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
-import { useKibanaCore } from '../../../../../observability/public';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -35,6 +34,7 @@ import { PROJECTION } from '../../../../common/projections/typings';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getRedirectLocation({
   urlParams,
@@ -86,7 +86,7 @@ export function TransactionOverview() {
     status: transactionListStatus
   } = useTransactionList(urlParams);
 
-  const { http } = useKibanaCore();
+  const { http } = useApmPluginContext().core;
 
   const { data: hasMLJob = false } = useFetcher(() => {
     if (serviceName && transactionType) {
@@ -96,7 +96,13 @@ export function TransactionOverview() {
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
-      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      filterNames: [
+        'transactionResult',
+        'host',
+        'containerId',
+        'podName',
+        'serviceVersion'
+      ],
       params: {
         serviceName,
         transactionType

@@ -17,21 +17,21 @@ import { IPsQueryTabBodyProps } from './types';
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 
 export const IPsQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   setQuery,
   indexPattern,
   flowTarget,
 }: IPsQueryTabBodyProps) => (
   <NetworkTopNFlowQuery
-    endDate={to}
+    endDate={endDate}
     flowTarget={flowTarget}
     filterQuery={filterQuery}
-    skip={isInitializing}
+    skip={skip}
     sourceId="default"
-    startDate={from}
+    startDate={startDate}
     type={networkModel.NetworkType.page}
   >
     {({

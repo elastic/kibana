@@ -1,0 +1,19 @@
+{
+  "name": "Simplest saved id with filters",
+  "description": "Simplest saved_id with a filter for a fallback if the saved_id is not found",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "saved_query",
+  "from": "now-6m",
+  "to": "now",
+  "filters": [
+    {
+      "query": {
+        "match_phrase": {
+          "host.name": "siem-windows"
+        }
+      }
+    }
+  ],
+  "saved_id": "test-saved-id"
+}

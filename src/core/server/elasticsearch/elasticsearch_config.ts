@@ -78,7 +78,7 @@ export const config = {
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
       keyPassphrase: schema.maybe(schema.string()),
-      alwaysPresentCertificate: schema.boolean({ defaultValue: true }),
+      alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
     }),
     apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
     healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),

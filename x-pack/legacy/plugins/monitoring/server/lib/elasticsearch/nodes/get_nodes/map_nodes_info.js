@@ -5,10 +5,7 @@
  */
 
 import { get, isUndefined } from 'lodash';
-import {
-  calculateNodeType,
-  getNodeTypeClassLabel,
-} from '../';
+import { calculateNodeType, getNodeTypeClassLabel } from '../';
 
 /**
  * @param {Array} nodeHits: info about each node from the hits in the get_nodes query
@@ -23,8 +20,11 @@ export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
     const sourceNode = get(node, '_source.source_node');
 
     const calculatedNodeType = calculateNodeType(sourceNode, get(clusterState, 'master_node'));
-    const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(sourceNode, calculatedNodeType);
-    const isOnline = !isUndefined(get(clusterState, [ 'nodes', sourceNode.uuid ]));
+    const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
+      sourceNode,
+      calculatedNodeType
+    );
+    const isOnline = !isUndefined(get(clusterState, ['nodes', sourceNode.uuid]));
 
     return {
       ...prev,
@@ -36,7 +36,7 @@ export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
         nodeTypeLabel: nodeTypeLabel,
         nodeTypeClass: nodeTypeClass,
         shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, 0),
-      }
+      },
     };
   }, {});
 }

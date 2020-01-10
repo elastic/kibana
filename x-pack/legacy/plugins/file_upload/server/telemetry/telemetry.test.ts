@@ -6,22 +6,13 @@
 
 import { getTelemetry, updateTelemetry } from './telemetry';
 
+const elasticsearchPlugin: any = null;
+const getSavedObjectsRepository: any = null;
 const internalRepository = () => ({
   get: jest.fn(() => null),
   create: jest.fn(() => ({ attributes: 'test' })),
   update: jest.fn(() => ({ attributes: 'test' })),
 });
-const server: any = {
-  savedObjects: {
-    getSavedObjectsRepository: jest.fn(() => internalRepository()),
-  },
-  plugins: {
-    elasticsearch: {
-      getCluster: jest.fn(() => ({ callWithInternalUser })),
-    },
-  },
-};
-const callWithInternalUser = jest.fn();
 
 function mockInit(getVal: any = { attributes: {} }): any {
   return {
@@ -34,7 +25,7 @@ describe('file upload plugin telemetry', () => {
   describe('getTelemetry', () => {
     it('should get existing telemetry', async () => {
       const internalRepo = mockInit();
-      await getTelemetry(server, internalRepo);
+      await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository, internalRepo);
       expect(internalRepo.update.mock.calls.length).toBe(0);
       expect(internalRepo.get.mock.calls.length).toBe(1);
       expect(internalRepo.create.mock.calls.length).toBe(0);
@@ -48,7 +39,12 @@ describe('file upload plugin telemetry', () => {
           filesUploadedTotalCount: 2,
         },
       });
-      await updateTelemetry({ server, internalRepo });
+
+      await updateTelemetry({
+        elasticsearchPlugin,
+        getSavedObjectsRepository,
+        internalRepo,
+      });
       expect(internalRepo.update.mock.calls.length).toBe(1);
       expect(internalRepo.get.mock.calls.length).toBe(1);
       expect(internalRepo.create.mock.calls.length).toBe(0);

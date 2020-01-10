@@ -27,14 +27,18 @@ const mockIndexPatternCreationType = {
   checkIndicesForErrors: () => false,
   getShowSystemIndices: () => false,
   renderPrompt: () => {},
-  getIndexPatternMappings: () => { return {}; },
-  getIndexTags: () => { return []; }
+  getIndexPatternMappings: () => {
+    return {};
+  },
+  getIndexTags: () => {
+    return [];
+  },
 };
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
     const es = {
-      search: () => new Promise((resolve) => resolve(successfulResponse))
+      search: () => new Promise(resolve => resolve(successfulResponse)),
     };
 
     const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
@@ -80,7 +84,7 @@ describe('getIndices', () => {
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
       const es = {
-        search: () => new Promise((resolve) => resolve(errorResponse))
+        search: () => new Promise(resolve => resolve(errorResponse)),
       };
 
       const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
@@ -89,7 +93,9 @@ describe('getIndices', () => {
 
     it('should throw exceptions', async () => {
       const es = {
-        search: () => { throw new Error('Fail'); }
+        search: () => {
+          throw new Error('Fail');
+        },
       };
 
       await expect(getIndices(es, mockIndexPatternCreationType, 'kibana', 1)).rejects.toThrow();
@@ -97,7 +103,7 @@ describe('getIndices', () => {
 
     it('should handle index_not_found_exception errors gracefully', async () => {
       const es = {
-        search: () => new Promise((resolve, reject) => reject(exceptionResponse))
+        search: () => new Promise((resolve, reject) => reject(exceptionResponse)),
       };
 
       const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);

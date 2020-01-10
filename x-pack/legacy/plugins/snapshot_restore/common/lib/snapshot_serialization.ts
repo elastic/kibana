@@ -20,7 +20,8 @@ import { deserializeTime, serializeTime } from './time_serialization';
 export function deserializeSnapshotDetails(
   repository: string,
   snapshotDetailsEs: SnapshotDetailsEs,
-  managedRepository?: string
+  managedRepository?: string,
+  successfulSnapshots?: SnapshotDetailsEs[]
 ): SnapshotDetails {
   if (!snapshotDetailsEs || typeof snapshotDetailsEs !== 'object') {
     throw new Error('Unable to deserialize snapshot details');
@@ -85,8 +86,12 @@ export function deserializeSnapshotDetails(
     durationInMillis,
     indexFailures,
     shards,
-    isManagedRepository: repository === managedRepository,
+    managedRepository,
   };
+
+  if (successfulSnapshots && successfulSnapshots.length) {
+    snapshotDetails.isLastSuccessfulSnapshot = successfulSnapshots[0].snapshot === snapshot;
+  }
 
   if (policyName) {
     snapshotDetails.policyName = policyName;

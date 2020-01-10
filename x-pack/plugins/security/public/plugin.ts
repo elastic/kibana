@@ -4,39 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { LicensingPluginSetup } from '../../licensing/public';
 import {
   SessionExpired,
   SessionTimeout,
+  ISessionTimeout,
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
+import { SecurityLicenseService } from '../common/licensing';
+import { SecurityNavControlService } from './nav_control';
+import { AuthenticationService } from './authentication';
+
+export interface PluginSetupDependencies {
+  licensing: LicensingPluginSetup;
+}
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
-  public setup(core: CoreSetup) {
+  private sessionTimeout!: ISessionTimeout;
+
+  private navControlService!: SecurityNavControlService;
+
+  private securityLicenseService!: SecurityLicenseService;
+
+  public setup(core: CoreSetup, { licensing }: PluginSetupDependencies) {
     const { http, notifications, injectedMetadata } = core;
     const { basePath, anonymousPaths } = http;
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
 
-    const sessionExpired = new SessionExpired(basePath);
+    const tenant = `${injectedMetadata.getInjectedVar('session.tenant', '')}`;
+    const sessionExpired = new SessionExpired(basePath, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    const sessionTimeout = new SessionTimeout(
-      injectedMetadata.getInjectedVar('sessionTimeout', null) as number | null,
-      notifications,
-      sessionExpired,
-      http
-    );
-    http.intercept(new SessionTimeoutHttpInterceptor(sessionTimeout, anonymousPaths));
+    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
+
+    this.navControlService = new SecurityNavControlService();
+    this.securityLicenseService = new SecurityLicenseService();
+    const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
+
+    const authc = new AuthenticationService().setup({ http: core.http });
+
+    this.navControlService.setup({
+      securityLicense: license,
+      authc,
+    });
 
     return {
-      anonymousPaths,
-      sessionTimeout,
+      authc,
+      sessionTimeout: this.sessionTimeout,
     };
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    this.sessionTimeout.start();
+    this.navControlService.start({ core });
+  }
+
+  public stop() {
+    this.sessionTimeout.stop();
+    this.navControlService.stop();
+    this.securityLicenseService.stop();
+  }
 }
 
 export type SecurityPluginSetup = ReturnType<SecurityPlugin['setup']>;

@@ -4,18 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'ui/autoload/all';
+// Used to run esaggs queries
+import 'uiExports/fieldFormats';
+import 'uiExports/search';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visResponseHandlers';
+// Used for kibana_context function
+import 'uiExports/savedObjectTypes';
+
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import chrome from 'ui/chrome';
-import { CoreSetup, CoreStart } from 'src/core/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
-import { start as dataShimStart } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
 import { metricVisualizationSetup, metricVisualizationStop } from '../metric_visualization_plugin';
@@ -24,25 +32,36 @@ import {
   datatableVisualizationStop,
 } from '../datatable_visualization_plugin';
 import { App } from './app';
-import { EditorFrameInstance } from '../types';
 import {
   LensReportManager,
   setReportManager,
   stopReportManager,
   trackUiEvent,
 } from '../lens_ui_telemetry';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
+import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
+import { EditorFrameStart } from '../types';
+
+export interface LensPluginSetupDependencies {
+  kibana_legacy: KibanaLegacySetup;
+}
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   dataShim: DataStart;
 }
+
 export class AppPlugin {
-  private instance: EditorFrameInstance | null = null;
-  private store: SavedObjectIndexStore | null = null;
+  private startDependencies: {
+    data: DataPublicPluginStart;
+    dataShim: DataStart;
+    savedObjectsClient: SavedObjectsClientContract;
+    editorFrame: EditorFrameStart;
+  } | null = null;
 
   constructor() {}
 
-  setup(core: CoreSetup, plugins: {}) {
+  setup(core: CoreSetup, { kibana_legacy }: LensPluginSetupDependencies) {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
@@ -50,77 +69,86 @@ export class AppPlugin {
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
     const editorFrameSetupInterface = editorFrameSetup();
-    this.store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
-    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
+    editorFrameSetupInterface.registerDatasource(indexPattern);
+
+    kibana_legacy.registerLegacyApp({
+      id: 'lens',
+      title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+      mount: async (context, params) => {
+        if (this.startDependencies === null) {
+          throw new Error('mounted before start phase');
+        }
+        const { data, savedObjectsClient, editorFrame } = this.startDependencies;
+        addHelpMenuToAppChrome(context.core.chrome);
+
+        const instance = editorFrame.createInstance({});
+
+        setReportManager(
+          new LensReportManager({
+            storage: new Storage(localStorage),
+            http: core.http,
+          })
+        );
+
+        const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+          trackUiEvent('loaded');
+          return (
+            <App
+              core={context.core}
+              data={data}
+              editorFrame={instance}
+              storage={new Storage(localStorage)}
+              docId={routeProps.match.params.id}
+              docStorage={new SavedObjectIndexStore(savedObjectsClient)}
+              redirectTo={id => {
+                if (!id) {
+                  routeProps.history.push('/lens');
+                } else {
+                  routeProps.history.push(`/lens/edit/${id}`);
+                }
+              }}
+            />
+          );
+        };
+
+        function NotFound() {
+          trackUiEvent('loaded_404');
+          return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
+        }
+        render(
+          <I18nProvider>
+            <HashRouter>
+              <Switch>
+                <Route exact path="/lens/edit/:id" render={renderEditor} />
+                <Route exact path="/lens" render={renderEditor} />
+                <Route path="/lens" component={NotFound} />
+              </Switch>
+            </HashRouter>
+          </I18nProvider>,
+          params.element
+        );
+        return () => {
+          instance.unmount();
+          unmountComponentAtNode(params.element);
+        };
+      },
+    });
   }
 
-  start(core: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
-    if (this.store === null) {
-      throw new Error('Start lifecycle called before setup lifecycle');
-    }
-
-    const store = this.store;
-
-    const editorFrameStartInterface = editorFrameStart();
-
-    this.instance = editorFrameStartInterface.createInstance({});
-
-    setReportManager(
-      new LensReportManager({
-        storage: new Storage(localStorage),
-        http: core.http,
-      })
-    );
-
-    const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-      trackUiEvent('loaded');
-      return (
-        <App
-          core={core}
-          data={data}
-          dataShim={dataShim}
-          editorFrame={this.instance!}
-          storage={new Storage(localStorage)}
-          docId={routeProps.match.params.id}
-          docStorage={store}
-          redirectTo={id => {
-            if (!id) {
-              routeProps.history.push('/');
-            } else {
-              routeProps.history.push(`/edit/${id}`);
-            }
-          }}
-        />
-      );
+  start({ savedObjects }: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
+    this.startDependencies = {
+      data,
+      dataShim,
+      savedObjectsClient: savedObjects.client,
+      editorFrame: editorFrameStart(),
     };
-
-    function NotFound() {
-      trackUiEvent('loaded_404');
-      return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
-    }
-
-    return (
-      <I18nProvider>
-        <HashRouter>
-          <Switch>
-            <Route exact path="/edit/:id" render={renderEditor} />
-            <Route exact path="/" render={renderEditor} />
-            <Route component={NotFound} />
-          </Switch>
-        </HashRouter>
-      </I18nProvider>
-    );
   }
 
   stop() {
-    if (this.instance) {
-      this.instance.unmount();
-    }
-
     stopReportManager();
 
     // TODO this will be handled by the plugin platform itself
@@ -131,10 +159,3 @@ export class AppPlugin {
     editorFrameStop();
   }
 }
-
-const app = new AppPlugin();
-
-export const appSetup = () => app.setup(npSetup.core, {});
-export const appStart = () =>
-  app.start(npStart.core, { dataShim: dataShimStart, data: npStart.plugins.data });
-export const appStop = () => app.stop();

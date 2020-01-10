@@ -14,8 +14,8 @@ import {
   InfraNodeType,
 } from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
-import { InfraSnapshotRequestOptions } from './snapshot';
-import { IP_FIELDS } from '../constants';
+import { InfraSnapshotRequestOptions } from './types';
+import { findInventoryModel } from '../../../common/inventory_models';
 
 export interface InfraSnapshotNodeMetricsBucket {
   key: { id: string };
@@ -73,12 +73,13 @@ export const getIPFromBucket = (
   nodeType: InfraNodeType,
   bucket: InfraSnapshotNodeGroupByBucket
 ): string | null => {
-  const ip = get<typeof bucket, unknown>(
-    bucket,
-    `ip.hits.hits[0]._source.${IP_FIELDS[nodeType]}`,
-    null
-  );
-
+  const inventoryModel = findInventoryModel(nodeType);
+  if (!inventoryModel.fields.ip) {
+    return null;
+  }
+  const ip = get(bucket, `ip.hits.hits[0]._source.${inventoryModel.fields.ip}`, null) as
+    | string[]
+    | null;
   if (Array.isArray(ip)) {
     return ip.find(isIPv4) || null;
   } else if (typeof ip === 'string') {

@@ -5,7 +5,17 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { EndpointPlugin, EndpointPluginSetup, EndpointPluginStart } from './plugin';
+import {
+  EndpointPlugin,
+  EndpointPluginStart,
+  EndpointPluginSetup,
+  EndpointPluginStartDependencies,
+  EndpointPluginSetupDependencies,
+} from './plugin';
 
-export const plugin: PluginInitializer<EndpointPluginSetup, EndpointPluginStart> = () =>
-  new EndpointPlugin();
+export const plugin: PluginInitializer<
+  EndpointPluginSetup,
+  EndpointPluginStart,
+  EndpointPluginSetupDependencies,
+  EndpointPluginStartDependencies
+> = () => new EndpointPlugin();

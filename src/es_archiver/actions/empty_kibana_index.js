@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  migrateKibanaIndex,
-  deleteKibanaIndices,
-  createStats,
-} from '../lib';
+import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
 export async function emptyKibanaIndexAction({ client, log, kbnClient }) {
   const stats = createStats('emptyKibanaIndex', log);

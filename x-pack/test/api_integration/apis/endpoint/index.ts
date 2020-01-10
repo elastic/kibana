@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('endpoint', function() {
-    this.tags('ciGroup6');
-
+export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
+  describe('Endpoint plugin', function() {
+    loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./endpoints'));
   });
 }

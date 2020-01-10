@@ -33,7 +33,7 @@ export async function importDashboards(req) {
   // docs are not seen as automatically up-to-date.
   const docs = payload.objects
     .filter(item => !exclude.includes(item.type))
-    .map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }));
+    .map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || {} }));
 
   const results = await savedObjectsClient.bulkCreate(docs, { overwrite });
   return { objects: results.saved_objects };

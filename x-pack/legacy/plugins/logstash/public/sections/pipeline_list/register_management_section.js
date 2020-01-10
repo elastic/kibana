@@ -12,11 +12,11 @@ management.getSection('logstash').register('pipelines', {
     defaultMessage: 'Pipelines',
   }),
   order: 10,
-  url: '#/management/logstash/pipelines/'
+  url: '#/management/logstash/pipelines/',
 });
 
 management.getSection('logstash/pipelines').register('pipeline', {
-  visible: false
+  visible: false,
 });
 
 management.getSection('logstash/pipelines/pipeline').register('edit', {
@@ -24,7 +24,7 @@ management.getSection('logstash/pipelines/pipeline').register('edit', {
     defaultMessage: 'Edit pipeline',
   }),
   order: 1,
-  visible: false
+  visible: false,
 });
 
 management.getSection('logstash/pipelines/pipeline').register('new', {
@@ -32,5 +32,5 @@ management.getSection('logstash/pipelines/pipeline').register('new', {
     defaultMessage: 'Create pipeline',
   }),
   order: 1,
-  visible: false
+  visible: false,
 });

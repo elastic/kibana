@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { jobServiceProvider } from '../models/job_service';
@@ -17,17 +15,12 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { forceStartDatafeeds } = jobServiceProvider(callWithRequest);
-      const {
-        datafeedIds,
-        start,
-        end
-      } = request.payload;
-      return forceStartDatafeeds(datafeedIds, start, end)
-        .catch(resp => wrapError(resp));
+      const { datafeedIds, start, end } = request.payload;
+      return forceStartDatafeeds(datafeedIds, start, end).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -37,12 +30,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { stopDatafeeds } = jobServiceProvider(callWithRequest);
       const { datafeedIds } = request.payload;
-      return stopDatafeeds(datafeedIds)
-        .catch(resp => wrapError(resp));
+      return stopDatafeeds(datafeedIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -52,12 +44,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { deleteJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
-      return deleteJobs(jobIds)
-        .catch(resp => wrapError(resp));
+      return deleteJobs(jobIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -67,12 +58,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { closeJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
-      return closeJobs(jobIds)
-        .catch(resp => wrapError(resp));
+      return closeJobs(jobIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -82,12 +72,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobsSummary } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
-      return jobsSummary(jobIds)
-        .catch(resp => wrapError(resp));
+      return jobsSummary(jobIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -97,14 +86,13 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
       const { dateFormatTz } = request.payload;
-      return jobsWithTimerange(dateFormatTz)
-        .catch(resp => {
-          wrapError(resp);
-        });
+      return jobsWithTimerange(dateFormatTz).catch(resp => {
+        wrapError(resp);
+      });
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -114,12 +102,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { createFullJobsList } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
-      return createFullJobsList(jobIds)
-        .catch(resp => wrapError(resp));
+      return createFullJobsList(jobIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -128,12 +115,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAllGroups } = jobServiceProvider(callWithRequest);
-      return getAllGroups()
-        .catch(resp => wrapError(resp));
+      return getAllGroups().catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -143,12 +129,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { updateGroups } = jobServiceProvider(callWithRequest);
       const { jobs } = request.payload;
-      return updateGroups(jobs)
-        .catch(resp => wrapError(resp));
+      return updateGroups(jobs).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -157,12 +142,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { deletingJobTasks } = jobServiceProvider(callWithRequest);
-      return deletingJobTasks()
-        .catch(resp => wrapError(resp));
+      return deletingJobTasks().catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -172,12 +156,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobsExist } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
-      return jobsExist(jobIds)
-        .catch(resp => wrapError(resp));
+      return jobsExist(jobIds).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -186,14 +169,13 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { indexPattern } = request.params;
-      const isRollup = (request.query.rollup === 'true');
+      const isRollup = request.query.rollup === 'true';
       const { newJobCaps } = jobServiceProvider(callWithRequest, request);
-      return newJobCaps(indexPattern, isRollup)
-        .catch(resp => wrapError(resp));
+      return newJobCaps(indexPattern, isRollup).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -210,7 +192,7 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
         query,
         aggFieldNamePairs,
         splitFieldName,
-        splitFieldValue
+        splitFieldValue,
       } = request.payload;
       const { newJobLineChart } = jobServiceProvider(callWithRequest, request);
       return newJobLineChart(
@@ -222,12 +204,12 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
         query,
         aggFieldNamePairs,
         splitFieldName,
-        splitFieldValue,
+        splitFieldValue
       ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -254,12 +236,12 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
         intervalMs,
         query,
         aggFieldNamePairs,
-        splitFieldName,
+        splitFieldName
       ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -268,12 +250,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAllJobAndGroupIds } = jobServiceProvider(callWithRequest);
-      return getAllJobAndGroupIds()
-        .catch(resp => wrapError(resp));
+      return getAllJobAndGroupIds().catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -283,12 +264,10 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getLookBackProgress } = jobServiceProvider(callWithRequest);
       const { jobId, start, end } = request.payload;
-      return getLookBackProgress(jobId, start, end)
-        .catch(resp => wrapError(resp));
+      return getLookBackProgress(jobId, start, end).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

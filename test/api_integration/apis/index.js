@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('apis', () => {
     loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./elasticsearch'));
@@ -28,11 +28,11 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./shorten'));
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
+    loadTestFile(require.resolve('./core'));
   });
 }

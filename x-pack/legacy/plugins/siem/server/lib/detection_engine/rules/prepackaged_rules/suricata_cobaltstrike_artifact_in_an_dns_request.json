@@ -1,0 +1,17 @@
+{
+  "rule_id": "481ef0f5-beda-4fa2-8bfb-039c95500deb",
+  "risk_score": 50,
+  "description": "Suricata CobaltStrike Artifact in an DNS Request",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata CobaltStrike Artifact in an DNS Request",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610166 or 2610167 or 2610168)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

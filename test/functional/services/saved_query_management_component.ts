@@ -26,6 +26,15 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
   const retry = getService('retry');
 
   class SavedQueryManagementComponent {
+    public async getCurrentlyLoadedQueryID() {
+      await this.openSavedQueryManagementComponent();
+      try {
+        return await testSubjects.getVisibleText('~saved-query-list-item-selected');
+      } catch {
+        return undefined;
+      }
+    }
+
     public async saveNewQuery(
       name: string,
       description: string,

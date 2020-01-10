@@ -15,10 +15,21 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
-export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
+export const validatePolicy = (
+  policy: SlmPolicyPayload,
+  validationHelperData: {
+    managedRepository?: {
+      name: string;
+      policy: string;
+    };
+    isEditing?: boolean;
+    policyName?: string;
+  }
+): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
+  const { managedRepository, isEditing, policyName } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -28,7 +39,9 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
       schedule: [],
       repository: [],
       indices: [],
+      expireAfterValue: [],
       minCount: [],
+      maxCount: [],
     },
   };
 
@@ -92,6 +105,50 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
       })
     );
   }
+
+  if (
+    managedRepository &&
+    managedRepository.name === repository &&
+    managedRepository.policy &&
+    !(isEditing && managedRepository.policy === policyName)
+  ) {
+    validation.errors.repository.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
+        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
+        values: {
+          policyName: managedRepository.policy,
+        },
+      })
+    );
+  }
+
+  if (retention && retention.expireAfterValue && retention.expireAfterValue < 0) {
+    validation.errors.expireAfterValue.push(
+      i18n.translate(
+        'xpack.snapshotRestore.policyValidation.invalidNegativeDeleteAfterErrorMessage',
+        {
+          defaultMessage: 'Delete after cannot be negative.',
+        }
+      )
+    );
+  }
+
+  if (retention && retention.minCount && retention.minCount < 0) {
+    validation.errors.minCount.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidNegativeMinCountErrorMessage', {
+        defaultMessage: 'Minimum count cannot be negative.',
+      })
+    );
+  }
+
+  if (retention && retention.maxCount && retention.maxCount < 0) {
+    validation.errors.maxCount.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidNegativeMaxCountErrorMessage', {
+        defaultMessage: 'Maximum count cannot be negative.',
+      })
+    );
+  }
+
   // Remove fields with no errors
   validation.errors = Object.entries(validation.errors)
     .filter(([key, value]) => value.length > 0)

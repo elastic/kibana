@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function serverExtensionsMixin(kbnServer, server) {
   /**
    *  Decorate all request objects with a new method, `methodName`,
@@ -52,7 +51,7 @@ export function serverExtensionsMixin(kbnServer, server) {
     }
 
     const requestCache = new WeakMap();
-    server.decorate('request', methodName, function () {
+    server.decorate('request', methodName, function() {
       const request = this;
 
       if (!requestCache.has(request)) {

@@ -39,6 +39,7 @@ function isEnabled(config) {
 export function apmSpecProvider(server) {
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
+  const { cloud } = server.newPlatform.setup;
 
   const savedObjects = [
     {
@@ -95,7 +96,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'logoAPM',
     artifacts,
     onPrem: onPremInstructions(config),
-    elasticCloud: createElasticCloudInstructions(config),
+    elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects,
     savedObjectsInstallMsg: i18n.translate(

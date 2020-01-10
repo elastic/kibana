@@ -21,4 +21,6 @@
 export { PluginOpaqueId } from './plugins/types';
 export * from './saved_objects/types';
 export * from './ui_settings/types';
+export * from './legacy/types';
 export { EnvironmentMode, PackageInfo } from './config/types';
+export { ICspConfig } from './csp';

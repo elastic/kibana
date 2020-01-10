@@ -9,7 +9,11 @@ import {
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
@@ -30,7 +34,10 @@ interface TopTraceOptions {
 export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-export function transactionGroupsFetcher(options: Options, setup: Setup) {
+export function transactionGroupsFetcher(
+  options: Options,
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
   const { client, config } = setup;
 
   const projection = getTransactionGroupsProjection({
@@ -57,7 +64,7 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
           terms: {
             ...projection.body.aggs.transactions.terms,
             order: { sum: 'desc' as const },
-            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
+            size: config['xpack.apm.ui.transactionGroupBucketSize']
           },
           aggs: {
             sample: {

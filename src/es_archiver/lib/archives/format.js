@@ -22,10 +22,7 @@ import { PassThrough } from 'stream';
 
 import stringify from 'json-stable-stringify';
 
-import {
-  createMapStream,
-  createIntersperseStream,
-} from '../../../legacy/utils';
+import { createMapStream, createIntersperseStream } from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 

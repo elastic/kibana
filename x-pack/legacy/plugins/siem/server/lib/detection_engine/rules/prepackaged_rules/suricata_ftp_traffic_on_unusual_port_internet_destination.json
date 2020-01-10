@@ -1,0 +1,17 @@
+{
+  "rule_id": "b1adc850-0fe3-4dac-94d3-6f240071f83a",
+  "risk_score": 50,
+  "description": "Suricata FTP Traffic on Unusual Port, Internet Destination",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata FTP Traffic on Unusual Port, Internet Destination",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610005 and (event.module:suricata and event.kind:alert) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

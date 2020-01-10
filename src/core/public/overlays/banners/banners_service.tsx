@@ -23,7 +23,7 @@ import { map } from 'rxjs/operators';
 
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
@@ -73,7 +73,7 @@ export interface OverlayBanner {
 
 interface StartDeps {
   i18n: I18nStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

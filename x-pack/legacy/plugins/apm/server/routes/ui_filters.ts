@@ -6,7 +6,12 @@
 
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import { setupRequest, Setup } from '../lib/helpers/setup_request';
+import {
+  setupRequest,
+  Setup,
+  SetupUIFilters,
+  SetupTimeRange
+} from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../../common/projections/typings';
 import {
@@ -35,9 +40,9 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
     return getEnvironments(setup, serviceName);
   }
 }));
@@ -76,19 +81,19 @@ function createLocalFiltersRoute<
   return createRoute(() => ({
     path,
     params: {
-      query: queryRt
-        ? t.intersection([queryRt, localUiBaseQueryRt])
-        : localUiBaseQueryRt
+      query: t.intersection([localUiBaseQueryRt, queryRt])
     },
-    handler: async (request, { query }: { query: t.TypeOf<BaseQueryType> }) => {
-      const setup = await setupRequest(request);
+    handler: async ({ context, request }) => {
+      const setup = await setupRequest(context, request);
+      const { query } = context.params;
+
       const { uiFilters, filterNames } = query;
       const parsedUiFilters = JSON.parse(uiFilters);
       const projection = getProjection({
         query,
         setup: {
           ...setup,
-          uiFiltersES: await getUiFiltersES(
+          uiFiltersES: getUiFiltersES(
             setup.dynamicIndexPattern,
             omit(parsedUiFilters, filterNames)
           )
@@ -222,5 +227,5 @@ type GetProjection<
   setup
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup;
+  setup: Setup & SetupUIFilters & SetupTimeRange;
 }) => TProjection;

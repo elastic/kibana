@@ -18,6 +18,6 @@ export function getReadonlyBadge(uiCapabilities) {
     tooltip: i18n.translate('xpack.graph.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save Graph workspaces',
     }),
-    iconType: 'glasses'
+    iconType: 'glasses',
   };
 }

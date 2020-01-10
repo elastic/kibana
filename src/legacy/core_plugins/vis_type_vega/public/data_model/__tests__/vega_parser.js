@@ -23,7 +23,6 @@ import { VegaParser } from '../vega_parser';
 import { bypassExternalUrlCheck } from '../../vega_view/vega_base_view';
 
 describe(`VegaParser._setDefaultValue`, () => {
-
   function test(spec, expected, ...params) {
     return () => {
       const vp = new VegaParser(spec);
@@ -36,11 +35,9 @@ describe(`VegaParser._setDefaultValue`, () => {
   it(`empty`, test({}, { config: { test: 42 } }, 42, 'config', 'test'));
   it(`exists`, test({ config: { test: 42 } }, { config: { test: 42 } }, 1, 'config', 'test'));
   it(`exists non-obj`, test({ config: false }, { config: false }, 42, 'config', 'test'));
-
 });
 
 describe(`VegaParser._setDefaultColors`, () => {
-
   function test(spec, isVegaLite, expected) {
     return () => {
       const vp = new VegaParser(spec);
@@ -51,28 +48,33 @@ describe(`VegaParser._setDefaultColors`, () => {
     };
   }
 
-  it(`vegalite`, test({}, true, {
-    config: {
-      range: { category: { scheme: 'elastic' } },
-      mark: { color: '#00B3A4' }
-    }
-  }));
+  it(
+    `vegalite`,
+    test({}, true, {
+      config: {
+        range: { category: { scheme: 'elastic' } },
+        mark: { color: '#00B3A4' },
+      },
+    })
+  );
 
-  it(`vega`, test({}, false, {
-    config: {
-      range: { category: { scheme: 'elastic' } },
-      arc: { fill: '#00B3A4' },
-      area: { fill: '#00B3A4' },
-      line: { stroke: '#00B3A4' },
-      path: { stroke: '#00B3A4' },
-      rect: { fill: '#00B3A4' },
-      rule: { stroke: '#00B3A4' },
-      shape: { stroke: '#00B3A4' },
-      symbol: { fill: '#00B3A4' },
-      trail: { fill: '#00B3A4' }
-    }
-  }));
-
+  it(
+    `vega`,
+    test({}, false, {
+      config: {
+        range: { category: { scheme: 'elastic' } },
+        arc: { fill: '#00B3A4' },
+        area: { fill: '#00B3A4' },
+        line: { stroke: '#00B3A4' },
+        path: { stroke: '#00B3A4' },
+        rect: { fill: '#00B3A4' },
+        rule: { stroke: '#00B3A4' },
+        shape: { stroke: '#00B3A4' },
+        symbol: { fill: '#00B3A4' },
+        trail: { fill: '#00B3A4' },
+      },
+    })
+  );
 });
 
 describe('VegaParser._resolveEsQueries', () => {
@@ -80,7 +82,9 @@ describe('VegaParser._resolveEsQueries', () => {
     return async () => {
       const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async (layer) => { return layer.url;}
+        getUrlForRegionLayer: async layer => {
+          return layer.url;
+        },
       });
       await vp._resolveDataUrls();
 
@@ -93,11 +97,24 @@ describe('VegaParser._resolveEsQueries', () => {
   it('no data2', test({ a: 1 }, { a: 1 }));
   it('non-es data', test({ data: { a: 10 } }, { data: { a: 10 } }));
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
-  it('es', test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
-  it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('emsfile', test(
-    { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
-    { data: { url: bypassExternalUrlCheck('url1') } }));
+  it(
+    'es',
+    test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } })
+  );
+  it(
+    'es arr',
+    test(
+      { arr: [{ data: { url: { index: 'a' }, x: 1 } }] },
+      { arr: [{ data: { values: [42], x: 1 } }] }
+    )
+  );
+  it(
+    'emsfile',
+    test(
+      { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
+      { data: { url: bypassExternalUrlCheck('url1') } }
+    )
+  );
 });
 
 describe('VegaParser._parseSchema', () => {
@@ -117,12 +134,27 @@ describe('VegaParser._parseSchema', () => {
     expect(vp.warnings).to.have.length(1);
   });
 
-  it('should not warn on current vega version', test('https://vega.github.io/schema/vega/v4.0.json', false, 0));
-  it('should not warn on older vega version', test('https://vega.github.io/schema/vega/v3.0.json', false, 0));
-  it('should warn on vega version too new to be supported', test('https://vega.github.io/schema/vega/v5.0.json', false, 1));
+  it(
+    'should not warn on current vega version',
+    test('https://vega.github.io/schema/vega/v4.0.json', false, 0)
+  );
+  it(
+    'should not warn on older vega version',
+    test('https://vega.github.io/schema/vega/v3.0.json', false, 0)
+  );
+  it(
+    'should warn on vega version too new to be supported',
+    test('https://vega.github.io/schema/vega/v5.0.json', false, 1)
+  );
 
-  it('should not warn on current vega-lite version', test('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0));
-  it('should warn on vega-lite version too new to be supported', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
+  it(
+    'should not warn on current vega-lite version',
+    test('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0)
+  );
+  it(
+    'should warn on vega-lite version too new to be supported',
+    test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1)
+  );
 });
 
 describe('VegaParser._parseTooltips', () => {
@@ -169,50 +201,71 @@ describe('VegaParser._parseMapConfig', () => {
     };
   }
 
-  it('empty', test({}, {
-    delayRepaint: true,
-    latitude: 0,
-    longitude: 0,
-    mapStyle: 'default',
-    zoomControl: true,
-    scrollWheelZoom: false,
-  }, 0));
+  it(
+    'empty',
+    test(
+      {},
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: 'default',
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      0
+    )
+  );
 
-  it('filled', test({
-    delayRepaint: true,
-    latitude: 0,
-    longitude: 0,
-    mapStyle: 'default',
-    zoomControl: true,
-    scrollWheelZoom: false,
-    maxBounds: [1, 2, 3, 4],
-  }, {
-    delayRepaint: true,
-    latitude: 0,
-    longitude: 0,
-    mapStyle: 'default',
-    zoomControl: true,
-    scrollWheelZoom: false,
-    maxBounds: [1, 2, 3, 4],
-  }, 0));
+  it(
+    'filled',
+    test(
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: 'default',
+        zoomControl: true,
+        scrollWheelZoom: false,
+        maxBounds: [1, 2, 3, 4],
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: 'default',
+        zoomControl: true,
+        scrollWheelZoom: false,
+        maxBounds: [1, 2, 3, 4],
+      },
+      0
+    )
+  );
 
-  it('warnings', test({
-    delayRepaint: true,
-    latitude: 0,
-    longitude: 0,
-    zoom: 'abc', // ignored
-    mapStyle: 'abc',
-    zoomControl: 'abc',
-    scrollWheelZoom: 'abc',
-    maxBounds: [2, 3, 4],
-  }, {
-    delayRepaint: true,
-    latitude: 0,
-    longitude: 0,
-    mapStyle: 'default',
-    zoomControl: true,
-    scrollWheelZoom: false,
-  }, 5));
+  it(
+    'warnings',
+    test(
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        zoom: 'abc', // ignored
+        mapStyle: 'abc',
+        zoomControl: 'abc',
+        scrollWheelZoom: 'abc',
+        maxBounds: [2, 3, 4],
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: 'default',
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      5
+    )
+  );
 });
 
 describe('VegaParser._parseConfig', () => {
@@ -252,7 +305,13 @@ describe('VegaParser._calcSizing', () => {
   it('fit', test({ autosize: 'fit' }, true, 0, 0));
   it('fit obj', test({ autosize: { type: 'fit' } }, true, 0, 0));
   it('padding const', test({ autosize: 'fit', padding: 10 }, true, 20, 20));
-  it('padding obj', test({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15));
+  it(
+    'padding obj',
+    test({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15)
+  );
   it('width height', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1));
-  it('VL width height', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0));
+  it(
+    'VL width height',
+    test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0)
+  );
 });

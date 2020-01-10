@@ -17,8 +17,7 @@ const List = styled.ul`
   width: 100%;
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${tint(0.1, theme.euiColorFullShade)};
+  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${tint(0.1, theme.euiColorFullShade)};
   position: absolute;
   background: #fff;
   z-index: 10;
@@ -71,9 +70,7 @@ class Suggestions extends Component {
       );
     });
 
-    return (
-      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
-    );
+    return <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>;
   }
 }
 
@@ -82,7 +79,7 @@ Suggestions.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
 };
 
 export default Suggestions;

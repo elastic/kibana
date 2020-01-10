@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { asDuration, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
-export const ChoroplethToolTip: React.SFC<{
+export const ChoroplethToolTip: React.FC<{
   name: string;
   value: number;
   docCount: number;

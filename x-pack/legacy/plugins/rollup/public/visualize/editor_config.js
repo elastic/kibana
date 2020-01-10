@@ -10,7 +10,7 @@ import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_provi
 export function initEditorConfig() {
   // Limit agg params based on rollup capabilities
   editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
-    if(indexPattern.type !== 'rollup') {
+    if (indexPattern.type !== 'rollup') {
       return {};
     }
 
@@ -18,40 +18,43 @@ export function initEditorConfig() {
 
     // Exclude certain param options for terms:
     // otherBucket, missingBucket, orderBy, orderAgg
-    if(aggTypeName === 'terms') {
+    if (aggTypeName === 'terms') {
       return {
         otherBucket: {
-          hidden: true
+          hidden: true,
         },
         missingBucket: {
-          hidden: true
+          hidden: true,
         },
       };
     }
 
     const rollupAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
     const field = aggConfig.params && aggConfig.params.field && aggConfig.params.field.name;
-    const fieldAgg = rollupAggs && field && rollupAggs[aggTypeName] && rollupAggs[aggTypeName][field];
+    const fieldAgg =
+      rollupAggs && field && rollupAggs[aggTypeName] && rollupAggs[aggTypeName][field];
 
-    if(!rollupAggs || !field || !fieldAgg) {
+    if (!rollupAggs || !field || !fieldAgg) {
       return {};
     }
 
     // Set interval and base interval for histograms based on rollup capabilities
-    if(aggTypeName === 'histogram') {
+    if (aggTypeName === 'histogram') {
       const interval = fieldAgg.interval;
-      return interval ? {
-        intervalBase: {
-          fixedValue: interval
-        },
-        interval: {
-          base: interval,
-          help: i18n.translate('xpack.rollupJobs.editorConfig.histogram.interval.helpText', {
-            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
-            values: { interval }
-          })
-        }
-      } : {};
+      return interval
+        ? {
+            intervalBase: {
+              fixedValue: interval,
+            },
+            interval: {
+              base: interval,
+              help: i18n.translate('xpack.rollupJobs.editorConfig.histogram.interval.helpText', {
+                defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+                values: { interval },
+              }),
+            },
+          }
+        : {};
     }
 
     // Set date histogram time zone based on rollup capabilities
@@ -66,11 +69,14 @@ export function initEditorConfig() {
         interval: {
           default: interval,
           timeBase: interval,
-          help: i18n.translate('xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText', {
-            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
-            values: { interval }
-          })
-        }
+          help: i18n.translate(
+            'xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText',
+            {
+              defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+              values: { interval },
+            }
+          ),
+        },
       };
     }
 

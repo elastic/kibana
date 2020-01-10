@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'kibana/server';
 import { Observable } from 'rxjs';
+import { PluginInitializerContext } from 'kibana/server';
 
 export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
   ? P
   : ReturnType<typeof createConfig$>;
 
 export const EndpointConfigSchema = schema.object({
-  searchResultDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  searchResultDefaultPageSize: schema.number({ defaultValue: 10 }),
-  ilmRollOverMaxSize: schema.string({ defaultValue: '50GB' }),
-  ilmRollOverMaxAge: schema.string({ defaultValue: '30d' }),
-  ilmDeleteMinAge: schema.string({ defaultValue: '90d' }),
+  enabled: schema.boolean({ defaultValue: false }),
+  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
+  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

@@ -9,9 +9,7 @@ import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_fro
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
-import {
-  INDEX_PATTERN_FILEBEAT
-} from '../../../../../common/constants';
+import { INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
 
 export function clusterRoute(server) {
   /*
@@ -23,31 +21,36 @@ export function clusterRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
+            max: Joi.date().required(),
           }).required(),
-          codePaths: Joi.array().items(Joi.string().required()).required()
-        })
-      }
+          codePaths: Joi.array()
+            .items(Joi.string().required())
+            .required(),
+        }),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       await verifyCcsAvailability(req);
 
-      const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
+      const indexPatterns = getIndexPatterns(server, {
+        filebeatIndexPattern: INDEX_PATTERN_FILEBEAT,
+      });
       const options = {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,
         end: req.payload.timeRange.max,
-        codePaths: req.payload.codePaths
+        codePaths: req.payload.codePaths,
       };
 
-      return getClustersFromRequest(req, indexPatterns, options)
-        .catch(err => handleError(err, req));
-    }
+      return getClustersFromRequest(req, indexPatterns, options).catch(err =>
+        handleError(err, req)
+      );
+    },
   });
 }

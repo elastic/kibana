@@ -25,7 +25,7 @@ export default new Chainable('bars', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'width',
@@ -40,18 +40,18 @@ export default new Chainable('bars', {
       help: i18n.translate('timelion.help.functions.bars.args.stackHelpText', {
         defaultMessage: 'Should bars be stacked, true by default',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.barsHelpText', {
     defaultMessage: 'Show the seriesList as bars',
   }),
   fn: function barsFn(args) {
-    return alter(args, function (eachSeries, width, stack) {
+    return alter(args, function(eachSeries, width, stack) {
       eachSeries.bars = eachSeries.bars || {};
       eachSeries.bars.show = width == null ? 1 : width;
       eachSeries.bars.lineWidth = width == null ? 6 : width;
       eachSeries.stack = stack == null ? true : stack;
       return eachSeries;
     });
-  }
+  },
 });

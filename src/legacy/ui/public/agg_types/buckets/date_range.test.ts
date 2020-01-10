@@ -95,7 +95,7 @@ describe('date_range params', () => {
     });
 
     it('should use the Kibana time_zone if no parameter specified', () => {
-      npStart.core.uiSettings.get = jest.fn(() => 'kibanaTimeZone');
+      npStart.core.uiSettings.get = jest.fn(() => 'kibanaTimeZone' as any);
 
       const aggConfigs = getAggConfigs(
         {

@@ -29,7 +29,7 @@ async function getBuildNumber() {
   }
 
   const wc = await execa.command('git log --format="%h" | wc -l', {
-    shell: true
+    shell: true,
   });
   return parseFloat(wc.stdout.trim());
 }

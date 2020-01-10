@@ -57,7 +57,6 @@ function buildInline(aggType, thresholdComparator, hasTermsAgg) {
       return false;
     `;
     }
-
   }
   if (aggType !== 'count' && !hasTermsAgg) {
     if (thresholdComparator === BETWEEN) {
@@ -104,7 +103,6 @@ function buildInline(aggType, thresholdComparator, hasTermsAgg) {
       return false;
     `;
     }
-
   }
 
   return singleLineScript(script);
@@ -115,7 +113,7 @@ watch.condition.script.params
  */
 function buildParams(threshold) {
   return {
-    threshold
+    threshold,
   };
 }
 
@@ -126,7 +124,7 @@ export function buildCondition({ aggType, thresholdComparator, hasTermsAgg, thre
   return {
     script: {
       source: buildInline(aggType, thresholdComparator, hasTermsAgg),
-      params: buildParams(threshold)
-    }
+      params: buildParams(threshold),
+    },
   };
 }

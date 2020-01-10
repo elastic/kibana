@@ -10,7 +10,8 @@ import uiChrome from 'ui/chrome';
 import template from './index.html';
 
 const tryPrivilege = ($http, kbnUrl) => {
-  return $http.get('../api/monitoring/v1/check_access')
+  return $http
+    .get('../api/monitoring/v1/check_access')
     .then(() => kbnUrl.redirect('/home'))
     .catch(noop);
 };
@@ -27,7 +28,7 @@ uiRoutes.when('/access-denied', {
      */
     initialCheck($http, kbnUrl) {
       return tryPrivilege($http, kbnUrl);
-    }
+    },
   },
   controllerAs: 'accessDenied',
   controller($scope, $injector) {
@@ -45,5 +46,5 @@ uiRoutes.when('/access-denied', {
     // keep trying to load data in the background
     const accessPoller = $interval(() => tryPrivilege($http, kbnUrl), 5 * 1000); // every 5 seconds
     $scope.$on('$destroy', () => $interval.cancel(accessPoller));
-  }
+  },
 });

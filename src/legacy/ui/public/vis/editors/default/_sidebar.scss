@@ -1,5 +1,3 @@
-@import '@elastic/eui/src/components/form/variables';
-
 //
 // LAYOUT
 //
@@ -43,7 +41,6 @@
     margin-right: -15px;
   }
 }
-
 
 /**
  * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
@@ -97,7 +94,7 @@
     margin-top: $euiSizeS;
   }
 
-  label:not([class^="eui"]) {
+  label:not([class^='eui']) {
     @include __legacyLabelStyles__bad;
     display: block;
   }
@@ -169,7 +166,7 @@
 .visEditorSidebar__aggGroupAccordionButtonContent {
   font-size: $euiFontSizeS;
 
-   span {
+  span {
     color: $euiColorDarkShade;
   }
 }

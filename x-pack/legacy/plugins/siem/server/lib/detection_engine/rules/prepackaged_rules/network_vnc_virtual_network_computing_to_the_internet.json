@@ -1,0 +1,17 @@
+{
+  "rule_id": "3ad49c61-7adc-42c1-b788-732eda2f5abf",
+  "risk_score": 50,
+  "description": "Network - VNC (Virtual Network Computing) To the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - VNC (Virtual Network Computing) To the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:5800 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -20,7 +20,7 @@ export class FunctionFormContextPending extends React.PureComponent {
     this.fetchContext(this.props);
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     const oldContext = this.props.contextExpression;
     const newContext = newProps.contextExpression;
     const forceUpdate = newProps.expressionType.requiresContext && oldContext !== newContext;

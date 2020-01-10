@@ -5,14 +5,19 @@
  */
 
 import React from 'react';
-import 'jest-dom/extend-expect';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { MetadataTable } from '..';
-import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import {
+  expectTextsInDocument,
+  MockApmPluginContextWrapper
+} from '../../../../utils/testHelpers';
 import { SectionsWithRows } from '../helper';
 
+const renderOptions = {
+  wrapper: MockApmPluginContextWrapper
+};
+
 describe('MetadataTable', () => {
-  afterEach(cleanup);
   it('shows sections', () => {
     const sectionsWithRows = ([
       { key: 'foo', label: 'Foo', required: true },
@@ -27,7 +32,10 @@ describe('MetadataTable', () => {
         ]
       }
     ] as unknown) as SectionsWithRows;
-    const output = render(<MetadataTable sections={sectionsWithRows} />);
+    const output = render(
+      <MetadataTable sections={sectionsWithRows} />,
+      renderOptions
+    );
     expectTextsInDocument(output, [
       'Foo',
       'No data available',
@@ -47,7 +55,10 @@ describe('MetadataTable', () => {
           required: true
         }
       ] as unknown) as SectionsWithRows;
-      const output = render(<MetadataTable sections={sectionsWithRows} />);
+      const output = render(
+        <MetadataTable sections={sectionsWithRows} />,
+        renderOptions
+      );
       expectTextsInDocument(output, ['Foo', 'No data available']);
     });
   });

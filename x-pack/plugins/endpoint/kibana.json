@@ -1,8 +1,9 @@
 {
   "id": "endpoint",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["x-pack", "endpoint"],
+  "configPath": ["xpack", "endpoint"],
+  "requiredPlugins": ["features", "embeddable"],
   "server": true,
   "ui": true
 }

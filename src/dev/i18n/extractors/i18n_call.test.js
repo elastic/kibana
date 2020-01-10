@@ -39,15 +39,15 @@ description 3\` });
 
 describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
-    let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
-      node => isCallExpression(node)
-    );
+    let callExpressionNode = [
+      ...traverseNodes(parse(i18nCallMessageSource).program.body),
+    ].find(node => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
-    callExpressionNode = [...traverseNodes(parse(translateCallMessageSource).program.body)].find(
-      node => isCallExpression(node)
-    );
+    callExpressionNode = [
+      ...traverseNodes(parse(translateCallMessageSource).program.body),
+    ].find(node => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 

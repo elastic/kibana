@@ -9,5 +9,5 @@ Register a route handler for `PUT` request.
 <b>Signature:</b>
 
 ```typescript
-put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+put: RouteRegistrar<'put'>;
 ```

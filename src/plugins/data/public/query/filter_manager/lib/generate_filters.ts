@@ -95,16 +95,18 @@ export function generateFilters(
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
 
-      switch (fieldName) {
-        case '_exists_':
-          filter = esFilters.buildExistsFilter(fieldObj, tmpIndexPattern);
-          break;
-        default:
-          filter = esFilters.buildPhraseFilter(fieldObj, value, tmpIndexPattern);
-          break;
-      }
-
-      filter.meta.negate = negate;
+      const filterType =
+        fieldName === '_exists_' ? esFilters.FILTERS.EXISTS : esFilters.FILTERS.PHRASE;
+      filter = esFilters.buildFilter(
+        tmpIndexPattern,
+        fieldObj,
+        filterType,
+        negate,
+        false,
+        value,
+        null,
+        esFilters.FilterStateStore.APP_STATE
+      );
     }
 
     newFilters.push(filter);

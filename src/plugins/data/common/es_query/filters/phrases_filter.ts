@@ -32,11 +32,21 @@ export type PhrasesFilter = Filter & {
 };
 
 export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === FILTERS.PHRASES;
+  filter?.meta?.type === FILTERS.PHRASES;
+
+export const getPhrasesFilterField = (filter: PhrasesFilter) => {
+  // Phrases is a newer filter type that has always been created via a constructor that ensures
+  // `meta.key` is set to the field name
+  return filter.meta.key;
+};
 
 // Creates a filter where the given field matches one or more of the given values
 // params should be an array of values
-export const buildPhrasesFilter = (field: IFieldType, params: any, indexPattern: IIndexPattern) => {
+export const buildPhrasesFilter = (
+  field: IFieldType,
+  params: any[],
+  indexPattern: IIndexPattern
+) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;
   const key = field.name;

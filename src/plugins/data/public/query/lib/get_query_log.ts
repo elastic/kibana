@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../persisted_log';
 
 export function getQueryLog(
-  uiSettings: UiSettingsClientContract,
+  uiSettings: IUiSettingsClient,
   storage: IStorageWrapper,
   appName: string,
   language: string

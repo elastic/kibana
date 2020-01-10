@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -52,7 +53,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
     };
   }
 
-  public async componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     const tags = await this.props.libs.tags.getTagsWithIds(this.props.beat.tags);
     const blocksResult = await this.props.libs.configBlocks.getForTags(
       this.props.beat.tags,
@@ -98,7 +99,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
           ),
         }));
 
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<ConfigurationBlock>> = [
       {
         field: 'displayValue',
         name: intl.formatMessage({

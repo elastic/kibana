@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,9 +37,8 @@ import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
-  isKibanaContextInitialized,
-  KibanaContext,
-  KibanaContextValue,
+  useKibanaContext,
+  InitializedKibanaContextValue,
   SavedSearchQuery,
 } from '../../../../lib/kibana';
 
@@ -75,7 +74,7 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export function getDefaultStepDefineState(
-  kibanaContext: KibanaContextValue
+  kibanaContext: InitializedKibanaContextValue
 ): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
@@ -83,13 +82,9 @@ export function getDefaultStepDefineState(
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
     searchString:
-      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
-        ? kibanaContext.combinedQuery
-        : defaultSearch,
+      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
     searchQuery:
-      isKibanaContextInitialized(kibanaContext) && kibanaContext.currentSavedSearch !== undefined
-        ? kibanaContext.combinedQuery
-        : defaultSearch,
+      kibanaContext.currentSavedSearch !== undefined ? kibanaContext.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
   };
@@ -195,8 +190,8 @@ interface Props {
   onChange(s: StepDefineExposedState): void;
 }
 
-export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
+export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const kibanaContext = useKibanaContext();
 
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
@@ -223,10 +218,6 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
-
-  if (!isKibanaContextInitialized(kibanaContext)) {
-    return null;
-  }
 
   const indexPattern = kibanaContext.currentIndexPattern;
 

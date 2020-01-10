@@ -4,35 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
+import { PluginInitializerContext } from 'kibana/public';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-import { KibanaCoreContextProvider } from '../../observability/public';
-const { core } = npStart;
 
-// render APM feedback link in global help menu
-core.chrome.setHelpExtension(domElement => {
-  ReactDOM.render(
-    <KibanaCoreContextProvider core={core}>
-      <GlobalHelpExtension />
-    </KibanaCoreContextProvider>,
-    domElement
-  );
-  return () => {
-    ReactDOM.unmountComponentAtNode(domElement);
-  };
-});
-
+// This will be moved to core.application.register when the new platform
+// migration is complete.
 // @ts-ignore
 chrome.setRootTemplate(template);
 
@@ -47,5 +30,7 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin().start(core);
+  const pluginInstance = plugin({} as PluginInitializerContext);
+  pluginInstance.setup(npSetup.core, npSetup.plugins);
+  pluginInstance.start(npStart.core, npStart.plugins);
 });

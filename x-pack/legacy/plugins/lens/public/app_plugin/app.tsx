@@ -10,21 +10,20 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { CoreStart, NotificationsStart } from 'src/core/public';
-import {
-  DataStart,
-  IndexPattern as IndexPatternInstance,
-  IndexPatterns as IndexPatternsService,
-  SavedQuery,
-} from 'src/legacy/core_plugins/data/public';
+import { AppMountContext, NotificationsStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+import { npStart } from 'ui/new_platform';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  IndexPattern as IndexPatternInstance,
+  IndexPatternsContract,
+  SavedQuery,
+} from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
@@ -46,7 +45,6 @@ interface State {
 export function App({
   editorFrame,
   data,
-  dataShim,
   core,
   storage,
   docId,
@@ -55,40 +53,41 @@ export function App({
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
-  core: CoreStart;
-  dataShim: DataStart;
+  core: AppMountContext['core'];
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
-  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isSaveModalVisible: false,
-    indexPatternsForTopNav: [],
-    query: { query: '', language },
-    dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
-    },
-    filters: [],
+  const [state, setState] = useState<State>(() => {
+    const currentRange = data.query.timefilter.timefilter.getTime();
+    return {
+      isLoading: !!docId,
+      isSaveModalVisible: false,
+      indexPatternsForTopNav: [],
+      query: { query: '', language },
+      dateRange: {
+        fromDate: currentRange.from,
+        toDate: currentRange.to,
+      },
+      filters: [],
+    };
   });
 
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = data.query.filterManager.getUpdates$().subscribe({
+    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
     return () => {
-      subscription.unsubscribe();
+      filterSubscription.unsubscribe();
     };
   }, []);
 
@@ -117,7 +116,7 @@ export function App({
         .then(doc => {
           getAllIndexPatterns(
             doc.state.datasourceMetaData.filterableIndexPatterns,
-            dataShim.indexPatterns.indexPatterns,
+            data.indexPatterns,
             core.notifications
           )
             .then(indexPatterns => {
@@ -151,7 +150,11 @@ export function App({
     }
   }, [docId]);
 
-  const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -161,7 +164,7 @@ export function App({
     []
   );
 
-  const { TopNavMenu } = navigation.ui;
+  const { TopNavMenu } = npStart.plugins.navigation.ui;
 
   return (
     <I18nProvider>
@@ -199,6 +202,7 @@ export function App({
                   dateRange.from !== state.dateRange.fromDate ||
                   dateRange.to !== state.dateRange.toDate
                 ) {
+                  data.query.timefilter.timefilter.setTime(dateRange);
                   trackUiEvent('app_date_change');
                 } else {
                   trackUiEvent('app_query_change');
@@ -283,7 +287,7 @@ export function App({
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,
-                      dataShim.indexPatterns.indexPatterns,
+                      data.indexPatterns,
                       core.notifications
                     ).then(indexPatterns => {
                       if (indexPatterns) {
@@ -346,7 +350,7 @@ export function App({
 
 export async function getAllIndexPatterns(
   ids: Array<{ id: string }>,
-  indexPatternsService: IndexPatternsService,
+  indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
   try {

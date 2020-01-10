@@ -18,10 +18,9 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
-import { FieldHook } from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -45,7 +44,7 @@ export const NumericField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
     >
       <EuiFieldNumber
         isInvalid={isInvalid}
-        value={field.value as string}
+        value={field.value as EuiFieldNumberProps['value']}
         onChange={field.onChange}
         isLoading={field.isValidating}
         fullWidth

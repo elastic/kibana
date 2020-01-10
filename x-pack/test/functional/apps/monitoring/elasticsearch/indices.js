@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
   const indicesList = getService('monitoringElasticsearchIndices');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-red-platinum', {
-        from: '2017-10-06 19:53:06.748',
-        to: '2017-10-06 20:15:30.212',
+        from: 'Oct 6, 2017 @ 19:53:06.748',
+        to: 'Oct 6, 2017 @ 20:15:30.212',
       });
 
       // go to indices listing
@@ -53,27 +53,187 @@ export default function ({ getService, getPageObjects }) {
 
       const indicesAll = await indicesList.getIndicesAll();
 
-      const tableData = [ /*eslint-disable max-len*/
-        { name: 'many-0006_gkuqbjonkjmg', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '4.08 /s', unassignedShards: '0', },
-        { name: 'many-0008_amnscruqlsnu', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '4.08 /s', unassignedShards: '0', },
-        { name: 'many-0010_dgnlpqtstfvi', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0012_jwomwdgfpisl', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0014_zrukbrvuluby', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0016_gyvtsyauoqqg', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0018_ipugjcmuagih', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0020_fqfovcnznbus', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0022_dqbcjopzejlk', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0024_rixhhwzyiczb', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
-        { name: 'many-0001_clruksahirti', status: 'Health: Deleted / Closed', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: 'N/A', },
-        { name: 'many-0002_emdkmgdeflno', status: 'Health: Deleted / Closed', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: 'N/A', },
-        { name: 'many-0003_jbwrztjwhkjt', status: 'Health: Deleted / Closed', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: 'N/A', },
-        { name: 'many-0004_wzgjkelqclur', status: 'Health: Deleted / Closed', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: 'N/A', },
-        { name: 'many-0005_dnzzblxoumfe', status: 'Health: Deleted / Closed', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: 'N/A', },
-        { name: 'many-0007_milycdknpycp', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
-        { name: 'many-0009_reolfgzjjtvh', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
-        { name: 'many-0011_xtkcmlwmxcov', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
-        { name: 'many-0013_smjuwdkhpduv', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
-        { name: 'many-0015_vwmrucgzvohb', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
+      const tableData = [
+        {
+          name: 'many-0006_gkuqbjonkjmg',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '4.08 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0008_amnscruqlsnu',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '4.08 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0010_dgnlpqtstfvi',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0012_jwomwdgfpisl',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0014_zrukbrvuluby',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0016_gyvtsyauoqqg',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0018_ipugjcmuagih',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0020_fqfovcnznbus',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0022_dqbcjopzejlk',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0024_rixhhwzyiczb',
+          status: 'Health: green',
+          documentCount: '1',
+          dataSize: '3.7 KB',
+          indexRate: '0 /s',
+          searchRate: '1.95 /s',
+          unassignedShards: '0',
+        },
+        {
+          name: 'many-0001_clruksahirti',
+          status: 'Health: Deleted / Closed',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: 'N/A',
+        },
+        {
+          name: 'many-0002_emdkmgdeflno',
+          status: 'Health: Deleted / Closed',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: 'N/A',
+        },
+        {
+          name: 'many-0003_jbwrztjwhkjt',
+          status: 'Health: Deleted / Closed',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: 'N/A',
+        },
+        {
+          name: 'many-0004_wzgjkelqclur',
+          status: 'Health: Deleted / Closed',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: 'N/A',
+        },
+        {
+          name: 'many-0005_dnzzblxoumfe',
+          status: 'Health: Deleted / Closed',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: 'N/A',
+        },
+        {
+          name: 'many-0007_milycdknpycp',
+          status: 'Health: red',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: '1',
+        },
+        {
+          name: 'many-0009_reolfgzjjtvh',
+          status: 'Health: red',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: '1',
+        },
+        {
+          name: 'many-0011_xtkcmlwmxcov',
+          status: 'Health: red',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: '1',
+        },
+        {
+          name: 'many-0013_smjuwdkhpduv',
+          status: 'Health: red',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: '1',
+        },
+        {
+          name: 'many-0015_vwmrucgzvohb',
+          status: 'Health: red',
+          documentCount: '1',
+          dataSize: '3.6 KB',
+          indexRate: '0 /s',
+          searchRate: '0 /s',
+          unassignedShards: '1',
+        },
       ]; /*eslint-enable*/
 
       // check the all data in the table

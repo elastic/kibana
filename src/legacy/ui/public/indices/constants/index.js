@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../index_patterns';
+import { indexPatterns } from '../../../../../plugins/data/public';
 
-export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [ ...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, '*' ];
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
 
 // Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
 // these characters are rendered in the UI.
-const insertionIndex = Math.floor(INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.length / 2);
+const insertionIndex = Math.floor(indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.length / 2);
 INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');

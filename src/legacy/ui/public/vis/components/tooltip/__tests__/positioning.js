@@ -23,7 +23,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
-describe('Tooltip Positioning', function () {
+describe('Tooltip Positioning', function() {
   const sandbox = sinon.createSandbox();
   const positions = ['north', 'south', 'east', 'west'];
   const bounds = ['top', 'left', 'bottom', 'right', 'area'];
@@ -37,14 +37,15 @@ describe('Tooltip Positioning', function () {
 
     const size = {
       width: _.random(width[0], width[1]),
-      height: _.random(height[0], height[1])
+      height: _.random(height[0], height[1]),
     };
 
-    $el.css({
-      width: size.width,
-      height: size.height,
-      visibility: 'hidden'
-    })
+    $el
+      .css({
+        width: size.width,
+        height: size.height,
+        visibility: 'hidden',
+      })
       .appendTo('body');
 
     if ($children) {
@@ -56,17 +57,17 @@ describe('Tooltip Positioning', function () {
     return $el;
   }
 
-  beforeEach(function () {
-    $window = testEl([500, 1000], [600, 800],
-      $chart = testEl([600, 750], [350, 550],
-        $tooltip = testEl([50, 100], [35, 75])
-      )
+  beforeEach(function() {
+    $window = testEl(
+      [500, 1000],
+      [600, 800],
+      ($chart = testEl([600, 750], [350, 550], ($tooltip = testEl([50, 100], [35, 75]))))
     );
 
     $sizer = $tooltip.clone().appendTo($window);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     $window.remove();
     $window = $chart = $tooltip = $sizer = null;
     positionTooltip.removeClone();
@@ -80,21 +81,21 @@ describe('Tooltip Positioning', function () {
     const base = $chart.offset();
 
     return {
-      clientX: base.left + ($chart.testSize.width * xPercent),
-      clientY: base.top + ($chart.testSize.height * yPercent)
+      clientX: base.left + $chart.testSize.width * xPercent,
+      clientY: base.top + $chart.testSize.height * yPercent,
     };
   }
 
-  describe('getTtSize()', function () {
-    it('should measure the outer-size of the tooltip using an un-obstructed clone', function () {
+  describe('getTtSize()', function() {
+    it('should measure the outer-size of the tooltip using an un-obstructed clone', function() {
       const w = sandbox.spy($.fn, 'outerWidth');
       const h = sandbox.spy($.fn, 'outerHeight');
 
       positionTooltip.getTtSize($tooltip.html(), $sizer);
 
-      [w, h].forEach(function (spy) {
+      [w, h].forEach(function(spy) {
         expect(spy).to.have.property('callCount', 1);
-        const matchHtml = w.thisValues.filter(function ($t) {
+        const matchHtml = w.thisValues.filter(function($t) {
           return !$t.is($tooltip) && $t.html() === $tooltip.html();
         });
         expect(matchHtml).to.have.length(1);
@@ -102,12 +103,12 @@ describe('Tooltip Positioning', function () {
     });
   });
 
-  describe('getBasePosition()', function () {
-    it('calculates the offset values for the four positions', function () {
+  describe('getBasePosition()', function() {
+    it('calculates the offset values for the four positions', function() {
       const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
       const pos = positionTooltip.getBasePosition(size, makeEvent());
 
-      positions.forEach(function (p) {
+      positions.forEach(function(p) {
         expect(pos).to.have.property(p);
       });
 
@@ -116,11 +117,11 @@ describe('Tooltip Positioning', function () {
     });
   });
 
-  describe('getBounds()', function () {
-    it('returns the offsets for the tlrb of the element', function () {
+  describe('getBounds()', function() {
+    it('returns the offsets for the tlrb of the element', function() {
       const cbounds = positionTooltip.getBounds($chart);
 
-      bounds.forEach(function (b) {
+      bounds.forEach(function(b) {
         expect(cbounds).to.have.property(b);
       });
 
@@ -129,8 +130,8 @@ describe('Tooltip Positioning', function () {
     });
   });
 
-  describe('getOverflow()', function () {
-    it('determines how much the base placement overflows the containing bounds in each direction', function () {
+  describe('getOverflow()', function() {
+    it('determines how much the base placement overflows the containing bounds in each direction', function() {
       // size the tooltip very small so it won't collide with the edges
       $tooltip.css({ width: 15, height: 15 });
       $sizer.css({ width: 15, height: 15 });
@@ -142,7 +143,7 @@ describe('Tooltip Positioning', function () {
       const pos = positionTooltip.getBasePosition(size, makeEvent(0.5, 0.5));
 
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
-      positions.forEach(function (p) {
+      positions.forEach(function(p) {
         expect(overflow).to.have.property(p);
 
         // all positions should be less than 0 because the tooltip is so much smaller than the chart
@@ -150,14 +151,14 @@ describe('Tooltip Positioning', function () {
       });
     });
 
-    it('identifies an overflow with a positive value in that direction', function () {
+    it('identifies an overflow with a positive value in that direction', function() {
       const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
 
       // position the element based on a mouse that is in the bottom right hand corner of the chart
       const pos = positionTooltip.getBasePosition(size, makeEvent(0.99, 0.99));
       const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
 
-      positions.forEach(function (p) {
+      positions.forEach(function(p) {
         expect(overflow).to.have.property(p);
 
         if (p === 'south' || p === 'east') {
@@ -168,7 +169,7 @@ describe('Tooltip Positioning', function () {
       });
     });
 
-    it('identifies only right overflow when tooltip overflows both sides of inner container but outer contains tooltip', function () {
+    it('identifies only right overflow when tooltip overflows both sides of inner container but outer contains tooltip', function() {
       // Size $tooltip larger than chart
       const largeWidth = $chart.width() + 10;
       $tooltip.css({ width: largeWidth });
@@ -194,14 +195,14 @@ describe('Tooltip Positioning', function () {
     });
   });
 
-  describe('positionTooltip() integration', function () {
-    it('returns nothing if the $chart or $tooltip are not passed in', function () {
+  describe('positionTooltip() integration', function() {
+    it('returns nothing if the $chart or $tooltip are not passed in', function() {
       expect(positionTooltip() === void 0).to.be(true);
       expect(positionTooltip(null, null, null) === void 0).to.be(true);
       expect(positionTooltip(null, $(), $()) === void 0).to.be(true);
     });
 
-    function check(xPercent, yPercent/*, prev, directions... */) {
+    function check(xPercent, yPercent /*, prev, directions... */) {
       const directions = _.drop(arguments, 2);
       const event = makeEvent(xPercent, yPercent);
       const placement = positionTooltip({
@@ -210,12 +211,14 @@ describe('Tooltip Positioning', function () {
         $sizer: $sizer,
         event: event,
         $el: $tooltip,
-        prev: _.isObject(directions[0]) ? directions.shift() : null
+        prev: _.isObject(directions[0]) ? directions.shift() : null,
       });
 
-      expect(placement).to.have.property('top').and.property('left');
+      expect(placement)
+        .to.have.property('top')
+        .and.property('left');
 
-      directions.forEach(function (dir) {
+      directions.forEach(function(dir) {
         switch (dir) {
           case 'top':
             expect(placement.top).to.be.lessThan(event.clientY);
@@ -235,37 +238,37 @@ describe('Tooltip Positioning', function () {
       return placement;
     }
 
-    describe('calculates placement of the tooltip properly', function () {
-      it('mouse is in the middle', function () {
-        check(0.50, 0.50, 'bottom', 'right');
+    describe('calculates placement of the tooltip properly', function() {
+      it('mouse is in the middle', function() {
+        check(0.5, 0.5, 'bottom', 'right');
       });
 
-      it('mouse is in the top left', function () {
-        check(0.10, 0.10, 'bottom', 'right');
+      it('mouse is in the top left', function() {
+        check(0.1, 0.1, 'bottom', 'right');
       });
 
-      it('mouse is in the top right', function () {
-        check(0.99, 0.10, 'bottom', 'left');
+      it('mouse is in the top right', function() {
+        check(0.99, 0.1, 'bottom', 'left');
       });
 
-      it('mouse is in the bottom right', function () {
+      it('mouse is in the bottom right', function() {
         check(0.99, 0.99, 'top', 'left');
       });
 
-      it('mouse is in the bottom left', function () {
-        check(0.10, 0.99, 'top', 'right');
+      it('mouse is in the bottom left', function() {
+        check(0.1, 0.99, 'top', 'right');
       });
     });
 
-    describe('maintain the direction of the tooltip on reposition', function () {
-      it('mouse moves from the top right to the middle', function () {
-        const pos = check(0.99, 0.10, 'bottom', 'left');
-        check(0.50, 0.50, pos, 'bottom', 'left');
+    describe('maintain the direction of the tooltip on reposition', function() {
+      it('mouse moves from the top right to the middle', function() {
+        const pos = check(0.99, 0.1, 'bottom', 'left');
+        check(0.5, 0.5, pos, 'bottom', 'left');
       });
 
-      it('mouse moves from the bottom left to the middle', function () {
-        const pos = check(0.10, 0.99, 'top', 'right');
-        check(0.50, 0.50, pos, 'top', 'right');
+      it('mouse moves from the bottom left to the middle', function() {
+        const pos = check(0.1, 0.99, 'top', 'right');
+        check(0.5, 0.5, pos, 'top', 'right');
       });
     });
   });

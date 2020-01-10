@@ -8,10 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
+import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
@@ -43,7 +44,9 @@ export interface AuthenticationsOverTimeComponentReduxProps {
   isInspected: boolean;
 }
 
-type AuthenticationsOverTimeProps = OwnProps & AuthenticationsOverTimeComponentReduxProps;
+type AuthenticationsOverTimeProps = OwnProps &
+  AuthenticationsOverTimeComponentReduxProps &
+  WithKibanaProps;
 
 class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
   AuthenticationsOverTimeProps,
@@ -56,6 +59,7 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       sourceId,
       startDate,
       endDate,
@@ -73,7 +77,7 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -108,6 +112,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const AuthenticationsOverTimeQuery = connect(makeMapStateToProps)(
-  AuthenticationsOverTimeComponentQuery
-);
+export const AuthenticationsOverTimeQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(AuthenticationsOverTimeComponentQuery);

@@ -21,11 +21,11 @@ import moment from 'moment-timezone';
 import { merge, Subscription } from 'rxjs';
 
 import { tap } from 'rxjs/operators';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
 
 interface StartDeps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

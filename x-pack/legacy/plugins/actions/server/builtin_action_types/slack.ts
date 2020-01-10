@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -17,14 +18,16 @@ import {
   ActionTypeExecutorResult,
   ExecutorType,
 } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-const SecretsSchema = schema.object({
+const secretsSchemaProps = {
   webhookUrl: schema.string(),
-});
+};
+const SecretsSchema = schema.object(secretsSchemaProps);
 
 // params definition
 
@@ -37,18 +40,40 @@ const ParamsSchema = schema.object({
 // action type definition
 
 // customizing executor is only used for tests
-export function getActionType(
-  { executor }: { executor: ExecutorType } = { executor: slackExecutor }
-): ActionType {
+export function getActionType({
+  configurationUtilities,
+  executor = slackExecutor,
+}: {
+  configurationUtilities: ActionsConfigurationUtilities;
+  executor?: ExecutorType;
+}): ActionType {
   return {
     id: '.slack',
     name: 'slack',
     validate: {
-      secrets: SecretsSchema,
+      secrets: schema.object(secretsSchemaProps, {
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+      }),
       params: ParamsSchema,
     },
     executor,
   };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  secretsObject: ActionTypeSecretsType
+) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(secretsObject.webhookUrl);
+  } catch (whitelistError) {
+    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
+      defaultMessage: 'error configuring slack action: {message}',
+      values: {
+        message: whitelistError.message,
+      },
+    });
+  }
 }
 
 // action executor
@@ -69,7 +94,7 @@ async function slackExecutor(
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
-      return errorResult(actionId, err.message);
+      return serviceErrorResult(actionId, err.message);
     }
 
     const { status, statusText, headers } = err.original.response;
@@ -88,7 +113,17 @@ async function slackExecutor(
       );
     }
 
-    return errorResult(actionId, `${err.message} - ${statusText}`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedHttpResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected http response from slack: {httpStatus} {httpStatusText}',
+        values: {
+          httpStatus: status,
+          httpStatusText: statusText,
+        },
+      }
+    );
+    return errorResult(actionId, errMessage);
   }
 
   if (result == null) {
@@ -102,55 +137,52 @@ async function slackExecutor(
   }
 
   if (result.text !== 'ok') {
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedTextResponseErrorMessage',
-      {
-        defaultMessage: 'unexpected text response from slack',
-      }
-    );
-    return errorResult(actionId, errMessage);
+    return serviceErrorResult(actionId, result.text);
   }
 
-  return successResult(result);
+  return successResult(actionId, result);
 }
 
-function successResult(data: any): ActionTypeExecutorResult {
-  return { status: 'ok', data };
+function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data, actionId };
 }
 
-function errorResult(id: string, message: string): ActionTypeExecutorResult {
+function errorResult(actionId: string, message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message,
+    actionId,
+  };
+}
+function serviceErrorResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" posting a slack message: {message}',
-    values: {
-      id,
-      message,
-    },
+    defaultMessage: 'error posting slack message',
   });
   return {
     status: 'error',
     message: errMessage,
+    actionId,
+    serviceMessage,
   };
 }
 
-function retryResult(id: string, message: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
     {
-      defaultMessage: 'an error occurred in action "{id}" posting a slack message, retry later',
-      values: {
-        id,
-      },
+      defaultMessage: 'error posting a slack message, retry later',
     }
   );
   return {
     status: 'error',
     message: errMessage,
     retry: true,
+    actionId,
   };
 }
 
 function retryResultSeconds(
-  id: string,
+  actionId: string,
   message: string,
   retryAfter: number
 ): ActionTypeExecutorResult {
@@ -160,12 +192,9 @@ function retryResultSeconds(
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
     {
-      defaultMessage:
-        'an error occurred in action "{id}" posting a slack message, retry at {retryString}: {message}',
+      defaultMessage: 'error posting a slack message, retry at {retryString}',
       values: {
-        id,
         retryString,
-        message,
       },
     }
   );
@@ -173,5 +202,7 @@ function retryResultSeconds(
     status: 'error',
     message: errMessage,
     retry,
+    actionId,
+    serviceMessage: message,
   };
 }
