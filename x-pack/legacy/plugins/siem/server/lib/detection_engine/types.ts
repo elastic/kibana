@@ -5,7 +5,7 @@
  */
 
 import { esFilters } from '../../../../../../../src/plugins/data/server';
-import { RuleStatus } from './rules/types';
+import { IRuleStatusAttributes } from './rules/types';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
@@ -68,7 +68,8 @@ export type RuleAlertParamsRest = Omit<
   | 'createdAt'
 > &
   Omit<
-    RuleStatus,
+    IRuleStatusAttributes,
+    | 'status'
     | 'alertId'
     | 'statusDate'
     | 'lastFailureAt'
@@ -85,11 +86,12 @@ export type RuleAlertParamsRest = Omit<
     output_index: RuleAlertParams['outputIndex'];
     created_at: RuleAlertParams['createdAt'];
     updated_at: RuleAlertParams['updatedAt'];
-    status_date: RuleStatus['statusDate'];
-    last_failure_at: RuleStatus['lastFailureAt'];
-    last_success_at: RuleStatus['lastSuccessAt'];
-    last_failure_message: RuleStatus['lastFailureMessage'];
-    last_success_message: RuleStatus['lastSuccessMessage'];
+    status?: IRuleStatusAttributes['status'] | undefined;
+    status_date?: IRuleStatusAttributes['statusDate'] | undefined;
+    last_failure_at?: IRuleStatusAttributes['lastFailureAt'] | undefined;
+    last_success_at?: IRuleStatusAttributes['lastSuccessAt'] | undefined;
+    last_failure_message?: IRuleStatusAttributes['lastFailureMessage'] | undefined;
+    last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
   };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {

@@ -82,26 +82,29 @@ export const signalRulesAlertType = ({
         search: `"${alertId}"`,
         searchFields: ['alertId'],
       });
-      ruleStatusSavedObjects.saved_objects.sort((a, b) => {
-        const dateA = new Date(a.attributes.statusDate);
-        const dateB = new Date(b.attributes.statusDate);
-        if (dateA < dateB) {
-          return -1;
-        } else if (dateA === dateB) {
-          return 0;
-        }
-        return 1;
-      });
-      // get status objects, update 0th element to executing
-      ruleStatusSavedObjects.saved_objects[0].attributes.status = 'executing';
-      ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = new Date().toISOString();
-      await services.savedObjectsClient.update(
-        ruleStatusSavedObjectType,
-        ruleStatusSavedObjects.saved_objects[0].id,
-        {
-          ...ruleStatusSavedObjects.saved_objects[0].attributes,
-        }
-      );
+      logger.debug(`ruleStatusSavedObjects: ${JSON.stringify(ruleStatusSavedObjects, null, 4)}`);
+      if (ruleStatusSavedObjects.saved_objects.length > 0) {
+        ruleStatusSavedObjects.saved_objects.sort((a, b) => {
+          const dateA = new Date(a.attributes.statusDate);
+          const dateB = new Date(b.attributes.statusDate);
+          if (dateA < dateB) {
+            return -1;
+          } else if (dateA === dateB) {
+            return 0;
+          }
+          return 1;
+        });
+        // get status objects, update 0th element to executing
+        ruleStatusSavedObjects.saved_objects[0].attributes.status = 'executing';
+        ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = new Date().toISOString();
+        await services.savedObjectsClient.update(
+          ruleStatusSavedObjectType,
+          ruleStatusSavedObjects.saved_objects[0].id,
+          {
+            ...ruleStatusSavedObjects.saved_objects[0].attributes,
+          }
+        );
+      }
       // then in the end of the executor delete all statuses
       // based on relevant alertIds
       // then create a new status saved object with bulk create
@@ -236,9 +239,11 @@ export const signalRulesAlertType = ({
                 lastSuccessMessage:
                   ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
               };
+
+              // drop the 5th status, insert new one at 0th index.
               await services.savedObjectsClient.bulkCreate([
                 newStatus,
-                ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+                ...ruleStatusSavedObjects.saved_objects.slice(0, 5),
               ]);
             }
           }
@@ -278,9 +283,11 @@ export const signalRulesAlertType = ({
               lastSuccessMessage:
                 ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
             };
+
+            // drop the 5th status, insert new one at 0th index.
             await services.savedObjectsClient.bulkCreate([
               newStatus,
-              ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+              ...ruleStatusSavedObjects.saved_objects.slice(0, 5),
             ]);
           }
         }
@@ -318,9 +325,11 @@ export const signalRulesAlertType = ({
             lastSuccessMessage:
               ruleStatusSavedObjects.saved_objects[0].attributes.lastSuccessMessage,
           };
+
+          // drop the 5th status, insert new one at 0th index.
           await services.savedObjectsClient.bulkCreate([
             newStatus,
-            ...ruleStatusSavedObjects.saved_objects.slice(0, 4),
+            ...ruleStatusSavedObjects.saved_objects.slice(0, 5),
           ]);
         }
       }

@@ -55,7 +55,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
             search: `"${rule.id}"`,
             searchFields: ['alertId'],
           });
-          return results.saved_objects;
+          return results;
         })
       );
       return transformFindAlertsOrError(rules, ruleStatuses);

@@ -40,7 +40,7 @@ export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
-export interface RuleStatus {
+export interface IRuleStatusAttributes {
   alertId: string; // created alert id.
   statusDate: string;
   lastFailureAt: string;
@@ -48,6 +48,22 @@ export interface RuleStatus {
   lastSuccessAt: string;
   lastSuccessMessage: string;
   status: RuleStatusString;
+}
+
+export interface IRuleStatusSavedObject {
+  type: string;
+  id: string;
+  attributes: IRuleStatusAttributes;
+  references: unknown[];
+  updated_at: string;
+  version: string;
+}
+
+export interface IRuleStatusFindType {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: IRuleStatusSavedObject[];
 }
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
@@ -144,10 +160,18 @@ export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
 };
 
-export const isRuleStatusType = (obj: unknown): obj is RuleStatus => {
-  return get('lastSuccessMessage', obj) !== null;
+export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
+  return get('lastSuccessMessage', obj) != null;
 };
 
-export const isRuleStatusTypes = (obj: unknown[]): obj is RuleStatus[] => {
-  return obj.every(ruleStatus => isRuleStatusType(ruleStatus));
+export const isRuleStatusSavedObjectType = (obj: unknown): obj is IRuleStatusSavedObject => {
+  return get('attributes', obj) != null;
+};
+
+export const isRuleStatusFindType = (obj: unknown): obj is IRuleStatusFindType => {
+  return get('saved_objects', obj) != null;
+};
+
+export const isRuleStatusFindTypes = (obj: unknown[] | undefined): obj is IRuleStatusFindType[] => {
+  return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };

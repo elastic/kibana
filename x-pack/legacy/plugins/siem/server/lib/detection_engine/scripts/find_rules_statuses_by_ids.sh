@@ -10,7 +10,7 @@ set -e
 ./check_env_variables.sh
 
 
-# Example: ./find_rules_sort.sh ["12345","6789abc"]
+# Example: ./find_rules_sort.sh '["12345","6789abc"]'
 curl -g -v -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find_statuses?ids=$1" \

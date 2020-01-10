@@ -5,12 +5,12 @@
  */
 
 import { ElasticsearchMappingOf } from '../../../utils/typed_elasticsearch_mappings';
-import { RuleStatus } from './types';
+import { IRuleStatusAttributes } from './types';
 
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 
 export const ruleStatusSavedObjectMappings: {
-  [ruleStatusSavedObjectType]: ElasticsearchMappingOf<RuleStatus>;
+  [ruleStatusSavedObjectType]: ElasticsearchMappingOf<IRuleStatusAttributes>;
 } = {
   [ruleStatusSavedObjectType]: {
     properties: {

@@ -11,9 +11,10 @@ import {
   RuleAlertType,
   isAlertType,
   isAlertTypes,
-  RuleStatus,
-  isRuleStatusType,
-  isRuleStatusTypes,
+  IRuleStatusSavedObject,
+  isRuleStatusFindType,
+  isRuleStatusFindTypes,
+  isRuleStatusSavedObjectType,
 } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
 import {
@@ -76,11 +77,11 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: RuleAlertType,
-  ruleStatus: RuleStatus
+  ruleStatus?: IRuleStatusSavedObject
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     created_at: alert.params.createdAt,
-    updated_at: ruleStatus.statusDate,
+    updated_at: ruleStatus?.attributes.statusDate ?? alert.params.updatedAt,
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -110,12 +111,12 @@ export const transformAlertToRule = (
     type: alert.params.type,
     threats: alert.params.threats,
     version: alert.params.version,
-    status: ruleStatus.status,
-    status_date: ruleStatus.statusDate,
-    last_failure_at: ruleStatus.lastFailureAt,
-    last_success_at: ruleStatus.lastSuccessAt,
-    last_failure_message: ruleStatus.lastFailureMessage,
-    last_success_message: ruleStatus.lastSuccessMessage,
+    status: ruleStatus?.attributes.status,
+    status_date: ruleStatus?.attributes.statusDate,
+    last_failure_at: ruleStatus?.attributes.lastFailureAt,
+    last_success_at: ruleStatus?.attributes.lastSuccessAt,
+    last_failure_message: ruleStatus?.attributes.lastFailureMessage,
+    last_success_message: ruleStatus?.attributes.lastSuccessMessage,
   });
 };
 
@@ -136,11 +137,17 @@ export const transformAlertsToRules = (
 
 export const transformFindAlertsOrError = (
   findResults: { data: unknown[] },
-  ruleStatuses: unknown[]
+  ruleStatuses?: unknown[]
 ): unknown | Boom => {
-  if (isAlertTypes(findResults.data) && isRuleStatusTypes(ruleStatuses)) {
+  if (!ruleStatuses && isAlertTypes(findResults.data)) {
     findResults.data = findResults.data.map(
-      (alert, idx) => transformAlertToRule(alert, ruleStatuses[idx][0].attributes) // fix type
+      alert => transformAlertToRule(alert) // fix type
+    );
+    return findResults;
+  }
+  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    findResults.data = findResults.data.map((alert, idx) =>
+      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
     );
     return findResults;
   } else {
@@ -150,9 +157,14 @@ export const transformFindAlertsOrError = (
 
 export const transformOrError = (
   alert: unknown,
-  ruleStatus: unknown
+  ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | Boom => {
-  if (isAlertType(alert) && isRuleStatusType(ruleStatus)) {
+  if (!ruleStatus && isAlertType(alert)) {
+    return transformAlertToRule(alert);
+  }
+  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
+    return transformAlertToRule(alert, ruleStatus.saved_objects[0]);
+  } else if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
     return transformAlertToRule(alert, ruleStatus);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
@@ -162,10 +174,10 @@ export const transformOrError = (
 export const transformOrBulkError = (
   ruleId: string,
   alert: unknown,
-  ruleStatus: unknown
+  ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
-  if (isAlertType(alert) && isRuleStatusType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus);
+  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
+    return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
   } else {
     return createBulkErrorObject({
       ruleId,

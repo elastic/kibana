@@ -61,7 +61,7 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
         return -1;
       });
       if (rule != null) {
-        return transformOrError(rule, ruleStatuses.saved_objects[0].attributes); // update this to run with an array of rule statuses
+        return transformOrError(rule, ruleStatuses); // update this to run with an array of rule statuses
       } else {
         return getIdError({ id, ruleId });
       }
