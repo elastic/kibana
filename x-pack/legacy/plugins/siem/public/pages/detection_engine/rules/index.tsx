@@ -67,8 +67,8 @@ export const RulesComponent = React.memo(() => {
                 }}
               />
             ) : (
-                getEmptyTagValue()
-              )
+              getEmptyTagValue()
+            )
           }
           title={i18n.PAGE_TITLE}
         >

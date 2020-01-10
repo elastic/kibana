@@ -42,8 +42,8 @@ export const usePrivilegeUser = (): Return => {
             setHasIndexWrite(privilege.index[indexName].manage);
             setHasManageApiKey(
               privilege.cluster.manage_security ||
-              privilege.cluster.manage_api_key ||
-              privilege.cluster.manage_own_api_key
+                privilege.cluster.manage_api_key ||
+                privilege.cluster.manage_own_api_key
             );
           }
         }

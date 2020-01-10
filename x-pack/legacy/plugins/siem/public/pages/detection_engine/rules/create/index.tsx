@@ -27,7 +27,7 @@ import * as i18n from './translations';
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
-const ResizeEuiPanel = styled(EuiPanel) <{
+const ResizeEuiPanel = styled(EuiPanel)<{
   height?: number;
 }>`
   .euiAccordion__iconWrapper {

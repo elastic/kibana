@@ -101,39 +101,39 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         isLoading === true || rule === null ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-            [
+          [
+            <FormattedMessage
+              id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
+              defaultMessage="Created by: {by} on {date}"
+              values={{
+                by: rule?.created_by ?? i18n.UNKNOWN,
+                date: (
+                  <FormattedDate
+                    value={rule?.created_at ?? new Date().toISOString()}
+                    fieldName="createdAt"
+                  />
+                ),
+              }}
+            />,
+            rule?.updated_by != null ? (
               <FormattedMessage
-                id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
-                defaultMessage="Created by: {by} on {date}"
+                id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
+                defaultMessage="Updated by: {by} on {date}"
                 values={{
-                  by: rule?.created_by ?? i18n.UNKNOWN,
+                  by: rule?.updated_by ?? i18n.UNKNOWN,
                   date: (
                     <FormattedDate
-                      value={rule?.created_at ?? new Date().toISOString()}
-                      fieldName="createdAt"
+                      value={rule?.updated_at ?? new Date().toISOString()}
+                      fieldName="updatedAt"
                     />
                   ),
                 }}
-              />,
-              rule?.updated_by != null ? (
-                <FormattedMessage
-                  id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
-                  defaultMessage="Updated by: {by} on {date}"
-                  values={{
-                    by: rule?.updated_by ?? i18n.UNKNOWN,
-                    date: (
-                      <FormattedDate
-                        value={rule?.updated_at ?? new Date().toISOString()}
-                        fieldName="updatedAt"
-                      />
-                    ),
-                  }}
-                />
-              ) : (
-                  ''
-                ),
-            ]
-          ),
+              />
+            ) : (
+              ''
+            ),
+          ]
+        ),
       [isLoading, rule]
     );
 
@@ -284,12 +284,12 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                 )}
               </GlobalTime>
             ) : (
-                <WrapperPage>
-                  <HeaderPage border title={i18n.PAGE_TITLE} />
+              <WrapperPage>
+                <HeaderPage border title={i18n.PAGE_TITLE} />
 
-                  <DetectionEngineEmptyPage />
-                </WrapperPage>
-              );
+                <DetectionEngineEmptyPage />
+              </WrapperPage>
+            );
           }}
         </WithSource>
 

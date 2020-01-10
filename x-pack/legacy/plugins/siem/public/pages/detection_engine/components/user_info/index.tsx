@@ -34,29 +34,29 @@ const initialState: State = {
 export type Action =
   | { type: 'updateLoading'; loading: boolean }
   | {
-    type: 'updateHasManageApiKey';
-    hasManageApiKey: boolean | null;
-  }
+      type: 'updateHasManageApiKey';
+      hasManageApiKey: boolean | null;
+    }
   | {
-    type: 'updateHasIndexWrite';
-    hasIndexWrite: boolean | null;
-  }
+      type: 'updateHasIndexWrite';
+      hasIndexWrite: boolean | null;
+    }
   | {
-    type: 'updateIsSignalIndexExists';
-    isSignalIndexExists: boolean | null;
-  }
+      type: 'updateIsSignalIndexExists';
+      isSignalIndexExists: boolean | null;
+    }
   | {
-    type: 'updateIsAuthenticated';
-    isAuthenticated: boolean | null;
-  }
+      type: 'updateIsAuthenticated';
+      isAuthenticated: boolean | null;
+    }
   | {
-    type: 'updateCanUserCRUD';
-    canUserCRUD: boolean | null;
-  }
+      type: 'updateCanUserCRUD';
+      canUserCRUD: boolean | null;
+    }
   | {
-    type: 'updateSignalIndexName';
-    signalIndexName: string | null;
-  };
+      type: 'updateSignalIndexName';
+      signalIndexName: string | null;
+    };
 
 export const userInfoReducer = (state: State, action: Action): State => {
   switch (action.type) {

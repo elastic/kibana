@@ -147,86 +147,86 @@ export const AllRules = React.memo<{
         {isInitialLoad ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
-            <>
-              <HeaderSection split title={i18n.ALL_RULES}>
-                <EuiFieldSearch
-                  aria-label={i18n.SEARCH_RULES}
-                  fullWidth
-                  incremental={false}
-                  placeholder={i18n.SEARCH_PLACEHOLDER}
-                  onSearch={filterString => {
-                    dispatch({
-                      type: 'updateFilterOptions',
-                      filterOptions: {
-                        ...filterOptions,
-                        filter: filterString,
-                      },
-                    });
-                  }}
-                />
-              </HeaderSection>
-
-              <UtilityBar border>
-                <UtilityBarSection>
-                  <UtilityBarGroup>
-                    <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
-                  </UtilityBarGroup>
-
-                  <UtilityBarGroup>
-                    <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                    {hasNoPermissions && (
-                      <UtilityBarAction
-                        iconSide="right"
-                        iconType="arrowDown"
-                        popoverContent={getBatchItemsPopoverContent}
-                      >
-                        {i18n.BATCH_ACTIONS}
-                      </UtilityBarAction>
-                    )}
-                    <UtilityBarAction
-                      iconSide="right"
-                      iconType="refresh"
-                      onClick={() => dispatch({ type: 'refresh' })}
-                    >
-                      {i18n.REFRESH}
-                    </UtilityBarAction>
-                  </UtilityBarGroup>
-                </UtilityBarSection>
-              </UtilityBar>
-
-              <EuiBasicTable
-                columns={getColumns(dispatch, history, hasNoPermissions)}
-                isSelectable={!hasNoPermissions ?? false}
-                itemId="rule_id"
-                items={tableData}
-                onChange={({ page, sort }: EuiBasicTableOnChange) => {
-                  dispatch({
-                    type: 'updatePagination',
-                    pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-                  });
+          <>
+            <HeaderSection split title={i18n.ALL_RULES}>
+              <EuiFieldSearch
+                aria-label={i18n.SEARCH_RULES}
+                fullWidth
+                incremental={false}
+                placeholder={i18n.SEARCH_PLACEHOLDER}
+                onSearch={filterString => {
                   dispatch({
                     type: 'updateFilterOptions',
                     filterOptions: {
                       ...filterOptions,
-                      sortField: 'enabled', // Only enabled is supported for sorting currently
-                      sortOrder: sort!.direction,
+                      filter: filterString,
                     },
                   });
                 }}
-                pagination={{
-                  pageIndex: pagination.page - 1,
-                  pageSize: pagination.perPage,
-                  totalItemCount: pagination.total,
-                  pageSizeOptions: [5, 10, 20],
-                }}
-                sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
-                selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
               />
-              {(isLoading || loading) && (
-                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-              )}
-            </>
-          )}
+            </HeaderSection>
+
+            <UtilityBar border>
+              <UtilityBarSection>
+                <UtilityBarGroup>
+                  <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                </UtilityBarGroup>
+
+                <UtilityBarGroup>
+                  <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
+                  {hasNoPermissions && (
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  )}
+                  <UtilityBarAction
+                    iconSide="right"
+                    iconType="refresh"
+                    onClick={() => dispatch({ type: 'refresh' })}
+                  >
+                    {i18n.REFRESH}
+                  </UtilityBarAction>
+                </UtilityBarGroup>
+              </UtilityBarSection>
+            </UtilityBar>
+
+            <EuiBasicTable
+              columns={getColumns(dispatch, history, hasNoPermissions)}
+              isSelectable={!hasNoPermissions ?? false}
+              itemId="rule_id"
+              items={tableData}
+              onChange={({ page, sort }: EuiBasicTableOnChange) => {
+                dispatch({
+                  type: 'updatePagination',
+                  pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+                });
+                dispatch({
+                  type: 'updateFilterOptions',
+                  filterOptions: {
+                    ...filterOptions,
+                    sortField: 'enabled', // Only enabled is supported for sorting currently
+                    sortOrder: sort!.direction,
+                  },
+                });
+              }}
+              pagination={{
+                pageIndex: pagination.page - 1,
+                pageSize: pagination.perPage,
+                totalItemCount: pagination.total,
+                pageSizeOptions: [5, 10, 20],
+              }}
+              sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+              selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+            />
+            {(isLoading || loading) && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
+          </>
+        )}
       </Panel>
     </>
   );
