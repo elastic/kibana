@@ -13,9 +13,9 @@ import {
   EuiHideFor,
   EuiTitle,
 } from '@elastic/eui';
-import { InventoryMetric } from '../../../../common/inventory_models/types';
+import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
+import { InventoryMetric, InventoryItemType } from '../../../../common/inventory_models/types';
 import { useNodeDetails } from '../../../containers/node_details/use_node_details';
-import { InfraNodeType, InfraTimerangeInput } from '../../../graphql/types';
 import { MetricsSideNav } from './side_nav';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { MetricsTimeControls } from './time_controls';
@@ -32,7 +32,7 @@ interface Props {
   requiredMetrics: InventoryMetric[];
   nodeId: string;
   cloudId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   sourceId: string;
   timeRange: MetricsTimeInput;
   parsedTimeRange: InfraTimerangeInput;

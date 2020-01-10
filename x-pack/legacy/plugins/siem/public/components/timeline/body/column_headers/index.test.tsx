@@ -17,14 +17,6 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ColumnHeadersComponent } from '.';
 
-jest.mock('../../../resize_handle/is_resizing', () => ({
-  ...jest.requireActual('../../../resize_handle/is_resizing'),
-  useIsContainerResizing: () => ({
-    isResizing: true,
-    setIsResizing: jest.fn(),
-  }),
-}));
-
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
 
@@ -115,38 +107,6 @@ describe('ColumnHeaders', () => {
             .first()
             .text()
         ).toContain(h.id);
-      });
-    });
-
-    test('it disables dragging during a column resize', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            isSelectAllChecked={false}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onSelectAll={jest.fn}
-            onUpdateColumns={jest.fn()}
-            showEventsSelect={false}
-            showSelectAllCheckbox={false}
-            sort={sort}
-            timelineId={'test'}
-            toggleColumn={jest.fn()}
-          />
-        </TestProviders>
-      );
-
-      defaultHeaders.forEach(h => {
-        expect(
-          wrapper
-            .find('[data-test-subj="draggable"]')
-            .first()
-            .prop('isDragDisabled')
-        ).toBe(true);
       });
     });
   });
