@@ -22,7 +22,6 @@ import { shallow } from 'enzyme';
 
 import { MetricVisComponent } from './metric_vis_component';
 import { Vis } from '../legacy_imports';
-import { MetricVisValue } from './metric_vis_value';
 
 jest.mock('ui/new_platform');
 

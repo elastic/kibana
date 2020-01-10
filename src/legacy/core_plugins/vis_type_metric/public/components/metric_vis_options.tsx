@@ -39,6 +39,7 @@ import {
 } from '../../../kbn_vislib_vis_types/public/components';
 import { ColorModes } from '../../../kbn_vislib_vis_types/public/utils/collections';
 import { MetricVisParam, VisParams } from '../types';
+import { SetColorRangeValue } from '../../../kbn_vislib_vis_types/public/components/common/color_ranges';
 
 function MetricVisOptions({
   stateParams,
@@ -135,7 +136,7 @@ function MetricVisOptions({
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={stateParams.metric.colorsRange}
-          setValue={setMetricValue}
+          setValue={setMetricValue as SetColorRangeValue}
           setTouched={setTouched}
           setValidity={setValidity}
         />
