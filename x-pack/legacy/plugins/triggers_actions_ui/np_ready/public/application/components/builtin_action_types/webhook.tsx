@@ -97,6 +97,20 @@ export function getActionType(): ActionTypeModel {
     },
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        body: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.body || actionParams.body.length === 0) {
+        errors.body.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
+            {
+              defaultMessage: 'Body is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     actionConnectorFields: WebhookActionConnectorFields,
@@ -110,8 +124,8 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   editActionSecrets,
   errors,
 }) => {
-  const [headerKey, setHeaderKey] = useState<string>('');
-  const [headerValue, setHeaderValue] = useState<string>('');
+  const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
+  const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
   const { user, password } = action.secrets;
@@ -123,7 +137,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
     keyHeader: new Array<string>(),
     valueHeader: new Array<string>(),
   };
-  if (!headerKey && headerValue) {
+  if (!httpHeaderKey && httpHeaderValue) {
     headerErrors.keyHeader.push(
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
@@ -133,7 +147,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       )
     );
   }
-  if (headerKey && !headerValue) {
+  if (httpHeaderKey && !httpHeaderValue) {
     headerErrors.valueHeader.push(
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
@@ -146,15 +160,15 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
 
   function addHeader() {
-    if (headers && !!Object.keys(headers).find(key => key === headerKey)) {
+    if (headers && !!Object.keys(headers).find(key => key === httpHeaderKey)) {
       return;
     }
     const updatedHeaders = headers
-      ? { ...headers, [headerKey]: headerValue }
-      : { [headerKey]: headerValue };
+      ? { ...headers, [httpHeaderKey]: httpHeaderValue }
+      : { [httpHeaderKey]: httpHeaderValue };
     editActionConfig('headers', updatedHeaders);
-    setHeaderKey('');
-    setHeaderValue('');
+    setHttpHeaderKey('');
+    setHttpHeaderValue('');
   }
 
   function viewHeaders() {
@@ -193,7 +207,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               id="webhookHeaderKey"
               fullWidth
               error={headerErrors.keyHeader}
-              isInvalid={hasHeaderErrors && headerKey !== undefined}
+              isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
               label={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
                 {
@@ -203,12 +217,12 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             >
               <EuiFieldText
                 fullWidth
-                isInvalid={hasHeaderErrors && headerKey !== undefined}
+                isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
                 name="keyHeader"
-                value={headerKey}
+                value={httpHeaderKey}
                 data-test-subj="webhookHeadersKeyInput"
                 onChange={e => {
-                  setHeaderKey(e.target.value);
+                  setHttpHeaderKey(e.target.value);
                 }}
               />
             </EuiFormRow>
@@ -218,7 +232,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               id="webhookHeaderValue"
               fullWidth
               error={headerErrors.valueHeader}
-              isInvalid={hasHeaderErrors && headerValue !== undefined}
+              isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
               label={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
                 {
@@ -228,12 +242,12 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             >
               <EuiFieldText
                 fullWidth
-                isInvalid={hasHeaderErrors && headerValue !== undefined}
+                isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
                 name="valueHeader"
-                value={headerValue}
+                value={httpHeaderValue}
                 data-test-subj="webhookHeadersValueInput"
                 onChange={e => {
-                  setHeaderValue(e.target.value);
+                  setHttpHeaderValue(e.target.value);
                 }}
               />
             </EuiFormRow>
@@ -241,7 +255,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiButtonEmpty
-                isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
+                isDisabled={hasHeaders && (hasHeaderErrors || !httpHeaderKey || !httpHeaderValue)}
                 data-test-subj="webhookAddHeaderButton"
                 onClick={() => addHeader()}
               >

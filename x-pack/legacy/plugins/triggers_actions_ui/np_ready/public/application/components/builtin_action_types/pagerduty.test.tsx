@@ -48,7 +48,7 @@ describe('pagerduty connector validation', () => {
       },
     });
 
-    delete actionConnector.config.test;
+    delete actionConnector.config.apiUrl;
     actionConnector.secrets.routingKey = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {

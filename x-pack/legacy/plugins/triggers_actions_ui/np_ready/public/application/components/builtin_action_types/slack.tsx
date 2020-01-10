@@ -53,6 +53,20 @@ export function getActionType(): ActionTypeModel {
     },
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        message: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.message || actionParams.message.length === 0) {
+        errors.message.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSlackMessageText',
+            {
+              defaultMessage: 'Message is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     actionConnectorFields: SlackActionFields,

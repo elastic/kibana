@@ -86,7 +86,7 @@ describe('webhook action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
+      errors: { body: [] },
     });
   });
 });
@@ -145,7 +145,7 @@ describe('WebhookParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ParamsFields
         action={actionParams}
-        errors={{}}
+        errors={{ body: [] }}
         editAction={() => {}}
         index={0}
         hasErrors={false}
@@ -158,5 +158,17 @@ describe('WebhookParamsFields renders', () => {
         .first()
         .prop('value')
     ).toStrictEqual('test message');
+  });
+
+  test('params validation fails when body is not valid', () => {
+    const actionParams = {
+      body: '',
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: ['Body is required.'],
+      },
+    });
   });
 });

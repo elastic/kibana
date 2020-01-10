@@ -23,6 +23,20 @@ export function getActionType(): ActionTypeModel {
     },
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        message: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.message || actionParams.message.length === 0) {
+        errors.message.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerLogMessageText',
+            {
+              defaultMessage: 'Message is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     actionConnectorFields: null,
@@ -47,13 +61,14 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
     { value: 'fatal', text: 'Fatal' },
   ];
 
+  // Set default value 'info' for level param
+  editAction('level', 'info', index);
+
   return (
     <Fragment>
       <EuiFormRow
         id="loggingLevel"
         fullWidth
-        error={errors.level}
-        isInvalid={hasErrors && level !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logLevelFieldLabel',
           {
@@ -63,11 +78,11 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
       >
         <EuiSelect
           fullWidth
-          isInvalid={hasErrors && level !== undefined}
           id="loggLevelSelect"
           data-test-subj="loggingLevelSelect"
           options={levelOptions}
           value={level}
+          defaultValue={'info'}
           onChange={e => {
             editAction('level', e.target.value, index);
           }}

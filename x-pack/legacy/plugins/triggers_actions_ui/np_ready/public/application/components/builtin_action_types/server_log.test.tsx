@@ -52,7 +52,7 @@ describe('action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
+      errors: { message: [] },
     });
   });
 });
@@ -71,7 +71,7 @@ describe('ServerLogParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ParamsFields
         action={actionParams}
-        errors={{}}
+        errors={{ message: [] }}
         editAction={() => {}}
         index={0}
         hasErrors={false}
@@ -85,5 +85,46 @@ describe('ServerLogParamsFields renders', () => {
         .prop('value')
     ).toStrictEqual('trace');
     expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
+  });
+
+  test('level param field is rendered with default value if not selected', () => {
+    expect(actionTypeModel.actionParamsFields).not.toBeNull();
+    if (!actionTypeModel.actionParamsFields) {
+      return;
+    }
+    const ParamsFields = actionTypeModel.actionParamsFields;
+    const actionParams = {
+      message: 'test message',
+      level: 'info',
+    };
+    const wrapper = mountWithIntl(
+      <ParamsFields
+        action={actionParams}
+        errors={{ message: [] }}
+        editAction={() => {}}
+        index={0}
+        hasErrors={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
+    expect(
+      wrapper
+        .find('[data-test-subj="loggingLevelSelect"]')
+        .first()
+        .prop('value')
+    ).toStrictEqual('info');
+    expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
+  });
+
+  test('params validation fails when message is not valid', () => {
+    const actionParams = {
+      message: '',
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: ['Message is required.'],
+      },
+    });
   });
 });

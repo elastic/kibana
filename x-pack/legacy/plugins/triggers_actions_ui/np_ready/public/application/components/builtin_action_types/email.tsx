@@ -25,7 +25,7 @@ import {
 } from '../../../types';
 
 export function getActionType(): ActionTypeModel {
-  const mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  const mailformat = /^[^@\s]+@[^@\s]+$/;
   return {
     id: '.email',
     iconClass: 'email',
@@ -56,7 +56,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (action.config.from && !action.config.from.match(mailformat)) {
+      if (action.config.from && !action.config.from.trim().match(mailformat)) {
         errors.from.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
@@ -231,7 +231,6 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               fullWidth
               isInvalid={errors.host.length > 0 && host !== undefined}
               name="host"
-              placeholder="localhost"
               value={host || ''}
               data-test-subj="emailHostInput"
               onChange={e => {
@@ -251,7 +250,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               <EuiFormRow
                 id="emailPort"
                 fullWidth
-                placeholder="8080"
+                placeholder="587"
                 error={errors.port}
                 isInvalid={errors.port.length > 0 && port !== undefined}
                 label={i18n.translate(

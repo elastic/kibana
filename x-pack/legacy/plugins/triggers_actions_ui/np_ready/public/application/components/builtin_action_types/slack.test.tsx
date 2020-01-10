@@ -71,15 +71,7 @@ describe('slack action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
-    });
-  });
-
-  test('if action params validation not fails when action params is empty', () => {
-    const actionParams = {};
-
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
+      errors: { message: [] },
     });
   });
 });
@@ -131,7 +123,7 @@ describe('SlackParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ParamsFields
         action={actionParams}
-        errors={{}}
+        errors={{ message: [] }}
         editAction={() => {}}
         index={0}
         hasErrors={false}
@@ -144,5 +136,17 @@ describe('SlackParamsFields renders', () => {
         .first()
         .prop('value')
     ).toStrictEqual('test message');
+  });
+
+  test('params validation fails when message is not valid', () => {
+    const actionParams = {
+      message: '',
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: ['Message is required.'],
+      },
+    });
   });
 });
