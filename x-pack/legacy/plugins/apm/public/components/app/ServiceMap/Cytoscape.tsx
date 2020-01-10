@@ -15,6 +15,7 @@ import React, {
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { cytoscapeOptions } from './cytoscapeOptions';
+import { updateServiceNodeData } from './fetch';
 
 cytoscape.use(dagre);
 
@@ -85,8 +86,15 @@ export function Cytoscape({
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
+    const nodeMouseoverHandler: cytoscape.EventHandler = event => {
+      event.target.connectedEdges().addClass('nodeHover');
+      // TODO: Do this on both hover and select
+      updateServiceNodeData(event.target);
+    };
     const mouseoutHandler: cytoscape.EventHandler = event => {
       event.target.removeClass('hover');
+    };
+    const nodeMouseoutHandler: cytoscape.EventHandler = event => {
       event.target.connectedEdges().removeClass('nodeHover');
     };
 
@@ -94,6 +102,8 @@ export function Cytoscape({
       cy.on('data', dataHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
+      cy.on('mouseover', 'node', nodeMouseoverHandler);
+      cy.on('mouseout', 'node', nodeMouseoutHandler);
     }
 
     return () => {
@@ -101,6 +111,8 @@ export function Cytoscape({
         cy.removeListener('data', undefined, dataHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
+        cy.removeListener('mouseover', 'node', nodeMouseoverHandler);
+        cy.removeListener('mouseout', 'node', nodeMouseoutHandler);
       }
     };
   }, [cy, serviceName]);
