@@ -8,18 +8,6 @@
 
 export type Maybe<T> = T | null;
 
-export interface PageInfoCase {
-  pageIndex: number;
-
-  pageSize: number;
-}
-
-export interface SortCase {
-  sortField: SortFieldCase;
-
-  sortOrder: Direction;
-}
-
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -269,10 +257,6 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
-export interface CaseInput {
-  caseId?: Maybe<string>;
-}
-
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -281,7 +265,7 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldCase {
+export enum SortFieldNote {
   updatedBy = 'updatedBy',
   updated = 'updated',
 }
@@ -289,11 +273,6 @@ export enum SortFieldCase {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
-}
-
-export enum SortFieldNote {
-  updatedBy = 'updatedBy',
-  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -401,7 +380,7 @@ export type EsValue = any;
 export interface Query {
   getCase: CaseSavedObject;
 
-  getAllCases: ResponseCases;
+  getCases: CasesSavedObjects;
 
   getNote: NoteResult;
 
@@ -435,8 +414,6 @@ export interface CaseSavedObject {
 }
 
 export interface CaseResult {
-  assignees: (Maybe<ElasticUser>)[];
-
   case_type: string;
 
   created_at: number;
@@ -458,10 +435,14 @@ export interface ElasticUser {
   full_name?: Maybe<string>;
 }
 
-export interface ResponseCases {
-  cases: CaseResult[];
+export interface CasesSavedObjects {
+  saved_objects: (Maybe<CaseSavedObject>)[];
 
-  totalCount?: Maybe<number>;
+  page: number;
+
+  per_page: number;
+
+  total: number;
 }
 
 export interface NoteResult {
@@ -2183,12 +2164,8 @@ export interface HostFields {
 export interface GetCaseQueryArgs {
   caseId: string;
 }
-export interface GetAllCasesQueryArgs {
-  pageInfo?: Maybe<PageInfoCase>;
-
+export interface GetCasesQueryArgs {
   search?: Maybe<string>;
-
-  sort?: Maybe<SortCase>;
 }
 export interface GetNoteQueryArgs {
   id: string;
@@ -2859,8 +2836,6 @@ export namespace GetCaseQuery {
   export type Attributes = {
     __typename?: 'CaseResult';
 
-    assignees: (Maybe<Assignees>)[];
-
     case_type: string;
 
     created_at: number;
@@ -2876,12 +2851,68 @@ export namespace GetCaseQuery {
     title: string;
   };
 
-  export type Assignees = {
+  export type CreatedBy = {
     __typename?: 'ElasticUser';
 
     username: string;
 
     full_name: Maybe<string>;
+  };
+}
+
+export namespace GetCasesQuery {
+  export type Variables = {
+    search?: Maybe<string>;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    getCases: GetCases;
+  };
+
+  export type GetCases = {
+    __typename?: 'CasesSavedObjects';
+
+    page: number;
+
+    per_page: number;
+
+    total: number;
+
+    saved_objects: (Maybe<SavedObjects>)[];
+  };
+
+  export type SavedObjects = {
+    __typename?: 'CaseSavedObject';
+
+    id: string;
+
+    type: string;
+
+    updated_at: string;
+
+    version: string;
+
+    attributes: Attributes;
+  };
+
+  export type Attributes = {
+    __typename?: 'CaseResult';
+
+    case_type: string;
+
+    created_at: number;
+
+    created_by: CreatedBy;
+
+    description: string;
+
+    state: string;
+
+    tags: (Maybe<string>)[];
+
+    title: string;
   };
 
   export type CreatedBy = {

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ipOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/case/index.gql_query';
+import { ipOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/ip_overview/index.gql_query';
 import { GetIpOverviewQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

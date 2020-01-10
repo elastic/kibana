@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
-import { PageInfoCase, CaseSavedObject, ResponseCases, SortCase } from '../../graphql/types';
+import { CaseSavedObject, CasesSavedObjects } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { caseSavedObjectType } from './saved_object_mappings';
 export class Case {
@@ -21,20 +21,20 @@ export class Case {
     return this.getSavedCase(request, caseId);
   }
 
-  public async getAllCases(
+  public async getCases(
     request: FrameworkRequest,
-    pageInfo: PageInfoCase | null,
-    search: string | null,
-    sort: SortCase | null
-  ): Promise<ResponseCases> {
+    // pageInfo: PageInfoCase | null,
+    search: string | null
+    // sort: SortCase | null
+  ): Promise<CasesSavedObjects> {
     const options: SavedObjectsFindOptions = {
       type: caseSavedObjectType,
-      perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-      page: pageInfo != null ? pageInfo.pageIndex : undefined,
+      // perPage: pageInfo != null ? pageInfo.pageSize : undefined,
+      // page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
-      searchFields: ['note'],
-      sortField: sort != null ? sort.sortField : undefined,
-      sortOrder: sort != null ? sort.sortOrder : undefined,
+      // searchFields: ['note'],
+      // sortField: sort != null ? sort.sortField : undefined,
+      // sortOrder: sort != null ? sort.sortOrder : undefined,
     };
     return this.getAllSavedCase(request, options);
   }
@@ -57,13 +57,13 @@ export class Case {
   private async getAllSavedCase(request: FrameworkRequest, options: SavedObjectsFindOptions) {
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
-
-    return {
-      totalCount: savedObjects.total,
-      cases: savedObjects.saved_objects.map(savedObject =>
-        convertSavedObjectToSavedCase(savedObject)
-      ),
-    };
+    return savedObjects;
+    // return {
+    //   totalCount: savedObjects.total,
+    //   cases: savedObjects.saved_objects.map(savedObject =>
+    //     convertSavedObjectToSavedCase(savedObject)
+    //   ),
+    // };
   }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

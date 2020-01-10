@@ -14,10 +14,6 @@ export const caseQuery = gql`
       updated_at
       version
       attributes {
-        assignees {
-          username
-          full_name
-        }
         case_type
         created_at
         created_by {

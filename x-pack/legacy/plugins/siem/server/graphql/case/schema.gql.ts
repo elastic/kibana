@@ -8,29 +8,6 @@ import gql from 'graphql-tag';
 
 export const caseSchema = gql`
   ###############
-  #### INPUT ####
-  ###############
-
-  input CaseInput {
-    caseId: String
-  }
-
-  input PageInfoCase {
-    pageIndex: Float!
-    pageSize: Float!
-  }
-
-  enum SortFieldCase {
-    updatedBy
-    updated
-  }
-
-  input SortCase {
-    sortField: SortFieldCase!
-    sortOrder: Direction!
-  }
-
-  ###############
   #### QUERY ####
   ###############
   type ElasticUser {
@@ -38,7 +15,6 @@ export const caseSchema = gql`
     full_name: String
   }
   type CaseResult {
-    assignees: [ElasticUser]!
     case_type: String!
     created_at: Float!
     created_by: ElasticUser!
@@ -56,9 +32,11 @@ export const caseSchema = gql`
     version: String!
   }
 
-  type ResponseCases {
-    cases: [CaseResult!]!
-    totalCount: Float
+  type CasesSavedObjects {
+    saved_objects: [CaseSavedObject]!
+    page: Float!
+    per_page: Float!
+    total: Float!
   }
 
   #########################
@@ -67,10 +45,26 @@ export const caseSchema = gql`
 
   extend type Query {
     getCase(caseId: ID!): CaseSavedObject!
-    getAllCases(pageInfo: PageInfoCase, search: String, sort: SortCase): ResponseCases!
+    getCases(search: String): CasesSavedObjects!
   }
 
   extend type Mutation {
     deleteCase(id: [ID!]!): Boolean
   }
 `;
+
+//
+// input PageInfoCase {
+//   pageIndex: Float!
+//   pageSize: Float!
+// }
+//
+// enum SortFieldCase {
+//   updatedBy
+//   updated
+// }
+//
+// input SortCase {
+//   sortField: SortFieldCase!
+//   sortOrder: Direction!
+// }

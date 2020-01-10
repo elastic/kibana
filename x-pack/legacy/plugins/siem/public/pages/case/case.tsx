@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
 
@@ -14,7 +14,8 @@ import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { CaseQuery } from '../../containers/case';
+import { CaseList } from './case_list';
+import { CaseView } from './case_view';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -40,18 +41,10 @@ export const CaseComponent = React.memo(() => {
           {({ indicesExist }) =>
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <EuiFlexGroup>
-                <CaseQuery sourceId="default" caseId="9ffef520-20e4-11ea-8f80-690fedc74682">
-                  {children => (
-                    <div>
-                      <h2>{`Case: ${children.caseData.attributes.title}`}</h2>
-                      <ul>
-                        <li>{`Description: ${children.caseData.attributes.description}`}</li>
-                        <li>{`Type: ${children.caseData.attributes.case_type}`}</li>
-                        <li>{`State: ${children.caseData.attributes.state}`}</li>
-                      </ul>
-                    </div>
-                  )}
-                </CaseQuery>
+                <CaseView />
+                <EuiFlexItem>
+                  <CaseList />
+                </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
               <EmptyPage

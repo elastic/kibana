@@ -11,7 +11,7 @@ import { Case } from '../../lib/case/saved_object';
 export type QueryCaseResolver = AppResolverOf<QueryResolvers.GetCaseResolver>;
 
 export type QueryAllCaseResolver = AppResolverWithFields<
-  QueryResolvers.GetAllCasesResolver,
+  QueryResolvers.GetCasesResolver,
   'totalCount' | 'Case'
 >;
 
@@ -26,7 +26,7 @@ export const createCaseResolvers = (
 ): {
   Query: {
     getCase: QueryCaseResolver;
-    getAllCases: QueryAllCaseResolver;
+    getCases: QueryAllCaseResolver;
   };
   Mutation: {
     deleteCase: MutationDeleteCaseResolver;
@@ -36,12 +36,12 @@ export const createCaseResolvers = (
     async getCase(root, args, { req }) {
       return libs.case.getCase(req, args.caseId);
     },
-    async getAllCases(root, args, { req }) {
-      return libs.case.getAllCases(
+    async getCases(root, args, { req }) {
+      return libs.case.getCases(
         req,
-        args.pageInfo || null,
-        args.search || null,
-        args.sort || null
+        // args.pageInfo || null,
+        args.search || null
+        // args.sort || null
       );
     },
   },

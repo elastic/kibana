@@ -10,18 +10,6 @@ import { SiemContext } from '../lib/types';
 
 export type Maybe<T> = T | null;
 
-export interface PageInfoCase {
-  pageIndex: number;
-
-  pageSize: number;
-}
-
-export interface SortCase {
-  sortField: SortFieldCase;
-
-  sortOrder: Direction;
-}
-
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -271,10 +259,6 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
-export interface CaseInput {
-  caseId?: Maybe<string>;
-}
-
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -283,7 +267,7 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldCase {
+export enum SortFieldNote {
   updatedBy = 'updatedBy',
   updated = 'updated',
 }
@@ -291,11 +275,6 @@ export enum SortFieldCase {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
-}
-
-export enum SortFieldNote {
-  updatedBy = 'updatedBy',
-  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -403,7 +382,7 @@ export type EsValue = any;
 export interface Query {
   getCase: CaseSavedObject;
 
-  getAllCases: ResponseCases;
+  getCases: CasesSavedObjects;
 
   getNote: NoteResult;
 
@@ -437,8 +416,6 @@ export interface CaseSavedObject {
 }
 
 export interface CaseResult {
-  assignees: (Maybe<ElasticUser>)[];
-
   case_type: string;
 
   created_at: number;
@@ -460,10 +437,14 @@ export interface ElasticUser {
   full_name?: Maybe<string>;
 }
 
-export interface ResponseCases {
-  cases: CaseResult[];
+export interface CasesSavedObjects {
+  saved_objects: (Maybe<CaseSavedObject>)[];
 
-  totalCount?: Maybe<number>;
+  page: number;
+
+  per_page: number;
+
+  total: number;
 }
 
 export interface NoteResult {
@@ -2185,12 +2166,8 @@ export interface HostFields {
 export interface GetCaseQueryArgs {
   caseId: string;
 }
-export interface GetAllCasesQueryArgs {
-  pageInfo?: Maybe<PageInfoCase>;
-
+export interface GetCasesQueryArgs {
   search?: Maybe<string>;
-
-  sort?: Maybe<SortCase>;
 }
 export interface GetNoteQueryArgs {
   id: string;
@@ -2582,7 +2559,7 @@ export namespace QueryResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = {}> {
     getCase?: GetCaseResolver<CaseSavedObject, TypeParent, TContext>;
 
-    getAllCases?: GetAllCasesResolver<ResponseCases, TypeParent, TContext>;
+    getCases?: GetCasesResolver<CasesSavedObjects, TypeParent, TContext>;
 
     getNote?: GetNoteResolver<NoteResult, TypeParent, TContext>;
 
@@ -2617,17 +2594,13 @@ export namespace QueryResolvers {
     caseId: string;
   }
 
-  export type GetAllCasesResolver<
-    R = ResponseCases,
+  export type GetCasesResolver<
+    R = CasesSavedObjects,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, GetAllCasesArgs>;
-  export interface GetAllCasesArgs {
-    pageInfo?: Maybe<PageInfoCase>;
-
+  > = Resolver<R, Parent, TContext, GetCasesArgs>;
+  export interface GetCasesArgs {
     search?: Maybe<string>;
-
-    sort?: Maybe<SortCase>;
   }
 
   export type GetNoteResolver<R = NoteResult, Parent = {}, TContext = SiemContext> = Resolver<
@@ -2763,8 +2736,6 @@ export namespace CaseSavedObjectResolvers {
 
 export namespace CaseResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CaseResult> {
-    assignees?: AssigneesResolver<(Maybe<ElasticUser>)[], TypeParent, TContext>;
-
     case_type?: CaseTypeResolver<string, TypeParent, TContext>;
 
     created_at?: CreatedAtResolver<number, TypeParent, TContext>;
@@ -2780,11 +2751,6 @@ export namespace CaseResultResolvers {
     title?: TitleResolver<string, TypeParent, TContext>;
   }
 
-  export type AssigneesResolver<
-    R = (Maybe<ElasticUser>)[],
-    Parent = CaseResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
   export type CaseTypeResolver<R = string, Parent = CaseResult, TContext = SiemContext> = Resolver<
     R,
     Parent,
@@ -2841,21 +2807,35 @@ export namespace ElasticUserResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace ResponseCasesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = ResponseCases> {
-    cases?: CasesResolver<CaseResult[], TypeParent, TContext>;
+export namespace CasesSavedObjectsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = CasesSavedObjects> {
+    saved_objects?: SavedObjectsResolver<(Maybe<CaseSavedObject>)[], TypeParent, TContext>;
 
-    totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
+    page?: PageResolver<number, TypeParent, TContext>;
+
+    per_page?: PerPageResolver<number, TypeParent, TContext>;
+
+    total?: TotalResolver<number, TypeParent, TContext>;
   }
 
-  export type CasesResolver<
-    R = CaseResult[],
-    Parent = ResponseCases,
+  export type SavedObjectsResolver<
+    R = (Maybe<CaseSavedObject>)[],
+    Parent = CasesSavedObjects,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = Maybe<number>,
-    Parent = ResponseCases,
+  export type PageResolver<
+    R = number,
+    Parent = CasesSavedObjects,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PerPageResolver<
+    R = number,
+    Parent = CasesSavedObjects,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalResolver<
+    R = number,
+    Parent = CasesSavedObjects,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9021,7 +9001,7 @@ export type IResolvers<TContext = SiemContext> = {
   CaseSavedObject?: CaseSavedObjectResolvers.Resolvers<TContext>;
   CaseResult?: CaseResultResolvers.Resolvers<TContext>;
   ElasticUser?: ElasticUserResolvers.Resolvers<TContext>;
-  ResponseCases?: ResponseCasesResolvers.Resolvers<TContext>;
+  CasesSavedObjects?: CasesSavedObjectsResolvers.Resolvers<TContext>;
   NoteResult?: NoteResultResolvers.Resolvers<TContext>;
   ResponseNotes?: ResponseNotesResolvers.Resolvers<TContext>;
   PinnedEvent?: PinnedEventResolvers.Resolvers<TContext>;
