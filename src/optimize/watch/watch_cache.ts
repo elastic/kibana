@@ -179,7 +179,7 @@ async function recursiveDelete(directory: string) {
         : unlinkAsync(absolutePath);
 
       // Ignore errors, if the file or directory doesn't exist.
-      result.catch(e => {
+      return result.catch(e => {
         if (e.code !== 'ENOENT') {
           throw e;
         }
