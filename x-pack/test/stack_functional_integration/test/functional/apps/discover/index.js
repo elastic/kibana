@@ -1,21 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import {
-  bdd,
-  remote,
-  defaultTimeout
-} from '../../../support';
 
-import PageObjects from '../../../support/page_objects';
+export default function ({ loadTestFile, getService }) {
+  const browser = getService('browser');
 
-bdd.describe('discover app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(function () {
-    return PageObjects.remote.setWindowSize(1200,800);
+  before(async () => {
+    await browser.setWindowSize(1200, 800);
   });
 
-  require('./_discover');
-  require('./_field_data');
-  require('./_shared_links');
-  require('./_collapse_expand');
-});
+  describe('discover app', function () {
+    loadTestFile(require.resolve('./discover'));
+    loadTestFile(require.resolve('./field_data'));
+    loadTestFile(require.resolve('./shared_links'));
+    loadTestFile(require.resolve('./collapse_expand'));
+  });
+};

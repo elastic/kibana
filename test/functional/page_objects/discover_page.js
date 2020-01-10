@@ -37,6 +37,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('input[ng-model=\'state.query\']');
     }
 
+    async getTimespanText() {
+      await find.byCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration').getVisibleText();
+    }
+
+    async getNoResultsTimepicker() {
+      await testSubjects.find('discoverNoResultsTimefilter');
+    }
+
     async getQuerySearchButton() {
       return await find.byCssSelector('button[aria-label=\'Search\']');
     }

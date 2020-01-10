@@ -34,6 +34,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['shield']);
+  const screenshot = getService('screenshots');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -112,6 +113,22 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         log.debug(`### Finished login process currentUrl = ${currentUrl}`);
       }
       return currentUrl;
+    }
+
+    async createErrorHandler(testObj: any) {
+      const testName = testObj.parent
+        ? [testObj.parent.name, testObj.name].join('_')
+        : testObj.name;
+
+      const errHandler = async (error: any) => {
+        const now = Date.now();
+        const fileName = `failure_${now}_${testName}`;
+
+        await screenshot.take(fileName, true);
+        throw error;
+      };
+
+      return errHandler;
     }
 
     /**

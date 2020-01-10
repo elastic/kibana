@@ -82,6 +82,16 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
       await testSubjects.click('superDatePickerstartDatePopoverButton').click();
     }
+
+    async getToastMessage() {
+      const twoXLonger = config.get('timeouts.waitFor') * 2;
+      await find.displayedByCssSelector('kbn-truncated.toast-message', twoXLonger).getVisibleText();
+    }
+
+    async waitForToastMessageGone() {
+      await find.waitForDeletedByCssSelector('kbn-truncated.toast-message');
+    }
+
     async setFromTime(timeString) {
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');

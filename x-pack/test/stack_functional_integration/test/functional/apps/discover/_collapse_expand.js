@@ -1,59 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import {
-  bdd,
-  esClient
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common', 'settings', 'discover']);
+  const log = getService('log');
+  const screenshot = getService('screenshots');
 
-import PageObjects from '../../../support/page_objects';
+  describe('discover tab', async () => {
+    before(async () => {
+      const fromTime = '2015-09-19 06:31:44.000';
+      const toTime = '2015-09-23 18:31:44.000';
 
-bdd.describe('discover tab', function describeIndexTests() {
-  bdd.before(function () {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
+      log.debug('discover');
+      await PageObjects.common.navigateToApp('discover');
+      log.debug('setAbsoluteRange');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    });
 
-    PageObjects.common.debug('discover');
-    return PageObjects.common.navigateToApp('discover')
-    .then(function () {
-      PageObjects.common.debug('setAbsoluteRange');
-      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    describe('field data', function () {
+      it('should initially be expanded', async () => {
+        screenshot.take('Discover-sidebar-expanded');
+        const width = await PageObjects.discover.getSidebarWidth();
+        log.debug('### expanded sidebar width = ' + width);
+        expect(width > 180).to.be(true);
+      });
+
+      it('should collapse when clicked', async () => {
+        await PageObjects.discover.toggleSidebarCollapse();
+        screenshot.take('Discover-sidebar-collapsed');
+        log.debug('### PageObjects.discover.getSidebarWidth()');
+        const width = await PageObjects.discover.getSidebarWidth();
+
+        log.debug('### collapsed sidebar width = ' + width);
+        expect(width < 20).to.be(true);
+      });
+
+      it('should expand when clicked', async () => {
+        await PageObjects.discover.toggleSidebarCollapse();
+        log.debug('PageObjects.discover.getSidebarWidth()');
+        const width = await PageObjects.discover.getSidebarWidth();
+        log.debug('expanded sidebar width = ' + width);
+        expect(width > 180).to.be(true);
+      });
     });
   });
-
-  bdd.describe('field data', function () {
-    bdd.it('should initially be expanded', function () {
-      PageObjects.common.saveScreenshot('Discover-sidebar-expanded');
-      return PageObjects.discover.getSidebarWidth()
-        .then(function (width) {
-          PageObjects.common.debug('expanded sidebar width = ' + width);
-          expect(width > 180).to.be(true);
-        });
-    });
-
-    bdd.it('should collapse when clicked', function () {
-      return PageObjects.discover.toggleSidebarCollapse()
-        .then(function () {
-          PageObjects.common.saveScreenshot('Discover-sidebar-collapsed');
-          PageObjects.common.debug('PageObjects.discover.getSidebarWidth()');
-          return PageObjects.discover.getSidebarWidth();
-        })
-        .then(function (width) {
-          PageObjects.common.debug('collapsed sidebar width = ' + width);
-          expect(width < 20).to.be(true);
-        });
-    });
-
-    bdd.it('should expand when clicked', function () {
-      return PageObjects.discover.toggleSidebarCollapse()
-        .then(function () {
-          PageObjects.common.debug('PageObjects.discover.getSidebarWidth()');
-          return PageObjects.discover.getSidebarWidth();
-        })
-        .then(function (width) {
-          PageObjects.common.debug('expanded sidebar width = ' + width);
-          expect(width > 180).to.be(true);
-        });
-    });
-  });
-});
+};
