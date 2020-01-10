@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import { config, HttpConfig } from '.';
+import { config } from '.';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -108,28 +108,6 @@ test('throws if xsrf.whitelist element does not start with a slash', () => {
 });
 
 describe('with TLS', () => {
-  test('throws if TLS is enabled but `key` is not specified', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('throws if TLS is enabled but `certificate` is not specified', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      ssl: {
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;
     const obj = {
@@ -143,189 +121,16 @@ describe('with TLS', () => {
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
+});
 
-  test('throws if TLS is not enabled but `clientAuthentication` is `optional`', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      port: 1234,
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'optional',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: must enable ssl to use [clientAuthentication]"`
-    );
-  });
-
-  test('throws if TLS is not enabled but `clientAuthentication` is `required`', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      port: 1234,
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'required',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: must enable ssl to use [clientAuthentication]"`
-    );
-  });
-
-  test('can specify `none` for [clientAuthentication] if ssl is not enabled', () => {
-    const obj = {
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'none',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.clientAuthentication).toBe('none');
-  });
-
-  test('can specify single `certificateAuthority` as a string', () => {
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: '/authority/',
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.certificateAuthorities).toBe('/authority/');
-  });
-
-  test('can specify socket timeouts', () => {
-    const obj = {
-      keepaliveTimeout: 1e5,
-      socketTimeout: 5e5,
-    };
-    const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
-    expect(keepaliveTimeout).toBe(1e5);
-    expect(socketTimeout).toBe(5e5);
-  });
-
-  test('can specify several `certificateAuthorities`', () => {
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: ['/authority/1', '/authority/2'],
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
-  });
-
-  test('accepts known protocols`', () => {
-    const httpSchema = config.schema;
-    const singleKnownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1'],
-      },
-    };
-
-    const allKnownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
-      },
-    };
-
-    const singleKnownProtocolConfig = httpSchema.validate(singleKnownProtocol);
-    expect(singleKnownProtocolConfig.ssl.supportedProtocols).toEqual(['TLSv1']);
-
-    const allKnownProtocolsConfig = httpSchema.validate(allKnownProtocols);
-    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual(['TLSv1', 'TLSv1.1', 'TLSv1.2']);
-  });
-
-  test('should accept known protocols`', () => {
-    const httpSchema = config.schema;
-
-    const singleUnknownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['SOMEv100500'],
-      },
-    };
-
-    const allKnownWithOneUnknownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'SOMEv100500'],
-      },
-    };
-
-    expect(() => httpSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingSnapshot();
-    expect(() =>
-      httpSchema.validate(allKnownWithOneUnknownProtocols)
-    ).toThrowErrorMatchingSnapshot();
-  });
-
-  test('HttpConfig instance should properly interpret `none` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'none',
-        },
-      }),
-      {} as any
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(false);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
-  });
-
-  test('HttpConfig instance should properly interpret `optional` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'optional',
-        },
-      }),
-      {} as any
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(true);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
-  });
-
-  test('HttpConfig instance should properly interpret `required` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'required',
-        },
-      }),
-      {} as any
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(true);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(true);
-  });
+test('can specify socket timeouts', () => {
+  const obj = {
+    keepaliveTimeout: 1e5,
+    socketTimeout: 5e5,
+  };
+  const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
+  expect(keepaliveTimeout).toBe(1e5);
+  expect(socketTimeout).toBe(5e5);
 });
 
 describe('with compression', () => {

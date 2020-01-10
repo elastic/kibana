@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import moment from 'moment';
 import { LicenseType } from '../common/types';
@@ -53,7 +52,7 @@ describe('licensing plugin', () => {
           features: {},
         });
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const license = await license$.pipe(take(1)).toPromise();
@@ -71,7 +70,7 @@ describe('licensing plugin', () => {
           })
         );
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
@@ -85,7 +84,7 @@ describe('licensing plugin', () => {
         const dataClient = elasticsearchServiceMock.createClusterClient();
         dataClient.callAsInternalUser.mockRejectedValue(new Error('test'));
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const license = await license$.pipe(take(1)).toPromise();
@@ -99,7 +98,7 @@ describe('licensing plugin', () => {
         error.status = 400;
         dataClient.callAsInternalUser.mockRejectedValue(error);
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const license = await license$.pipe(take(1)).toPromise();
@@ -119,7 +118,7 @@ describe('licensing plugin', () => {
           .mockResolvedValue({ license: buildRawLicense(), features: {} });
 
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
@@ -137,7 +136,7 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         await plugin.setup(coreSetup);
         await flushPromises();
@@ -152,7 +151,7 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         await plugin.setup(coreSetup);
         await flushPromises();
@@ -180,7 +179,7 @@ describe('licensing plugin', () => {
         );
 
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { license$ } = await plugin.setup(coreSetup);
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
@@ -209,7 +208,7 @@ describe('licensing plugin', () => {
           features: {},
         });
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
         const { refresh } = await plugin.setup(coreSetup);
 
         expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(0);
@@ -242,7 +241,7 @@ describe('licensing plugin', () => {
           features: {},
         });
         const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+        coreSetup.elasticsearch.dataClient = dataClient;
 
         const { createLicensePoller, license$ } = await plugin.setup(coreSetup);
         const customClient = elasticsearchServiceMock.createClusterClient();
