@@ -1,8 +1,11 @@
-import { bdd, defaultTimeout, esClient, common } from '../../../support';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-bdd.describe('winlogbeat app', function () {
-  this.timeout = defaultTimeout;
-
-  require('./_winlogbeat');
-
-});
+export default function ({ loadTestFile }) {
+  describe('winlogbeat app', function () {
+    loadTestFile(require.resolve('./_winlogbeat'));
+  });
+};

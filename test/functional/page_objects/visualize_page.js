@@ -41,13 +41,20 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     get index() {
       return {
         LOGSTASH_TIME_BASED: 'logstash-*',
-        LOGSTASH_NON_TIME_BASED: 'logstash*'
+        LOGSTASH_NON_TIME_BASED: 'logstash*',
       };
     }
 
     async gotoVisualizationLandingPage() {
       log.debug('gotoVisualizationLandingPage');
       await PageObjects.common.navigateToApp('visualize');
+    }
+
+    async getLegendLabelsList() {
+      return await find.allByCssSelector('.legend-value-title')
+        .getProperty('textContent')
+        .map(s => s.trim());
+      //PageObjects.common.debug('found legend labels ' + array);
     }
 
     async checkListingSelectAllCheckbox() {
@@ -183,7 +190,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.click(`visEditorAdd_${type}`);
       await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
     }
-
 
     async clickMetric() {
       await this.clickVisType('metric');
@@ -495,6 +501,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async applyFilters() {
       return await testSubjects.click('filterBarApplyFilters');
     }
+
     /**
      * Set the test for a filter aggregation.
      * @param {*} filterValue the string value of the filter
@@ -770,7 +777,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: 2 * defaultFindTimeout
+        timeout: 2 * defaultFindTimeout,
       });
       expect(successToast).to.be(true);
     }
@@ -948,7 +955,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     */
     async getAreaChartPaths(dataLabel) {
       const path = await retry.try(
-        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2),
       );
       const data = await path.getAttribute('d');
       log.debug(data);
@@ -996,12 +1003,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return chartData;
     }
 
-
     // Returns value per pixel
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
       // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
-        async () => await find.byCssSelector(`div.visAxis__splitAxes--y > div > svg > g.${axis} > g:last-of-type.tick`)
+        async () => await find.byCssSelector(`div.visAxis__splitAxes--y > div > svg > g.${axis} > g:last-of-type.tick`),
       );
       const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
       const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
@@ -1009,13 +1015,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await find.byCssSelector(
-        'div.visAxis__column--y.visAxis__column--left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
+        'div.visAxis__column--y.visAxis__column--left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick',
       );
       const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
     }
-
 
     async getHeatmapData() {
       const chartTypes = await retry.try(
@@ -1054,7 +1059,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
      * It uses a better return format, than the old getTableVisData, by properly splitting
      * cell values into arrays. Please use this function for newer tests.
      */
-    async getTableVisContent({ stripEmptyRows = true } = { }) {
+    async getTableVisContent({ stripEmptyRows = true } = {}) {
       return await retry.try(async () => {
         const container = await testSubjects.find('tableVis');
         const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
@@ -1072,9 +1077,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         }));
 
         if (allTables.length === 1) {
-        // If there was only one table we return only the data for that table
-        // This prevents an unnecessary array around that single table, which
-        // is the case we have in most tests.
+          // If there was only one table we return only the data for that table
+          // This prevents an unnecessary array around that single table, which
+          // is the case we have in most tests.
           return allData[0];
         }
 
