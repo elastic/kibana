@@ -10,7 +10,7 @@ export interface BasicSignals {
   signal: AbortSignal;
 }
 export interface QuerySignals extends BasicSignals {
-  query: string;
+  query: object;
 }
 
 export interface SignalsResponse {
@@ -18,7 +18,8 @@ export interface SignalsResponse {
   timeout: boolean;
 }
 
-export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extends SignalsResponse {
+export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
+  extends SignalsResponse {
   _shards: {
     total: number;
     successful: number;
