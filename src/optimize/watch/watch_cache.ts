@@ -98,10 +98,6 @@ export class WatchCache {
     // delete everything in optimize/.cache directory
     await recursiveDelete(normalizePosixPath(this.cachePath));
 
-    // delete some empty folder that could be left
-    // from the previous cache path reset action
-    // await deleteEmpty(this.cachePath);
-
     // delete dlls
     await del(this.dllsPath);
 
