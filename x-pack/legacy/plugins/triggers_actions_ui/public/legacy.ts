@@ -48,6 +48,7 @@ routes.when(`${BASE_PATH}:section?/:subsection?/:view?/:id?`, {
               app.mount(npStart as any, {
                 element: elem,
                 appBasePath: BASE_PATH,
+                onAppLeave: () => undefined,
               });
           },
         },
