@@ -79,6 +79,13 @@ export interface Props {
   hoverProvider?: monacoEditor.languages.HoverProvider;
 
   /**
+   * Language config provider for bracket
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
+   */
+  languageConfiguration?: monacoEditor.languages.LanguageConfiguration;
+
+  /**
    * Function called before the editor is mounted in the view
    */
   editorWillMount?: EditorWillMount;
@@ -129,6 +136,13 @@ export class CodeEditor extends React.Component<Props, {}> {
 
       if (this.props.hoverProvider) {
         monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+      }
+
+      if (this.props.languageConfiguration) {
+        monaco.languages.setLanguageConfiguration(
+          this.props.languageId,
+          this.props.languageConfiguration
+        );
       }
     });
 

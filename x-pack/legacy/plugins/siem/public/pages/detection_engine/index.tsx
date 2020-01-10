@@ -11,9 +11,9 @@ import { useSignalIndex } from '../../containers/detection_engine/signals/use_si
 import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
 
 import { CreateRuleComponent } from './rules/create';
-import { DetectionEngineComponent } from './detection_engine';
+import { DetectionEngine } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
-import { RuleDetailsComponent } from './rules/details';
+import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
 
 const detectionEnginePath = `/:pageName(detection-engine)`;
@@ -44,7 +44,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
   return (
     <Switch>
       <Route exact path={detectionEnginePath} strict>
-        <DetectionEngineComponent
+        <DetectionEngine
           loading={indexNameLoading || privilegeLoading}
           isSignalIndexExists={isSignalIndexExists}
           isUserAuthenticated={isAuthenticated}
@@ -56,13 +56,13 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
           <Route exact path={`${detectionEnginePath}/rules`}>
             <RulesComponent />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/create`}>
+          <Route exact path={`${detectionEnginePath}/rules/create`}>
             <CreateRuleComponent />
           </Route>
-          <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
-            <RuleDetailsComponent signalsIndex={signalIndexName} />
+          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
+            <RuleDetails signalsIndex={signalIndexName} />
           </Route>
-          <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
+          <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
             <EditRuleComponent />
           </Route>
         </>

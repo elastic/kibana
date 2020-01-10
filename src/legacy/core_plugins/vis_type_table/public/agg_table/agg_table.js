@@ -74,7 +74,11 @@ export function KbnAggTable(config, RecursionHelper) {
         // escape each cell in each row
         const csvRows = rows.map(function(row) {
           return Object.entries(row).map(([k, v]) => {
-            return escape(formatted ? columns.find(c => c.id === k).formatter.convert(v) : v);
+            const column = columns.find(c => c.id === k);
+            if (formatted && column) {
+              return escape(column.formatter.convert(v));
+            }
+            return escape(v);
           });
         });
 
@@ -110,12 +114,16 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics } = $scope.dimensions;
+          const { buckets, metrics, splitColumn } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function(col, i) {
               const isBucket = buckets.find(bucket => bucket.accessor === i);
-              const dimension = isBucket || metrics.find(metric => metric.accessor === i);
+              const isSplitColumn = splitColumn
+                ? splitColumn.find(splitColumn => splitColumn.accessor === i)
+                : undefined;
+              const dimension =
+                isBucket || isSplitColumn || metrics.find(metric => metric.accessor === i);
 
               if (!dimension) return;
 
@@ -135,18 +143,15 @@ export function KbnAggTable(config, RecursionHelper) {
               }
 
               const isDate =
-                _.get(dimension, 'format.id') === 'date' ||
-                _.get(dimension, 'format.params.id') === 'date';
-              const isNumeric =
-                _.get(dimension, 'format.id') === 'number' ||
-                _.get(dimension, 'format.params.id') === 'number';
+                dimension.format?.id === 'date' || dimension.format?.params?.id === 'date';
+              const allowsNumericalAggregations = formatter?.allowsNumericalAggregations;
 
               let { totalFunc } = $scope;
               if (typeof totalFunc === 'undefined' && showPercentage) {
                 totalFunc = 'sum';
               }
 
-              if (isNumeric || isDate || totalFunc === 'count') {
+              if (allowsNumericalAggregations || isDate || totalFunc === 'count') {
                 const sum = tableRows => {
                   return _.reduce(
                     tableRows,
@@ -161,7 +166,6 @@ export function KbnAggTable(config, RecursionHelper) {
                 };
 
                 formattedColumn.sumTotal = sum(table.rows);
-
                 switch (totalFunc) {
                   case 'sum': {
                     if (!isDate) {
