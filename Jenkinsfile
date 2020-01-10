@@ -1,5 +1,8 @@
 #!/bin/groovy
 
+env.GIT_TRACE = '1'
+env.GIT_CURL_VERBOSE = '1'
+
 def NUMBER_OF_NODES = 25
 
 def work = [:]
