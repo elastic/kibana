@@ -13,11 +13,15 @@ import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { drag } from '../../lib/drag_n_drop/helpers';
-import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import { clearTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('timeline flyout button', () => {
-  beforeEach(() => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
+  });
+
+  afterEach(() => {
+    clearTimeline();
   });
 
   it('toggles open the timeline', () => {

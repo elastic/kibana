@@ -7,6 +7,8 @@
 import { drag, drop } from '../drag_n_drop/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
 import {
+  CLOSE_PROVIDER_BADGE_BTN,
+  CLOSE_TIMELINE_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DATA_PROVIDERS,
@@ -18,6 +20,15 @@ import { DEFAULT_TIMEOUT } from '../util/helpers';
 /** Toggles the timeline's open / closed state by clicking the `T I M E L I N E` button */
 export const toggleTimelineVisibility = () =>
   cy.get(TIMELINE_TOGGLE_BUTTON, { timeout: DEFAULT_TIMEOUT }).click();
+
+export const clearTimeline = () => {
+  cy.get(TIMELINE_DATA_PROVIDERS).then($provider => {
+    if ($provider.find(CLOSE_PROVIDER_BADGE_BTN).length === 1) {
+      cy.get(CLOSE_PROVIDER_BADGE_BTN).click();
+    }
+  });
+  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+};
 
 /** Drags and drops a host from the `All Hosts` widget on the `Hosts` page to the timeline */
 export const dragFromAllHostsToTimeline = () => {
