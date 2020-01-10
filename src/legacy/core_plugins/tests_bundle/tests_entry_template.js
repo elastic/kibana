@@ -123,7 +123,8 @@ const coreSystem = new CoreSystem({
       },
       mapConfig: {
         includeElasticMapsService: true,
-        manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
+        emsFileApiUrl: 'https://vector-staging.maps.elastic.co',
+        emsTileApiUrl: 'https://tiles.maps.elastic.co',
       },
       vegaConfig: {
         enabled: true,
