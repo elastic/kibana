@@ -9,7 +9,7 @@
   "type": "query",
   "from": "now-6m",
   "to": "now",
-  "query": "(destination.port:6665 or destination.port:6666 or destination.port:6667 or destination.port:6668 or destination.port:6669) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "query": "(destination.port:20 or destination.port:21) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "language": "kuery",
   "filters": [],
   "enabled": false,
