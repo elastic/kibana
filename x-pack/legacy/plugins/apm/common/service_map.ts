@@ -18,5 +18,4 @@ export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;
 export interface Connection {
   source: ConnectionNode;
   destination: ConnectionNode;
-  bidirectional?: boolean;
 }
