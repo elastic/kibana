@@ -63,6 +63,13 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
+|alertId|The id of this alert.|
+|spaceId|The id of the space of this alert.|
+|namespace|The namespace of the space of this alert; same as spaceId, unless spaceId === 'default', then namespace = undefined.|
+|name|The name of this alert.|
+|tags|The tags associated with this alert.|
+|createdBy|The userid that created this alert.|
+|updatedBy|The userid that last updated this alert.|
 
 ### Example
 
