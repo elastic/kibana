@@ -196,7 +196,11 @@ Object {
     undefined,
   ],
   "ssl": Object {
+    "alwaysPresentCertificate": undefined,
+    "certificate": undefined,
     "certificateAuthorities": undefined,
+    "key": undefined,
+    "keyPassphrase": undefined,
     "verificationMode": "none",
   },
 }

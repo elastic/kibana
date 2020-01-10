@@ -15,7 +15,6 @@ import {
 import {
   ES_FIELD_TYPES,
   IIndexPattern,
-  IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
@@ -31,7 +30,7 @@ export function loadNewJobCapabilities(
   return new Promise(async (resolve, reject) => {
     if (indexPatternId !== undefined) {
       // index pattern is being used
-      const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);
+      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       resolve(newJobCapsService.newJobCaps);
     } else if (savedSearchId !== undefined) {
