@@ -116,15 +116,12 @@ export const AllRules = React.memo<{
   }, [rulesData]);
 
   const euiBasicTableSelectionProps = useMemo(
-    () =>
-      canUserCRUD
-        ? {
-            selectable: (item: TableData) => !item.isLoading,
-            onSelectionChange: (selected: TableData[]) =>
-              dispatch({ type: 'setSelected', selectedItems: selected }),
-          }
-        : {},
-    [canUserCRUD]
+    () => ({
+      selectable: (item: TableData) => !item.isLoading,
+      onSelectionChange: (selected: TableData[]) =>
+        dispatch({ type: 'setSelected', selectedItems: selected }),
+    }),
+    []
   );
 
   return (
@@ -223,7 +220,7 @@ export const AllRules = React.memo<{
                 pageSizeOptions: [5, 10, 20],
               }}
               sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
-              {...euiBasicTableSelectionProps}
+              selection={canUserCRUD ? euiBasicTableSelectionProps : undefined}
             />
             {(isLoading || loading) && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
