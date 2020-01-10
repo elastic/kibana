@@ -53,8 +53,8 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-    '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/kbn-test',
-    '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/kbn-test/$1',
+    '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
+    '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^plugins/([^/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
