@@ -33,6 +33,11 @@ export {
   AppUpdater,
   ApplicationSetup,
   ApplicationStart,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
   // Internal types
   InternalApplicationStart,
   LegacyApp,

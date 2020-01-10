@@ -40,6 +40,42 @@ export interface AppBase {
     updater$?: Observable<AppUpdater>;
 }
 
+// @public
+export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
+
+// @public
+export enum AppLeaveActionType {
+    // (undocumented)
+    confirm = "confirm",
+    // (undocumented)
+    default = "default"
+}
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppLeaveActionFactory"
+//
+// @public
+export interface AppLeaveConfirmAction {
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: AppLeaveActionType.confirm;
+}
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppLeaveActionFactory"
+//
+// @public
+export interface AppLeaveDefaultAction {
+    // (undocumented)
+    type: AppLeaveActionType.default;
+}
+
+// Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
@@ -57,7 +93,7 @@ export interface ApplicationStart {
     navigateToApp(appId: string, options?: {
         path?: string;
         state?: any;
-    }): void;
+    }): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -90,6 +126,7 @@ export type AppMountDeprecated = (context: AppMountContext, params: AppMountPara
 export interface AppMountParameters {
     appBasePath: string;
     element: HTMLElement;
+    onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
 // @public
@@ -752,6 +789,8 @@ export interface OverlayRef {
 export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
+    // (undocumented)
+    openConfirm: OverlayModalStart['openConfirm'];
     // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

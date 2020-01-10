@@ -24,12 +24,14 @@ import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
+import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
   AppBase,
+  AppLeaveHandler,
   AppMount,
   AppMountDeprecated,
   AppMounter,
@@ -43,11 +45,13 @@ import {
   LegacyAppMounter,
   Mounter,
 } from './types';
+import { getLeaveAction, isConfirmAction } from './application_leave';
 
 interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
+  history?: History<any>;
   /**
    * Only necessary for redirecting to legacy apps
    * @deprecated
@@ -57,6 +61,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  overlays: OverlayStart;
 }
 
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
@@ -91,6 +96,7 @@ export class ApplicationService {
   private readonly apps = new Map<string, App | LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
+  private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
@@ -105,11 +111,12 @@ export class ApplicationService {
     http: { basePath },
     injectedMetadata,
     redirectTo = (path: string) => (window.location.href = path),
+    history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
     // Only setup history if we're not in legacy mode
     if (!injectedMetadata.getLegacyMode()) {
-      this.history = createBrowserHistory({ basename });
+      this.history = history || createBrowserHistory({ basename });
     }
 
     // If we do not have history available, use redirectTo to do a full page refresh.
@@ -220,12 +227,14 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
     this.registrationClosed = true;
+    window.addEventListener('beforeunload', this.onBeforeUnload);
+
     const { capabilities } = await this.capabilities.start({
       appIds: [...this.mounters.keys()],
       http,
@@ -254,25 +263,74 @@ export class ApplicationService {
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
-      navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
+      navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
         const app = applications$.value.get(appId);
         if (app && app.status !== AppStatus.accessible) {
           // should probably redirect to the error page instead
           throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
         }
-        this.navigate!(getAppUrl(availableMounters, appId, path), state);
-        this.currentAppId$.next(appId);
+        if (await this.shouldNavigate(overlays)) {
+          this.appLeaveHandlers.delete(this.currentAppId$.value!);
+          this.navigate!(getAppUrl(availableMounters, appId, path), state);
+          this.currentAppId$.next(appId);
+        }
       },
-      getComponent: () =>
-        this.history ? <AppRouter history={this.history} mounters={availableMounters} /> : null,
+      getComponent: () => {
+        if (!this.history) {
+          return null;
+        }
+        return (
+          <AppRouter
+            history={this.history}
+            mounters={availableMounters}
+            setAppLeaveHandler={this.setAppLeaveHandler}
+          />
+        );
+      },
     };
   }
+
+  private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
+    this.appLeaveHandlers.set(appId, handler);
+  };
+
+  private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
+    const currentAppId = this.currentAppId$.value;
+    if (currentAppId === undefined) {
+      return true;
+    }
+    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    if (isConfirmAction(action)) {
+      const confirmed = await overlays.openConfirm(action.text, {
+        title: action.title,
+        'data-test-subj': 'appLeaveConfirmModal',
+      });
+      if (!confirmed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private onBeforeUnload = (event: Event) => {
+    const currentAppId = this.currentAppId$.value;
+    if (currentAppId === undefined) {
+      return;
+    }
+    const action = getLeaveAction(this.appLeaveHandlers.get(currentAppId));
+    if (isConfirmAction(action)) {
+      event.preventDefault();
+      // some browsers accept a string return value being the message displayed
+      event.returnValue = action.text as any;
+    }
+  };
 
   public stop() {
     this.stop$.next();
     this.currentAppId$.complete();
     this.statusUpdaters$.complete();
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }
 

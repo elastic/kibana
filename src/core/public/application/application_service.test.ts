@@ -25,6 +25,7 @@ import { shallow } from 'enzyme';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
@@ -48,11 +49,11 @@ const createLegacyApp = (props: Partial<LegacyApp>): LegacyApp => {
   };
 };
 
-describe('#setup()', () => {
-  let setupDeps: MockLifecycle<'setup'>;
-  let startDeps: MockLifecycle<'start'>;
-  let service: ApplicationService;
+let setupDeps: MockLifecycle<'setup'>;
+let startDeps: MockLifecycle<'start'>;
+let service: ApplicationService;
 
+describe('#setup()', () => {
   beforeEach(() => {
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
@@ -61,7 +62,7 @@ describe('#setup()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -426,12 +427,9 @@ describe('#setup()', () => {
 });
 
 describe('#start()', () => {
-  let setupDeps: MockLifecycle<'setup'>;
-  let startDeps: MockLifecycle<'start'>;
-  let service: ApplicationService;
-
   beforeEach(() => {
     MockHistory.push.mockReset();
+
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
@@ -439,7 +437,7 @@ describe('#start()', () => {
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 
@@ -535,6 +533,7 @@ describe('#start()', () => {
             }
           }
           mounters={Map {}}
+          setAppLeaveHandler={[Function]}
         />
       `);
     });
@@ -591,10 +590,10 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
 
-      navigateToApp('myOtherApp');
+      await navigateToApp('myOtherApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
     });
 
@@ -605,10 +604,10 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
 
-      navigateToApp('app2');
+      await navigateToApp('app2');
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', undefined);
     });
 
@@ -619,13 +618,13 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
+      await navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
       expect(MockHistory.push).toHaveBeenCalledWith(
         '/app/myTestApp/deep/link/to/location/2',
         undefined
       );
 
-      navigateToApp('app2', { path: 'deep/link/to/location/2' });
+      await navigateToApp('app2', { path: 'deep/link/to/location/2' });
       expect(MockHistory.push).toHaveBeenCalledWith(
         '/custom/path/deep/link/to/location/2',
         undefined
@@ -639,10 +638,10 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp', { state: 'my-state' });
+      await navigateToApp('myTestApp', { state: 'my-state' });
       expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', 'my-state');
 
-      navigateToApp('app2', { state: 'my-state' });
+      await navigateToApp('app2', { state: 'my-state' });
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', 'my-state');
     });
 
@@ -653,7 +652,7 @@ describe('#start()', () => {
 
       const { navigateToApp } = await service.start(startDeps);
 
-      navigateToApp('myTestApp');
+      await navigateToApp('myTestApp');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/myTestApp');
     });
 
@@ -708,5 +707,41 @@ describe('#start()', () => {
       await navigateToApp('baseApp:legacyApp1');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
     });
+  });
+});
+
+describe('#stop()', () => {
+  let addListenerSpy: jest.SpyInstance;
+  let removeListenerSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    addListenerSpy = jest.spyOn(window, 'addEventListener');
+    removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+
+    MockHistory.push.mockReset();
+    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    setupDeps = {
+      http,
+      context: contextServiceMock.createSetupContract(),
+      injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    };
+    setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    service = new ApplicationService();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('removes the beforeunload listener', async () => {
+    service.setup(setupDeps);
+    await service.start(startDeps);
+    expect(addListenerSpy).toHaveBeenCalledTimes(1);
+    expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    const handler = addListenerSpy.mock.calls[0][1];
+    service.stop();
+    expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+    expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
   });
 });
