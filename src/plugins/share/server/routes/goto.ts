@@ -46,7 +46,11 @@ export const createGotoRoute = ({
       path: '/goto/{urlId}',
       validate: {
         params: schema.object({ urlId: schema.string() }),
-        query: schema.object({ embed: schema.string() }),
+        query: schema.maybe(
+          schema.object({
+            embed: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+          })
+        ),
       },
     },
     router.handleLegacyErrors(async function(context, request, response) {
