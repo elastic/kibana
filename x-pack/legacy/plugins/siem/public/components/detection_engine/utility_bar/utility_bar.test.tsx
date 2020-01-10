@@ -6,7 +6,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../../mock';
@@ -44,7 +43,7 @@ describe('UtilityBar', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('UtilityBar'))).toMatchSnapshot();
+    expect(wrapper.find('UtilityBar')).toMatchSnapshot();
   });
 
   test('it applies border styles when border is true', () => {

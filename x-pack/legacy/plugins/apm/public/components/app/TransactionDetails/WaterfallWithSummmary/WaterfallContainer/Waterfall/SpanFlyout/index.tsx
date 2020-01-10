@@ -101,7 +101,7 @@ export function SpanFlyout({
   const dbContext = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = httpContext?.response.status_code;
+  const spanHttpStatusCode = httpContext?.response?.status_code;
   const spanHttpUrl = httpContext?.url?.original;
   const spanHttpMethod = httpContext?.method;
 
