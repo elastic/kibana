@@ -13,7 +13,6 @@ import {
   EuiText,
   EuiListGroup,
 } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
