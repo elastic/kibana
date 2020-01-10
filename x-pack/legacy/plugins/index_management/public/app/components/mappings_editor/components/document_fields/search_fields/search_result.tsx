@@ -59,6 +59,7 @@ export const SearchResult = React.memo(
       />
     ) : (
       <VirtualList
+        style={{ overflowX: 'hidden' }}
         width="100%"
         height={listHeight}
         itemCount={result.length}
