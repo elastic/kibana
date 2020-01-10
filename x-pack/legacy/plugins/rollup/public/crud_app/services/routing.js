@@ -10,16 +10,6 @@
 
 import { createLocation } from 'history';
 
-let _userHasLeftApp = false;
-
-export function setUserHasLeftApp(userHasLeftApp) {
-  _userHasLeftApp = userHasLeftApp;
-}
-
-export function getUserHasLeftApp() {
-  return _userHasLeftApp;
-}
-
 const isModifiedEvent = event =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
