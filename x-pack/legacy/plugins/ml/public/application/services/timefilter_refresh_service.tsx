@@ -6,10 +6,7 @@
 
 import { Subject } from 'rxjs';
 
-interface MlTimeFilterUpdate {
-  lastRefresh: number;
-  timeRange: { start: string; end: string };
-}
+import { Refresh } from '../routing/use_refresh';
 
-export const mlTimefilterRefresh$ = new Subject<MlTimeFilterUpdate>();
-export const mlTimefilterTimeChange$ = new Subject<MlTimeFilterUpdate>();
+export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();
+export const mlTimefilterTimeChange$ = new Subject<Required<Refresh>>();

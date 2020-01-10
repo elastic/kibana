@@ -14,9 +14,9 @@ import {
   mlTimefilterTimeChange$,
 } from '../services/timefilter_refresh_service';
 
-interface Refresh {
-  timeRange?: { start: string; end: string };
+export interface Refresh {
   lastRefresh: number;
+  timeRange?: { start: string; end: string };
 }
 
 const refresh$: Observable<Refresh> = merge(
