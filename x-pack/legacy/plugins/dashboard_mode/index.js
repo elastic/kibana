@@ -12,12 +12,8 @@ import { createDashboardModeRequestInterceptor } from './server';
 
 import { i18n } from '@kbn/i18n';
 
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 // Copied largely from plugins/kibana/index.js. The dashboard viewer includes just the dashboard section of
 // the standard kibana plugin. We don't want to include code for the other links (visualize, dev tools, etc)
@@ -71,7 +67,7 @@ export function dashboardMode(kibana) {
               }
             ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-            category: AppCategoryObj.analyze,
+            category: AppCategory.analyze,
           },
         ],
       },

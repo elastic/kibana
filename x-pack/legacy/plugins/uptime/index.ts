@@ -9,13 +9,8 @@ import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
 import { KibanaServer, plugin } from './server';
-
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -37,7 +32,7 @@ export const uptime = (kibana: any) =>
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',
-        category: AppCategoryObj.observability,
+        category: AppCategory.observability,
       },
       home: ['plugins/uptime/register_feature'],
     },

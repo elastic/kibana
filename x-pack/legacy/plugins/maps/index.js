@@ -14,12 +14,8 @@ import _ from 'lodash';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
 
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 export function maps(kibana) {
   return new kibana.Plugin({
@@ -37,7 +33,7 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
-        category: AppCategoryObj.analyze,
+        category: AppCategory.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();

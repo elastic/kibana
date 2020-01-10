@@ -59,6 +59,7 @@ import {
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
+import { AppCategory } from '../../../application/types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -184,14 +185,34 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   }
 }
 
-// TODO@myasonik use an enum or something
-const categoryIcon = {
-  management: 'managementApp',
-};
+function getGroupIcon(groupName: AppCategory) {
+  switch (groupName) {
+    case AppCategory.management:
+      return 'managementApp';
+  }
+}
 
-function getGroupIcon(groupName: string) {
-  // @ts-ignore TODO@myasonik
-  return categoryIcon[groupName];
+function getGroupLabel(groupName: AppCategory) {
+  switch (groupName) {
+    case AppCategory.analyze:
+      return i18n.translate('core.ui.analyzeNavList.label', {
+        defaultMessage: 'Analyze',
+      });
+    case AppCategory.observability:
+      return i18n.translate('core.ui.observabilityNavList.label', {
+        defaultMessage: 'Observability',
+      });
+    case AppCategory.security:
+      return i18n.translate('core.ui.securityNavList.label', {
+        defaultMessage: 'Security',
+      });
+    case AppCategory.management:
+      return i18n.translate('core.ui.managementNavList.label', {
+        defaultMessage: 'Management',
+      });
+    default:
+      return groupName;
+  }
 }
 
 function truncateRecentItemLabel(label: string): string {
@@ -364,41 +385,71 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  public renderNavLinks() {
-    const isOSS = false; // TODO@myasonik
-    const disableGroupedNavSetting = false; // TODO@myasonik
-    if (isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7) {
-      return (
-        <EuiNavDrawer
-          ref={this.navDrawerRef}
-          data-test-subj="navDrawer"
-          isLocked={this.props.isLocked}
-          onIsLockedUpdate={this.props.onIsLockedUpdate}
-          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-            defaultMessage: 'Primary',
-          })}
-        >
-          {this.renderRecentLinks(this.state.recentlyAccessed)}
-          <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={this.state.navLinks}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
-        </EuiNavDrawer>
-      );
-    }
-
-    // TODO@myasonik use an enum or something
-    const { undefined: unknowns, management, ...mainNav } = groupBy(
+  public renderGroupedNav() {
+    const { undefined: unknowns, [AppCategory.management]: management, ...mainNav } = groupBy(
       this.state.navLinks,
       'category'
     );
 
-    // Have to conditional the whole nav because of an EUI bug
-    // https://github.com/elastic/eui/issues/2709)
+    return (
+      <>
+        <EuiNavDrawerGroup
+          data-test-subj="navDrawerAppsMenu"
+          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+            defaultMessage: 'Primary navigation links',
+          })}
+          listItems={[
+            ...Object.keys(mainNav).map(categoryName => {
+              const category = parseInt(categoryName, 10);
+              const childLinks = mainNav[categoryName];
+              if (childLinks.length === 1) {
+                return {
+                  ...childLinks[0],
+                  label: getGroupLabel(category),
+                  iconType: getGroupIcon(category),
+                };
+              }
+
+              return {
+                label: getGroupLabel(category),
+                iconType: getGroupIcon(category),
+                flyoutMenu: {
+                  title: getGroupLabel(category),
+                  listItems: sortBy(childLinks, 'order'),
+                },
+              };
+            }),
+            ...sortBy(unknowns, 'order'),
+          ]}
+        />
+        <EuiHorizontalRule margin="none" />
+        {management.length > 0 && (
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerManagementMenu"
+            aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
+              defaultMessage: 'Management navigation links',
+            })}
+            listItems={[
+              {
+                label: getGroupLabel(AppCategory.management),
+                iconType: getGroupIcon(AppCategory.management),
+                flyoutMenu: {
+                  title: getGroupLabel(AppCategory.management),
+                  listItems: sortBy(management, 'order'),
+                },
+              },
+            ]}
+          />
+        )}
+      </>
+    );
+  }
+
+  public renderNavLinks() {
+    const isOSS = false; // TODO@myasonik
+    const disableGroupedNavSetting = false; // TODO@myasonik
+    const showUngroupedNav = isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7;
+
     return (
       <EuiNavDrawer
         ref={this.navDrawerRef}
@@ -411,42 +462,17 @@ class HeaderUI extends Component<Props, State> {
       >
         {this.renderRecentLinks(this.state.recentlyAccessed)}
         <EuiHorizontalRule margin="none" />
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerAppsMenu"
-          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-            defaultMessage: 'Primary navigation links',
-          })}
-          listItems={[
-            ...Object.keys(mainNav).map(groupName => {
-              const childLinks = mainNav[groupName];
-
-              if (childLinks.length === 1) {
-                return { ...childLinks[0], label: groupName, iconType: getGroupIcon(groupName) };
-              }
-
-              return {
-                label: groupName,
-                iconType: getGroupIcon(groupName),
-                flyoutMenu: { title: groupName, listItems: sortBy(childLinks, 'order') },
-              };
-            }),
-            ...sortBy(unknowns, 'order'),
-          ]}
-        />
-        <EuiHorizontalRule margin="none" />
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerManagementMenu"
-          aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-            defaultMessage: 'Management navigation links',
-          })}
-          listItems={[
-            {
-              label: 'management',
-              iconType: getGroupIcon('management'),
-              flyoutMenu: { title: 'management', listItems: sortBy(management, 'order') },
-            },
-          ]}
-        />
+        {showUngroupedNav ? (
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={this.state.navLinks}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
+        ) : (
+          this.renderGroupedNav()
+        )}
       </EuiNavDrawer>
     );
   }

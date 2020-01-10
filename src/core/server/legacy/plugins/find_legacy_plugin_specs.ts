@@ -77,6 +77,7 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
   return (uiExports.navLinkSpecs || [])
     .map<LegacyNavLink>(spec => ({
       id: spec.id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       url: spec.url,

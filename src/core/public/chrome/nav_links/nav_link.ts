@@ -18,13 +18,7 @@
  */
 
 import { pick } from '../../../utils';
-
-enum AppCategory {
-  analyze,
-  observability,
-  security,
-  management,
-}
+import { AppCategory } from '../../application/types';
 
 /**
  * @public

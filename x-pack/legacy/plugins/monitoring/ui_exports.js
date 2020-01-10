@@ -6,13 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-
-const AppCategory = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the

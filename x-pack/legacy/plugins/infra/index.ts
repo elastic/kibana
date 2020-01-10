@@ -21,12 +21,8 @@ import { APMPluginContract } from '../../../plugins/apm/server';
 
 export const APP_ID = 'infra';
 
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -62,7 +58,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
-          category: AppCategoryObj.observability,
+          category: AppCategory.observability,
         },
         {
           description: i18n.translate('xpack.infra.linkLogsDescription', {
@@ -76,7 +72,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Logs',
           }),
           url: `/app/${APP_ID}#/logs`,
-          category: AppCategoryObj.observability,
+          category: AppCategory.observability,
         },
       ],
       mappings: savedObjectMappings,

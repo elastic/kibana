@@ -10,12 +10,8 @@ import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
 
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
@@ -30,7 +26,7 @@ export function canvas(kibana) {
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/legacy_start',
-        category: AppCategoryObj.analyze,
+        category: AppCategory.analyze,
       },
       interpreter: [
         'plugins/canvas/browser_functions',

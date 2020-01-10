@@ -30,13 +30,8 @@ import {
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
-
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -67,7 +62,7 @@ export const siem = (kibana: any) => {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
-          // category: AppCategoryObj.security,
+          category: AppCategory.security,
         },
       ],
       uiSettingDefaults: {

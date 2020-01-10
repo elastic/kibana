@@ -26,13 +26,7 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
-
-enum AppCategory {
-  analyze,
-  observability,
-  security,
-  management,
-}
+import { AppCategory } from '../application/types';
 
 /** @public */
 export interface LegacyNavLink {

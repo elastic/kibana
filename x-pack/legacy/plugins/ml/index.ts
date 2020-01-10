@@ -19,16 +19,12 @@ import {
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
 
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
+
 interface MlServer extends Server {
   addAppLinksToSampleDataset: () => {};
 }
-
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
 
 export const ml = (kibana: any) => {
   return new kibana.Plugin({
@@ -49,7 +45,7 @@ export const ml = (kibana: any) => {
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/legacy',
-        category: AppCategoryObj.management,
+        category: AppCategory.management,
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],

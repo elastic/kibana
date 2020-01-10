@@ -12,12 +12,8 @@ import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
-export const AppCategoryObj = {
-  analyze: 'analyze',
-  observability: 'observability',
-  security: 'security',
-  management: 'management',
-};
+// eslint-disable-next-line
+import { AppCategory } from '../../../../src/core/public/application/types';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -32,7 +28,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
         main: 'plugins/graph/index',
-        category: AppCategoryObj.analyze,
+        category: AppCategory.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
