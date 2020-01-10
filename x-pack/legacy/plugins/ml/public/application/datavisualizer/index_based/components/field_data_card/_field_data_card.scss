@@ -1,7 +1,7 @@
 .mlFieldDataCard {
   height: 480px;
   box-shadow: none;
-  border-color: $euiColorLightShade;
+  border-color: $euiBorderColor;
 
   // Note the names of these styles need to match the type of the field they are displaying.
   .boolean {
