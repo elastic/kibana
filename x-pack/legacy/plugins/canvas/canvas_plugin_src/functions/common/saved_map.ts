@@ -20,6 +20,7 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 interface Arguments {
   id: string;
   center: MapCenter | null;
+  hideLayer: string[];
   title: string | null;
   timerange: TimeRangeArg | null;
 }
@@ -41,6 +42,7 @@ export type SavedMapInput = EmbeddableInput & {
     lon: number;
     zoom: number;
   };
+  hiddenLayers?: string[];
 };
 
 const defaultTimeRange = {
@@ -65,6 +67,12 @@ export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Argume
         types: ['mapCenter'],
         help: argHelp.center,
         required: false,
+      },
+      hideLayer: {
+        types: ['string'],
+        help: argHelp.hideLayer,
+        required: false,
+        multi: true,
       },
       timerange: {
         types: ['timerange'],
@@ -104,6 +112,7 @@ export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Argume
           hideFilterActions: true,
           title: args.title ? args.title : undefined,
           isLayerTOCOpen: false,
+          hiddenLayers: args.hideLayer || [],
         },
         embeddableType: EmbeddableTypes.map,
       };

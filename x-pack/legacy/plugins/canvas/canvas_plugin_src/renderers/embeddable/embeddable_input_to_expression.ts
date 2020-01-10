@@ -38,6 +38,13 @@ export function embeddableInputToExpression(
         `timerange={timerange from="${mapInput.timeRange.from}" to="${mapInput.timeRange.to}"}`
       );
     }
+
+    if (mapInput.hiddenLayers && mapInput.hiddenLayers.length) {
+      for (const layerId of mapInput.hiddenLayers) {
+        expressionParts.push(`hideLayer="${layerId}"`);
+      }
+    }
   }
+
   return expressionParts.join(' ');
 }
