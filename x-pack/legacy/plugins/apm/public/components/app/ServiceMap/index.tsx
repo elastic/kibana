@@ -112,6 +112,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInteractive, setIsInteractive] = useState(false);
   const percentageLoadedRef = useRef(0);
   const [percentageLoaded, setPercentageLoaded] = useState(
     percentageLoadedRef.current
@@ -151,7 +152,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         const shouldGetNext = responses.length + 1 < MAX_REQUESTS && data.after;
 
         if (shouldGetNext) {
-          percentageLoadedRef.current += 10;
+          percentageLoadedRef.current += 30;
           setPercentageLoaded(percentageLoadedRef.current);
           await getNext({ after: data.after });
         }
@@ -164,6 +165,13 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   useEffect(() => {
     percentageLoadedRef.current = 5;
     setPercentageLoaded(percentageLoadedRef.current);
+
+    // Allow user interaction after 5 seconds regardless of load status
+    setIsInteractive(false);
+    setTimeout(() => {
+      setIsInteractive(true);
+    }, 5000);
+
     getNext({ reset: true }).then(() => {
       percentageLoadedRef.current = 100;
       setPercentageLoaded(percentageLoadedRef.current);
@@ -288,33 +296,37 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     );
   });
 
+  const updateMap = () => {
+    renderedElements.current = elements;
+    if (openToast.current) {
+      notifications.toasts.remove(openToast.current);
+    }
+    forceUpdate();
+  };
+
   if (renderedElements.current.length === 0) {
     renderedElements.current = elements;
   } else if (newData.length && !openToast.current) {
-    openToast.current = notifications.toasts.add({
-      title: i18n.translate('xpack.apm.newServiceMapData', {
-        defaultMessage: `Newly discovered connections are available.`
-      }),
-      onClose: () => {
-        openToast.current = null;
-      },
-      toastLifeTimeMs: 24 * 60 * 60 * 1000,
-      text: toMountPoint(
-        <EuiButton
-          onClick={() => {
-            renderedElements.current = elements;
-            if (openToast.current) {
-              notifications.toasts.remove(openToast.current);
-            }
-            forceUpdate();
-          }}
-        >
-          {i18n.translate('xpack.apm.updateServiceMap', {
-            defaultMessage: 'Update map'
-          })}
-        </EuiButton>
-      )
-    }).id;
+    if (isInteractive) {
+      openToast.current = notifications.toasts.add({
+        title: i18n.translate('xpack.apm.newServiceMapData', {
+          defaultMessage: `Newly discovered connections are available.`
+        }),
+        onClose: () => {
+          openToast.current = null;
+        },
+        toastLifeTimeMs: 24 * 60 * 60 * 1000,
+        text: toMountPoint(
+          <EuiButton onClick={updateMap}>
+            {i18n.translate('xpack.apm.updateServiceMap', {
+              defaultMessage: 'Update map'
+            })}
+          </EuiButton>
+        )
+      }).id;
+    } else {
+      updateMap();
+    }
   }
 
   useEffect(() => {
@@ -326,7 +338,11 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }, [notifications.toasts]);
 
   return isValidPlatinumLicense ? (
-    <LoadingOverlay isLoading={isLoading} percentageLoaded={percentageLoaded}>
+    <LoadingOverlay
+      isLoading={isLoading}
+      percentageLoaded={percentageLoaded}
+      isInteractive={isInteractive}
+    >
       <Cytoscape
         elements={renderedElements.current}
         serviceName={serviceName}
