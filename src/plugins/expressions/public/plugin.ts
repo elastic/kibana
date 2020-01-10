@@ -19,8 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
-import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
-import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from '../common';
+import { Executor, RenderFunctionsRegistry, FunctionsRegistry, TypesRegistry } from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import {
   setCoreStart,
@@ -97,20 +96,18 @@ export interface ExpressionsStart {
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly functions = new FunctionsRegistry();
-  private readonly renderers = new RenderFunctionsRegistry();
-  private readonly types = new TypesRegistry();
+  private readonly executor = new Executor();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { functions, renderers, types } = this;
+    const { executor } = this;
 
-    setRenderersRegistry(renderers);
+    setRenderersRegistry(executor.renderers);
 
-    const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
-      functions.register(fn);
-    };
+    const registerFunction = this.executor.registerFunction.bind(this.executor);
+    const registerType = this.executor.registerType.bind(this.executor);
+    const registerRenderer = this.executor.registerRenderer.bind(this.executor);
 
     registerFunction(clogFunction);
     registerFunction(fontFunction);
@@ -119,34 +116,33 @@ export class ExpressionsPublicPlugin
     registerFunction(variable);
     registerFunction(variableSet);
 
-    types.register(booleanType);
-    types.register(datatableType);
-    types.register(errorType);
-    types.register(filterType);
-    types.register(imageType);
-    types.register(nullType);
-    types.register(numberType);
-    types.register(pointseries);
-    types.register(rangeType);
-    types.register(renderType);
-    types.register(shapeType);
-    types.register(stringType);
-    types.register(styleType);
-    types.register(kibanaContextType);
-    types.register(kibanaDatatableType);
+    registerType(booleanType);
+    registerType(datatableType);
+    registerType(errorType);
+    registerType(filterType);
+    registerType(imageType);
+    registerType(nullType);
+    registerType(numberType);
+    registerType(pointseries);
+    registerType(rangeType);
+    registerType(renderType);
+    registerType(shapeType);
+    registerType(stringType);
+    registerType(styleType);
+    registerType(kibanaContextType);
+    registerType(kibanaDatatableType);
 
     // TODO: Refactor this function.
     const getExecutor = () => {
       const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
         const interpret = interpreterProvider({
-          types: types.toJS(),
+          types: executor.getTypes(),
           handlers: { ...handlers, ...createHandlers() },
-          functions,
+          functions: executor.functions,
         });
         return interpret(ast, context);
       };
-      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
-      return executor;
+      return { interpreter: { interpretAst } } as ExpressionExecutor;
     };
 
     setInterpreter(getExecutor().interpreter);
@@ -178,16 +174,12 @@ export class ExpressionsPublicPlugin
 
     const setup: ExpressionsSetup = {
       registerFunction,
-      registerRenderer: (renderer: any) => {
-        renderers.register(renderer);
-      },
-      registerType: type => {
-        types.register(type);
-      },
+      registerRenderer,
+      registerType,
       __LEGACY: {
-        functions,
-        renderers,
-        types,
+        functions: executor.functions,
+        renderers: executor.renderers,
+        types: executor.types,
         getExecutor,
         loadLegacyServerFunctionWrappers,
       },
