@@ -20,7 +20,6 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
-// @ts-ignore
 import deepFreeze from 'deep-freeze-strict';
 import {
   PureTransitionsToTransitions,
