@@ -5,38 +5,41 @@ def NUMBER_OF_NODES = 25
 def work = [:]
 for(def i = 0; i < NUMBER_OF_NODES; i++) {
   work["node-${i}"] = {
-    doIt()
+    node('linux && immutable') {
+      for(def j = 0; j < 5; j++) {
+        dir("dir-${j}") {
+          doIt()
+        }
+      }
+    }
   }
 }
 
 parallel(work)
 
 def doIt() {
-  node('linux && immutable') {
-    def hadError = false
+  def hadError = false
 
-    for(def i = 0; i < 500; i++) {
-      try {
-        timeout(time: 2, unit: 'MINUTES') {
-          sh 'curl --connect-timeout 5 https://github.com/elastic/kibana || true'
-          checkout scm
-        }
-        sleep 30
-      } catch(ex) {
-        hadError = true
-        sh 'curl --connect-timeout 5 https://github.com/elastic/kibana || true'
-        catchError {
-          throw ex
-        }
+  for(def i = 0; i < 500; i++) {
+    try {
+      timeout(time: 2, unit: 'MINUTES') {
+        checkout scm
       }
-
+      sleep 30
+    } catch(ex) {
+      hadError = true
+      sh 'curl --connect-timeout 5 https://github.com/elastic/kibana || true'
       catchError {
-        sh 'rm -rf kibana'
+        throw ex
       }
     }
 
-    if (hadError) {
-      input("Waiting...")
+    catchError {
+      sh 'rm -rf kibana'
     }
+  }
+
+  if (hadError) {
+    input("Waiting...")
   }
 }
