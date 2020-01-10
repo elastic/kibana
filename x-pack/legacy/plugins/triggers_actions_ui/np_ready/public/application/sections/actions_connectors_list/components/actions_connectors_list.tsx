@@ -294,6 +294,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   const emptyPrompt = (
     <EuiEmptyPrompt
+      data-test-subj="createFirstConnectorEmptyPrompt"
       title={
         <Fragment>
           <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />

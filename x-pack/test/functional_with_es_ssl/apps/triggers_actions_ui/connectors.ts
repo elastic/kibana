@@ -113,26 +113,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
     it('should delete a connector', async () => {
+      async function createConnector(connectorName: string) {
+        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+        const serverLogCard = await testSubjects.find('.server-log-card');
+        await serverLogCard.click();
+
+        const nameInput = await testSubjects.find('nameInput');
+        await nameInput.click();
+        await nameInput.clearValue();
+        await nameInput.type(connectorName);
+
+        const saveButton = await find.byCssSelector(
+          '[data-test-subj="saveActionButton"]:not(disabled)'
+        );
+        await saveButton.click();
+        await pageObjects.common.closeToast();
+      }
       const connectorName = generateUniqueKey();
+      await createConnector(connectorName);
 
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-      const serverLogCard = await testSubjects.find('.server-log-card');
-      await serverLogCard.click();
-
-      const nameInput = await testSubjects.find('nameInput');
-      await nameInput.click();
-      await nameInput.clearValue();
-      await nameInput.type(connectorName);
-
-      const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
-      );
-      await saveButton.click();
-
-      await pageObjects.common.closeToast();
+      await createConnector(generateUniqueKey());
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -144,7 +146,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteConnectorsConfirmation', { timeout: 30 * 1000 });
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -152,26 +153,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should bulk delete connectors', async () => {
+    it('should bulk delete connectors', async () => {
+      async function createConnector(connectorName: string) {
+        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+        const serverLogCard = await testSubjects.find('.server-log-card');
+        await serverLogCard.click();
+
+        const nameInput = await testSubjects.find('nameInput');
+        await nameInput.click();
+        await nameInput.clearValue();
+        await nameInput.type(connectorName);
+
+        const saveButton = await find.byCssSelector(
+          '[data-test-subj="saveActionButton"]:not(disabled)'
+        );
+        await saveButton.click();
+        await pageObjects.common.closeToast();
+      }
+
       const connectorName = generateUniqueKey();
+      await createConnector(connectorName);
 
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-      const serverLogCard = await testSubjects.find('.server-log-card');
-      await serverLogCard.click();
-
-      const nameInput = await testSubjects.find('nameInput');
-      await nameInput.click();
-      await nameInput.clearValue();
-      await nameInput.type(connectorName);
-
-      const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
-      );
-      await saveButton.click();
-
-      await pageObjects.common.closeToast();
+      await createConnector(generateUniqueKey());
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -185,6 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const bulkDeleteBtn = await testSubjects.find('bulkDelete');
       await bulkDeleteBtn.click();
+      await testSubjects.existOrFail('deleteConnectorsConfirmation');
+      await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteConnectorsConfirmation', { timeout: 30 * 1000 });
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
