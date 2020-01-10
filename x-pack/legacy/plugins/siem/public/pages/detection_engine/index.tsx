@@ -8,9 +8,9 @@ import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { CreateRuleComponent } from './rules/create';
-import { DetectionEngineComponent } from './detection_engine';
+import { DetectionEngine } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
-import { RuleDetailsComponent } from './rules/details';
+import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
 import { useUserInfo, ManageUserInfo } from './components/user_info';
 
@@ -31,7 +31,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
     <ManageUserInfo>
       <Switch>
         <Route exact path={detectionEnginePath} strict>
-          <DetectionEngineComponent
+          <DetectionEngine
             canUserCRUD={canUserCRUD ?? false}
             loading={loading}
             isSignalIndexExists={isSignalIndexExists}
@@ -46,7 +46,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
           <CreateRuleComponent />
         </Route>
         <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
-          <RuleDetailsComponent />
+          <RuleDetails />
         </Route>
         <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
           <EditRuleComponent />

@@ -5,9 +5,11 @@
  */
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StickyContainer } from 'react-sticky';
 
+import { connect } from 'react-redux';
+import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { SiemSearchBar } from '../../components/search_bar';
@@ -16,16 +18,23 @@ import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-import { SignalsTable } from './components/signals';
-
-import { SignalsCharts } from './components/signals_chart';
+import { Query } from '../../../../../../../src/plugins/data/common/query';
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { State } from '../../store';
+import { inputsSelectors } from '../../store/inputs';
+import { InputsModelId } from '../../store/inputs/constants';
+import { InputsRange } from '../../store/inputs/model';
 import { useSignalInfo } from './components/signals_info';
+import { SignalsTable } from './components/signals';
+import { SignalsHistogramPanel } from './components/signals_histogram_panel';
+import { signalsHistogramOptions } from './components/signals_histogram_panel/config';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
-interface DetectionEngineComponentProps {
+interface OwnProps {
   canUserCRUD: boolean;
   loading: boolean;
   isSignalIndexExists: boolean | null;
@@ -33,9 +42,41 @@ interface DetectionEngineComponentProps {
   signalsIndex: string | null;
 }
 
-export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({ canUserCRUD, loading, isSignalIndexExists, isUserAuthenticated, signalsIndex }) => {
+interface ReduxProps {
+  filters: esFilters.Filter[];
+  query: Query;
+}
+
+export interface DispatchProps {
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
+}
+
+type DetectionEngineComponentProps = OwnProps & ReduxProps & DispatchProps;
+
+const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
+  ({
+    canUserCRUD,
+    filters,
+    loading,
+    isSignalIndexExists,
+    isUserAuthenticated,
+    query,
+    setAbsoluteRangeDatePicker,
+    signalsIndex,
+  }) => {
     const [lastSignals] = useSignalInfo({});
+
+    const updateDateRangeCallback = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
       return (
         <WrapperPage>
@@ -61,7 +102,6 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                 <FiltersGlobal>
                   <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
-
                 <WrapperPage>
                   <HeaderPage
                     border
@@ -81,18 +121,29 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                     </EuiButton>
                   </HeaderPage>
 
-                  <SignalsCharts />
-
-                  <EuiSpacer />
                   <GlobalTime>
                     {({ to, from }) => (
-                      <SignalsTable
-                        loading={loading}
-                        canUserCRUD={canUserCRUD}
-                        from={from}
-                        signalsIndex={signalsIndex ?? ''}
-                        to={to}
-                      />
+                      <>
+                        <SignalsHistogramPanel
+                          filters={filters}
+                          from={from}
+                          loadingInitial={loading}
+                          query={query}
+                          stackByOptions={signalsHistogramOptions}
+                          to={to}
+                          updateDateRange={updateDateRangeCallback}
+                        />
+
+                        <EuiSpacer />
+
+                        <SignalsTable
+                          loading={loading}
+                          canUserCRUD={canUserCRUD}
+                          from={from}
+                          signalsIndex={signalsIndex ?? ''}
+                          to={to}
+                        />
+                      </>
                     )}
                   </GlobalTime>
                 </WrapperPage>
@@ -105,10 +156,28 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
             );
           }}
         </WithSource>
-
         <SpyRoute />
       </>
     );
   }
 );
 DetectionEngineComponent.displayName = 'DetectionEngineComponent';
+
+const makeMapStateToProps = () => {
+  const getGlobalInputs = inputsSelectors.globalSelector();
+  return (state: State) => {
+    const globalInputs: InputsRange = getGlobalInputs(state);
+    const { query, filters } = globalInputs;
+
+    return {
+      query,
+      filters,
+    };
+  };
+};
+
+export const DetectionEngine = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+})(DetectionEngineComponent);
+
+DetectionEngine.displayName = 'DetectionEngine';
