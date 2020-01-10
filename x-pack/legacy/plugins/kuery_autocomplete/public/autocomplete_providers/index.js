@@ -17,10 +17,14 @@ function dedup(suggestions) {
   return uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
 }
 
-export const kueryProvider = ({ config, indexPatterns, boolFilter }) => {
-  const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
-    return provider({ config, indexPatterns, boolFilter });
-  });
+export const setupKueryProvider = ({ uiSettings }) => ({ indexPatterns, boolFilter }) => {
+  const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider =>
+    provider({
+      config: uiSettings,
+      indexPatterns,
+      boolFilter,
+    })
+  );
 
   return function getSuggestions({ query, selectionStart, selectionEnd, signal }) {
     const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(

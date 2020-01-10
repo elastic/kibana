@@ -18,8 +18,7 @@ import { history } from '../../../utils/history';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
-  AutocompleteProvider,
-  AutocompleteSuggestion,
+  autocomplete as autocompleteNamespace,
   esKuery,
   IIndexPattern
 } from '../../../../../../../../src/plugins/data/public';
@@ -29,7 +28,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocompleteNamespace.AutocompleteSuggestion[];
   isLoadingSuggestions: boolean;
 }
 
@@ -43,17 +42,13 @@ function getSuggestions(
   selectionStart: number,
   indexPattern: IIndexPattern,
   boolFilter: unknown,
-  autocompleteProvider?: AutocompleteProvider
+  autocompleteProvider?: autocompleteNamespace.AutocompleteProvider
 ) {
   if (!autocompleteProvider) {
     return [];
   }
-  const config = {
-    get: () => true
-  };
 
   const getAutocompleteSuggestions = autocompleteProvider({
-    config,
     indexPatterns: [indexPattern],
     boolFilter
   });

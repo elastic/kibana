@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
-import { AutocompleteSuggestion, esKuery } from '../../../../../../../../src/plugins/data/public';
+import { autocomplete, esKuery } from '../../../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
@@ -36,18 +36,14 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   public async getSuggestions(
     kuery: string,
     selectionStart: any
-  ): Promise<AutocompleteSuggestion[]> {
+  ): Promise<autocomplete.AutocompleteSuggestion[]> {
     const autocompleteProvider = getAutocompleteProvider('kuery');
     if (!autocompleteProvider) {
       return [];
     }
-    const config = {
-      get: () => true,
-    };
     const indexPattern = await this.getIndexPattern();
 
     const getAutocompleteSuggestions = autocompleteProvider({
-      config,
       indexPatterns: [indexPattern],
       boolFilter: null,
     });

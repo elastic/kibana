@@ -13,10 +13,9 @@ import { Typeahead } from './typeahead';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
 import {
-  AutocompleteProviderRegister,
-  AutocompleteSuggestion,
   esKuery,
   IIndexPattern,
+  autocomplete as autocompleteNamespace,
 } from '../../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from '../../../hooks';
 
@@ -25,7 +24,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocompleteNamespace.AutocompleteSuggestion[];
   isLoadingIndexPattern: boolean;
 }
 
@@ -38,18 +37,14 @@ function getSuggestions(
   query: string,
   selectionStart: number,
   apmIndexPattern: IIndexPattern,
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
+  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart
 ) {
   const autocompleteProvider = autocomplete.getProvider('kuery');
   if (!autocompleteProvider) {
     return [];
   }
-  const config = {
-    get: () => true,
-  };
 
   const getAutocompleteSuggestions = autocompleteProvider({
-    config,
     indexPatterns: [apmIndexPattern],
   });
 
@@ -62,7 +57,7 @@ function getSuggestions(
 }
 
 interface Props {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart;
 }
 
 export function KueryBar({ autocomplete }: Props) {
@@ -106,7 +101,10 @@ export function KueryBar({ autocomplete }: Props) {
         autocomplete
       );
       suggestions = suggestions
-        .filter((suggestion: AutocompleteSuggestion) => !startsWith(suggestion.text, 'span.'))
+        .filter(
+          (suggestion: autocompleteNamespace.AutocompleteSuggestion) =>
+            !startsWith(suggestion.text, 'span.')
+        )
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

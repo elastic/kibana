@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { npStart } from 'ui/new_platform';
-import { AutocompleteSuggestion, IIndexPattern } from 'src/plugins/data/public';
+import { autocomplete, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
 
 const getAutocompleteProvider = (language: string) =>
@@ -16,7 +16,7 @@ interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: AutocompleteSuggestion[];
+    suggestions: autocomplete.AutocompleteSuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -28,7 +28,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocomplete.AutocompleteSuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<
@@ -57,16 +57,12 @@ export class WithKueryAutocompletion extends React.Component<
   ) => {
     const { indexPattern } = this.props;
     const autocompletionProvider = getAutocompleteProvider('kuery');
-    const config = {
-      get: () => true,
-    };
 
     if (!autocompletionProvider) {
       return;
     }
 
     const getSuggestions = autocompletionProvider({
-      config,
       indexPatterns: [indexPattern],
       boolFilter: [],
     });

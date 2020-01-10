@@ -62,7 +62,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     );
 
     return {
-      autocomplete: this.autocomplete,
+      autocomplete: this.autocomplete.setup(),
       search: this.searchService.setup(core),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -82,7 +82,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     const dataServices = {
-      autocomplete: this.autocomplete,
+      autocomplete: this.autocomplete.start(),
+      // todo: value suggestions
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats,

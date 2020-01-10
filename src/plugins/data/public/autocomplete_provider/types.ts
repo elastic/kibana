@@ -20,17 +20,11 @@
 import { AutocompleteProviderRegister } from '.';
 import { IIndexPattern, IFieldType } from '../../common';
 
-export type AutocompletePublicPluginSetup = Pick<
-  AutocompleteProviderRegister,
-  'addProvider' | 'getProvider'
->;
-export type AutocompletePublicPluginStart = Pick<AutocompleteProviderRegister, 'getProvider'>;
+export type AutocompletePublicPluginSetup = ReturnType<AutocompleteProviderRegister['setup']>;
+export type AutocompletePublicPluginStart = ReturnType<AutocompleteProviderRegister['start']>;
 
 /** @public **/
 export type AutocompleteProvider = (args: {
-  config: {
-    get(configKey: string): any;
-  };
   indexPatterns: IIndexPattern[];
   boolFilter?: any;
 }) => GetSuggestions;

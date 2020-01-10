@@ -23,11 +23,14 @@ import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '.
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
-import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
+import {
+  autocomplete as autocompleteNamespace,
+  esKuery,
+} from '../../../../../../src/plugins/data/public';
 
 interface OverviewPageProps {
   basePath: string;
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart;
   history: any;
   location: {
     pathname: string;

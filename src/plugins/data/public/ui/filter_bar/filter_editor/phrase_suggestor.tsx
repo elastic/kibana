@@ -69,6 +69,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
       return;
     }
     this.setState({ isLoading: true });
+    // todo: value suggestions
     const suggestions = await this.services.data.getSuggestions(indexPattern.title, field, value);
     this.setState({ suggestions, isLoading: false });
   }, 500);

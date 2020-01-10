@@ -20,7 +20,7 @@
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+import { autocomplete } from '.';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
@@ -38,14 +38,14 @@ export interface DataStartDependencies {
 }
 
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
+  autocomplete: autocomplete.AutocompletePublicPluginSetup;
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
 
 export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
+  autocomplete: autocomplete.AutocompletePublicPluginStart;
   getSuggestions: IGetSuggestions;
   indexPatterns: IndexPatternsContract;
   search: ISearchStart;
@@ -57,7 +57,6 @@ export interface DataPublicPluginStart {
   };
 }
 
-export * from './autocomplete_provider/types';
 export { IGetSuggestions } from './suggestions_provider/types';
 
 export interface IDataPluginServices extends Partial<CoreStart> {

@@ -13,12 +13,8 @@ export async function getSuggestions(query, selectionStart, indexPattern, boolFi
   if (!autocompleteProvider) {
     return [];
   }
-  const config = {
-    get: () => true,
-  };
 
   const getAutocompleteSuggestions = autocompleteProvider({
-    config,
     indexPatterns: [indexPattern],
     boolFilter,
   });
