@@ -123,8 +123,8 @@ const createApmApi = () => {
     .add(transactionByTraceIdRoute)
 
     // Service map
-    .add(serviceMapRoute)
-    .add(serviceMapServiceNodeRoute);
+    .add(serviceMapServiceNodeRoute)
+    .add(serviceMapRoute);
 
   return api;
 };
