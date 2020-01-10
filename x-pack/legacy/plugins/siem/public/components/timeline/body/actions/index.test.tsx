@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';

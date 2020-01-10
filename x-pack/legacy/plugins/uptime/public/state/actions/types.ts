@@ -5,8 +5,17 @@
  */
 
 export interface QueryParams {
+  monitorId: string;
   dateStart: string;
   dateEnd: string;
   filters?: string;
   statusFilter?: string;
+  location?: string;
+}
+
+export interface MonitorDetailsActionPayload {
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+  location?: string;
 }

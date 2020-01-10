@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
+import { Readable } from 'stream';
 
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
@@ -45,6 +46,24 @@ export interface RulesRequest extends RequestFacade {
 
 export interface BulkRulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest[];
+}
+
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+  };
+}
+export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+  query: { overwrite: boolean };
+  payload: { file: HapiReadableStream };
+}
+
+export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
+  payload: { objects: Array<{ rule_id: string }> | null | undefined };
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
 }
 
 export type QueryRequest = Omit<RequestFacade, 'query'> & {
