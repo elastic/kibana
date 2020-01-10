@@ -51,9 +51,22 @@ export const USERNAME = '[data-test-subj="loginUsername"]';
 We prefer not to mock API responses in most of our smoke tests, but sometimes
 it's necessary because a test must assert that a specific value is rendered,
 and it's not possible to derive that value based on the data in the
-envrionment where tests are running.
+environment where tests are running.
 
 Mocked responses API from the server are located in `siem/cypress/fixtures`.
+
+## Speeding up test execution time
+
+Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
+taken into consideration until another solution is implemented:
+
+- Don't refresh the page for every test to clean the state of it.
+- Instead, group the tests that are similar in different contexts.
+- For every context login only once, clean the state between tests if needed without re-loading the page.
+- All tests in a spec file must be order-independent. 
+    - If you need to reload the page to make the tests order-independent, consider to create a new context.
+
+Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
 ## Authentication
 

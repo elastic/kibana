@@ -41,7 +41,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
     if (!stateParams.mapType) {
       setValue('mapType', vis.type.editorConfig.collections.mapTypes[0]);
     }
-  }, []);
+  }, [setValue, stateParams.mapType, vis.type.editorConfig.collections.mapTypes]);
 
   return (
     <>
