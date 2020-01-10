@@ -131,7 +131,6 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
                 })}
               </p>
             </EuiText>
-            <EuiSpacer size="m" />
             {getSecurityConfigurationErrorUi()}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import '../../jest.helpers';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { kfetch } from 'ui/kfetch';
 import { AlertsStatus, AlertsStatusProps } from './status';
 import { ALERT_TYPE_PREFIX } from '../../../common/constants';
@@ -25,6 +25,7 @@ jest.mock('ui/kfetch', () => ({
 const defaultProps: AlertsStatusProps = {
   clusterUuid: '1adsb23',
   emailAddress: 'test@elastic.co',
+  ccs: '',
 };
 
 describe('Status', () => {
@@ -35,9 +36,18 @@ describe('Status', () => {
       enabled: false,
     });
 
-    (kfetch as jest.Mock).mockReturnValue({
-      data: [],
+    (kfetch as jest.Mock).mockImplementation(({ pathname }) => {
+      if (pathname === '/internal/security/api_key/privileges') {
+        return { areApiKeysEnabled: true };
+      }
+      return {
+        data: [],
+      };
     });
+
+    const spy = jest.spyOn(React, 'useEffect');
+    spy.mockImplementationOnce(f => f());
+    spy.mockImplementationOnce(f => f());
   });
 
   it('should render without setup mode', () => {
@@ -45,10 +55,14 @@ describe('Status', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render a flyout when clicking the link', () => {
-    const component = shallow(<AlertsStatus {...defaultProps} />);
+  it('should render a flyout when clicking the link', async () => {
+    (getSetupModeState as jest.Mock).mockReturnValue({
+      enabled: true,
+    });
 
+    const component = shallow(<AlertsStatus {...defaultProps} />);
     component.find('EuiLink').simulate('click');
+    await component.update();
     expect(component.find('EuiFlyout')).toMatchSnapshot();
   });
 
@@ -65,18 +79,8 @@ describe('Status', () => {
       enabled: true,
     });
 
-    const component = mount(<AlertsStatus {...defaultProps} />);
-
-    await new Promise(resolve => process.nextTick(resolve));
-
-    component.update();
+    const component = shallow(<AlertsStatus {...defaultProps} />);
+    await component.update();
     expect(component.find('EuiCallOut')).toMatchSnapshot();
-  });
-
-  it('should close the flyout if setup mode is disabled', async () => {
-    const component = mount(<AlertsStatus {...defaultProps} />);
-    component.find('EuiLink').simulate('click');
-    await new Promise(resolve => process.nextTick(resolve));
-    expect(component.find('EuiFlyout').exists()).toBe(false);
   });
 });
