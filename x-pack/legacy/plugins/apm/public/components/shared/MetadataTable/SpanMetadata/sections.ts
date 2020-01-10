@@ -11,7 +11,8 @@ import {
   SPAN,
   LABELS,
   TRANSACTION,
-  TRACE
+  TRACE,
+  MESSAGE_SPAN
 } from '../sections';
 
 export const SPAN_METADATA_SECTIONS: Section[] = [
@@ -20,5 +21,6 @@ export const SPAN_METADATA_SECTIONS: Section[] = [
   TRANSACTION,
   TRACE,
   SERVICE,
+  MESSAGE_SPAN,
   AGENT
 ];

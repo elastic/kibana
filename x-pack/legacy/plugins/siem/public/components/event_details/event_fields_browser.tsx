@@ -6,7 +6,7 @@
 
 import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
-import * as React from 'react';
+import React, { useMemo } from 'react';
 
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
@@ -29,26 +29,35 @@ interface Props {
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
-    const fieldsByName = getAllFieldsByName(browserFields);
+    const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+    const items = useMemo(
+      () =>
+        sortBy(data, ['field']).map(item => ({
+          ...item,
+          ...fieldsByName[item.field],
+          valuesConcatenated: item.values != null ? item.values.join() : '',
+        })),
+      [data, fieldsByName]
+    );
+    const columns = useMemo(
+      () =>
+        getColumns({
+          browserFields,
+          columnHeaders,
+          eventId,
+          onUpdateColumns,
+          contextId: timelineId,
+          toggleColumn,
+        }),
+      [browserFields, columnHeaders, eventId, onUpdateColumns, timelineId, toggleColumn]
+    );
+
     return (
       <div className="euiTable--compressed">
         <EuiInMemoryTable
           // @ts-ignore items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
-          items={sortBy(data, ['field']).map(item => {
-            return {
-              ...item,
-              ...fieldsByName[item.field],
-              valuesConcatenated: item.values != null ? item.values.join() : '',
-            };
-          })}
-          columns={getColumns({
-            browserFields,
-            columnHeaders,
-            eventId,
-            onUpdateColumns,
-            contextId: timelineId,
-            toggleColumn,
-          })}
+          items={items}
+          columns={columns}
           pagination={false}
           search={search}
           sorting={true}
