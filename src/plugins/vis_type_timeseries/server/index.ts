@@ -25,7 +25,6 @@ export { VisTypeTimeseriesSetup, Framework } from './plugin';
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    failOnRequestValidation: schema.boolean({ defaultValue: false }),
   }),
 };
 

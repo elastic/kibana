@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { getVisData } from '../lib/get_vis_data';
@@ -34,12 +33,6 @@ export const visDataRoutes = (
   framework: Framework,
   { logFailedValidation }: ValidationTelemetryServiceSetup
 ) => {
-  let failOnRequestValidation = false;
-
-  framework.config$.subscribe(config => {
-    failOnRequestValidation = config.failOnRequestValidation;
-  });
-
   router.post(
     {
       path: '/api/metrics/vis/data',
@@ -51,22 +44,11 @@ export const visDataRoutes = (
       const { error: validationError } = visPayloadSchema.validate(request.body);
       if (validationError) {
         logFailedValidation();
-        if (failOnRequestValidation) {
-          framework.logger.error(
-            `Request validation error: ${validationError}. To allow outdated requests, set 'metrics.failOnRequestValidation' to false.`
-          );
-          return response.badRequest({
-            body: i18n.translate('visTypeTimeseries.validationError', {
-              defaultMessage:
-                'Request validation failed. To disable request validation please contact your system administrator. Detailed error message: {validationError}',
-              values: {
-                validationError: validationError.message,
-              },
-            }),
-          });
-        }
+        const savedObjectId =
+          (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
+          'unavailable';
         framework.logger.warn(
-          `Request validation error: ${validationError.message}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
+          `Request validation error: ${validationError.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
         );
       }
       try {

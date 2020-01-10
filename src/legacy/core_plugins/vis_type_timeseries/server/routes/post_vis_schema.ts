@@ -238,6 +238,7 @@ export const visPayloadSchema = Joi.object({
         .required(),
     }).optional(),
   }).required(),
+  savedObjectId: Joi.string().optional(),
   timerange: Joi.object({
     timezone: stringRequired,
     min: stringRequired,

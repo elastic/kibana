@@ -59,7 +59,12 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
+type buildVisFunction = (
+  visState: VisState,
+  schemas: Schemas,
+  uiState: any,
+  meta: { savedObjectId?: string }
+) => string;
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
@@ -248,11 +253,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: (visState, schemas, uiState = {}) => {
+  metrics: (visState, schemas, uiState = {}, { savedObjectId }) => {
     const paramsJson = prepareJson('params', visState.params);
     const uiStateJson = prepareJson('uiState', uiState);
+    const savedObjectIdParam = prepareString('savedObjectId', savedObjectId);
 
-    return `tsvb ${paramsJson} ${uiStateJson}`;
+    return `tsvb ${paramsJson} ${uiStateJson} ${savedObjectIdParam}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);
@@ -488,6 +494,7 @@ export const buildPipeline = async (
   params: {
     searchSource: ISearchSource;
     timeRange?: any;
+    savedObjectId?: string;
   }
 ) => {
   const { searchSource } = params;
@@ -521,7 +528,9 @@ export const buildPipeline = async (
 
   const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState, {
+      savedObjectId: params.savedObjectId,
+    });
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);

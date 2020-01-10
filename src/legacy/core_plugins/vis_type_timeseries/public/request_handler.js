@@ -23,7 +23,14 @@ import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 import { getUISettings } from './services';
 
-export const metricsRequestHandler = async ({ uiState, timeRange, filters, query, visParams }) => {
+export const metricsRequestHandler = async ({
+  uiState,
+  timeRange,
+  filters,
+  query,
+  visParams,
+  savedObjectId,
+}) => {
   const config = getUISettings();
   const timezone = timezoneProvider(config)();
   const uiStateObj = uiState.get(visParams.type, {});
@@ -49,6 +56,7 @@ export const metricsRequestHandler = async ({ uiState, timeRange, filters, query
           filters,
           panels: [visParams],
           state: uiStateObj,
+          savedObjectId: savedObjectId || 'unsaved',
         }),
       });
 
@@ -59,9 +67,6 @@ export const metricsRequestHandler = async ({ uiState, timeRange, filters, query
         ...resp,
       };
     } catch (error) {
-      if (error.body && error.body.message) {
-        return Promise.reject(new Error(error.body.message));
-      }
       return Promise.reject(error);
     }
   }
