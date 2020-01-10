@@ -12,10 +12,6 @@ export function makePolicyUpdateHandler(libs: FleetServerLib) {
     const internalUser = libs.framework.getInternalUser();
 
     if (action === 'created') {
-      if (policyId === 'default') {
-        // TODO wait for #53111 to be fixed
-        return;
-      }
       await libs.apiKeys.generateEnrollmentApiKey(internalUser, {
         policyId,
       });
