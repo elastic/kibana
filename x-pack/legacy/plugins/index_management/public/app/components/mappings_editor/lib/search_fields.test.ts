@@ -172,4 +172,21 @@ describe('Search fields', () => {
     expect(result[1].field.path).toEqual(field2.path); // Field 2 name _is_ the search term, comes first
     expect(result[2].field.path).toEqual(field1.path);
   });
+
+  test('should sort first field whose name fully matches the term', () => {
+    const field1 = getField({ type: 'text' }, ['aerospke', 'namespace']);
+    const field2 = getField({ type: 'text' }, ['agent', 'name']);
+
+    const allFields = {
+      [field1.id]: field1,
+      [field2.id]: field2,
+    };
+
+    const searchTerm = 'name';
+
+    const result = searchFields(searchTerm, allFields);
+    expect(result.length).toBe(2);
+    expect(result[0].field.path).toEqual(field2.path); // Field 2 name fully matches
+    expect(result[1].field.path).toEqual(field1.path);
+  });
 });

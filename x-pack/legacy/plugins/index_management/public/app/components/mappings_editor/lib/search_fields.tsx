@@ -50,8 +50,12 @@ const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
 const calculateScore = (metadata: Omit<SearchMetadata, 'score' | 'display'>): number => {
   let score = 0;
 
-  if (metadata.matchFieldName) {
+  if (metadata.fullyMatchFieldName) {
     score += 15;
+  }
+
+  if (metadata.matchFieldName) {
+    score += 5;
   }
 
   if (metadata.matchPath) {
@@ -122,7 +126,13 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
   const { term, terms, type, searchRegexArray } = searchData;
   const typeToCompare = type ?? term;
 
-  const matchFieldName = new RegExp(terms[terms.length - 1], 'i').test(fieldData.name);
+  // We consider that the last search term is the field name we are searching
+  const fieldNameTerm = terms[terms.length - 1];
+
+  const fullyMatchFieldName = fieldNameTerm === fieldData.name;
+  const matchFieldName = fullyMatchFieldName
+    ? true
+    : new RegExp(fieldNameTerm, 'i').test(fieldData.name);
   const matchStartOfPath = fieldData.path.startsWith(term);
   const fullyMatchPath = term === fieldData.path;
   const matchType = fieldData.type.includes(typeToCompare);
@@ -153,6 +163,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
     matchStartOfPath,
     fullyMatchPath,
     matchType,
+    fullyMatchFieldName,
     fullyMatchType,
     stringMatch,
   };
@@ -187,12 +198,12 @@ const getSubArrays = (arr: string[]): string[][] => {
 };
 
 const getRegexArrayFromSearchTerms = (searchTerms: string[]): RegExp[] => {
-  const termsRegexArray = searchTerms.map(term => new RegExp(term, 'i'));
-  const fuzzyJoinChar = '[_\\.-\\s]?';
+  const termsRegex = new RegExp(searchTerms.join('|'), 'i');
+  const fuzzyJoinChar = '([\\._-\\s]|(\\s>\\s))?';
   const fuzzySearchRegexArray = getSubArrays(searchTerms).map(
     ([A, B]) => new RegExp(A + fuzzyJoinChar + B, 'i')
   );
-  const regexArray = [...termsRegexArray, ...fuzzySearchRegexArray];
+  const regexArray = [termsRegex, ...fuzzySearchRegexArray];
 
   return regexArray;
 };
@@ -223,22 +234,20 @@ const parseSearchTerm = (term: string): SearchData => {
 
 export const searchFields = (term: string, fields: NormalizedFields['byId']): SearchResult[] => {
   const searchData = parseSearchTerm(term);
-  return (
-    Object.values(fields)
-      .map(field => ({
-        field,
-        metadata: getSearchMetadata(searchData, {
-          name: field.source.name,
-          path: field.path.join(' > '),
-          type: field.source.type,
-        }),
-      }))
-      // only show the first 100 results
-      .filter(({ metadata }, index) => metadata.score > 0 && index < 100)
-      .sort(sortResult)
-      .map(({ field, metadata: { display } }) => ({
-        display,
-        field,
-      }))
-  );
+  return Object.values(fields)
+    .map(field => ({
+      field,
+      metadata: getSearchMetadata(searchData, {
+        name: field.source.name,
+        path: field.path.join(' > '),
+        type: field.source.type,
+      }),
+    }))
+    .filter(({ metadata }) => metadata.score > 0)
+    .filter((_, index) => index < 100) // only return the first 100 results
+    .sort(sortResult)
+    .map(({ field, metadata: { display } }) => ({
+      display,
+      field,
+    }));
 };

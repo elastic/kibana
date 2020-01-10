@@ -251,6 +251,10 @@ export interface SearchMetadata {
    */
   matchStartOfPath: boolean;
   /**
+   * If the last word of the search terms fully matches the field name
+   */
+  fullyMatchFieldName: boolean;
+  /**
    * If the search term exactly matches the field type
    */
   fullyMatchType: boolean;
