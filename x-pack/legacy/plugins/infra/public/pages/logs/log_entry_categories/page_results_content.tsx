@@ -5,14 +5,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -161,57 +154,55 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   return (
     <ResultsContentPage>
-      <EuiPageBody>
-        <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="l">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        {jobHasProblem(jobStatus['log-entry-categories-count'], setupStatus) ? (
           <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="l">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem />
-                <EuiFlexItem grow={false}>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <LogAnalysisJobProblemIndicator
+              jobStatus={jobStatus['log-entry-categories-count']}
+              onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+              onRecreateMlJobForUpdate={viewSetupForUpdate}
+              setupStatus={setupStatus}
+            />
           </EuiFlexItem>
-          {jobHasProblem(jobStatus['log-entry-categories-count'], setupStatus) ? (
-            <EuiFlexItem grow={false}>
-              <LogAnalysisJobProblemIndicator
-                jobStatus={jobStatus['log-entry-categories-count']}
-                onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-                onRecreateMlJobForUpdate={viewSetupForUpdate}
-                setupStatus={setupStatus}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {isFirstUse && !hasResults ? (
-            <EuiFlexItem grow={false}>
-              <FirstUseCallout />
-            </EuiFlexItem>
-          ) : null}
+        ) : null}
+        {isFirstUse && !hasResults ? (
           <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="l">
-              <TopCategoriesSection
-                availableDatasets={logEntryCategoryDatasets}
-                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
-                isLoadingTopCategories={isLoadingTopLogEntryCategories}
-                jobId={jobIds['log-entry-categories-count']}
-                onChangeDatasetSelection={setCategoryQueryDatasets}
-                onRequestRecreateMlJob={viewSetupForReconfiguration}
-                selectedDatasets={categoryQueryDatasets}
-                timeRange={categoryQueryTimeRange.timeRange}
-                topCategories={topLogEntryCategories}
-              />
-            </EuiPanel>
+            <FirstUseCallout />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageBody>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="l">
+            <TopCategoriesSection
+              availableDatasets={logEntryCategoryDatasets}
+              isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+              isLoadingTopCategories={isLoadingTopLogEntryCategories}
+              jobId={jobIds['log-entry-categories-count']}
+              onChangeDatasetSelection={setCategoryQueryDatasets}
+              onRequestRecreateMlJob={viewSetupForReconfiguration}
+              selectedDatasets={categoryQueryDatasets}
+              timeRange={categoryQueryTimeRange.timeRange}
+              topCategories={topLogEntryCategories}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ResultsContentPage>
   );
 };
@@ -234,6 +225,7 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
 // kicks in on small screens via media queries breaking when using direction="column"
 export const ResultsContentPage = euiStyled(EuiPage)`
   flex: 1 0 0%;
+  flex-direction: column;
 
   .euiFlexGroup--responsive > .euiFlexItem {
     flex-basis: auto !important;
