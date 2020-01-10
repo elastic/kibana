@@ -26,21 +26,17 @@ describe('createTickFormatter(format, template)', () => {
     expect(fn(1.5556)).to.equal('1.56');
   });
 
-  // it('returns a percent with percent formatter', () => {
-  //   const config = {
-  //     'format:percent:defaultPattern': '0.[00]%',
-  //   };
-  //   const fn = createTickFormatter('percent', null, key => config[key]);
-  //   expect(fn(0.5556)).to.equal('55.56%');
-  // });
+  it('returns a percent with percent formatter', () => {
+    const config = {};
+    const fn = createTickFormatter('percent', null, key => config[key]);
+    expect(fn(0.5556)).to.equal('55.56%');
+  });
 
-  // it('returns a byte formatted string with byte formatter', () => {
-  //   const config = {
-  //     'format:bytes:defaultPattern': '0.0b',
-  //   };
-  //   const fn = createTickFormatter('bytes', null, key => config[key]);
-  //   expect(fn(1500 ^ 10)).to.equal('1.5KB');
-  // });
+  it('returns a byte formatted string with byte formatter', () => {
+    const config = {};
+    const fn = createTickFormatter('bytes', null, key => config[key]);
+    expect(fn(1500 ^ 10)).to.equal('1.5KB');
+  });
 
   it('returns a custom formatted string with custom formatter', () => {
     const fn = createTickFormatter('0.0a');

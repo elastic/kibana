@@ -6,7 +6,6 @@
 
 import { compose, withProps } from 'recompose';
 import { NumberFormatArgInput as Component, Props as ComponentProps } from './number_format';
-import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
 // @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
@@ -15,11 +14,11 @@ import { ArgumentStrings } from '../../../../i18n';
 const { NumberFormat: strings } = ArgumentStrings;
 
 const formatMap = {
-  NUMBER: AdvancedSettings.get('format:number:defaultPattern'),
-  PERCENT: AdvancedSettings.get('format:percent:defaultPattern'),
-  CURRENCY: AdvancedSettings.get('format:currency:defaultPattern'),
+  NUMBER: '0,0.[000]',
+  PERCENT: '0,0.[000]%',
+  CURRENCY: '$0,0.[00]',
   DURATION: '00:00:00',
-  BYTES: AdvancedSettings.get('format:bytes:defaultPattern'),
+  BYTES: '0,0.[000]b',
 };
 
 const numberFormats = [

@@ -35,7 +35,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'format:bytes:defaultPattern': '0,0.[000]b',
       });
     });
 
