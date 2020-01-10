@@ -6,12 +6,16 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ToolbarProps } from '../../../../public/components/inventory/toolbars/toolbar';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleMetricControls } from '../../../../public/components/waffle/waffle_metric_controls';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleGroupByControls } from '../../../../public/components/waffle/waffle_group_by_controls';
 import {
   toGroupByOpt,
   toMetricOpt,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../public/components/inventory/toolbars/toolbar_wrapper';
 import { SnapshotMetricType } from '../../types';
 

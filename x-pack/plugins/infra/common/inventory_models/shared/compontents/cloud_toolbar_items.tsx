@@ -6,8 +6,11 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ToolbarProps } from '../../../../public/components/inventory/toolbars/toolbar';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleAccountsControls } from '../../../../public/components/waffle/waffle_accounts_controls';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleRegionControls } from '../../../../public/components/waffle/waffle_region_controls';
 
 type Props = ToolbarProps;

@@ -6,14 +6,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { withTheme } from '../../../../../common/eui_styled_components/eui_styled_components';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Section } from '../../../public/pages/metrics/components/section';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SubSection } from '../../../public/pages/metrics/components/sub_section';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
 import * as Aws from '../shared/layouts/aws';
 import * as Ngnix from '../shared/layouts/nginx';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetadataDetails } from '../../../public/pages/metrics/components/metadata_details';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutContent } from '../../../public/pages/metrics/components/layout_content';
 
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
