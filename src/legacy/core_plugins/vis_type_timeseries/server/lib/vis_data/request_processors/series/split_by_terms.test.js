@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { splitByTerms } from '../split_by_terms';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { splitByTerms } from './split_by_terms';
 
 describe('splitByTerms(req, panel, series)', () => {
   let panel;
@@ -46,16 +44,16 @@ describe('splitByTerms(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     splitByTerms(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns a valid terms agg', () => {
+  test('returns a valid terms agg', () => {
     const next = doc => doc;
     const doc = splitByTerms(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           terms: {
@@ -70,12 +68,12 @@ describe('splitByTerms(req, panel, series)', () => {
     });
   });
 
-  it('returns a valid terms agg sort by terms', () => {
+  test('returns a valid terms agg sort by terms', () => {
     const next = doc => doc;
     series.terms_order_by = '_key';
     series.terms_direction = 'asc';
     const doc = splitByTerms(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           terms: {
@@ -90,11 +88,11 @@ describe('splitByTerms(req, panel, series)', () => {
     });
   });
 
-  it('returns a valid terms agg with custom sort', () => {
+  test('returns a valid terms agg with custom sort', () => {
     series.terms_order_by = 'avgmetric';
     const next = doc => doc;
     const doc = splitByTerms(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           terms: {
@@ -116,11 +114,11 @@ describe('splitByTerms(req, panel, series)', () => {
     });
   });
 
-  it('calls next and does not add a terms agg', () => {
+  test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
-    const next = sinon.spy(doc => doc);
+    const next = jest.fn(doc => doc);
     const doc = splitByTerms(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
-    expect(doc).to.eql({});
+    expect(next.mock.calls.length).toEqual(1);
+    expect(doc).toEqual({});
   });
 });

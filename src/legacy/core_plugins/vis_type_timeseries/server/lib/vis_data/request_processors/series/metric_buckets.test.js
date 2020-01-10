@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { metricBuckets } from '../metric_buckets';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { metricBuckets } from './metric_buckets';
 
 describe('metricBuckets(req, panel, series)', () => {
   let panel;
@@ -63,16 +61,16 @@ describe('metricBuckets(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     metricBuckets(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns metric aggs', () => {
+  test('returns metric aggs', () => {
     const next = doc => doc;
     const doc = metricBuckets(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {

@@ -17,36 +17,15 @@
  * under the License.
  */
 
-import { siblingBuckets } from '../sibling_buckets';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { splitByEverything } from './split_by_everything';
 
-describe('siblingBuckets(req, panel, series)', () => {
+describe('splitByEverything(req, panel, series)', () => {
   let panel;
   let series;
   let req;
   beforeEach(() => {
-    panel = {
-      time_field: 'timestamp',
-    };
-    series = {
-      id: 'test',
-      split_mode: 'terms',
-      terms_size: 10,
-      terms_field: 'host',
-      metrics: [
-        {
-          id: 'metric-1',
-          type: 'avg',
-          field: 'cpu',
-        },
-        {
-          id: 'metric-2',
-          type: 'avg_bucket',
-          field: 'metric-1',
-        },
-      ],
-    };
+    panel = {};
+    series = { id: 'test', split_mode: 'everything' };
     req = {
       payload: {
         timerange: {
@@ -58,26 +37,31 @@ describe('siblingBuckets(req, panel, series)', () => {
   });
 
   it('calls next when finished', () => {
-    const next = sinon.spy();
-    siblingBuckets(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    const next = jest.fn();
+    splitByEverything(req, panel, series)(next)({});
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns sibling aggs', () => {
+  it('returns a valid filter with match_all', () => {
     const next = doc => doc;
-    const doc = siblingBuckets(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    const doc = splitByEverything(req, panel, series)(next)({});
+    expect(doc).toEqual({
       aggs: {
         test: {
-          aggs: {
-            'metric-2': {
-              extended_stats_bucket: {
-                buckets_path: 'timeseries>metric-1',
-              },
-            },
+          filter: {
+            match_all: {},
           },
         },
       },
     });
+  });
+
+  it('calls next and does not add a filter', () => {
+    series.split_mode = 'terms';
+    series.terms_field = 'host';
+    const next = jest.fn(doc => doc);
+    const doc = splitByEverything(req, panel, series)(next)({});
+    expect(next.mock.calls.length).toEqual(1);
+    expect(doc).toEqual({});
   });
 });

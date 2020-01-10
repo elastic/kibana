@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { splitByFilters } from '../split_by_filters';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { splitByFilters } from './split_by_filters';
 
 describe('splitByFilters(req, panel, series)', () => {
   let panel;
@@ -58,16 +56,16 @@ describe('splitByFilters(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     splitByFilters(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns a valid terms agg', () => {
+  test('returns a valid terms agg', () => {
     const next = doc => doc;
     const doc = splitByFilters(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           filters: {
@@ -107,11 +105,11 @@ describe('splitByFilters(req, panel, series)', () => {
     });
   });
 
-  it('calls next and does not add a terms agg', () => {
+  test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
-    const next = sinon.spy(doc => doc);
+    const next = jest.fn(doc => doc);
     const doc = splitByFilters(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
-    expect(doc).to.eql({});
+    expect(next.mock.calls.length).toEqual(1);
+    expect(doc).toEqual({});
   });
 });

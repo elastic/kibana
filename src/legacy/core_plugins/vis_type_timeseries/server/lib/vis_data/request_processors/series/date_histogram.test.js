@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import sinon from 'sinon';
-import { DefaultSearchCapabilities } from '../../../../search_strategies/default_search_capabilities';
-import { dateHistogram } from '../date_histogram';
+import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
+import { dateHistogram } from './date_histogram';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;
@@ -54,18 +52,18 @@ describe('dateHistogram(req, panel, series)', () => {
     capabilities = new DefaultSearchCapabilities(req);
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns valid date histogram', () => {
+  test('returns valid date histogram', () => {
     const next = doc => doc;
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
@@ -93,13 +91,13 @@ describe('dateHistogram(req, panel, series)', () => {
     });
   });
 
-  it('returns valid date histogram (offset by 1h)', () => {
+  test('returns valid date histogram (offset by 1h)', () => {
     series.offset_time = '1h';
     const next = doc => doc;
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
@@ -127,7 +125,7 @@ describe('dateHistogram(req, panel, series)', () => {
     });
   });
 
-  it('returns valid date histogram with overridden index pattern', () => {
+  test('returns valid date histogram with overridden index pattern', () => {
     series.override_index_pattern = 1;
     series.series_index_pattern = '*';
     series.series_time_field = 'timestamp';
@@ -136,7 +134,7 @@ describe('dateHistogram(req, panel, series)', () => {
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
@@ -165,7 +163,7 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   describe('dateHistogram for entire time range mode', () => {
-    it('should ignore entire range mode for timeseries', () => {
+    test('should ignore entire range mode for timeseries', () => {
       panel.time_range_mode = 'entire_time_range';
       panel.type = 'timeseries';
 
@@ -174,18 +172,18 @@ describe('dateHistogram(req, panel, series)', () => {
         {}
       );
 
-      expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).to.eql(undefined);
-      expect(doc.aggs.test.aggs.timeseries.date_histogram).to.exist;
+      expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).toBeUndefined();
+      expect(doc.aggs.test.aggs.timeseries.date_histogram).toBeDefined();
     });
 
-    it('should returns valid date histogram for entire range mode', () => {
+    test('should returns valid date histogram for entire range mode', () => {
       panel.time_range_mode = 'entire_time_range';
 
       const next = doc => doc;
       const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
         {}
       );
-      expect(doc).to.eql({
+      expect(doc).toEqual({
         aggs: {
           test: {
             aggs: {

@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import { splitByFilter } from '../split_by_filter';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { siblingBuckets } from './sibling_buckets';
 
-describe('splitByFilter(req, panel, series)', () => {
+describe('siblingBuckets(req, panel, series)', () => {
   let panel;
   let series;
   let req;
   beforeEach(() => {
-    panel = {};
+    panel = {
+      time_field: 'timestamp',
+    };
     series = {
       id: 'test',
-      split_mode: 'filter',
-      filter: { query: 'host:example-01', language: 'lucene' },
+      split_mode: 'terms',
+      terms_size: 10,
+      terms_field: 'host',
+      metrics: [
+        {
+          id: 'metric-1',
+          type: 'avg',
+          field: 'cpu',
+        },
+        {
+          id: 'metric-2',
+          type: 'avg_bucket',
+          field: 'metric-1',
+        },
+      ],
     };
     req = {
       payload: {
@@ -42,42 +55,27 @@ describe('splitByFilter(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
-    splitByFilter(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+  test('calls next when finished', () => {
+    const next = jest.fn();
+    siblingBuckets(req, panel, series)(next)({});
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns a valid filter with a query_string', () => {
+  test('returns sibling aggs', () => {
     const next = doc => doc;
-    const doc = splitByFilter(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    const doc = siblingBuckets(req, panel, series)(next)({});
+    expect(doc).toEqual({
       aggs: {
         test: {
-          filter: {
-            bool: {
-              filter: [],
-              must: [
-                {
-                  query_string: {
-                    query: 'host:example-01',
-                  },
-                },
-              ],
-              must_not: [],
-              should: [],
+          aggs: {
+            'metric-2': {
+              extended_stats_bucket: {
+                buckets_path: 'timeseries>metric-1',
+              },
             },
           },
         },
       },
     });
-  });
-
-  it('calls next and does not add a filter', () => {
-    series.split_mode = 'terms';
-    const next = sinon.spy(doc => doc);
-    const doc = splitByFilter(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
-    expect(doc).to.eql({});
   });
 });

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { query } from '../query';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { query } from './query';
 
 describe('query(req, panel, series)', () => {
   let panel;
@@ -47,16 +45,16 @@ describe('query(req, panel, series)', () => {
     series = { id: 'test' };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     query(req, panel, series, config)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns doc with query for timerange', () => {
+  test('returns doc with query for timerange', () => {
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
@@ -79,11 +77,11 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  it('returns doc with query for timerange (offset by 1h)', () => {
+  test('returns doc with query for timerange (offset by 1h)', () => {
     series.offset_time = '1h';
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
@@ -106,7 +104,7 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  it('returns doc with global query', () => {
+  test('returns doc with global query', () => {
     req.payload.filters = [
       {
         bool: {
@@ -122,7 +120,7 @@ describe('query(req, panel, series)', () => {
     ];
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
@@ -157,11 +155,11 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  it('returns doc with series filter', () => {
+  test('returns doc with series filter', () => {
     series.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
@@ -198,7 +196,7 @@ describe('query(req, panel, series)', () => {
       },
     });
   });
-  it('returns doc with panel filter and global', () => {
+  test('returns doc with panel filter and global', () => {
     req.payload.filters = [
       {
         bool: {
@@ -215,7 +213,7 @@ describe('query(req, panel, series)', () => {
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {
@@ -265,7 +263,7 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  it('returns doc with panel filter (ignoring globals)', () => {
+  test('returns doc with panel filter (ignoring globals)', () => {
     req.payload.filters = [
       {
         bool: {
@@ -283,7 +281,7 @@ describe('query(req, panel, series)', () => {
     panel.ignore_global_filter = true;
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       size: 0,
       query: {
         bool: {

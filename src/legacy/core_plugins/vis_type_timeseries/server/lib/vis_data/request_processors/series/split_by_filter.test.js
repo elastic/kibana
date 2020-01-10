@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { splitByEverything } from '../split_by_everything';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { splitByFilter } from './split_by_filter';
 
-describe('splitByEverything(req, panel, series)', () => {
+describe('splitByFilter(req, panel, series)', () => {
   let panel;
   let series;
   let req;
   beforeEach(() => {
     panel = {};
-    series = { id: 'test', split_mode: 'everything' };
+    series = {
+      id: 'test',
+      split_mode: 'filter',
+      filter: { query: 'host:example-01', language: 'lucene' },
+    };
     req = {
       payload: {
         timerange: {
@@ -38,32 +40,42 @@ describe('splitByEverything(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
-    splitByEverything(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+  test('calls next when finished', () => {
+    const next = jest.fn();
+    splitByFilter(req, panel, series)(next)({});
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns a valid filter with match_all', () => {
+  test('returns a valid filter with a query_string', () => {
     const next = doc => doc;
-    const doc = splitByEverything(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    const doc = splitByFilter(req, panel, series)(next)({});
+    expect(doc).toEqual({
       aggs: {
         test: {
           filter: {
-            match_all: {},
+            bool: {
+              filter: [],
+              must: [
+                {
+                  query_string: {
+                    query: 'host:example-01',
+                  },
+                },
+              ],
+              must_not: [],
+              should: [],
+            },
           },
         },
       },
     });
   });
 
-  it('calls next and does not add a filter', () => {
+  test('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
-    series.terms_field = 'host';
-    const next = sinon.spy(doc => doc);
-    const doc = splitByEverything(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
-    expect(doc).to.eql({});
+    const next = jest.fn(doc => doc);
+    const doc = splitByFilter(req, panel, series)(next)({});
+    expect(next.mock.calls.length).toEqual(1);
+    expect(doc).toEqual({});
   });
 });

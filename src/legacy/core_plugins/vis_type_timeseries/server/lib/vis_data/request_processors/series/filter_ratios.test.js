@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { ratios } from '../filter_ratios';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { ratios } from './filter_ratios';
 
 describe('ratios(req, panel, series)', () => {
   let panel;
@@ -55,16 +53,16 @@ describe('ratios(req, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     ratios(req, panel, series)(next)({});
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('returns filter ratio aggs', () => {
+  test('returns filter ratio aggs', () => {
     const next = doc => doc;
     const doc = ratios(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
@@ -119,11 +117,11 @@ describe('ratios(req, panel, series)', () => {
     });
   });
 
-  it('returns empty object when field is not set', () => {
+  test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
     const next = doc => doc;
     const doc = ratios(req, panel, series)(next)({});
-    expect(doc).to.eql({
+    expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
