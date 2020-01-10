@@ -16,12 +16,14 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
@@ -148,6 +150,14 @@ export class PipelineListing extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.pipline_listing.heading"
+                defaultMessage="Logstash pipelines"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>

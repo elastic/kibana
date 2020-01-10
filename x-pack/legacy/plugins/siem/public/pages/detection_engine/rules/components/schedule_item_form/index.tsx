@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -30,6 +30,10 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   .euiFormControlLayout {
     max-width: 200px !important;
   }
+`;
+
+const MyEuiSelect = styled(EuiSelect)`
+  width: auto;
 `;
 
 export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
@@ -79,22 +83,33 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
+  const label = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={false} component="span">
+          {field.label}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} component="span">
+          {field.labelAppend}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [field.label, field.labelAppend]
+  );
 
   return (
     <StyledEuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
+      label={label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth
+      fullWidth={false}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
       <EuiFieldNumber
         append={
-          <EuiSelect
-            compressed={true}
+          <MyEuiSelect
             fullWidth={false}
             options={timeTypeOptions}
             onChange={onChangeTimeType}
@@ -102,7 +117,6 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
             {...rest}
           />
         }
-        compressed
         fullWidth
         min={0}
         onChange={onChangeTimeVal}

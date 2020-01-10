@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Columns it renders the expected columns 1`] = `
-<EventsTdGroupData
+<styled.div
   data-test-subj="data-driven-columns"
 >
-  <EventsTd
+  <styled.div
     key="message"
     style={
       Object {
@@ -12,7 +12,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <DraggableWrapper
@@ -36,9 +36,9 @@ exports[`Columns it renders the expected columns 1`] = `
         render={[Function]}
         truncate={true}
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="event.category"
     style={
       Object {
@@ -46,7 +46,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -59,9 +59,9 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="Access"
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="event.action"
     style={
       Object {
@@ -69,7 +69,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -82,9 +82,9 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="Action"
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="host.name"
     style={
       Object {
@@ -92,7 +92,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -105,9 +105,9 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="apache"
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="source.ip"
     style={
       Object {
@@ -115,7 +115,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -128,9 +128,9 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="192.168.0.1"
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="destination.ip"
     style={
       Object {
@@ -138,7 +138,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -151,9 +151,9 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="192.168.0.3"
       />
-    </EventsTdContent>
-  </EventsTd>
-  <EventsTd
+    </styled.div>
+  </styled.div>
+  <styled.div
     key="user.name"
     style={
       Object {
@@ -161,7 +161,7 @@ exports[`Columns it renders the expected columns 1`] = `
       }
     }
   >
-    <EventsTdContent
+    <styled.div
       data-test-subj="cell-container"
     >
       <FormattedFieldValue
@@ -174,7 +174,7 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
         value="john.dee"
       />
-    </EventsTdContent>
-  </EventsTd>
-</EventsTdGroupData>
+    </styled.div>
+  </styled.div>
+</styled.div>
 `;

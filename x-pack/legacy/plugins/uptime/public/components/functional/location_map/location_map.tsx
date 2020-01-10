@@ -11,10 +11,12 @@ import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations } from '../../../../common/runtime_types';
 
+// These height/width values are used to make sure map is in center of panel
+// And to make sure, it doesn't take too much space
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
-  margin-right: 10px;
+  margin-right: 20px;
 `;
 
 interface LocationMapProps {

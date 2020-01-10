@@ -10,23 +10,26 @@ import { CategorizationFieldSelect } from './categorization_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import {
-  MultiMetricJobCreator,
-  PopulationJobCreator,
   AdvancedJobCreator,
+  CategorizationJobCreator,
+  isCategorizationJobCreator,
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
 export const CategorizationField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
+  const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const { catFields } = newJobCapsService;
   const [categorizationFieldName, setCategorizationFieldName] = useState(
     jobCreator.categorizationFieldName
   );
+  const isCategorizationJob = isCategorizationJobCreator(jobCreator);
 
   useEffect(() => {
-    jobCreator.categorizationFieldName = categorizationFieldName;
-    jobCreatorUpdate();
+    if (jobCreator.categorizationFieldName !== categorizationFieldName) {
+      jobCreator.categorizationFieldName = categorizationFieldName;
+      jobCreatorUpdate();
+    }
   }, [categorizationFieldName]);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export const CategorizationField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description>
+    <Description isOptional={isCategorizationJob === false}>
       <CategorizationFieldSelect
         fields={catFields}
         changeHandler={setCategorizationFieldName}
