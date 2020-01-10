@@ -158,7 +158,7 @@ export const RuleDetailsComponent = memo(() => {
                               <EuiButton
                                 href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
                                 iconType="visControls"
-                                isDisabled={!canUserCRUD || (rule?.immutable ?? true)}
+                                isDisabled={!canUserCRUD || rule?.immutable}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
                               </EuiButton>

@@ -124,8 +124,9 @@ export const useUserInfo = (): Return => {
     createSignalIndex,
   ] = useSignalIndex();
 
-  const uiCapabilities = useKibana().services.application?.capabilities;
-  const capabilitiesCanUserCRUD = (uiCapabilities?.siem?.crud as boolean) ?? false;
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
 
   useEffect(() => {
     if (loading !== privilegeLoading || indexNameLoading) {
@@ -166,7 +167,7 @@ export const useUserInfo = (): Return => {
   useEffect(() => {
     if (
       isAuthenticated &&
-      hasApiWrite &&
+      hasWrite &&
       isSignalIndexExists != null &&
       !isSignalIndexExists &&
       createSignalIndex != null

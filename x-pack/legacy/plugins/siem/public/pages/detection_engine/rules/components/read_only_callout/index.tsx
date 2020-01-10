@@ -10,10 +10,10 @@ import React, { memo, useCallback, useState } from 'react';
 import * as i18n from './translations';
 
 const ReadOnlyCallOutComponent = () => {
-  const [showCAllout, setShowCallOut] = useState(true);
+  const [showCallOut, setShowCallOut] = useState(true);
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
-  return showCAllout ? (
+  return showCallOut ? (
     <EuiCallOut title={i18n.READ_ONLY_CALLOUT_TITLE} color="warning" iconType="alert">
       <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>
       <EuiButton color="warning" onClick={handleCallOut}>

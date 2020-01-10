@@ -145,7 +145,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
-        defaultMessage: 'MITRE ATT&CK',
+        defaultMessage: 'MITRE ATT&CK &#8482',
       }
     ),
     labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
