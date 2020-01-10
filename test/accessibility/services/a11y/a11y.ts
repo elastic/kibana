@@ -45,7 +45,6 @@ export const normalizeResult = (report: any) => {
 export function A11yProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const Wd = getService('__webdriver__');
-  const log = getService('log');
 
   /**
    * Accessibility testing service using the Axe (https://www.deque.com/axe/)
