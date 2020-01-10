@@ -52,13 +52,13 @@ type DetectionEngineComponentProps = ReduxProps & DispatchProps;
 
 const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
   ({ filters, query, setAbsoluteRangeDatePicker }) => {
-    const [
+    const {
       loading,
       isSignalIndexExists,
-      isUserAuthenticated,
+      isAuthenticated: isUserAuthenticated,
       canUserCRUD,
       signalIndexName,
-    ] = useUserInfo();
+    } = useUserInfo();
 
     const [lastSignals] = useSignalInfo({});
 
@@ -141,11 +141,11 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                 </WrapperPage>
               </StickyContainer>
             ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
-                <DetectionEngineEmptyPage />
-              </WrapperPage>
-            );
+                <WrapperPage>
+                  <HeaderPage border title={i18n.PAGE_TITLE} />
+                  <DetectionEngineEmptyPage />
+                </WrapperPage>
+              );
           }}
         </WithSource>
         <SpyRoute />

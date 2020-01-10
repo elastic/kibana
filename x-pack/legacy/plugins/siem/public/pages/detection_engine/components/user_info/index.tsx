@@ -11,27 +11,20 @@ import { usePrivilegeUser } from '../../../../containers/detection_engine/signal
 import { useSignalIndex } from '../../../../containers/detection_engine/signals/use_signal_index';
 import { useKibana } from '../../../../lib/kibana';
 
-type Return = [
-  boolean,
-  boolean | null,
-  boolean | null,
-  boolean | null,
-  string | null,
-  boolean | null
-];
-
 export interface State {
   canUserCRUD: boolean | null;
-  hasWrite: boolean | null;
+  hasIndexWrite: boolean | null;
+  hasManageApiKey: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
-  loading: boolean | null;
+  loading: boolean;
   signalIndexName: string | null;
 }
 
 const initialState: State = {
   canUserCRUD: null,
-  hasWrite: null,
+  hasIndexWrite: null,
+  hasManageApiKey: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   loading: true,
@@ -41,25 +34,29 @@ const initialState: State = {
 export type Action =
   | { type: 'updateLoading'; loading: boolean }
   | {
-      type: 'updateHasWrite';
-      hasWrite: boolean | null;
-    }
+    type: 'updateHasManageApiKey';
+    hasManageApiKey: boolean | null;
+  }
   | {
-      type: 'updateIsSignalIndexExists';
-      isSignalIndexExists: boolean | null;
-    }
+    type: 'updateHasIndexWrite';
+    hasIndexWrite: boolean | null;
+  }
   | {
-      type: 'updateIsAuthenticated';
-      isAuthenticated: boolean | null;
-    }
+    type: 'updateIsSignalIndexExists';
+    isSignalIndexExists: boolean | null;
+  }
   | {
-      type: 'updateCanUserCRUD';
-      canUserCRUD: boolean | null;
-    }
+    type: 'updateIsAuthenticated';
+    isAuthenticated: boolean | null;
+  }
   | {
-      type: 'updateSignalIndexName';
-      signalIndexName: string | null;
-    };
+    type: 'updateCanUserCRUD';
+    canUserCRUD: boolean | null;
+  }
+  | {
+    type: 'updateSignalIndexName';
+    signalIndexName: string | null;
+  };
 
 export const userInfoReducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -69,10 +66,16 @@ export const userInfoReducer = (state: State, action: Action): State => {
         loading: action.loading,
       };
     }
-    case 'updateHasWrite': {
+    case 'updateHasIndexWrite': {
       return {
         ...state,
-        hasWrite: action.hasWrite,
+        hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasManageApiKey': {
+      return {
+        ...state,
+        hasManageApiKey: action.hasManageApiKey,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -118,12 +121,25 @@ export const ManageUserInfo = ({ children }: ManageUserInfoProps) => (
   </StateUserInfoContext.Provider>
 );
 
-export const useUserInfo = (): Return => {
+export const useUserInfo = (): State => {
   const [
-    { canUserCRUD, hasWrite, isSignalIndexExists, isAuthenticated, loading, signalIndexName },
+    {
+      canUserCRUD,
+      hasIndexWrite,
+      hasManageApiKey,
+      isSignalIndexExists,
+      isAuthenticated,
+      loading,
+      signalIndexName,
+    },
     dispatch,
   ] = useUserData();
-  const [privilegeLoading, isApiAuthenticated, hasApiWrite] = usePrivilegeUser();
+  const [
+    privilegeLoading,
+    isApiAuthenticated,
+    hasApiIndexWrite,
+    hasApiManageApiKey,
+  ] = usePrivilegeUser();
   const [
     indexNameLoading,
     isApiSignalIndexExists,
@@ -142,10 +158,16 @@ export const useUserInfo = (): Return => {
   }, [loading, privilegeLoading, indexNameLoading]);
 
   useEffect(() => {
-    if (hasWrite !== hasApiWrite && hasApiWrite != null) {
-      dispatch({ type: 'updateHasWrite', hasWrite: hasApiWrite });
+    if (hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
+      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
-  }, [hasWrite, hasApiWrite]);
+  }, [hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (hasManageApiKey !== hasApiManageApiKey && hasApiManageApiKey != null) {
+      dispatch({ type: 'updateHasManageApiKey', hasManageApiKey: hasApiManageApiKey });
+    }
+  }, [hasManageApiKey, hasApiManageApiKey]);
 
   useEffect(() => {
     if (isSignalIndexExists !== isApiSignalIndexExists && isApiSignalIndexExists != null) {
@@ -174,21 +196,22 @@ export const useUserInfo = (): Return => {
   useEffect(() => {
     if (
       isAuthenticated &&
-      hasWrite &&
+      hasIndexWrite &&
       isSignalIndexExists != null &&
       !isSignalIndexExists &&
       createSignalIndex != null
     ) {
       createSignalIndex();
     }
-  }, [createSignalIndex, isAuthenticated, isSignalIndexExists, hasWrite]);
+  }, [createSignalIndex, isAuthenticated, isSignalIndexExists, hasIndexWrite]);
 
-  return [
-    indexNameLoading || privilegeLoading,
+  return {
+    loading,
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
+    hasIndexWrite,
+    hasManageApiKey,
     signalIndexName,
-    hasWrite,
-  ];
+  };
 };

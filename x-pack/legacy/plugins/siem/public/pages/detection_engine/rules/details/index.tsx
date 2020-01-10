@@ -36,6 +36,7 @@ import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
 import * as detectionI18n from '../../translations';
+import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
 import { getStepsData } from '../helpers';
@@ -68,14 +69,14 @@ type RuleDetailsComponentProps = ReduxProps & DispatchProps;
 
 const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
   ({ filters, query, setAbsoluteRangeDatePicker }) => {
-    const [
+    const {
       loading,
       isSignalIndexExists,
       isAuthenticated,
       canUserCRUD,
+      hasManageApiKey,
       signalIndexName,
-      hasWriteToChangeActivation,
-    ] = useUserInfo();
+    } = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
@@ -83,6 +84,8 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       detailsView: true,
     });
     const [lastSignals] = useSignalInfo({ ruleId });
+    const userHasNoPermissions =
+      canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
     if (
       isSignalIndexExists != null &&
@@ -98,39 +101,39 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         isLoading === true || rule === null ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          [
-            <FormattedMessage
-              id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
-              defaultMessage="Created by: {by} on {date}"
-              values={{
-                by: rule?.created_by ?? i18n.UNKNOWN,
-                date: (
-                  <FormattedDate
-                    value={rule?.created_at ?? new Date().toISOString()}
-                    fieldName="createdAt"
-                  />
-                ),
-              }}
-            />,
-            rule?.updated_by != null ? (
+            [
               <FormattedMessage
-                id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
-                defaultMessage="Updated by: {by} on {date}"
+                id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
+                defaultMessage="Created by: {by} on {date}"
                 values={{
-                  by: rule?.updated_by ?? i18n.UNKNOWN,
+                  by: rule?.created_by ?? i18n.UNKNOWN,
                   date: (
                     <FormattedDate
-                      value={rule?.updated_at ?? new Date().toISOString()}
-                      fieldName="updatedAt"
+                      value={rule?.created_at ?? new Date().toISOString()}
+                      fieldName="createdAt"
                     />
                   ),
                 }}
-              />
-            ) : (
-              ''
-            ),
-          ]
-        ),
+              />,
+              rule?.updated_by != null ? (
+                <FormattedMessage
+                  id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
+                  defaultMessage="Updated by: {by} on {date}"
+                  values={{
+                    by: rule?.updated_by ?? i18n.UNKNOWN,
+                    date: (
+                      <FormattedDate
+                        value={rule?.updated_at ?? new Date().toISOString()}
+                        fieldName="updatedAt"
+                      />
+                    ),
+                  }}
+                />
+              ) : (
+                  ''
+                ),
+            ]
+          ),
       [isLoading, rule]
     );
 
@@ -153,6 +156,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
     return (
       <>
+        {userHasNoPermissions && <ReadOnlyCallOut />}
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -188,7 +192,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           <EuiFlexItem grow={false}>
                             <RuleSwitch
                               id={rule?.id ?? '-1'}
-                              isDisabled={!canUserCRUD || !hasWriteToChangeActivation}
+                              isDisabled={userHasNoPermissions}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
                             />
@@ -200,7 +204,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 <EuiButton
                                   href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
                                   iconType="visControls"
-                                  isDisabled={(!canUserCRUD || rule?.immutable) ?? true}
+                                  isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                                 >
                                   {ruleI18n.EDIT_RULE_SETTINGS}
                                 </EuiButton>
@@ -280,12 +284,12 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                 )}
               </GlobalTime>
             ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <WrapperPage>
+                  <HeaderPage border title={i18n.PAGE_TITLE} />
 
-                <DetectionEngineEmptyPage />
-              </WrapperPage>
-            );
+                  <DetectionEngineEmptyPage />
+                </WrapperPage>
+              );
           }}
         </WithSource>
 

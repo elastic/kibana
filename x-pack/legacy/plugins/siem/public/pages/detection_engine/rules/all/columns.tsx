@@ -74,8 +74,7 @@ type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<T
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
   history: H.History,
-  canUserCRUD: boolean,
-  hasWriteToChangeActivation: boolean
+  hasNoPermissions: boolean
 ): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
@@ -99,10 +98,10 @@ export const getColumns = (
             value === 'low'
               ? euiLightVars.euiColorVis0
               : value === 'medium'
-              ? euiLightVars.euiColorVis5
-              : value === 'high'
-              ? euiLightVars.euiColorVis7
-              : euiLightVars.euiColorVis9
+                ? euiLightVars.euiColorVis5
+                : value === 'high'
+                  ? euiLightVars.euiColorVis7
+                  : euiLightVars.euiColorVis9
           }
         >
           {value}
@@ -117,8 +116,8 @@ export const getColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <PreferenceFormattedDate value={new Date(value)} />
-        );
+            <PreferenceFormattedDate value={new Date(value)} />
+          );
       },
       sortable: true,
       truncateText: true,
@@ -131,16 +130,16 @@ export const getColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <>
-            {value.type === 'Fail' ? (
-              <EuiTextColor color="danger">
-                {value.type} <EuiIconTip content={value.message} type="iInCircle" />
-              </EuiTextColor>
-            ) : (
-              <EuiTextColor color="secondary">{value.type}</EuiTextColor>
-            )}
-          </>
-        );
+            <>
+              {value.type === 'Fail' ? (
+                <EuiTextColor color="danger">
+                  {value.type} <EuiIconTip content={value.message} type="iInCircle" />
+                </EuiTextColor>
+              ) : (
+                  <EuiTextColor color="secondary">{value.type}</EuiTextColor>
+                )}
+            </>
+          );
       },
       truncateText: true,
     },
@@ -170,7 +169,7 @@ export const getColumns = (
           dispatch={dispatch}
           id={item.id}
           enabled={item.activate}
-          isDisabled={!canUserCRUD || !hasWriteToChangeActivation}
+          isDisabled={hasNoPermissions}
           isLoading={item.isLoading}
         />
       ),
@@ -185,5 +184,5 @@ export const getColumns = (
     } as EuiTableActionsColumnType<TableData>,
   ];
 
-  return canUserCRUD ? [...cols, ...actions] : cols;
+  return hasNoPermissions ? cols : [...cols, ...actions];
 };

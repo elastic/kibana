@@ -27,7 +27,7 @@ import * as i18n from './translations';
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
-const ResizeEuiPanel = styled(EuiPanel)<{
+const ResizeEuiPanel = styled(EuiPanel) <{
   height?: number;
 }>`
   .euiAccordion__iconWrapper {
@@ -57,7 +57,13 @@ const MyEuiPanel = styled(EuiPanel)`
 `;
 
 export const CreateRuleComponent = React.memo(() => {
-  const [loading, isSignalIndexExists, isAuthenticated, canUserCRUD] = useUserInfo();
+  const {
+    loading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
+    hasManageApiKey,
+  } = useUserInfo();
   const [heightAccordion, setHeightAccordion] = useState(-1);
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
@@ -79,6 +85,8 @@ export const CreateRuleComponent = React.memo(() => {
     [RuleStep.scheduleRule]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
   if (
     isSignalIndexExists != null &&
@@ -86,7 +94,7 @@ export const CreateRuleComponent = React.memo(() => {
     (!isSignalIndexExists || !isAuthenticated)
   ) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (canUserCRUD != null && !canUserCRUD) {
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 

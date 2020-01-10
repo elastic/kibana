@@ -25,13 +25,13 @@ import * as i18n from './translations';
 export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
-  const [
+  const {
     loading,
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasWriteToChangeActivation,
-  ] = useUserInfo();
+    hasManageApiKey,
+  } = useUserInfo();
 
   if (
     isSignalIndexExists != null &&
@@ -40,11 +40,12 @@ export const RulesComponent = React.memo(() => {
   ) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
-
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
   const lastCompletedRun = undefined;
   return (
     <>
-      {!canUserCRUD && <ReadOnlyCallOut />}
+      {userHasNoPermissions && <ReadOnlyCallOut />}
       <ImportRuleModal
         showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
@@ -66,8 +67,8 @@ export const RulesComponent = React.memo(() => {
                 }}
               />
             ) : (
-              getEmptyTagValue()
-            )
+                getEmptyTagValue()
+              )
           }
           title={i18n.PAGE_TITLE}
         >
@@ -75,7 +76,7 @@ export const RulesComponent = React.memo(() => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={!canUserCRUD || loading}
+                isDisabled={userHasNoPermissions || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -88,7 +89,7 @@ export const RulesComponent = React.memo(() => {
                 fill
                 href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
                 iconType="plusInCircle"
-                isDisabled={!canUserCRUD || loading}
+                isDisabled={userHasNoPermissions || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
@@ -97,9 +98,8 @@ export const RulesComponent = React.memo(() => {
         </HeaderPage>
         <AllRules
           loading={loading}
-          hasWriteToChangeActivation={hasWriteToChangeActivation}
+          hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
-          canUserCRUD={canUserCRUD ?? false}
         />
       </WrapperPage>
 

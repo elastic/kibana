@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const READ_ONLY_CALLOUT_TITLE = i18n.translate(
   'xpack.siem.detectionEngine.readOnlyCallOutTitle',
   {
-    defaultMessage: 'Edit rule permissions required',
+    defaultMessage: 'Rule permissions required',
   }
 );
 

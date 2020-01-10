@@ -23,7 +23,7 @@ export const getIndexExists = async (
     });
     return response._shards.total > 0;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (err.status === 404) {
       return false;
     } else {
       throw err;

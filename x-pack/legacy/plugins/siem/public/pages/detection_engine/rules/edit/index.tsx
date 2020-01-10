@@ -48,16 +48,25 @@ interface ScheduleStepRuleForm extends StepRuleForm {
 }
 
 export const EditRuleComponent = memo(() => {
-  const [initLoading, isSignalIndexExists, isAuthenticated, canUserCRUD] = useUserInfo();
+  const {
+    loading: initLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
+    hasManageApiKey,
+  } = useUserInfo();
   const { ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
+
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
   if (
     isSignalIndexExists != null &&
     isAuthenticated != null &&
     (!isSignalIndexExists || !isAuthenticated)
   ) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (canUserCRUD != null && !canUserCRUD) {
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
