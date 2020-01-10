@@ -9,7 +9,7 @@ Array [
     aria-label="SSL certificate expires in 2 months"
     class="euiText euiText--small euiText--constrainedWidth"
   >
-    SSL certificate expires 
+    SSL certificate expires
     <span
       class="euiBadge euiBadge--iconLeft euiBadge--default"
     >

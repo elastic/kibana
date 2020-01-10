@@ -21,11 +21,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { EuiKeyboardAccessible } from '@elastic/eui';
+import { EuiKeyboardAccessible, keyCodes } from '@elastic/eui';
 
 class MetricVisValue extends Component {
   onClick = () => {
     this.props.onFilter(this.props.metric);
+  };
+
+  onKeyPress = e => {
+    if (e.keyCode === keyCodes.ENTER) {
+      this.onClick();
+    }
   };
 
   render() {
@@ -47,6 +53,7 @@ class MetricVisValue extends Component {
         className={containerClassName}
         style={{ backgroundColor: metric.bgColor }}
         onClick={hasFilter ? this.onClick : null}
+        onKeyPress={hasFilter ? this.onKeyPress : null}
         tabIndex={hasFilter ? 0 : null}
         role={hasFilter ? 'button' : null}
       >
