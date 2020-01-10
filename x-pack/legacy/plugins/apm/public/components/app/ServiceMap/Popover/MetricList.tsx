@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { isNumber } from 'lodash';
 import { ServiceNodeMetrics } from '../../../../../server/lib/service_map/get_service_map_service_node_info';
 import {
   asDuration,
@@ -16,6 +17,18 @@ import {
   toMicroseconds,
   tpmUnit
 } from '../../../../utils/formatters';
+
+function LoadingSpinner() {
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceAround"
+      style={{ width: 280, height: 170 }}
+    >
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexGroup>
+  );
+}
 
 const ItemRow = styled('tr')`
   line-height: 2;
@@ -34,13 +47,18 @@ const na = i18n.translate('xpack.apm.serviceMap.NotAvailableMetric', {
   defaultMessage: 'N/A'
 });
 
+interface MetricListProps extends ServiceNodeMetrics {
+  isLoading: boolean;
+}
+
 export function MetricList({
   avgCpuUsage,
   avgErrorsPerMinute,
   avgMemoryUsage,
   avgRequestsPerMinute,
-  avgTransactionDuration
-}: ServiceNodeMetrics) {
+  avgTransactionDuration,
+  isLoading
+}: MetricListProps) {
   const listItems = [
     {
       title: i18n.translate(
@@ -61,7 +79,7 @@ export function MetricList({
         }
       ),
       description: isNumber(avgRequestsPerMinute)
-        ? `${avgRequestsPerMinute} ${tpmUnit('request')}`
+        ? `${avgRequestsPerMinute.toFixed(2)} ${tpmUnit('request')}`
         : na
     },
     {
@@ -71,7 +89,7 @@ export function MetricList({
           defaultMessage: 'Errors per minute (avg.)'
         }
       ),
-      description: avgErrorsPerMinute ?? na
+      description: avgErrorsPerMinute?.toFixed(2) ?? na
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
@@ -86,11 +104,13 @@ export function MetricList({
       description: isNumber(avgMemoryUsage) ? asPercent(avgMemoryUsage, 1) : na
     }
   ];
-  return (
+  return isLoading ? (
+    <LoadingSpinner />
+  ) : (
     <table>
       <tbody>
         {listItems.map(({ title, description }) => (
-          <ItemRow>
+          <ItemRow key={title}>
             <ItemTitle>{title}</ItemTitle>
             <ItemDescription>{description}</ItemDescription>
           </ItemRow>

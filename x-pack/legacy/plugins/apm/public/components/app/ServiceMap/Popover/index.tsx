@@ -10,7 +10,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
-  EuiTitle
+  EuiTitle,
+  EuiLoadingContent
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
@@ -40,7 +41,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     ? (selectedNode.data('id') as string)
     : null;
 
-  const { data = {} as ServiceNodeMetrics } = useFetcher(
+  const { data = {} as ServiceNodeMetrics, status } = useFetcher(
     callApmApi => {
       if (serviceName && start && end) {
         return callApmApi({
@@ -153,7 +154,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
         )}
 
         <EuiFlexItem>
-          <MetricList {...data} />
+          <MetricList {...data} isLoading={status === 'loading'} />
         </EuiFlexItem>
         {isService && (
           <Buttons
