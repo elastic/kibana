@@ -14,7 +14,7 @@ describe('snapshot API', () => {
     fetchMock = jest.spyOn(window, 'fetch');
     mockResponse = {
       ok: true,
-      json: () => new Promise(r => r({ up: 3, down: 12, mixed: 0, total: 15 })),
+      json: () => new Promise(r => r({ up: 3, down: 12, total: 15 })),
     };
   });
 
@@ -34,7 +34,7 @@ describe('snapshot API', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/uptime/snapshot/count?dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%22auto-http-0X21EE76EAC459873F%22&statusFilter=up'
     );
-    expect(resp).toEqual({ up: 3, down: 12, mixed: 0, total: 15 });
+    expect(resp).toEqual({ up: 3, down: 12, total: 15 });
   });
 
   it(`throws when server response doesn't correspond to expected type`, async () => {
