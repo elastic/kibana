@@ -39,6 +39,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        pageNavigation: 'individual',
       });
       await browser.setWindowSize(1600, 1000);
 

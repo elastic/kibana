@@ -115,7 +115,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        await kibanaServer.uiSettings.replace({});
+        await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
         await PageObjects.settings.navigateTo();
       });
 

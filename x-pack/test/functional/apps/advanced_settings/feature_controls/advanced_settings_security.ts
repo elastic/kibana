@@ -54,7 +54,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
-        await kibanaServer.uiSettings.replace({});
+        await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
         await PageObjects.settings.navigateTo();
       });
 
