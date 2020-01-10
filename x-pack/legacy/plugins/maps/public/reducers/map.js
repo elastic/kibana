@@ -16,7 +16,6 @@ import {
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
-  TOGGLE_LAYER_VISIBLE,
   SET_LAYER_VISIBILITY,
   MAP_EXTENT_CHANGED,
   MAP_READY,
@@ -309,8 +308,6 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         waitingForMapReadyLayerList: [],
       };
-    case TOGGLE_LAYER_VISIBLE:
-      return updateLayerInList(state, action.layerId, 'visible');
     case SET_LAYER_VISIBILITY:
       return updateLayerInList(state, action.layerId, 'visible', action.visibility);
     case UPDATE_LAYER_STYLE:

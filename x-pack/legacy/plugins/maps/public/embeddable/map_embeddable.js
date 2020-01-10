@@ -37,7 +37,7 @@ import {
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom, getHiddenLayers } from '../selectors/map_selectors';
+import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddable extends Embeddable {
@@ -249,9 +249,7 @@ export class MapEmbeddable extends Embeddable {
       });
     }
 
-    const hiddenLayerIds = getHiddenLayers(this._store.getState())
-      .map(layer => layer.id)
-      .sort();
+    const hiddenLayerIds = getHiddenLayerIds(this._store.getState());
 
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({
