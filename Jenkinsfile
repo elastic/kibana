@@ -20,6 +20,7 @@ def doIt() {
         timeout(time: 2, unit: 'MINUTES') {
           sh 'curl --connect-timeout 5 https://github.com/elastic/kibana || true'
           checkout scm
+          sleep 30
         }
       } catch(ex) {
         hadError = true
@@ -27,6 +28,10 @@ def doIt() {
         catchError {
           throw ex
         }
+      }
+
+      catchError {
+        sh 'rm -rf kibana'
       }
     }
 
