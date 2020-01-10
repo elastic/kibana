@@ -16,6 +16,8 @@ export const setBasePath = createAction<string>('SET BASE PATH');
 
 export const triggerAppRefresh = createAction<number>('REFRESH APP');
 
+export const setEsKueryString = createAction<string>('SET ES KUERY STRING');
+
 export const toggleIntegrationsPopover = createAction<PopoverState>(
   'TOGGLE INTEGRATION POPOVER STATE'
 );

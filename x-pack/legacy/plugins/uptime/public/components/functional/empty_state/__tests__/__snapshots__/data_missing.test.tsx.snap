@@ -20,7 +20,7 @@ exports[`DataMissing component renders basePath and headingMessage 1`] = `
               values={
                 Object {
                   "configureHeartbeatLink": <ForwardRef
-                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                    href="/app/kibana#/home/tutorial/uptimeMonitors"
                     target="_blank"
                   >
                     <FormattedMessage

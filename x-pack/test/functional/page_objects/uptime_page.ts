@@ -70,5 +70,20 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         await uptimeService.setStatusFilterDown();
       }
     }
+
+    public async selectFilterItems(filters: Record<string, string[]>) {
+      for (const key in filters) {
+        if (filters.hasOwnProperty(key)) {
+          const values = filters[key];
+          for (let i = 0; i < values.length; i++) {
+            await uptimeService.selectFilterItem(key, values[i]);
+          }
+        }
+      }
+    }
+
+    public async getSnapshotCount() {
+      return await uptimeService.getSnapshotCount();
+    }
   })();
 }

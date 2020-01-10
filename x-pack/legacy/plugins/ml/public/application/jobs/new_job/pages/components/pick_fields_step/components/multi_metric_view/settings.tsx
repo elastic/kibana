@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
 import { SplitFieldSelector } from '../split_field';
 import { Influencers } from '../influencers';
@@ -18,19 +17,6 @@ interface Props {
 }
 
 export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
-
-  useEffect(() => {
-    jobCreator.bucketSpan = bucketSpan;
-    jobCreatorUpdate();
-    setIsValid(bucketSpan !== '');
-  }, [bucketSpan]);
-
-  useEffect(() => {
-    setBucketSpan(jobCreator.bucketSpan);
-  }, [jobCreatorUpdated]);
-
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">

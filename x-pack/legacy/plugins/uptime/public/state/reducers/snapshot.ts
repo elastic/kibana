@@ -21,7 +21,6 @@ export interface SnapshotState {
 const initialState: SnapshotState = {
   count: {
     down: 0,
-    mixed: 0,
     total: 0,
     up: 0,
   },

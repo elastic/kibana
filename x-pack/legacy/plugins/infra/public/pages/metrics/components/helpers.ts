@@ -8,13 +8,14 @@ import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../utils/formatters';
-import { InfraDataSeries, InfraMetricData } from '../../../graphql/types';
+import { InfraDataSeries } from '../../../graphql/types';
 import {
   InventoryVisTypeRT,
   InventoryFormatterType,
   InventoryVisType,
 } from '../../../../common/inventory_models/types';
 import { SeriesOverrides } from '../types';
+import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 
 /**
  * Returns a formatter
@@ -34,7 +35,7 @@ export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean =
 /**
  * Returns the minimum and maximum timestamp for a metric
  */
-export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] => {
+export const getMaxMinTimestamp = (metric: NodeDetailsMetricData): [number, number] => {
   if (metric.series.some(seriesHasLessThen2DataPoints)) {
     return [0, 0];
   }
