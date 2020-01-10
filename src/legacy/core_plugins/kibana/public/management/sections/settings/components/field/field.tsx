@@ -174,7 +174,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   };
 
-  onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  onFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = e.target.value;
     const { type, validation } = this.props.setting;
     const { unsavedValue } = this.state;
@@ -348,7 +348,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
 
     switch (type) {
       case 'array':
-        valueToSave = valueToSave.split(',').map(val => val.trim());
+        valueToSave = valueToSave.split(',').map((val: string) => val.trim());
         isSameValue = valueToSave.join(',') === defVal.join(',');
         break;
       case 'json':
@@ -421,7 +421,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
               )
             }
             checked={!!unsavedValue}
-            onChange={this.onFieldChange}
+            onChange={this.onFieldChange as React.ChangeEvent<HTMLSelectElement>}
             disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}

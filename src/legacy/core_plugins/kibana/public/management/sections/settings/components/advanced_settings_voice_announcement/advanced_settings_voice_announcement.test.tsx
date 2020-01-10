@@ -22,6 +22,24 @@ import { shallow } from 'enzyme';
 
 import { AdvancedSettingsVoiceAnnouncement } from './advanced_settings_voice_announcement';
 
+const settingPartial = {
+  name: 'name',
+  isOverridden: false,
+  type: 'string',
+  value: 'value',
+
+  defVal: 'defVal',
+  optionLabels: { label: 'label' },
+  description: 'description',
+  displayName: 'displayName',
+  isCustom: false,
+  requiresPageReload: false,
+  options: {
+    maxSize: [1, 2, 3],
+  },
+  validation: { regex: /a/, message: 'message' },
+};
+
 const testProps = {
   nothing: {
     query: '',
@@ -29,6 +47,7 @@ const testProps = {
       [
         {
           ariaName: 'General',
+          ...settingPartial,
         },
       ],
     ],
@@ -39,6 +58,7 @@ const testProps = {
       [
         {
           ariaName: 'General',
+          ...settingPartial,
         },
       ],
     ],
