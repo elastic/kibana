@@ -107,7 +107,7 @@ describe('Retrieve ES Fields', () => {
     const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
       .callAsCurrentUser as jest.Mock;
 
-    callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
+    callAsCurrentUserMock.mockRejectedValueOnce(mockResults);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -141,18 +141,6 @@ describe('Retrieve ES Fields', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`Object {}`);
-  });
-
-  it(`returns 400 when request is missing the index query`, async () => {
-    const request = httpServerMock.createKibanaRequest({
-      method: 'get',
-      path,
-      query: {},
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-    expect(response.status).toBe(400);
-    expect(response.payload).toMatchInlineSnapshot(`"\\"index\\" query is required"`);
   });
 
   it(`returns 500 when index does not exist`, async () => {

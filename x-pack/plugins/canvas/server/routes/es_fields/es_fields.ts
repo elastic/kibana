@@ -8,11 +8,12 @@ import { mapValues, keys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { API_ROUTE } from '../../../../../legacy/plugins/canvas/common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
+// @ts-ignore unconverted lib
 import { normalizeType } from '../../../../../legacy/plugins/canvas/server/lib/normalize_type';
 import { RouteInitializerDeps } from '..';
 
 const ESFieldsRequestSchema = schema.object({
-  index: schema.maybe(schema.string()),
+  index: schema.string(),
   fields: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -29,10 +30,6 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
     catchErrorHandler(async (context, request, response) => {
       const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
       const { index, fields } = request.query;
-
-      if (!index) {
-        return response.customError({ body: '"index" query is required', statusCode: 400 });
-      }
 
       const config = {
         index,
