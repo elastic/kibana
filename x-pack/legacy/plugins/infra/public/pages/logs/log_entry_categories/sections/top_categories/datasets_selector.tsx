@@ -40,6 +40,7 @@ export const DatasetsSelector: React.FunctionComponent<{
 
   return (
     <EuiComboBox
+      aria-label={datasetFilterPlaceholder}
       isLoading={isLoading}
       onChange={handleChange}
       options={options}
@@ -52,7 +53,7 @@ export const DatasetsSelector: React.FunctionComponent<{
 const datasetFilterPlaceholder = i18n.translate(
   'xpack.infra.logs.logEntryCategories.datasetFilterPlaceholder',
   {
-    defaultMessage: 'Select datasets',
+    defaultMessage: 'Filter by datasets',
   }
 );
 
