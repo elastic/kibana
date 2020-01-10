@@ -17,8 +17,18 @@
  * under the License.
  */
 
-declare module 'encode-uri-query' {
-  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
-  // eslint-disable-next-line import/no-default-export
-  export default encodeUriQuery;
+import { IStateStorage } from './types';
+
+export interface ISessionStorageStateStorage extends IStateStorage {
+  set: <State>(key: string, state: State) => void;
+  get: <State = unknown>(key: string) => State | null;
 }
+
+export const createSessionStorageStateStorage = (
+  storage: Storage = window.sessionStorage
+): ISessionStorageStateStorage => {
+  return {
+    set: <State>(key: string, state: State) => storage.setItem(key, JSON.stringify(state)),
+    get: (key: string) => JSON.parse(storage.getItem(key)!),
+  };
+};

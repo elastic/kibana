@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+export {
+  encodeState,
+  decodeState,
+  expandedStateToHashedState,
+  hashedStateToExpandedState,
+} from './encode_decode_state';
