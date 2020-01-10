@@ -43,7 +43,7 @@ const style: cytoscape.Stylesheet[] = [
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
       'font-size': theme.euiFontSizeXS,
       height: theme.avatarSizing.l.size,
-      label: 'data(id)',
+      label: 'data(label)',
       'min-zoomed-font-size': theme.euiSizeL,
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
@@ -72,7 +72,18 @@ const style: cytoscape.Stylesheet[] = [
       //
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
-      width: 1
+      width: 1,
+      'source-arrow-shape': 'none'
+    }
+  },
+  {
+    selector: 'edge[bidirectional]',
+    style: {
+      'source-arrow-shape': 'triangle',
+      'target-arrow-shape': 'triangle',
+      // @ts-ignore
+      'source-distance-from-node': theme.paddingSizes.xs,
+      'target-distance-from-node': theme.paddingSizes.xs
     }
   }
 ];

@@ -6,9 +6,10 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { find } from 'lodash';
+import { find, isEqual, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
+import { ValuesType } from 'utility-types';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
 import {
@@ -72,21 +73,18 @@ ${theme.euiColorLightShade}`,
 
 const MAX_REQUESTS = 15;
 
-function getConnectionNodeId(
-  node: ConnectionNode,
-  destMap: Record<string, ServiceConnectionNode> = {}
-): string {
+function getConnectionNodeId(node: ConnectionNode): string {
   if ('destination.address' in node) {
-    const mapped = destMap[node['destination.address']];
-    return mapped
-      ? getConnectionNodeId(mapped, destMap)
-      : node['destination.address'];
+    // use a prefix to distinguish exernal destination ids from services
+    return `>${node['destination.address']}`;
   }
   return node['service.name'];
 }
 
-function getEdgeId(source: ConnectionNode, destination: ConnectionNode) {
-  return `${getConnectionNodeId(source)}~${getConnectionNodeId(destination)}`;
+function getConnectionId(connection: Connection) {
+  return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(
+    connection.destination
+  )}`;
 }
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
@@ -187,51 +185,64 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       };
     }, {} as Record<string, ServiceConnectionNode>);
 
-    const services = responses.flatMap(response => response.services);
+    const serviceNodes = responses
+      .flatMap(response => response.services)
+      .map(service => ({
+        ...service,
+        id: service['service.name']
+      }));
 
-    const nodesById = responses
+    // maps destination.address to service.name if possible
+    function getConnectionNode(node: ConnectionNode) {
+      const mappedNode =
+        ('destination.address' in node &&
+          destMap[node['destination.address']]) ||
+        node;
+
+      return {
+        ...mappedNode,
+        id: getConnectionNodeId(mappedNode)
+      };
+    }
+
+    // build connections with mapped nodes
+    const connections = responses
       .flatMap(response => response.connections)
+      .map(connection => {
+        const source = getConnectionNode(connection.source);
+        const destination = getConnectionNode(connection.destination);
+
+        return {
+          source,
+          destination,
+          id: getConnectionId({ source, destination })
+        };
+      })
+      .filter(connection => connection.source.id !== connection.destination.id);
+
+    const nodes = connections
       .flatMap(connection => [connection.source, connection.destination])
-      .concat(services)
-      .reduce((acc, node) => {
-        const nodeId = getConnectionNodeId(node, destMap);
+      .concat(serviceNodes);
 
-        return {
-          ...acc,
-          [nodeId]: destMap[nodeId] || node
-        };
-      }, {} as Record<string, ConnectionNode>);
+    type ConnectionWithId = ValuesType<typeof connections>;
+    type ConnectionNodeWithId = ValuesType<typeof nodes>;
 
-    const edgesById = responses
-      .flatMap(response => response.connections)
-      .reduce((acc, connection) => {
-        const source =
-          nodesById[getConnectionNodeId(connection.source, destMap)];
-        const destination =
-          nodesById[getConnectionNodeId(connection.destination, destMap)];
+    const connectionsById = connections.reduce((connectionMap, connection) => {
+      return {
+        ...connectionMap,
+        [connection.id]: connection
+      };
+    }, {} as Record<string, ConnectionWithId>);
 
-        if (acc[getEdgeId(destination, source)]) {
-          return {
-            ...acc,
-            [getEdgeId(destination, source)]: {
-              source,
-              destination,
-              bidirectional: true
-            }
-          };
-        }
+    const nodesById = nodes.reduce((nodeMap, node) => {
+      return {
+        ...nodeMap,
+        [node.id]: node
+      };
+    }, {} as Record<string, ConnectionNodeWithId>);
 
-        return {
-          ...acc,
-          [getEdgeId(source, destination)]: {
-            source,
-            destination
-          }
-        };
-      }, {} as Record<string, Connection>);
-
-    return [
-      ...(Object.values(nodesById) as ConnectionNode[]).map(node => {
+    const cyNodes = (Object.values(nodesById) as ConnectionNodeWithId[]).map(
+      node => {
         let data = {};
 
         if ('service.name' in node) {
@@ -247,36 +258,53 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         return {
           group: 'nodes' as const,
           data: {
-            id: getConnectionNodeId(node, destMap),
+            id: node.id,
+            label:
+              'service.name' in node
+                ? node['service.name']
+                : node['destination.address'],
             ...data
           }
         };
-      }),
-      ...(Object.values(edgesById) as Connection[])
-        .filter(connection => connection.source !== connection.destination)
-        .map(connection => {
-          return {
-            group: 'edges' as const,
-            data: {
-              id: getEdgeId(connection.source, connection.destination),
-              source: getConnectionNodeId(connection.source, destMap),
-              target: getConnectionNodeId(connection.destination, destMap)
-            },
-            style: connection.bidirectional
-              ? {
-                  'source-arrow-shape': 'triangle',
-                  'target-arrow-shape': 'triangle',
-                  'source-distance-from-node': theme.paddingSizes.xs,
-                  'target-distance-from-node': theme.paddingSizes.xs
-                }
-              : {
-                  'source-arrow-shape': 'none',
-                  'target-arrow-shape': 'triangle',
-                  'target-distance-from-node': theme.paddingSizes.xs
-                }
-          };
-        })
-    ];
+      }
+    );
+
+    // instead of adding connections in two directions,
+    // we add a `bidirectional` flag to use in styling
+    const dedupedConnections = (sortBy(
+      Object.values(connectionsById),
+      // make sure that order is stable
+      'id'
+    ) as ConnectionWithId[]).reduce<
+      Array<ConnectionWithId & { bidirectional?: boolean }>
+    >((prev, connection) => {
+      const reversedConnection = prev.find(
+        c =>
+          c.destination.id === connection.source.id &&
+          c.source.id === connection.destination.id
+      );
+
+      if (reversedConnection) {
+        reversedConnection.bidirectional = true;
+        return prev;
+      }
+
+      return prev.concat(connection);
+    }, []);
+
+    const cyEdges = dedupedConnections.map(connection => {
+      return {
+        group: 'edges' as const,
+        data: {
+          id: connection.id,
+          source: connection.source.id,
+          target: connection.destination.id,
+          bidirectional: connection.bidirectional ? true : undefined
+        }
+      };
+    }, []);
+
+    return [...cyNodes, ...cyEdges];
   }, [responses, search]);
 
   const license = useLicense();
@@ -290,10 +318,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const openToast = useRef<string | null>(null);
 
   const newData = elements.filter(element => {
-    return !find(
-      renderedElements.current,
-      el => el.data.id === element.data.id
-    );
+    return !find(renderedElements.current, el => isEqual(el, element));
   });
 
   const updateMap = () => {
