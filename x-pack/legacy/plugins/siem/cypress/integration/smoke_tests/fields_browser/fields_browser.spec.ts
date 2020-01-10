@@ -6,7 +6,7 @@
 
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import {
-  cleansFieldsBrowser,
+  clearFieldsBrowser,
   clickOutsideFieldsBrowser,
   openTimelineFieldsBrowser,
   populateTimeline,
@@ -56,7 +56,7 @@ describe('Fields Browser', () => {
     });
 
     afterEach(() => {
-      cleansFieldsBrowser();
+      clearFieldsBrowser();
     });
 
     it('renders the fields browser with the expected title when the Fields button is clicked', () => {
@@ -141,7 +141,7 @@ describe('Fields Browser', () => {
 
     afterEach(() => {
       openTimelineFieldsBrowser();
-      cleansFieldsBrowser();
+      clearFieldsBrowser();
     });
 
     it('removes the message field from the timeline when the user un-checks the field', () => {
