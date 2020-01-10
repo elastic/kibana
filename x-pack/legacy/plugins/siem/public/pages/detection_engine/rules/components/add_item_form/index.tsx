@@ -114,7 +114,7 @@ export const AddItem = ({
     <MyEuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
-      error={errorMessage}
+      error={showValidation ? errorMessage : null}
       isInvalid={showValidation && isInvalid}
       fullWidth
       data-test-subj={dataTestSubj}
@@ -148,7 +148,7 @@ export const AddItem = ({
                   <EuiButtonIcon
                     color="danger"
                     iconType="trash"
-                    isDisabled={isDisabled}
+                    isDisabled={isDisabled || (isEmpty(item) && values.length === 1)}
                     onClick={() => removeItem(index)}
                     aria-label={RuleI18n.DELETE}
                   />
