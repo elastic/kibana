@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { Services, AlertsConfigType } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
