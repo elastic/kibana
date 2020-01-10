@@ -57,7 +57,6 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     return {
       authc,
       sessionTimeout: this.sessionTimeout,
-      license,
     };
   }
 
