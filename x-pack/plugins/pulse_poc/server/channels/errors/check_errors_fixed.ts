@@ -20,7 +20,7 @@ export async function check(es: IScopedClusterClient, deploymentId: string) {
   // the following request is throwing a "ServiceUnavailable" error in Kibana startup.
   const response = await es.callAsInternalUser('search', {
     index: 'pulse-poc-raw-errors',
-    size: 0,
+    size: 100,
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
