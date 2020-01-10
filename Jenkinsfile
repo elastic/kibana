@@ -27,17 +27,14 @@ def doIt() {
 
   for(def i = 0; i < 500; i++) {
     try {
-      timeout(time: 2, unit: 'MINUTES') {
+      timeout(time: 3, unit: 'MINUTES') {
         checkout scm
       }
       sleep 30
     } catch(ex) {
       hadError = true
       catchError {
-        sh 'dig github.com'
-      }
-      catchError {
-        sh 'curl --connect-timeout 5 https://github.com/elastic/kibana'
+        sh 'curl --verbose --connect-timeout 5 https://github.com/elastic/kibana'
       }
       catchError {
         throw ex
