@@ -19,7 +19,7 @@ describe('FilterPopover component', () => {
     props = {
       fieldName: 'foo',
       id: 'test',
-      isLoading: false,
+      loading: false,
       items: ['first', 'second', 'third', 'fourth'],
       onFilterFieldChange: jest.fn(),
       selectedItems: ['first', 'third'],
@@ -47,7 +47,7 @@ describe('FilterPopover component', () => {
   });
 
   it('does not show item list when loading', () => {
-    props.isLoading = true;
+    props.loading = true;
     const wrapper = shallowWithIntl(<FilterPopover {...props} />);
     expect(wrapper).toMatchSnapshot();
   });

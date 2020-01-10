@@ -35,7 +35,7 @@ export const createStateContainerReactHelpers = <Container extends StateContaine
     return value;
   };
 
-  const useTransitions = () => useContainer().transitions;
+  const useTransitions = (): Container['transitions'] => useContainer().transitions;
 
   const useSelector = <Result>(
     selector: (state: UnboxState<Container>) => Result,
