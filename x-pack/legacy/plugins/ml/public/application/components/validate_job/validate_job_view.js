@@ -264,7 +264,7 @@ export class ValidateJob extends Component {
 
     return (
       <Fragment>
-        {embedded === false && (
+        {embedded === false ? (
           <div>
             <EuiButton
               onClick={this.validate}
@@ -292,7 +292,11 @@ export class ValidateJob extends Component {
                   />
                 }
               >
-                <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+                )}
 
                 <EuiText>
                   <FormattedMessage
@@ -320,15 +324,14 @@ export class ValidateJob extends Component {
               </Modal>
             )}
           </div>
-        )}
-        {embedded === true && (
-          <>
+        ) : (
+          <Fragment>
             {isLoading ? (
               <LoadingSpinner />
             ) : (
               <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
             )}
-          </>
+          </Fragment>
         )}
       </Fragment>
     );
