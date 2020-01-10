@@ -199,7 +199,7 @@ export const AllRules = React.memo<{
 
             <EuiBasicTable
               columns={getColumns(dispatch, history, canUserCRUD)}
-              isSelectable={canUserCRUD}
+              isSelectable={canUserCRUD ?? false}
               itemId="rule_id"
               items={tableData}
               onChange={({ page, sort }: EuiBasicTableOnChange) => {

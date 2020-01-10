@@ -32,7 +32,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => {
       <Switch>
         <Route exact path={detectionEnginePath} strict>
           <DetectionEngineComponent
-            canUserCRUD={canUserCRUD}
+            canUserCRUD={canUserCRUD ?? false}
             loading={loading}
             isSignalIndexExists={isSignalIndexExists}
             isUserAuthenticated={isAuthenticated}

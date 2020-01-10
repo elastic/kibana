@@ -92,7 +92,7 @@ export const RulesComponent = React.memo(() => {
         <AllRules
           loading={loading}
           importCompleteToggle={importCompleteToggle}
-          canUserCRUD={canUserCRUD}
+          canUserCRUD={canUserCRUD ?? false}
         />
       </WrapperPage>
 

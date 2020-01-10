@@ -219,7 +219,7 @@ export const RuleDetailsComponent = memo(() => {
 
                     {ruleId != null && (
                       <SignalsTable
-                        canUserCRUD={canUserCRUD}
+                        canUserCRUD={canUserCRUD ?? false}
                         defaultFilters={signalDefaultFilters}
                         loading={loading || isLoading}
                         from={from}
