@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { RuleGroup } from './rule_group';
 import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
-import { ExceptFieldRule } from './except_field_rule';
 
 /**
  * Represents a group of rules in which none can evaluate to true (all must evaluate to false).
@@ -47,7 +46,7 @@ export class ExceptAnyRule extends RuleGroup {
 
   /** {@see RuleGroup.canContainRules} */
   public canContainRules(rules: Rule[]) {
-    const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
+    const forbiddenRules = [ExceptAllRule, ExceptAnyRule];
     return rules.every(
       candidate => !forbiddenRules.some(forbidden => candidate instanceof forbidden)
     );

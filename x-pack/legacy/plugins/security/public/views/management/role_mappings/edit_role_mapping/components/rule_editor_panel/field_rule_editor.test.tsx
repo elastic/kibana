@@ -48,7 +48,6 @@ describe('FieldRuleEditor', () => {
   it('can render a text-based field rule', () => {
     const props = {
       rule: new FieldRule('username', '*'),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -62,7 +61,6 @@ describe('FieldRuleEditor', () => {
   it('can render a number-based field rule', () => {
     const props = {
       rule: new FieldRule('username', 12),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -76,7 +74,6 @@ describe('FieldRuleEditor', () => {
   it('can render a null-based field rule', () => {
     const props = {
       rule: new FieldRule('username', null),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -90,7 +87,6 @@ describe('FieldRuleEditor', () => {
   it('can render a boolean-based field rule (true)', () => {
     const props = {
       rule: new FieldRule('username', true),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -104,7 +100,6 @@ describe('FieldRuleEditor', () => {
   it('can render a boolean-based field rule (false)', () => {
     const props = {
       rule: new FieldRule('username', false),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -118,7 +113,6 @@ describe('FieldRuleEditor', () => {
   it('can render with alternate values specified', () => {
     const props = {
       rule: new FieldRule('username', ['*', 12, null, true, false]),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -150,7 +144,6 @@ describe('FieldRuleEditor', () => {
   it('allows alternate values to be added when "allowAdd" is set to true', () => {
     const props = {
       rule: new FieldRule('username', null),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -169,7 +162,6 @@ describe('FieldRuleEditor', () => {
   it('allows values to be deleted; deleting all values invokes "onDelete"', () => {
     const props = {
       rule: new FieldRule('username', ['*', 12, null]),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
@@ -215,40 +207,9 @@ describe('FieldRuleEditor', () => {
     expect(props.onDelete).toHaveBeenCalledTimes(1);
   });
 
-  it('allows alternate values to be deleted, but at least one must remain, if "allowDelete" is set to false', () => {
-    const props = {
-      rule: new FieldRule('username', ['*', null]),
-      allowDelete: false,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
-    };
-
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-
-    expect(findTestSubject(wrapper, `fieldRuleEditorDeleteValue`)).toHaveLength(2);
-    findTestSubject(wrapper, `fieldRuleEditorDeleteValue-0`).simulate('click');
-
-    expect(props.onChange).toHaveBeenCalledTimes(1);
-    const [updatedRule1] = props.onChange.mock.calls[0];
-    expect(updatedRule1.toRaw()).toEqual({
-      field: {
-        username: [null],
-      },
-    });
-
-    props.onChange.mockReset();
-
-    // simulate updated rule being fed back in
-    wrapper.setProps({ rule: updatedRule1 });
-
-    // only one rule left; no delete available
-    expect(findTestSubject(wrapper, `fieldRuleEditorDeleteValue`)).toHaveLength(0);
-  });
-
   it('allows field data types to be changed', () => {
     const props = {
       rule: new FieldRule('username', '*'),
-      allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };

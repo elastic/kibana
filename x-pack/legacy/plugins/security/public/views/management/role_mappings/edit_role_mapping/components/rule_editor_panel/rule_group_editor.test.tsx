@@ -7,7 +7,7 @@
 import React from 'react';
 import { RuleGroupEditor } from './rule_group_editor';
 import { shallowWithIntl, mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { AllRule, FieldRule, AnyRule, ExceptFieldRule } from '../../../model';
+import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../../model';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { EuiContextMenuItem } from '@elastic/eui';
@@ -62,7 +62,7 @@ describe('RuleGroupEditor', () => {
 
   it('warns when changing group types which would invalidate child rules', async () => {
     const props = {
-      rule: new AllRule([new ExceptFieldRule(new FieldRule('my_custom_field', 'foo*'))]),
+      rule: new AllRule([new ExceptAnyRule([new FieldRule('my_custom_field', 'foo*')])]),
       allowAdd: true,
       ruleDepth: 0,
       onChange: jest.fn(),
@@ -71,7 +71,7 @@ describe('RuleGroupEditor', () => {
     const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AddRuleButton)).toHaveLength(1);
+    expect(wrapper.find(AddRuleButton)).toHaveLength(2);
     expect(findTestSubject(wrapper, 'deleteRuleGroupButton')).toHaveLength(2);
 
     const anyRule = new AnyRule();
@@ -102,7 +102,7 @@ describe('RuleGroupEditor', () => {
 
   it('does not change groups when canceling the confirmation', async () => {
     const props = {
-      rule: new AllRule([new ExceptFieldRule(new FieldRule('username', '*'))]),
+      rule: new AllRule([new ExceptAnyRule([new FieldRule('username', '*')])]),
       allowAdd: true,
       ruleDepth: 0,
       onChange: jest.fn(),
@@ -111,7 +111,7 @@ describe('RuleGroupEditor', () => {
     const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AddRuleButton)).toHaveLength(1);
+    expect(wrapper.find(AddRuleButton)).toHaveLength(2);
     expect(findTestSubject(wrapper, 'deleteRuleGroupButton')).toHaveLength(2);
 
     const anyRule = new AnyRule();

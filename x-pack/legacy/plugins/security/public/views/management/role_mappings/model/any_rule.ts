@@ -9,7 +9,7 @@ import { RuleGroup } from './rule_group';
 import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
-import { ExceptFieldRule } from './except_field_rule';
+
 /**
  * Represents a group of rules in which at least one must evaluate to true.
  */
@@ -47,7 +47,7 @@ export class AnyRule extends RuleGroup {
 
   /** {@see RuleGroup.canContainRules} */
   public canContainRules(rules: Rule[]) {
-    const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
+    const forbiddenRules = [ExceptAllRule, ExceptAnyRule];
     return rules.every(
       candidate => !forbiddenRules.some(forbidden => candidate instanceof forbidden)
     );

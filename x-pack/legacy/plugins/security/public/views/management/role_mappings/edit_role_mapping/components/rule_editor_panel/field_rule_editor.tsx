@@ -22,7 +22,6 @@ import { FieldRule, FieldRuleValue } from '../../../model';
 
 interface Props {
   rule: FieldRule;
-  allowDelete: boolean;
   onChange: (rule: FieldRule) => void;
   onDelete: () => void;
 }
@@ -88,10 +87,8 @@ export class FieldRuleEditor extends Component<Props, {}> {
     const isPrimaryRow = valueIndex === 0;
 
     let renderAddValueButton = true;
-    let renderDeleteButton = !isPrimaryRow || this.props.allowDelete;
     let rowRuleValue: FieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
-      renderDeleteButton = ruleValue.length > 1 || this.props.allowDelete;
       renderAddValueButton = ruleValue.length - 1 === valueIndex;
       rowRuleValue = ruleValue[valueIndex];
     }
@@ -160,23 +157,19 @@ export class FieldRuleEditor extends Component<Props, {}> {
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFormRow hasEmptyLabelSpace={true}>
-            {renderDeleteButton ? (
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                iconSize="s"
-                data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
-                aria-label={i18n.translate(
-                  'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
-                  {
-                    defaultMessage: 'Delete value',
-                  }
-                )}
-                onClick={() => this.onRemoveAlternateValue(valueIndex)}
-              />
-            ) : (
-              <EuiIcon type="empty" aria-hidden={true} />
-            )}
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              iconSize="s"
+              data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
+              aria-label={i18n.translate(
+                'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
+                {
+                  defaultMessage: 'Delete value',
+                }
+              )}
+              onClick={() => this.onRemoveAlternateValue(valueIndex)}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

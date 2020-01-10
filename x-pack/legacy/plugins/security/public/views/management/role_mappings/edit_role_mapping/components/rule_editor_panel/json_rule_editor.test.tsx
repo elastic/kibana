@@ -17,14 +17,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
-import {
-  AllRule,
-  AnyRule,
-  FieldRule,
-  ExceptAnyRule,
-  ExceptAllRule,
-  ExceptFieldRule,
-} from '../../../model';
+import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../../model';
 
 describe('JSONRuleEditor', () => {
   it('renders an empty rule set', () => {
@@ -50,7 +43,6 @@ describe('JSONRuleEditor', () => {
           new AllRule([new FieldRule('realm', 'special-one')]),
         ]),
         new ExceptAllRule([new FieldRule('realm', '*')]),
-        new ExceptFieldRule(new FieldRule('dn', '*')),
       ]),
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
@@ -76,11 +68,6 @@ describe('JSONRuleEditor', () => {
         {
           except: {
             all: [{ field: { realm: '*' } }],
-          },
-        },
-        {
-          except: {
-            field: { dn: '*' },
           },
         },
       ],

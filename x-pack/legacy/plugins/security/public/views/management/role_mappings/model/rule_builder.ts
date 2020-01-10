@@ -10,7 +10,6 @@ import { FieldRule, FieldRuleValue } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
 import { Rule } from './rule';
-import { ExceptFieldRule } from './except_field_rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
 import { RuleBuilderError } from '.';
@@ -111,7 +110,7 @@ function createRuleForType(
 
       const fieldRule = new FieldRule(field, value);
       return {
-        rules: isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule,
+        rules: isRuleNegated ? new ExceptAllRule([fieldRule]) : fieldRule,
         maxDepth: depth,
       };
     }

@@ -21,7 +21,11 @@ describe('generateRulesFromRaw', () => {
       all: [
         {
           except: {
-            field: { username: '*' },
+            all: [
+              {
+                field: { username: '*' },
+              },
+            ],
           },
         },
         {
@@ -39,11 +43,13 @@ describe('generateRulesFromRaw', () => {
     expect(rules).toMatchInlineSnapshot(`
       AllRule {
         "rules": Array [
-          ExceptFieldRule {
-            "fieldRule": FieldRule {
-              "field": "username",
-              "value": "*",
-            },
+          ExceptAllRule {
+            "rules": Array [
+              FieldRule {
+                "field": "username",
+                "value": "*",
+              },
+            ],
           },
           AnyRule {
             "rules": Array [
@@ -300,6 +306,38 @@ describe('generateRulesFromRaw', () => {
           },
         });
       }).toThrowError(`"except" rule can only exist within an "all" rule.`);
+    });
+
+    it('converts an "except field" rule into an equivilent "except all" rule', () => {
+      expect(
+        generateRulesFromRaw({
+          all: [
+            {
+              except: {
+                field: {
+                  username: '*',
+                },
+              },
+            },
+          ],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "maxDepth": 2,
+          "rules": AllRule {
+            "rules": Array [
+              ExceptAllRule {
+                "rules": Array [
+                  FieldRule {
+                    "field": "username",
+                    "value": "*",
+                  },
+                ],
+              },
+            ],
+          },
+        }
+      `);
     });
   });
 });

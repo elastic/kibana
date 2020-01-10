@@ -60,7 +60,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
             </EuiFlexGroup>
           </EuiFlexItem>
           {this.renderSubRules()}
-          {this.props.allowAdd && this.props.rule.canAddRule() && (
+          {this.props.allowAdd && (
             <EuiFlexItem>
               <AddRuleButton onClick={this.onAddRuleClick} />
             </EuiFlexItem>
@@ -115,7 +115,6 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                 this.props.onChange(updatedRule);
               }}
-              allowDelete={this.props.rule.canRemoveRule()}
               onDelete={() => {
                 const updatedRule = this.props.rule.clone() as RuleGroup;
                 updatedRule.removeRule(subRuleIndex);

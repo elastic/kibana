@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AllRule,
-  AnyRule,
-  FieldRule,
-  ExceptAllRule,
-  ExceptAnyRule,
-  ExceptFieldRule,
-  RuleGroup,
-} from '.';
+import { AllRule, AnyRule, FieldRule, ExceptAllRule, ExceptAnyRule, RuleGroup } from '.';
 
 describe('All rule', () => {
   it('can be constructed without sub rules', () => {
@@ -32,11 +24,9 @@ describe('All rule', () => {
       new FieldRule('username', '*'),
       new ExceptAllRule(),
       new ExceptAnyRule(),
-      new ExceptFieldRule(),
     ];
 
     const rule = new AllRule() as RuleGroup;
-    expect(rule.canAddRule()).toEqual(true);
     expect(rule.canContainRules(subRules)).toEqual(true);
     subRules.forEach(sr => rule.addRule(sr));
     expect(rule.getRules()).toEqual([...subRules]);

@@ -8,14 +8,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { findTestSubject } from 'test_utils/find_test_subject';
-import {
-  AnyRule,
-  AllRule,
-  FieldRule,
-  ExceptAnyRule,
-  ExceptAllRule,
-  ExceptFieldRule,
-} from '../../../model';
+import { AnyRule, AllRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../../model';
 import { RuleGroupEditor } from './rule_group_editor';
 import { FieldRuleEditor } from './field_rule_editor';
 
@@ -82,7 +75,6 @@ describe('VisualRuleEditor', () => {
           new AllRule([new FieldRule('realm', 'special-one')]),
         ]),
         new ExceptAllRule([new FieldRule('realm', '*')]),
-        new ExceptFieldRule(new FieldRule('dn', '*')),
       ]),
       maxDepth: 4,
       onSwitchEditorMode: jest.fn(),
@@ -90,8 +82,8 @@ describe('VisualRuleEditor', () => {
     };
     const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
 
-    expect(wrapper.find(RuleGroupEditor)).toHaveLength(6);
-    expect(wrapper.find(FieldRuleEditor)).toHaveLength(5);
+    expect(wrapper.find(RuleGroupEditor)).toHaveLength(5);
+    expect(wrapper.find(FieldRuleEditor)).toHaveLength(4);
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(0);
   });
 

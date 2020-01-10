@@ -136,7 +136,6 @@ export class VisualRuleEditor extends Component<Props, {}> {
       <FieldRuleEditor
         rule={rule as FieldRule}
         onChange={value => onChange(value)}
-        allowDelete={true}
         onDelete={this.onRuleDelete}
       />
     );

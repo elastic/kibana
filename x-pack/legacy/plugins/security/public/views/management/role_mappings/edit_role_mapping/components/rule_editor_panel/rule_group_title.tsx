@@ -21,7 +21,6 @@ import {
   AnyRule,
   ExceptAllRule,
   ExceptAnyRule,
-  ExceptFieldRule,
   FieldRule,
 } from '../../../model';
 
@@ -33,7 +32,7 @@ interface Props {
 }
 
 const rules = [new AllRule(), new AnyRule()];
-const exceptRules = [new ExceptAllRule(), new ExceptAnyRule(), new ExceptFieldRule()];
+const exceptRules = [new ExceptAllRule(), new ExceptAnyRule()];
 
 export const RuleGroupTitle = (props: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -39,18 +39,4 @@ export abstract class RuleGroup extends Rule {
    * @param rules the rules to test.
    */
   abstract canContainRules(rules: Rule[]): boolean;
-
-  /**
-   * Determines if this group is currently capable of adding rules.
-   */
-  public canAddRule(): boolean {
-    return true;
-  }
-
-  /**
-   * Determines if this group is currently capable of removing rules.
-   */
-  public canRemoveRule(): boolean {
-    return true;
-  }
 }
