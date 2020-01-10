@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
+import { usePrevious } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -20,10 +21,15 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
-import { getDateFormatTz } from '../../explorer/explorer_utils';
+import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
+import { mlForecastService } from '../../services/forecast_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
+import {
+  createTimeSeriesJobData,
+  getAutoZoomDuration,
+} from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
@@ -103,7 +109,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
-  let bounds;
+  let bounds: TimeRangeBounds | undefined;
   if (globalState?.time !== undefined) {
     bounds = {
       min: moment(globalState.time.from),
@@ -117,8 +123,16 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
   const selectedForecastId = appState?.mlTimeSeriesExplorer?.forecastId;
   const zoom = appState?.mlTimeSeriesExplorer?.zoom;
 
+  let autoZoomDuration: number | undefined;
+  if (selectedJobIds !== undefined && selectedJobIds.length === 1) {
+    autoZoomDuration = getAutoZoomDuration(
+      createTimeSeriesJobData(mlJobService.jobs),
+      mlJobService.getJob(selectedJobIds[0])
+    );
+  }
+
   const appStateHandler = useCallback(
-    (action: string, payload: any) => {
+    (action: string, payload?: any) => {
       const mlTimeSeriesExplorer =
         appState?.mlTimeSeriesExplorer !== undefined ? { ...appState.mlTimeSeriesExplorer } : {};
 
@@ -127,6 +141,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
           delete mlTimeSeriesExplorer.detectorIndex;
           delete mlTimeSeriesExplorer.entities;
           delete mlTimeSeriesExplorer.forecastId;
+          delete mlTimeSeriesExplorer.zoom;
           break;
 
         case APP_STATE_ACTION.SET_DETECTOR_INDEX:
@@ -144,6 +159,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
         case APP_STATE_ACTION.SET_ZOOM:
           mlTimeSeriesExplorer.zoom = payload;
           break;
+
         case APP_STATE_ACTION.UNSET_ZOOM:
           delete mlTimeSeriesExplorer.zoom;
           break;
@@ -153,6 +169,74 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     },
     [JSON.stringify([appState, globalState])]
   );
+
+  // When changing jobs we'll clear appState (detectorIndex, entities, forecastId).
+  // To retore settings from the URL on initial load we also need to check against
+  // `previousSelectedJobIds` to avoid wiping appState.
+  if (Array.isArray(selectedJobIds)) {
+    selectedJobIds.sort();
+  }
+  const previousSelectedJobIds = usePrevious(selectedJobIds);
+  useEffect(() => {
+    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
+      setLastRefresh(Date.now());
+      appStateHandler(APP_STATE_ACTION.CLEAR);
+    }
+  }, [JSON.stringify(selectedJobIds)]);
+
+  const boundsMinMs = bounds?.min?.valueOf();
+  const boundsMaxMs = bounds?.max?.valueOf();
+  useEffect(() => {
+    if (
+      autoZoomDuration !== undefined &&
+      boundsMinMs !== undefined &&
+      boundsMaxMs !== undefined &&
+      selectedForecastId !== undefined
+    ) {
+      const selectedJob = mlJobService.getJob(selectedJobIds[0]);
+
+      mlForecastService
+        .getForecastDateRange(selectedJob, selectedForecastId)
+        .then(resp => {
+          if (autoZoomDuration === undefined) {
+            return;
+          }
+
+          const earliest = moment(resp.earliest || boundsMinMs);
+          const latest = moment(resp.latest || boundsMaxMs);
+
+          // Set the zoom to centre on the start of the forecast range, depending
+          // on the time range of the forecast and data.
+          // const earliestDataDate = first(contextChartData).date;
+          const zoomLatestMs = Math.min(
+            earliest.valueOf() + autoZoomDuration / 2,
+            latest.valueOf()
+          );
+          const zoomEarliestMs = zoomLatestMs - autoZoomDuration;
+          const zoomState = {
+            from: moment(zoomEarliestMs).toISOString(),
+            to: moment(zoomLatestMs).toISOString(),
+          };
+          appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
+
+          if (earliest.isBefore(moment(boundsMinMs)) || latest.isAfter(moment(boundsMaxMs))) {
+            const earliestMs = Math.min(earliest.valueOf(), boundsMinMs);
+            const latestMs = Math.max(latest.valueOf(), boundsMaxMs);
+            setGlobalState('time', {
+              from: moment(earliestMs).toISOString(),
+              to: moment(latestMs).toISOString(),
+            });
+          }
+        })
+        .catch(resp => {
+          // eslint-disable-next-line no-console
+          console.error(
+            'Time series explorer - error loading time range of forecast from elasticsearch:',
+            resp
+          );
+        });
+    }
+  }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
@@ -164,6 +248,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     <TimeSeriesExplorer
       {...{
         appStateHandler,
+        autoZoomDuration,
         bounds,
         dateFormatTz,
         jobsWithTimeRange,

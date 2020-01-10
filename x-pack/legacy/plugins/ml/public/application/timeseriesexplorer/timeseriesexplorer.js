@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { debounce, difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { debounce, difference, each, find, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -78,7 +78,6 @@ import {
   calculateDefaultFocusRange,
   calculateInitialFocusRange,
   createTimeSeriesJobData,
-  getAutoZoomDuration,
   processForecastResults,
   processMetricPlotResults,
   processRecordScoreResults,
@@ -120,7 +119,6 @@ function getViewableDetectors(selectedJob) {
 
 function getTimeseriesexplorerDefaultState() {
   return {
-    autoZoomDuration: undefined,
     chartDetails: undefined,
     contextAggregationInterval: undefined,
     contextChartData: undefined,
@@ -188,6 +186,7 @@ const containerPadding = 24;
 export class TimeSeriesExplorer extends React.Component {
   static propTypes = {
     appStateHandler: PropTypes.func.isRequired,
+    autoZoomDuration: PropTypes.number,
     bounds: PropTypes.object,
     dateFormatTz: PropTypes.string.isRequired,
     jobsWithTimeRange: PropTypes.array.isRequired,
@@ -472,54 +471,15 @@ export class TimeSeriesExplorer extends React.Component {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
-  loadForForecastId = forecastId => {
-    const { appStateHandler, bounds, selectedJobIds, setGlobalState } = this.props;
-    const { autoZoomDuration, contextChartData } = this.state;
-    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
-
-    mlForecastService
-      .getForecastDateRange(selectedJob, forecastId)
-      .then(resp => {
-        const earliest = moment(resp.earliest || bounds.min.valueOf());
-        const latest = moment(resp.latest || bounds.max.valueOf());
-
-        // Set the zoom to centre on the start of the forecast range, depending
-        // on the time range of the forecast and data.
-        const earliestDataDate = first(contextChartData).date;
-        const zoomLatestMs = Math.min(earliest + autoZoomDuration / 2, latest.valueOf());
-        const zoomEarliestMs = Math.max(
-          zoomLatestMs - autoZoomDuration,
-          earliestDataDate.getTime()
-        );
-
-        const zoomState = {
-          from: moment(zoomEarliestMs).toISOString(),
-          to: moment(zoomLatestMs).toISOString(),
-        };
-        appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
-
-        // Ensure the forecast data will be shown if hidden previously.
-        this.setState({ showForecast: true });
-
-        if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
-          const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
-          const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-          setGlobalState('time', {
-            from: moment(earliestMs).toISOString(),
-            to: moment(latestMs).toISOString(),
-          });
-        }
-      })
-      .catch(resp => {
-        console.log(
-          'Time series explorer - error loading time range of forecast from elasticsearch:',
-          resp
-        );
-      });
-  };
-
   loadSingleMetricData = (fullRefresh = true) => {
-    const { bounds, selectedDetectorIndex, selectedForecastId, selectedJobIds, zoom } = this.props;
+    const {
+      autoZoomDuration,
+      bounds,
+      selectedDetectorIndex,
+      selectedForecastId,
+      selectedJobIds,
+      zoom,
+    } = this.props;
 
     if (selectedJobIds === undefined) {
       return;
@@ -581,9 +541,6 @@ export class TimeSeriesExplorer extends React.Component {
             // Set zoomFrom/zoomTo attributes in scope which will result in the metric chart automatically
             // selecting the specified range in the context chart, and so loading that date range in the focus chart.
             if (stateUpdate.contextChartData.length) {
-              // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
-              stateUpdate.autoZoomDuration = getAutoZoomDuration(jobs, selectedJob);
-
               // Check for a zoom parameter in the appState (URL).
               let focusRange = calculateInitialFocusRange(
                 zoom,
@@ -593,7 +550,7 @@ export class TimeSeriesExplorer extends React.Component {
 
               if (focusRange === undefined) {
                 focusRange = calculateDefaultFocusRange(
-                  stateUpdate.autoZoomDuration,
+                  autoZoomDuration,
                   stateUpdate.contextAggregationInterval,
                   stateUpdate.contextChartData,
                   stateUpdate.contextForecastData
@@ -714,8 +671,7 @@ export class TimeSeriesExplorer extends React.Component {
           });
 
         // Plus query for forecast data if there is a forecastId stored in the appState.
-        const forecastId = selectedForecastId;
-        if (forecastId !== undefined) {
+        if (selectedForecastId !== undefined) {
           awaitingCount++;
           let aggType = undefined;
           const detector = selectedJob.analysis_config.detectors[detectorIndex];
@@ -727,7 +683,7 @@ export class TimeSeriesExplorer extends React.Component {
             .getForecastData(
               selectedJob,
               detectorIndex,
-              forecastId,
+              selectedForecastId,
               nonBlankEntities,
               searchBounds.min.valueOf(),
               searchBounds.max.valueOf(),
@@ -741,7 +697,7 @@ export class TimeSeriesExplorer extends React.Component {
             })
             .catch(resp => {
               console.log(
-                `Time series explorer - error loading data for forecast ID ${forecastId}`,
+                `Time series explorer - error loading data for forecast ID ${selectedForecastId}`,
                 resp
               );
             });
@@ -943,6 +899,11 @@ export class TimeSeriesExplorer extends React.Component {
             ...refreshFocusData,
             ...tableData,
           });
+          const zoomState = {
+            from: selection.from.toISOString(),
+            to: selection.to.toISOString(),
+          };
+          this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
         })
     );
 
@@ -1083,6 +1044,16 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (
       previousProps === undefined ||
+      previousProps.selectedForecastId !== this.props.selectedForecastId
+    ) {
+      if (this.props.selectedForecastId !== undefined) {
+        // Ensure the forecast data will be shown if hidden previously.
+        this.setState({ showForecast: true });
+      }
+    }
+
+    if (
+      previousProps === undefined ||
       !isEqual(previousProps.bounds, this.props.bounds) ||
       !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
@@ -1100,15 +1071,6 @@ export class TimeSeriesExplorer extends React.Component {
         !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
         !isEqual(previousProps.selectedJobIds, this.props.selectedJobIds);
       this.loadSingleMetricData(fullRefresh);
-    }
-
-    if (
-      previousProps === undefined ||
-      !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId)
-    ) {
-      if (this.props.selectedForecastId !== undefined) {
-        this.loadForForecastId(this.props.selectedForecastId);
-      }
     }
 
     if (previousProps === undefined) {
@@ -1133,7 +1095,8 @@ export class TimeSeriesExplorer extends React.Component {
     }
 
     if (
-      this.state.autoZoomDuration === undefined ||
+      this.props.autoZoomDuration === undefined ||
+      this.props.selectedForecastId !== undefined ||
       this.state.contextAggregationInterval === undefined ||
       this.state.contextChartData === undefined ||
       this.state.contextChartData.length === 0
@@ -1142,7 +1105,7 @@ export class TimeSeriesExplorer extends React.Component {
     }
 
     const defaultRange = calculateDefaultFocusRange(
-      this.state.autoZoomDuration,
+      this.props.autoZoomDuration,
       this.state.contextAggregationInterval,
       this.state.contextChartData,
       this.state.contextForecastData
@@ -1164,8 +1127,6 @@ export class TimeSeriesExplorer extends React.Component {
         to: selection.to.toISOString(),
       };
       this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
-    } else {
-      this.props.appStateHandler(APP_STATE_ACTION.UNSET_ZOOM);
     }
   }
 
@@ -1175,10 +1136,16 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   render() {
-    const { bounds, dateFormatTz, lastRefresh, selectedDetectorIndex, selectedJobIds } = this.props;
-
     const {
       autoZoomDuration,
+      bounds,
+      dateFormatTz,
+      lastRefresh,
+      selectedDetectorIndex,
+      selectedJobIds,
+    } = this.props;
+
+    const {
       chartDetails,
       contextAggregationInterval,
       contextChartData,
