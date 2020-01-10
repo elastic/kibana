@@ -24,7 +24,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../types';
 
 const kbnVislibVisTypesPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    id: 'kbn_vislib_vis_types',
+    id: 'vis_type_vislib',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
     styleSheetPaths: resolve(__dirname, 'public/index.scss'),

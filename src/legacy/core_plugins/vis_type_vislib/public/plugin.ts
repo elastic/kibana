@@ -26,7 +26,7 @@ import {
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { createKbnVislibVisTypesFn } from './kbn_vislib_vis_fn';
+import { createKbnVislibVisTypesFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
   createHistogramVisTypeDefinition,
@@ -37,8 +37,7 @@ import {
   createHorizontalBarVisTypeDefinition,
   createGaugeVisTypeDefinition,
   createGoalVisTypeDefinition,
-  // @ts-ignore
-} from './kbn_vislib_vis_types';
+} from './vis_type_vislib_vis_types';
 
 type ResponseHandlerProvider = () => {
   name: string;

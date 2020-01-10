@@ -29,7 +29,7 @@ import { colorSchemas, ColorSchemas } from 'ui/color_maps';
 import { MetricVisComponent } from './components/metric_vis_controller';
 
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
 
 export const metricVisDefinition = {
   name: 'metric',

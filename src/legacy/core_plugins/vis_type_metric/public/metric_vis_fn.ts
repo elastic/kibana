@@ -27,7 +27,7 @@ import {
   Render,
   Style,
 } from '../../../../plugins/expressions/public';
-import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
 import { visType, DimensionsVisParam, VisParams } from './types';
 
 type Context = KibanaDatatable;
