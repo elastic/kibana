@@ -113,7 +113,7 @@ async function fetchFieldExistence({
     toDate,
     client: context.core.elasticsearch.dataClient,
     index: indexPatternTitle,
-    timeFieldName,
+    timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
   });
 
