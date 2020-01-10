@@ -5,11 +5,15 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
+import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
+import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import {
-  ALERT_TYPE_LICENSE_EXPIRATION,
   CALCULATE_DURATION_SINCE,
+  KIBANA_ALERTING_ENABLED,
+  ALERT_TYPE_LICENSE_EXPIRATION,
 } from '../../../../common/constants';
-import { mapSeverity } from '../../alerts/map_severity';
+import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,11 +22,11 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButton,
+  EuiText,
   EuiSpacer,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { formatTimestampToDuration } from '../../../../common';
 
 export function AlertsPanel({ alerts, changeUrl }) {
   const goToAlerts = () => changeUrl('/alerts');
@@ -32,41 +36,96 @@ export function AlertsPanel({ alerts, changeUrl }) {
     return null;
   }
 
-  const alertsList = alerts.map((alert, idx) => {
-    const callOutProps = mapSeverity(alert.severity);
-    let message = alert.message;
+  // enclosed component for accessing changeUrl
+  function TopAlertItem({ item, index }) {
+    const severityIcon = mapSeverity(item.metadata.severity);
 
-    if (!alert.isFiring) {
-      callOutProps.title = i18n.translate(
+    if (item.resolved_timestamp) {
+      severityIcon.title = i18n.translate(
         'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
         {
           defaultMessage: '{severityIconTitle} (resolved {time} ago)',
           values: {
-            severityIconTitle: callOutProps.title,
-            time: formatTimestampToDuration(alert.resolvedMS, CALCULATE_DURATION_SINCE),
+            severityIconTitle: severityIcon.title,
+            time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE),
           },
         }
       );
-      callOutProps.color = 'success';
-      callOutProps.iconType = 'check';
-    } else {
-      if (alert.type === ALERT_TYPE_LICENSE_EXPIRATION) {
-        message = (
-          <Fragment>
-            {message}
-            &nbsp;
-            <EuiLink href="#license">Please update your license</EuiLink>
-          </Fragment>
-        );
-      }
+      severityIcon.color = 'success';
+      severityIcon.iconType = 'check';
     }
 
     return (
-      <EuiCallOut key={idx} {...callOutProps}>
-        <p>{message}</p>
+      <EuiCallOut
+        key={`alert-item-${index}`}
+        data-test-subj="topAlertItem"
+        className="kuiVerticalRhythm"
+        iconType={severityIcon.iconType}
+        color={severityIcon.color}
+        title={severityIcon.title}
+      >
+        <FormattedAlert
+          prefix={item.prefix}
+          suffix={item.suffix}
+          message={item.message}
+          metadata={item.metadata}
+          changeUrl={changeUrl}
+        />
+        <EuiText size="xs">
+          <p data-test-subj="alertMeta" className="monCallout--meta">
+            <FormattedMessage
+              id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
+              defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
+              values={{
+                updateDateTime: formatDateTimeLocal(item.update_timestamp),
+                duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE),
+              }}
+            />
+          </p>
+        </EuiText>
       </EuiCallOut>
     );
-  });
+  }
+
+  const alertsList = KIBANA_ALERTING_ENABLED
+    ? alerts.map((alert, idx) => {
+        const callOutProps = mapSeverity(alert.severity);
+        let message = alert.message;
+
+        if (!alert.isFiring) {
+          callOutProps.title = i18n.translate(
+            'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
+            {
+              defaultMessage: '{severityIconTitle} (resolved {time} ago)',
+              values: {
+                severityIconTitle: callOutProps.title,
+                time: formatTimestampToDuration(alert.resolvedMS, CALCULATE_DURATION_SINCE),
+              },
+            }
+          );
+          callOutProps.color = 'success';
+          callOutProps.iconType = 'check';
+        } else {
+          if (alert.type === ALERT_TYPE_LICENSE_EXPIRATION) {
+            message = (
+              <Fragment>
+                {message}
+                &nbsp;
+                <EuiLink href="#license">Please update your license</EuiLink>
+              </Fragment>
+            );
+          }
+        }
+
+        return (
+          <EuiCallOut key={idx} {...callOutProps}>
+            <p>{message}</p>
+          </EuiCallOut>
+        );
+      })
+    : alerts.map((item, index) => (
+        <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />
+      ));
 
   return (
     <div data-test-subj="clusterAlertsContainer">
