@@ -1538,7 +1538,7 @@ export class TimeSeriesExplorer extends React.Component {
               <EuiSpacer size="m" />
             </EuiText>
           )}
-        {arePartitioningFieldsProvided && jobs.length > 0 && (
+        {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (
           <AnomaliesTable bounds={bounds} tableData={tableData} filter={this.tableFilter} />
         )}
       </TimeSeriesExplorerPage>
