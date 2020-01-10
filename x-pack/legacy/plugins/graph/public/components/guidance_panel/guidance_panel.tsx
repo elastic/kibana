@@ -105,7 +105,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ol className="gphGuidancePanel__list" aria-describedby="graphHeading">
+          <ol className="gphGuidancePanel__list" aria-labelledby="graphHeading">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <EuiLink onClick={onOpenDatasourcePicker}>
                 {i18n.translate(
