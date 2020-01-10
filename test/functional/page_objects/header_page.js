@@ -101,6 +101,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('superDatePickerAbsoluteDateInput').type(timeString);
     }
 
+    async clickToastOK() {
+      await find.clickByCssSelector('div.toaster-container button:nth-child(1)');
+    }
+
     async setAbsoluteRange(fromTime, toTime) {
       await PageObjects.common.sleep(2000);
       await testSubjects.click('superDatePickerShowDatesButton');

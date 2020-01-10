@@ -45,6 +45,27 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('discoverNoResultsTimefilter');
     }
 
+    async clickShare() {
+      await find.clickByCssSelector('button[aria-label="Share Search"]');
+    }
+
+    async getShareCaption() {
+      return find.byCssSelector('.vis-share label')
+        .getVisibleText();
+    }
+
+    async clickCopyToClipboard() {
+      await find.clickDisplayedByCssSelector('button.clipboard-button');
+    }
+
+    async clickShortenUrl() {
+      await find.clickByCssSelector('button.shorten-button');
+    }
+
+    async getShortenedUrl() {
+      return find.byCssSelector('.url').getProperty('value');
+    }
+
     async getQuerySearchButton() {
       return await find.byCssSelector('button[aria-label=\'Search\']');
     }
@@ -138,7 +159,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const el = await find.byCssSelector('.echChart canvas:last-of-type');
       await browser.dragAndDrop(
         { location: el, offset: { x: 200, y: 20 } },
-        { location: el, offset: { x: 400, y: 30 } }
+        { location: el, offset: { x: 400, y: 30 } },
       );
     }
 
@@ -202,7 +223,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getDocTableField(index) {
       const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`,
       );
       return await field.getVisibleText();
     }
