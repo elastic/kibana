@@ -5,9 +5,8 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
 
@@ -41,7 +40,7 @@ describe('Footer Timeline Component', () => {
         />
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the loading panel at the beginning ', () => {

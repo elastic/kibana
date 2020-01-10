@@ -18,7 +18,7 @@
  */
 
 import {
-  KibanaSupertestProvider,
+  createKibanaSupertestProvider,
   KibanaSupertestWithoutAuthProvider,
   ElasticsearchSupertestProvider,
 } from './services';
@@ -30,7 +30,7 @@ export default async function({ readConfigFile }) {
   return {
     services: {
       ...commonConfig.get('services'),
-      supertest: KibanaSupertestProvider,
+      supertest: createKibanaSupertestProvider(),
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
     },

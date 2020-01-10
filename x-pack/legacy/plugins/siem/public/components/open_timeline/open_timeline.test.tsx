@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
@@ -143,7 +143,7 @@ describe('OpenTimeline', () => {
     ).toBe(true);
   });
 
-  test('it shows extended columns and actions when onDeleteSelected and deleteTimelines are specified', () => {
+  test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -178,10 +178,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(true);
+    expect(props.actionTimelineToShow).toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when is onDeleteSelected undefined and deleteTimelines is specified', () => {
+  test('it does NOT show the delete action columns when is onDeleteSelected undefined and deleteTimelines is specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -215,10 +215,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when is onDeleteSelected provided and deleteTimelines is undefined', () => {
+  test('it does NOT show the delete action columns when is onDeleteSelected provided and deleteTimelines is undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -252,10 +252,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when both onDeleteSelected and deleteTimelines are undefined', () => {
+  test('it does NOT show the delete action when both onDeleteSelected and deleteTimelines are undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -288,6 +288,6 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 });
