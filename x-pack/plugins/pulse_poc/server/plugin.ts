@@ -116,9 +116,11 @@ export class PulsePocPlugin {
       async (context, request, response) => {
         const { deploymentId } = request.params;
         const es = context.core.elasticsearch.adminClient;
-
         const allChannelCheckResults = this.channels.map(async channel => {
-          const channelChecks = channel.checks.map(check => check.check(es, deploymentId));
+          const indexName = `pulse-poc-raw-${channel.id}`;
+          const channelChecks = channel.checks.map(check =>
+            check.check(es, { deploymentId, indexName })
+          );
           const checkResults = await Promise.all(channelChecks);
           const instructions = checkResults.filter((value: any) => Boolean(value));
           return {

@@ -18,5 +18,5 @@
  */
 
 export async function getRecords() {
-  return [{}];
+  return [];
 }

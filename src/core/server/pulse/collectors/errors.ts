@@ -17,6 +17,16 @@
  * under the License.
  */
 
+export interface Payload {
+  errorId: string;
+}
+
+const payloads: Payload[] = [];
+
+export async function putRecord(payload: Payload) {
+  payloads.push(payload);
+}
+
 export async function getRecords() {
-  return [];
+  return payloads;
 }
