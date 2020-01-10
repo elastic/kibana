@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -158,7 +159,15 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
             defaultMessage: 'No data source',
           })}
+          heading="h1"
         >
+          <EuiScreenReaderOnly>
+            <p id="graphHeading">
+              {i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
+                defaultMessage: 'No data source',
+              })}
+            </p>
+          </EuiScreenReaderOnly>
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
