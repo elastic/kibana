@@ -6,7 +6,7 @@
 
 import { EuiCodeEditor } from '@elastic/eui';
 import { set } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DetailItem } from '../../graphql/types';

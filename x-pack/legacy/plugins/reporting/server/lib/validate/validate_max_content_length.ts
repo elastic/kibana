@@ -25,6 +25,7 @@ export async function validateMaxContentLength(server: ServerFacade, logger: Log
   const kibanaMaxContentBytes: number = config.get(KIBANA_MAX_SIZE_BYTES_PATH);
 
   if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
+    // TODO this should simply throw an error and let the handler conver it to a warning mesasge. See validateServerHost.
     logger.warning(
       `${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
         `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your ${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`

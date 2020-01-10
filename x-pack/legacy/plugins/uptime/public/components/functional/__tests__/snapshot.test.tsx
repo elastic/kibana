@@ -13,7 +13,6 @@ describe('Snapshot component', () => {
   const snapshot: Snapshot = {
     up: 8,
     down: 2,
-    mixed: 0,
     total: 10,
   };
 

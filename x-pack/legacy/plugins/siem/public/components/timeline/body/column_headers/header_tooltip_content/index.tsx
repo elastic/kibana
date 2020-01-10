@@ -6,7 +6,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { getIconFromType } from '../../../../event_details/helpers';

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import {
@@ -91,7 +92,7 @@ describe('Stat Items Component', () => {
     ],
   ])('disable charts', wrapper => {
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should render titles', () => {
@@ -180,7 +181,7 @@ describe('Stat Items Component', () => {
       );
     });
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {
