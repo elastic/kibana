@@ -38,7 +38,7 @@ Viewing your data from different angles provides better insights. Dimensions tha
 === Create choropleth maps
 Plotting millions of individual documents on a map does not provide a lot of value. Documents overlap each other, making it difficult to extract insights.
 
-Choropleth maps are an ideal solution for visualizing big data sets. Choropleth maps provide a way to group documents into logical sets and visually compare and contrast metrics across groups allowing you to easily detect patterns. Choropleth maps shade areas in proportion to metric values and are commonly used to visualize population statistics such as race, age or political affiliation across geopolitical boundaries.
+Choropleth maps are an ideal solution for visualizing big data sets. Choropleth maps provide a way to group documents into logical sets and visually compare and contrast metrics across groups, allowing you to easily detect patterns. Choropleth maps shade areas in proportion to metric values and are commonly used to visualize population statistics such as race, age, or political affiliation across geopolitical boundaries.
 
 [float]
 === Use data driven styling to symbolize features from data values
