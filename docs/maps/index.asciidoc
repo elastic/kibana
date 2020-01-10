@@ -11,20 +11,19 @@ With *Elastic Maps*, you can:
 
 * Create maps with multiple layers and indices.
 * Upload GeoJSON files into Elasticsearch.
-* Embed your map in Dashboards.
+* Embed your map in dashboards.
 * Create choropleth maps.
 * Use data driven styling to symbolize features from data values.
 * Focus the data you want to display with searches.
 
-Start your tour of *Elastic Maps* with the <<maps-getting-started, getting started tutorial>>.
+*Ready to get started?* Start your tour of *Elastic Maps* with the <<maps-getting-started, getting started tutorial>>.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
 
 [float]
 === Create maps with multiple layers and indices
-Context is a force multiplier for spatial analysis, revealing how and where data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions.
-Create maps with multiple layers and indices to show all of your data in a single map. Plot individual documents or use aggregations to plot any data set, no matter how large.
+You can use multiple layers and indices to show all your data in a single map. This enables your map to show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. You can plot individual documents or use aggregations to play any data set, no matter how large.
 
 [float]
 === Upload GeoJSON files into Elasticsearch
@@ -36,8 +35,6 @@ Viewing your data from different angles provides better insights. Dimensions tha
 
 [float]
 === Create choropleth maps
-Plotting millions of individual documents on a map does not provide a lot of value. Documents overlap each other, making it difficult to extract insights.
-
 Choropleth maps are an ideal solution for visualizing big data sets. Choropleth maps provide a way to group documents into logical sets and visually compare and contrast metrics across groups, allowing you to easily detect patterns. Choropleth maps shade areas in proportion to metric values and are commonly used to visualize population statistics such as race, age, or political affiliation across geopolitical boundaries.
 
 [float]
@@ -46,7 +43,7 @@ You can customize each layer to highlight meaningful dimensions in your data. Fo
 
 [float]
 === Focus the data you want to display with searches
-Use the search bar for real-time search for all of your Elasticsearch layers. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.
+Use the search bar for real-time search for all of your Elasticsearch layers. Draw a polygon on the map or use the shape from features to create spatial filters to narrow search results to documents that either intersect with, are within, or do not intersect with the specified geometry. Filter individual layers to compares facets.
 
 
 
