@@ -159,7 +159,7 @@ export const getPrivilegeRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
 });
 
-interface FindHit {
+export interface FindHit {
   page: number;
   perPage: number;
   total: number;
@@ -176,7 +176,7 @@ export const getFindResult = (): FindHit => ({
 export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
-  total: 0,
+  total: 1,
   data: [getResult()],
 });
 
