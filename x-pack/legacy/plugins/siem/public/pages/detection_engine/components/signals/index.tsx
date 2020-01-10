@@ -31,10 +31,9 @@ import { ColumnHeader } from '../../../../components/timeline/body/column_header
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { inputsSelectors, SerializedFilterQuery, State } from '../../../../store';
-import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
+import { updateSignalStatusAction } from './actions';
 import {
   CreateTimelineProps,
-  SendSignalsToTimeline,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
   UpdateSignalsStatus,
@@ -216,12 +215,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         showClearSelectionAction,
       ]
     );
-    const sendSignalsToTimelineCallback: SendSignalsToTimeline = useCallback(async () => {
-      await sendSignalsToTimelineAction({
-        createTimeline: createTimelineCallback,
-        data: Object.values(selectedEventIds),
-      });
-    }, [selectedEventIds, setEventsDeletedCallback, setEventsLoadingCallback]);
 
     // Callback for creating the SignalUtilityBar which receives totalCount from EventsViewer component
     const utilityBarCallback = useCallback(
@@ -233,7 +226,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
             isFilteredToOpen={filterGroup === FILTER_OPEN}
             selectAll={selectAllCallback}
             selectedEventIds={selectedEventIds}
-            sendSignalsToTimeline={sendSignalsToTimelineCallback}
             showClearSelection={showClearSelectionAction}
             totalCount={totalCount}
             updateSignalsStatus={updateSignalsStatusCallback}

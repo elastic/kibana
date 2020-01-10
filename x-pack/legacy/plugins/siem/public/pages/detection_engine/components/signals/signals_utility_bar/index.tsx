@@ -20,6 +20,7 @@ import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
+import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
 
 interface SignalsUtilityBarProps {
   areEventsLoading: boolean;
@@ -27,7 +28,6 @@ interface SignalsUtilityBarProps {
   isFilteredToOpen: boolean;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  sendSignalsToTimeline: SendSignalsToTimeline;
   showClearSelection: boolean;
   totalCount: number;
   updateSignalsStatus: UpdateSignalsStatus;
@@ -42,32 +42,15 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
   selectAll,
   showClearSelection,
   updateSignalsStatus,
-  sendSignalsToTimeline,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const getBatchItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        items={getBatchItems(
-          areEventsLoading,
-          showClearSelection,
-          selectedEventIds,
-          updateSignalsStatus,
-          sendSignalsToTimeline,
-          closePopover,
-          isFilteredToOpen
-        )}
-      />
-    ),
-    [
-      areEventsLoading,
-      selectedEventIds,
-      updateSignalsStatus,
-      sendSignalsToTimeline,
-      isFilteredToOpen,
-    ]
-  );
+  const handleUpdateStatus = useCallback(async () => {
+    await updateSignalsStatus({
+      signalIds: Object.keys(selectedEventIds),
+      status: isFilteredToOpen ? FILTER_CLOSED : FILTER_OPEN,
+    });
+  }, [selectedEventIds, updateSignalsStatus, isFilteredToOpen]);
 
   const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
   const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
@@ -93,11 +76,13 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
-                  iconSide="right"
-                  iconType="arrowDown"
-                  popoverContent={getBatchItemsPopoverContent}
+                  disabled={areEventsLoading || Object.keys(selectedEventIds).length === 0}
+                  iconType={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
+                  onClick={handleUpdateStatus}
                 >
-                  {i18n.BATCH_ACTIONS}
+                  {isFilteredToOpen
+                    ? i18n.BATCH_ACTION_CLOSE_SELECTED
+                    : i18n.BATCH_ACTION_OPEN_SELECTED}
                 </UtilityBarAction>
 
                 <UtilityBarAction
