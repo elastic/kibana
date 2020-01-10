@@ -102,6 +102,7 @@ export class PulseService {
 
     this.log.debug('Will attempt first telemetry collection in 5 seconds...');
     const sendTelemetrySubcription = setInterval(() => {
+      this.log.debug('sending telemetry data from pulse');
       this.sendTelemetry(elasticsearch).catch(err => this.log.error(err.stack));
     }, 5000);
     this.subscriptions.add(sendTelemetrySubcription);

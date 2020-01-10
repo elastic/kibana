@@ -6,15 +6,18 @@
 
 import { IScopedClusterClient } from 'src/core/server';
 
-interface FixedVersions {
-  version: string;
-}
 interface ErrorSignatureFixedVersionPair {
   error: string;
-  fixedVersion?: FixedVersions[];
+  fixedVersions?: string[];
 }
 export async function check(es: IScopedClusterClient, deploymentId: string) {
-  const errorSignatureFixedVersionPairs: ErrorSignatureFixedVersionPair[] = [];
+  const errorSignatureFixedVersionPairs: ErrorSignatureFixedVersionPair[] = [
+    {
+      error: 'example_error',
+      fixedVersions: ['7.5.1'],
+    },
+  ];
+  // the following request is throwing a "ServiceUnavailable" error in Kibana startup.
   const response = await es.callAsInternalUser('search', {
     index: 'pulse-poc-raw-errors',
     size: 0,
@@ -47,7 +50,7 @@ export async function check(es: IScopedClusterClient, deploymentId: string) {
     response.hits.hits.forEach((doc: any) =>
       errorSignatureFixedVersionPairs.push({
         error: doc._source.error_signature,
-        fixedVersion: doc._source.fixed_versions,
+        fixedVersions: doc._source.fixed_versions,
       })
     );
     return {
