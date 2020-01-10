@@ -1,10 +1,15 @@
-import { bdd, defaultTimeout } from '../../../support';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-bdd.describe('users app', function () {
-  this.timeout = defaultTimeout;
+export default function ({ loadTestFile }) {
 
-  require('./_users');
-  require('./_secure_roles_perm');
-  require('./_roles_dls');
-  require('./_roles_fls');
-});
+  describe('users app', function () {
+    loadTestFile(require.resolve('./_users'));
+    loadTestFile(require.resolve('./_secure_roles_perm'));
+    loadTestFile(require.resolve('./_roles_dls'));
+    loadTestFile(require.resolve('./_roles_fls'));
+  });
+};

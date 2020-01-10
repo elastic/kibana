@@ -100,6 +100,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.getSpinnerDone();
     }
 
+    async clickKibanaIndices() {
+      log.debug('clickKibanaIndices link');
+      await this.clickLinkText('Index Patterns');
+    }
+
     async setAdvancedSettingsInput(propertyName, propertyValue) {
       const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();

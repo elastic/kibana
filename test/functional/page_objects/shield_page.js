@@ -17,11 +17,12 @@
  * under the License.
  */
 
-export function ShieldPageProvider({ getService }) {
+export function ShieldPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
   const provisionedEnv = getService('provisionedEnv');
+  const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize']);
 
   const regularLogin = async (user, pwd) => {
     await testSubjects.setValue('loginUsername', user);
@@ -52,28 +53,31 @@ export function ShieldPageProvider({ getService }) {
 
       await regularLogin(user, pwd);
     }
-  }
 
-  // TODO-TRE: Uncomment and fix?
-  // async logout() {
-  //   await PageObjects.common.findTestSubject('userMenuButton')
-  //     .click();
-  //   await PageObjects.common.sleep(500);
-  //   await PageObjects.common.findTestSubject('logoutLink')
-  //     .click();
-  //
-  //   // for new K7 app menu
-  //   // await this.remote.setFindTimeout(defaultFindTimeout)
-  //   //     .findByCssSelector('#headerUserMenu')
-  //   //     .click();
-  //   //
-  //   // await PageObjects.common.sleep(1111);
-  //   // await this.remote.setFindTimeout(defaultFindTimeout)
-  //   //     .findByCssSelector('.euiLink[href="/logout"]')
-  //   //     .click();
-  //   PageObjects.common.log('found and clicked log out--------------------------');
-  //   await PageObjects.common.sleep(8002);
-  // }
+    async logoutLogin(user, pwd) {
+      await this.logout();
+      await PageObjects.common.sleep(3002);
+      await this.login(user, pwd);
+    }
+
+    async logout() {
+      await testSubjects.click('userMenuButton');
+      await PageObjects.common.sleep(500);
+      await testSubjects.click('logoutLink');
+
+      // for new K7 app menu
+      // await this.remote.setFindTimeout(defaultFindTimeout)
+      //     .findByCssSelector('#headerUserMenu')
+      //     .click();
+      //
+      // await PageObjects.common.sleep(1111);
+      // await this.remote.setFindTimeout(defaultFindTimeout)
+      //     .findByCssSelector('.euiLink[href="/logout"]')
+      //     .click();
+      log.debug('### found and clicked log out--------------------------');
+      await PageObjects.common.sleep(8002);
+    }
+  }
 
   return new ShieldPage();
 }
