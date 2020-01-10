@@ -6,11 +6,15 @@ def work = [:]
 for(def i = 0; i < NUMBER_OF_NODES; i++) {
   work["node-${i}"] = {
     node('linux && immutable') {
+      def innerWork = [:]
       for(def j = 0; j < 5; j++) {
-        dir("dir-${j}") {
-          doIt()
+        innerWork["work-${j}"] = {
+          dir("dir-${j}") {
+            doIt()
+          }
         }
       }
+      parallel(innerWork)
     }
   }
 }
