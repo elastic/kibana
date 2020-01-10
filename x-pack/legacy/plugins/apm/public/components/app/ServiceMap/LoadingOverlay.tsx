@@ -30,43 +30,16 @@ const ProgressBarContainer = styled.div`
   max-width: 600px;
 `;
 
-function Content({
-  isInteractive,
-  children
-}: {
-  isInteractive: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      style={
-        // Necessary because React should only update the style of the DOM node,
-        // otherwise Cytoscape rendering repaints with visual bugs.
-        isInteractive
-          ? undefined
-          : {
-              pointerEvents: 'none',
-              opacity: 0.5
-            }
-      }
-    >
-      {children}
-    </div>
-  );
-}
-
 interface Props {
   children: React.ReactNode;
   isLoading: boolean;
   percentageLoaded: number;
-  isInteractive: boolean;
 }
 
 export const LoadingOverlay = ({
   children,
   isLoading,
-  percentageLoaded,
-  isInteractive
+  percentageLoaded
 }: Props) => (
   <Container>
     {isLoading && (
@@ -88,6 +61,6 @@ export const LoadingOverlay = ({
         </EuiText>
       </Overlay>
     )}
-    <Content isInteractive={isInteractive}>{children}</Content>
+    {children}
   </Container>
 );

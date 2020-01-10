@@ -10,6 +10,7 @@ import { find, isEqual, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
+import { ElementDefinition } from 'cytoscape';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
 import {
@@ -33,24 +34,6 @@ interface ServiceMapProps {
   serviceName?: string;
 }
 
-type Element =
-  | {
-      group: 'nodes';
-      data: {
-        id: string;
-        agentName?: string;
-        href?: string;
-      };
-    }
-  | {
-      group: 'edges';
-      data: {
-        id: string;
-        source: string;
-        target: string;
-      };
-    };
-
 const cytoscapeDivStyle = {
   height: '85vh',
   background: `linear-gradient(
@@ -71,7 +54,7 @@ ${theme.euiColorLightShade}`,
   margin: `-${theme.gutterTypes.gutterLarge}`
 };
 
-const MAX_REQUESTS = 15;
+const MAX_REQUESTS = 5;
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('destination.address' in node) {
@@ -110,7 +93,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInteractive, setIsInteractive] = useState(false);
   const percentageLoadedRef = useRef(0);
   const [percentageLoaded, setPercentageLoaded] = useState(
     percentageLoadedRef.current
@@ -163,12 +145,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   useEffect(() => {
     percentageLoadedRef.current = 5;
     setPercentageLoaded(percentageLoadedRef.current);
-
-    // Allow user interaction after 5 seconds regardless of load status
-    setIsInteractive(false);
-    setTimeout(() => {
-      setIsInteractive(true);
-    }, 5000);
 
     getNext({ reset: true }).then(() => {
       percentageLoadedRef.current = 100;
@@ -313,7 +289,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     license?.isActive &&
     (license?.type === 'platinum' || license?.type === 'trial');
 
-  const renderedElements = useRef<Element[]>([]);
+  const renderedElements = useRef<ElementDefinition[]>([]);
 
   const openToast = useRef<string | null>(null);
 
@@ -332,26 +308,22 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   if (renderedElements.current.length === 0) {
     renderedElements.current = elements;
   } else if (newData.length && !openToast.current) {
-    if (isInteractive) {
-      openToast.current = notifications.toasts.add({
-        title: i18n.translate('xpack.apm.newServiceMapData', {
-          defaultMessage: `Newly discovered connections are available.`
-        }),
-        onClose: () => {
-          openToast.current = null;
-        },
-        toastLifeTimeMs: 24 * 60 * 60 * 1000,
-        text: toMountPoint(
-          <EuiButton onClick={updateMap}>
-            {i18n.translate('xpack.apm.updateServiceMap', {
-              defaultMessage: 'Update map'
-            })}
-          </EuiButton>
-        )
-      }).id;
-    } else {
-      updateMap();
-    }
+    openToast.current = notifications.toasts.add({
+      title: i18n.translate('xpack.apm.newServiceMapData', {
+        defaultMessage: `Newly discovered connections are available.`
+      }),
+      onClose: () => {
+        openToast.current = null;
+      },
+      toastLifeTimeMs: 24 * 60 * 60 * 1000,
+      text: toMountPoint(
+        <EuiButton onClick={updateMap}>
+          {i18n.translate('xpack.apm.updateServiceMap', {
+            defaultMessage: 'Update map'
+          })}
+        </EuiButton>
+      )
+    }).id;
   }
 
   useEffect(() => {
@@ -363,11 +335,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }, [notifications.toasts]);
 
   return isValidPlatinumLicense ? (
-    <LoadingOverlay
-      isLoading={isLoading}
-      percentageLoaded={percentageLoaded}
-      isInteractive={isInteractive}
-    >
+    <LoadingOverlay isLoading={isLoading} percentageLoaded={percentageLoaded}>
       <Cytoscape
         elements={renderedElements.current}
         serviceName={serviceName}
