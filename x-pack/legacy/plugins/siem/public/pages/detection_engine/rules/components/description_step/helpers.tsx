@@ -9,7 +9,6 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
   EuiText,
   EuiListGroup,
@@ -27,6 +26,10 @@ import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_
 import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatsDescription, ListItems } from './types';
+import { SeverityBadge } from '../severity_badge';
+
+const isNotEmptyArray = (values: string[]) =>
+  !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
 
 const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
@@ -148,12 +151,34 @@ export const buildThreatsDescription = ({
   return [];
 };
 
+export const buildUnorderedListArrayDescription = (
+  label: string,
+  field: string,
+  values: string[]
+): ListItems[] => {
+  if (isNotEmptyArray(values)) {
+    return [
+      {
+        title: label,
+        description: (
+          <ul>
+            {values.map((val: string) =>
+              isEmpty(val) ? null : <li key={`${field}-${val}`}>{val}</li>
+            )}
+          </ul>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
 export const buildStringArrayDescription = (
   label: string,
   field: string,
   values: string[]
 ): ListItems[] => {
-  if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
+  if (isNotEmptyArray(values)) {
     return [
       {
         title: label,
@@ -174,31 +199,15 @@ export const buildStringArrayDescription = (
   return [];
 };
 
-export const buildSeverityDescription = (label: string, value: string): ListItems[] => {
-  return [
-    {
-      title: label,
-      description: (
-        <EuiHealth
-          color={
-            value === 'low'
-              ? euiLightVars.euiColorVis0
-              : value === 'medium'
-              ? euiLightVars.euiColorVis5
-              : value === 'high'
-              ? euiLightVars.euiColorVis7
-              : euiLightVars.euiColorVis9
-          }
-        >
-          {value}
-        </EuiHealth>
-      ),
-    },
-  ];
-};
+export const buildSeverityDescription = (label: string, value: string): ListItems[] => [
+  {
+    title: label,
+    description: <SeverityBadge value={value} />,
+  },
+];
 
 export const buildUrlsDescription = (label: string, values: string[]): ListItems[] => {
-  if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
+  if (isNotEmptyArray(values)) {
     return [
       {
         title: label,

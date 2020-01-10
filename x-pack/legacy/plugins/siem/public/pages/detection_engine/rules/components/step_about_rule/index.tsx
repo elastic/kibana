@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, get } from 'lodash/fp';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
@@ -33,196 +33,196 @@ const TagContainer = styled.div`
   margin-top: 16px;
 `;
 
-export const StepAboutRule = memo<StepAboutRuleProps>(
-  ({
-    defaultValues,
-    descriptionDirection = 'row',
-    isReadOnlyView,
-    isUpdateView = false,
-    isLoading,
-    setForm,
-    setStepData,
-  }) => {
-    const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
+  defaultValues,
+  descriptionDirection = 'row',
+  isReadOnlyView,
+  isUpdateView = false,
+  isLoading,
+  setForm,
+  setStepData,
+}) => {
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
 
-    const { form } = useForm({
-      defaultValue: myStepData,
-      options: { stripEmptyFields: false },
-      schema,
-    });
+  const { form } = useForm({
+    defaultValue: myStepData,
+    options: { stripEmptyFields: false },
+    schema,
+  });
 
-    const onSubmit = useCallback(async () => {
-      if (setStepData) {
-        setStepData(RuleStep.aboutRule, null, false);
-        const { isValid, data } = await form.submit();
-        if (isValid) {
-          setStepData(RuleStep.aboutRule, data, isValid);
-          setMyStepData({ ...data, isNew: false } as AboutStepRule);
-        }
+  const onSubmit = useCallback(async () => {
+    if (setStepData) {
+      setStepData(RuleStep.aboutRule, null, false);
+      const { isValid, data } = await form.submit();
+      if (isValid) {
+        setStepData(RuleStep.aboutRule, data, isValid);
+        setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
-    }, [form]);
+    }
+  }, [form]);
 
-    useEffect(() => {
-      const { isNew, ...initDefaultValue } = myStepData;
-      if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
-        const myDefaultValues = {
-          ...defaultValues,
-          isNew: false,
-        };
-        setMyStepData(myDefaultValues);
-        if (!isReadOnlyView) {
-          Object.keys(schema).forEach(key => {
-            const val = get(key, myDefaultValues);
-            if (val != null) {
-              form.setFieldValue(key, val);
+  useEffect(() => {
+    const { isNew, ...initDefaultValue } = myStepData;
+    if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+      const myDefaultValues = {
+        ...defaultValues,
+        isNew: false,
+      };
+      setMyStepData(myDefaultValues);
+      if (!isReadOnlyView) {
+        Object.keys(schema).forEach(key => {
+          const val = get(key, myDefaultValues);
+          if (val != null) {
+            form.setFieldValue(key, val);
+          }
+        });
+      }
+    }
+  }, [defaultValues]);
+
+  useEffect(() => {
+    if (setForm != null) {
+      setForm(RuleStep.aboutRule, form);
+    }
+  }, [form]);
+
+  return isReadOnlyView && myStepData != null ? (
+    <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+  ) : (
+    <>
+      <Form form={form} data-test-subj="stepAboutRule">
+        <CommonUseField
+          path="name"
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleName',
+            'data-test-subj': 'detectionEngineStepAboutRuleName',
+            euiFieldProps: {
+              fullWidth: false,
+              disabled: isLoading,
+            },
+          }}
+        />
+        <CommonUseField
+          path="description"
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleDescription',
+            'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+            euiFieldProps: {
+              disabled: isLoading,
+            },
+          }}
+        />
+        <CommonUseField
+          path="severity"
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleSeverity',
+            'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
+            euiFieldProps: {
+              fullWidth: false,
+              disabled: isLoading,
+              options: severityOptions,
+            },
+          }}
+        />
+        <CommonUseField
+          path="riskScore"
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleRiskScore',
+            'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+            euiFieldProps: {
+              max: 100,
+              min: 0,
+              fullWidth: false,
+              disabled: isLoading,
+              options: severityOptions,
+              showTicks: true,
+              tickInterval: 25,
+            },
+          }}
+        />
+        <UseField
+          path="timeline"
+          component={PickTimeline}
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleTimeline',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
+          }}
+        />
+        <UseField
+          path="references"
+          component={AddItem}
+          componentProps={{
+            addText: I18n.ADD_REFERENCE,
+            idAria: 'detectionEngineStepAboutRuleReferenceUrls',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
+            validate: isUrlInvalid,
+          }}
+        />
+        <UseField
+          path="falsePositives"
+          component={AddItem}
+          componentProps={{
+            addText: I18n.ADD_FALSE_POSITIVE,
+            idAria: 'detectionEngineStepAboutRuleFalsePositives',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
+          }}
+        />
+        <UseField
+          path="threats"
+          component={AddMitreThreat}
+          componentProps={{
+            idAria: 'detectionEngineStepAboutRuleMitreThreats',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+          }}
+        />
+        <TagContainer>
+          <CommonUseField
+            path="tags"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleTags',
+              'data-test-subj': 'detectionEngineStepAboutRuleTags',
+              euiFieldProps: {
+                fullWidth: true,
+                isDisabled: isLoading,
+                placeholder: '',
+              },
+            }}
+          />
+        </TagContainer>
+        <FormDataProvider pathsToWatch="severity">
+          {({ severity }) => {
+            const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
+            const riskScoreField = form.getFields().riskScore;
+            if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
+              riskScoreField.setValue(newRiskScore);
             }
-          });
-        }
-      }
-    }, [defaultValues]);
+            return null;
+          }}
+        </FormDataProvider>
+      </Form>
+      {!isUpdateView && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                {RuleI18n.CONTINUE}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};
 
-    useEffect(() => {
-      if (setForm != null) {
-        setForm(RuleStep.aboutRule, form);
-      }
-    }, [form]);
-
-    return isReadOnlyView && myStepData != null ? (
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
-    ) : (
-      <>
-        <Form form={form} data-test-subj="stepAboutRule">
-          <CommonUseField
-            path="name"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleName',
-              'data-test-subj': 'detectionEngineStepAboutRuleName',
-              euiFieldProps: {
-                fullWidth: false,
-                disabled: isLoading,
-              },
-            }}
-          />
-          <CommonUseField
-            path="description"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleDescription',
-              'data-test-subj': 'detectionEngineStepAboutRuleDescription',
-              euiFieldProps: {
-                disabled: isLoading,
-              },
-            }}
-          />
-          <CommonUseField
-            path="severity"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleSeverity',
-              'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
-              euiFieldProps: {
-                fullWidth: false,
-                disabled: isLoading,
-                options: severityOptions,
-              },
-            }}
-          />
-          <CommonUseField
-            path="riskScore"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleRiskScore',
-              'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
-              euiFieldProps: {
-                max: 100,
-                min: 0,
-                fullWidth: false,
-                disabled: isLoading,
-                options: severityOptions,
-                showTicks: true,
-                tickInterval: 25,
-              },
-            }}
-          />
-          <UseField
-            path="timeline"
-            component={PickTimeline}
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleTimeline',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-            }}
-          />
-          <UseField
-            path="references"
-            component={AddItem}
-            componentProps={{
-              addText: I18n.ADD_REFERENCE,
-              idAria: 'detectionEngineStepAboutRuleReferenceUrls',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
-              validate: isUrlInvalid,
-            }}
-          />
-          <UseField
-            path="falsePositives"
-            component={AddItem}
-            componentProps={{
-              addText: I18n.ADD_FALSE_POSITIVE,
-              idAria: 'detectionEngineStepAboutRuleFalsePositives',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
-            }}
-          />
-          <UseField
-            path="threats"
-            component={AddMitreThreat}
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleMitreThreats',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
-            }}
-          />
-          <TagContainer>
-            <CommonUseField
-              path="tags"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleTags',
-                'data-test-subj': 'detectionEngineStepAboutRuleTags',
-                euiFieldProps: {
-                  fullWidth: true,
-                  isDisabled: isLoading,
-                  placeholder: '',
-                },
-              }}
-            />
-          </TagContainer>
-          <FormDataProvider pathsToWatch="severity">
-            {({ severity }) => {
-              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const riskScoreField = form.getFields().riskScore;
-              if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
-                riskScoreField.setValue(newRiskScore);
-              }
-              return null;
-            }}
-          </FormDataProvider>
-        </Form>
-        {!isUpdateView && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                  {RuleI18n.CONTINUE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </>
-    );
-  }
-);
+export const StepAboutRule = memo(StepAboutRuleComponent);

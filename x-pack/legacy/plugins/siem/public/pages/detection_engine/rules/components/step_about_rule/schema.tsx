@@ -23,6 +23,12 @@ import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
+const OptionalFieldLabel = (
+  <EuiText color="subdued" size="xs">
+    {RuleI18n.OPTIONAL_FIELD}
+  </EuiText>
+);
+
 export const schema: FormSchema = {
   name: {
     type: FIELD_TYPES.TEXT,
@@ -108,7 +114,7 @@ export const schema: FormSchema = {
         defaultMessage: 'Reference URLs',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: (
@@ -136,10 +142,10 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldFalsePositiveLabel',
       {
-        defaultMessage: 'False positives',
+        defaultMessage: 'False positives examples',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
   },
   threats: {
     label: i18n.translate(
@@ -148,7 +154,7 @@ export const schema: FormSchema = {
         defaultMessage: 'MITRE ATT&CK',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: (
@@ -184,6 +190,6 @@ export const schema: FormSchema = {
           'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
   },
 };

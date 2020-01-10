@@ -19,6 +19,7 @@ import { FormData, FormHook } from '../components/shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepContentWrapper } from '../components/step_content_wrapper';
 import * as RuleI18n from '../translations';
 import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
 import { formatRule } from './helpers';
@@ -240,13 +241,16 @@ export const CreateRuleComponent = React.memo(() => {
             }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepDefineRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
-              isLoading={isLoading}
-              setForm={setStepsForm}
-              setStepData={setStepData}
-              resizeParentContainer={height => setHeightAccordion(height)}
-            />
+            <StepContentWrapper>
+              <StepDefineRule
+                isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
+                isLoading={isLoading}
+                setForm={setStepsForm}
+                setStepData={setStepData}
+                resizeParentContainer={height => setHeightAccordion(height)}
+                descriptionDirection={'column'}
+              />
+            </StepContentWrapper>
           </EuiAccordion>
         </ResizeEuiPanel>
         <EuiSpacer size="s" />
@@ -271,12 +275,15 @@ export const CreateRuleComponent = React.memo(() => {
             }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepAboutRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
-              isLoading={isLoading}
-              setForm={setStepsForm}
-              setStepData={setStepData}
-            />
+            <StepContentWrapper>
+              <StepAboutRule
+                descriptionDirection="column"
+                isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
+                isLoading={isLoading}
+                setForm={setStepsForm}
+                setStepData={setStepData}
+              />
+            </StepContentWrapper>
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="s" />
@@ -301,12 +308,15 @@ export const CreateRuleComponent = React.memo(() => {
             }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepScheduleRule
-              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
-              isLoading={isLoading}
-              setForm={setStepsForm}
-              setStepData={setStepData}
-            />
+            <StepContentWrapper>
+              <StepScheduleRule
+                descriptionDirection="column"
+                isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
+                isLoading={isLoading}
+                setForm={setStepsForm}
+                setStepData={setStepData}
+              />
+            </StepContentWrapper>
           </EuiAccordion>
         </MyEuiPanel>
       </WrapperPage>
