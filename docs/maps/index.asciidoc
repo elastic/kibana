@@ -42,7 +42,7 @@ Choropleth maps are an ideal solution for visualizing big data sets. Choropleth 
 
 [float]
 === Use data driven styling to symbolize features from data values
-Customize each layer to highlight meaningful dimensions in your data. For example, use dark colors to symbolize areas with more web log traffic, and lighter colors to sybmolize areas with less traffic. Use larger circles to symbolize areas with more total bytes transferred, and smaller circles to symbolize areas with less bytes transferred.
+You can customize each layer to highlight meaningful dimensions in your data. For example, you can use dark colors to symbolize areas with more web log traffic, and lighter colors to symbolize areas with less traffic. .
 
 [float]
 === Focus the data you want to display with searches
