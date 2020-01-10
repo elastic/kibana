@@ -55,12 +55,6 @@ export class ThresholdWatch extends BaseWatch {
     return formatVisualizeData(this, results);
   }
 
-  // To Elasticsearch
-  get upstreamJson() {
-    const result = super.upstreamJson;
-    return result;
-  }
-
   // To Kibana
   get downstreamJson() {
     const result = merge({}, super.downstreamJson, {

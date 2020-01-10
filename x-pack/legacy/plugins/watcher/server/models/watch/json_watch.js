@@ -23,12 +23,6 @@ export class JsonWatch extends BaseWatch {
     return serializeJsonWatch(this.name, this.watch);
   }
 
-  // To Elasticsearch
-  get upstreamJson() {
-    const result = super.upstreamJson;
-    return result;
-  }
-
   // To Kibana
   get downstreamJson() {
     const result = merge({}, super.downstreamJson, {
