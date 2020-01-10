@@ -3,14 +3,14 @@
 env.GIT_TRACE = '1'
 env.GIT_CURL_VERBOSE = '1'
 
-def NUMBER_OF_NODES = 25
+def NUMBER_OF_NODES = 3
 
 def work = [:]
 for(def i = 0; i < NUMBER_OF_NODES; i++) {
   work["node-${i}"] = {
     node('linux && immutable') {
       def innerWork = [:]
-      for(def j = 0; j < 5; j++) {
+      for(def j = 0; j < 1; j++) {
         def x = j
         innerWork["work-${x}"] = {
           dir("dir-${x}") {
@@ -28,7 +28,7 @@ parallel(work)
 def doIt() {
   def hadError = false
 
-  for(def i = 0; i < 500; i++) {
+  for(def i = 0; i < 100; i++) {
     try {
       timeout(time: 3, unit: 'MINUTES') {
         checkout scm
