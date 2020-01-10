@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { BytesFormat } from './bytes';
+import { DefaultNumberFormat } from './default_number';
 
-describe('BytesFormat', () => {
+describe('DefaultNumberFormat', () => {
   let config: Record<string, any> = {};
 
   const getConfig = (key: string) => config[key];
@@ -28,16 +28,21 @@ describe('BytesFormat', () => {
     config = {};
   });
 
-  test('default pattern', () => {
-    const formatter = new BytesFormat({}, getConfig);
+  test('default number', () => {
+    // Node only contains locale data for `en`, so this is ignored. The fallback is tested here
+    config['format:defaultLocale'] = 'ch-DE';
 
-    expect(formatter.convert(5150000)).toBe('4.911MB');
+    const formatter = new DefaultNumberFormat({}, getConfig);
+
+    expect(formatter.convert(5150000)).toBe(`5,150,000`);
   });
 
-  test('custom pattern and locale', () => {
-    config['format:number:defaultLocale'] = 'de';
-    const formatter = new BytesFormat({ pattern: '0,0.[0]b' }, getConfig);
+  test('number of decimals', () => {
+    // Node only contains locale data for `en`, so this is ignored. The fallback is tested here
+    config['format:defaultLocale'] = 'ch-DE';
 
-    expect(formatter.convert('10500')).toBe('10,3KB');
+    const formatter = new DefaultNumberFormat({ minDecimals: 2 }, getConfig);
+
+    expect(formatter.convert(5150000)).toBe(`5,150,000.00`);
   });
 });

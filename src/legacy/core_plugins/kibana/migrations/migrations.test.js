@@ -78,6 +78,36 @@ Object {
 
       expect(migrate(input)).toEqual(expected);
     });
+
+    it('should handle malformed fieldFormatMap', () => {
+      const input = {
+        attributes: {
+          title: 'test',
+          fieldFormatMap: '{"nochange":{"id":"percen',
+        },
+      };
+
+      expect(migrate(input)).toEqual(input);
+    });
+
+    it('should rewrite fieldFormatMap if there are custom numeraljs patterns', () => {
+      const input = {
+        attributes: {
+          title: 'test',
+          fieldFormatMap:
+            '{"nochange":{"id":"percent"},"change":{"id":"bytes","pattern":"0.[000]b"}}',
+        },
+      };
+      const expected = {
+        attributes: {
+          title: 'test',
+          fieldFormatMap:
+            '{"nochange":{"id":"percent"},"change":{"id":"number","pattern":"0.[000]b"}}',
+        },
+      };
+
+      expect(migrate(input)).toEqual(expected);
+    });
   });
 });
 

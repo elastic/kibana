@@ -57,22 +57,8 @@ export abstract class NumeralFormat extends FieldFormat {
     if (isNaN(val)) return '';
 
     const previousLocale = numeral.language();
-    const defaultLocale = this.getConfig && this.getConfig('format:number:defaultLocale');
-    let locale = 'en';
-    if (defaultLocale === 'detect') {
-      if (navigator.languages && navigator.languages.length) {
-        const match = navigator.languages.find(lang => {
-          return !!supportedNumeralLanguages[lang];
-        });
-        if (match) {
-          locale = match;
-        }
-      } else if (navigator.language && !!supportedNumeralLanguages[navigator.language]) {
-        locale = navigator.language;
-      }
-    }
-
-    numeral.language(locale);
+    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+    numeral.language(defaultLocale);
 
     const formatted = numeralInst.set(val).format(pattern || this.param('pattern'));
 

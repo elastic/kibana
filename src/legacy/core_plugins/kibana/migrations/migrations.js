@@ -463,50 +463,58 @@ function migrateSubTypeAndParentFieldProperties(doc) {
   if (!doc.attributes.fields) return doc;
 
   const fieldsString = doc.attributes.fields;
-  const fields = JSON.parse(fieldsString);
-  const migratedFields = fields.map(field => {
-    if (field.subType === 'multi') {
-      return {
-        ...omit(field, 'parent'),
-        subType: { multi: { parent: field.parent } },
-      };
-    }
+  try {
+    const fields = JSON.parse(fieldsString);
+    const migratedFields = fields.map(field => {
+      if (field.subType === 'multi') {
+        return {
+          ...omit(field, 'parent'),
+          subType: { multi: { parent: field.parent } },
+        };
+      }
 
-    return field;
-  });
+      return field;
+    });
 
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      fields: JSON.stringify(migratedFields),
-    },
-  };
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        fields: JSON.stringify(migratedFields),
+      },
+    };
+  } catch (e) {
+    return doc;
+  }
 }
 
 function migrateNumeralFieldFormatters(doc) {
   if (!doc.attributes.fieldFormatMap) return doc;
 
   const fieldFormatMap = doc.attributes.fieldFormatMap;
-  const fieldFormats = JSON.parse(fieldFormatMap);
-  // const migratedFields = fields.map(field => {
-  //   if (field.subType === 'multi') {
-  //     return {
-  //       ...omit(field, 'parent'),
-  //       subType: { multi: { parent: field.parent } },
-  //     };
-  //   }
+  try {
+    const fieldFormats = JSON.parse(fieldFormatMap);
 
-  //   return field;
-  // });
+    const newFormats = Object.fromEntries(
+      Object.entries(fieldFormats).map(([field, format]) => {
+        if (format.pattern && (format.id === 'bytes' || format.id === 'percent')) {
+          // Migrate custom numeral.js patterns to 'number'
+          return [field, { ...format, id: 'number' }];
+        }
+        return [field, format];
+      })
+    );
 
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      fieldFormatMap: JSON.stringify(fieldFormats),
-    },
-  };
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        fieldFormatMap: JSON.stringify(newFormats),
+      },
+    };
+  } catch (e) {
+    return doc;
+  }
 }
 
 const executeMigrations720 = flow(

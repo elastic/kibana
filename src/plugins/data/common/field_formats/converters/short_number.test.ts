@@ -17,27 +17,18 @@
  * under the License.
  */
 
-import { BytesFormat } from './bytes';
+import { ShortNumberFormat } from './short_number';
 
-describe('BytesFormat', () => {
-  let config: Record<string, any> = {};
+describe('ShortNumberFormat', () => {
+  const config: Record<string, any> = {};
 
   const getConfig = (key: string) => config[key];
 
-  beforeEach(() => {
-    config = {};
-  });
+  test('default', () => {
+    const formatter = new ShortNumberFormat({}, getConfig);
 
-  test('default pattern', () => {
-    const formatter = new BytesFormat({}, getConfig);
-
-    expect(formatter.convert(5150000)).toBe('4.911MB');
-  });
-
-  test('custom pattern and locale', () => {
-    config['format:number:defaultLocale'] = 'de';
-    const formatter = new BytesFormat({ pattern: '0,0.[0]b' }, getConfig);
-
-    expect(formatter.convert('10500')).toBe('10,3KB');
+    // This expectation is only for node, in the browser the same number is formatted as '1.234M'
+    // This is because of limited ICU support in node
+    expect(formatter.convert(1234567)).toBe('1,234,567');
   });
 });

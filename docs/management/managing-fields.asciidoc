@@ -5,8 +5,9 @@ The fields for the index pattern are listed in a table. Click a column header to
 the *Controls* button in the rightmost column for a given field to edit the field's properties. You can manually set
 the field's format from the *Format* drop-down. Format options vary based on the field's type.
 
-You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the
-*Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
+You can also set the field's popularity value in the *Popularity* text entry box to any desired value. If a field has a
+popularity value, it will be sorted higher in Discover. Click the *Update Field* button to confirm your changes or
+*Cancel* to return to the list of fields.
 
 Kibana has field formatters for the following field types:
 
@@ -46,18 +47,23 @@ include::field-formatters/string-formatter.asciidoc[]
 [[field-formatters-numeric]]
 === Numeric Field Formatters
 
-Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
+Numeric fields support the `Default Number`, `Percent`, `Bytes`, `Short Number`, `Currency`, `Custom Numeral.js format`,
+`Duration`, `String`, `Url`, and `Color` formatters.
+
+The advanced setting `format:defaultLocale` affects the localization of numbers with these formats: `Default Number`,
+`Percent`, `Short Number`, and `Currency`. The advanced setting `format:number:defaultLocale` affects the localization of
+numbers with the `Bytes` and `Custom Numeral.js format`.
+
+The `Custom Numeral.js format` enables customization of display using the https://adamwdraper.github.io/Numeral-js/[numeral.js]
+standard format definitions.
+
+include::field-formatters/duration-formatter.asciidoc[]
 
 include::field-formatters/url-formatter.asciidoc[]
 
 include::field-formatters/string-formatter.asciidoc[]
 
-include::field-formatters/duration-formatter.asciidoc[]
-
 include::field-formatters/color-formatter.asciidoc[]
-
-The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
-the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
 
 [[scripted-fields]]
 === Scripted Fields
@@ -65,7 +71,7 @@ the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format defini
 Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched using Kibana's default
-query language. However they can be queried using Kibana's new <<kuery-query, experimental query language>>. Scripted
+query language. However they can be queried using Kibana's new <<kuery-query, query language>>. Scripted
 fields are also supported in the filter bar.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on

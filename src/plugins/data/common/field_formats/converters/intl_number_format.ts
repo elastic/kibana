@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
@@ -43,11 +42,15 @@ export abstract class IntlNumberFormat extends FieldFormat {
     if (isNaN(val)) return '';
 
     const defaultLocale = this.getConfig && this.getConfig('format:defaultLocale');
-    let locales = [defaultLocale, 'en'];
+    let locales;
     if (defaultLocale === 'detect') {
       locales = navigator.languages
         ? navigator.languages.concat(['en'])
-        : [navigator.language].concat(locales);
+        : [navigator.language, defaultLocale, 'en'];
+    } else if (defaultLocale) {
+      locales = [defaultLocale, 'en'];
+    } else {
+      locales = ['en'];
     }
 
     const inst = new Intl.NumberFormat(locales, this.getArguments());

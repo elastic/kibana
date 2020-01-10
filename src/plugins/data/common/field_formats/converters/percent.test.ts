@@ -22,8 +22,6 @@ import { PercentFormat } from './percent';
 describe('PercentFormat', () => {
   const config: Record<string, any> = {};
 
-  config['format:percent:defaultPattern'] = '0,0.[000]%';
-
   const getConfig = (key: string) => config[key];
 
   test('default pattern', () => {

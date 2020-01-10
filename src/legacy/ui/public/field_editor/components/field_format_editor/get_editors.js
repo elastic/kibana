@@ -33,15 +33,15 @@ import { TruncateFormatEditor } from './editors/truncate';
 import { UrlFormatEditor } from './editors/url/url';
 
 export const editors = [
+  DefaultNumberFormatEditor,
   BytesFormatEditor,
   ColorFormatEditor,
   CurrencyFormatEditor,
   DateFormatEditor,
   DateNanosFormatEditor,
   CustomNumberFormatEditor,
-  DefaultNumberFormatEditor,
-  DurationFormatEditor,
   ShortNumberFormatEditor,
+  DurationFormatEditor,
   PercentFormatEditor,
   StaticLookupFormatEditor,
   StringFormatEditor,

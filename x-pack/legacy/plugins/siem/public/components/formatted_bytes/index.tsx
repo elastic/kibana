@@ -7,7 +7,6 @@
 import React from 'react';
 import numeral from '@elastic/numeral';
 
-import { DEFAULT_BYTES_FORMAT } from '../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
 type Bytes = string | number;
@@ -17,9 +16,7 @@ export const formatBytes = (value: Bytes, format: string) => {
 };
 
 export const useFormatBytes = () => {
-  const [bytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
-
-  return (value: Bytes) => formatBytes(value, bytesFormat);
+  return (value: Bytes) => formatBytes(value, '0,0.0b');
 };
 
 export const PreferenceFormattedBytesComponent = ({ value }: { value: Bytes }) => (

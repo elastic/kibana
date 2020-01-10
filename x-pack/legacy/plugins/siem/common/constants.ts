@@ -6,7 +6,6 @@
 
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
-export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 export const DEFAULT_DARK_MODE = 'theme:darkMode';

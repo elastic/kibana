@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { BytesFormat } from './bytes';
+import 'intl';
+import { CurrencyFormat } from './currency';
 
-describe('BytesFormat', () => {
+describe('CurrencyFormat', () => {
   let config: Record<string, any> = {};
 
   const getConfig = (key: string) => config[key];
@@ -28,16 +29,29 @@ describe('BytesFormat', () => {
     config = {};
   });
 
-  test('default pattern', () => {
-    const formatter = new BytesFormat({}, getConfig);
+  test('default currency', () => {
+    // This locale is not supported in node
+    config['format:defaultLocale'] = 'pt-PT';
+    config['format:currency:defaultCurrency'] = 'EUR';
 
-    expect(formatter.convert(5150000)).toBe('4.911MB');
+    const formatter = new CurrencyFormat({}, getConfig);
+
+    expect(formatter.convert(5150000)).toBe('€5,150,000');
   });
 
-  test('custom pattern and locale', () => {
-    config['format:number:defaultLocale'] = 'de';
-    const formatter = new BytesFormat({ pattern: '0,0.[0]b' }, getConfig);
+  test('decimals', () => {
+    config['format:currency:defaultCurrency'] = 'USD';
 
-    expect(formatter.convert('10500')).toBe('10,3KB');
+    const formatter = new CurrencyFormat({}, getConfig);
+
+    expect(formatter.convert(1234.56789)).toBe('$1,234.57');
+  });
+
+  test('2 decimal places', () => {
+    config['format:currency:defaultCurrency'] = 'USD';
+
+    const formatter = new CurrencyFormat({ minDecimals: 2 }, getConfig);
+
+    expect(formatter.convert(1234)).toBe('$1,234.00');
   });
 });
