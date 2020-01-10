@@ -1,28 +1,28 @@
 {
-  "monitor": {
-    "check_group": "d76f0762-d445-11e9-88e3-3e80641b9c71",
-    "duration": {
-      "us": 24627
-    },
-    "id": "0002-up",
-    "ip": "127.0.0.1",
-    "name": "",
-    "status": "up",
-    "type": "http"
-  },
   "observer": {
     "geo": {
-      "location": "37.926868, -78.024902",
-      "name": "mpls"
+      "name": "mpls",
+      "location": "37.926868, -78.024902"
     },
     "hostname": "avc-x1x"
   },
+  "monitor": {
+    "duration": {
+      "us": 24627
+    },
+    "ip": "127.0.0.1",
+    "name": "",
+    "check_group": "d76f0762-d445-11e9-88e3-3e80641b9c71",
+    "id": "0002-up",
+    "type": "http",
+    "status": "up"
+  },
   "url": {
-    "domain": "localhost",
-    "full": "http://localhost:5678/pattern?r=200x1",
     "path": "/pattern",
+    "scheme": "http",
     "port": 5678,
+    "domain": "localhost",
     "query": "r=200x1",
-    "scheme": "http"
+    "full": "http://localhost:5678/pattern?r=200x1"
   }
 }
