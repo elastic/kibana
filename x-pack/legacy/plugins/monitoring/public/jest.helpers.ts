@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 
 /**
  * Suppress React 16.8 act() warnings globally.
@@ -17,3 +18,19 @@ beforeAll(() => {
     }
   });
 });
+
+export function mockUseEffects(count = 1) {
+  const spy = jest.spyOn(React, 'useEffect');
+  for (let i = 0; i < count; i++) {
+    spy.mockImplementationOnce(f => f());
+  }
+}
+
+// export function mockUseEffectForDeps(deps, count = 1) {
+//   const spy = jest.spyOn(React, 'useEffect');
+//   for (let i = 0; i < count; i++) {
+//     spy.mockImplementationOnce((f, depList) => {
+
+//     });
+//   }
+// }

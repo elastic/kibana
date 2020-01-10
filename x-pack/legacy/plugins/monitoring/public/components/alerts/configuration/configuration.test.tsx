@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import '../../../jest.helpers';
-import { shallow, ShallowWrapper, mount, ReactWrapper } from 'enzyme';
+import { mockUseEffects } from '../../../jest.helpers';
+import { shallow, ShallowWrapper } from 'enzyme';
 import { kfetch } from 'ui/kfetch';
 import { AlertsConfiguration, AlertsConfigurationProps } from './configuration';
 
@@ -15,7 +15,7 @@ jest.mock('ui/kfetch', () => ({
 }));
 
 const defaultProps: AlertsConfigurationProps = {
-  clusterUuid: '1adsb23',
+  ccs: '',
   emailAddress: 'test@elastic.co',
   onDone: jest.fn(),
 };
@@ -58,8 +58,10 @@ describe('Configuration', () => {
 
   describe('selected action', () => {
     const actionId = 'a123b';
-    let component: ReactWrapper;
+    let component: ShallowWrapper;
     beforeEach(async () => {
+      mockUseEffects(2);
+
       (kfetch as jest.Mock).mockImplementation(() => {
         return {
           data: [
@@ -72,32 +74,33 @@ describe('Configuration', () => {
         };
       });
 
-      component = mount(<AlertsConfiguration {...defaultProps} />);
-      await new Promise(resolve => process.nextTick(resolve));
-      await component.update();
+      component = shallow(<AlertsConfiguration {...defaultProps} />);
     });
 
     it('reflect in Step1', async () => {
+      const steps = component.find('EuiSteps').dive();
       expect(
-        component
+        steps
           .find('EuiStep')
           .at(0)
           .prop('title')
       ).toBe('Select email action');
-      expect(component.find('Step1').prop('selectedEmailActionId')).toBe(actionId);
+      expect(steps.find('Step1').prop('selectedEmailActionId')).toBe(actionId);
     });
 
     it('should enable Step2', async () => {
-      expect(component.find('Step2').prop('isDisabled')).toBe(false);
+      const steps = component.find('EuiSteps').dive();
+      expect(steps.find('Step2').prop('isDisabled')).toBe(false);
     });
 
     it('should enable Step3', async () => {
-      expect(component.find('Step3').prop('isDisabled')).toBe(false);
+      const steps = component.find('EuiSteps').dive();
+      expect(steps.find('Step3').prop('isDisabled')).toBe(false);
     });
   });
 
   describe('edit action', () => {
-    let component: ReactWrapper;
+    let component: ShallowWrapper;
     beforeEach(async () => {
       (kfetch as jest.Mock).mockImplementation(() => {
         return {
@@ -105,22 +108,22 @@ describe('Configuration', () => {
         };
       });
 
-      component = mount(<AlertsConfiguration {...defaultProps} />);
-      await new Promise(resolve => process.nextTick(resolve));
-      await component.update();
+      component = shallow(<AlertsConfiguration {...defaultProps} />);
     });
 
     it('disable Step2', async () => {
-      expect(component.find('Step2').prop('isDisabled')).toBe(true);
+      const steps = component.find('EuiSteps').dive();
+      expect(steps.find('Step2').prop('isDisabled')).toBe(true);
     });
 
     it('disable Step3', async () => {
-      expect(component.find('Step3').prop('isDisabled')).toBe(true);
+      const steps = component.find('EuiSteps').dive();
+      expect(steps.find('Step3').prop('isDisabled')).toBe(true);
     });
   });
 
   describe('no email address', () => {
-    let component: ReactWrapper;
+    let component: ShallowWrapper;
     beforeEach(async () => {
       (kfetch as jest.Mock).mockImplementation(() => {
         return {
@@ -134,13 +137,12 @@ describe('Configuration', () => {
         };
       });
 
-      component = mount(<AlertsConfiguration {...defaultProps} emailAddress="" />);
-      await new Promise(resolve => process.nextTick(resolve));
-      await component.update();
+      component = shallow(<AlertsConfiguration {...defaultProps} emailAddress="" />);
     });
 
     it('should disable Step3', async () => {
-      expect(component.find('Step3').prop('isDisabled')).toBe(true);
+      const steps = component.find('EuiSteps').dive();
+      expect(steps.find('Step3').prop('isDisabled')).toBe(true);
     });
   });
 });

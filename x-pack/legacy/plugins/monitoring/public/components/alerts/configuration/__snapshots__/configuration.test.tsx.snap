@@ -54,13 +54,15 @@ exports[`Configuration shallow view should render step 2 1`] = `
 `;
 
 exports[`Configuration shallow view should render step 3 1`] = `
-<EuiButton
-  isDisabled={true}
-  isLoading={false}
-  onClick={[Function]}
->
-  Save
-</EuiButton>
+<Fragment>
+  <EuiButton
+    isDisabled={true}
+    isLoading={false}
+    onClick={[Function]}
+  >
+    Save
+  </EuiButton>
+</Fragment>
 `;
 
 exports[`Configuration should render high level steps 1`] = `
@@ -111,6 +113,7 @@ exports[`Configuration should render high level steps 1`] = `
     title="Confirm and save"
   >
     <Step3
+      error=""
       isDisabled={true}
       isSaving={false}
       save={[Function]}

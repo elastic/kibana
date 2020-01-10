@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import '../../jest.helpers';
 import { shallow } from 'enzyme';
 import { kfetch } from 'ui/kfetch';
 import { AlertsStatus, AlertsStatusProps } from './status';
 import { ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { getSetupModeState } from '../../lib/setup_mode';
+import { mockUseEffects } from '../../jest.helpers';
 
 jest.mock('../../lib/setup_mode', () => ({
   getSetupModeState: jest.fn(),
@@ -30,7 +30,7 @@ const defaultProps: AlertsStatusProps = {
 
 describe('Status', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    mockUseEffects(2);
 
     (getSetupModeState as jest.Mock).mockReturnValue({
       enabled: false,
@@ -44,10 +44,6 @@ describe('Status', () => {
         data: [],
       };
     });
-
-    const spy = jest.spyOn(React, 'useEffect');
-    spy.mockImplementationOnce(f => f());
-    spy.mockImplementationOnce(f => f());
   });
 
   it('should render without setup mode', () => {
