@@ -106,7 +106,7 @@ export class VectorStyle extends AbstractStyle {
       VECTOR_STYLES.LABEL_BORDER_COLOR
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE],
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
       VECTOR_STYLES.LABEL_BORDER_SIZE,
       this._labelSizeStyleProperty
     );

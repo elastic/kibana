@@ -38,9 +38,12 @@ const options = [
   },
 ];
 
-export function VectorStyleLabelHaloSizeEditor({ handlePropertyChange, styleProperty }) {
+export function VectorStyleLabelBorderSizeEditor({ handlePropertyChange, styleProperty }) {
   function onChange(e) {
-    handlePropertyChange(styleProperty.getStyleName(), { size: e.target.value });
+    const styleDescriptor = {
+      options: { size: e.target.value },
+    };
+    handlePropertyChange(styleProperty.getStyleName(), styleDescriptor);
   }
 
   return (
