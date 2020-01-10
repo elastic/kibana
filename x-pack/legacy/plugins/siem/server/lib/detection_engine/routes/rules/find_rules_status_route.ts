@@ -61,7 +61,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         return -1;
       });
       return {
-        ...acc,
+        ...(await acc),
         [id]: lastFiveErrorsForId.saved_objects.map(errorItem => errorItem.attributes),
       };
     }, {});
