@@ -5,9 +5,9 @@
  */
 
 import DateMath from '@elastic/datemath';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { createContext } from 'react';
-import { UptimeAppColors } from '../uptime_app';
+import React, { createContext, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { UptimeAppProps } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
 
@@ -17,13 +17,11 @@ export interface UMSettingsContextValues {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
   basePath: string;
-  colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  refreshApp: () => void;
   commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
@@ -49,22 +47,44 @@ const defaultContext: UMSettingsContextValues = {
   autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
   autorefreshInterval: AUTOREFRESH_INTERVAL,
   basePath: BASE_PATH,
-  colors: {
-    danger: euiLightVars.euiColorDanger,
-    mean: euiLightVars.euiColorPrimary,
-    range: euiLightVars.euiFocusBackgroundColor,
-    success: euiLightVars.euiColorSuccess,
-    warning: euiLightVars.euiColorWarning,
-    gray: euiLightVars.euiColorLightShade,
-  },
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,
   isApmAvailable: true,
   isInfraAvailable: true,
   isLogsAvailable: true,
-  refreshApp: () => {
-    throw new Error('App refresh was not initialized, set it when you invoke the context');
-  },
 };
-
 export const UptimeSettingsContext = createContext(defaultContext);
+
+export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
+  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable } = props;
+
+  const { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd } = useParams();
+
+  const value = useMemo(() => {
+    const absoluteStartDate = DateMath.parse(dateRangeStart ?? '');
+    const absoluteEndDate = DateMath.parse(dateRangeEnd ?? '');
+    return {
+      absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
+      absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
+      autorefreshInterval,
+      autorefreshIsPaused,
+      basePath,
+      dateRangeStart,
+      dateRangeEnd,
+      isApmAvailable,
+      isInfraAvailable,
+      isLogsAvailable,
+    };
+  }, [
+    autorefreshInterval,
+    autorefreshIsPaused,
+    dateRangeStart,
+    dateRangeEnd,
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+  ]);
+
+  return <UptimeSettingsContext.Provider value={value} children={children} />;
+};

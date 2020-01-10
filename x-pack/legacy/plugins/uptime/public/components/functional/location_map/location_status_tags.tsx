@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 import { MonitorLocation } from '../../../../common/runtime_types';
 
 const TextStyle = styled.div`
@@ -31,7 +31,7 @@ interface Props {
 export const LocationStatusTags = ({ locations }: Props) => {
   const {
     colors: { gray, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   const upLocs: string[] = [];
   const downLocs: string[] = [];

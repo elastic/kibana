@@ -61,6 +61,10 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
     }
   }, [headerText, setBreadcrumbs, params, monitorPage]);
 
+  useEffect(() => {
+    document.title = getTitle();
+  }, []);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
