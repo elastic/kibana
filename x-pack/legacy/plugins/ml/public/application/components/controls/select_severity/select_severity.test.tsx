@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
@@ -64,10 +64,8 @@ describe('SelectSeverity', () => {
 
   test('state for currently selected value is updated correctly on click', done => {
     const wrapper = mount(
-      <MemoryRouter initialEntries={['page']}>
-        <Route path="page">
-          <SelectSeverity />
-        </Route>
+      <MemoryRouter>
+        <SelectSeverity />
       </MemoryRouter>
     );
 

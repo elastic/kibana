@@ -58,7 +58,7 @@ function optionValueToInterval(value: string) {
   return interval;
 }
 
-const TABLE_INTERVAL_DEFAULT = OPTIONS[0].value;
+const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 const TABLE_INTERVAL_APP_STATE_NAME = 'mlSelectInterval';
 
 export const useTableInterval = () => {

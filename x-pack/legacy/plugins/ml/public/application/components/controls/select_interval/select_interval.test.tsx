@@ -5,26 +5,51 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
+import { MemoryRouter } from 'react-router-dom';
+import { mount } from 'enzyme';
+
+import { EuiSelect } from '@elastic/eui';
+
 import { SelectInterval } from './select_interval';
 
 describe('SelectInterval', () => {
   test('creates correct initial selected value', () => {
-    const wrapper = shallowWithIntl(<SelectInterval />);
-    const defaultSelectedValue = wrapper.props().interval.val;
+    const wrapper = mount(
+      <MemoryRouter>
+        <SelectInterval />
+      </MemoryRouter>
+    );
+    const select = wrapper.find(EuiSelect);
 
+    const defaultSelectedValue = select.props().value;
     expect(defaultSelectedValue).toBe('auto');
   });
 
-  test('currently selected value is updated correctly on click', () => {
-    const wrapper = shallowWithIntl(<SelectInterval />);
-    const select = wrapper.first().shallow();
-
-    const defaultSelectedValue = wrapper.props().interval.val;
+  test('currently selected value is updated correctly on click', done => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <SelectInterval />
+      </MemoryRouter>
+    );
+    const select = wrapper.find(EuiSelect).first();
+    const defaultSelectedValue = select.props().value;
     expect(defaultSelectedValue).toBe('auto');
 
-    select.simulate('change', { target: { value: 'day' } });
-    const updatedSelectedValue = wrapper.props().interval.val;
-    expect(updatedSelectedValue).toBe('day');
+    const onChange = select.props().onChange;
+
+    act(() => {
+      if (onChange !== undefined) {
+        onChange({ target: { value: 'day' } } as React.ChangeEvent<HTMLSelectElement>);
+      }
+    });
+
+    setImmediate(() => {
+      wrapper.update();
+      const updatedSelect = wrapper.find(EuiSelect).first();
+      const updatedSelectedValue = updatedSelect.props().value;
+      expect(updatedSelectedValue).toBe('day');
+      done();
+    });
   });
 });
