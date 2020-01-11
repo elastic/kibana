@@ -38,12 +38,14 @@ const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
     return -1;
   }
 
+  // With a match and the same score,...
+
   if (a.metadata.stringMatch.length === b.metadata.stringMatch.length) {
     // The field with the shortest path (less tree "depth") comes first
     return a.field.path.length - b.field.path.length;
   }
 
-  // With the same score, the longest match string wins.
+  // The longest match string wins.
   return b.metadata.stringMatch.length - a.metadata.stringMatch.length;
 };
 
@@ -107,7 +109,7 @@ const getJSXdisplayFromMeta = (
     );
   } else if (metadata.matchPath) {
     const { stringMatch } = metadata;
-    const charIndex = path.toLowerCase().indexOf(stringMatch!.toLowerCase());
+    const charIndex = path.toLowerCase().lastIndexOf(stringMatch!.toLowerCase());
     const startString = path.substr(0, charIndex);
     const endString = path.substr(charIndex + stringMatch!.length);
     display = (
