@@ -109,7 +109,7 @@ const getJSXdisplayFromMeta = (
     );
   } else if (metadata.matchPath) {
     const { stringMatch } = metadata;
-    const charIndex = path.toLowerCase().lastIndexOf(stringMatch!.toLowerCase());
+    const charIndex = path.lastIndexOf(stringMatch!);
     const startString = path.substr(0, charIndex);
     const endString = path.substr(charIndex + stringMatch!.length);
     display = (
@@ -153,7 +153,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
       .sort((a, b) => b![0].length - a![0].length);
 
     if (arrayMatch.length) {
-      stringMatch = arrayMatch[0]![0];
+      stringMatch = arrayMatch[0]![0].toLowerCase();
     }
   }
 
@@ -255,7 +255,7 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
       field,
       metadata: getSearchMetadata(searchData, {
         name: field.source.name,
-        path: field.path.join(' > '),
+        path: field.path.join(' > ').toLowerCase(),
         type: field.source.type,
       }),
     }))
