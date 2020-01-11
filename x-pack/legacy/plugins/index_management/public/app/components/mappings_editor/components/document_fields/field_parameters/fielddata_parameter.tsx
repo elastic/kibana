@@ -8,15 +8,18 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiCallOut, EuiLink, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import {
-  UseField,
-  Field,
-  FormDataProvider,
-  UseMultiFields,
-  FieldHook,
-} from '../../../shared_imports';
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiCallOut,
+  EuiLink,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
+import { UseField, Field, UseMultiFields, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
 import { NormalizedField } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -106,6 +109,72 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
 
           return (
             <>
+              <EuiCallOut
+                color="warning"
+                iconType="alert"
+                size="s"
+                title={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledWarningTitle"
+                    defaultMessage="Fielddata can consume significant memory. This is particularly likely when loading high-cardinality text fields. {docsLink}"
+                    values={{
+                      docsLink: (
+                        <EuiLink
+                          href={documentationService.getEnablingFielddataLink()}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledDocumentationLink',
+                            {
+                              defaultMessage: 'Learn more.',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+              />
+
+              <EuiSpacer size="m" />
+
+              <EuiTitle size="xxs">
+                <h4>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.fielddata.fielddataDocumentFrequencyRangeTitle',
+                    {
+                      defaultMessage: 'Document frequency range',
+                    }
+                  )}
+                </h4>
+              </EuiTitle>
+
+              <EuiSpacer size="s" />
+
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.idxMgmt.mappingsEditor.fielddata.fielddataFrequencyMessage"
+                  defaultMessage="This range determines the terms loaded into memory. Frequency is calculated per segment. Exclude small segments based on their size, in number of documents. {docsLink}"
+                  values={{
+                    docsLink: (
+                      <EuiLink
+                        href={documentationService.getFielddataFrequencyLink()}
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.fielddata.fielddataFrequencyDocumentationLink',
+                          {
+                            defaultMessage: 'Learn more.',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+
+              <EuiSpacer size="m" />
+
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <FielddataFrequencyComponent min={min} max={max} />
@@ -137,39 +206,6 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
           );
         }}
       </UseMultiFields>
-
-      <FormDataProvider pathsToWatch="fielddata">
-        {({ fielddata }) =>
-          fielddata === true ? (
-            <>
-              <EuiSpacer />
-              <EuiCallOut color="warning">
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledWarningMessage"
-                    defaultMessage="Fielddata can consume significant memory, especially when loading high-cardinality text fields. {docsLink}"
-                    values={{
-                      docsLink: (
-                        <EuiLink
-                          href={documentationService.getEnablingFielddataLink()}
-                          target="_blank"
-                        >
-                          {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledDocumentationLink',
-                            {
-                              defaultMessage: 'Learn more.',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiCallOut>
-            </>
-          ) : null
-        }
-      </FormDataProvider>
     </EditFieldFormRow>
   );
 };
