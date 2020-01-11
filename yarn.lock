@@ -1941,14 +1941,16 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@17.3.1":
-  version "17.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.3.1.tgz#67d883207b2efdb9a48f2d949b95de1e4bbc1064"
-  integrity sha512-fYoPbRXr9mZlTcfSqOCE65yb2Zpsptq4Y1Lg8+aeMw8G5JpMnUx1RaBRe1OJrCRHWpuF0f8Yxg+i1DDqxxLnlA==
+"@elastic/eui@18.0.0":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.0.0.tgz#b65607c87be63f9455630cab1ab2a365acd2a805"
+  integrity sha512-wFI6HwEmwnmctRiP5S3ScjJSqER+xmh7/3ur5BvPRYSaXm5vGJnj0bwqQD1GZ9jgfrrc7qy7f4ff3zbmuTBs3Q==
   dependencies:
+    "@types/chroma-js" "^1.4.3"
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     "@types/react-beautiful-dnd" "^10.1.0"
+    chroma-js "^2.0.4"
     classnames "^2.2.5"
     highlight.js "^9.12.0"
     html "^1.0.0"
