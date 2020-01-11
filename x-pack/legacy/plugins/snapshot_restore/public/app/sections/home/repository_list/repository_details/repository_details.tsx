@@ -361,14 +361,11 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               })}
             >
               <p>
-                {JSON.stringify(
-                  cleanup.error
-                    ? cleanup.error
-                    : i18n.translate(
-                        'xpack.snapshotRestore.repositoryDetails.cleanupUnknownError',
-                        { defaultMessage: '503: Unknown error' }
-                      )
-                )}
+                {cleanup.error
+                  ? JSON.stringify(cleanup.error)
+                  : i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupUnknownError', {
+                      defaultMessage: '503: Unknown error',
+                    })}
               </p>
             </EuiCallOut>
           )}
