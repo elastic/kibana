@@ -331,7 +331,7 @@ describe('deprecations', () => {
   });
 
   it('logs a warning if ssl.key is set and ssl.certificate is not', () => {
-    const { messages } = applyElasticsearchDeprecations({ ssl: { key: 'foo' } });
+    const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
@@ -340,12 +340,17 @@ describe('deprecations', () => {
   });
 
   it('logs a warning if ssl.certificate is set and ssl.key is not', () => {
-    const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: 'foo' } });
+    const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
       ]
     `);
+  });
+
+  it('does not log a warning if both ssl.key and ssl.certificate are set', () => {
+    const { messages } = applyElasticsearchDeprecations({ ssl: { key: '', certificate: '' } });
+    expect(messages).toEqual([]);
   });
 });
 
