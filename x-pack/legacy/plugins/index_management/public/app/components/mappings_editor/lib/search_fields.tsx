@@ -185,7 +185,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
 /**
  * Return an array of array combining sibling elements
  * In: ['A', 'B', 'C', 'D']
- * Out: [['A', 'B'], ['B', 'C'], ['C', 'D']]
+ * Out: [['A', 'B'], ['A', 'B' 'C'], ['B', 'C'], ['B','C', 'D'], ['C', 'D']]
  *
  * @param arr Array of string
  */
@@ -193,7 +193,12 @@ const getSubArrays = (arr: string[]): string[][] => {
   let i = 0;
   const result = [];
   while (i < arr.length - 1) {
-    result.push([arr[i], arr[i + 1]]);
+    result.push(arr.slice(i, i + 2));
+
+    if (i + 2 < arr.length) {
+      result.push(arr.slice(i, i + 3));
+    }
+
     i++;
   }
   return result;
@@ -203,7 +208,7 @@ const getRegexArrayFromSearchTerms = (searchTerms: string[]): RegExp[] => {
   const termsRegex = new RegExp(searchTerms.join('|'), 'i');
   const fuzzyJoinChar = '([\\._-\\s]|(\\s>\\s))?';
   const fuzzySearchRegexArray = getSubArrays(searchTerms).map(
-    ([A, B]) => new RegExp(A + fuzzyJoinChar + B, 'i')
+    termsArray => new RegExp(termsArray.join(fuzzyJoinChar), 'i')
   );
   const regexArray = [termsRegex, ...fuzzySearchRegexArray];
 
