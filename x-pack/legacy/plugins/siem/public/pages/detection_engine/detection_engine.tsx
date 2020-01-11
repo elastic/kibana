@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLoadingContent, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { StickyContainer } from 'react-sticky';
 
@@ -18,30 +18,23 @@ import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-import { SignalsTable } from './components/signals';
-import * as signalsI18n from './components/signals/translations';
-import { SignalsHistogramPanel } from './components/signals_histogram_panel';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
-import { inputsSelectors } from '../../store/inputs';
 import { State } from '../../store';
+import { inputsSelectors } from '../../store/inputs';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 import { InputsRange } from '../../store/inputs/model';
-import { signalsHistogramOptions } from './components/signals_histogram_panel/config';
 import { useSignalInfo } from './components/signals_info';
+import { SignalsTable } from './components/signals';
+import { NoWriteSignalsCallOut } from './components/no_write_signals_callout';
+import { SignalsHistogramPanel } from './components/signals_histogram_panel';
+import { signalsHistogramOptions } from './components/signals_histogram_panel/config';
+import { useUserInfo } from './components/user_info';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { HeaderSection } from '../../components/header_section';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-
-interface OwnProps {
-  loading: boolean;
-  isSignalIndexExists: boolean | null;
-  isUserAuthenticated: boolean | null;
-  signalsIndex: string | null;
-}
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -56,18 +49,19 @@ export interface DispatchProps {
   }>;
 }
 
-type DetectionEngineComponentProps = OwnProps & ReduxProps & DispatchProps;
+type DetectionEngineComponentProps = ReduxProps & DispatchProps;
 
-export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
-  ({
-    filters,
-    loading,
-    isSignalIndexExists,
-    isUserAuthenticated,
-    query,
-    setAbsoluteRangeDatePicker,
-    signalsIndex,
-  }) => {
+const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
+  ({ filters, query, setAbsoluteRangeDatePicker }) => {
+    const {
+      loading,
+      isSignalIndexExists,
+      isAuthenticated: isUserAuthenticated,
+      canUserCRUD,
+      signalIndexName,
+      hasIndexWrite,
+    } = useUserInfo();
+
     const [lastSignals] = useSignalInfo({});
 
     const updateDateRangeCallback = useCallback(
@@ -95,6 +89,7 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
     }
     return (
       <>
+        {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -102,7 +97,6 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
                 <FiltersGlobal>
                   <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
-
                 <WrapperPage>
                   <HeaderPage
                     border
@@ -137,16 +131,14 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
 
                         <EuiSpacer />
 
-                        {!loading ? (
-                          isSignalIndexExists && (
-                            <SignalsTable from={from} signalsIndex={signalsIndex ?? ''} to={to} />
-                          )
-                        ) : (
-                          <EuiPanel>
-                            <HeaderSection title={signalsI18n.SIGNALS_TABLE_TITLE} />
-                            <EuiLoadingContent />
-                          </EuiPanel>
-                        )}
+                        <SignalsTable
+                          loading={loading}
+                          hasIndexWrite={hasIndexWrite ?? false}
+                          canUserCRUD={canUserCRUD ?? false}
+                          from={from}
+                          signalsIndex={signalIndexName ?? ''}
+                          to={to}
+                        />
                       </>
                     )}
                   </GlobalTime>
@@ -160,7 +152,6 @@ export const DetectionEngineComponent = React.memo<DetectionEngineComponentProps
             );
           }}
         </WithSource>
-
         <SpyRoute />
       </>
     );
