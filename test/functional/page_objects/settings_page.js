@@ -32,7 +32,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
+      await find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
 
     async clickLinkText(text) {
@@ -101,8 +101,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
       await this.clickLinkText('Index Patterns');
+    }
+
+    async clickKibanaIndicies() {
+      return this.clickLinkText('Index Patterns');
     }
 
     async setAdvancedSettingsInput(propertyName, propertyValue) {

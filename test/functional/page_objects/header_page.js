@@ -17,9 +17,6 @@
  * under the License.
  */
 
-
-
-
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
@@ -52,6 +49,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async getSpinnerDone() {
       const tenXLonger = config.get('timeouts.waitFor') * 5;
       return find.byCssSelector('[data-test-subj="globalLoadingIndicator-hidden"]', tenXLonger);
+    }
+
+    async clickReporting() {
+      await testSubjects.click('shareTopNavButton');
+    }
+
+    async clickPrintablePdf() {
+      await testSubjects.click('sharePanel-PDFReports');
     }
 
     async setQuickSpan(timespan) {
