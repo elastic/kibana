@@ -5,25 +5,27 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { shallow } from 'enzyme';
 import { SelectLimit } from './select_limit';
+
+jest.useFakeTimers();
 
 describe('SelectLimit', () => {
   test('creates correct initial selected value', () => {
     const wrapper = shallow(<SelectLimit />);
-    const defaultSelectedValue = wrapper.props().limit.display;
-    expect(defaultSelectedValue).toBe('10');
+    expect(wrapper.props().value).toEqual(10);
   });
 
   test('state for currently selected value is updated correctly on click', () => {
     const wrapper = shallow(<SelectLimit />);
-    const select = wrapper.first().shallow();
+    expect(wrapper.props().value).toEqual(10);
 
-    const defaultSelectedValue = wrapper.props().limit.display;
-    expect(defaultSelectedValue).toBe('10');
+    act(() => {
+      wrapper.simulate('change', { target: { value: 25 } });
+    });
+    wrapper.update();
 
-    select.simulate('change', { target: { value: '25' } });
-    const updatedSelectedValue = wrapper.props().limit.display;
-    expect(updatedSelectedValue).toBe('25');
+    expect(wrapper.props().value).toEqual(10);
   });
 });

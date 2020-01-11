@@ -17,5 +17,5 @@ export declare const anomalyDataChange: (
   anomalyRecords: any[],
   earliestMs: number,
   latestMs: number,
-  severity: number
+  severity?: number
 ) => void;

@@ -25,6 +25,7 @@ import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
+import { useSwimlaneLimit } from '../../explorer/select_limit';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
@@ -143,6 +144,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
+  const [swimlaneLimit] = useSwimlaneLimit();
+  useEffect(() => {
+    explorerService.setSwimlaneLimit(swimlaneLimit);
+  }, [swimlaneLimit]);
 
   const [selectedCells, setSelectedCells] = useSelectedCells();
   useEffect(() => {

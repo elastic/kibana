@@ -47,7 +47,7 @@ const MAX_CHARTS_PER_ROW = 4;
 
 // callback(getDefaultChartsData());
 
-export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, severity) {
+export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, severity = 0) {
   const data = getDefaultChartsData();
 
   const filteredRecords = anomalyRecords.filter(record => {
@@ -94,6 +94,10 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
   }));
 
   explorerService.setCharts({ ...data });
+
+  if (seriesConfigs.length === 0) {
+    return;
+  }
 
   // Query 1 - load the raw metric data.
   function getMetricData(config, range) {

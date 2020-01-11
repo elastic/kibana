@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './select_limit_service.js';
+export { useSwimlaneLimit, SelectLimit } from './select_limit';
