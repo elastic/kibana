@@ -78,10 +78,10 @@ export function addEmbeddableToDashboardUrl(
  */
 export function getLensUrlFromDashboardAbsoluteUrl(
   dashboardAbsoluteUrl: string | undefined | null,
-  basePath: string | null,
+  basePath: string | null | undefined,
   id: string
 ): string | null {
-  if (!dashboardAbsoluteUrl || !basePath) {
+  if (!dashboardAbsoluteUrl || basePath === null || basePath === undefined) {
     return null;
   }
   const { host, protocol } = parse(dashboardAbsoluteUrl);

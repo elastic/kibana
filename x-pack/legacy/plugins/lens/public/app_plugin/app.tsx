@@ -334,7 +334,9 @@ export function App({
                     redirectTo(id);
                   }
                 })
-                .catch(() => {
+                .catch(e => {
+                  // eslint-disable-next-line no-console
+                  console.dir(e);
                   trackUiEvent('save_failed');
                   core.notifications.toasts.addDanger(
                     i18n.translate('xpack.lens.app.docSavingError', {

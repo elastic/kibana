@@ -107,5 +107,11 @@ describe('Dashboard URL Helper', () => {
     expect(getLensUrlFromDashboardAbsoluteUrl(url, basePath, id)).toEqual(
       'http://myserver.mydomain.com:5601/wev/app/kibana#/lens/edit/1244'
     );
+
+    url =
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(getLensUrlFromDashboardAbsoluteUrl(url, '', id)).toEqual(
+      'http://localhost:5601/app/kibana#/lens/edit/1244'
+    );
   });
 });
