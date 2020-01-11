@@ -12,6 +12,8 @@ describe('ML - data recognizer', () => {
 
   const moduleIds = [
     'apache_ecs',
+    'apm_jsbase',
+    'apm_nodejs',
     'apm_transaction',
     'auditbeat_process_docker_ecs',
     'auditbeat_process_hosts_ecs',

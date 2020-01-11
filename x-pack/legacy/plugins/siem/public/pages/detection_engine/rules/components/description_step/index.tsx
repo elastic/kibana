@@ -143,6 +143,14 @@ const getDescriptionItem = (
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
+  } else if (field === 'riskScore') {
+    const description: string = get(field, value);
+    return [
+      {
+        title: label,
+        description,
+      },
+    ];
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {
