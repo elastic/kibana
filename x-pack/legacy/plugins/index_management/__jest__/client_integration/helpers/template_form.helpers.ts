@@ -50,6 +50,8 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       .find('removeFieldButton')
       .at(index)
       .simulate('click');
+
+    testBed.find('confirmModalConfirmButton').simulate('click');
   };
 
   const clickCancelCreateFieldButton = () => {
