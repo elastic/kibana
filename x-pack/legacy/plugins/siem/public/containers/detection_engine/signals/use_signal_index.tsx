@@ -8,9 +8,10 @@ import { useEffect, useState, useRef } from 'react';
 
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../../components/toasters';
+import { createPrepackagedRules } from '../rules';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
-import { PostSignalError } from './types';
+import { PostSignalError, SignalIndexError } from './types';
 
 type Func = () => void;
 
@@ -40,11 +41,15 @@ export const useSignalIndex = (): Return => {
         if (isSubscribed && signal != null) {
           setSignalIndexName(signal.name);
           setSignalIndexExists(true);
+          createPrepackagedRules({ signal: abortCtrl.signal });
         }
       } catch (error) {
         if (isSubscribed) {
           setSignalIndexName(null);
           setSignalIndexExists(false);
+          if (error instanceof SignalIndexError && error.statusCode !== 404) {
+            errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
+          }
         }
       }
       if (isSubscribed) {
@@ -69,7 +74,7 @@ export const useSignalIndex = (): Return => {
           } else {
             setSignalIndexName(null);
             setSignalIndexExists(false);
-            errorToToaster({ title: i18n.SIGNAL_FETCH_FAILURE, error, dispatchToaster });
+            errorToToaster({ title: i18n.SIGNAL_POST_FAILURE, error, dispatchToaster });
           }
         }
       }
