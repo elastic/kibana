@@ -84,43 +84,41 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
             <UtilityBarText>{i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}</UtilityBarText>
           </UtilityBarGroup>
 
-          {canUserCRUD && (
-            <UtilityBarGroup>
-              {totalCount > 0 && (
-                <>
-                  <UtilityBarText>
-                    {i18n.SELECTED_SIGNALS(
-                      showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
-                      showClearSelection ? totalCount : Object.keys(selectedEventIds).length
-                    )}
-                  </UtilityBarText>
+          <UtilityBarGroup>
+            {canUserCRUD && (
+              <>
+                <UtilityBarText>
+                  {i18n.SELECTED_SIGNALS(
+                    showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
+                    showClearSelection ? totalCount : Object.keys(selectedEventIds).length
+                  )}
+                </UtilityBarText>
 
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                <UtilityBarAction
+                  iconSide="right"
+                  iconType="arrowDown"
+                  popoverContent={getBatchItemsPopoverContent}
+                >
+                  {i18n.BATCH_ACTIONS}
+                </UtilityBarAction>
 
-                  <UtilityBarAction
-                    iconType="listAdd"
-                    onClick={() => {
-                      if (!showClearSelection) {
-                        selectAll();
-                      } else {
-                        clearSelection();
-                      }
-                    }}
-                  >
-                    {showClearSelection
-                      ? i18n.CLEAR_SELECTION
-                      : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
-                  </UtilityBarAction>
-                </>
-              )}
-            </UtilityBarGroup>
-          )}
+                <UtilityBarAction
+                  iconType="listAdd"
+                  onClick={() => {
+                    if (!showClearSelection) {
+                      selectAll();
+                    } else {
+                      clearSelection();
+                    }
+                  }}
+                >
+                  {showClearSelection
+                    ? i18n.CLEAR_SELECTION
+                    : i18n.SELECT_ALL_SIGNALS(formattedTotalCount, totalCount)}
+                </UtilityBarAction>
+              </>
+            )}
+          </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
     </>

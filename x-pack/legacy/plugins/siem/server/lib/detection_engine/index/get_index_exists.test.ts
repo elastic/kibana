@@ -7,10 +7,10 @@
 import { getIndexExists } from './get_index_exists';
 
 class StatusCode extends Error {
-  statusCode: number = -1;
-  constructor(statusCode: number, message: string) {
+  status: number = -1;
+  constructor(status: number, message: string) {
     super(message);
-    this.statusCode = statusCode;
+    this.status = status;
   }
 }
 

@@ -174,7 +174,7 @@ export const AllRules = React.memo<{
 
                 <UtilityBarGroup>
                   <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                  {hasNoPermissions && (
+                  {!hasNoPermissions && (
                     <UtilityBarAction
                       iconSide="right"
                       iconType="arrowDown"
