@@ -21,11 +21,11 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   if (buckets && buckets.length !== 0) {
     indices = buckets.reduce(normalizeIndexShards, {});
     indicesTotals = calculateIndicesTotals(indices);
+  }
 
-    if (includeNodes) {
-      const masterNode = get(cluster, 'cluster_state.master_node');
-      nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
-    }
+  if (includeNodes) {
+    const masterNode = get(cluster, 'cluster_state.master_node');
+    nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
   }
 
   return {
@@ -39,12 +39,19 @@ export function getShardStats(
   req,
   esIndexPattern,
   cluster,
-  { includeNodes = false, includeIndices = false } = {}
+  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
   const metric = ElasticsearchMetric.getMetricFields();
+  const filters = [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }];
+  if (indexName) {
+    filters.push({ term: { 'shard.index': indexName } });
+  }
+  if (nodeUuid) {
+    filters.push({ term: { 'shard.node': nodeUuid } });
+  }
   const params = {
     index: esIndexPattern,
     size: 0,
@@ -55,10 +62,10 @@ export function getShardStats(
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
         metric,
-        filters: [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }],
+        filters,
       }),
       aggs: {
-        ...getShardAggs(config, includeNodes),
+        ...getShardAggs(config, includeNodes, includeIndices),
       },
     },
   };

@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 import { ConditionalToolTip } from './conditional_tooltip';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 const initialState = {
   isPopoverOpen: false,
@@ -28,7 +28,7 @@ interface Props {
   node: InfraWaffleMapNode;
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   currentTime: number;
 }
 
