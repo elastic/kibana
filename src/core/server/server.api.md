@@ -1935,7 +1935,7 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    uiOptions?: Record<string, string | number>;
+    uiOptions?: Record<string, any>;
     value?: SavedObjectAttribute;
 }
 

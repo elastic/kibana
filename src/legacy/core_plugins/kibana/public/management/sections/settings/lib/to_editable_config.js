@@ -52,6 +52,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
     options: def.options,
     optionLabels: def.optionLabels,
     requiresPageReload: !!def.requiresPageReload,
+    uiOptions: def.uiOptions || {},
   };
 
   return conf;

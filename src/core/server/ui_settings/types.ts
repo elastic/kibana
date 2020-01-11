@@ -103,7 +103,7 @@ export interface UiSettingsParams {
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
   /** field ui opttions */
-  uiOptions?: Record<string, string | number>;
+  uiOptions?: Record<string, any>;
 }
 
 /** @internal */

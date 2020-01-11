@@ -9,5 +9,5 @@ field ui opttions
 <b>Signature:</b>
 
 ```typescript
-uiOptions?: Record<string, string | number>;
+uiOptions?: Record<string, any>;
 ```
