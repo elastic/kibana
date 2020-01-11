@@ -22,18 +22,19 @@ import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { InputsRange } from '../../store/inputs/model';
 import { useSignalInfo } from './components/signals_info';
 import { SignalsTable } from './components/signals';
+import { NoWriteSignalsCallOut } from './components/no_write_signals_callout';
 import { SignalsHistogramPanel } from './components/signals_histogram_panel';
 import { signalsHistogramOptions } from './components/signals_histogram_panel/config';
+import { useUserInfo } from './components/user_info';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { useUserInfo } from './components/user_info';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -58,6 +59,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
       isAuthenticated: isUserAuthenticated,
       canUserCRUD,
       signalIndexName,
+      hasIndexWrite,
     } = useUserInfo();
 
     const [lastSignals] = useSignalInfo({});
@@ -87,6 +89,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
     }
     return (
       <>
+        {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -130,6 +133,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
 
                         <SignalsTable
                           loading={loading}
+                          hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={canUserCRUD ?? false}
                           from={from}
                           signalsIndex={signalIndexName ?? ''}

@@ -93,6 +93,7 @@ interface DispatchProps {
 interface OwnProps {
   canUserCRUD: boolean;
   defaultFilters?: esFilters.Filter[];
+  hasIndexWrite: boolean;
   from: number;
   loading: boolean;
   signalsIndex: string;
@@ -112,6 +113,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     from,
     globalFilters,
     globalQuery,
+    hasIndexWrite,
     isSelectAllChecked,
     loading,
     loadingEventIds,
@@ -238,6 +240,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
             canUserCRUD={canUserCRUD}
             areEventsLoading={loadingEventIds.length > 0}
             clearSelection={clearSelectionCallback}
+            hasIndexWrite={hasIndexWrite}
             isFilteredToOpen={filterGroup === FILTER_OPEN}
             selectAll={selectAllCallback}
             selectedEventIds={selectedEventIds}
@@ -250,6 +253,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       },
       [
         canUserCRUD,
+        hasIndexWrite,
         clearSelectionCallback,
         filterGroup,
         loadingEventIds.length,
@@ -264,6 +268,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       () =>
         getSignalsActions({
           canUserCRUD,
+          hasIndexWrite,
           createTimeline: createTimelineCallback,
           setEventsLoading: setEventsLoadingCallback,
           setEventsDeleted: setEventsDeletedCallback,

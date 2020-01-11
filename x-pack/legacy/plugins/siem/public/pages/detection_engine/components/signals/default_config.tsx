@@ -169,12 +169,14 @@ export const requiredFieldsForActions = [
 
 export const getSignalsActions = ({
   canUserCRUD,
+  hasIndexWrite,
   setEventsLoading,
   setEventsDeleted,
   createTimeline,
   status,
 }: {
   canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
@@ -199,7 +201,7 @@ export const getSignalsActions = ({
       width: 26,
     },
   ];
-  return canUserCRUD
+  return canUserCRUD && hasIndexWrite
     ? [
         ...actions,
         {

@@ -35,6 +35,7 @@ import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
+import { NoWriteSignalsCallOut } from '../../components/no_write_signals_callout';
 import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
@@ -75,6 +76,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       isAuthenticated,
       canUserCRUD,
       hasManageApiKey,
+      hasIndexWrite,
       signalIndexName,
     } = useUserInfo();
     const { ruleId } = useParams();
@@ -156,6 +158,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
     return (
       <>
+        {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
         {userHasNoPermissions && <ReadOnlyCallOut />}
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
@@ -273,6 +276,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                         <SignalsTable
                           canUserCRUD={canUserCRUD ?? false}
                           defaultFilters={signalDefaultFilters}
+                          hasIndexWrite={hasIndexWrite ?? false}
                           from={from}
                           loading={loading}
                           signalsIndex={signalIndexName ?? ''}
