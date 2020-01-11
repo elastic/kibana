@@ -72,7 +72,7 @@ const settings = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
-    options: {
+    uiOptions: {
       maxSize: {
         length: 1000,
         displayName: '1 kB',
