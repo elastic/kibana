@@ -18,7 +18,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { IClusterClient } from '../elasticsearch';
+// import { IClusterClient } from '../elasticsearch';
 
 export interface PulseInstruction {
   owner: string;
@@ -32,14 +32,22 @@ interface ChannelConfig {
 }
 
 export class PulseChannel {
-  public readonly getRecords: (elasticsearch: IClusterClient) => Promise<Record<string, any>>;
-
+  public readonly getRecords: () => Promise<Record<string, any>>;
+  private readonly collector: any;
   constructor(private readonly config: ChannelConfig) {
-    this.getRecords = require(`${__dirname}/collectors/${this.id}`).getRecords;
+    this.collector = require(`${__dirname}/collectors/${this.id}`);
+    this.getRecords = this.collector.getRecords;
   }
 
   public get id() {
     return this.config.id;
+  }
+
+  public sendPulse<T = any>(payload: T) {
+    if (!this.collector.putRecord) {
+      throw Error(`this.collector.putRecords not implemented for ${this.id}.`);
+    }
+    this.collector.putRecord(payload);
   }
 
   public instructions$() {

@@ -17,22 +17,21 @@
  * under the License.
  */
 
-import { IClusterClient } from '../../elasticsearch';
-/* queries the local error index for the current deployment
-   (is the info and config provided by using callAsInternalUser? It doesn't look like it)
-   returns array of documents in the local index
-   these documents may or may not have fixed-version annotations,
-   but will have an error recorded along with a signature for the error
-*/
+// getRecords should return an array of one or more telemetry
+// records for the errors channel. Each record will ultimately
+// be stored as an individual document in the errors channel index
+// by the service
 
-export async function getRecords(elasticsearch: IClusterClient) {
-  // this is where I start getting confused. `callAsInternalUser` docs only gives the following info:
-  /*
-  Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. See {@link APICaller}.
-  @param endpoint — String descriptor of the endpoint e.g. cluster.getSettings or ping. --> what does 'ping' give us?
-  @param clientParams — A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
-  @param options — Options that affect the way we call the API and process the result.
-  */
-  const errorsRecorded = await elasticsearch.callAsInternalUser('ping');
-  return [{ errors_recorded: errorsRecorded }];
+export interface Payload {
+  errorId: string;
+}
+
+const payloads: Payload[] = [];
+
+export async function putRecord(payload: Payload) {
+  payloads.push(payload);
+}
+
+export async function getRecords() {
+  return payloads;
 }

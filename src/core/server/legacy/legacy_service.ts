@@ -281,6 +281,7 @@ export class LegacyService implements CoreService {
         dataClient$: setupDeps.core.elasticsearch.dataClient$,
         createClient: setupDeps.core.elasticsearch.createClient,
       },
+      pulse: setupDeps.core.pulse,
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
         registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(

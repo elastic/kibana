@@ -19,14 +19,15 @@
 
 import { readdirSync } from 'fs';
 import { resolve, parse } from 'path';
+
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
+import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
+import { sendPulse, Fetcher } from './send_pulse';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
@@ -35,6 +36,10 @@ export interface InternalPulseService {
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
 }
+
+export type PulseServiceSetup = InternalPulseService;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PulseServiceStart {}
 
 interface ChannelResponse {
   id: string;
@@ -53,18 +58,19 @@ const channelNames = readdirSync(resolve(__dirname, 'collectors'))
   });
 
 export class PulseService {
+  private retriableErrors = 0;
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
-  private readonly instructions: Map<string, Subject<any>> = new Map();
-  private readonly subscriptions: Set<NodeJS.Timer> = new Set();
-  private elasticsearch?: IClusterClient;
+  private readonly instructions$: Map<string, Subject<any>> = new Map();
+  // private readonly subscriptions: Set<NodeJS.Timer> = new Set();
+  // private elasticsearch?: IClusterClient;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction>();
-        this.instructions.set(id, instructions$);
+        this.instructions$.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$ });
         return [channel.id, channel];
       })
@@ -72,9 +78,22 @@ export class PulseService {
   }
 
   public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
-    this.log.info('Setting up service');
+    this.log.debug('Setting up pulse service');
 
-    this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
+    // poll for instructions every second for this deployment
+    setInterval(() => {
+      // eslint-disable-next-line no-console
+      this.loadInstructions().catch(err => console.error(err.stack));
+    }, 1000);
+
+    // eslint-disable-next-line no-console
+    console.log('Will attempt first telemetry collection in 5 seconds...');
+    setTimeout(() => {
+      setInterval(() => {
+        // eslint-disable-next-line no-console
+        this.sendTelemetry().catch(err => console.error(err.stack));
+      }, 5000);
+    }, 5000);
 
     return {
       getChannel: (id: string) => {
@@ -87,35 +106,6 @@ export class PulseService {
     };
   }
 
-  public async start() {
-    this.log.info('Starting service');
-    if (!this.elasticsearch) {
-      throw Error(`The 'PulseService.setup' method needs to be called before the 'start' method`);
-    }
-    const elasticsearch = this.elasticsearch;
-
-    // poll for instructions every second for this deployment
-    const loadInstructionSubcription = setInterval(() => {
-      this.loadInstructions().catch(err => this.log.error(err.stack));
-    }, 1000);
-    this.subscriptions.add(loadInstructionSubcription);
-
-    this.log.debug('Will attempt first telemetry collection in 5 seconds...');
-    const sendTelemetrySubcription = setInterval(() => {
-      this.log.debug('sending telemetry data from pulse');
-      this.sendTelemetry(elasticsearch).catch(err => this.log.error(err.stack));
-    }, 5000);
-    this.subscriptions.add(sendTelemetrySubcription);
-  }
-
-  public async stop() {
-    this.subscriptions.forEach(subscription => {
-      clearInterval(subscription);
-      this.subscriptions.delete(subscription);
-    });
-  }
-
-  private retriableErrors = 0;
   private async loadInstructions() {
     const url = 'http://localhost:5601/api/pulse_poc/instructions/123';
     let response: any;
@@ -141,7 +131,7 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions.get(channel.id);
+      const instructions$ = this.instructions$.get(channel.id);
       if (!instructions$) {
         throw new Error(
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
@@ -155,7 +145,8 @@ export class PulseService {
   private handleRetriableError() {
     this.retriableErrors++;
     if (this.retriableErrors === 1) {
-      this.log.warn(
+      // eslint-disable-next-line no-console
+      console.warn(
         'Kibana is not yet available at http://localhost:5601/api, will continue to check for the next 120 seconds...'
       );
     } else if (this.retriableErrors > 120) {
@@ -163,24 +154,11 @@ export class PulseService {
     }
   }
 
-  private async sendTelemetry(elasticsearch: IClusterClient) {
-    this.log.debug('Sending telemetry');
-    const url = 'http://localhost:5601/api/pulse_poc/intake/123';
-
-    const channels = [];
-    for (const channel of this.channels.values()) {
-      const records = await channel.getRecords(elasticsearch);
-      this.log.debug(`Channel "${channel.id}" returns the records ${JSON.stringify(records)}`);
-      channels.push({
-        records,
-        channel_id: channel.id,
-      });
-    }
-
-    let response: any;
-    try {
-      response = await fetch(url, {
+  private async sendTelemetry() {
+    const fetcher: Fetcher<any> = async (url, channels) => {
+      return await fetch(url, {
         method: 'post',
+
         headers: {
           'content-type': 'application/json',
           'kbn-xsrf': 'true',
@@ -189,21 +167,81 @@ export class PulseService {
           channels,
         }),
       });
-    } catch (err) {
-      if (!err.message.includes('ECONNREFUSED')) {
-        throw err;
-      }
-      // the instructions polling should handle logging for this case, yay for POCs
-      return;
-    }
-    if (response.status === 503) {
-      // the instructions polling should handle logging for this case, yay for POCs
-      return;
-    }
+    };
 
-    if (response.status !== 200) {
-      const responseBody = await response.text();
-      throw new Error(`${response.status}: ${responseBody}`);
-    }
+    return await sendPulse(this.channels, fetcher);
   }
 }
+
+// public async start() {
+//   this.log.info('Starting service');
+//   if (!this.elasticsearch) {
+//     throw Error(`The 'PulseService.setup' method needs to be called before the 'start' method`);
+//   }
+//   const elasticsearch = this.elasticsearch;
+
+//   // poll for instructions every second for this deployment
+//   const loadInstructionSubcription = setInterval(() => {
+//     this.loadInstructions().catch(err => this.log.error(err.stack));
+//   }, 1000);
+//   this.subscriptions.add(loadInstructionSubcription);
+
+//   this.log.debug('Will attempt first telemetry collection in 5 seconds...');
+//   const sendTelemetrySubcription = setInterval(() => {
+//     this.sendTelemetry(elasticsearch).catch(err => this.log.error(err.stack));
+//   }, 5000);
+//   this.subscriptions.add(sendTelemetrySubcription);
+// }
+
+// public async stop() {
+//   this.subscriptions.forEach(subscription => {
+//     clearInterval(subscription);
+//     this.subscriptions.delete(subscription);
+//   });
+// }
+
+// private retriableErrors = 0;
+
+// private async sendTelemetry(elasticsearch: IClusterClient) {
+//   this.log.debug('Sending telemetry');
+//   const url = 'http://localhost:5601/api/pulse_poc/intake/123';
+
+//   const channels = [];
+//   for (const channel of this.channels.values()) {
+//     const records = await channel.getRecords(elasticsearch);
+//     this.log.debug(`Channel "${channel.id}" returns the records ${JSON.stringify(records)}`);
+//     channels.push({
+//       records,
+//       channel_id: channel.id,
+//     });
+//   }
+
+//   let response: any;
+//   try {
+//     response = await fetch(url, {
+//       method: 'post',
+//       headers: {
+//         'content-type': 'application/json',
+//         'kbn-xsrf': 'true',
+//       },
+//       body: JSON.stringify({
+//         channels,
+//       }),
+//     });
+//   } catch (err) {
+//     if (!err.message.includes('ECONNREFUSED')) {
+//       throw err;
+//     }
+//     // the instructions polling should handle logging for this case, yay for POCs
+//     return;
+//   }
+//   if (response.status === 503) {
+//     // the instructions polling should handle logging for this case, yay for POCs
+//     return;
+//   }
+
+//   if (response.status !== 200) {
+//     const responseBody = await response.text();
+//     throw new Error(`${response.status}: ${responseBody}`);
+//   }
+// }
