@@ -118,12 +118,12 @@ function FieldListItemComponent(
     );
 
     return (
-      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+      <EuiFlexGroup gutterSize="xs">
         {canHaveMultiFields && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addMultiFieldButtonLabel}>
               <EuiButtonIcon
-                iconType="submodule"
+                iconType="documents"
                 onClick={addField}
                 data-test-subj="addMultiFieldButton"
                 aria-label={addMultiFieldButtonLabel}
@@ -235,9 +235,7 @@ function FieldListItemComponent(
               </EuiBadge>
             </EuiFlexItem>
 
-            <EuiFlexItem className="mappingsEditor__fieldsListItem__actions">
-              {renderActionButtons()}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{renderActionButtons()}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
