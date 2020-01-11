@@ -1,33 +1,39 @@
-import expect from 'expect.js';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import {
-  bdd
-} from '../../../support';
+import expect from '@kbn/expect';
 
-import PageObjects from '../../../support/page_objects';
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const log = getService('log');
+  const retry = getService('retry');
 
-bdd.describe('check heartbeat', function () {
-  bdd.before(async function () {
-    await PageObjects.common.tryForTime(120000, async function () {
-      await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
-      PageObjects.common.debug('create Index Pattern');
-      await PageObjects.settings.createIndexPattern('heartbeat-*');
+  describe('check heartbeat', function () {
+    before(async function () {
+      await retry.tryForTime(120000, async function () {
+        await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
+        log.debug('create Index Pattern');
+        await PageObjects.settings.createIndexPattern('heartbeat-*');
+      });
+      log.debug('navigateToApp Discover');
+      return PageObjects.common.navigateToApp('discover');
     });
-    PageObjects.common.debug('navigateToApp Discover');
-    return PageObjects.common.navigateToApp('discover');
+
+    it('heartbeat- should have hit count GT 0', async function () {
+      //  await PageObjects.header.clickDiscover();
+      //await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('heartbeat-*');
+      await retry.tryForTime(40000, async () => {
+        await PageObjects.header.setQuickSpan('Today');
+      });
+      await retry.tryForTime(40000, async () => {
+        const hitCount = await PageObjects.discover.getHitCount();
+        expect(hitCount).to.be.greaterThan('0');
+      });
+    });
+
   });
-
-  bdd.it('heartbeat- should have hit count GT 0', async function () {
-	   //  await PageObjects.header.clickDiscover();
-    //await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern('heartbeat-*');
-    await PageObjects.common.tryForTime(40000, async () => {
-      await PageObjects.header.setQuickSpan('Today');
-    });
-    await PageObjects.common.tryForTime(40000, async () => {
-      const hitCount = await PageObjects.discover.getHitCount();
-      expect(hitCount).to.be.greaterThan('0');
-    });
-  });
-
-});
+};
