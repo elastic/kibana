@@ -16,7 +16,7 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import * as H from 'history';
-import React from 'react';
+import React, { Dispatch } from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
@@ -32,8 +32,13 @@ import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
+import { ActionToaster } from '../../../../components/toasters';
 
-const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
+const getActions = (
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
+  history: H.History
+) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'visControls',
@@ -52,7 +57,8 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch),
+    onClick: (rowItem: TableData) =>
+      duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
   },
   {
     description: i18n.EXPORT_RULE,
@@ -64,13 +70,14 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
 ];
 
-// Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
   history: H.History
 ): Array<EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>> => [
   {
@@ -172,7 +179,7 @@ export const getColumns = (
     width: '85px',
   },
   {
-    actions: getActions(dispatch, history),
+    actions: getActions(dispatch, dispatchToaster, history),
     width: '40px',
   } as EuiTableActionsColumnType<TableData>,
 ];

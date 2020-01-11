@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import uuid from 'uuid';
@@ -80,10 +80,34 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
-      <EuiContextMenuPanel items={getBatchItems(selectedItems, dispatch, closePopover)} />
+      <EuiContextMenuPanel
+        items={getBatchItems(selectedItems, dispatch, dispatchToaster, closePopover)}
+      />
     ),
-    [selectedItems, dispatch]
+    [selectedItems, dispatch, dispatchToaster]
   );
+
+  const tableOnChangeCallback = useCallback(
+    ({ page, sort }: EuiBasicTableOnChange) => {
+      dispatch({
+        type: 'updatePagination',
+        pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+      });
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: {
+          ...filterOptions,
+          sortField: 'enabled', // Only enabled is supported for sorting currently
+          sortOrder: sort?.direction ?? 'desc',
+        },
+      });
+    },
+    [dispatch, filterOptions, pagination]
+  );
+
+  const columns = useMemo(() => {
+    return getColumns(dispatch, dispatchToaster, history);
+  }, [dispatch, dispatchToaster, history]);
 
   useEffect(() => {
     dispatch({ type: 'loading', isLoading: isLoadingRules });
@@ -180,24 +204,11 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, history)}
+              columns={columns}
               isSelectable
               itemId="rule_id"
               items={tableData}
-              onChange={({ page, sort }: EuiBasicTableOnChange) => {
-                dispatch({
-                  type: 'updatePagination',
-                  pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-                });
-                dispatch({
-                  type: 'updateFilterOptions',
-                  filterOptions: {
-                    ...filterOptions,
-                    sortField: 'enabled', // Only enabled is supported for sorting currently
-                    sortOrder: sort!.direction,
-                  },
-                });
-              }}
+              onChange={tableOnChangeCallback}
               pagination={{
                 pageIndex: pagination.page - 1,
                 pageSize: pagination.perPage,

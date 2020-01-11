@@ -15,6 +15,7 @@ import {
   NewRule,
   Rule,
   FetchRuleProps,
+  RuleError,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
@@ -118,50 +119,50 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  *
  * @param ids array of Rule ID's (not rule_id) to enable/disable
  * @param enabled to enable or disable
+ *
+ * @throws An error if response is not OK
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
         'kbn-xsrf': 'true',
       },
-      body: JSON.stringify({ id, enabled }),
-    })
+      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
  * Deletes provided Rule ID's
  *
  * @param ids array of Rule ID's (not rule_id) to delete
+ *
+ * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> => {
-  // TODO: Don't delete if immutable!
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
         'kbn-xsrf': 'true',
       },
-    })
+      body: JSON.stringify(ids.map(id => ({ id }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
