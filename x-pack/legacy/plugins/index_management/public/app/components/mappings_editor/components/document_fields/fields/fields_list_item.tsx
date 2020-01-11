@@ -213,7 +213,21 @@ function FieldListItemComponent(
                   color="text"
                   onClick={toggleExpand}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                  aria-label={`Expand field ${source.name}`}
+                  aria-label={
+                    isExpanded
+                      ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
+                          defaultMessage: 'Collapse field {name}',
+                          values: {
+                            name: source.name,
+                          },
+                        })
+                      : i18n.translate('xpack.idxMgmt.mappingsEditor.expandFieldButtonLabel', {
+                          defaultMessage: 'Expand field {name}',
+                          values: {
+                            name: source.name,
+                          },
+                        })
+                  }
                 />
               </EuiFlexItem>
             )}
