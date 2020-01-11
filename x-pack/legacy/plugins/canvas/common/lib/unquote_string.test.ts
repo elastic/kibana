@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { unquoteString } from '../unquote_string';
+import { unquoteString } from './unquote_string';
 
 describe('unquoteString', () => {
   it('removes double quotes', () => {

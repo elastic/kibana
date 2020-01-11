@@ -86,6 +86,7 @@
 /packages/kbn-es/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /src/legacy/server/keystore/ @elastic/kibana-operations
 /src/legacy/server/pid/ @elastic/kibana-operations
 /src/legacy/server/sass/ @elastic/kibana-operations
