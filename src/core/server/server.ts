@@ -257,6 +257,10 @@ export class Server {
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
     this.configService.addDeprecationProvider(
+      elasticsearchConfig.path,
+      elasticsearchConfig.deprecations!
+    );
+    this.configService.addDeprecationProvider(
       uiSettingsConfig.path,
       uiSettingsConfig.deprecations!
     );
