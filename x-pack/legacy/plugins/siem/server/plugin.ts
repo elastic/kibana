@@ -62,6 +62,7 @@ export class Plugin {
           },
           ui: [
             'show',
+            'crud',
             'alerting:show',
             'actions:show',
             'alerting:save',
