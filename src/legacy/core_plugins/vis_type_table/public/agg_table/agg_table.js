@@ -74,7 +74,11 @@ export function KbnAggTable(config, RecursionHelper) {
         // escape each cell in each row
         const csvRows = rows.map(function(row) {
           return Object.entries(row).map(([k, v]) => {
-            return escape(formatted ? columns.find(c => c.id === k).formatter.convert(v) : v);
+            const column = columns.find(c => c.id === k);
+            if (formatted && column) {
+              return escape(column.formatter.convert(v));
+            }
+            return escape(v);
           });
         });
 
@@ -110,12 +114,16 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics } = $scope.dimensions;
+          const { buckets, metrics, splitColumn } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function(col, i) {
               const isBucket = buckets.find(bucket => bucket.accessor === i);
-              const dimension = isBucket || metrics.find(metric => metric.accessor === i);
+              const isSplitColumn = splitColumn
+                ? splitColumn.find(splitColumn => splitColumn.accessor === i)
+                : undefined;
+              const dimension =
+                isBucket || isSplitColumn || metrics.find(metric => metric.accessor === i);
 
               if (!dimension) return;
 
