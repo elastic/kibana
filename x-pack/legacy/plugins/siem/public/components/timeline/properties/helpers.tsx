@@ -18,7 +18,7 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import uuid from 'uuid';
 
 import { Note } from '../../../lib/note';

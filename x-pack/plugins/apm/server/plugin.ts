@@ -58,16 +58,14 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     });
 
     await new Promise(resolve => {
-      combineLatest(mergedConfig$, core.elasticsearch.dataClient$).subscribe(
-        async ([config, dataClient]) => {
-          this.currentConfig = config;
-          await createApmAgentConfigurationIndex({
-            esClient: dataClient,
-            config,
-          });
-          resolve();
-        }
-      );
+      mergedConfig$.subscribe(async config => {
+        this.currentConfig = config;
+        await createApmAgentConfigurationIndex({
+          esClient: core.elasticsearch.dataClient,
+          config,
+        });
+        resolve();
+      });
     });
 
     return {

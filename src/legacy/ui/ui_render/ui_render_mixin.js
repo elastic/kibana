@@ -21,6 +21,7 @@ import { createHash } from 'crypto';
 import Boom from 'boom';
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
@@ -42,16 +43,8 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.setupViews(resolve(__dirname, 'views'));
 
   server.exposeStaticDir(
-    '/node_modules/@elastic/eui/dist/{path*}',
-    fromRoot('node_modules/@elastic/eui/dist')
-  );
-  server.exposeStaticDir(
     '/node_modules/@kbn/ui-framework/dist/{path*}',
     fromRoot('node_modules/@kbn/ui-framework/dist')
-  );
-  server.exposeStaticDir(
-    '/node_modules/@elastic/charts/dist/{path*}',
-    fromRoot('node_modules/@elastic/charts/dist')
   );
 
   const translationsCache = { translations: null, hash: null };
@@ -117,14 +110,12 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${dllBundlePath}/vendors_3.style.dll.css`,
           ...(darkMode
             ? [
-                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
+                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-                `${basePath}/node_modules/@elastic/charts/dist/theme_only_dark.css`,
               ]
             : [
-                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
+                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-                `${basePath}/node_modules/@elastic/charts/dist/theme_only_light.css`,
               ]),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
@@ -145,6 +136,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             regularBundlePath,
             dllBundlePath,
             styleSheetPaths,
+            sharedDepsFilename: UiSharedDeps.distFilename,
           },
         });
 

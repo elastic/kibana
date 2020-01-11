@@ -132,4 +132,62 @@ describe('Router validator', () => {
       'The validation rule provided in the handler is not valid'
     );
   });
+
+  it('should validate and infer type when data is an array', () => {
+    expect(
+      RouteValidator.from({
+        body: schema.arrayOf(schema.string()),
+      }).getBody(['foo', 'bar'])
+    ).toStrictEqual(['foo', 'bar']);
+    expect(
+      RouteValidator.from({
+        body: schema.arrayOf(schema.number()),
+      }).getBody([1, 2, 3])
+    ).toStrictEqual([1, 2, 3]);
+    expect(
+      RouteValidator.from({
+        body: schema.arrayOf(schema.object({ foo: schema.string() })),
+      }).getBody([{ foo: 'bar' }, { foo: 'dolly' }])
+    ).toStrictEqual([{ foo: 'bar' }, { foo: 'dolly' }]);
+
+    expect(() =>
+      RouteValidator.from({
+        body: schema.arrayOf(schema.number()),
+      }).getBody(['foo', 'bar', 'dolly'])
+    ).toThrowError('[0]: expected value of type [number] but got [string]');
+    expect(() =>
+      RouteValidator.from({
+        body: schema.arrayOf(schema.number()),
+      }).getBody({ foo: 'bar' })
+    ).toThrowError('expected value of type [array] but got [Object]');
+  });
+
+  it('should validate and infer type when data is a primitive', () => {
+    expect(
+      RouteValidator.from({
+        body: schema.string(),
+      }).getBody('foobar')
+    ).toStrictEqual('foobar');
+    expect(
+      RouteValidator.from({
+        body: schema.number(),
+      }).getBody(42)
+    ).toStrictEqual(42);
+    expect(
+      RouteValidator.from({
+        body: schema.boolean(),
+      }).getBody(true)
+    ).toStrictEqual(true);
+
+    expect(() =>
+      RouteValidator.from({
+        body: schema.string(),
+      }).getBody({ foo: 'bar' })
+    ).toThrowError('expected value of type [string] but got [Object]');
+    expect(() =>
+      RouteValidator.from({
+        body: schema.number(),
+      }).getBody('foobar')
+    ).toThrowError('expected value of type [number] but got [string]');
+  });
 });

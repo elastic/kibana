@@ -23,6 +23,7 @@ import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 function generateDLL(config) {
   const {
@@ -149,6 +150,9 @@ function generateDLL(config) {
       // are more tailored for the final bundles result
       // and not for the webpack compilations performance itself
       hints: false,
+    },
+    externals: {
+      ...UiSharedDeps.externals,
     },
   };
 }

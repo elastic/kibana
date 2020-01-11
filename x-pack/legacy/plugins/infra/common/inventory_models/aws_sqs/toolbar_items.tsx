@@ -7,16 +7,16 @@
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { InfraSnapshotMetricType } from '../../graphql/types';
 import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { SnapshotMetricType } from '../types';
 
 export const AwsSQSToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.sqsMessagesVisible,
-    InfraSnapshotMetricType.sqsMessagesDelayed,
-    InfraSnapshotMetricType.sqsMessagesSent,
-    InfraSnapshotMetricType.sqsMessagesEmpty,
-    InfraSnapshotMetricType.sqsOldestMessage,
+  const metricTypes: SnapshotMetricType[] = [
+    'sqsMessagesVisible',
+    'sqsMessagesDelayed',
+    'sqsMessagesSent',
+    'sqsMessagesEmpty',
+    'sqsOldestMessage',
   ];
   const groupByFields = ['cloud.region'];
   return (
