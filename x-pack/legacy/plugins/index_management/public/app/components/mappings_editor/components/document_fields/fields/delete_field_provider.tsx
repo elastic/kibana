@@ -61,11 +61,7 @@ export const DeleteFieldProvider = ({ children }: Props) => {
       .sort();
     const hasAliases = Boolean(aliases.length);
 
-    if (hasChildFields || hasMultiFields || hasAliases) {
-      setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });
-    } else {
-      dispatch({ type: 'field.remove', value: field.id });
-    }
+    setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });
   };
 
   const closeModal = () => {
