@@ -297,10 +297,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.advanced', {
         defaultMessage: 'Advanced',
       });
-    // case JOB_TYPE.CATEGORIZATION:
-    //   return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
-    //     defaultMessage: 'Categorization',
-    //   });
+    case JOB_TYPE.CATEGORIZATION:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
+        defaultMessage: 'Categorization',
+      });
     default:
       return '';
   }

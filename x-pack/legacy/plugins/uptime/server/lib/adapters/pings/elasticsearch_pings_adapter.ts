@@ -88,7 +88,10 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return results;
   },
 
-  getLatestMonitorDocs: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
+  // Get The monitor latest state sorted by timestamp with date range
+  getLatestMonitorStatus: async ({ callES, dateStart, dateEnd, monitorId }) => {
+    // TODO: Write tests for this function
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -98,13 +101,12 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
               {
                 range: {
                   '@timestamp': {
-                    gte: dateRangeStart,
-                    lte: dateRangeEnd,
+                    gte: dateStart,
+                    lte: dateEnd,
                   },
                 },
               },
               ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
-              ...(location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
           },
         },
@@ -131,21 +133,45 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     };
 
     const result = await callES('search', params);
-    const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
+    const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
 
-    return buckets.map(
-      ({
-        latest: {
-          hits: { hits },
+    return {
+      ...ping?._source,
+      timestamp: ping?._source?.['@timestamp'],
+    };
+  },
+
+  // Get the monitor meta info regardless of timestamp
+  getMonitor: async ({ callES, monitorId }) => {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 1,
+        _source: ['url', 'monitor', 'observer'],
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.id': monitorId,
+                },
+              },
+            ],
+          },
         },
-      }) => {
-        const timestamp = hits[0]._source[`@timestamp`];
-        return {
-          ...hits[0]._source,
-          timestamp,
-        };
-      }
-    );
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    };
+
+    const result = await callES('search', params);
+
+    return result.hits.hits[0]?._source;
   },
 
   getPingHistogram: async ({
