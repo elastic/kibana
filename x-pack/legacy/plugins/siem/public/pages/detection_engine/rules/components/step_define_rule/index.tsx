@@ -59,13 +59,12 @@ const getStepDefaultValue = (
   }
 };
 
-export const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   defaultValues,
   descriptionDirection = 'row',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  resizeParentContainer,
   setForm,
   setStepData,
 }) => {
@@ -192,7 +191,6 @@ export const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
             onCloseTimelineSearch: handleCloseTimelineSearch,
-            resizeParentContainer,
           }}
         />
         <FormDataProvider pathsToWatch="index">
