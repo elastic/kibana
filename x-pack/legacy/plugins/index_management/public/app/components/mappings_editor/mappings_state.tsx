@@ -11,14 +11,14 @@ import {
   addFieldToState,
   MappingsConfiguration,
   MappingsFields,
-  MappingsTemplate,
+  MappingsTemplates,
   State,
   Dispatch,
 } from './reducer';
 import { Field, FieldsEditor } from './types';
 import { normalize, deNormalize } from './lib';
 
-type Mappings = MappingsTemplate &
+type Mappings = MappingsTemplates &
   MappingsConfiguration & {
     properties: MappingsFields;
   };
@@ -27,7 +27,7 @@ export interface Types {
   Mappings: Mappings;
   MappingsConfiguration: MappingsConfiguration;
   MappingsFields: MappingsFields;
-  MappingsTemplates: MappingsTemplate;
+  MappingsTemplates: MappingsTemplates;
 }
 
 export interface OnUpdateHandlerArg {
@@ -49,7 +49,7 @@ export interface Props {
     getProperties(): Mappings['properties'];
   }) => React.ReactNode;
   defaultValue: {
-    templates: MappingsTemplate;
+    templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
   };

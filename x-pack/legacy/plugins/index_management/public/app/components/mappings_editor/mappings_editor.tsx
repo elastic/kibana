@@ -93,7 +93,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
               <DocumentFields />
             );
 
-          const tabContentLookup = {
+          const tabToContentMap = {
             fields: (
               <>
                 <DocumentFieldsHeader />
@@ -136,7 +136,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
 
               <EuiSpacer size="l" />
 
-              {tabContentLookup[selectedTab]}
+              {tabToContentMap[selectedTab]}
             </div>
           );
         }}

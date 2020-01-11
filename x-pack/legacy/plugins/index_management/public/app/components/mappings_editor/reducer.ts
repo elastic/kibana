@@ -31,7 +31,7 @@ export interface MappingsConfiguration {
   _meta?: string;
 }
 
-export interface MappingsTemplate {
+export interface MappingsTemplates {
   dynamic_templates: Template[];
 }
 
@@ -67,10 +67,10 @@ export interface State {
   };
   templates: {
     defaultValue: {
-      dynamic_templates: MappingsTemplate['dynamic_templates'];
+      dynamic_templates: MappingsTemplates['dynamic_templates'];
     };
-    form?: FormHook<MappingsTemplate>;
-  } & OnFormUpdateArg<MappingsTemplate>;
+    form?: FormHook<MappingsTemplates>;
+  } & OnFormUpdateArg<MappingsTemplates>;
 }
 
 export type Action =

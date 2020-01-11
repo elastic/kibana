@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
 import { FormSchema, fieldValidators } from '../../shared_imports';
-import { MappingsTemplate } from '../../reducer';
+import { MappingsTemplates } from '../../reducer';
 
 const { isJsonField } = fieldValidators;
 
-export const templatesFormSchema: FormSchema<MappingsTemplate> = {
+export const templatesFormSchema: FormSchema<MappingsTemplates> = {
   dynamicTemplates: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.templates.dynamicTemplatesEditorLabel', {
       defaultMessage: 'Dynamic templates data',
