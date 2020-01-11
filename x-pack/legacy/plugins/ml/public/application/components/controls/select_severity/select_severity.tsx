@@ -119,7 +119,7 @@ const getSeverityOptions = () =>
   }));
 
 interface Props {
-  classNames: string;
+  classNames?: string;
 }
 
 export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) => {
