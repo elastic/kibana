@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
 import { Dictionary } from '../../../../common/types/common';
 import { AggFieldNamePair } from '../../../../common/types/fields';
+import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
 import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/jobs';
@@ -108,7 +109,7 @@ declare interface Ml {
   checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
-  esSearch(obj: object): any;
+  esSearch(obj: object): Promise<any>;
   esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
@@ -175,6 +176,20 @@ declare interface Ml {
       start: number,
       end: number
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
+    categorizationFieldExamples(
+      indexPatternTitle: string,
+      query: object,
+      size: number,
+      field: string,
+      timeField: string | undefined,
+      start: number,
+      end: number,
+      analyzer: any
+    ): Promise<{ valid: number; examples: any[] }>;
+    topCategories(
+      jobId: string,
+      count: number
+    ): Promise<{ total: number; categories: Array<{ count?: number; category: Category }> }>;
   };
 
   estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;
