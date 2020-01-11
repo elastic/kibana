@@ -283,8 +283,10 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
       rawConfig.ssl.keystore.path,
       rawConfig.ssl.keystore.password
     );
-    if (!keystore.key && !keystore.cert) {
-      throw new Error(`Did not find key or certificate in Elasticsearch keystore.`);
+    if (!keystore.key) {
+      throw new Error(`Did not find key in Elasticsearch keystore.`);
+    } else if (!keystore.cert) {
+      throw new Error(`Did not find certificate in Elasticsearch keystore.`);
     }
     key = keystore.key;
     certificate = keystore.cert;
