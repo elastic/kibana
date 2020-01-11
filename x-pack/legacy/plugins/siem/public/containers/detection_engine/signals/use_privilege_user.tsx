@@ -6,10 +6,18 @@
 
 import { useEffect, useState } from 'react';
 
+import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { useStateToaster } from '../../../components/toasters';
 import { getUserPrivilege } from './api';
+import * as i18n from './translations';
 
-type Return = [boolean, boolean | null, boolean | null];
-
+interface Return {
+  loading: boolean;
+  isAuthenticated: boolean | null;
+  hasIndexManage: boolean | null;
+  hasManageApiKey: boolean | null;
+  hasIndexWrite: boolean | null;
+}
 /**
  * Hook to get user privilege from
  *
@@ -17,7 +25,10 @@ type Return = [boolean, boolean | null, boolean | null];
 export const usePrivilegeUser = (): Return => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setAuthenticated] = useState<boolean | null>(null);
-  const [hasWrite, setHasWrite] = useState<boolean | null>(null);
+  const [hasIndexManage, setHasIndexManage] = useState<boolean | null>(null);
+  const [hasIndexWrite, setHasIndexWrite] = useState<boolean | null>(null);
+  const [hasManageApiKey, setHasManageApiKey] = useState<boolean | null>(null);
+  const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -34,13 +45,21 @@ export const usePrivilegeUser = (): Return => {
           setAuthenticated(privilege.isAuthenticated);
           if (privilege.index != null && Object.keys(privilege.index).length > 0) {
             const indexName = Object.keys(privilege.index)[0];
-            setHasWrite(privilege.index[indexName].create_index);
+            setHasIndexManage(privilege.index[indexName].manage);
+            setHasIndexWrite(privilege.index[indexName].write);
+            setHasManageApiKey(
+              privilege.cluster.manage_security ||
+                privilege.cluster.manage_api_key ||
+                privilege.cluster.manage_own_api_key
+            );
           }
         }
       } catch (error) {
         if (isSubscribed) {
           setAuthenticated(false);
-          setHasWrite(false);
+          setHasIndexManage(false);
+          setHasIndexWrite(false);
+          errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {
@@ -55,5 +74,5 @@ export const usePrivilegeUser = (): Return => {
     };
   }, []);
 
-  return [loading, isAuthenticated, hasWrite];
+  return { loading, isAuthenticated, hasIndexManage, hasManageApiKey, hasIndexWrite };
 };

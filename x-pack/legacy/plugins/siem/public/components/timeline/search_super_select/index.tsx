@@ -149,20 +149,23 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     );
   }, []);
 
-  const handleTimelineChange = useCallback(options => {
-    const selectedTimeline = options.filter(
-      (option: { checked: string }) => option.checked === 'on'
-    );
-    if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
-      onTimelineChange(
-        isEmpty(selectedTimeline[0].title)
-          ? i18nTimeline.UNTITLED_TIMELINE
-          : selectedTimeline[0].title,
-        selectedTimeline[0].id
+  const handleTimelineChange = useCallback(
+    options => {
+      const selectedTimeline = options.filter(
+        (option: { checked: string }) => option.checked === 'on'
       );
-    }
-    setIsPopoverOpen(false);
-  }, []);
+      if (selectedTimeline != null && selectedTimeline.length > 0) {
+        onTimelineChange(
+          isEmpty(selectedTimeline[0].title)
+            ? i18nTimeline.UNTITLED_TIMELINE
+            : selectedTimeline[0].title,
+          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+        );
+      }
+      setIsPopoverOpen(false);
+    },
+    [onTimelineChange]
+  );
 
   const handleOnScroll = useCallback(
     (
