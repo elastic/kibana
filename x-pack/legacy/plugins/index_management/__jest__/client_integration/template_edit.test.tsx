@@ -183,6 +183,8 @@ describe('<TemplateEdit />', () => {
           indexPatterns: UPDATED_INDEX_PATTERN,
           mappings: {
             ...MAPPING,
+            _meta: {},
+            _source: {},
             properties: {
               [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
                 type: 'text',
