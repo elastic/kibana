@@ -1,293 +1,1518 @@
 {
   "nodeSummary": {
-    "resolver": "jxcP6ue7eRCieNNitFTT0EA",
-    "node_ids": [],
-    "attributes": {},
-    "transport_address": "",
-    "name": "jxcP6ue7eRCieNNitFTT0EA",
-    "type": "node",
-    "nodeTypeLabel": "Offline Node",
-    "status": "Offline",
-    "isOnline": false
+    "resolver": "jUT5KdxfRbORSCWkb5zjmA",
+    "node_ids": [
+      "jUT5KdxfRbORSCWkb5zjmA"
+    ],
+    "attributes": {
+      "ml.enabled": "true",
+      "ml.max_open_jobs": "10"
+    },
+    "transport_address": "127.0.0.1:9300",
+    "name": "whatever-01",
+    "type": "master",
+    "nodeTypeLabel": "Master Node",
+    "nodeTypeClass": "starFilled",
+    "totalShards": 38,
+    "indexCount": 20,
+    "documents": 24830,
+    "dataSize": 52847579,
+    "freeSpace": 186755088384,
+    "totalSpace": 499065712640,
+    "usedHeap": 29,
+    "status": "Online",
+    "isOnline": true
+  },
+  "metrics": {
+    "node_total_io": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.fs.io_stats.total.operations",
+          "metricAgg": "max",
+          "label": "Total I/O",
+          "title": "I/O Operations Rate",
+          "description": "Total I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            null
+          ],
+          [
+            1507235540000,
+            null
+          ],
+          [
+            1507235550000,
+            null
+          ],
+          [
+            1507235560000,
+            null
+          ],
+          [
+            1507235570000,
+            null
+          ],
+          [
+            1507235580000,
+            null
+          ],
+          [
+            1507235590000,
+            null
+          ],
+          [
+            1507235600000,
+            null
+          ],
+          [
+            1507235610000,
+            null
+          ],
+          [
+            1507235620000,
+            null
+          ],
+          [
+            1507235630000,
+            null
+          ],
+          [
+            1507235640000,
+            null
+          ],
+          [
+            1507235650000,
+            null
+          ],
+          [
+            1507235660000,
+            null
+          ],
+          [
+            1507235670000,
+            null
+          ],
+          [
+            1507235680000,
+            null
+          ],
+          [
+            1507235690000,
+            null
+          ],
+          [
+            1507235700000,
+            null
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.fs.io_stats.total.read_operations",
+          "metricAgg": "max",
+          "label": "Total Read I/O",
+          "title": "I/O Operations Rate",
+          "description": "Total Read I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            null
+          ],
+          [
+            1507235540000,
+            null
+          ],
+          [
+            1507235550000,
+            null
+          ],
+          [
+            1507235560000,
+            null
+          ],
+          [
+            1507235570000,
+            null
+          ],
+          [
+            1507235580000,
+            null
+          ],
+          [
+            1507235590000,
+            null
+          ],
+          [
+            1507235600000,
+            null
+          ],
+          [
+            1507235610000,
+            null
+          ],
+          [
+            1507235620000,
+            null
+          ],
+          [
+            1507235630000,
+            null
+          ],
+          [
+            1507235640000,
+            null
+          ],
+          [
+            1507235650000,
+            null
+          ],
+          [
+            1507235660000,
+            null
+          ],
+          [
+            1507235670000,
+            null
+          ],
+          [
+            1507235680000,
+            null
+          ],
+          [
+            1507235690000,
+            null
+          ],
+          [
+            1507235700000,
+            null
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.fs.io_stats.total.write_operations",
+          "metricAgg": "max",
+          "label": "Total Write I/O",
+          "title": "I/O Operations Rate",
+          "description": "Total Write I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            null
+          ],
+          [
+            1507235540000,
+            null
+          ],
+          [
+            1507235550000,
+            null
+          ],
+          [
+            1507235560000,
+            null
+          ],
+          [
+            1507235570000,
+            null
+          ],
+          [
+            1507235580000,
+            null
+          ],
+          [
+            1507235590000,
+            null
+          ],
+          [
+            1507235600000,
+            null
+          ],
+          [
+            1507235610000,
+            null
+          ],
+          [
+            1507235620000,
+            null
+          ],
+          [
+            1507235630000,
+            null
+          ],
+          [
+            1507235640000,
+            null
+          ],
+          [
+            1507235650000,
+            null
+          ],
+          [
+            1507235660000,
+            null
+          ],
+          [
+            1507235670000,
+            null
+          ],
+          [
+            1507235680000,
+            null
+          ],
+          [
+            1507235690000,
+            null
+          ],
+          [
+            1507235700000,
+            null
+          ]
+        ]
+      }
+    ],
+    "node_latency": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.search.query_total",
+          "metricAgg": "sum",
+          "label": "Search",
+          "title": "Latency",
+          "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
+          "units": "ms",
+          "format": "0,0.[00]",
+          "hasCalculation": true,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            0.33333333333333337
+          ],
+          [
+            1507235540000,
+            0
+          ],
+          [
+            1507235550000,
+            0.33333333333333337
+          ],
+          [
+            1507235560000,
+            0
+          ],
+          [
+            1507235570000,
+            0.33333333333333337
+          ],
+          [
+            1507235580000,
+            0
+          ],
+          [
+            1507235590000,
+            0
+          ],
+          [
+            1507235600000,
+            0.33333333333333337
+          ],
+          [
+            1507235610000,
+            0
+          ],
+          [
+            1507235620000,
+            0
+          ],
+          [
+            1507235630000,
+            0.33333333333333337
+          ],
+          [
+            1507235640000,
+            0
+          ],
+          [
+            1507235650000,
+            0
+          ],
+          [
+            1507235660000,
+            0
+          ],
+          [
+            1507235670000,
+            0.2
+          ],
+          [
+            1507235680000,
+            0
+          ],
+          [
+            1507235690000,
+            0
+          ],
+          [
+            1507235700000,
+            0
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.indexing.index_total",
+          "metricAgg": "sum",
+          "label": "Indexing",
+          "title": "Latency",
+          "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This considers any shard located on this node, including replicas.",
+          "units": "ms",
+          "format": "0,0.[00]",
+          "hasCalculation": true,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            0
+          ],
+          [
+            1507235540000,
+            0
+          ],
+          [
+            1507235550000,
+            0.888888888888889
+          ],
+          [
+            1507235560000,
+            1.1666666666666667
+          ],
+          [
+            1507235570000,
+            0
+          ],
+          [
+            1507235580000,
+            0
+          ],
+          [
+            1507235590000,
+            0
+          ],
+          [
+            1507235600000,
+            0
+          ],
+          [
+            1507235610000,
+            1.3333333333333333
+          ],
+          [
+            1507235620000,
+            1.1666666666666667
+          ],
+          [
+            1507235630000,
+            0
+          ],
+          [
+            1507235640000,
+            0
+          ],
+          [
+            1507235650000,
+            0
+          ],
+          [
+            1507235660000,
+            0
+          ],
+          [
+            1507235670000,
+            2.3333333333333335
+          ],
+          [
+            1507235680000,
+            2.8749999999999996
+          ],
+          [
+            1507235690000,
+            0
+          ],
+          [
+            1507235700000,
+            0
+          ]
+        ]
+      }
+    ],
+    "node_jvm_mem": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.jvm.mem.heap_max_in_bytes",
+          "metricAgg": "max",
+          "label": "Max Heap",
+          "title": "JVM Heap",
+          "description": "Total heap available to Elasticsearch running in the JVM.",
+          "units": "B",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            709623808
+          ],
+          [
+            1507235530000,
+            709623808
+          ],
+          [
+            1507235540000,
+            709623808
+          ],
+          [
+            1507235550000,
+            709623808
+          ],
+          [
+            1507235560000,
+            709623808
+          ],
+          [
+            1507235570000,
+            709623808
+          ],
+          [
+            1507235580000,
+            709623808
+          ],
+          [
+            1507235590000,
+            709623808
+          ],
+          [
+            1507235600000,
+            709623808
+          ],
+          [
+            1507235610000,
+            709623808
+          ],
+          [
+            1507235620000,
+            709623808
+          ],
+          [
+            1507235630000,
+            709623808
+          ],
+          [
+            1507235640000,
+            709623808
+          ],
+          [
+            1507235650000,
+            709623808
+          ],
+          [
+            1507235660000,
+            709623808
+          ],
+          [
+            1507235670000,
+            709623808
+          ],
+          [
+            1507235680000,
+            709623808
+          ],
+          [
+            1507235690000,
+            709623808
+          ],
+          [
+            1507235700000,
+            709623808
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.jvm.mem.heap_used_in_bytes",
+          "metricAgg": "max",
+          "label": "Used Heap",
+          "title": "JVM Heap",
+          "description": "Total heap used by Elasticsearch running in the JVM.",
+          "units": "B",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            317052776
+          ],
+          [
+            1507235530000,
+            344014976
+          ],
+          [
+            1507235540000,
+            368593248
+          ],
+          [
+            1507235550000,
+            253850400
+          ],
+          [
+            1507235560000,
+            348095032
+          ],
+          [
+            1507235570000,
+            182919712
+          ],
+          [
+            1507235580000,
+            212395016
+          ],
+          [
+            1507235590000,
+            244004144
+          ],
+          [
+            1507235600000,
+            270412240
+          ],
+          [
+            1507235610000,
+            245052864
+          ],
+          [
+            1507235620000,
+            370270616
+          ],
+          [
+            1507235630000,
+            196944168
+          ],
+          [
+            1507235640000,
+            223491760
+          ],
+          [
+            1507235650000,
+            253878472
+          ],
+          [
+            1507235660000,
+            280811736
+          ],
+          [
+            1507235670000,
+            371931976
+          ],
+          [
+            1507235680000,
+            329874616
+          ],
+          [
+            1507235690000,
+            363869776
+          ],
+          [
+            1507235700000,
+            211045968
+          ]
+        ]
+      }
+    ],
+    "node_mem": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.segments.memory_in_bytes",
+          "metricAgg": "max",
+          "label": "Lucene Total",
+          "title": "Index Memory",
+          "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
+          "units": "B",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            4797457
+          ],
+          [
+            1507235530000,
+            4797457
+          ],
+          [
+            1507235540000,
+            4797457
+          ],
+          [
+            1507235550000,
+            4797457
+          ],
+          [
+            1507235560000,
+            4823580
+          ],
+          [
+            1507235570000,
+            4823580
+          ],
+          [
+            1507235580000,
+            4823580
+          ],
+          [
+            1507235590000,
+            4823580
+          ],
+          [
+            1507235600000,
+            4823580
+          ],
+          [
+            1507235610000,
+            4838368
+          ],
+          [
+            1507235620000,
+            4741420
+          ],
+          [
+            1507235630000,
+            4741420
+          ],
+          [
+            1507235640000,
+            4741420
+          ],
+          [
+            1507235650000,
+            4741420
+          ],
+          [
+            1507235660000,
+            4741420
+          ],
+          [
+            1507235670000,
+            4757998
+          ],
+          [
+            1507235680000,
+            4787542
+          ],
+          [
+            1507235690000,
+            4787542
+          ],
+          [
+            1507235700000,
+            4787542
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.segments.terms_memory_in_bytes",
+          "metricAgg": "max",
+          "label": "Terms",
+          "title": "Index Memory",
+          "description": "Heap memory used by Terms (e.g., text). This is a part of Lucene Total.",
+          "units": "B",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            3764438
+          ],
+          [
+            1507235530000,
+            3764438
+          ],
+          [
+            1507235540000,
+            3764438
+          ],
+          [
+            1507235550000,
+            3764438
+          ],
+          [
+            1507235560000,
+            3786762
+          ],
+          [
+            1507235570000,
+            3786762
+          ],
+          [
+            1507235580000,
+            3786762
+          ],
+          [
+            1507235590000,
+            3786762
+          ],
+          [
+            1507235600000,
+            3786762
+          ],
+          [
+            1507235610000,
+            3799306
+          ],
+          [
+            1507235620000,
+            3715996
+          ],
+          [
+            1507235630000,
+            3715996
+          ],
+          [
+            1507235640000,
+            3715996
+          ],
+          [
+            1507235650000,
+            3715996
+          ],
+          [
+            1507235660000,
+            3715996
+          ],
+          [
+            1507235670000,
+            3729890
+          ],
+          [
+            1507235680000,
+            3755528
+          ],
+          [
+            1507235690000,
+            3755528
+          ],
+          [
+            1507235700000,
+            3755528
+          ]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.segments.points_memory_in_bytes",
+          "metricAgg": "max",
+          "label": "Points",
+          "title": "Index Memory",
+          "description": "Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.",
+          "units": "B",
+          "format": "0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            12171
+          ],
+          [
+            1507235530000,
+            12171
+          ],
+          [
+            1507235540000,
+            12171
+          ],
+          [
+            1507235550000,
+            12171
+          ],
+          [
+            1507235560000,
+            12198
+          ],
+          [
+            1507235570000,
+            12198
+          ],
+          [
+            1507235580000,
+            12198
+          ],
+          [
+            1507235590000,
+            12198
+          ],
+          [
+            1507235600000,
+            12198
+          ],
+          [
+            1507235610000,
+            12218
+          ],
+          [
+            1507235620000,
+            12120
+          ],
+          [
+            1507235630000,
+            12120
+          ],
+          [
+            1507235640000,
+            12120
+          ],
+          [
+            1507235650000,
+            12120
+          ],
+          [
+            1507235660000,
+            12120
+          ],
+          [
+            1507235670000,
+            12140
+          ],
+          [
+            1507235680000,
+            12166
+          ],
+          [
+            1507235690000,
+            12166
+          ],
+          [
+            1507235700000,
+            12166
+          ]
+        ]
+      }
+    ],
+    "node_cpu_metric": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.process.cpu.percent",
+          "metricAgg": "max",
+          "label": "CPU Utilization",
+          "description": "Percentage of CPU usage for the Elasticsearch process.",
+          "units": "%",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            1
+          ],
+          [
+            1507235530000,
+            0
+          ],
+          [
+            1507235540000,
+            0
+          ],
+          [
+            1507235550000,
+            1
+          ],
+          [
+            1507235560000,
+            2
+          ],
+          [
+            1507235570000,
+            0
+          ],
+          [
+            1507235580000,
+            2
+          ],
+          [
+            1507235590000,
+            0
+          ],
+          [
+            1507235600000,
+            0
+          ],
+          [
+            1507235610000,
+            3
+          ],
+          [
+            1507235620000,
+            2
+          ],
+          [
+            1507235630000,
+            2
+          ],
+          [
+            1507235640000,
+            0
+          ],
+          [
+            1507235650000,
+            1
+          ],
+          [
+            1507235660000,
+            0
+          ],
+          [
+            1507235670000,
+            2
+          ],
+          [
+            1507235680000,
+            2
+          ],
+          [
+            1507235690000,
+            1
+          ],
+          [
+            1507235700000,
+            0
+          ]
+        ]
+      }
+    ],
+    "node_load_average": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.os.cpu.load_average.1m",
+          "metricAgg": "max",
+          "label": "1m",
+          "title": "System Load",
+          "description": "Load average over the last minute.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            2.876953125
+          ],
+          [
+            1507235530000,
+            2.66015625
+          ],
+          [
+            1507235540000,
+            2.40625
+          ],
+          [
+            1507235550000,
+            2.189453125
+          ],
+          [
+            1507235560000,
+            2.626953125
+          ],
+          [
+            1507235570000,
+            2.451171875
+          ],
+          [
+            1507235580000,
+            2.81640625
+          ],
+          [
+            1507235590000,
+            3.70703125
+          ],
+          [
+            1507235600000,
+            3.51171875
+          ],
+          [
+            1507235610000,
+            3.359375
+          ],
+          [
+            1507235620000,
+            3.076171875
+          ],
+          [
+            1507235630000,
+            2.990234375
+          ],
+          [
+            1507235640000,
+            2.904296875
+          ],
+          [
+            1507235650000,
+            2.84375
+          ],
+          [
+            1507235660000,
+            3.28125
+          ],
+          [
+            1507235670000,
+            5.30859375
+          ],
+          [
+            1507235680000,
+            7.63671875
+          ],
+          [
+            1507235690000,
+            9.4375
+          ],
+          [
+            1507235700000,
+            11.421875
+          ]
+        ]
+      }
+    ],
+    "node_segment_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "node_stats.indices.segments.count",
+          "metricAgg": "max",
+          "label": "Segment Count",
+          "description": "Maximum segment count for primary and replica shards on this node.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            128
+          ],
+          [
+            1507235530000,
+            128
+          ],
+          [
+            1507235540000,
+            128
+          ],
+          [
+            1507235550000,
+            128
+          ],
+          [
+            1507235560000,
+            131
+          ],
+          [
+            1507235570000,
+            131
+          ],
+          [
+            1507235580000,
+            131
+          ],
+          [
+            1507235590000,
+            131
+          ],
+          [
+            1507235600000,
+            131
+          ],
+          [
+            1507235610000,
+            133
+          ],
+          [
+            1507235620000,
+            126
+          ],
+          [
+            1507235630000,
+            126
+          ],
+          [
+            1507235640000,
+            126
+          ],
+          [
+            1507235650000,
+            126
+          ],
+          [
+            1507235660000,
+            126
+          ],
+          [
+            1507235670000,
+            128
+          ],
+          [
+            1507235680000,
+            130
+          ],
+          [
+            1507235690000,
+            130
+          ],
+          [
+            1507235700000,
+            130
+          ]
+        ]
+      }
+    ]
   },
   "logs": {
     "enabled": false,
-    "limit": 10,
+    "logs": [],
     "reason": {
-      "clusterExists": false,
       "indexPatternExists": false,
       "indexPatternInTimeRangeExists": false,
       "typeExistsAtAnyTime": false,
+      "typeExists": false,
       "usingStructuredLogs": false,
+      "clusterExists": false,
       "nodeExists": false,
-      "indexExists": null,
-      "typeExists": false
+      "indexExists": null
     },
-    "logs": []
+    "limit": 10
   },
-  "metrics": {
-    "node_latency": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.search.query_total",
-        "metricAgg": "sum",
-        "label": "Search",
-        "title": "Latency",
-        "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
-        "units": "ms",
-        "format": "0,0.[00]",
-        "hasCalculation": true,
-        "isDerivative": false
-      },
-      "data": []
-    }, {
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.indexing.index_total",
-        "metricAgg": "sum",
-        "label": "Indexing",
-        "title": "Latency",
-        "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This considers any shard located on this node, including replicas.",
-        "units": "ms",
-        "format": "0,0.[00]",
-        "hasCalculation": true,
-        "isDerivative": false
-      },
-      "data": []
-    }],
-    "node_jvm_mem": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.jvm.mem.heap_max_in_bytes",
-        "metricAgg": "max",
-        "label": "Max Heap",
-        "title": "JVM Heap",
-        "description": "Total heap available to Elasticsearch running in the JVM.",
-        "units": "B",
-        "format": "0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }, {
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.jvm.mem.heap_used_in_bytes",
-        "metricAgg": "max",
-        "label": "Used Heap",
-        "title": "JVM Heap",
-        "description": "Total heap used by Elasticsearch running in the JVM.",
-        "units": "B",
-        "format": "0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }],
-    "node_mem": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.segments.memory_in_bytes",
-        "metricAgg": "max",
-        "label": "Lucene Total",
-        "title": "Index Memory",
-        "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
-        "units": "B",
-        "format": "0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }, {
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.segments.terms_memory_in_bytes",
-        "metricAgg": "max",
-        "label": "Terms",
-        "title": "Index Memory",
-        "description": "Heap memory used by Terms (e.g., text). This is a part of Lucene Total.",
-        "units": "B",
-        "format": "0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }, {
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.segments.points_memory_in_bytes",
-        "metricAgg": "max",
-        "label": "Points",
-        "title": "Index Memory",
-        "description": "Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.",
-        "units": "B",
-        "format": "0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }],
-    "node_cpu_metric": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.process.cpu.percent",
-        "metricAgg": "max",
-        "label": "CPU Utilization",
-        "description": "Percentage of CPU usage for the Elasticsearch process.",
-        "units": "%",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }],
-		"node_total_io": [{
- 			"bucket_size": "10 seconds",
-			"data": [],
-			"metric": {
-				"app": "elasticsearch",
-				"description": "Total I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
-				"field": "node_stats.fs.io_stats.total.operations",
-				"format": "0,0.[00]",
-				"hasCalculation": false,
-				"isDerivative": true,
-				"label": "Total I/O",
-				"metricAgg": "max",
-				"title": "I/O Operations Rate",
-				"units": "/s"
-			},
-			"timeRange": {
-				"max": 1507235712000,
-				"min": 1507235508000
-			}
-		},
-		{
-			"bucket_size": "10 seconds",
-			"data": [],
-			"metric": {
-				"app": "elasticsearch",
-				"description": "Total Read I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
-				"field": "node_stats.fs.io_stats.total.read_operations",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true,
-        "label": "Total Read I/O",
-        "metricAgg": "max",
-        "title": "I/O Operations Rate",
-        "units": "/s"
-      },
-      "timeRange": {
-        "max": 1507235712000,
-        "min": 1507235508000
-      }
+  "shards": [
+    {
+      "index": "watermelon-tweets-2017.10.05",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
     },
     {
-      "bucket_size": "10 seconds",
-      "data": [],
-      "metric": {
-				"app": "elasticsearch",
-				"description": "Total Write I/O. (This metric is not supported on all platforms and may display N/A if I/O data is unavailable.)",
-				"field": "node_stats.fs.io_stats.total.write_operations",
-				"format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true,
-        "label": "Total Write I/O",
-        "metricAgg": "max",
-        "title": "I/O Operations Rate",
-        "units": "/s"
-      },
-      "timeRange": {
-        "max": 1507235712000,
-        "min": 1507235508000
-      }
-    }],
-    "node_load_average": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.os.cpu.load_average.1m",
-        "metricAgg": "max",
-        "label": "1m",
-        "title": "System Load",
-        "description": "Load average over the last minute.",
-        "units": "",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }],
-    "node_segment_count": [{
-      "bucket_size": "10 seconds",
-      "timeRange": {
-        "min": 1507235508000,
-        "max": 1507235712000
-      },
-      "metric": {
-        "app": "elasticsearch",
-        "field": "node_stats.indices.segments.count",
-        "metricAgg": "max",
-        "label": "Segment Count",
-        "description": "Maximum segment count for primary and replica shards on this node.",
-        "units": "",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": []
-    }]
-  },
-  "shards": [],
+      "index": "watermelon-tweets-2017.10.05",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "watermelon-tweets-2017.10.05",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "watermelon-tweets-2017.10.05",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.09.30",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.09.30",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.09.30",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.09.30",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.09.30",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.03",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.03",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.03",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.03",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.03",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    },
+    {
+      "index": "phone-home",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "phone-home",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "phone-home",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "phone-home",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    },
+    {
+      "index": "relocation_test",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": "bwQWH-7IQY-mFPpfoaoFXQ",
+      "shard": 0,
+      "state": "RELOCATING"
+    }
+  ],
   "shardStats": {
     "indices": {
       "avocado-tweets-2017.09.30": {
         "status": "green",
-        "primary": 5,
-        "replica": 5,
+        "primary": 3,
+        "replica": 2,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -295,8 +1520,8 @@
       },
       "avocado-tweets-2017.10.02": {
         "status": "green",
-        "primary": 5,
-        "replica": 5,
+        "primary": 3,
+        "replica": 2,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -305,43 +1530,34 @@
       "avocado-tweets-2017.10.03": {
         "status": "green",
         "primary": 5,
-        "replica": 5,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
         }
       },
       "phone-home": {
-        "status": "yellow",
-        "primary": 5,
-        "replica": 4,
+        "status": "green",
+        "primary": 4,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
-          "replica": 1
+          "replica": 0
         }
       },
       "watermelon-tweets-2017.10.05": {
-        "status": "yellow",
-        "primary": 5,
-        "replica": 4,
+        "status": "green",
+        "primary": 4,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
-          "replica": 1
-        }
-      },
-      ".security-v6": {
-        "status": "yellow",
-        "primary": 1,
-        "replica": 1,
-        "unassigned": {
-          "primary": 0,
-          "replica": 1
+          "replica": 0
         }
       },
       ".kibana": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -349,7 +1565,7 @@
       },
       ".monitoring-alerts-6": {
         "status": "green",
-        "primary": 1,
+        "primary": 0,
         "replica": 1,
         "unassigned": {
           "primary": 0,
@@ -358,7 +1574,7 @@
       },
       ".monitoring-es-6-2017.10.05": {
         "status": "yellow",
-        "primary": 1,
+        "primary": 0,
         "replica": 0,
         "unassigned": {
           "primary": 0,
@@ -367,17 +1583,26 @@
       },
       ".monitoring-kibana-6-2017.10.05": {
         "status": "yellow",
-        "primary": 1,
+        "primary": 0,
         "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 1
         }
       },
+      ".security-v6": {
+        "status": "green",
+        "primary": 1,
+        "replica": 0,
+        "unassigned": {
+          "primary": 0,
+          "replica": 0
+        }
+      },
       ".triggered_watches": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -386,7 +1611,7 @@
       ".watcher-history-7-2017.09.29": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -395,7 +1620,7 @@
       ".watcher-history-7-2017.09.30": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -404,7 +1629,7 @@
       ".watcher-history-7-2017.10.01": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -412,7 +1637,7 @@
       },
       ".watcher-history-7-2017.10.02": {
         "status": "green",
-        "primary": 1,
+        "primary": 0,
         "replica": 1,
         "unassigned": {
           "primary": 0,
@@ -422,7 +1647,7 @@
       ".watcher-history-7-2017.10.03": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -430,7 +1655,7 @@
       },
       ".watcher-history-7-2017.10.04": {
         "status": "green",
-        "primary": 1,
+        "primary": 0,
         "replica": 1,
         "unassigned": {
           "primary": 0,
@@ -440,7 +1665,7 @@
       ".watcher-history-7-2017.10.05": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -449,7 +1674,7 @@
       ".watches": {
         "status": "green",
         "primary": 1,
-        "replica": 1,
+        "replica": 0,
         "unassigned": {
           "primary": 0,
           "replica": 0
@@ -471,22 +1696,10 @@
       "shardCount": 38,
       "indexCount": 20,
       "name": "whatever-01",
-      "node_ids": ["jUT5KdxfRbORSCWkb5zjmA"],
+      "node_ids": [
+        "jUT5KdxfRbORSCWkb5zjmA"
+      ],
       "type": "master"
-    },
-    "xcP6ue7eRCieNNitFTT0EA": {
-      "shardCount": 36,
-      "indexCount": 19,
-      "name": "whatever-02",
-      "node_ids": ["xcP6ue7eRCieNNitFTT0EA"],
-      "type": "node"
-    },
-    "bwQWH-7IQY-mFPpfoaoFXQ": {
-      "shardCount": 4,
-      "indexCount": 4,
-      "name": "whatever-03",
-      "node_ids": ["bwQWH-7IQY-mFPpfoaoFXQ"],
-      "type": "node"
     }
   },
   "stateUuid": "6wwwErXyTfaa4uHBHG5Pbg"

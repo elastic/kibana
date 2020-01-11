@@ -65,7 +65,7 @@ export function AnnotationsPlot(props: Props) {
               </EuiFlexGroup>
             }
           >
-            <EuiIcon type="tag" color={theme.euiColorSecondary} />
+            <EuiIcon type="dot" color={theme.euiColorSecondary} />
           </EuiToolTip>
         </div>
       ))}

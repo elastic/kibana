@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import tinycolor from 'tinycolor2';
 import _ from 'lodash';
 
 import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
 import { IndexMap } from './types';
+import { MAX_TREE_DEPTH } from './constants';
 
 export const comparator = (v1: number, v2: number) => {
   if (v1 < v2) {
@@ -53,16 +53,16 @@ function getToolTip(key: string) {
   }
 }
 
-export function timeInMilliseconds(data: any) {
+export function timeInMilliseconds(data: any): number {
   if (data.time_in_nanos) {
     return data.time_in_nanos / 1000000;
   }
 
   if (typeof data.time === 'string') {
-    return data.time.replace('ms', '');
+    return Number(data.time.replace('ms', ''));
   }
 
-  return data.time;
+  return Number(data.time);
 }
 
 export function calcTimes(data: any[], parentId?: string) {
@@ -117,21 +117,6 @@ export function normalizeBreakdown(breakdown: Record<string, number>) {
   });
 }
 
-export function normalizeTimes(data: any[], totalTime: number, depth: number) {
-  // Second pass to normalize
-  for (const child of data) {
-    child.timePercentage = ((timeInMilliseconds(child) / totalTime) * 100).toFixed(2);
-    child.absoluteColor = tinycolor.mix('#F5F5F5', '#FFAFAF', child.timePercentage).toHexString();
-    child.depth = depth;
-
-    if (child.children != null && child.children.length !== 0) {
-      normalizeTimes(child.children, totalTime, depth + 1);
-    }
-  }
-
-  data.sort((a, b) => comparator(timeInMilliseconds(a), timeInMilliseconds(b)));
-}
-
 export function normalizeIndices(indices: IndexMap, target: Targets) {
   // Sort the shards per-index
   let sortQueryComponents;
@@ -167,7 +152,26 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
   }
 }
 
-export function initTree<T>(data: Operation[], depth = 0, parent: Operation | null = null) {
+export function normalizeTime(operation: Operation, totalTime: number) {
+  operation.timePercentage = ((timeInMilliseconds(operation) / totalTime) * 100).toFixed(2);
+  operation.absoluteColor = tinycolor
+    .mix('#F5F5F5', '#FFAFAF', +operation.timePercentage)
+    .toHexString();
+}
+
+export function initTree<T>(
+  data: Operation[],
+  totalTime: number,
+  depth = 0,
+  parent: Operation | null = null
+) {
+  if (MAX_TREE_DEPTH + 1 === depth) {
+    if (parent) {
+      parent!.hasChildren = false;
+      parent!.children = [];
+    }
+    return;
+  }
   for (const child of data) {
     // For bwc of older profile responses
     if (!child.description) {
@@ -178,44 +182,28 @@ export function initTree<T>(data: Operation[], depth = 0, parent: Operation | nu
       child.query_type = null;
     }
 
-    // Use named function for tests.
+    normalizeTime(child, totalTime);
     child.parent = parent;
     child.time = timeInMilliseconds(child);
     child.lucene = child.description;
     child.query_type = child.type!.split('.').pop()!;
-    child.visible = child.timePercentage > 20;
+    child.visible = +child.timePercentage > 20;
     child.depth = depth;
 
     if (child.children != null && child.children.length !== 0) {
-      initTree(child.children, depth + 1, child);
+      initTree(child.children, totalTime, depth + 1, child);
     }
   }
+
+  data.sort((a, b) => comparator(timeInMilliseconds(a), timeInMilliseconds(b)));
 }
 
-export function closeNode<T = any>(node: Operation) {
-  const closeDraft = (draft: Operation) => {
-    draft.visible = false;
-
-    if (draft.children == null || draft.children.length === 0) {
-      return;
-    }
-
-    for (const child of draft.children) {
-      closeDraft(child);
-    }
-  };
-  return produce<Operation>(node, draft => {
-    closeDraft(draft);
-  });
-}
-
-export const sortIndices = (data: IndexMap) =>
-  produce<IndexMap, Index[]>(data, doNotChange => {
-    const sortedIndices: Index[] = [];
-    for (const index of Object.values(doNotChange)) {
-      sortedIndices.push(index);
-    }
-    // And now sort the indices themselves
-    sortedIndices.sort((a, b) => comparator(a.time, b.time));
-    return sortedIndices;
-  });
+export const sortIndices = (data: IndexMap) => {
+  const sortedIndices: Index[] = [];
+  for (const index of Object.values(data)) {
+    sortedIndices.push(index);
+  }
+  // And now sort the indices themselves
+  sortedIndices.sort((a, b) => comparator(a.time, b.time));
+  return sortedIndices;
+};

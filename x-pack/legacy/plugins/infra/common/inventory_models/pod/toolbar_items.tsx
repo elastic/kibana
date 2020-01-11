@@ -7,15 +7,10 @@
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { InfraSnapshotMetricType } from '../../graphql/types';
+import { SnapshotMetricType } from '../types';
 
 export const PodToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.cpu,
-    InfraSnapshotMetricType.memory,
-    InfraSnapshotMetricType.rx,
-    InfraSnapshotMetricType.tx,
-  ];
+  const metricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'rx', 'tx'];
   const groupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
   return (
     <MetricsAndGroupByToolbarItems
