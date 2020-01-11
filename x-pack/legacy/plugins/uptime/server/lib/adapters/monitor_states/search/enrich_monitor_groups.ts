@@ -5,7 +5,7 @@
  */
 
 import { get, sortBy } from 'lodash';
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { getHistogramIntervalFormatted } from '../../../helper';
 import { INDEX_NAMES, STATES } from '../../../../../common/constants';
 import {
@@ -77,19 +77,19 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         }
                         String agentIdIP = agentId + "-" + (ip == null ? "" : ip.toString());
                         def ts = doc["@timestamp"][0].toInstant().toEpochMilli();
-                        
+
                         def lastCheck = state.checksByAgentIdIP[agentId];
                         Instant lastTs = lastCheck != null ? lastCheck["@timestamp"] : null;
                         if (lastTs != null && lastTs > ts) {
                           return;
                         }
-                        
+
                         curCheck.put("@timestamp", ts);
-                        
+
                         Map agent = new HashMap();
                         agent.id = agentId;
                         curCheck.put("agent", agent);
-                        
+
                         if (state.globals.url == null) {
                           Map url = new HashMap();
                           Collection fields = ["full", "original", "scheme", "username", "password", "domain", "port", "path", "query", "fragment"];
@@ -102,7 +102,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                           }
                           state.globals.url = url;
                         }
-                        
+
                         Map monitor = new HashMap();
                         monitor.status = doc["monitor.status"][0];
                         monitor.ip = ip;
@@ -113,7 +113,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                           }
                         }
                         curCheck.monitor = monitor;
-                        
+
                         if (curCheck.observer == null) {
                           curCheck.observer = new HashMap();
                         }
@@ -144,14 +144,14 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
                           curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
                         }
-                        
+
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
                 `,
                 combine_script: 'return state;',
                 reduce_script: `
                         // The final document
                         Map result = new HashMap();
-                        
+
                         Map checks = new HashMap();
                         Instant maxTs = Instant.ofEpochMilli(0);
                         Collection ips = new HashSet();
@@ -159,7 +159,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         Collection podUids = new HashSet();
                         Collection containerIds = new HashSet();
                         Collection tls = new HashSet();
-                        String name = null; 
+                        String name = null;
                         for (state in states) {
                           result.putAll(state.globals);
                           for (entry in state.checksByAgentIdIP.entrySet()) {
@@ -167,18 +167,18 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                             def check = entry.getValue();
                             def lastBestCheck = checks.get(agentIdIP);
                             def checkTs = Instant.ofEpochMilli(check.get("@timestamp"));
-                        
+
                             if (maxTs.isBefore(checkTs)) { maxTs = checkTs}
-                        
+
                             if (lastBestCheck == null || lastBestCheck.get("@timestamp") < checkTs) {
                               check["@timestamp"] = check["@timestamp"];
                               checks[agentIdIP] = check
                             }
-      
+
                             if (check.monitor.name != null && check.monitor.name != "") {
                               name = check.monitor.name;
                             }
-      
+
                             ips.add(check.monitor.ip);
                             if (check.observer != null && check.observer.geo != null && check.observer.geo.name != null) {
                               geoNames.add(check.observer.geo.name);
@@ -194,45 +194,45 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                             }
                           }
                         }
-                        
+
                         // We just use the values so we can store these as nested docs
                         result.checks = checks.values();
                         result.put("@timestamp", maxTs);
-                        
-                        
+
+
                         Map summary = new HashMap();
                         summary.up = checks.entrySet().stream().filter(c -> c.getValue().monitor.status == "up").count();
                         summary.down = checks.size() - summary.up;
                         result.summary = summary;
-                        
+
                         Map monitor = new HashMap();
                         monitor.ip = ips;
                         monitor.name = name;
-                        monitor.status = summary.down > 0 ? (summary.up > 0 ? "mixed": "down") : "up";
+                        monitor.status = summary.down > 0 ? "down" : "up";
                         result.monitor = monitor;
-                        
+
                         Map observer = new HashMap();
                         Map geo = new HashMap();
                         observer.geo = geo;
                         geo.name = geoNames;
                         result.observer = observer;
-                        
+
                         if (!podUids.isEmpty()) {
                           result.kubernetes = new HashMap();
                           result.kubernetes.pod = new HashMap();
                           result.kubernetes.pod.uid = podUids;
                         }
-      
+
                         if (!containerIds.isEmpty()) {
                           result.container = new HashMap();
                           result.container.id = containerIds;
                         }
-                        
+
                         if (!tls.isEmpty()) {
                           result.tls = new HashMap();
                           result.tls = tls;
                         }
-      
+
                         return result;
                 `,
               },

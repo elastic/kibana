@@ -68,8 +68,8 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     configuration: {
       defaultValue: defaultValue.configuration,
       data: {
-        raw: {},
-        format: () => ({} as Mappings),
+        raw: defaultValue.configuration,
+        format: () => defaultValue.configuration,
       },
       validate: () => Promise.resolve(true),
     },
