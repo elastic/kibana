@@ -14,6 +14,7 @@ import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redir
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { usePersistRule } from '../../../../containers/detection_engine/rules';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
+import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
 import { FormData, FormHook } from '../components/shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
@@ -48,6 +49,13 @@ const MyEuiPanel = styled(EuiPanel)<{
 `;
 
 export const CreateRuleComponent = React.memo(() => {
+  const {
+    loading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
+    hasManageApiKey,
+  } = useUserInfo();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -68,6 +76,18 @@ export const CreateRuleComponent = React.memo(() => {
     [RuleStep.scheduleRule]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+  }
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
@@ -207,7 +227,7 @@ export const CreateRuleComponent = React.memo(() => {
         <HeaderPage
           backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
           border
-          isLoading={isLoading}
+          isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
         <MyEuiPanel zIndex={3}>
@@ -234,7 +254,7 @@ export const CreateRuleComponent = React.memo(() => {
             <StepContentWrapper>
               <StepDefineRule
                 isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
-                isLoading={isLoading}
+                isLoading={isLoading || loading}
                 setForm={setStepsForm}
                 setStepData={setStepData}
                 descriptionDirection={'column'}
@@ -268,7 +288,7 @@ export const CreateRuleComponent = React.memo(() => {
               <StepAboutRule
                 descriptionDirection="column"
                 isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
-                isLoading={isLoading}
+                isLoading={isLoading || loading}
                 setForm={setStepsForm}
                 setStepData={setStepData}
               />
@@ -301,7 +321,7 @@ export const CreateRuleComponent = React.memo(() => {
               <StepScheduleRule
                 descriptionDirection="column"
                 isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
-                isLoading={isLoading}
+                isLoading={isLoading || loading}
                 setForm={setStepsForm}
                 setStepData={setStepData}
               />

@@ -7,7 +7,7 @@
 import { EuiButton, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { ActionCreator } from 'typescript-fsa';
@@ -28,13 +28,16 @@ import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 import { SignalsHistogramPanel } from '../../components/signals_histogram_panel';
 import { SignalsTable } from '../../components/signals';
+import { useUserInfo } from '../../components/user_info';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
 import { useSignalInfo } from '../../components/signals_info';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
+import { NoWriteSignalsCallOut } from '../../components/no_write_signals_callout';
 import * as detectionI18n from '../../translations';
+import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
 import { getStepsData } from '../helpers';
@@ -50,10 +53,6 @@ import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
 
-interface OwnProps {
-  signalsIndex: string | null;
-}
-
 interface ReduxProps {
   filters: esFilters.Filter[];
   query: Query;
@@ -67,22 +66,41 @@ export interface DispatchProps {
   }>;
 }
 
-type RuleDetailsComponentProps = OwnProps & ReduxProps & DispatchProps;
+type RuleDetailsComponentProps = ReduxProps & DispatchProps;
 
 const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
-  ({ filters, query, setAbsoluteRangeDatePicker, signalsIndex }) => {
+  ({ filters, query, setAbsoluteRangeDatePicker }) => {
+    const {
+      loading,
+      isSignalIndexExists,
+      isAuthenticated,
+      canUserCRUD,
+      hasManageApiKey,
+      hasIndexWrite,
+      signalIndexName,
+    } = useUserInfo();
     const { ruleId } = useParams();
-    const [loading, rule] = useRule(ruleId);
+    const [isLoading, rule] = useRule(ruleId);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
     });
     const [lastSignals] = useSignalInfo({ ruleId });
+    const userHasNoPermissions =
+      canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-    const title = loading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
+    if (
+      isSignalIndexExists != null &&
+      isAuthenticated != null &&
+      (!isSignalIndexExists || !isAuthenticated)
+    ) {
+      return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    }
+
+    const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
     const subTitle = useMemo(
       () =>
-        loading === true || rule === null ? (
+        isLoading === true || rule === null ? (
           <EuiLoadingSpinner size="m" />
         ) : (
           [
@@ -118,7 +136,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
             ),
           ]
         ),
-      [loading, rule]
+      [isLoading, rule]
     );
 
     const signalDefaultFilters = useMemo(
@@ -140,6 +158,8 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
     return (
       <>
+        {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
+        {userHasNoPermissions && <ReadOnlyCallOut />}
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -175,6 +195,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           <EuiFlexItem grow={false}>
                             <RuleSwitch
                               id={rule?.id ?? '-1'}
+                              isDisabled={userHasNoPermissions}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
                             />
@@ -186,7 +207,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 <EuiButton
                                   href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}/edit`}
                                   iconType="visControls"
-                                  isDisabled={rule?.immutable ?? true}
+                                  isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                                 >
                                   {ruleI18n.EDIT_RULE_SETTINGS}
                                 </EuiButton>
@@ -200,7 +221,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
                       <EuiFlexGroup>
                         <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+                          <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                             {defineRuleData != null && (
                               <StepDefineRule
                                 descriptionDirection="column"
@@ -213,7 +234,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                         </EuiFlexItem>
 
                         <EuiFlexItem component="section" grow={2}>
-                          <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+                          <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
                             {aboutRuleData != null && (
                               <StepAboutRule
                                 descriptionDirection="row"
@@ -226,7 +247,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                         </EuiFlexItem>
 
                         <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+                          <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                             {scheduleRuleData != null && (
                               <StepScheduleRule
                                 descriptionDirection="column"
@@ -253,9 +274,12 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
 
                       {ruleId != null && (
                         <SignalsTable
+                          canUserCRUD={canUserCRUD ?? false}
                           defaultFilters={signalDefaultFilters}
+                          hasIndexWrite={hasIndexWrite ?? false}
                           from={from}
-                          signalsIndex={signalsIndex ?? ''}
+                          loading={loading}
+                          signalsIndex={signalIndexName ?? ''}
                           to={to}
                         />
                       )}
