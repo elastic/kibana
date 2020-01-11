@@ -55,7 +55,6 @@ export const DeleteFieldProvider = ({ children }: Props) => {
   }
 
   const deleteField: DeleteFieldFunc = field => {
-    const { hasChildFields, hasMultiFields } = field;
     const aliases = getAllDescendantAliases(field, fields)
       .map(id => byId[id].path.join(' > '))
       .sort();
