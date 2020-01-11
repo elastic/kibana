@@ -57,6 +57,10 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping-meta-field.html`;
   }
 
+  public getDynamicTemplatesLink() {
+    return `${this.esDocsBase}/dynamic-templates.html`;
+  }
+
   public getMappingSourceFieldLink() {
     return `${this.esDocsBase}/mapping-source-field.html`;
   }

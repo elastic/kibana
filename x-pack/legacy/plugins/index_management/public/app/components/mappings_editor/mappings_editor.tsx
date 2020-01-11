@@ -13,6 +13,7 @@ import {
   DocumentFieldsHeader,
   DocumentFields,
   DocumentFieldsJsonEditor,
+  TemplatesForm,
 } from './components';
 import { IndexSettings } from './types';
 import { State, Dispatch } from './reducer';
@@ -25,7 +26,7 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
-type TabName = 'fields' | 'advanced';
+type TabName = 'fields' | 'advanced' | 'templates';
 
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
   const [selectedTab, selectTab] = useState<TabName>('fields');
@@ -39,6 +40,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       date_detection,
       dynamic_date_formats,
       properties = {},
+      dynamic_templates,
     } = defaultValue ?? {};
 
     return {
@@ -51,6 +53,9 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
         dynamic_date_formats,
       },
       fields: properties,
+      templates: {
+        dynamic_templates,
+      },
     };
   }, [defaultValue]);
 
@@ -64,6 +69,12 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
          * Don't navigate away from the tab if there are errors in the form.
          * For now there is no need to display a CallOut as the form can never be invalid.
          */
+        return;
+      }
+    } else if (selectedTab === 'templates') {
+      const { isValid: isTemplatesFormValid } = await state.templates.form!.submit();
+
+      if (!isTemplatesFormValid) {
         return;
       }
     }
@@ -82,16 +93,17 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
               <DocumentFields />
             );
 
-          const content =
-            selectedTab === 'fields' ? (
+          const tabContentLookup = {
+            fields: (
               <>
                 <DocumentFieldsHeader />
                 <EuiSpacer size="m" />
                 {editor}
               </>
-            ) : (
-              <ConfigurationForm defaultValue={state.configuration.defaultValue} />
-            );
+            ),
+            advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
+            templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
+          };
 
           return (
             <div className="mappingsEditor">
@@ -102,6 +114,14 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                     defaultMessage: 'Mapped fields',
+                  })}
+                </EuiTab>
+                <EuiTab
+                  onClick={() => changeTab('templates', [state, dispatch])}
+                  isSelected={selectedTab === 'templates'}
+                >
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
+                    defaultMessage: 'Dynamic templates',
                   })}
                 </EuiTab>
                 <EuiTab
@@ -116,7 +136,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
 
               <EuiSpacer size="l" />
 
-              {content}
+              {tabContentLookup[selectedTab]}
             </div>
           );
         }}

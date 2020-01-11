@@ -31,6 +31,14 @@ export interface MappingsConfiguration {
   _meta?: string;
 }
 
+export interface MappingsTemplate {
+  dynamic_templates: Template[];
+}
+
+interface Template {
+  [key: string]: any;
+}
+
 export interface MappingsFields {
   [key: string]: any;
 }
@@ -57,12 +65,20 @@ export interface State {
     format(): MappingsFields;
     isValid: boolean;
   };
+  templates: {
+    defaultValue: {
+      dynamic_templates: MappingsTemplate['dynamic_templates'];
+    };
+    form?: FormHook<MappingsTemplate>;
+  } & OnFormUpdateArg<MappingsTemplate>;
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<State['configuration']> }
   | { type: 'configuration.save' }
+  | { type: 'templates.update'; value: Partial<State['templates']> }
+  | { type: 'templates.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -237,6 +253,10 @@ export const reducer = (state: State, action: Action): State => {
           ...state.configuration,
           defaultValue: action.value.configuration,
         },
+        templates: {
+          ...state.templates,
+          defaultValue: action.value.templates,
+        },
         documentFields: {
           ...state.documentFields,
           status: 'idle',
@@ -269,6 +289,36 @@ export const reducer = (state: State, action: Action): State => {
           data: {
             raw,
             format: () => configurationData,
+          },
+          validate: async () => true,
+        },
+      };
+    }
+    case 'templates.update': {
+      const nextState = {
+        ...state,
+        templates: { ...state.templates, ...action.value },
+      };
+
+      const isValid = isStateValid(nextState);
+      nextState.isValid = isValid;
+
+      return nextState;
+    }
+    case 'templates.save': {
+      const {
+        data: { raw, format },
+      } = state.templates;
+      const templatesData = format();
+
+      return {
+        ...state,
+        templates: {
+          isValid: true,
+          defaultValue: templatesData,
+          data: {
+            raw,
+            format: () => templatesData,
           },
           validate: async () => true,
         },
