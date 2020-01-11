@@ -126,7 +126,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
       explorerService.setExplorerData(explorerData);
     }
-  }, [JSON.stringify(explorerData)]);
+  }, [explorerData]);
 
   const explorerAppState = useObservable(explorerService.appState$);
   useEffect(() => {
