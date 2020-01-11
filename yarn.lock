@@ -1070,10 +1070,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^13.5.12":
-  version "13.5.12"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.12.tgz#95bd92389ec5fb411debfa5979091b6da2e4b123"
-  integrity sha512-MMNuebZ5jmzXkUJZr/mSvmtWNIR0gWGBtbqpZBfq3T9WRQPvnEHeE/N1WmXw2BSvwN86fy1i0gr52izh/nfzjQ==
+"@elastic/charts@~13.5.13":
+  version "13.5.13"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.13.tgz#332455af6f990f196a7544af14fabd123b81892e"
+  integrity sha512-TlzIwmBIlXsxdD27Ltfl+BuIWqTh7OtKQMVAbARYsWsrBhf+GphxoVT7spWyBPIrUuMLegP4T6I5mC1XhkqNgA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     classnames "^2.2.6"
