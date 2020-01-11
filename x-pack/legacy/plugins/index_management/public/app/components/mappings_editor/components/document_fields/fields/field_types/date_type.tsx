@@ -6,13 +6,9 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiLink } from '@elastic/eui';
-import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field } from '../../../../shared_imports';
 
 import {
   StoreParameter,
@@ -22,8 +18,9 @@ import {
   NullValueParameter,
   IgnoreMalformedParameter,
   FormatParameter,
+  LocaleParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -59,28 +56,7 @@ export const DateType = ({ field }: Props) => {
       </BasicParametersSection>
 
       <AdvancedParametersSection>
-        {/* locale */}
-        <EditFieldFormRow
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
-            defaultMessage: 'Set locale',
-          })}
-          description={
-            <FormattedMessage
-              id="xpack.idxMgmt.mappingsEditor.dateType.localeFieldDescription"
-              defaultMessage="The locale to use when parsing dates. This is useful because months might not have the same name or abbreviation in all languages. Defaults to the {root} locale."
-              values={{
-                root: (
-                  <EuiLink href={documentationService.getRootLocaleLink()} target="_blank">
-                    ROOT
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-          defaultToggleValue={getDefaultToggleValue('locale', field.source)}
-        >
-          <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
-        </EditFieldFormRow>
+        <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
 
         <DocValuesParameter />
 

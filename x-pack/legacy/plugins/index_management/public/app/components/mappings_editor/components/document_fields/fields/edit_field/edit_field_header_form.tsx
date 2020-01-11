@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { UseField, useFormContext } from '../../../../shared_imports';
+import { UseField, useFormContext, FormDataProvider } from '../../../../shared_imports';
 import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
 import {
   getFieldConfig,
@@ -122,7 +122,19 @@ export const EditFieldHeaderForm = React.memo(
         </EuiFlexGroup>
 
         <FieldDescriptionSection isMultiField={isMultiField}>
-          {typeDefinition.description ? typeDefinition.description() : null}
+          {hasSubType ? (
+            <FormDataProvider pathsToWatch="subType">
+              {formData => {
+                if (formData.subType) {
+                  const subTypeDefinition = TYPE_DEFINITION[formData.subType as SubType];
+                  return (subTypeDefinition?.description?.() as JSX.Element) ?? null;
+                }
+                return null;
+              }}
+            </FormDataProvider>
+          ) : (
+            typeDefinition.description?.()
+          )}
         </FieldDescriptionSection>
       </>
     );
