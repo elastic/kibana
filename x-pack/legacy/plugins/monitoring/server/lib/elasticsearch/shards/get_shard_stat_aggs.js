@@ -8,7 +8,7 @@
  * @param {Object} config - Kibana config service
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
  */
-export function getShardAggs(config, includeNodes) {
+export function getShardAggs(config, includeNodes, includeIndices) {
   const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
   const aggSize = 10;
   const indicesAgg = {
@@ -40,7 +40,7 @@ export function getShardAggs(config, includeNodes) {
   };
 
   return {
-    ...{ indices: indicesAgg },
+    ...{ indices: includeIndices ? indicesAgg : undefined },
     ...{ nodes: includeNodes ? nodesAgg : undefined },
   };
 }
