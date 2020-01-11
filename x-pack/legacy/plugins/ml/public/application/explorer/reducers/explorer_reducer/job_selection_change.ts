@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { ActionPayload } from '../../explorer_dashboard_service';
 import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
 
@@ -36,11 +35,6 @@ export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload)
     // indexPattern will not be used if there are no influencers so set up can be skipped
     // indexPattern is passed to KqlFilterBar which is only shown if (noInfluencersConfigured === false)
     stateUpdate.indexPattern = getIndexPattern(selectedJobs);
-  }
-
-  if (selectedJobs.length > 1) {
-    stateUpdate.viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
-    return stateUpdate;
   }
 
   stateUpdate.loading = true;
