@@ -145,7 +145,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteConnectorBtn.click();
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteConnectorsConfirmation', { timeout: 30 * 1000 });
+      await testSubjects.missingOrFail('deleteConnectorsConfirmation');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -191,7 +191,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await bulkDeleteBtn.click();
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteConnectorsConfirmation', { timeout: 30 * 1000 });
+      await testSubjects.missingOrFail('deleteConnectorsConfirmation');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
