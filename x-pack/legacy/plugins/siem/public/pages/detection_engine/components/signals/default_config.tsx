@@ -168,55 +168,66 @@ export const requiredFieldsForActions = [
 ];
 
 export const getSignalsActions = ({
+  canUserCRUD,
+  hasIndexWrite,
   setEventsLoading,
   setEventsDeleted,
   createTimeline,
   status,
 }: {
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-}): TimelineAction[] => [
-  {
-    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="send-signal-to-timeline-tool-tip"
-        content={i18n.ACTION_VIEW_IN_TIMELINE}
-      >
-        <EuiButtonIcon
-          data-test-subj={'send-signal-to-timeline-tool-tip'}
-          onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
-          iconType="tableDensityNormal"
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
-    id: 'sendSignalToTimeline',
-    width: 26,
-  },
-  {
-    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="update-signal-status-tool-tip"
-        content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
-      >
-        <EuiButtonIcon
-          data-test-subj={'update-signal-status-button'}
-          onClick={() =>
-            updateSignalStatusAction({
-              signalIds: [eventId],
-              status,
-              setEventsLoading,
-              setEventsDeleted,
-            })
-          }
-          iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
-    id: 'updateSignalStatus',
-    width: 26,
-  },
-];
+}): TimelineAction[] => {
+  const actions = [
+    {
+      getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+        <EuiToolTip
+          data-test-subj="send-signal-to-timeline-tool-tip"
+          content={i18n.ACTION_VIEW_IN_TIMELINE}
+        >
+          <EuiButtonIcon
+            data-test-subj={'send-signal-to-timeline-tool-tip'}
+            onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
+            iconType="tableDensityNormal"
+            aria-label="Next"
+          />
+        </EuiToolTip>
+      ),
+      id: 'sendSignalToTimeline',
+      width: 26,
+    },
+  ];
+  return canUserCRUD && hasIndexWrite
+    ? [
+        ...actions,
+        {
+          getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+            <EuiToolTip
+              data-test-subj="update-signal-status-tool-tip"
+              content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
+            >
+              <EuiButtonIcon
+                data-test-subj={'update-signal-status-button'}
+                onClick={() =>
+                  updateSignalStatusAction({
+                    signalIds: [eventId],
+                    status,
+                    setEventsLoading,
+                    setEventsDeleted,
+                  })
+                }
+                iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
+                aria-label="Next"
+              />
+            </EuiToolTip>
+          ),
+          id: 'updateSignalStatus',
+          width: 26,
+        },
+      ]
+    : actions;
+};

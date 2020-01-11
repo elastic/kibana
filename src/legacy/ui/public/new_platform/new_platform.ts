@@ -124,7 +124,11 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const params = { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) };
+      const params = {
+        element,
+        appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`),
+        onAppLeave: () => undefined,
+      };
       const unmount = isAppMountDeprecated(app.mount)
         ? await app.mount({ core: npStart.core }, params)
         : await app.mount(params);
