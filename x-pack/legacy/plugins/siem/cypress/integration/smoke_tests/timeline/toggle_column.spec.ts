@@ -6,7 +6,7 @@
 
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import { populateTimeline } from '../../lib/fields_browser/helpers';
-import { clearTimeline, toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
+import { createNewTimeline, toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
@@ -16,12 +16,11 @@ describe('toggle column in timeline', () => {
   });
 
   afterEach(() => {
-    clearTimeline();
+    createNewTimeline();
   });
 
   const timestampField = '@timestamp';
   const idField = '_id';
-  const indexField = '_index';
 
   it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
     populateTimeline();
@@ -73,16 +72,16 @@ describe('toggle column in timeline', () => {
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });
 
-  it('adds the _index field to the timeline via drag and drop', () => {
+  it('adds the _id field to the timeline via drag and drop', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${indexField}"]`).should(
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should(
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-name-${indexField}"]`).then(field =>
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-name-${idField}"]`).then(field =>
       drag(field)
     );
 
@@ -90,7 +89,7 @@ describe('toggle column in timeline', () => {
       drop(headersDropArea)
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${indexField}"]`, {
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`, {
       timeout: DEFAULT_TIMEOUT,
     }).should('exist');
   });

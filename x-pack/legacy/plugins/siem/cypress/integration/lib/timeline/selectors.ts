@@ -39,6 +39,6 @@ export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
-export const CLOSE_PROVIDER_BADGE_BTN = '[data-test-subj="closeProviderBadge"]';
+export const TIMELINE_SETTINGS = '[data-test-subj="settings-gear"]';
 
-export const TIMELINE_QUERY_INPUT = '[data-test-subj="timelineQueryInput"]';
+export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
