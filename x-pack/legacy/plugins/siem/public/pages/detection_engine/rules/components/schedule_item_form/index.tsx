@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSelect,
+  EuiFormControlLayout,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -27,8 +34,19 @@ const timeTypeOptions = [
 ];
 
 const StyledEuiFormRow = styled(EuiFormRow)`
+  max-width: none;
+
   .euiFormControlLayout {
     max-width: 200px !important;
+  }
+
+  .euiFormControlLayout__childrenWrapper > *:first-child {
+    box-shadow: none;
+    height: 38px;
+  }
+
+  .euiFormControlLayout:not(:first-child) {
+    border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   }
 `;
 
@@ -107,7 +125,7 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiFieldNumber
+      <EuiFormControlLayout
         append={
           <MyEuiSelect
             fullWidth={false}
@@ -117,12 +135,9 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
             {...rest}
           />
         }
-        fullWidth
-        min={0}
-        onChange={onChangeTimeVal}
-        value={timeVal}
-        {...rest}
-      />
+      >
+        <EuiFieldNumber fullWidth min={0} onChange={onChangeTimeVal} value={timeVal} {...rest} />
+      </EuiFormControlLayout>
     </StyledEuiFormRow>
   );
 };

@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty, isEqual, get } from 'lodash/fp';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
@@ -22,6 +23,7 @@ import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
+import { StepContentWrapper } from '../step_content_wrapper';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -42,6 +44,20 @@ const stepDefineDefaultValue = {
   },
 };
 
+const MyLabelButton = styled(EuiButtonEmpty)`
+  height: 18px;
+  font-size: 12px;
+
+  .euiIcon {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+MyLabelButton.defaultProps = {
+  flush: 'right',
+};
+
 const getStepDefaultValue = (
   indicesConfig: string[],
   defaultValues: DefineStepRule | null
@@ -60,6 +76,7 @@ const getStepDefaultValue = (
 };
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+  addPadding = false,
   defaultValues,
   descriptionDirection = 'row',
   isReadOnlyView,
@@ -136,80 +153,79 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   return isReadOnlyView && myStepData != null ? (
-    <StepRuleDescription
-      direction={descriptionDirection}
-      indexPatterns={indexPatternQueryBar as IIndexPattern}
-      schema={schema}
-      data={myStepData}
-    />
+    <StepContentWrapper addPadding={addPadding}>
+      <StepRuleDescription
+        direction={descriptionDirection}
+        indexPatterns={indexPatternQueryBar as IIndexPattern}
+        schema={schema}
+        data={myStepData}
+      />
+    </StepContentWrapper>
   ) : (
     <>
-      <Form form={form} data-test-subj="stepDefineRule">
-        <CommonUseField
-          path="index"
-          config={{
-            ...schema.index,
-            labelAppend: !localUseIndicesConfig ? (
-              <EuiButtonEmpty
-                size="xs"
-                onClick={handleResetIndices}
-                flush="right"
-                iconType="refresh"
-              >
-                <small>{i18n.RESET_DEFAULT_INDEX}</small>
-              </EuiButtonEmpty>
-            ) : null,
-          }}
-          componentProps={{
-            idAria: 'detectionEngineStepDefineRuleIndices',
-            'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-            euiFieldProps: {
-              fullWidth: true,
+      <StepContentWrapper addPadding={!isUpdateView}>
+        <Form form={form} data-test-subj="stepDefineRule">
+          <CommonUseField
+            path="index"
+            config={{
+              ...schema.index,
+              labelAppend: !localUseIndicesConfig ? (
+                <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                  {i18n.RESET_DEFAULT_INDEX}
+                </MyLabelButton>
+              ) : null,
+            }}
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleIndices',
+              'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+              euiFieldProps: {
+                fullWidth: true,
+                isDisabled: isLoading,
+                placeholder: '',
+              },
+            }}
+          />
+          <UseField
+            path="queryBar"
+            config={{
+              ...schema.queryBar,
+              labelAppend: (
+                <MyLabelButton onClick={handleOpenTimelineSearch}>
+                  {i18n.IMPORT_TIMELINE_QUERY}
+                </MyLabelButton>
+              ),
+            }}
+            component={QueryBarDefineRule}
+            componentProps={{
+              browserFields,
+              loading: indexPatternLoadingQueryBar,
+              idAria: 'detectionEngineStepDefineRuleQueryBar',
+              indexPattern: indexPatternQueryBar,
               isDisabled: isLoading,
-              placeholder: '',
-            },
-          }}
-        />
-        <UseField
-          path="queryBar"
-          config={{
-            ...schema.queryBar,
-            labelAppend: (
-              <EuiButtonEmpty size="xs" onClick={handleOpenTimelineSearch}>
-                <small>{i18n.IMPORT_TIMELINE_QUERY}</small>
-              </EuiButtonEmpty>
-            ),
-          }}
-          component={QueryBarDefineRule}
-          componentProps={{
-            browserFields,
-            loading: indexPatternLoadingQueryBar,
-            idAria: 'detectionEngineStepDefineRuleQueryBar',
-            indexPattern: indexPatternQueryBar,
-            isDisabled: isLoading,
-            isLoading: indexPatternLoadingQueryBar,
-            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-            openTimelineSearch,
-            onCloseTimelineSearch: handleCloseTimelineSearch,
-          }}
-        />
-        <FormDataProvider pathsToWatch="index">
-          {({ index }) => {
-            if (index != null) {
-              if (isEqual(index, indicesConfig) && !localUseIndicesConfig) {
-                setLocalUseIndicesConfig(true);
+              isLoading: indexPatternLoadingQueryBar,
+              dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+              openTimelineSearch,
+              onCloseTimelineSearch: handleCloseTimelineSearch,
+            }}
+          />
+          <FormDataProvider pathsToWatch="index">
+            {({ index }) => {
+              if (index != null) {
+                if (isEqual(index, indicesConfig) && !localUseIndicesConfig) {
+                  setLocalUseIndicesConfig(true);
+                }
+                if (!isEqual(index, indicesConfig) && localUseIndicesConfig) {
+                  setLocalUseIndicesConfig(false);
+                }
+                if (index != null && !isEmpty(index) && !isEqual(index, mylocalIndicesConfig)) {
+                  setMyLocalIndicesConfig(index);
+                }
               }
-              if (!isEqual(index, indicesConfig) && localUseIndicesConfig) {
-                setLocalUseIndicesConfig(false);
-              }
-              if (index != null && !isEmpty(index) && !isEqual(index, mylocalIndicesConfig)) {
-                setMyLocalIndicesConfig(index);
-              }
-            }
-            return null;
-          }}
-        </FormDataProvider>
-      </Form>
+              return null;
+            }}
+          </FormDataProvider>
+        </Form>
+      </StepContentWrapper>
       {!isUpdateView && (
         <>
           <EuiHorizontalRule margin="m" />

@@ -22,6 +22,7 @@ import { isUrlInvalid } from './helpers';
 import { schema } from './schema';
 import * as I18n from './translations';
 import { PickTimeline } from '../pick_timeline';
+import { StepContentWrapper } from '../step_content_wrapper';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -34,6 +35,7 @@ const TagContainer = styled.div`
 `;
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
+  addPadding = false,
   defaultValues,
   descriptionDirection = 'row',
   isReadOnlyView,
@@ -87,123 +89,127 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [form]);
 
   return isReadOnlyView && myStepData != null ? (
-    <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+    <StepContentWrapper addPadding={addPadding}>
+      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+    </StepContentWrapper>
   ) : (
     <>
-      <Form form={form} data-test-subj="stepAboutRule">
-        <CommonUseField
-          path="name"
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleName',
-            'data-test-subj': 'detectionEngineStepAboutRuleName',
-            euiFieldProps: {
-              fullWidth: false,
-              disabled: isLoading,
-            },
-          }}
-        />
-        <CommonUseField
-          path="description"
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleDescription',
-            'data-test-subj': 'detectionEngineStepAboutRuleDescription',
-            euiFieldProps: {
-              disabled: isLoading,
-            },
-          }}
-        />
-        <CommonUseField
-          path="severity"
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleSeverity',
-            'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
-            euiFieldProps: {
-              fullWidth: false,
-              disabled: isLoading,
-              options: severityOptions,
-            },
-          }}
-        />
-        <CommonUseField
-          path="riskScore"
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleRiskScore',
-            'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
-            euiFieldProps: {
-              max: 100,
-              min: 0,
-              fullWidth: false,
-              disabled: isLoading,
-              options: severityOptions,
-              showTicks: true,
-              tickInterval: 25,
-            },
-          }}
-        />
-        <UseField
-          path="timeline"
-          component={PickTimeline}
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleTimeline',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-          }}
-        />
-        <UseField
-          path="references"
-          component={AddItem}
-          componentProps={{
-            addText: I18n.ADD_REFERENCE,
-            idAria: 'detectionEngineStepAboutRuleReferenceUrls',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
-            validate: isUrlInvalid,
-          }}
-        />
-        <UseField
-          path="falsePositives"
-          component={AddItem}
-          componentProps={{
-            addText: I18n.ADD_FALSE_POSITIVE,
-            idAria: 'detectionEngineStepAboutRuleFalsePositives',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
-          }}
-        />
-        <UseField
-          path="threats"
-          component={AddMitreThreat}
-          componentProps={{
-            idAria: 'detectionEngineStepAboutRuleMitreThreats',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
-          }}
-        />
-        <TagContainer>
+      <StepContentWrapper addPadding={!isUpdateView}>
+        <Form form={form} data-test-subj="stepAboutRule">
           <CommonUseField
-            path="tags"
+            path="name"
             componentProps={{
-              idAria: 'detectionEngineStepAboutRuleTags',
-              'data-test-subj': 'detectionEngineStepAboutRuleTags',
+              idAria: 'detectionEngineStepAboutRuleName',
+              'data-test-subj': 'detectionEngineStepAboutRuleName',
               euiFieldProps: {
-                fullWidth: true,
-                isDisabled: isLoading,
-                placeholder: '',
+                fullWidth: false,
+                disabled: isLoading,
               },
             }}
           />
-        </TagContainer>
-        <FormDataProvider pathsToWatch="severity">
-          {({ severity }) => {
-            const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-            const riskScoreField = form.getFields().riskScore;
-            if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
-              riskScoreField.setValue(newRiskScore);
-            }
-            return null;
-          }}
-        </FormDataProvider>
-      </Form>
+          <CommonUseField
+            path="description"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleDescription',
+              'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+              euiFieldProps: {
+                disabled: isLoading,
+              },
+            }}
+          />
+          <CommonUseField
+            path="severity"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleSeverity',
+              'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
+              euiFieldProps: {
+                fullWidth: false,
+                disabled: isLoading,
+                options: severityOptions,
+              },
+            }}
+          />
+          <CommonUseField
+            path="riskScore"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleRiskScore',
+              'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+              euiFieldProps: {
+                max: 100,
+                min: 0,
+                fullWidth: false,
+                disabled: isLoading,
+                options: severityOptions,
+                showTicks: true,
+                tickInterval: 25,
+              },
+            }}
+          />
+          <UseField
+            path="timeline"
+            component={PickTimeline}
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleTimeline',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
+            }}
+          />
+          <UseField
+            path="references"
+            component={AddItem}
+            componentProps={{
+              addText: I18n.ADD_REFERENCE,
+              idAria: 'detectionEngineStepAboutRuleReferenceUrls',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
+              validate: isUrlInvalid,
+            }}
+          />
+          <UseField
+            path="falsePositives"
+            component={AddItem}
+            componentProps={{
+              addText: I18n.ADD_FALSE_POSITIVE,
+              idAria: 'detectionEngineStepAboutRuleFalsePositives',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
+            }}
+          />
+          <UseField
+            path="threats"
+            component={AddMitreThreat}
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleMitreThreats',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+            }}
+          />
+          <TagContainer>
+            <CommonUseField
+              path="tags"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleTags',
+                'data-test-subj': 'detectionEngineStepAboutRuleTags',
+                euiFieldProps: {
+                  fullWidth: true,
+                  isDisabled: isLoading,
+                  placeholder: '',
+                },
+              }}
+            />
+          </TagContainer>
+          <FormDataProvider pathsToWatch="severity">
+            {({ severity }) => {
+              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
+              const riskScoreField = form.getFields().riskScore;
+              if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
+                riskScoreField.setValue(newRiskScore);
+              }
+              return null;
+            }}
+          </FormDataProvider>
+        </Form>
+      </StepContentWrapper>
       {!isUpdateView && (
         <>
           <EuiHorizontalRule margin="m" />

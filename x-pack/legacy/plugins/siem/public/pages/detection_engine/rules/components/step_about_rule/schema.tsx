@@ -142,7 +142,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldFalsePositiveLabel',
       {
-        defaultMessage: 'False positives examples',
+        defaultMessage: 'False positive examples',
       }
     ),
     labelAppend: OptionalFieldLabel,

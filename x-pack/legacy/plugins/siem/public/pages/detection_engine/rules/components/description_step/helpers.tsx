@@ -10,8 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiText,
-  EuiListGroup,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
@@ -26,6 +26,7 @@ import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatsDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
+import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const isNotEmptyArray = (values: string[]) =>
   !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
@@ -99,10 +100,17 @@ const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-const MyEuiListGroup = styled(EuiListGroup)`
-  padding: 0px;
-  .euiListGroupItem__button {
-    padding: 0px;
+const TechniqueLinkItem = styled(EuiButtonEmpty)`
+  .euiIcon {
+    width: 8px;
+    height: 8px;
+  }
+`;
+
+const ReferenceLinkItem = styled(EuiButtonEmpty)`
+  .euiIcon {
+    width: 12px;
+    height: 12px;
   }
 `;
 
@@ -120,28 +128,31 @@ export const buildThreatsDescription = ({
               const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
               return (
                 <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
-                  <EuiText grow={false} size="s">
-                    <h5>
-                      <EuiLink href={threat.tactic.reference} target="_blank">
-                        {tactic != null ? tactic.text : ''}
-                      </EuiLink>
-                    </h5>
-                    <MyEuiListGroup
-                      flush={false}
-                      bordered={false}
-                      listItems={threat.techniques.map(technique => {
-                        const myTechnique = techniquesOptions.find(t => t.name === technique.name);
-                        return {
-                          label: myTechnique != null ? myTechnique.label : '',
-                          href: technique.reference,
-                          target: '_blank',
-                        };
-                      })}
-                    />
-                  </EuiText>
+                  <EuiLink href={threat.tactic.reference} target="_blank">
+                    {tactic != null ? tactic.text : ''}
+                  </EuiLink>
+                  <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+                    {threat.techniques.map(technique => {
+                      const myTechnique = techniquesOptions.find(t => t.name === technique.name);
+                      return (
+                        <EuiFlexItem>
+                          <TechniqueLinkItem
+                            href={technique.reference}
+                            target="_blank"
+                            iconType={ListTreeIcon}
+                            size="xs"
+                            flush="left"
+                          >
+                            {myTechnique != null ? myTechnique.label : ''}
+                          </TechniqueLinkItem>
+                        </EuiFlexItem>
+                      );
+                    })}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               );
             })}
+            <EuiSpacer />
           </ThreatsEuiFlexGroup>
         ),
       },
@@ -211,17 +222,21 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
       {
         title: label,
         description: (
-          <EuiListGroup
-            flush={true}
-            bordered={false}
-            listItems={values.map((val: string) => ({
-              label: val,
-              href: val,
-              iconType: 'link',
-              size: 'xs',
-              target: '_blank',
-            }))}
-          />
+          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+            {values.map((val: string) => (
+              <EuiFlexItem>
+                <ReferenceLinkItem
+                  href={val}
+                  target="_blank"
+                  iconType="link"
+                  size="xs"
+                  flush="left"
+                >
+                  {val}
+                </ReferenceLinkItem>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         ),
       },
     ];
