@@ -146,7 +146,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         });
       }
       return null;
-    }, [browserFields, globalFilters, globalQuery, indexPatterns, to, from]);
+    }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
 
     // Callback for creating a new timeline -- utilized by row/batch actions
     const createTimelineCallback = useCallback(
@@ -188,7 +188,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
         setFilterGroup(newFilterGroup);
       },
-      [setFilterGroup]
+      [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
 
     // Callback for clearing entire selection from utility bar
@@ -196,7 +196,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
       setSelectAll(false);
       setShowClearSelectionAction(false);
-    }, [clearSelected, setShowClearSelectionAction]);
+    }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
 
     // Callback for selecting all events on all pages from utility bar
     // Dispatches to stateful_body's selectAll via TimelineTypeContext props
@@ -204,7 +204,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const selectAllCallback = useCallback(() => {
       setSelectAll(true);
       setShowClearSelectionAction(true);
-    }, [setShowClearSelectionAction]);
+    }, [setSelectAll, setShowClearSelectionAction]);
 
     const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
       async ({ signalIds, status }: UpdateSignalsStatusProps) => {
@@ -252,6 +252,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         selectAllCallback,
         selectedEventIds,
         showClearSelectionAction,
+        updateSignalsStatusCallback,
       ]
     );
 
@@ -266,7 +267,14 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
           setEventsDeleted: setEventsDeletedCallback,
           status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         }),
-      [canUserCRUD, createTimelineCallback, filterGroup]
+      [
+        canUserCRUD,
+        createTimelineCallback,
+        hasIndexWrite,
+        filterGroup,
+        setEventsLoadingCallback,
+        setEventsDeletedCallback,
+      ]
     );
 
     const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
