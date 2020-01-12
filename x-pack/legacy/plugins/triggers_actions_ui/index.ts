@@ -14,12 +14,6 @@ export function triggersActionsUI(kibana: any) {
     configPrefix: 'xpack.triggers_actions_ui',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana'],
-    isEnabled(config: Legacy.KibanaConfig) {
-      return (
-        config.get('xpack.triggers_actions_ui.enabled') &&
-        (config.get('xpack.actions.enabled') || config.get('xpack.alerting.enabled'))
-      );
-    },
     config(Joi: Root) {
       return Joi.object()
         .keys({
@@ -29,13 +23,14 @@ export function triggersActionsUI(kibana: any) {
         .default();
     },
     uiExports: {
-      hacks: ['plugins/triggers_actions_ui/hacks/register'],
+      home: ['plugins/triggers_actions_ui/hacks/register'],
       managementSections: ['plugins/triggers_actions_ui/legacy'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       injectDefaultVars(server: Legacy.Server) {
         const serverConfig = server.config();
         return {
           createAlertUiEnabled: serverConfig.get('xpack.triggers_actions_ui.createAlertUiEnabled'),
+          uiEnabled: serverConfig.get('xpack.triggers_actions_ui.enabled'),
         };
       },
     },
