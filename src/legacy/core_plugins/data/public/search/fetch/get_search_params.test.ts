@@ -66,18 +66,6 @@ describe('getMSearchParams', () => {
 });
 
 describe('getSearchParams', () => {
-  test('includes rest_total_hits_as_int', () => {
-    const config = getConfigStub();
-    const searchParams = getSearchParams(config);
-    expect(searchParams.rest_total_hits_as_int).toBe(true);
-  });
-
-  test('includes ignore_unavailable', () => {
-    const config = getConfigStub();
-    const searchParams = getSearchParams(config);
-    expect(searchParams.ignore_unavailable).toBe(true);
-  });
-
   test('includes ignore_throttled according to search:includeFrozen', () => {
     let config = getConfigStub({ 'search:includeFrozen': true });
     let searchParams = getSearchParams(config);
@@ -96,14 +84,5 @@ describe('getSearchParams', () => {
     config = getConfigStub({ 'courier:maxConcurrentShardRequests': 5 });
     searchParams = getSearchParams(config);
     expect(searchParams.max_concurrent_shard_requests).toBe(5);
-  });
-
-  test('includes timeout according to esShardTimeout if greater than 0', () => {
-    const config = getConfigStub();
-    let searchParams = getSearchParams(config, 0);
-    expect(searchParams.timeout).toBe(undefined);
-
-    searchParams = getSearchParams(config, 100);
-    expect(searchParams.timeout).toBe('100ms');
   });
 });
