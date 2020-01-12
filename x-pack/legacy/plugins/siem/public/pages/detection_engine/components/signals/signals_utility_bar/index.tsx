@@ -5,7 +5,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiContextMenuPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
   UtilityBar,
@@ -15,14 +14,15 @@ import {
   UtilityBarText,
 } from '../../../../../components/detection_engine/utility_bar';
 import * as i18n from './translations';
-import { getBatchItems } from './batch_actions';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
-import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
+import { UpdateSignalsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
 
 interface SignalsUtilityBarProps {
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   isFilteredToOpen: boolean;
@@ -34,6 +34,8 @@ interface SignalsUtilityBarProps {
 }
 
 const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
+  canUserCRUD,
+  hasIndexWrite,
   areEventsLoading,
   clearSelection,
   totalCount,
@@ -66,7 +68,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            {totalCount > 0 && (
+            {canUserCRUD && hasIndexWrite && (
               <>
                 <UtilityBarText>
                   {i18n.SELECTED_SIGNALS(
