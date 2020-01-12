@@ -102,7 +102,7 @@ export interface UiSettingsParams {
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
-  /** field ui opttions */
+  /** field ui options */
   uiOptions?: Record<string, any>;
 }
 

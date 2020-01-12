@@ -4,7 +4,7 @@
 
 ## UiSettingsParams.uiOptions property
 
-field ui opttions
+field ui options
 
 <b>Signature:</b>
 
