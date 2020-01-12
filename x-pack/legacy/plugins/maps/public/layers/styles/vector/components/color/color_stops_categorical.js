@@ -8,15 +8,20 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFormRow, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { addCategoricalRow, removeRow, getColorInput, getDeleteButton } from './color_stops_utils';
-
-const DEFAULT_COLOR = '#FF0000';
-const DEFAULT_NEXT_COLOR = '#00FF00';
+import { EuiFieldText } from '@elastic/eui';
+import {
+  addCategoricalRow,
+  removeRow,
+  getColorInput,
+  getDeleteButton,
+  getColorStopRow,
+  DEFAULT_CUSTOM_COLOR,
+  DEFAULT_NEXT_COLOR,
+} from './color_stops_utils';
 
 export const ColorStopsCategorical = ({
   colorStops = [
-    { stop: null, color: DEFAULT_COLOR }, //first stop is the "other" color
+    { stop: null, color: DEFAULT_CUSTOM_COLOR }, //first stop is the "other" color
     { stop: '', color: DEFAULT_NEXT_COLOR },
   ],
   onChange,
@@ -55,8 +60,17 @@ export const ColorStopsCategorical = ({
   }
 
   const rows = colorStops.map((colorStop, index) => {
+    const onColorChange = color => {
+      const newColorStops = _.cloneDeep(colorStops);
+      newColorStops[index].color = color;
+      onChange({
+        colorStops: newColorStops,
+        isInvalid: false,
+      });
+    };
+
     const { stopInput } = getStopInput(colorStop.stop, index);
-    const { colorError, colorInput } = getColorInput(colorStops, onChange, colorStop.color, index);
+    const { colorError, colorInput } = getColorInput(colorStops, onColorChange, colorStop.color);
     const errors = colorError ? [colorError] : [];
 
     const onAdd = () => {
@@ -79,32 +93,7 @@ export const ColorStopsCategorical = ({
       deleteButton = getDeleteButton(onRemove);
     }
 
-    return (
-      <EuiFormRow
-        key={index}
-        className="mapColorStop"
-        isInvalid={errors.length !== 0}
-        error={errors}
-        display="rowCompressed"
-      >
-        <div>
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem>{stopInput}</EuiFlexItem>
-            <EuiFlexItem>{colorInput}</EuiFlexItem>
-          </EuiFlexGroup>
-          <div className="mapColorStop__icons">
-            {deleteButton}
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              color="primary"
-              aria-label="Add"
-              title="Add"
-              onClick={onAdd}
-            />
-          </div>
-        </div>
-      </EuiFormRow>
-    );
+    return getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd });
   });
 
   return <div>{rows}</div>;

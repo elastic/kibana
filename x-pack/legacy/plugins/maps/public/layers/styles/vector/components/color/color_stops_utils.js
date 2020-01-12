@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiColorPicker, isValidHex } from '@elastic/eui';
-import _ from 'lodash';
+import {
+  EuiButtonIcon,
+  EuiColorPicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  isValidHex,
+} from '@elastic/eui';
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
@@ -53,27 +60,55 @@ export function getDeleteButton(onRemove) {
     <EuiButtonIcon
       iconType="trash"
       color="danger"
-      aria-label="Delete"
-      title="Delete"
+      aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
+        defaultMessage: 'Delete',
+      })}
+      title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      })}
       onClick={onRemove}
     />
   );
 }
 
-export function getColorInput(colorStops, onChange, color, index) {
-  const onColorChange = color => {
-    const newColorStops = _.cloneDeep(colorStops);
-    newColorStops[index].color = color;
-    onChange({
-      colorStops: newColorStops,
-      isInvalid: false,
-    });
-  };
-
+export function getColorInput(colorStops, onColorChange, color) {
   return {
-    colorError: isColorInvalid(color) ? 'Color must provide a valid hex value' : undefined,
+    colorError: isColorInvalid(color)
+      ? i18n.translate('xpack.maps.styles.colorStops.hexWarningLabel', {
+          defaultMessage: 'Color must provide a valid hex value',
+        })
+      : undefined,
     colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
   };
+}
+
+export function getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd }) {
+  return (
+    <EuiFormRow
+      key={index}
+      className="mapColorStop"
+      isInvalid={errors.length !== 0}
+      error={errors}
+      display="rowCompressed"
+    >
+      <div>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem>{stopInput}</EuiFlexItem>
+          <EuiFlexItem>{colorInput}</EuiFlexItem>
+        </EuiFlexGroup>
+        <div className="mapColorStop__icons">
+          {deleteButton}
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            color="primary"
+            aria-label="Add"
+            title="Add"
+            onClick={onAdd}
+          />
+        </div>
+      </div>
+    </EuiFormRow>
+  );
 }
 
 export function isColorInvalid(color) {
@@ -96,3 +131,6 @@ export function isOrdinalStopsInvalid(colorStops) {
     return isColorInvalid(colorStop.color) || isOrdinalStopInvalid(colorStop.stop) || isDescending;
   });
 }
+
+export const DEFAULT_CUSTOM_COLOR = '#FF0000';
+export const DEFAULT_NEXT_COLOR = '#00FF00';
