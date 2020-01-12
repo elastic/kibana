@@ -7,12 +7,20 @@
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName } from '../style_util';
-import { getColorRampStops } from '../../color_utils';
+import { getColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
 import { VectorIcon } from '../components/legend/vector_icon';
 import { VECTOR_STYLES } from '../vector_style_defaults';
+import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -55,7 +63,17 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
 
-  isCustomColorRamp() {
+  isOrdinal() {
+    return (
+      typeof this._options.type === 'undefined' || this._options.type === COLOR_MAP_TYPE.ORDINAL
+    );
+  }
+
+  isCategorical() {
+    return this._options.type === COLOR_MAP_TYPE.CATEGORICAL;
+  }
+
+  isCustomOrdinalColorRamp() {
     return this._options.useCustomColorRamp;
   }
 
@@ -63,16 +81,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return true;
   }
 
-  isScaled() {
-    return !this.isCustomColorRamp();
+  isOrdinalScaled() {
+    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
   }
 
-  isRanged() {
-    return !this.isCustomColorRamp();
+  isOrdinalRanged() {
+    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
   }
 
-  hasBreaks() {
-    return this.isCustomColorRamp();
+  hasOrdinalBreaks() {
+    return (this.isOrdinal() && this.isCustomOrdinalColorRamp()) || this.isCategorical();
   }
 
   _getMbColor() {
@@ -82,6 +100,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
+    return this._getMBDataDrivenColor({
+      targetName: getComputedFieldName(this._styleName, this._options.field.name),
+    });
+  }
+
+  _getMbDataDrivenOrdinalColor({ targetName }) {
     if (
       this._options.useCustomColorRamp &&
       (!this._options.customColorRamp || !this._options.customColorRamp.length)
@@ -89,15 +113,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    return this._getMBDataDrivenColor({
-      targetName: getComputedFieldName(this._styleName, this._options.field.name),
-      colorStops: this._getMBColorStops(),
-      isSteps: this._options.useCustomColorRamp,
-    });
-  }
-
-  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
-    if (isSteps) {
+    const colorStops = this._getMbOrdinalColorStops();
+    if (this._options.useCustomColorRamp) {
       const firstStopValue = colorStops[0];
       const lessThenFirstStopValue = firstStopValue - 1;
       return [
@@ -107,7 +124,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         ...colorStops,
       ];
     }
-
     return [
       'interpolate',
       ['linear'],
@@ -118,14 +134,81 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     ];
   }
 
-  _getMBColorStops() {
-    if (this._options.useCustomColorRamp) {
-      return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
+  _getColorPaletteStops() {
+    if (this._options.useCustomColorPalette && this._options.customColorPalette) {
+      return this._options.customColorPalette.map((config, index) => {
+        return {
+          stop: config.stop,
+          color: config.color,
+          isDefault: index === 0,
+        };
+      });
     }
 
-    return getColorRampStops(this._options.color);
+    const fieldMeta = this.getFieldMeta();
+    if (!fieldMeta || !fieldMeta.categories) {
+      return [];
+    }
+
+    const colors = getColorPalette(this._options.color);
+    if (!colors) {
+      return [];
+    }
+    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
+
+    const stops = [];
+    for (let i = 0; i < maxLength; i++) {
+      stops.push({
+        stop: i === 0 ? '__DEFAULT__' : fieldMeta.categories[i - 1].key,
+        isDefault: i === 0,
+        color: colors[i],
+      });
+    }
+    return stops;
+  }
+
+  _getMbDataDrivenCategoricalColor() {
+    if (
+      this._options.useCustomColorPalette &&
+      (!this._options.customColorPalette || !this._options.customColorPalette.length)
+    ) {
+      return null;
+    }
+
+    const paletteStops = this._getColorPaletteStops();
+    if (!paletteStops.length) {
+      return null;
+    }
+    const mbStops = [];
+    for (let i = 1; i < paletteStops.length; i++) {
+      const stop = paletteStops[i];
+      mbStops.push(stop.stop);
+      mbStops.push(stop.color);
+    }
+    mbStops.push(paletteStops[0].color); //first color is default color
+    return ['match', ['get', this._options.field.name], ...mbStops];
+  }
+
+  _getMBDataDrivenColor({ targetName }) {
+    if (this.isCategorical()) {
+      return this._getMbDataDrivenCategoricalColor({ targetName });
+    } else {
+      return this._getMbDataDrivenOrdinalColor({ targetName });
+    }
+  }
+
+  _getOrdinalColorStopsFromCustom() {
+    return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+      return [...accumulatedStops, nextStop.stop, nextStop.color];
+    }, []);
+  }
+
+  _getMbOrdinalColorStops() {
+    if (this._options.useCustomColorRamp) {
+      return this._getOrdinalColorStopsFromCustom();
+    } else {
+      return getColorRampStops(this._options.color);
+    }
   }
 
   renderRangeLegendHeader() {
@@ -172,19 +255,43 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     );
   }
 
-  _renderColorbreaks({ isLinesOnly, isPointsOnly, symbolId }) {
-    if (!this._options.customColorRamp) {
-      return null;
+  _getColorRampStops() {
+    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
+      return this._options.customColorRamp;
+    } else {
+      return [];
     }
+  }
 
-    return this._options.customColorRamp.map((config, index) => {
-      const value = this.formatField(config.stop);
+  _getColorStops() {
+    if (this.isOrdinal()) {
+      return this._getColorRampStops();
+    } else if (this.isCategorical()) {
+      return this._getColorPaletteStops();
+    } else {
+      return [];
+    }
+  }
+
+  _renderColorbreaks({ isLinesOnly, isPointsOnly, symbolId }) {
+    const stops = this._getColorStops();
+    return stops.map((config, index) => {
+      let textValue;
+      if (config.isDefault) {
+        textValue = (
+          <EuiText size={'xs'}>
+            <EuiTextColor color="secondary">Default</EuiTextColor>
+          </EuiText>
+        );
+      } else {
+        const value = this.formatField(config.stop);
+        textValue = <EuiText size={'xs'}>{value}</EuiText>;
+      }
+
       return (
         <EuiFlexItem key={index}>
           <EuiFlexGroup direction={'row'} gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiText size={'xs'}>{value}</EuiText>
-            </EuiFlexItem>
+            <EuiFlexItem>{textValue}</EuiFlexItem>
             <EuiFlexItem>
               {this._renderStopIcon(config.color, isLinesOnly, isPointsOnly, symbolId)}
             </EuiFlexItem>

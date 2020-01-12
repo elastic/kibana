@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValidHex } from '@elastic/eui';
+import { EuiButtonIcon, EuiColorPicker, isValidHex } from '@elastic/eui';
+import _ from 'lodash';
+import React from 'react';
+import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 
 export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
@@ -14,7 +17,15 @@ export function removeRow(colorStops, index) {
   return [...colorStops.slice(0, index), ...colorStops.slice(index + 1)];
 }
 
-export function addRow(colorStops, index) {
+export function addOrdinalRow(colorStops, index) {
+  return addRow(colorStops, index, COLOR_MAP_TYPE.ORDINAL);
+}
+
+export function addCategoricalRow(colorStops, index) {
+  return addRow(colorStops, index, COLOR_MAP_TYPE.CATEGORICAL);
+}
+
+export function addRow(colorStops, index, colorMapType) {
   const currentStop = colorStops[index].stop;
   let delta = 1;
   if (index === colorStops.length - 1) {
@@ -29,22 +40,51 @@ export function addRow(colorStops, index) {
     delta = (nextStop - currentStop) / 2;
   }
 
+  const nextValue = colorMapType === COLOR_MAP_TYPE.ORDINAL ? currentStop + delta : currentStop;
   const newRow = {
-    stop: currentStop + delta,
+    stop: nextValue,
     color: '#FF0000',
   };
   return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
+}
+
+export function getDeleteButton(onRemove) {
+  return (
+    <EuiButtonIcon
+      iconType="trash"
+      color="danger"
+      aria-label="Delete"
+      title="Delete"
+      onClick={onRemove}
+    />
+  );
+}
+
+export function getColorInput(colorStops, onChange, color, index) {
+  const onColorChange = color => {
+    const newColorStops = _.cloneDeep(colorStops);
+    newColorStops[index].color = color;
+    onChange({
+      colorStops: newColorStops,
+      isInvalid: false,
+    });
+  };
+
+  return {
+    colorError: isColorInvalid(color) ? 'Color must provide a valid hex value' : undefined,
+    colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
+  };
 }
 
 export function isColorInvalid(color) {
   return !isValidHex(color) || color === '';
 }
 
-export function isStopInvalid(stop) {
+export function isOrdinalStopInvalid(stop) {
   return stop === '' || isNaN(stop);
 }
 
-export function isInvalid(colorStops) {
+export function isOrdinalStopsInvalid(colorStops) {
   return colorStops.some((colorStop, index) => {
     // expect stops to be in ascending order
     let isDescending = false;
@@ -53,6 +93,6 @@ export function isInvalid(colorStops) {
       isDescending = prevStop >= colorStop.stop;
     }
 
-    return isColorInvalid(colorStop.color) || isStopInvalid(colorStop.stop) || isDescending;
+    return isColorInvalid(colorStop.color) || isOrdinalStopInvalid(colorStop.stop) || isDescending;
   });
 }

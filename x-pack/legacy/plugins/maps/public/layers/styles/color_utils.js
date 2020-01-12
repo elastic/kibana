@@ -12,6 +12,7 @@ import { ColorGradient } from './components/color_gradient';
 import { palettes } from '@elastic/eui/lib/services';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
+import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 
 const GRADIENT_INTERVALS = 8;
 
@@ -83,4 +84,46 @@ export function getLinearGradient(colorStrings) {
       ${Math.floor((100 * i) / (intervals - 1))}%,`;
   }
   return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
+}
+
+export const COLOR_PALETTES = [
+  {
+    id: 'palette_0',
+    colors: DEFAULT_FILL_COLORS.slice(0, COLOR_PALETTE_MAX_SIZE),
+  },
+  {
+    id: 'palette_1',
+    colors: [
+      '#a6cee3',
+      '#1f78b4',
+      '#b2df8a',
+      '#33a02c',
+      '#fb9a99',
+      '#e31a1c',
+      '#fdbf6f',
+      '#ff7f00',
+      '#cab2d6',
+      '#6a3d9a',
+    ],
+  },
+  {
+    id: 'palette_2',
+    colors: [
+      '#8dd3c7',
+      '#ffffb3',
+      '#bebada',
+      '#fb8072',
+      '#80b1d3',
+      '#fdb462',
+      '#b3de69',
+      '#fccde5',
+      '#d9d9d9',
+      '#bc80bd',
+    ],
+  },
+];
+
+export function getColorPalette(paletteId) {
+  const palette = COLOR_PALETTES.find(palette => palette.id === paletteId);
+  return palette ? palette.colors : null;
 }

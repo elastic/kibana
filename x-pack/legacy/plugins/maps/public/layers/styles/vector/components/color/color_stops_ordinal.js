@@ -16,11 +16,21 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { addRow, removeRow, isColorInvalid, isStopInvalid, isInvalid } from './color_stops_utils';
+import {
+  addOrdinalRow,
+  removeRow,
+  isColorInvalid,
+  isOrdinalStopInvalid,
+  isOrdinalStopsInvalid,
+  getDeleteButton,
+} from './color_stops_utils';
 
 const DEFAULT_COLOR = '#FF0000';
 
-export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], onChange }) => {
+export const ColorStopsOrdinal = ({
+  colorStops = [{ stop: 0, color: DEFAULT_COLOR }],
+  onChange,
+}) => {
   function getStopInput(stop, index) {
     const onStopChange = e => {
       const newColorStops = _.cloneDeep(colorStops);
@@ -28,12 +38,12 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
       newColorStops[index].stop = isNaN(sanitizedValue) ? '' : sanitizedValue;
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isOrdinalStopsInvalid(newColorStops),
       });
     };
 
     let error;
-    if (isStopInvalid(stop)) {
+    if (isOrdinalStopInvalid(stop)) {
       error = 'Stop must be a number';
     } else if (index !== 0 && colorStops[index - 1].stop >= stop) {
       error = 'Stop must be greater than previous stop value';
@@ -53,7 +63,7 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
       newColorStops[index].color = color;
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isOrdinalStopsInvalid(newColorStops),
       });
     };
 
@@ -74,34 +84,25 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
       errors.push(colorError);
     }
 
-    const onRemove = () => {
-      const newColorStops = removeRow(colorStops, index);
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
-      });
-    };
-
     const onAdd = () => {
-      const newColorStops = addRow(colorStops, index);
+      const newColorStops = addOrdinalRow(colorStops, index);
 
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isOrdinalStopsInvalid(newColorStops),
       });
     };
 
     let deleteButton;
     if (colorStops.length > 1) {
-      deleteButton = (
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label="Delete"
-          title="Delete"
-          onClick={onRemove}
-        />
-      );
+      const onRemove = () => {
+        const newColorStops = removeRow(colorStops, index);
+        onChange({
+          colorStops: newColorStops,
+          isInvalid: isOrdinalStopsInvalid(newColorStops),
+        });
+      };
+      deleteButton = getDeleteButton(onRemove);
     }
 
     return (
@@ -135,7 +136,7 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
   return <div>{rows}</div>;
 };
 
-ColorStops.propTypes = {
+ColorStopsOrdinal.propTypes = {
   /**
    * Array of { stop, color }.
    * Stops are numbers in strictly ascending order.

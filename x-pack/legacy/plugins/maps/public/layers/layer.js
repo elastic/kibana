@@ -344,6 +344,10 @@ export class AbstractLayer {
     return [];
   }
 
+  async getStringFields() {
+    return [];
+  }
+
   async getFields() {
     return [];
   }

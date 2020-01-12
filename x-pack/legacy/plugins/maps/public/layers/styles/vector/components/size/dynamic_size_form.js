@@ -9,6 +9,7 @@ import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
 
 export function DynamicSizeForm({
   fields,
@@ -20,6 +21,14 @@ export function DynamicSizeForm({
 
   const onFieldChange = ({ field }) => {
     onDynamicStyleChange(styleProperty.getStyleName(), { ...styleOptions, field });
+  };
+
+  const onFieldMetaOptionsChange = fieldMetaOptions => {
+    const options = {
+      ...styleProperty.getOptions(),
+      fieldMetaOptions,
+    };
+    onDynamicStyleChange(styleProperty.getStyleName(), options);
   };
 
   const onSizeRangeChange = ({ minSize, maxSize }) => {
@@ -43,6 +52,13 @@ export function DynamicSizeForm({
     );
   }
 
+  const fieldMetaOptionsPopover = styleProperty.supportsFieldMeta() ? (
+    <OrdinalFieldMetaOptionsPopover
+      styleProperty={styleProperty}
+      onChange={onFieldMetaOptionsChange}
+    />
+  ) : null;
+
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
@@ -58,6 +74,7 @@ export function DynamicSizeForm({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {sizeRange}
+      {fieldMetaOptionsPopover}
     </Fragment>
   );
 }

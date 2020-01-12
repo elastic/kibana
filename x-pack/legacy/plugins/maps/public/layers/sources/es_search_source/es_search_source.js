@@ -125,6 +125,21 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  async getStringFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+      const aggFields = indexPattern.fields.getByType('string').filter(field => {
+        return field.aggregatable;
+      });
+      return aggFields.map(field => {
+        return this.createField({ fieldName: field.name });
+      });
+    } catch (error) {
+      //error surfaces in the LayerTOC UI
+      return [];
+    }
+  }
+
   async getFields() {
     try {
       const indexPattern = await this.getIndexPattern();

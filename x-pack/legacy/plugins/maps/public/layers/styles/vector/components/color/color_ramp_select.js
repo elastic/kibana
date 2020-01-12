@@ -10,7 +10,8 @@ import PropTypes from 'prop-types';
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../../color_utils';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ColorStops } from './color_stops';
+import { ColorStopsOrdinal } from './color_stops_ordinal';
+import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
@@ -33,6 +34,7 @@ export class ColorRampSelect extends Component {
     this.props.onChange({
       color: useCustomColorRamp ? null : selectedValue,
       useCustomColorRamp,
+      type: COLOR_MAP_TYPE.ORDINAL,
     });
   };
 
@@ -45,6 +47,7 @@ export class ColorRampSelect extends Component {
 
     this.props.onChange({
       customColorRamp: colorStops,
+      type: COLOR_MAP_TYPE.ORDINAL,
     });
   };
 
@@ -62,7 +65,7 @@ export class ColorRampSelect extends Component {
       colorStopsInput = (
         <Fragment>
           <EuiSpacer size="s" />
-          <ColorStops
+          <ColorStopsOrdinal
             colorStops={this.state.customColorRamp}
             onChange={this._onCustomColorRampChange}
           />
@@ -82,13 +85,24 @@ export class ColorRampSelect extends Component {
       },
       ...COLOR_GRADIENTS,
     ];
+    let valueOfSelected;
+    if (useCustomColorRamp) {
+      valueOfSelected = CUSTOM_COLOR_RAMP;
+    } else {
+      if (colorRampOptions.find(option => option.value === color)) {
+        valueOfSelected = color;
+      } else {
+        valueOfSelected = COLOR_GRADIENTS[0].value;
+        this._onColorRampSelect(valueOfSelected);
+      }
+    }
 
     return (
       <Fragment>
         <EuiSuperSelect
           options={colorRampOptions}
           onChange={this._onColorRampSelect}
-          valueOfSelected={useCustomColorRamp ? CUSTOM_COLOR_RAMP : color}
+          valueOfSelected={valueOfSelected}
           hasDividers={true}
           {...rest}
         />
