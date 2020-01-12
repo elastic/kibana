@@ -55,7 +55,7 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToNetworkPage}
-      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName`}
+      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName/:flowTarget`}
     />
     <Route
       component={RedirectToDetectionEnginePage}

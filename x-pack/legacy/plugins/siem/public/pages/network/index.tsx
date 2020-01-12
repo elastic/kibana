@@ -20,9 +20,9 @@ import { NetworkRouteType } from './navigation/types';
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const networkPagePath = `/:pageName(${SiemPageName.network})`;
-const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
+const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
 
-export const NetworkContainer = React.memo<Props>(() => {
+const NetworkContainerComponent: React.FC<Props> = () => {
   const capabilities = useContext(MlCapabilitiesContext);
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
@@ -54,14 +54,15 @@ export const NetworkContainer = React.memo<Props>(() => {
             )}
           />
           <Route
-            path={ipDetailsPagePath}
+            path={`${ipDetailsPageBasePath}/:flowTarget`}
             render={({
               match: {
-                params: { detailName },
+                params: { detailName, flowTarget },
               },
             }) => (
               <IPDetails
                 detailName={detailName}
+                flowTarget={flowTarget}
                 to={to}
                 from={from}
                 setQuery={setQuery}
@@ -69,6 +70,15 @@ export const NetworkContainer = React.memo<Props>(() => {
                 isInitializing={isInitializing}
               />
             )}
+          />
+          <Route
+            path={ipDetailsPageBasePath}
+            render={({
+              location: { search = '' },
+              match: {
+                params: { detailName },
+              },
+            }) => <Redirect to={`/${SiemPageName.network}/ip/${detailName}/source${search}`} />}
           />
           <Route
             path={`/${SiemPageName.network}/`}
@@ -80,6 +90,6 @@ export const NetworkContainer = React.memo<Props>(() => {
       )}
     </GlobalTime>
   );
-});
+};
 
-NetworkContainer.displayName = 'NetworkContainer';
+export const NetworkContainer = React.memo(NetworkContainerComponent);

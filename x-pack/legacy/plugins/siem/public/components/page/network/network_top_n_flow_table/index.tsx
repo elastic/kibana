@@ -88,7 +88,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     updateNetworkTable,
   }) => {
     const columns = useMemo(
-      () => getNFlowColumnsCurated(indexPattern, flowTargeted, type, NetworkTopNFlowTableId),
+      () => getNFlowColumnsCurated(flowTargeted, type, NetworkTopNFlowTableId),
       [indexPattern, flowTargeted, type]
     );
 
