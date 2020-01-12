@@ -25,6 +25,7 @@ import 'brace/mode/markdown';
 
 import { toastNotifications } from 'ui/notify';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
@@ -41,6 +42,7 @@ import {
   EuiImage,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
   EuiText,
   EuiSelect,
   EuiSwitch,
@@ -565,6 +567,26 @@ export class Field extends PureComponent {
 
   renderDescription(setting) {
     let description;
+    let deprecation;
+
+    if (setting.deprecation) {
+      deprecation = (
+        <>
+          <EuiToolTip content={setting.deprecation.message}>
+            <EuiBadge
+              color="warning"
+              onClick={() => {
+                window.open(setting.deprecation.url, '_blank');
+              }}
+              onClickAriaLabel="Click to view deprecation documentation for this setting."
+            >
+              Deprecated
+            </EuiBadge>
+          </EuiToolTip>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
 
     if (React.isValidElement(setting.description)) {
       description = setting.description;
@@ -582,6 +604,7 @@ export class Field extends PureComponent {
 
     return (
       <Fragment>
+        {deprecation}
         {description}
         {this.renderDefaultValue(setting)}
       </Fragment>
