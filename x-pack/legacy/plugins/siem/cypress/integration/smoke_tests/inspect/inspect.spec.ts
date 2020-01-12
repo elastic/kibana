@@ -14,7 +14,7 @@ import {
 } from '../../lib/inspect/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
-import { closesModal, openHostsAndStatsTables } from '../../lib/inspect/helpers';
+import { closesModal, openStatsAndTables } from '../../lib/inspect/helpers';
 
 describe('Inspect', () => {
   context('Hosts stats and tables', () => {
@@ -27,7 +27,7 @@ describe('Inspect', () => {
 
     INSPECT_HOSTS_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
-        openHostsAndStatsTables(table);
+        openStatsAndTables(table);
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
       })
     );
@@ -43,7 +43,7 @@ describe('Inspect', () => {
 
     INSPECT_NETWORK_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
-        openHostsAndStatsTables(table);
+        openStatsAndTables(table);
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
       })
     );

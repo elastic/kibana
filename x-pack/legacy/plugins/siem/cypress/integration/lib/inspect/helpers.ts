@@ -8,7 +8,7 @@ import { DEFAULT_TIMEOUT } from '../util/helpers';
 
 import { INSPECT_BUTTON_ICON, InspectButtonMetadata } from './selectors';
 
-export const openHostsAndStatsTables = (table: InspectButtonMetadata) => {
+export const openStatsAndTables = (table: InspectButtonMetadata) => {
   if (table.tabId) {
     cy.get(table.tabId).click({ force: true });
   }
