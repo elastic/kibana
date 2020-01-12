@@ -24,6 +24,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/plugin_disc
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
 import { CustomCoreSetup } from './server/plugin';
+import { AppCategory } from '../../../core/types';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
@@ -60,6 +61,7 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
+        category: AppCategory.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],

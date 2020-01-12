@@ -31,6 +31,6 @@ export const registerFeature = () => {
     icon: 'timelionApp',
     path: '/app/timelion',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA, // TODO@myasonik #awkward
+    category: FeatureCatalogueCategory.DATA,
   };
 };
