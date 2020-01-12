@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ValuesType } from 'utility-types';
-import { sortBy } from 'lodash';
-import {
-  Connection,
-  ConnectionNode,
-  ServiceConnectionNode
-} from '../../../../common/service_map';
+import { sortBy, isEqual } from 'lodash';
+import { Connection, ConnectionNode } from '../../../../common/service_map';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 
@@ -30,12 +26,9 @@ export function getCytoscapeElements(
   responses: ServiceMapAPIResponse[],
   search: string
 ) {
-  const destMap = responses.reduce((prev, response) => {
-    return {
-      ...prev,
-      ...response.destinationMap
-    };
-  }, {} as Record<string, ServiceConnectionNode>);
+  const discoveredServices = responses.flatMap(
+    response => response.discoveredServices
+  );
 
   const serviceNodes = responses
     .flatMap(response => response.services)
@@ -46,9 +39,15 @@ export function getCytoscapeElements(
 
   // maps destination.address to service.name if possible
   function getConnectionNode(node: ConnectionNode) {
-    const mappedNode =
-      ('destination.address' in node && destMap[node['destination.address']]) ||
-      node;
+    let mappedNode: ConnectionNode | undefined;
+
+    if ('destination.address' in node) {
+      mappedNode = discoveredServices.find(map => isEqual(map.from, node))?.to;
+    }
+
+    if (!mappedNode) {
+      mappedNode = node;
+    }
 
     return {
       ...mappedNode,

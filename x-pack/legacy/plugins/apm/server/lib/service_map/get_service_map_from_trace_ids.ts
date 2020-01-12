@@ -12,7 +12,8 @@ import {
 import {
   Connection,
   ServiceConnectionNode,
-  ConnectionNode
+  ConnectionNode,
+  ExternalConnectionNode
 } from '../../../common/service_map';
 
 export async function getServiceMapFromTraceIds({
@@ -66,6 +67,7 @@ export async function getServiceMapFromTraceIds({
                   'trace.id',
                   'processor.event',
                   'span.type',
+                  'span.subtype',
                   'agent.name'
                 };
                 state.fieldsToCopy = fieldsToCopy;`
@@ -96,7 +98,16 @@ export async function getServiceMapFromTraceIds({
             },
             reduce_script: {
               lang: 'painless',
-              source: `def processAndReturnEvent(def context, def eventId) {
+              source: `
+              def getDestination ( def event ) {
+                def destination = new HashMap();
+                destination['destination.address'] = event['destination.address'];
+                destination['span.type'] = event['span.type'];
+                destination['span.subtype'] = event['span.subtype'];
+                return destination;
+              }
+              
+              def processAndReturnEvent(def context, def eventId) {
                 if (context.processedEvents[eventId] != null) {
                   return context.processedEvents[eventId];
                 }
@@ -135,7 +146,8 @@ export async function getServiceMapFromTraceIds({
                         || parent['service.environment'] != event['service.environment']
                       )
                     ) {
-                      context.externalToServiceMap[parent['destination.address']] = service;
+                      def parentDestination = getDestination(parent);
+                      context.externalToServiceMap.put(parentDestination, service);
                     }
                   }
                 }
@@ -151,8 +163,7 @@ export async function getServiceMapFromTraceIds({
 
                 /* if there is an outgoing span, create a new path */
                 if (event['destination.address'] != null && event['destination.address'] != '') {
-                  def outgoingLocation = new HashMap();
-                  outgoingLocation['destination.address'] = event['destination.address'];
+                  def outgoingLocation = getDestination(event);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);
                   context.paths.add(outgoingPath);
@@ -191,8 +202,17 @@ export async function getServiceMapFromTraceIds({
 
               def response = new HashMap();
               response.paths = paths;
-              response.externalToServiceMap = context.externalToServiceMap;
-              
+
+              def discoveredServices = new HashSet();
+
+              for(entry in context.externalToServiceMap.entrySet()) {
+                def map = new HashMap();
+                map.from = entry.getKey();
+                map.to = entry.getValue();
+                discoveredServices.add(map);
+              }
+              response.discoveredServices = discoveredServices;
+
               return response;`
             }
           }
@@ -205,7 +225,10 @@ export async function getServiceMapFromTraceIds({
 
   const scriptResponse = serviceMapResponse.aggregations?.service_map.value as {
     paths: ConnectionNode[][];
-    externalToServiceMap: Record<string, ServiceConnectionNode>;
+    discoveredServices: Array<{
+      from: ExternalConnectionNode;
+      to: ServiceConnectionNode;
+    }>;
   };
 
   let paths = scriptResponse.paths;
@@ -251,6 +274,6 @@ export async function getServiceMapFromTraceIds({
 
   return {
     connections,
-    destinationMap: scriptResponse.externalToServiceMap
+    discoveredServices: scriptResponse.discoveredServices
   };
 }

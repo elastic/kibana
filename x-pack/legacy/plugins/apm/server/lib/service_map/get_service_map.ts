@@ -46,7 +46,7 @@ async function getConnectionData({
         environment,
         traceIds
       })
-    : { connections: [], destinationMap: {} };
+    : { connections: [], discoveredServices: [] };
 
   return {
     after: nextAfter,
