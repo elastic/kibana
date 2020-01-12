@@ -92,7 +92,6 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
           tabIndex: -1,
-          'data-test-subj': 'closeProviderBadge',
         }}
         data-test-subj="providerBadge"
       >
