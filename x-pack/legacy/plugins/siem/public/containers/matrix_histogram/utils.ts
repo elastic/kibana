@@ -46,13 +46,16 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [totalCount, setTotalCount] = useState(-1);
 
   const isDNSQuery = (
-    variable: GetNetworkDnsQuery.Variables | GetMatrixHistogramQuery.Variables
+    variable: Pick<
+      MatrixHistogramQueryProps,
+      'isHistogram' | 'isPtrIncluded' | 'sort' | 'pagination'
+    >
   ): variable is GetNetworkDnsQuery.Variables => {
     return (
-      (variable as GetNetworkDnsQuery.Variables).isHistogram !== undefined &&
-      (variable as GetNetworkDnsQuery.Variables).isPtrIncluded !== undefined &&
-      (variable as GetNetworkDnsQuery.Variables).sort !== undefined &&
-      (variable as GetNetworkDnsQuery.Variables).pagination !== undefined
+      variable.isHistogram !== undefined &&
+      variable.isPtrIncluded !== undefined &&
+      variable.sort !== undefined &&
+      variable.pagination !== undefined
     );
   };
 
