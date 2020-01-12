@@ -13,11 +13,13 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Node = ({
   nodeSummary,
@@ -38,10 +40,17 @@ export const Node = ({
     metrics.node_latency,
     metrics.node_segment_count,
   ];
-
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.node.heading"
+              defaultMessage="Elasticsearch node"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPanel>
           <NodeDetailStatus stats={nodeSummary} />
         </EuiPanel>

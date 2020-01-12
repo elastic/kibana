@@ -28,8 +28,7 @@ const limitString = (string: string, limit: number) =>
   `${string.slice(0, limit)}${string.length > limit ? '...' : ''}`;
 
 /**
- * This is a component that recursively iterates over data to render out a tree like
- * structure in a flatly.
+ * This component recursively renders a tree
  */
 export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
   const [childrenVisible, setChildrenVisible] = useState(hasVisibleChild(operation));
@@ -106,7 +105,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
       </div>
       {childrenVisible &&
         operation.hasChildren &&
-        operation.children.flatMap((childOp, idx) => (
+        operation.children.map((childOp, idx) => (
           <ShardDetailsTreeNode key={idx} operation={childOp} index={index} shard={shard} />
         ))}
     </>
