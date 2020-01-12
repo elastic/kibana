@@ -64,7 +64,7 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { IndexPatterns } from '../../../../../plugins/data/public';
+import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
@@ -92,7 +92,7 @@ import { DiscoverStartPlugins } from './plugin';
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
  */
 export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -105,7 +105,7 @@ export function getInnerAngularModuleEmbeddable(
   core: CoreStart,
   deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, true);
+  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
   configureAppAngularModule(module, core as LegacyCoreStart, true);
   return module;
 }
@@ -116,6 +116,7 @@ export function initializeInnerAngularModule(
   name = 'app/discover',
   core: CoreStart,
   navigation: NavigationStart,
+  data: DataPublicPluginStart,
   embeddable = false
 ) {
   if (!initialized) {
@@ -129,6 +130,7 @@ export function initializeInnerAngularModule(
     createLocalGlobalStateModule();
     createLocalAppStateModule();
     createLocalStorageModule();
+    createElasticSearchModule(data);
     createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -160,7 +162,6 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'elasticsearch',
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
@@ -294,6 +295,15 @@ const createLocalStorageService = function(type: string) {
     return new Storage($window[type]);
   };
 };
+
+function createElasticSearchModule(data: DataPublicPluginStart) {
+  angular
+    .module('discoverEs', ['discoverConfig'])
+    // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
+    .service('es', () => {
+      return data.__LEGACY.esClient;
+    });
+}
 
 function createIndexPatternsModule() {
   angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);
