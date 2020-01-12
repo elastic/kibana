@@ -18,7 +18,8 @@ import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData, useQuery } from './utils';
+import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
+import { useQuery } from '../../containers/matrix_histogram/utils';
 import {
   MatrixHistogramProps,
   MatrixHistogramOption,

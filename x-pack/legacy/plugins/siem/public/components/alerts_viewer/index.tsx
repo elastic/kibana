@@ -20,10 +20,6 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
     text: i18n.ALERTS_STACK_BY_MODULE,
     value: 'event.module',
   },
-  {
-    text: i18n.ALERTS_DOCUMENT_TYPE,
-    value: 'event.type',
-  },
 ];
 const dataKey = 'Alerts';
 const AlertsOverTimeGqlQuery = gql`
