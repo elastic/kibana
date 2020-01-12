@@ -58,6 +58,23 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
+export interface FieldSelectionItem {
+  name: string;
+  mappings_types: string[];
+  is_included: boolean;
+  is_required: boolean;
+  feature_type?: string;
+  reason?: string;
+}
+
+export interface DfAnalyticsExplainResponse {
+  field_selection: FieldSelectionItem[];
+  memory_estimation: {
+    expected_memory_without_disk: string;
+    expected_memory_with_disk: string;
+  };
+}
+
 export interface Eval {
   meanSquaredError: number | string;
   rSquared: number | string;
@@ -357,6 +374,7 @@ interface LoadEvalDataConfig {
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
   jobType: ANALYSIS_CONFIG_TYPE;
+  requiresKeyword?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -368,6 +386,7 @@ export const loadEvalData = async ({
   searchQuery,
   ignoreDefaultQuery,
   jobType,
+  requiresKeyword,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -375,7 +394,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && requiresKeyword === true) {
     predictedField = `${predictedField}.keyword`;
   }
 
