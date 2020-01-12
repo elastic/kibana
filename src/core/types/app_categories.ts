@@ -17,24 +17,9 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
-  LegacyApp,
-} from './types';
+export enum AppCategory {
+  analyze,
+  observability,
+  security,
+  management,
+}

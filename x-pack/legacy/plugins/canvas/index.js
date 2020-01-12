@@ -5,13 +5,11 @@
  */
 
 import { resolve } from 'path';
+import { AppCategory } from '../../../../src/core/types';
 import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
-
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
 
 export function canvas(kibana) {
   return new kibana.Plugin({

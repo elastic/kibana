@@ -31,13 +31,7 @@ import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
-
-export enum AppCategory {
-  analyze,
-  observability,
-  security,
-  management,
-}
+import { AppCategory } from '../../types';
 
 /** @public */
 export interface AppBase {
@@ -51,7 +45,7 @@ export interface AppBase {
   /**
    * The category the app lives in
    */
-  category: AppCategory;
+  category?: AppCategory;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.

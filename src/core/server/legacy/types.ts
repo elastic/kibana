@@ -19,7 +19,7 @@
 
 import { Server } from 'hapi';
 
-import { ChromeNavLink, AppCategory } from '../../public';
+import { ChromeNavLink } from '../../public';
 import { LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';

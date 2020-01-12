@@ -9,11 +9,9 @@ import { Server } from 'hapi';
 import { resolve } from 'path';
 import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { AppCategory } from '../../../../src/core/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({

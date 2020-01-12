@@ -34,8 +34,7 @@ import { getUiSettingDefaults } from './ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line
-import { AppCategory } from '../../../core/public/application/types';
+import { AppCategory } from '../../../core/types';
 
 const mkdirAsync = promisify(Fs.mkdir);
 

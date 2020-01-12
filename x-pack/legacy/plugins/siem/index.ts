@@ -30,8 +30,7 @@ import {
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
+import { AppCategory } from '../../../../src/core/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {

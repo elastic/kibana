@@ -18,11 +18,9 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/fea
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../plugins/apm/server';
+import { AppCategory } from '../../../../src/core/types';
 
 export const APP_ID = 'infra';
-
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
 
 export function infra(kibana: any) {
   return new kibana.Plugin({

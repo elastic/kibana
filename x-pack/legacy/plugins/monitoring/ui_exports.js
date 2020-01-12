@@ -6,8 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
+import { AppCategory } from '../../../../src/core/types';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the

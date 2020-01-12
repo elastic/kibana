@@ -59,7 +59,7 @@ import {
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
-import { AppCategory } from '../../../application/types';
+import { AppCategory } from '../../../../types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -493,8 +493,6 @@ class HeaderUI extends Component<Props, State> {
     if (!isVisible) {
       return null;
     }
-
-    // console.log(this.props.application);
 
     return (
       <header>

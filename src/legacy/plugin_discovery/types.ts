@@ -24,8 +24,7 @@ import { Capabilities } from '../../core/server';
 import { SavedObjectsSchemaDefinition } from '../../core/server/saved_objects/schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagementDefinition } from '../../core/server/saved_objects/management';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AppCategory } from '../../../../src/core/public/application/types';
+import { AppCategory } from '../../core/types';
 
 /**
  * Usage
@@ -61,7 +60,7 @@ export interface LegacyPluginOptions {
       euiIconType: string;
       order: number;
       listed: boolean;
-      category: AppCategory;
+      category?: AppCategory;
     }>;
     apps: any;
     hacks: string[];

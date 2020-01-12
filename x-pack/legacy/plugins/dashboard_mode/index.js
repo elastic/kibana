@@ -5,15 +5,10 @@
  */
 
 import { resolve } from 'path';
-
-import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
-
-import { createDashboardModeRequestInterceptor } from './server';
-
 import { i18n } from '@kbn/i18n';
-
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
+import { AppCategory } from '../../../../src/core/types';
+import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
+import { createDashboardModeRequestInterceptor } from './server';
 
 // Copied largely from plugins/kibana/index.js. The dashboard viewer includes just the dashboard section of
 // the standard kibana plugin. We don't want to include code for the other links (visualize, dev tools, etc)

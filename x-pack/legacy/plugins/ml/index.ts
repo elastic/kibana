@@ -10,7 +10,7 @@ import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
 import { CloudSetup } from '../../../plugins/cloud/server';
-
+import { AppCategory } from '../../../../src/core/types';
 import {
   MlInitializerContext,
   MlCoreSetup,
@@ -18,9 +18,6 @@ import {
 } from './server/new_platform/plugin';
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
-
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
 
 interface MlServer extends Server {
   addAppLinksToSampleDataset: () => {};

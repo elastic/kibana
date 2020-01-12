@@ -18,7 +18,7 @@
  */
 
 import { pick } from '../../../utils';
-import { AppCategory } from '../../application/types';
+import { AppCategory } from '../../../types';
 
 /**
  * @public
@@ -37,7 +37,7 @@ export interface ChromeNavLink {
   /**
    * The category the app lives in
    */
-  readonly category: AppCategory;
+  readonly category?: AppCategory;
 
   /**
    * The base route used to open the root of an application.

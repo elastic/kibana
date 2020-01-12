@@ -64,8 +64,8 @@ export class LegacyPlatformService {
 
   public setup({ core, plugins }: SetupDeps) {
     // Always register legacy apps, even if not in legacy mode.
-    core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) => {
-      return core.application.registerLegacyApp({
+    core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      core.application.registerLegacyApp({
         id: navLink.id,
         order: navLink.order,
         title: navLink.title,
@@ -75,8 +75,8 @@ export class LegacyPlatformService {
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
         category: navLink.category,
-      });
-    });
+      })
+    );
 
     const legacyCore: LegacyCoreSetup = {
       ...core,

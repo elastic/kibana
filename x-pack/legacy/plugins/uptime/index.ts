@@ -9,8 +9,7 @@ import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
 import { KibanaServer, plugin } from './server';
-// eslint-disable-next-line
-import { AppCategory } from '../../../../src/core/public/application/types';
+import { AppCategory } from '../../../../src/core/types';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
