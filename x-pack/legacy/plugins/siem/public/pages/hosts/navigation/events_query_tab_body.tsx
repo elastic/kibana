@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
@@ -13,13 +13,14 @@ import { eventsDefaultModel } from '../../../components/events_viewer/default_mo
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
+import * as i18n from '../translations';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 const eventsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'action',
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
     value: 'event.action',
   },
 ];
@@ -33,6 +34,13 @@ export const EventsQueryTabBody = ({
   startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: EVENTS_HISTOGRAM_ID });
+      }
+    };
+  }, []);
   return (
     <>
       <MatrixHistogramContainer
@@ -49,7 +57,7 @@ export const EventsQueryTabBody = ({
         stackByOptions={eventsStackByOptions}
         startDate={startDate}
         type={hostsModel.HostsType.page}
-        title="Events"
+        title={i18n.NAVIGATION_EVENTS_TITLE}
         updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
       />

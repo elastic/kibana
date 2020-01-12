@@ -17,6 +17,7 @@ import {
   SortField,
   SourceConfiguration,
   TimerangeInput,
+  Maybe,
 } from '../../graphql/types';
 import { RequestFacade } from '../../types';
 
@@ -131,7 +132,7 @@ export interface RequestBasicOptions {
 }
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField: string;
+  stackByField?: Maybe<string>;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

@@ -22,12 +22,13 @@ import { networkModel } from '../../../store';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { networkDnsQuery } from '../../../containers/network_dns/index.gql_query';
 import { bytesFormatter } from '../../../components/matrix_histogram/utils';
+import * as i18n from '../translations';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 const dnsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'domain',
+    text: i18n.NAVIGATION_DNS_STACK_BY_DOMAIN,
     value: 'dns.question.registered_domain',
   },
 ];
@@ -82,7 +83,7 @@ export const DnsQueryTabBody = ({
             sourceId="default"
             startDate={startDate}
             stackByOptions={dnsStackByOptions}
-            title="DNS"
+            title={i18n.NAVIGATION_DNS_TITLE}
             type={networkModel.NetworkType.page}
             updateDateRange={updateDateRange}
             yTickFormatter={bytesFormatter}

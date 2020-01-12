@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType } from '@elastic/charts';
+import { ScaleType, Position } from '@elastic/charts';
 import { SetStateAction } from 'react';
 import { DocumentNode } from 'graphql';
 import {
@@ -12,9 +12,6 @@ import {
   MatrixOverOrdinalHistogramData,
   NetworkDnsSortField,
   PaginationInputPaginated,
-  TimerangeInput,
-  Maybe,
-  Source,
 } from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
@@ -71,6 +68,7 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  legendPosition?: Position;
 }
 
 export interface HistogramBucket {

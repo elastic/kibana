@@ -44,6 +44,7 @@ export const MatrixHistogram = React.memo(
     id,
     isPtrIncluded,
     isInspected,
+    legendPosition,
     limit,
     mapping,
     query,
@@ -66,6 +67,7 @@ export const MatrixHistogram = React.memo(
       scaleType,
       yTickFormatter,
       showLegend,
+      legendPosition,
     });
     const [showInspect, setShowInspect] = useState(false);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);

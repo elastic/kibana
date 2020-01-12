@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import * as i18n from './translations';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
@@ -18,7 +19,7 @@ import { MatrixHistogramGqlQuery } from '../../matrix_histogram/index.gql_query'
 const ID = 'anomaliesOverTimeQuery';
 const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'job',
+    text: i18n.ANOMALIES_STACK_BY_JOB_ID,
     value: 'job_id',
   },
 ];
@@ -50,6 +51,14 @@ export const AnomaliesQueryTabBody = ({
     ip
   );
 
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+
   return (
     <>
       <MatrixHistogramContainer
@@ -67,7 +76,7 @@ export const AnomaliesQueryTabBody = ({
         sourceId="default"
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
-        title="Anomalies"
+        title={i18n.ANOMALIES_TITLE}
         type={type}
         updateDateRange={updateDateRange}
       />

@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -19,12 +19,13 @@ import {
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
 import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
+import * as i18n from '../translations';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
 const authStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'event type',
+    text: i18n.NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE,
     value: 'event.type',
   },
 ];
@@ -56,65 +57,74 @@ export const AuthenticationsQueryTabBody = ({
   startDate,
   type,
   updateDateRange = () => {},
-}: HostsComponentsQueryProps) => (
-  <>
-    <MatrixHistogramContainer
-      authenticationsType={true}
-      dataKey="AuthenticationsHistogram"
-      defaultStackByOption={authStackByOptions[0]}
-      deleteQuery={deleteQuery}
-      endDate={endDate}
-      filterQuery={filterQuery}
-      id={ID}
-      mapping={authMatrixDataMappingFields}
-      query={MatrixHistogramGqlQuery}
-      setQuery={setQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      stackByOptions={authStackByOptions}
-      title="Authentication"
-      type={hostsModel.HostsType.page}
-      updateDateRange={updateDateRange}
-    />
-    <EuiSpacer size="l" />
-    <AuthenticationsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({
-        authentications,
-        totalCount,
-        loading,
-        pageInfo,
-        loadPage,
-        id,
-        inspect,
-        isInspected,
-        refetch,
-      }) => (
-        <AuthenticationTableManage
-          data={authentications}
-          deleteQuery={deleteQuery}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          isInspect={isInspected}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          setQuery={setQuery}
-          totalCount={totalCount}
-          type={type}
-        />
-      )}
-    </AuthenticationsQuery>
-  </>
-);
+}: HostsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+  return (
+    <>
+      <MatrixHistogramContainer
+        authenticationsType={true}
+        dataKey="AuthenticationsHistogram"
+        defaultStackByOption={authStackByOptions[0]}
+        deleteQuery={deleteQuery}
+        endDate={endDate}
+        filterQuery={filterQuery}
+        id={ID}
+        mapping={authMatrixDataMappingFields}
+        query={MatrixHistogramGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
+        sourceId="default"
+        startDate={startDate}
+        stackByOptions={authStackByOptions}
+        title={i18n.NAVIGATION_AUTHENTICATIONS_TITLE}
+        type={hostsModel.HostsType.page}
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer size="l" />
+      <AuthenticationsQuery
+        endDate={endDate}
+        filterQuery={filterQuery}
+        skip={skip}
+        sourceId="default"
+        startDate={startDate}
+        type={type}
+      >
+        {({
+          authentications,
+          totalCount,
+          loading,
+          pageInfo,
+          loadPage,
+          id,
+          inspect,
+          isInspected,
+          refetch,
+        }) => (
+          <AuthenticationTableManage
+            data={authentications}
+            deleteQuery={deleteQuery}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+            id={id}
+            inspect={inspect}
+            isInspect={isInspected}
+            loading={loading}
+            loadPage={loadPage}
+            refetch={refetch}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+            setQuery={setQuery}
+            totalCount={totalCount}
+            type={type}
+          />
+        )}
+      </AuthenticationsQuery>
+    </>
+  );
+};
 
 AuthenticationsQueryTabBody.displayName = 'AuthenticationsQueryTabBody';

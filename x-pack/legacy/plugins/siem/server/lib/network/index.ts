@@ -41,7 +41,7 @@ export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
   isPtrIncluded: boolean;
   networkDnsSortField: NetworkDnsSortField;
-  stackByField: string;
+  stackByField?: Maybe<string>;
 }
 
 export class Network {
