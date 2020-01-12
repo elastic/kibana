@@ -25,7 +25,7 @@ describe('Inspect', () => {
       closesModal();
     });
 
-    INSPECT_HOSTS_BUTTONS_IN_SIEM.map(table =>
+    INSPECT_HOSTS_BUTTONS_IN_SIEM.forEach(table =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
@@ -41,7 +41,7 @@ describe('Inspect', () => {
       closesModal();
     });
 
-    INSPECT_NETWORK_BUTTONS_IN_SIEM.map(table =>
+    INSPECT_NETWORK_BUTTONS_IN_SIEM.forEach(table =>
       it(`inspects the ${table.title}`, () => {
         openStatsAndTables(table);
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
