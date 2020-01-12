@@ -13,7 +13,7 @@ import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { drag } from '../../lib/drag_n_drop/helpers';
-import { clearTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import { createNewTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('timeline flyout button', () => {
   before(() => {
@@ -21,7 +21,13 @@ describe('timeline flyout button', () => {
   });
 
   afterEach(() => {
-    clearTimeline();
+    cy.get('[data-test-subj="kibanaChrome"]').then($page => {
+      if ($page.find('[data-test-subj="flyoutOverlay"]').length === 1) {
+        toggleTimelineVisibility();
+      }
+    });
+
+    createNewTimeline();
   });
 
   it('toggles open the timeline', () => {
