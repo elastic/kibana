@@ -85,8 +85,12 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
-    timeline_id: timeline.id,
-    timeline_title: timeline.title,
+    ...(timeline.id != null && timeline.title != null
+      ? {
+          timeline_id: timeline.id,
+          timeline_title: timeline.title,
+        }
+      : {}),
     threats: threats
       .filter(threat => threat.tactic.name !== 'none')
       .map(threat => ({
