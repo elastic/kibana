@@ -10,7 +10,7 @@ import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
 } from '../../lib/timeline/selectors';
 import {
-  clearTimeline,
+  createNewTimeline,
   dragFromAllHostsToTimeline,
   toggleTimelineVisibility,
 } from '../../lib/timeline/helpers';
@@ -31,7 +31,7 @@ describe('timeline data providers', () => {
   });
 
   afterEach(() => {
-    clearTimeline();
+    createNewTimeline();
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
