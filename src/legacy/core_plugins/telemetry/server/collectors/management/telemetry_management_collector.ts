@@ -33,23 +33,17 @@ export async function getTranslationCount(loader: any, locale: string): Promise<
 export function createCollectorFetch(server: Server) {
   return async function fetchUsageStats(): Promise<UsageStats> {
     const internalRepo = server.newPlatform.setup.core.savedObjects.createInternalRepository();
-    const uiSettings = server.newPlatform.start.core.uiSettings.asScopedToClient(
+    const uiSettingsClient = server.newPlatform.start.core.uiSettings.asScopedToClient(
       new SavedObjectsClient(internalRepo)
     );
 
-    const all = await uiSettings.getAll();
-    console.log(
-      await uiSettings.get('visualize:enableLabs'),
-      uiSettings.isOverridden('visualize:enableLabs')
-    );
-    const modifiedEntries = Object.keys(all)
-      .filter((setting: any) => uiSettings.isOverridden(setting[0]))
+    const user = await uiSettingsClient.getUserProvided();
+    const modifiedEntries = Object.keys(user)
+      .filter((key: string) => key !== 'buildNum')
       .reduce((obj: any, key: string) => {
-        obj[key] = all[key];
+        obj[key] = user[key].userValue;
         return obj;
       }, {});
-    modifiedEntries.test = 'aaa';
-    console.log(modifiedEntries);
 
     return modifiedEntries;
   };
