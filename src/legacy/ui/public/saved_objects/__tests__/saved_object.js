@@ -108,10 +108,10 @@ describe('Saved Object', function() {
   );
 
   beforeEach(
-    ngMock.inject(function(es, $window) {
+    ngMock.inject(function($window) {
       savedObjectsClientStub = npStart.core.savedObjects.client;
       SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
-      esDataStub = es;
+      esDataStub = npStart.plugins.data.__LEGACY.esClient;
       window = $window;
     })
   );
@@ -130,7 +130,7 @@ describe('Saved Object', function() {
     describe('with confirmOverwrite', function() {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(Bluebird.reject(mock409FetchError));
+        esDataStub.create.returns(Bluebird.reject(mock409FetchError));
       }
 
       it('when false does not request overwrite', function() {
