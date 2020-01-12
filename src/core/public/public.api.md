@@ -26,6 +26,8 @@ export interface App extends AppBase {
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
+    // Warning: (ae-forgotten-export) The symbol "AppCategory" needs to be exported by the entry point index.d.ts
+    category?: AppCategory;
     euiIconType?: string;
     icon?: string;
     // (undocumented)
@@ -225,6 +227,7 @@ export interface ChromeNavLink {
     // @deprecated
     readonly active?: boolean;
     readonly baseUrl: string;
+    readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
     readonly euiIconType?: string;
@@ -711,6 +714,8 @@ export interface LegacyCoreStart extends CoreStart {
 
 // @public (undocumented)
 export interface LegacyNavLink {
+    // (undocumented)
+    category?: AppCategory;
     // (undocumented)
     euiIconType?: string;
     // (undocumented)
