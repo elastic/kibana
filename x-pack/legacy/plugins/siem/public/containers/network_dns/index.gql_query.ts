@@ -8,15 +8,16 @@ import gql from 'graphql-tag';
 
 export const networkDnsQuery = gql`
   query GetNetworkDnsQuery(
-    $sourceId: ID!
-    $sort: NetworkDnsSortField!
-    $isPtrIncluded: Boolean!
-    $timerange: TimerangeInput!
-    $pagination: PaginationInputPaginated!
-    $filterQuery: String
     $defaultIndex: [String!]!
+    $filterQuery: String
     $inspect: Boolean!
     $isHistogram: Boolean!
+    $isPtrIncluded: Boolean!
+    $pagination: PaginationInputPaginated!
+    $sort: NetworkDnsSortField!
+    $sourceId: ID!
+    $stackByField: String
+    $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id

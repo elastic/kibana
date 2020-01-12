@@ -6,14 +6,13 @@
 import { noop } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
-import { getMatrixHistogramQuery } from '../../containers/helpers';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
+import { MatrixHistogramGqlQuery } from '../../containers/matrix_histogram/index.gql_query';
 const ID = 'alertsOverTimeQuery';
 const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -22,9 +21,6 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 const dataKey = 'Alerts';
-const AlertsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Alerts')}
-`;
 export const AlertsView = ({
   deleteQuery,
   endDate,
@@ -46,13 +42,14 @@ export const AlertsView = ({
   return (
     <>
       <MatrixHistogramContainer
+        alertsType={true}
         dataKey={dataKey}
         deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[0]}
         endDate={endDate}
         filterQuery={filterQuery}
         id={ID}
-        query={AlertsOverTimeGqlQuery}
+        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         skip={skip}
         sourceId="default"

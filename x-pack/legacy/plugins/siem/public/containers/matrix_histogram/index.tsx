@@ -22,9 +22,13 @@ import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface OwnProps extends QueryTemplateProps {
+  alertsType?: boolean;
+  anomaliesType?: boolean;
+  authenticationsType?: boolean;
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
   deleteQuery?: ({ id }: { id: string }) => void;
+  eventsType?: boolean;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;

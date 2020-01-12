@@ -2348,6 +2348,8 @@ export interface NetworkDnsSourceArgs {
 
   sort: NetworkDnsSortField;
 
+  stackByField?: Maybe<string>;
+
   timerange: TimerangeInput;
 
   defaultIndex: string[];
@@ -3223,17 +3225,165 @@ export namespace GetKpiNetworkQuery {
   };
 }
 
+export namespace GetMatrixHistogramQuery {
+  export type Variables = {
+    alertsType: boolean;
+    anomaliesType: boolean;
+    authenticationsType: boolean;
+    defaultIndex: string[];
+    eventsType: boolean;
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+    sourceId: string;
+    stackByField?: Maybe<string>;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AlertsHistogram: AlertsHistogram;
+
+    AnomaliesHistogram: AnomaliesHistogram;
+
+    AuthenticationsHistogram: AuthenticationsHistogram;
+
+    EventsHistogram: EventsHistogram;
+  };
+
+  export type AlertsHistogram = {
+    __typename?: 'AlertsOverTimeData';
+
+    AlertsOverTimeByModule: AlertsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type AlertsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type AnomaliesHistogram = {
+    __typename?: 'AnomaliesOverTimeData';
+
+    AnomaliesOverTimeByModule: AnomaliesOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<_Inspect>;
+  };
+
+  export type AnomaliesOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type _Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type AuthenticationsHistogram = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    AuthenticationsOverTimeByModule: AuthenticationsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<__Inspect>;
+  };
+
+  export type AuthenticationsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type __Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type EventsHistogram = {
+    __typename?: 'EventsOverTimeData';
+
+    EventsOverTimeByModule: EventsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<___Inspect>;
+  };
+
+  export type EventsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type ___Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetNetworkDnsQuery {
   export type Variables = {
-    sourceId: string;
-    sort: NetworkDnsSortField;
-    isPtrIncluded: boolean;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
     defaultIndex: string[];
+    filterQuery?: Maybe<string>;
     inspect: boolean;
     isHistogram: boolean;
+    isPtrIncluded: boolean;
+    pagination: PaginationInputPaginated;
+    sort: NetworkDnsSortField;
+    sourceId: string;
+    stackByField?: Maybe<string>;
+    timerange: TimerangeInput;
   };
 
   export type Query = {

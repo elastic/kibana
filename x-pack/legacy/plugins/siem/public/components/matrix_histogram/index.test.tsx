@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { MatrixHistogram } from '.';
-import { EventsOverTimeGqlQuery as mockQuery } from '../../pages/hosts/navigation';
+import { MatrixHistogramGqlQuery as mockQuery } from '../../container/matrix_histogram/index.gql_query';
 
 jest.mock('../../lib/kibana');
 

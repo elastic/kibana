@@ -43,6 +43,7 @@ export interface NetworkDnsArgs {
   networkDns: NetworkDnsEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  stackByField?: string;
   totalCount: number;
   histogram: MatrixOverOrdinalHistogramData[];
 }

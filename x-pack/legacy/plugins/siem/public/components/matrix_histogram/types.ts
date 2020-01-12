@@ -30,7 +30,6 @@ export interface MatrixHistogramOption {
   value: string;
 }
 export interface MatrixHistogramBasicProps {
-  deleteQuery?: ({ id }: { id: string }) => void;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
@@ -48,7 +47,11 @@ export interface MatrixHistogramBasicProps {
 
 export interface MatrixHistogramQueryProps {
   activePage?: number;
+  alertsType?: boolean;
+  anomaliesType?: boolean;
+  authenticationsType?: boolean;
   dataKey: string;
+  eventsType?: boolean;
   endDate: number;
   filterQuery?: ESQuery | string | undefined;
   limit?: number;
@@ -68,23 +71,6 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   scaleType?: ScaleType;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
-}
-
-export interface MatrixHistogramQueryVariables<SortField = NetworkDnsSortField> {
-  sourceId: string;
-  timerange: TimerangeInput;
-  filterQuery?: Maybe<string>;
-  defaultIndex: string[];
-  inspect: boolean;
-  isHistogram?: boolean;
-  sort?: SortField;
-  stackByField: string;
-  isPtrIncluded: boolean;
-  pagination?: PaginationInputPaginated;
-}
-
-export interface MatrixHistogramQuery {
-  source: Source;
 }
 
 export interface HistogramBucket {

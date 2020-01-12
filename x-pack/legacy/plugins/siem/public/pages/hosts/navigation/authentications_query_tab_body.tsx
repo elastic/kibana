@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -18,8 +17,8 @@ import {
   MatrixHistogramMappingTypes,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { getMatrixHistogramQuery } from '../../../containers/helpers';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
+import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
@@ -29,10 +28,6 @@ const authStackByOptions: MatrixHistogramOption[] = [
     value: 'event.type',
   },
 ];
-
-const AuthenticationsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Authentications')}
-`;
 
 enum AuthMatrixDataGroup {
   authSuccess = 'authentication_success',
@@ -64,6 +59,7 @@ export const AuthenticationsQueryTabBody = ({
 }: HostsComponentsQueryProps) => (
   <>
     <MatrixHistogramContainer
+      authenticationsType={true}
       dataKey="Authentications"
       defaultStackByOption={authStackByOptions[0]}
       deleteQuery={deleteQuery}
@@ -71,7 +67,7 @@ export const AuthenticationsQueryTabBody = ({
       filterQuery={filterQuery}
       id={ID}
       mapping={authMatrixDataMappingFields}
-      query={AuthenticationsOverTimeGqlQuery}
+      query={MatrixHistogramGqlQuery}
       setQuery={setQuery}
       skip={skip}
       sourceId="default"

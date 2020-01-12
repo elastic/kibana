@@ -2350,6 +2350,8 @@ export interface NetworkDnsSourceArgs {
 
   sort: NetworkDnsSortField;
 
+  stackByField?: Maybe<string>;
+
   timerange: TimerangeInput;
 
   defaultIndex: string[];
@@ -3195,6 +3197,8 @@ export namespace SourceResolvers {
     pagination: PaginationInputPaginated;
 
     sort: NetworkDnsSortField;
+
+    stackByField?: Maybe<string>;
 
     timerange: TimerangeInput;
 

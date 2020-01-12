@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
@@ -14,7 +13,7 @@ import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { MatrixHistogramContainer } from '../../matrix_histogram';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
-import { getMatrixHistogramQuery } from '../../helpers';
+import { MatrixHistogramGqlQuery } from '../../matrix_histogram/index.gql_query';
 
 const ID = 'anomaliesOverTimeQuery';
 const anomaliesStackByOptions: MatrixHistogramOption[] = [
@@ -23,9 +22,7 @@ const anomaliesStackByOptions: MatrixHistogramOption[] = [
     value: 'job_id',
   },
 ];
-const AnomaliesOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Anomalies')}
-`;
+
 export const AnomaliesQueryTabBody = ({
   deleteQuery,
   endDate,
@@ -56,6 +53,7 @@ export const AnomaliesQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
+        anomaliesType={true}
         dataKey="Anomalies"
         defaultStackByOption={anomaliesStackByOptions[0]}
         deleteQuery={deleteQuery}
@@ -63,7 +61,7 @@ export const AnomaliesQueryTabBody = ({
         filterQuery={mergedFilterQuery}
         hideHistogramIfEmpty={true}
         id={ID}
-        query={AnomaliesOverTimeGqlQuery}
+        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         skip={skip}
         sourceId="default"

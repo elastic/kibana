@@ -32,10 +32,13 @@ import { ChartSeriesData } from '../charts/common';
 export const MatrixHistogram = React.memo(
   ({
     activePage,
+    alertsType,
+    anomaliesType,
+    authenticationsType,
     dataKey,
     defaultStackByOption,
-    deleteQuery,
     endDate,
+    eventsType,
     filterQuery,
     hideHistogramIfEmpty = false,
     id,
@@ -101,8 +104,12 @@ export const MatrixHistogram = React.memo(
       {},
       HistogramAggregation
     >({
+      alertsType,
+      anomaliesType,
+      authenticationsType,
       dataKey,
       endDate,
+      eventsType,
       filterQuery,
       query,
       skip,

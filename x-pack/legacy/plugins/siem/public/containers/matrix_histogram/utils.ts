@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   MatrixHistogramDataTypes,
   MatrixHistogramQueryProps,
-  MatrixHistogramQueryVariables,
-  MatrixHistogramQuery,
 } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { useStateToaster } from '../../components/toasters';
@@ -19,9 +17,14 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
+import { GetMatrixHistogramQuery, GetNetworkDnsQuery } from '../../graphql/types';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
+  alertsType = false,
+  anomaliesType = false,
+  authenticationsType = false,
   dataKey,
+  eventsType = false,
   endDate,
   filterQuery,
   query,
@@ -41,6 +44,45 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
   const [totalCount, setTotalCount] = useState(-1);
+
+  const isDNSQuery = (
+    variable: GetNetworkDnsQuery.Variables | GetMatrixHistogramQuery.Variables
+  ): variable is GetNetworkDnsQuery.Variables => {
+    return (
+      (variable as GetNetworkDnsQuery.Variables).isHistogram !== undefined &&
+      (variable as GetNetworkDnsQuery.Variables).isPtrIncluded !== undefined &&
+      (variable as GetNetworkDnsQuery.Variables).sort !== undefined &&
+      (variable as GetNetworkDnsQuery.Variables).pagination !== undefined
+    );
+  };
+
+  const basicVariables = {
+    filterQuery: createFilter(filterQuery),
+    sourceId: 'default',
+    timerange: {
+      interval: '12h',
+      from: startDate!,
+      to: endDate!,
+    },
+    defaultIndex,
+    inspect: isInspected,
+    stackByField,
+  };
+  const dnsVariables = {
+    ...basicVariables,
+    isHistogram,
+    isPtrIncluded,
+    sort,
+    pagination,
+  };
+  const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
+    ...basicVariables,
+    alertsType,
+    anomaliesType,
+    authenticationsType,
+    eventsType,
+  };
+
   const apolloClient = useApolloClient();
 
   useEffect(() => {
@@ -52,25 +94,13 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       if (!apolloClient || (pagination != null && pagination.querySize < 0)) return null;
       setLoading(true);
       return apolloClient
-        .query<MatrixHistogramQuery, MatrixHistogramQueryVariables>({
+        .query<
+          GetMatrixHistogramQuery.Query | GetNetworkDnsQuery.Query,
+          GetMatrixHistogramQuery.Variables | GetNetworkDnsQuery.Variables
+        >({
           query,
           fetchPolicy: 'cache-first',
-          variables: {
-            filterQuery: createFilter(filterQuery),
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              from: startDate!,
-              to: endDate!,
-            },
-            defaultIndex,
-            inspect: isInspected,
-            isHistogram,
-            stackByField,
-            sort,
-            isPtrIncluded,
-            pagination,
-          },
+          variables: isDNSQuery(dnsVariables) ? dnsVariables : matrixHistogramVariables,
           context: {
             fetchOptions: {
               abortSignal,

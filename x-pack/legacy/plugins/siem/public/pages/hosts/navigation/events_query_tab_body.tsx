@@ -6,20 +6,17 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import gql from 'graphql-tag';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { getMatrixHistogramQuery } from '../../../containers/helpers';
+import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
-export const EventsOverTimeGqlQuery = gql`
-  ${getMatrixHistogramQuery('Events')}
-`;
+
 const eventsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'action',
@@ -43,8 +40,9 @@ export const EventsQueryTabBody = ({
         defaultStackByOption={eventsStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}
+        eventsType={true}
         filterQuery={filterQuery}
-        query={EventsOverTimeGqlQuery}
+        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         skip={skip}
         sourceId="default"
