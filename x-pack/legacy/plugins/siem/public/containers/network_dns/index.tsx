@@ -32,8 +32,8 @@ import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
-const ID = 'networkDnsQuery';
-const HISTOGRAM_ID = 'networkDnsHistogramQuery';
+export const ID = 'networkDnsQuery';
+export const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 export interface NetworkDnsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;

@@ -43,6 +43,7 @@ describe('Matrix Histogram Component', () => {
     setQuery: jest.fn(),
     skip: false,
     sourceId: 'default',
+    stackByField: 'mockStackByField',
     stackByOptions: [{ text: 'text', value: 'value' }],
     startDate: new Date('2019-07-18T19:00: 00.000Z').valueOf(),
     subtitle: 'mockSubtitle',

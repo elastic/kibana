@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
@@ -91,6 +91,10 @@ export const MatrixHistogram = React.memo(
       },
       []
     );
+    const getPagination = () =>
+      activePage != null && limit != null
+        ? generateTablePaginationOptions(activePage, limit)
+        : undefined;
 
     const { data, loading, inspect, totalCount, refetch = noop } = useQuery<
       {},
@@ -107,10 +111,7 @@ export const MatrixHistogram = React.memo(
       isInspected,
       isPtrIncluded,
       isHistogram: true,
-      pagination:
-        activePage != null && limit != null
-          ? generateTablePaginationOptions(activePage, limit)
-          : undefined,
+      pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     });
 

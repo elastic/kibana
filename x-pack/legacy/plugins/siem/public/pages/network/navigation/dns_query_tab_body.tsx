@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { EuiSpacer } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
-import { NetworkDnsQuery, NetworkDnsHistogramQuery } from '../../../containers/network_dns';
+import {
+  NetworkDnsQuery,
+  NetworkDnsHistogramQuery,
+  ID,
+  HISTOGRAM_ID,
+} from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
@@ -29,6 +34,7 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 ];
 
 export const DnsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   skip,
@@ -36,62 +42,72 @@ export const DnsQueryTabBody = ({
   setQuery,
   type,
   updateDateRange = () => {},
-}: NetworkComponentQueryProps) => (
-  <>
-    <NetworkDnsHistogramQuery
-      dataKey={['NetworkDns', 'histogram']}
-      defaultStackByOption={dnsStackByOptions[0]}
-      endDate={endDate}
-      filterQuery={filterQuery}
-      query={networkDnsQuery}
-      scaleType={ScaleType.Ordinal}
-      setQuery={setQuery}
-      sourceId="default"
-      startDate={startDate}
-      stackByOptions={dnsStackByOptions}
-      title="DNS"
-      type={networkModel.NetworkType.page}
-      updateDateRange={updateDateRange}
-      yTickFormatter={bytesFormatter}
-      showLegend={false}
-    />
-    <EuiSpacer />
-    <NetworkDnsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({
-        totalCount,
-        loading,
-        networkDns,
-        pageInfo,
-        loadPage,
-        id,
-        inspect,
-        isInspected,
-        refetch,
-      }) => (
-        <NetworkDnsTableManage
-          data={networkDns}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          isInspect={isInspected}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          setQuery={setQuery}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          totalCount={totalCount}
-          type={type}
-        />
-      )}
-    </NetworkDnsQuery>
-  </>
-);
+}: NetworkComponentQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+        deleteQuery({ id: HISTOGRAM_ID });
+      }
+    };
+  }, []);
+  return (
+    <>
+      <NetworkDnsHistogramQuery
+        dataKey={useMemo(() => ['NetworkDns', 'histogram'], [])}
+        defaultStackByOption={dnsStackByOptions[0]}
+        endDate={endDate}
+        filterQuery={filterQuery}
+        query={networkDnsQuery}
+        scaleType={ScaleType.Ordinal}
+        setQuery={setQuery}
+        sourceId="default"
+        startDate={startDate}
+        stackByOptions={dnsStackByOptions}
+        title="DNS"
+        type={networkModel.NetworkType.page}
+        updateDateRange={updateDateRange}
+        yTickFormatter={bytesFormatter}
+        showLegend={false}
+      />
+      <EuiSpacer />
+      <NetworkDnsQuery
+        endDate={endDate}
+        filterQuery={filterQuery}
+        skip={skip}
+        sourceId="default"
+        startDate={startDate}
+        type={type}
+      >
+        {({
+          totalCount,
+          loading,
+          networkDns,
+          pageInfo,
+          loadPage,
+          id,
+          inspect,
+          isInspected,
+          refetch,
+        }) => (
+          <NetworkDnsTableManage
+            data={networkDns}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+            id={id}
+            inspect={inspect}
+            isInspect={isInspected}
+            loading={loading}
+            loadPage={loadPage}
+            refetch={refetch}
+            setQuery={setQuery}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+            totalCount={totalCount}
+            type={type}
+          />
+        )}
+      </NetworkDnsQuery>
+    </>
+  );
+};
 
 DnsQueryTabBody.displayName = 'DNSQueryTabBody';
