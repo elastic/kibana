@@ -93,12 +93,6 @@ export class Plugin implements CorePlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, { __LEGACY }: LegacyPlugins) {
-    const uiEnabled = core.injectedMetadata.getInjectedVar('uiEnabled');
-
-    if (uiEnabled === false) {
-      return;
-    }
-
     const { capabilities } = __LEGACY;
     const canShowActions = hasShowActionsCapability(capabilities.get());
     const canShowAlerts = hasShowAlertsCapability(capabilities.get());

@@ -15,7 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function() {
     before(async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await browser.refresh();
+      await pageObjects.header.awaitKibanaChrome();
+      await pageObjects.common.navigateToActualUrl('kibana', 'management/kibana/triggersActions');
     });
 
     it('Loads the app', async () => {

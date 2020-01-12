@@ -88,6 +88,7 @@ export default async function({ readConfigFile }) {
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
         '--xpack.endpoint.enabled=true',
+        '--xpack.index_management.enabled=true',
       ],
     },
     uiSettings: {
