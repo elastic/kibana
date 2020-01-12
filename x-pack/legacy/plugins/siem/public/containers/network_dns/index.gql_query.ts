@@ -28,6 +28,7 @@ export const networkDnsQuery = gql`
         pagination: $pagination
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        stackByField: $stackByField
       ) {
         totalCount
         edges @skip(if: $isHistogram) {

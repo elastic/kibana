@@ -2629,7 +2629,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AlertsOverTimeByModule",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -2782,7 +2782,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AnomaliesOverTimeByModule",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -3546,7 +3546,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AuthenticationsOverTimeByModule",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -6265,7 +6265,7 @@
             "deprecationReason": null
           },
           {
-            "name": "EventsOverTimeByModule",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {

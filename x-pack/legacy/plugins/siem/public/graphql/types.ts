@@ -563,7 +563,7 @@ export interface IndexField {
 export interface AlertsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AlertsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -585,7 +585,7 @@ export interface MatrixOverTimeHistogramData {
 export interface AnomaliesOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AnomaliesOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -727,7 +727,7 @@ export interface PageInfoPaginated {
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AuthenticationsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -1311,7 +1311,7 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  EventsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -3262,14 +3262,14 @@ export namespace GetMatrixHistogramQuery {
   export type AlertsHistogram = {
     __typename?: 'AlertsOverTimeData';
 
-    AlertsOverTimeByModule: AlertsOverTimeByModule[];
+    matrixHistogramData: MatrixHistogramData[];
 
     totalCount: number;
 
     inspect: Maybe<Inspect>;
   };
 
-  export type AlertsOverTimeByModule = {
+  export type MatrixHistogramData = {
     __typename?: 'MatrixOverTimeHistogramData';
 
     x: number;
@@ -3290,14 +3290,14 @@ export namespace GetMatrixHistogramQuery {
   export type AnomaliesHistogram = {
     __typename?: 'AnomaliesOverTimeData';
 
-    AnomaliesOverTimeByModule: AnomaliesOverTimeByModule[];
+    matrixHistogramData: _MatrixHistogramData[];
 
     totalCount: number;
 
     inspect: Maybe<_Inspect>;
   };
 
-  export type AnomaliesOverTimeByModule = {
+  export type _MatrixHistogramData = {
     __typename?: 'MatrixOverTimeHistogramData';
 
     x: number;
@@ -3318,14 +3318,14 @@ export namespace GetMatrixHistogramQuery {
   export type AuthenticationsHistogram = {
     __typename?: 'AuthenticationsOverTimeData';
 
-    AuthenticationsOverTimeByModule: AuthenticationsOverTimeByModule[];
+    matrixHistogramData: __MatrixHistogramData[];
 
     totalCount: number;
 
     inspect: Maybe<__Inspect>;
   };
 
-  export type AuthenticationsOverTimeByModule = {
+  export type __MatrixHistogramData = {
     __typename?: 'MatrixOverTimeHistogramData';
 
     x: number;
@@ -3346,14 +3346,14 @@ export namespace GetMatrixHistogramQuery {
   export type EventsHistogram = {
     __typename?: 'EventsOverTimeData';
 
-    EventsOverTimeByModule: EventsOverTimeByModule[];
+    matrixHistogramData: ___MatrixHistogramData[];
 
     totalCount: number;
 
     inspect: Maybe<___Inspect>;
   };
 
-  export type EventsOverTimeByModule = {
+  export type ___MatrixHistogramData = {
     __typename?: 'MatrixOverTimeHistogramData';
 
     x: number;

@@ -39,7 +39,7 @@ export class ElasticsearchAnomaliesAdapter implements AnomaliesAdapter {
     };
     return {
       inspect,
-      AnomaliesOverTimeByModule: getAnomaliesOverTimeByJobId(anomaliesOverTimeBucket),
+      matrixHistogramData: getAnomaliesOverTimeByJobId(anomaliesOverTimeBucket),
       totalCount,
     };
   }

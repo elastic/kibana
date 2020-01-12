@@ -147,7 +147,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
     return {
       inspect,
-      EventsOverTimeByModule: getEventsOverTimeByActionName(eventsOverTimeBucket),
+      matrixHistogramData: getEventsOverTimeByActionName(eventsOverTimeBucket),
       totalCount,
     };
   }

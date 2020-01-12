@@ -132,7 +132,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     };
     return {
       inspect,
-      AuthenticationsOverTimeByModule: getAuthenticationsOverTimeByAuthenticationResult(
+      matrixHistogramData: getAuthenticationsOverTimeByAuthenticationResult(
         authenticationsOverTimeBucket
       ),
       totalCount,

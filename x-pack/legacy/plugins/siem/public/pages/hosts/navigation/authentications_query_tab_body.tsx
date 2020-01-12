@@ -60,7 +60,7 @@ export const AuthenticationsQueryTabBody = ({
   <>
     <MatrixHistogramContainer
       authenticationsType={true}
-      dataKey="Authentications"
+      dataKey="AuthenticationsHistogram"
       defaultStackByOption={authStackByOptions[0]}
       deleteQuery={deleteQuery}
       endDate={endDate}

@@ -54,7 +54,7 @@ export const AnomaliesQueryTabBody = ({
     <>
       <MatrixHistogramContainer
         anomaliesType={true}
-        dataKey="Anomalies"
+        dataKey="AnomaliesHistogram"
         defaultStackByOption={anomaliesStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}

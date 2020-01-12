@@ -20,7 +20,7 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
     value: 'event.module',
   },
 ];
-const dataKey = 'Alerts';
+const dataKey = 'AlertsHistogram';
 export const AlertsView = ({
   deleteQuery,
   endDate,

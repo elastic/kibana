@@ -36,7 +36,7 @@ export const authenticationsSchema = gql`
 
   type AuthenticationsOverTimeData {
     inspect: Inspect
-    AuthenticationsOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 

@@ -111,8 +111,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
           result => {
             if (isSubscribed) {
               const isDataKeyAnArray = Array.isArray(dataKey);
-              const rootDataKey = isDataKeyAnArray ? dataKey[0] : `${dataKey}Histogram`;
-              const histogramDataKey = isDataKeyAnArray ? dataKey[1] : `${dataKey}OverTimeByModule`;
+              const rootDataKey = isDataKeyAnArray ? dataKey[0] : `${dataKey}`;
+              const histogramDataKey = isDataKeyAnArray ? dataKey[1] : `matrixHistogramData`;
               const source = getOr({}, `data.source.${rootDataKey}`, result);
               setData(getOr([], histogramDataKey, source));
               setTotalCount(getOr(-1, 'totalCount', source));

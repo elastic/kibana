@@ -27,7 +27,7 @@ export const MatrixHistogramGqlQuery = gql`
         defaultIndex: $defaultIndex
         stackByField: $stackByField
       ) @include(if: $alertsType) {
-        AlertsOverTimeByModule {
+        matrixHistogramData {
           x
           y
           g
@@ -44,7 +44,7 @@ export const MatrixHistogramGqlQuery = gql`
         defaultIndex: $defaultIndex
         stackByField: $stackByField
       ) @include(if: $anomaliesType) {
-        AnomaliesOverTimeByModule {
+        matrixHistogramData {
           x
           y
           g
@@ -61,7 +61,7 @@ export const MatrixHistogramGqlQuery = gql`
         defaultIndex: $defaultIndex
         stackByField: $stackByField
       ) @include(if: $authenticationsType) {
-        AuthenticationsOverTimeByModule {
+        matrixHistogramData {
           x
           y
           g
@@ -78,7 +78,7 @@ export const MatrixHistogramGqlQuery = gql`
         defaultIndex: $defaultIndex
         stackByField: $stackByField
       ) @include(if: $eventsType) {
-        EventsOverTimeByModule {
+        matrixHistogramData {
           x
           y
           g

@@ -31,14 +31,14 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
-    const AlertsOverTimeByModule = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
+    const matrixHistogramData = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
     return {
       inspect,
-      AlertsOverTimeByModule: getAlertsOverTimeByModule(AlertsOverTimeByModule),
+      matrixHistogramData: getAlertsOverTimeByModule(matrixHistogramData),
       totalCount,
     };
   }

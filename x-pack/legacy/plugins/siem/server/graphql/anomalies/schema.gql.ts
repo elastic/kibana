@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export const anomaliesSchema = gql`
   type AnomaliesOverTimeData {
     inspect: Inspect
-    AnomaliesOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 

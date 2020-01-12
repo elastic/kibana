@@ -565,7 +565,7 @@ export interface IndexField {
 export interface AlertsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AlertsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -587,7 +587,7 @@ export interface MatrixOverTimeHistogramData {
 export interface AnomaliesOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AnomaliesOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -729,7 +729,7 @@ export interface PageInfoPaginated {
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  AuthenticationsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -1313,7 +1313,7 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  EventsOverTimeByModule: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -3463,7 +3463,7 @@ export namespace AlertsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    AlertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
+    matrixHistogramData?: MatrixHistogramDataResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -3477,7 +3477,7 @@ export namespace AlertsOverTimeDataResolvers {
     Parent = AlertsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AlertsOverTimeByModuleResolver<
+  export type MatrixHistogramDataResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = AlertsOverTimeData,
     TContext = SiemContext
@@ -3538,7 +3538,7 @@ export namespace AnomaliesOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AnomaliesOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    AnomaliesOverTimeByModule?: AnomaliesOverTimeByModuleResolver<
+    matrixHistogramData?: MatrixHistogramDataResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -3552,7 +3552,7 @@ export namespace AnomaliesOverTimeDataResolvers {
     Parent = AnomaliesOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AnomaliesOverTimeByModuleResolver<
+  export type MatrixHistogramDataResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = AnomaliesOverTimeData,
     TContext = SiemContext
@@ -4013,7 +4013,7 @@ export namespace AuthenticationsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    AuthenticationsOverTimeByModule?: AuthenticationsOverTimeByModuleResolver<
+    matrixHistogramData?: MatrixHistogramDataResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -4027,7 +4027,7 @@ export namespace AuthenticationsOverTimeDataResolvers {
     Parent = AuthenticationsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AuthenticationsOverTimeByModuleResolver<
+  export type MatrixHistogramDataResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = AuthenticationsOverTimeData,
     TContext = SiemContext
@@ -5967,7 +5967,7 @@ export namespace EventsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventsOverTimeData> {
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    EventsOverTimeByModule?: EventsOverTimeByModuleResolver<
+    matrixHistogramData?: MatrixHistogramDataResolver<
       MatrixOverTimeHistogramData[],
       TypeParent,
       TContext
@@ -5981,7 +5981,7 @@ export namespace EventsOverTimeDataResolvers {
     Parent = EventsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type EventsOverTimeByModuleResolver<
+  export type MatrixHistogramDataResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = EventsOverTimeData,
     TContext = SiemContext

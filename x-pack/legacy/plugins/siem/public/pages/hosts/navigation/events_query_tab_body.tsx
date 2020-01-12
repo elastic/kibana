@@ -36,7 +36,7 @@ export const EventsQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        dataKey="Events"
+        dataKey="EventsHistogram"
         defaultStackByOption={eventsStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}

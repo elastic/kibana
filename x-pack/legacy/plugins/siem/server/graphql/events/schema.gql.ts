@@ -76,7 +76,7 @@ export const eventsSchema = gql`
 
   type EventsOverTimeData {
     inspect: Inspect
-    EventsOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
