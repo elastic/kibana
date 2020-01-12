@@ -135,7 +135,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     const abortSignal = abortCtrl.signal;
 
     async function fetchData() {
-      if (!apolloClient) return null;
+      if (!apolloClient || (pagination != null && pagination.querySize < 0)) return null;
       setLoading(true);
       return apolloClient
         .query<MatrixHistogramQuery, MatrixHistogramQueryVariables>({

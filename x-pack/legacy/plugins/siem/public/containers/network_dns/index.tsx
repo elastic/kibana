@@ -26,13 +26,13 @@ import { generateTablePaginationOptions } from '../../components/paginated_table
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../store/constants';
 import { MatrixHistogram } from '../../components/matrix_histogram';
 import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
-export const ID = 'networkDnsQuery';
+const ID = 'networkDnsQuery';
 export const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 export interface NetworkDnsArgs {
   id: string;
@@ -55,6 +55,7 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
+  limit: number;
   query: DocumentNode;
   scaleType: ScaleType;
   setQuery: SetQuery;
@@ -181,12 +182,12 @@ const makeMapStateToProps = () => {
 const makeMapHistogramStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = HISTOGRAM_ID }: OwnProps) => {
+  const mapStateToProps = (state: State, { id = HISTOGRAM_ID, limit }: DnsHistogramOwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       ...getNetworkDnsSelector(state),
       activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-      limit: DEFAULT_TABLE_LIMIT,
+      limit,
       isInspected,
       id,
     };

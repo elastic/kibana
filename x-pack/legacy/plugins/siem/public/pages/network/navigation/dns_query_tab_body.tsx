@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -13,7 +13,6 @@ import { NetworkDnsTable } from '../../../components/page/network/network_dns_ta
 import {
   NetworkDnsQuery,
   NetworkDnsHistogramQuery,
-  ID,
   HISTOGRAM_ID,
 } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -46,50 +45,50 @@ export const DnsQueryTabBody = ({
   useEffect(() => {
     return () => {
       if (deleteQuery) {
-        deleteQuery({ id: ID });
         deleteQuery({ id: HISTOGRAM_ID });
       }
     };
   }, []);
   return (
-    <>
-      <NetworkDnsHistogramQuery
-        dataKey={useMemo(() => ['NetworkDns', 'histogram'], [])}
-        defaultStackByOption={dnsStackByOptions[0]}
-        endDate={endDate}
-        filterQuery={filterQuery}
-        query={networkDnsQuery}
-        scaleType={ScaleType.Ordinal}
-        setQuery={setQuery}
-        sourceId="default"
-        startDate={startDate}
-        stackByOptions={dnsStackByOptions}
-        title="DNS"
-        type={networkModel.NetworkType.page}
-        updateDateRange={updateDateRange}
-        yTickFormatter={bytesFormatter}
-        showLegend={false}
-      />
-      <EuiSpacer />
-      <NetworkDnsQuery
-        endDate={endDate}
-        filterQuery={filterQuery}
-        skip={skip}
-        sourceId="default"
-        startDate={startDate}
-        type={type}
-      >
-        {({
-          totalCount,
-          loading,
-          networkDns,
-          pageInfo,
-          loadPage,
-          id,
-          inspect,
-          isInspected,
-          refetch,
-        }) => (
+    <NetworkDnsQuery
+      endDate={endDate}
+      filterQuery={filterQuery}
+      skip={skip}
+      sourceId="default"
+      startDate={startDate}
+      type={type}
+    >
+      {({
+        totalCount,
+        loading,
+        networkDns,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+      }) => (
+        <>
+          <NetworkDnsHistogramQuery
+            dataKey={['NetworkDns', 'histogram']}
+            defaultStackByOption={dnsStackByOptions[0]}
+            endDate={endDate}
+            filterQuery={filterQuery}
+            limit={totalCount}
+            query={networkDnsQuery}
+            scaleType={ScaleType.Ordinal}
+            setQuery={setQuery}
+            sourceId="default"
+            startDate={startDate}
+            stackByOptions={dnsStackByOptions}
+            title="DNS"
+            type={networkModel.NetworkType.page}
+            updateDateRange={updateDateRange}
+            yTickFormatter={bytesFormatter}
+            showLegend={false}
+          />
+          <EuiSpacer />
           <NetworkDnsTableManage
             data={networkDns}
             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
@@ -104,9 +103,9 @@ export const DnsQueryTabBody = ({
             totalCount={totalCount}
             type={type}
           />
-        )}
-      </NetworkDnsQuery>
-    </>
+        </>
+      )}
+    </NetworkDnsQuery>
   );
 };
 
