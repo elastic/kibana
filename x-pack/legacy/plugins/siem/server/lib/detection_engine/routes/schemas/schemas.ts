@@ -9,7 +9,9 @@ import Joi from 'joi';
 /* eslint-disable @typescript-eslint/camelcase */
 export const description = Joi.string();
 export const enabled = Joi.boolean();
+export const exclude_export_details = Joi.boolean();
 export const false_positives = Joi.array().items(Joi.string());
+export const file_name = Joi.string();
 export const filters = Joi.array();
 export const from = Joi.string();
 export const immutable = Joi.boolean();
@@ -21,6 +23,11 @@ export const index = Joi.array()
 export const interval = Joi.string();
 export const query = Joi.string();
 export const language = Joi.string().valid('kuery', 'lucene');
+export const objects = Joi.array().items(
+  Joi.object({
+    rule_id,
+  }).required()
+);
 export const output_index = Joi.string();
 export const saved_id = Joi.string();
 export const timeline_id = Joi.string();
@@ -75,7 +82,6 @@ export const threat_technique = Joi.object({
   reference: threat_technique_reference.required(),
 });
 export const threat_techniques = Joi.array().items(threat_technique.required());
-
 export const threats = Joi.array().items(
   Joi.object({
     framework: threat_framework.required(),
@@ -83,5 +89,12 @@ export const threats = Joi.array().items(
     techniques: threat_techniques.required(),
   })
 );
-
+export const created_at = Joi.string()
+  .isoDate()
+  .strict();
+export const updated_at = Joi.string()
+  .isoDate()
+  .strict();
+export const created_by = Joi.string();
+export const updated_by = Joi.string();
 export const version = Joi.number().min(1);
