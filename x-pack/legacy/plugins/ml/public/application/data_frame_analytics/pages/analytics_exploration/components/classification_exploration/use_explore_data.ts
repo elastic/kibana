@@ -12,7 +12,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
-// import moment from 'moment-timezone';
 
 import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
 
@@ -22,18 +21,13 @@ import { SavedSearchQuery } from '../../../../../contexts/kibana';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { Field } from '../../../../../../../common/types/fields';
 
-// import { ColumnType } from '../../../../../components/ml_in_memory_table';
-
 import {
-  // getDefaultClassificationFields,
   getDefaultClassificationFieldsFromJobCaps,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  // getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  // defaultSearchQuery,
   SearchQuery,
 } from '../../../../common';
 

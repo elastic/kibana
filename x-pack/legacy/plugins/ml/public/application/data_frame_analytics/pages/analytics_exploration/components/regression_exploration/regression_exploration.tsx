@@ -14,6 +14,10 @@ import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -39,8 +43,10 @@ interface Props {
 export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+  const kibanaContext = useKibanaContext();
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
@@ -68,6 +74,22 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   useEffect(() => {
     loadJobConfig();
   }, []);
+  // TODO: error handling
+  const initializeJobCapsService = async () => {
+    if (jobConfig !== undefined) {
+      const sourceIndex = jobConfig.source.index[0];
+      const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+      }
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    initializeJobCapsService();
+  }, [JSON.stringify(jobConfig)]);
 
   if (jobConfigErrorMessage !== undefined) {
     return (
@@ -94,12 +116,12 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   return (
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <ResultsTable
           jobConfig={jobConfig}
           jobStatus={jobStatus}
