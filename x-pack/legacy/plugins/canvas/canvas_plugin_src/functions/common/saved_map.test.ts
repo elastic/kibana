@@ -27,6 +27,7 @@ describe('savedMap', () => {
     center: null,
     title: null,
     timerange: null,
+    hideLayer: null,
   };
 
   it('accepts null context', () => {
