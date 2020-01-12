@@ -6,11 +6,15 @@
 
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
+import { overviewFiltersReducer } from './overview_filters';
 import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
+import { monitorStatusReducer } from './monitor_status';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
+  overviewFilters: overviewFiltersReducer,
   snapshot: snapshotReducer,
   ui: uiReducer,
+  monitorStatus: monitorStatusReducer,
 });

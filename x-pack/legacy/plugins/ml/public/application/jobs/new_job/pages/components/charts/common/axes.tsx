@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { Axis, getAxisId, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
+import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
 import { getYRange } from './utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
 
@@ -26,17 +26,12 @@ export const Axes: FC<Props> = ({ chartData }) => {
   return (
     <Fragment>
       <Axis
-        id={getAxisId('bottom')}
+        id="bottom"
         position={Position.Bottom}
         showOverlappingTicks={true}
         tickFormat={dateFormatter}
       />
-      <Axis
-        id={getAxisId('left')}
-        position={Position.Left}
-        tickFormat={tickFormatter}
-        domain={yDomain}
-      />
+      <Axis id="left" position={Position.Left} tickFormat={tickFormatter} domain={yDomain} />
     </Fragment>
   );
 };

@@ -5,13 +5,9 @@
  */
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
-import numeral from '@elastic/numeral';
 
-import { UpdateDateRange, ChartSeriesData } from '../../components/charts/common';
-import {
-  MatrixHistogramDataTypes,
-  MatrixHistogramMappingTypes,
-} from '../../components/matrix_histogram/types';
+import { UpdateDateRange, ChartSeriesData } from '../charts/common';
+import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 
 export const getBarchartConfigs = ({
   from,
@@ -91,8 +87,4 @@ export const getCustomChartData = (
       return { ...item, color: mapItem.color };
     }, formattedChartData);
   else return formattedChartData;
-};
-
-export const bytesFormatter = (value: number) => {
-  return numeral(value).format('0,0.[0]b');
 };

@@ -21,8 +21,8 @@ import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { networkDnsQuery } from '../../../containers/network_dns/index.gql_query';
-import { bytesFormatter } from '../../../components/matrix_histogram/utils';
 import * as i18n from '../translations';
+import { useFormatBytes } from '../../../components/formatted_bytes';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -50,6 +50,8 @@ export const DnsQueryTabBody = ({
       }
     };
   }, []);
+  const formatBytes = useFormatBytes();
+
   return (
     <NetworkDnsQuery
       endDate={endDate}
@@ -86,7 +88,7 @@ export const DnsQueryTabBody = ({
             title={i18n.NAVIGATION_DNS_TITLE}
             type={networkModel.NetworkType.page}
             updateDateRange={updateDateRange}
-            yTickFormatter={bytesFormatter}
+            yTickFormatter={formatBytes}
             showLegend={false}
           />
           <EuiSpacer />

@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { LocationMap } from '../location_map';
-import { MonitorStatusBar } from '../monitor_status_bar';
+import { MonitorStatusBar } from './monitor_status_bar';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -28,13 +28,18 @@ export const MonitorStatusDetailsComponent = ({
 }: MonitorStatusBarProps) => {
   useEffect(() => {
     loadMonitorLocations(monitorId);
-  }, [monitorId, dateStart, dateEnd]);
+  }, [loadMonitorLocations, monitorId, dateStart, dateEnd]);
 
   return (
     <EuiPanel>
       <EuiFlexGroup gutterSize="l" wrap>
         <EuiFlexItem grow={true}>
-          <MonitorStatusBar monitorId={monitorId} variables={variables} />
+          <MonitorStatusBar
+            monitorId={monitorId}
+            variables={variables}
+            dateStart={dateStart}
+            dateEnd={dateEnd}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />

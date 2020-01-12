@@ -27,7 +27,14 @@ import {
 } from '../../../../src/plugins/dashboard_embeddable_container/public/embeddable/dashboard_constants';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'visualize',
+    'header',
+    'discover',
+    'tileMap',
+    'visChart',
+  ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const queryBar = getService('queryBar');
@@ -58,14 +65,14 @@ export default function({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.switchToEditMode();
 
-      await PageObjects.visualize.openLegendOptionColors('Count');
-      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
+      await PageObjects.visChart.openLegendOptionColors('Count');
+      await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
 
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
-      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist(
+      const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
         '#EA6460'
       );
 
@@ -153,10 +160,10 @@ export default function({ getService, getPageObjects }) {
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
 
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.tileMap.clickMapZoomIn();
+      await PageObjects.tileMap.clickMapZoomIn();
+      await PageObjects.tileMap.clickMapZoomIn();
+      await PageObjects.tileMap.clickMapZoomIn();
 
       await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
 
@@ -225,8 +232,8 @@ export default function({ getService, getPageObjects }) {
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function() {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-          await PageObjects.visualize.openLegendOptionColors('80,000');
-          await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
+          await PageObjects.visChart.openLegendOptionColors('80,000');
+          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
           await browser.get(newUrl.toString(), false);
@@ -248,7 +255,7 @@ export default function({ getService, getPageObjects }) {
         // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
         it.skip('and updates the pie slice legend color', async function() {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#FFFFFF');
             expect(colorExists).to.be(true);
           });
         });
@@ -269,7 +276,7 @@ export default function({ getService, getPageObjects }) {
         // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
         it.skip('resets the legend color as well', async function() {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
             expect(colorExists).to.be(true);
           });
         });
