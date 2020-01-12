@@ -25,5 +25,5 @@ export const openStatsAndTables = (table: InspectButtonMetadata) => {
 };
 
 export const closesModal = () => {
-  cy.get('[data-test-subj="modal-inspect-close"]').click();
+  cy.get('[data-test-subj="modal-inspect-close"]', { timeout: DEFAULT_TIMEOUT }).click();
 };
