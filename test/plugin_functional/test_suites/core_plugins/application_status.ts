@@ -42,25 +42,27 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     }, s);
   };
 
-  const navigateToApp = async (i: string) => {
-    return await browser.executeAsync(async (appId, cb: Function) => {
+  const navigateToApp = async (i: string): Promise<{ error?: string }> => {
+    return (await browser.executeAsync(async (appId, cb: Function) => {
       // navigating in legacy mode performs a page refresh
       // and webdriver seems to re-execute the script after the reload
       // as it considers it didn't end on the previous session.
       // however when testing navigation to NP app, __coreProvider is not accessible
       // so we need to check for existence.
       if (!window.__coreProvider) {
-        cb();
+        cb({});
       }
       const plugin = window.__coreProvider.start.plugins
         .core_app_status as CoreAppStatusPluginStart;
       try {
         await plugin.navigateToApp(appId);
-        cb();
+        cb({});
       } catch (e) {
-        cb(e.message);
+        cb({
+          error: e.message,
+        });
       }
-    }, i);
+    }, i)) as any;
   };
 
   describe('application status management', () => {
@@ -96,8 +98,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         status: AppStatus.inaccessible,
       });
 
-      const error = await navigateToApp('app_status');
-      expect(error).to.contain('Trying to navigate to an inaccessible application: app_status');
+      const result = await navigateToApp('app_status');
+      expect(result.error).to.contain(
+        'Trying to navigate to an inaccessible application: app_status'
+      );
     });
 
     it('allows to navigate to an accessible app', async () => {
@@ -105,8 +109,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         status: AppStatus.accessible,
       });
 
-      const error = await navigateToApp('app_status');
-      expect(error).to.eql(null);
+      const result = await navigateToApp('app_status');
+      expect(result.error).to.eql(undefined);
     });
   });
 }
