@@ -40,7 +40,12 @@ import {
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { Field } from '../../../../../../../common/types/fields';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
-import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
+import {
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+  toggleSelectedField,
+  isKeywordAndTextType,
+} from '../../../../common/fields';
 
 import {
   DataFrameAnalyticsConfig,
@@ -58,44 +63,6 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 
 import { useExploreData, TableItem } from './use_explore_data';
 import { ExplorationTitle } from './regression_exploration';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-
-// TODO: move to central location
-export const toggleSelectedFieldClassification = (
-  selectedFields: Field[],
-  column: EsFieldName
-): Field[] => {
-  const index = selectedFields.map(field => field.name).indexOf(column);
-  if (index === -1) {
-    const columnField = newJobCapsService.getFieldById(column);
-    if (columnField !== null) {
-      selectedFields.push(columnField);
-    }
-  } else {
-    selectedFields.splice(index, 1);
-  }
-  return selectedFields;
-};
-
-// TODO: move to central location to share regression/class
-export const isKeywordAndTextType = (fieldName: string): boolean => {
-  const { fields } = newJobCapsService;
-
-  const fieldType = fields.find(field => field.name === fieldName)?.type;
-  let isBothTypes = false;
-
-  // If it's a keyword type - check if it has a corresponding text type
-  if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
-    const field = newJobCapsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
-    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
-  } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
-    //   If text, check if has corresponding keyword type
-    const field = newJobCapsService.getFieldById(`${fieldName}.keyword`);
-    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
-  }
-
-  return isBothTypes;
-};
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
@@ -136,7 +103,7 @@ export const ResultsTable: FC<Props> = React.memo(
     function toggleColumn(column: EsFieldName) {
       if (tableItems.length > 0 && jobConfig !== undefined) {
         // spread to a new array otherwise the component wouldn't re-render
-        setSelectedFields([...toggleSelectedFieldClassification(selectedFields, column)]);
+        setSelectedFields([...toggleSelectedField(selectedFields, column)]);
       }
     }
 

@@ -12,7 +12,6 @@ import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_m
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
@@ -25,16 +24,10 @@ import {
   SearchQuery,
 } from '../../../../common';
 import { Field } from '../../../../../../../common/types/fields';
+import { LoadExploreDataArg } from '../../../../common/analytics';
 
 export type TableItem = Record<string, any>;
 
-// TODO: combine this loadExploreData type since it's the same for regression/class
-interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
-  searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-}
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;

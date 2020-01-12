@@ -17,9 +17,9 @@ import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_m
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { Field } from '../../../../../../../common/types/fields';
+import { LoadExploreDataArg } from '../../../../common/analytics';
 
 import {
   getDefaultClassificationFieldsFromJobCaps,
@@ -33,12 +33,6 @@ import {
 
 export type TableItem = Record<string, any>;
 
-interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
-  searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-}
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;

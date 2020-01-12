@@ -13,6 +13,7 @@ import {
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
+import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -41,6 +42,41 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
 ]);
 
 const ML__ID_COPY = 'ml__id_copy';
+
+export const toggleSelectedFieldClassification = (
+  selectedFields: Field[],
+  column: EsFieldName
+): Field[] => {
+  const index = selectedFields.map(field => field.name).indexOf(column);
+  if (index === -1) {
+    const columnField = newJobCapsService.getFieldById(column);
+    if (columnField !== null) {
+      selectedFields.push(columnField);
+    }
+  } else {
+    selectedFields.splice(index, 1);
+  }
+  return selectedFields;
+};
+
+export const isKeywordAndTextType = (fieldName: string): boolean => {
+  const { fields } = newJobCapsService;
+
+  const fieldType = fields.find(field => field.name === fieldName)?.type;
+  let isBothTypes = false;
+
+  // If it's a keyword type - check if it has a corresponding text type
+  if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
+    const field = newJobCapsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+  } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
+    //   If text, check if has corresponding keyword type
+    const field = newJobCapsService.getFieldById(`${fieldName}.keyword`);
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
+  }
+
+  return isBothTypes;
+};
 
 // Used to sort columns:
 // - string based columns are moved to the left
@@ -231,6 +267,7 @@ export const getDefaultClassificationFieldsFromJobCaps = (
   }
 
   const dependentVariable = getDependentVar(jobConfig.analysis);
+  const type = newJobCapsService.getFieldById(dependentVariable)?.type;
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
@@ -246,7 +283,7 @@ export const getDefaultClassificationFieldsFromJobCaps = (
       name: `${resultsField}.is_training`,
       type: ES_FIELD_TYPES.BOOLEAN,
     },
-    { id: predictedField, name: predictedField },
+    { id: predictedField, name: predictedField, type },
     ...fields,
   ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
 
@@ -354,13 +391,13 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
     .slice(0, MAX_COLUMNS);
 };
 
-export const toggleSelectedField = (
-  selectedFields: EsFieldName[],
-  column: EsFieldName
-): EsFieldName[] => {
-  const index = selectedFields.indexOf(column);
+export const toggleSelectedField = (selectedFields: Field[], column: EsFieldName): Field[] => {
+  const index = selectedFields.map(field => field.name).indexOf(column);
   if (index === -1) {
-    selectedFields.push(column);
+    const columnField = newJobCapsService.getFieldById(column);
+    if (columnField !== null) {
+      selectedFields.push(columnField);
+    }
   } else {
     selectedFields.splice(index, 1);
   }
