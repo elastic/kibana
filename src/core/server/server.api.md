@@ -1937,6 +1937,7 @@ export interface UiSettingsParams {
     type?: UiSettingsType;
     value?: SavedObjectAttribute;
     type?: UiSettingsType;
+    validation?: StringValidation | ImageValidation;
 }
 
 type StringValidation = {
