@@ -11,7 +11,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { Header } from '../../components/header';
-import { RoutedTabs, TabBetaBadge } from '../../components/navigation/routed_tabs';
+import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { SourceErrorPage } from '../../components/source_error_page';
@@ -41,12 +41,7 @@ export const LogsPage = ({ match }: RouteComponentProps) => {
   };
 
   const logRateTab = {
-    title: (
-      <>
-        {logRateTabTitle}
-        <TabBetaBadge title={logRateTabTitle} />
-      </>
-    ),
+    title: logRateTabTitle,
     path: `${match.path}/log-rate`,
   };
 
