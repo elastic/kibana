@@ -34,7 +34,7 @@ export const getDriftTolerance = ({
   from: string;
   to: string;
   interval: moment.Duration;
-}) => {
+}): moment.Duration | null => {
   if (to.trim() !== 'now') {
     // we only support 'now' for drift detection
     return null;
