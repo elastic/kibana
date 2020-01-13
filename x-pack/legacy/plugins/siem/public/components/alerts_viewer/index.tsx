@@ -21,6 +21,7 @@ const alertsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 const dataKey = 'AlertsHistogram';
+
 export const AlertsView = ({
   deleteQuery,
   endDate,
@@ -44,6 +45,7 @@ export const AlertsView = ({
     (totalCount: number) => `${i18n.SHOWING}: ${totalCount} ${i18n.UNIT(totalCount)}`,
     []
   );
+
   return (
     <>
       <MatrixHistogramContainer
