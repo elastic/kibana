@@ -462,7 +462,7 @@ export function getUiSettingDefaults() {
         message: i18n.translate('kbn.advancedSettings.courier.batchSearchesTextDeprecation', {
           defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
         }),
-        docLinksKey: 'batchSearchesDeprecation',
+        docLinksKey: 'kibanaSearchSettings',
       },
       category: ['search'],
     },
