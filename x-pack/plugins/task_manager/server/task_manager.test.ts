@@ -20,39 +20,33 @@ import {
   awaitTaskRunResult,
   TaskLifecycleEvent,
 } from './task_manager';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../../src/core/server';
+import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 
-const savedObjectsClient = savedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
-  const defaultConfig = {
-    xpack: {
-      task_manager: {
-        max_workers: 10,
-        index: 'foo',
-        max_attempts: 9,
-        poll_interval: 6000000,
-      },
-    },
-    server: {
-      uuid: 'some-uuid',
-    },
-  };
+
   const config = {
-    get: (path: string) => _.get(defaultConfig, path),
+    enabled: true,
+    max_workers: 10,
+    index: 'foo',
+    max_attempts: 9,
+    poll_interval: 6000000,
+    request_capacity: 1000,
   };
   const taskManagerOpts = {
     config,
     savedObjectsRepository: savedObjectsClient,
     serializer,
-    callWithInternalUser: jest.fn(),
+    callAsInternalUser: jest.fn(),
     logger: mockLogger(),
+    taskManagerId: 'some-uuid',
   };
 
   beforeEach(() => {
@@ -63,21 +57,9 @@ describe('TaskManager', () => {
 
   test('throws if no valid UUID is available', async () => {
     expect(() => {
-      const configWithoutServerUUID = {
-        xpack: {
-          task_manager: {
-            max_workers: 10,
-            index: 'foo',
-            max_attempts: 9,
-            poll_interval: 6000000,
-          },
-        },
-      };
       new TaskManager({
         ...taskManagerOpts,
-        config: {
-          get: (path: string) => _.get(configWithoutServerUUID, path),
-        },
+        taskManagerId: '',
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"TaskManager is unable to start as Kibana has no valid UUID assigned to it."`
@@ -234,7 +216,7 @@ describe('TaskManager', () => {
 
   test('allows and queues fetching tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+    taskManagerOpts.callAsInternalUser.mockResolvedValue({
       hits: {
         total: {
           value: 0,
@@ -245,13 +227,13 @@ describe('TaskManager', () => {
     const promise = client.fetch({});
     client.start();
     await promise;
-    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
   });
 
   test('allows fetching tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     client.start();
-    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+    taskManagerOpts.callAsInternalUser.mockResolvedValue({
       hits: {
         total: {
           value: 0,
@@ -260,7 +242,7 @@ describe('TaskManager', () => {
       },
     });
     await client.fetch({});
-    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+    expect(taskManagerOpts.callAsInternalUser).toHaveBeenCalled();
   });
 
   test('allows middleware registration before starting', () => {
@@ -282,7 +264,6 @@ describe('TaskManager', () => {
     };
 
     client.start();
-
     expect(() => client.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
     );

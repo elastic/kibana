@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../../../plugins/task_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 import { Subject } from 'rxjs';
 
 export const taskManagerMock = {
