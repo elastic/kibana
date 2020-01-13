@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { produce } from 'immer';
 import { Reducer } from 'react';
 import { State } from './store';
 
@@ -17,36 +16,49 @@ export type Action =
   | { type: 'setActiveTab'; value: Targets | null }
   | { type: 'setCurrentResponse'; value: ShardSerialized[] | null };
 
-export const reducer: Reducer<State, Action> = (state, action) =>
-  produce<State>(state, draft => {
-    if (action.type === 'setProfiling') {
-      draft.pristine = false;
-      draft.profiling = action.value;
-      if (draft.profiling) {
-        draft.currentResponse = null;
-        draft.highlightDetails = null;
-      }
-      return;
-    }
+export const reducer: Reducer<State, Action> = (state, action) => {
+  const nextState = { ...state };
 
-    if (action.type === 'setHighlightDetails') {
-      draft.highlightDetails = action.value;
-      return;
+  if (action.type === 'setProfiling') {
+    nextState.pristine = false;
+    nextState.profiling = action.value;
+    if (nextState.profiling) {
+      nextState.currentResponse = null;
+      nextState.highlightDetails = null;
     }
+    return nextState;
+  }
 
-    if (action.type === 'setActiveTab') {
-      draft.activeTab = action.value;
-      return;
+  if (action.type === 'setHighlightDetails') {
+    if (action.value) {
+      const value = action.value;
+      // Exclude children to avoid unnecessary work copying a recursive structure.
+      const { children, parent, ...restOfOperation } = value.operation;
+      nextState.highlightDetails = {
+        indexName: value.indexName,
+        operation: Object.freeze(restOfOperation),
+        // prettier-ignore
+        shardName: `[${/* shard id */value.shard.id[0]}][${/* shard number */value.shard.id[2] }]`
+      };
+    } else {
+      nextState.highlightDetails = null;
     }
+    return nextState;
+  }
 
-    if (action.type === 'setCurrentResponse') {
-      draft.currentResponse = action.value;
-      if (draft.currentResponse) {
-        // Default to the searches tab
-        draft.activeTab = 'searches';
-      }
-      return;
+  if (action.type === 'setActiveTab') {
+    nextState.activeTab = action.value;
+    return nextState;
+  }
+
+  if (action.type === 'setCurrentResponse') {
+    nextState.currentResponse = action.value;
+    if (nextState.currentResponse) {
+      // Default to the searches tab
+      nextState.activeTab = 'searches';
     }
+    return nextState;
+  }
 
-    throw new Error(`Unknown action: ${action}`);
-  });
+  throw new Error(`Unknown action: ${action}`);
+};

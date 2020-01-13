@@ -46,6 +46,7 @@ export function getProjectPaths({ rootPath, ossOnly, skipKibanaPlugins }: Option
 
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));
+    projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
     projectPaths.push(resolve(rootPath, 'x-pack/legacy/plugins/*'));
   }
 

@@ -16,5 +16,6 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./field_level_security'));
     loadTestFile(require.resolve('./rbac_phase1'));
     loadTestFile(require.resolve('./user_email'));
+    loadTestFile(require.resolve('./role_mappings'));
   });
 }
