@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorSSLCertificate } from './monitor_ssl_certificate';
-export { MonitorStatusBar, MonitorStatusBarComponent } from './monitor_status_bar';
+import { i18n } from '@kbn/i18n';
+
+export const getTitle = (name?: string) => {
+  const appName = i18n.translate('xpack.uptime.title', {
+    defaultMessage: 'Uptime',
+  });
+  return `${appName} ${name ? '| ' + name : ''} - Kibana`;
+};
