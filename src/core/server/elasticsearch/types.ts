@@ -77,7 +77,4 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
-
-  readonly adminClient$: Observable<IClusterClient>;
-  readonly dataClient$: Observable<IClusterClient>;
 }
