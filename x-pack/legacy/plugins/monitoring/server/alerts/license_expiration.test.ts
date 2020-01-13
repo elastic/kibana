@@ -14,8 +14,14 @@ import { Logger } from 'src/core/server';
 import { AlertServices } from '../../../alerting/server/types';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { AlertInstance } from '../../../alerting/server/alert_instance';
-import { AlertState, AlertClusterState, AlertParams } from './types';
+import {
+  AlertState,
+  AlertClusterState,
+  AlertParams,
+  LicenseExpirationAlertExecutorOptions,
+} from './types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 function fillLicense(license: any, clusterUuid?: string) {
   return {
@@ -37,6 +43,29 @@ const params: AlertParams = {
   dateFormat: 'YYYY',
   timezone: 'UTC',
   ccs: null,
+};
+
+interface MockServices {
+  callCluster: jest.Mock;
+  alertInstanceFactory: jest.Mock;
+  savedObjectsClient: jest.Mock;
+}
+
+const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
+  alertId: '',
+  startedAt: new Date(),
+  services: {
+    callCluster: (path: string, opts: any) => new Promise(resolve => resolve()),
+    alertInstanceFactory: (id: string) => new AlertInstance(),
+    savedObjectsClient: {} as jest.Mocked<SavedObjectsClientContract>,
+  },
+  params: {},
+  state: {},
+  spaceId: '',
+  name: '',
+  tags: [],
+  createdBy: null,
+  updatedBy: null,
 };
 
 describe('getLicenseExpiration', () => {
@@ -64,11 +93,6 @@ describe('getLicenseExpiration', () => {
     expect(alert.actionGroups).toEqual(['default']);
   });
 
-  interface MockServices {
-    callCluster: jest.Mock;
-    alertInstanceFactory: jest.Mock;
-    savedObjectsClient: jest.Mock;
-  }
   it('should return the state if no license is provided', async () => {
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
 
@@ -80,8 +104,7 @@ describe('getLicenseExpiration', () => {
     const state = { foo: 1 };
 
     const result = await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
@@ -119,8 +142,7 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
@@ -189,8 +211,7 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     const result: AlertState = (await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
@@ -268,8 +289,7 @@ describe('getLicenseExpiration', () => {
     };
 
     const result: AlertState = (await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
@@ -338,8 +358,7 @@ describe('getLicenseExpiration', () => {
 
     const state = {};
     const result: AlertState = (await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
@@ -404,8 +423,7 @@ describe('getLicenseExpiration', () => {
 
     const state = {};
     const result: AlertState = (await alert.executor({
-      alertId: '',
-      startedAt: new Date(),
+      ...alertExecutorOptions,
       services,
       params,
       state,
