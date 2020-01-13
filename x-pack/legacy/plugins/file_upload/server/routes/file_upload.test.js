@@ -27,6 +27,26 @@ const mockRouteContext = ({
   },
 } as unknown) as RequestHandlerContext;
 
+const sampleFirstReq = {
+  index: 'dinagatislandhh',
+  data: [],
+  settings: { number_of_shards: 1 },
+  mappings: { coordinates: { type: 'geo_point' } },
+  ingestPipeline: {},
+  fileType: 'json',
+  app: 'Maps'
+};
+
+const sampleSecondReq = {
+  index: 'dinagatislandhh',
+  data: [ { coordinates: [Array], name: 'Dinagat Islands' } ],
+  settings: {},
+  mappings: {},
+  ingestPipeline: {},
+  fileType: 'json'
+};
+
+
 describe('POST file', () => {
   let routeHandler: RequestHandler<any, any, any>;
 

@@ -20,17 +20,17 @@ function importData({ callWithRequest, id, index, settings, mappings, ingestPipe
 
 export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository) {
   return async (con, req, res) => {
+
     const requestObj = {
       query: req.query,
       body: req.body,
-      params: req.params,
       headers: req.headers,
     };
 
     // `id` being `undefined` tells us that this is a new import due to create a new index.
     // follow-up import calls to just add additional data will include the `id` of the created
     // index, we'll ignore those and don't increment the counter.
-    const { id } = requestObj.params;
+    const { id } = requestObj.query;
     if (!id) {
       await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
     }
@@ -47,17 +47,19 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
   };
 }
 
-const validateBodySchema = (data, idRef) => {
-  const idExists = schema.string({ validate: value => !!value ? undefined : 'No id'});
+export const validateBodySchema = (data, boolHasId) => {
   const bodySchema = schema.object({
       app: schema.maybe(schema.string()),
       index: schema.string(),
-      data: schema.conditional(
-        idRef,
-        idExists,
-        schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 }),
-        schema.any(),
-      ),
+      data: boolHasId
+        ? schema.arrayOf(
+          schema.object(
+            {},
+            { allowUnknowns: true }
+          ),
+          { minSize: 1 }
+        )
+        : schema.any(),
       fileType: schema.string(),
       ingestPipeline: schema.maybe(schema.object(
         {},
@@ -66,18 +68,26 @@ const validateBodySchema = (data, idRef) => {
           allowUnknowns: true
         }
       )),
-      settings: schema.conditional(
-        idRef,
-        idExists,
-        schema.any(),
-        schema.object({}, { allowUnknowns: true }),
-      ),
-      mappings: schema.conditional(
-        idRef,
-        idExists,
-        schema.any(),
-        schema.object({}, { allowUnknowns: true }),
-      ),
+      settings: boolHasId
+        ? schema.any()
+        : schema.object(
+          {},
+          {
+            defaultValue: {
+              number_of_shards: 1
+            },
+            allowUnknowns: true
+          }
+        ),
+      mappings: boolHasId
+        ? schema.any()
+        : schema.object(
+          {},
+          {
+            defaultValue: {},
+            allowUnknowns: true
+          }
+        ),
     },
     { allowUnknowns: true }
   );
@@ -85,13 +95,19 @@ const validateBodySchema = (data, idRef) => {
 };
 
 export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
+  let boolHasId = false;
   router.post({
       path: `${IMPORT_ROUTE}{id?}`,
       validate: {
-        params: schema.maybe(schema.object({id: schema.nullable(schema.string())})),
+        query: (data, { ok, badRequest }) => {
+          const validQuery = schema.maybe(schema.object({id: schema.nullable(schema.string())})).validate(data);
+          boolHasId = !!data.id;
+          return validQuery
+            ? ok(validQuery)
+            : badRequest('Invalid query', ['query']);
+        },
         body: (data, { ok, badRequest }) => {
-          const idRef = schema.siblingRef('params.id');
-          return validateBodySchema(data, idRef)
+          return validateBodySchema(data, boolHasId)
             ? ok(data)
             : badRequest('Invalid payload', ['body']);
         },

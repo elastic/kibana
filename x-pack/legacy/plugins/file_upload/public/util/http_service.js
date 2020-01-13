@@ -30,6 +30,7 @@ export async function http(options) {
     method: options.method || 'GET',
     headers: allHeaders,
     credentials: 'same-origin',
+    query: options.query
   };
 
   if (body !== null) {
