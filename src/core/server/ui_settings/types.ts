@@ -109,12 +109,12 @@ export interface UiSettingsParams {
   validation?: StringValidation | ImageValidation;
 }
 
-interface StringValidation {
+export interface StringValidation {
   regexString: string;
   message: string;
 }
 
-interface ImageValidation {
+export interface ImageValidation {
   maxSize: {
     length: number;
     description: string;
