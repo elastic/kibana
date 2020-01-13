@@ -11,6 +11,8 @@ import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { COLOR_GRADIENTS, COLOR_PALETTES_INPUTS } from '../../../color_utils';
 
 export class DynamicColorForm extends React.Component {
   state = {
@@ -85,8 +87,16 @@ export class DynamicColorForm extends React.Component {
       };
 
       if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+        const customOptionLabel = (
+          <FormattedMessage
+            id="xpack.maps.style.customColorRampLabel"
+            defaultMessage="Custom color ramp"
+          />
+        );
         colorSelect = (
           <ColorMapSelect
+            colorMapOptions={COLOR_GRADIENTS}
+            customOptionLabel={customOptionLabel}
             onChange={options => onColorChange(options)}
             colorMapType={COLOR_MAP_TYPE.ORDINAL}
             color={styleOptions.color}
@@ -96,8 +106,16 @@ export class DynamicColorForm extends React.Component {
           />
         );
       } else if (this.state.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
+        const customOptionLabel = (
+          <FormattedMessage
+            id="xpack.maps.style.customColorPaletteLabel"
+            defaultMessage="Custom color palette"
+          />
+        );
         colorSelect = (
           <ColorMapSelect
+            colorMapOptions={COLOR_PALETTES_INPUTS}
+            customOptionLabel={customOptionLabel}
             onChange={options => onColorChange(options)}
             colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
             color={styleOptions.color}

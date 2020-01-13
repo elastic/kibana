@@ -7,8 +7,6 @@
 import React, { Component, Fragment } from 'react';
 
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
-import { COLOR_GRADIENTS, COLOR_PALETTES_INPUTS } from '../../../color_utils';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
@@ -116,52 +114,27 @@ export class ColorMapSelect extends Component {
       }
     }
 
-    let colorMapOptions;
     let valueOfSelected;
-    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      colorMapOptions = [
-        {
-          value: CUSTOM_COLOR_MAP,
-          inputDisplay: (
-            <FormattedMessage
-              id="xpack.maps.style.customColorRampLabel"
-              defaultMessage="Custom color ramp"
-            />
-          ),
-        },
-        ...COLOR_GRADIENTS,
-      ];
-      if (useCustomColorRamp) {
-        valueOfSelected = CUSTOM_COLOR_MAP;
-      } else {
-        if (colorMapOptions.find(option => option.value === color)) {
-          valueOfSelected = color;
-        } else {
-          valueOfSelected = COLOR_GRADIENTS[0].value;
-          this._onColorMapSelect(valueOfSelected);
-        }
-      }
-    } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-      const customOption = {
+    const colorMapOptions = [
+      {
         value: CUSTOM_COLOR_MAP,
-        inputDisplay: (
-          <FormattedMessage
-            id="xpack.maps.style.customColorPaletteLabel"
-            defaultMessage="Custom color palette"
-          />
-        ),
-      };
+        inputDisplay: this.props.customOptionLabel,
+      },
+      ...this.props.colorMapOptions,
+    ];
 
-      colorMapOptions = [customOption, ...COLOR_PALETTES_INPUTS];
-      if (useCustomColorPalette) {
-        valueOfSelected = CUSTOM_COLOR_MAP;
+    const useCustom =
+      this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL
+        ? useCustomColorRamp
+        : useCustomColorPalette;
+    if (useCustom) {
+      valueOfSelected = CUSTOM_COLOR_MAP;
+    } else {
+      if (colorMapOptions.find(option => option.value === color)) {
+        valueOfSelected = color;
       } else {
-        if (colorMapOptions.find(option => option.value === color)) {
-          valueOfSelected = color;
-        } else {
-          valueOfSelected = COLOR_PALETTES_INPUTS[0].value;
-          this._onColorMapSelect(valueOfSelected);
-        }
+        valueOfSelected = this.props.colorMapOptions[0].value;
+        this._onColorMapSelect(valueOfSelected);
       }
     }
 
@@ -178,10 +151,3 @@ export class ColorMapSelect extends Component {
     );
   }
 }
-
-// ColorRampSelect.propTypes = {
-//   color: PropTypes.string,
-//   onChange: PropTypes.func.isRequired,
-//   useCustomColorRamp: PropTypes.bool,
-//   customColorRamp: PropTypes.array,
-// };
