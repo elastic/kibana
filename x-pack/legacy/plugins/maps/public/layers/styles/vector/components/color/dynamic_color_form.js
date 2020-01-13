@@ -7,8 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
-import { ColorRampSelect } from './color_ramp_select';
-import { ColorPaletteSelect } from './color_palette_select';
+import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
@@ -84,10 +83,12 @@ export class DynamicColorForm extends React.Component {
         };
         onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
       };
+
       if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
         colorSelect = (
-          <ColorRampSelect
+          <ColorMapSelect
             onChange={options => onColorChange(options)}
+            colorMapType={COLOR_MAP_TYPE.ORDINAL}
             color={styleOptions.color}
             customColorRamp={styleOptions.customColorRamp}
             useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
@@ -96,8 +97,9 @@ export class DynamicColorForm extends React.Component {
         );
       } else if (this.state.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
         colorSelect = (
-          <ColorPaletteSelect
+          <ColorMapSelect
             onChange={options => onColorChange(options)}
+            colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
             color={styleOptions.color}
             customColorPalette={styleOptions.customColorPalette}
             useCustomColorPalette={_.get(styleOptions, 'useCustomColorPalette', false)}

@@ -130,3 +130,20 @@ export function getColorPalette(paletteId) {
   const palette = COLOR_PALETTES.find(palette => palette.id === paletteId);
   return palette ? palette.colors : null;
 }
+
+export const COLOR_PALETTES_INPUTS = COLOR_PALETTES.map(palette => {
+  const paletteDisplay = palette.colors.map(color => {
+    const style = {
+      backgroundColor: color,
+      width: '10%',
+      position: 'relative',
+      height: '100%',
+      display: 'inline-block',
+    };
+    return <div style={style}>&nbsp;</div>;
+  });
+  return {
+    value: palette.id,
+    inputDisplay: <div className={'mapColorGradient'}>{paletteDisplay}</div>,
+  };
+});
