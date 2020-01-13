@@ -58,6 +58,7 @@ export interface RuleStepData {
 }
 
 export interface RuleStepProps {
+  addPadding?: boolean;
   descriptionDirection?: 'row' | 'column';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
