@@ -95,14 +95,14 @@ const getJSXdisplayFromMeta = (
 
   if (metadata.fullyMatchPath) {
     display = (
-      <span>
+      <span style={{ lineHeight: 1.5 }}>
         <strong>{path}</strong>
       </span>
     );
   } else if (metadata.matchStartOfPath) {
     const endString = path.substr(term.length, path.length);
     display = (
-      <span>
+      <span style={{ lineHeight: 1.5 }}>
         <strong>{term}</strong>
         {endString}
       </span>
@@ -113,7 +113,7 @@ const getJSXdisplayFromMeta = (
     const startString = path.substr(0, charIndex);
     const endString = path.substr(charIndex + stringMatch!.length);
     display = (
-      <span>
+      <span style={{ lineHeight: 1.5 }}>
         {startString}
         <strong>{stringMatch}</strong>
         {endString}
