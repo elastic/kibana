@@ -7672,7 +7672,6 @@
     "xpack.ml.datavisualizer.actionsPanel.createJobDescription": "高度なジョブウィザードでジョブを作成し、このデータの異常を検出します:",
     "xpack.ml.datavisualizer.actionsPanel.createJobTitle": "ジョブの作成",
     "xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage": "インデックス {index} のデータの読み込み中にエラーが発生。{message}。リクエストがタイムアウトした可能性があります。小さなサンプルサイズを使うか、時間範囲を狭めてみてください。",
-    "xpack.ml.datavisualizer.fieldsPanel.filterFieldsPlaceholder": "フィルター",
     "xpack.ml.datavisualizer.fieldsPanel.searchBarError": "検索の実行中にエラーが発生。{message}。",
     "xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel": "空のフィールドを表示",
     "xpack.ml.datavisualizer.fieldTypesSelect.allFieldsTypeOptionLabel": "すべてのフィールドタイプ",
