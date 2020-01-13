@@ -8,7 +8,11 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  IIndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../src/plugins/data/public';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
@@ -71,7 +75,7 @@ export function getIndexPatternIdFromName(name: string) {
 }
 
 export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
-  const resp: { savedSearch: SavedSearchSavedObject | null; indexPattern: IndexPattern | null } = {
+  const resp: { savedSearch: SavedSearchSavedObject | null; indexPattern: IIndexPattern | null } = {
     savedSearch: null,
     indexPattern: null,
   };

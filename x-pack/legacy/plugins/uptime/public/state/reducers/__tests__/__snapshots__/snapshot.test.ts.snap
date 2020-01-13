@@ -4,7 +4,6 @@ exports[`snapshot reducer appends a current error to existing errors list 1`] = 
 Object {
   "count": Object {
     "down": 0,
-    "mixed": 0,
     "total": 0,
     "up": 0,
   },
@@ -19,7 +18,6 @@ exports[`snapshot reducer changes the count when a snapshot fetch succeeds 1`] =
 Object {
   "count": Object {
     "down": 15,
-    "mixed": 0,
     "total": 25,
     "up": 10,
   },
@@ -32,7 +30,6 @@ exports[`snapshot reducer sets the state's status to loading during a fetch 1`] 
 Object {
   "count": Object {
     "down": 0,
-    "mixed": 0,
     "total": 0,
     "up": 0,
   },
@@ -45,7 +42,6 @@ exports[`snapshot reducer updates existing state 1`] = `
 Object {
   "count": Object {
     "down": 1,
-    "mixed": 0,
     "total": 4,
     "up": 3,
   },

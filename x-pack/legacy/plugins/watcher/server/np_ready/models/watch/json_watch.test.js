@@ -52,26 +52,6 @@ describe('JsonWatch', () => {
     });
   });
 
-  describe('upstreamJson getter method', () => {
-    it('should return the correct result', () => {
-      const watch = new JsonWatch({ watch: { foo: 'bar' } });
-      const actual = watch.upstreamJson;
-      const expected = {
-        id: undefined,
-        watch: {
-          foo: 'bar',
-          metadata: {
-            xpack: {
-              type: 'json',
-            },
-          },
-        },
-      };
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
   describe('downstreamJson getter method', () => {
     let props;
     beforeEach(() => {
