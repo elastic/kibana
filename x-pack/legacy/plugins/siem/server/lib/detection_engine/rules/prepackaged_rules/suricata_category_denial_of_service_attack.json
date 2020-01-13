@@ -1,0 +1,17 @@
+{
+  "rule_id": "42a60eaa-fd20-479b-b6ca-bdb88d47b34b",
+  "risk_score": 50,
+  "description": "Suricata Category - Denial of Service Attack",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Denial of Service Attack",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Detection of a Denial of Service Attack\" or rule.category: \"Detection of a Denial of Service Attack\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

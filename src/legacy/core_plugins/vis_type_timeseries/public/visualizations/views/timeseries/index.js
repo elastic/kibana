@@ -25,11 +25,8 @@ import {
   Chart,
   Position,
   Settings,
-  getAxisId,
-  getGroupId,
   DARK_THEME,
   LIGHT_THEME,
-  getAnnotationId,
   AnnotationDomainTypes,
   LineAnnotation,
   TooltipType,
@@ -75,7 +72,7 @@ export const TimeSeries = ({
   const chartRef = useRef();
   const updateCursor = (_, cursor) => {
     if (chartRef.current) {
-      chartRef.current.dispatchExternalCursorEvent(cursor);
+      chartRef.current.dispatchExternalPointerEvent(cursor);
     }
   };
 
@@ -99,7 +96,7 @@ export const TimeSeries = ({
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}
-        onCursorUpdate={handleCursorUpdate}
+        onPointerUpdate={handleCursorUpdate}
         theme={
           hasBarChart
             ? {}
@@ -126,7 +123,7 @@ export const TimeSeries = ({
         return (
           <LineAnnotation
             key={id}
-            annotationId={getAnnotationId(id)}
+            id={id}
             domainType={AnnotationDomainTypes.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
@@ -214,8 +211,8 @@ export const TimeSeries = ({
       {yAxis.map(({ id, groupId, position, tickFormatter, domain, hide }) => (
         <Axis
           key={groupId}
-          groupId={getGroupId(groupId)}
-          id={getAxisId(id)}
+          groupId={groupId}
+          id={id}
           position={position}
           domain={domain}
           hide={hide}
@@ -226,7 +223,7 @@ export const TimeSeries = ({
       ))}
 
       <Axis
-        id={getAxisId('bottom')}
+        id="bottom"
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}

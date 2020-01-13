@@ -103,8 +103,8 @@ async function compareScreenshots() {
 
     const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
 
-    const sessionImage = PNG.sync.read(await fs.promises.readFile(sessionImagePath));
-    const baselineImage = PNG.sync.read(await fs.promises.readFile(baselineImagePath));
+    const sessionImage = PNG.sync.read(await readFileAsync(sessionImagePath));
+    const baselineImage = PNG.sync.read(await readFileAsync(baselineImagePath));
     const { width, height } = sessionImage;
     const diff = new PNG({ width, height });
 
@@ -117,7 +117,7 @@ async function compareScreenshots() {
       { threshold: 0 }
     );
 
-    await fs.promises.writeFile(diffImagePath, PNG.sync.write(diff));
+    await writeFileAsync(diffImagePath, PNG.sync.write(diff));
 
     const change = numDiffPixels / (width * height);
     const changePercentage = (change * 100).toFixed(2);

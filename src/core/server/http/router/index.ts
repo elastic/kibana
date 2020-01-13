@@ -31,7 +31,6 @@ export {
   RouteMethod,
   RouteConfig,
   RouteConfigOptions,
-  RouteSchemas,
   RouteContentType,
   RouteConfigOptionsBody,
   validBodyOutput,
@@ -55,3 +54,13 @@ export {
 } from './response';
 
 export { IKibanaSocket } from './socket';
+
+export {
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidationError,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+} from './validator';

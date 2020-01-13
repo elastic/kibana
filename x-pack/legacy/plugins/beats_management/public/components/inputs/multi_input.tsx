@@ -9,7 +9,10 @@ import { CommonProps } from '@elastic/eui/src/components/common';
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
-interface ComponentProps extends FormsyInputProps, CommonProps, EuiTextAreaProps {
+interface ComponentProps
+  extends FormsyInputProps,
+    CommonProps,
+    Omit<EuiTextAreaProps, 'onChange' | 'onBlur'> {
   instantValidation: boolean;
   label: string;
   errorText: string;

@@ -100,24 +100,6 @@ export const logEntriesSchema = gql`
     entries: [InfraLogEntry!]!
   }
 
-  type InfraLogItemField {
-    "The flattened field name"
-    field: String!
-    "The value for the Field as a string"
-    value: String!
-  }
-
-  type InfraLogItem {
-    "The ID of the document"
-    id: ID!
-    "The index where the document was found"
-    index: String!
-    "Time key for the document - derived from the source configuration timestamp and tiebreaker settings"
-    key: InfraTimeKey!
-    "An array of flattened fields and values"
-    fields: [InfraLogItemField!]!
-  }
-
   extend type InfraSource {
     "A consecutive span of log entries surrounding a point in time"
     logEntriesAround(
@@ -150,6 +132,5 @@ export const logEntriesSchema = gql`
       "The highlighting to apply to the log entries"
       highlights: [InfraLogEntryHighlightInput!]!
     ): [InfraLogEntryInterval!]!
-    logItem(id: ID!): InfraLogItem!
   }
 `;

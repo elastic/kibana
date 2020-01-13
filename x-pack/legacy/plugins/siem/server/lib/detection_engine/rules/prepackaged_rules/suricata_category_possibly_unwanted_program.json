@@ -1,0 +1,17 @@
+{
+  "rule_id": "1b9a31e8-fdfa-400e-aa4e-79a7f1a1da18",
+  "risk_score": 50,
+  "description": "Suricata Category - Possibly Unwanted Program",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Possibly Unwanted Program",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Possibly Unwanted Program Detected\" or rule.category: \"Possibly Unwanted Program Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

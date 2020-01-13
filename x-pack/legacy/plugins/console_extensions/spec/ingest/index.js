@@ -37,4 +37,33 @@ const enrichProcessorDefinition = {
   },
 };
 
-export const processors = [enrichProcessorDefinition];
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-processor.html
+const inferenceProcessorDefinition = {
+  inference: {
+    __template: {
+      model_id: '',
+      inference_config: {},
+      field_mappings: {},
+    },
+    target_field: '',
+    model_id: '',
+    field_mappings: {
+      __template: {},
+    },
+    inference_config: {
+      regression: {
+        __template: {},
+        results_field: '',
+      },
+      classification: {
+        __template: {},
+        results_field: '',
+        num_top_classes: 2,
+        top_classes_results_field: '',
+      },
+    },
+    ...commonPipelineParams,
+  },
+};
+
+export const processors = [enrichProcessorDefinition, inferenceProcessorDefinition];

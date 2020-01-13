@@ -27,8 +27,6 @@ export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_KBN_VERSION = 'kbnVersion';
-export const DEFAULT_TIMEZONE_BROWSER = 'timezoneBrowser';
 export const DEFAULT_FROM = 'now-24h';
 export const DEFAULT_TO = 'now';
 export const DEFAULT_INTERVAL_PAUSE = true;
@@ -66,3 +64,8 @@ export const SIGNALS_INDEX_KEY = 'signalsIndex';
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
+
+/**
+ * Common naming convention for an unauthenticated user
+ */
+export const UNAUTHENTICATED_USER = 'Unauthenticated';

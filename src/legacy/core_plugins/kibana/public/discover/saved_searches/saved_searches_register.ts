@@ -31,13 +31,13 @@ savedObjectManagementRegistry.register({
   service: 'savedSearches',
   title: 'searches',
 });
+const services = {
+  savedObjectsClient: npStart.core.savedObjects.client,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+const savedSearches = createSavedSearchesService(services);
+
 const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', () => {
-  const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-  return createSavedSearchesService(services);
-});
+module.service('savedSearches', () => savedSearches);

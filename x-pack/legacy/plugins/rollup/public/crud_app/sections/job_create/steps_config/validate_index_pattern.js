@@ -7,8 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
 export function validateIndexPattern(indexPattern, rollupIndex) {
   if (!indexPattern || !indexPattern.trim()) {
     return [
@@ -28,7 +27,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     ];
   }
 
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
+  const illegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (indexPattern.includes(char)) {
       chars.push(char);
     }

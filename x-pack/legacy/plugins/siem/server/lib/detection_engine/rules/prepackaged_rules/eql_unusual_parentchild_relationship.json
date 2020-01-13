@@ -1,0 +1,17 @@
+{
+  "rule_id": "35df0dd8-092d-4a83-88c1-5151a804f31b",
+  "risk_score": 50,
+  "description": "EQL - Unusual Parent-Child Relationship ",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Unusual Parent-Child Relationship ",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "   event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.executable:* and   (      (process.name:\"smss.exe\" and not process.parent.name:(\"System\" or \"smss.exe\")) or       (process.name:\"csrss.exe\" and not process.parent.name:(\"smss.exe\" or \"svchost.exe\")) or       (process.name:\"wininit.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"winlogon.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"lsass.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"LogonUI.exe\" and not process.parent.name:(\"winlogon.exe\" or \"wininit.exe\")) or       (process.name:\"services.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"svchost.exe\" and not process.parent.name:(\"services.exe\" or \"MsMpEng.exe\")) or      (process.name:\"spoolsv.exe\" and not process.parent.name:\"services.exe\") or       (process.name:\"taskhost.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"taskhostw.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"userinit.exe\" and not process.parent.name:(\"dwm.exe\" or \"winlogon.exe\"))    )",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

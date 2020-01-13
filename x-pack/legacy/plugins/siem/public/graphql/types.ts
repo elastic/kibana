@@ -6,8 +6,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction as EuiDirection } from '@elastic/eui';
-
 export type Maybe<T> = T | null;
 
 export interface PageInfoNote {
@@ -54,7 +52,7 @@ export interface PaginationInput {
 export interface SortField {
   sortFieldId: string;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -66,25 +64,25 @@ export interface LastTimeDetails {
 export interface HostsSortField {
   field: HostsFields;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface UsersSortField {
   field: UsersFields;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface NetworkTopTablesSortField {
   field: NetworkTopTablesFields;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface NetworkHttpSortField {
@@ -94,7 +92,7 @@ export interface NetworkHttpSortField {
 export interface TlsSortField {
   field: TlsFields;
 
-  direction: Direction | EuiDirection;
+  direction: Direction;
 }
 
 export interface PageInfoTimeline {

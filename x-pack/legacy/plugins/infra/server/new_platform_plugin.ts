@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { InfraConfig } from '../../../../plugins/infra/server';
 import { initInfraServer } from './infra_server';
@@ -23,11 +24,16 @@ import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
+import { APP_ID } from '../index';
 import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export interface KbnServer extends Server {
   usage: any;
 }
+
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
 
 export interface InfraPluginSetup {
   defineInternalSourceConfiguration: (
@@ -106,6 +112,14 @@ export class InfraServerPlugin {
 
     plugins.features.registerFeature(METRICS_FEATURE);
     plugins.features.registerFeature(LOGS_FEATURE);
+
+    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+      {
+        path: `/app/${APP_ID}#/logs`,
+        label: logsSampleDataLinkLabel,
+        icon: 'logsApp',
+      },
+    ]);
 
     initInfraServer(this.libs);
 

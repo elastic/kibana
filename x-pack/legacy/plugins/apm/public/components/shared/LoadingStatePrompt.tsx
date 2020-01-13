@@ -5,20 +5,14 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 export function LoadingStatePrompt() {
   return (
-    <EuiEmptyPrompt
-      title={
-        <div>
-          {i18n.translate('xpack.apm.loading.prompt', {
-            defaultMessage: 'Loading...'
-          })}
-        </div>
-      }
-      titleSize="s"
-    />
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="l" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

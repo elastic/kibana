@@ -207,7 +207,6 @@ describe('PingList component', () => {
         onPageCountChange={jest.fn()}
         onSelectedLocationChange={(loc: EuiComboBoxOptionProps[]) => {}}
         onSelectedStatusChange={jest.fn()}
-        onUpdateApp={jest.fn()}
         pageSize={30}
         selectedOption="down"
         selectedLocation={AllLocationOption.value}

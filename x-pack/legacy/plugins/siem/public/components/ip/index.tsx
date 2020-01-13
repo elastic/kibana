@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 

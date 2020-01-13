@@ -12,18 +12,20 @@ import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
-
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
+import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import {
+  ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
   OnDeleteSelected,
@@ -41,14 +43,14 @@ import {
   OpenTimelineReduxProps,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { timelineDefaults } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
+  hideActions?: ActionTimelineToShow[];
+  onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
 export type OpenTimelineOwnProps = OwnProps &
@@ -69,15 +71,17 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
-    defaultPageSize,
-    isModal = false,
-    title,
     apolloClient,
     closeModalTimeline,
+    createNewTimeline,
+    defaultPageSize,
+    hideActions = [],
+    isModal = false,
+    onOpenTimeline,
+    timeline,
+    title,
     updateTimeline,
     updateIsLoading,
-    timeline,
-    createNewTimeline,
   }) => {
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -212,6 +216,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         queryTimelineById({
           apolloClient,
           duplicate,
+          onOpenTimeline,
           timelineId,
           updateIsLoading,
           updateTimeline,
@@ -286,6 +291,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               data-test-subj={'open-timeline-modal'}
               deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
+              hideActions={hideActions}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}

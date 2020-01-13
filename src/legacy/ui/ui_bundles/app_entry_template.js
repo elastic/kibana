@@ -42,7 +42,7 @@ import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
 
-${apmInit('injectedMetadata.apm')}
+${apmInit('injectedMetadata.vars.apmConfig')}
 
 i18n.load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)

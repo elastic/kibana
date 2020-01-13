@@ -8,7 +8,8 @@ import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { RequestAuth } from 'hapi';
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
@@ -51,6 +52,7 @@ export interface FrameworkRequest<InternalRequest extends WrappableRequest = Req
   params: InternalRequest['params'];
   query: InternalRequest['query'];
   auth: InternalRequest['auth'];
+  user: AuthenticatedUser | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

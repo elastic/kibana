@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';

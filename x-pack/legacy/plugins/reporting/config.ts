@@ -14,7 +14,7 @@ export async function config(Joi: any) {
     enabled: Joi.boolean().default(true),
     kibanaServer: Joi.object({
       protocol: Joi.string().valid(['http', 'https']),
-      hostname: Joi.string(),
+      hostname: Joi.string().invalid('0'),
       port: Joi.number().integer(),
     }).default(),
     queue: Joi.object({

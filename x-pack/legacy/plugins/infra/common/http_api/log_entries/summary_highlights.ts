@@ -6,6 +6,7 @@
 
 import * as rt from 'io-ts';
 import { logEntriesSummaryRequestRT, logEntriesSummaryBucketRT } from './summary';
+import { logEntriesCursorRT } from './common';
 
 export const LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH = '/api/log_entries/summary_highlights';
 
@@ -23,10 +24,7 @@ export type LogEntriesSummaryHighlightsRequest = rt.TypeOf<
 export const logEntriesSummaryHighlightsBucketRT = rt.intersection([
   logEntriesSummaryBucketRT,
   rt.type({
-    representativeKey: rt.type({
-      time: rt.number,
-      tiebreaker: rt.number,
-    }),
+    representativeKey: logEntriesCursorRT,
   }),
 ]);
 

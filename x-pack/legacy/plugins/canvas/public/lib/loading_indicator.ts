@@ -16,7 +16,7 @@ export interface LoadingIndicatorInterface {
 
 const loadingCount$ = new Rx.BehaviorSubject(0);
 
-export const initLoadingIndicator = (addLoadingCount: CoreStart['http']['addLoadingCount']) =>
+export const initLoadingIndicator = (addLoadingCount: CoreStart['http']['addLoadingCountSource']) =>
   addLoadingCount(loadingCount$);
 
 export const loadingIndicator = {
