@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { histogramDetailsUrl } from '../../../services';
+import { getHistogramDetailsUrl } from '../../../services';
 
 import { FieldList } from '../../components';
 
@@ -96,7 +96,7 @@ export class StepHistogramUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={histogramDetailsUrl}
+              href={getHistogramDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateHistogramDocsButton"

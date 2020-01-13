@@ -12,8 +12,6 @@ import { addSearchStrategy } from 'ui/courier';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 import { addBadgeExtension, addToggleExtension } from '../../index_management/public';
-// @ts-ignore
-import { registerRollupApp } from './angular';
 
 const plugin = new RollupPlugin();
 
@@ -29,9 +27,4 @@ export const setup = plugin.setup(npSetup.core, {
     management,
   },
 });
-export const start = plugin.start(npStart.core, {
-  ...npStart.plugins,
-  __LEGACY: {
-    registerRollupApp,
-  },
-});
+export const start = plugin.start(npStart.core, npStart.plugins);

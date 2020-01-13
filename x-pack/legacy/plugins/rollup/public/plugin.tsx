@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { EditorConfigProviderRegistry } from 'ui/vis/editors/config/editor_config_providers';
+// @ts-ignore
 import { SearchStrategyProvider } from 'ui/courier/search_strategy/types';
 import { ManagementSetup } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
@@ -40,7 +41,7 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { setHttp, setApiPrefix } from './crud_app/services';
+import { setHttp, setApiPrefix, setEsBaseAndXPackBase } from './crud_app/services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -57,11 +58,6 @@ export interface RollupPluginSetupDependencies {
 
 export interface RollupPluginStartDependencies {
   management: ManagementStart;
-  __LEGACY: {
-    // TODO this becomes part of the management section register function as soon as
-    // the API is ready
-    registerRollupApp: (renderFunction: (element: HTMLElement) => void) => () => void;
-  };
 }
 
 export class RollupPlugin implements Plugin {
@@ -113,6 +109,8 @@ export class RollupPlugin implements Plugin {
   start(core: CoreStart, { management }: RollupPluginStartDependencies) {
     setHttp(core.http);
     setApiPrefix(core.http.basePath.prepend('/api/rollup'));
+    setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
+
     const esSection = management.sections.getSection('elasticsearch');
 
     const I18nContext = core.i18n.Context;

@@ -26,7 +26,7 @@ import {
 
 import { parseEsInterval } from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
-import { dateHistogramDetailsUrl, dateHistogramAggregationUrl } from '../../../services';
+import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
 
 import { StepError } from './components';
 
@@ -192,7 +192,7 @@ export class StepDateHistogramUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={dateHistogramDetailsUrl}
+              href={getDateHistogramDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
@@ -218,7 +218,7 @@ export class StepDateHistogramUi extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={dateHistogramAggregationUrl} target="_blank">
+                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"

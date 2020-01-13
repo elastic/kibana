@@ -27,7 +27,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl, cronUrl } from '../../../services';
+import { getLogisticalDetailsUrl, getCronUrl } from '../../../services';
 import { StepError } from './components';
 
 import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
@@ -146,7 +146,7 @@ export class StepLogisticsUi extends Component {
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={
               <p>
-                <EuiLink href={cronUrl} target="_blank">
+                <EuiLink href={getCronUrl()} target="_blank">
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
@@ -258,7 +258,7 @@ export class StepLogisticsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={logisticalDetailsUrl}
+              href={getLogisticalDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateLogisticsDocsButton"

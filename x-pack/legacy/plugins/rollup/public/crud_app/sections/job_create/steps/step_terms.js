@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { termsDetailsUrl } from '../../../services';
+import { getTermsDetailsUrl } from '../../../services';
 
 import { FieldList } from '../../components';
 
@@ -99,7 +99,7 @@ export class StepTermsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={termsDetailsUrl}
+              href={getTermsDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateTermsDocsButton"
