@@ -1935,8 +1935,20 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    uiOptions?: Record<string, any>;
     value?: SavedObjectAttribute;
+    type?: UiSettingsType;
+}
+
+type StringValidation = {
+  regexString: string,
+  message: string
+};
+
+type ImageValidation = {
+  maxSize: {
+    length: number;
+    description: string;
+  }
 }
 
 // @public (undocumented)
