@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import get from 'lodash/fp/get';
-import getOr from 'lodash/fp/getOr';
+import { get } from 'lodash';
 import { getLuminance, parseToHsl, parseToRgb, rgba, shade, tint } from 'polished';
 
 type PropReader = <Prop, Default = any>(props: object, defaultValue?: Default) => Prop;
@@ -16,7 +15,7 @@ const asPropReader = (reader: string | string[] | PropReader) =>
     : <Props extends object, Prop extends keyof Props, Default>(
         props: Props,
         defaultValue?: Default
-      ) => getOr(defaultValue, reader as Prop, props);
+      ) => get(props, reader as Prop, defaultValue);
 
 export const switchProp = Object.assign(
   (propName: string | string[] | PropReader, options: Map<any, any> | object) => (

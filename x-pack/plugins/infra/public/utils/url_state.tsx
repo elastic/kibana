@@ -5,7 +5,7 @@
  */
 
 import { History, Location } from 'history';
-import throttle from 'lodash/fp/throttle';
+import { throttle } from 'lodash';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
@@ -53,7 +53,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     this.handleInitialize(location);
   }
 
-  private replaceStateInLocation = throttle(1000, (urlState: UrlState | undefined) => {
+  private replaceStateInLocation = throttle((urlState: UrlState | undefined) => {
     const { history, location, urlStateKey } = this.props;
 
     const newLocation = replaceQueryStringInLocation(
@@ -64,7 +64,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     if (newLocation !== location) {
       history.replace(newLocation);
     }
-  });
+  }, 1000);
 
   private handleInitialize = (location: Location) => {
     const { onInitialize, mapToUrlState, urlStateKey, urlState } = this.props;

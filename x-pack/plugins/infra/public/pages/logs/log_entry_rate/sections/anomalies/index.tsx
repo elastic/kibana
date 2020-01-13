@@ -18,7 +18,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../utils/eui_styled_components';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';

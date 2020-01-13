@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../utils/eui_styled_components';
 
 interface TabConfiguration {
   title: string | React.ReactNode;

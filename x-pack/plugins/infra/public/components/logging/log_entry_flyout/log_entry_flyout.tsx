@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 import { TimeKey } from '../../../../common/time';
 import { InfraLoadingPanel } from '../../loading';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import compose from 'lodash/fp/compose';
+import { compose } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 

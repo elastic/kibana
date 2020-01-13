@@ -19,7 +19,7 @@ import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../utils/eui_styled_components';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
 

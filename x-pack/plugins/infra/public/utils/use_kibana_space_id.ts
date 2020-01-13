@@ -7,7 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useKibanaSpaceId = (): string => {
   const kibana = useKibana();

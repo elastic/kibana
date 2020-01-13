@@ -17,7 +17,7 @@ import { InfraGroupByOptions } from '../../../lib/lib';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface ToolbarProps {

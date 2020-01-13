@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
+import { euiStyled, EuiTheme, withTheme } from '../../utils/eui_styled_components';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { ColumnarPage, PageContent } from '../../components/page';
@@ -17,7 +17,7 @@ import { InfraLoadingPanel } from '../../components/loading';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 
 const DetailPageContent = euiStyled(PageContent)`

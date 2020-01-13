@@ -14,7 +14,7 @@ import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,
 } from '../../../components/source_configuration';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageNoIndicesContent = () => {
   const basePath = useKibana().services.http?.basePath || '';

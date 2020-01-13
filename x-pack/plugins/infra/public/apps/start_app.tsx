@@ -15,7 +15,7 @@ import { CoreStart } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { EuiThemeProvider } from '../../../../common/eui_styled_components';
+import { EuiThemeProvider } from '../../utils/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
@@ -25,7 +25,7 @@ import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,
   KibanaContextProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../src/plugins/kibana_react/public';
 import { ROOT_ELEMENT_ID } from '../legacy_shim';
 // NP_TODO: Type plugins
 export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: any) {

@@ -10,7 +10,7 @@ import React from 'react';
 
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 
 interface LogEntryIconColumnProps {
   isHighlighted: boolean;

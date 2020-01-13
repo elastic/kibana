@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import { esKuery } from '../../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { WaffleFilterState } from './reducer';
 
 export const selectWaffleFilterQuery = (state: WaffleFilterState) =>

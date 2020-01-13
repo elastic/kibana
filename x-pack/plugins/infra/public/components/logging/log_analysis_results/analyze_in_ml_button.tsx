@@ -10,7 +10,7 @@ import React from 'react';
 import { encode } from 'rison-node';
 import qs from 'querystring';
 import url from 'url';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{

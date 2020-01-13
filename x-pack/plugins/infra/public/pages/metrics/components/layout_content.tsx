@@ -5,7 +5,7 @@
  */
 
 import { EuiPageContent } from '@elastic/eui';
-import { euiStyled } from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 
 export const LayoutContent = euiStyled(EuiPageContent)`
   position: relative;

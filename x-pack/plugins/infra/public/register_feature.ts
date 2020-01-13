@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
-} from '../../../../../src/plugins/home/public';
+} from '../../../../src/plugins/home/public';
 
 const APP_ID = 'infra';
 

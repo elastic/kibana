@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../utils/eui_styled_components';
 
 export const LogStatusbar = euiStyled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',

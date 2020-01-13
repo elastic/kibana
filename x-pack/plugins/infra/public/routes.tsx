@@ -14,7 +14,7 @@ import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
 import { RedirectWithQueryParams } from './utils/redirect_with_query_params';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../src/plugins/kibana_react/public';
 
 interface RouterProps {
   history: History;

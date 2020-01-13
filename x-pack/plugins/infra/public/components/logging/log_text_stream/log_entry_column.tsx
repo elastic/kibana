@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 import {
   LogColumnConfiguration,
   isMessageLogColumnConfiguration,

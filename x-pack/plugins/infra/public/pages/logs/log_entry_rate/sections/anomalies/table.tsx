@@ -12,7 +12,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { formatAnomalyScore, getFriendlyNameForPartitionId } from '../helpers/data_formatters';
-import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../utils/eui_styled_components';
 
 interface TableItem {
   id: string;

@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 
 interface LogTextStreamJumpToTailProps {
   onClickJump?: () => void;

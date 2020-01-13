@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
+import { isEqual } from 'lodash';
 import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 

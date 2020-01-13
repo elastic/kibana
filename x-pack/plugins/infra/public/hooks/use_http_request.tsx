@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export function useHTTPRequest<Response>(
   pathname: string,

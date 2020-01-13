@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useSavedView } from '../../hooks/use_saved_view';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewListFlyout } from './view_list_flyout';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props<ViewState> {
   viewType: string;

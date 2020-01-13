@@ -12,9 +12,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../utils/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 

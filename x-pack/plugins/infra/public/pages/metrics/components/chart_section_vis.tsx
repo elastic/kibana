@@ -20,7 +20,7 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({

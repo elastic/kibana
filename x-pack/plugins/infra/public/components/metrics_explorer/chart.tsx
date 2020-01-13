@@ -17,7 +17,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../utils/eui_styled_components';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
@@ -27,7 +27,7 @@ import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
-import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   title?: string | null;

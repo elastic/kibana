@@ -6,10 +6,10 @@
 
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
-import max from 'lodash/fp/max';
+import { max } from 'lodash';
 import * as React from 'react';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 import { SummaryBucket } from './types';
 
 interface DensityChartProps {

@@ -5,11 +5,11 @@
  */
 
 import { bisector } from 'd3-array';
-import sortBy from 'lodash/fp/sortBy';
-import throttle from 'lodash/fp/throttle';
+import { sortBy } from 'lodash';
+import { throttle } from 'lodash';
 import * as React from 'react';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../utils/eui_styled_components';
 import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {
@@ -57,17 +57,14 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public childDimensions = new Map<Child, Rect>();
   private nextScrollEventFromCenterTarget = false;
 
-  public handleScroll: React.UIEventHandler<HTMLDivElement> = throttle(
-    SCROLL_THROTTLE_INTERVAL,
-    () => {
-      // If this event was fired by the centerTarget method modifying the scrollTop,
-      // then don't send `fromScroll: true` to reportVisibleChildren. The rest of the
-      // app needs to respond differently depending on whether the user is scrolling through
-      // the pane manually, versus whether the pane is updating itself in response to new data
-      this.reportVisibleChildren(!this.nextScrollEventFromCenterTarget);
-      this.nextScrollEventFromCenterTarget = false;
-    }
-  );
+  public handleScroll: React.UIEventHandler<HTMLDivElement> = throttle(() => {
+    // If this event was fired by the centerTarget method modifying the scrollTop,
+    // then don't send `fromScroll: true` to reportVisibleChildren. The rest of the
+    // app needs to respond differently depending on whether the user is scrolling through
+    // the pane manually, versus whether the pane is updating itself in response to new data
+    this.reportVisibleChildren(!this.nextScrollEventFromCenterTarget);
+    this.nextScrollEventFromCenterTarget = false;
+  }, SCROLL_THROTTLE_INTERVAL);
 
   public registerChild = (key: any, element: MeasurableChild | null) => {
     if (element === null) {
@@ -79,7 +76,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
 
   public updateChildDimensions = () => {
     this.childDimensions = new Map<Child, Rect>(
-      sortDimensionsByTop(
+      sortBy<[any, Rect]>(
         Array.from(this.childRefs.entries()).reduce((accumulatedDimensions, [key, child]) => {
           const currentOffsetRect = child.getOffsetRect();
 
@@ -88,7 +85,8 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
           }
 
           return accumulatedDimensions;
-        }, [] as Array<[any, Rect]>)
+        }, [] as Array<[any, Rect]>),
+        '1.top'
       )
     );
   };
@@ -301,8 +299,6 @@ const getVisibleChildren = <Child extends {}>(
     topChildOffset: childDimensions[topChildIndex][1].top - scrollTop,
   };
 };
-
-const sortDimensionsByTop = sortBy<[any, Rect]>('1.top');
 
 const getChildIndexBefore = bisector<[any, Rect], number>(([key, rect]) => rect.top + rect.height)
   .left;

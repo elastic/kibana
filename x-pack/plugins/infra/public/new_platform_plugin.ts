@@ -15,11 +15,8 @@ import introspectionQueryResultData from './graphql/introspection.json';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
-import {
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 interface ClientPluginsSetup {
   home: HomePublicPluginSetup;

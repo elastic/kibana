@@ -8,7 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 
-import { euiStyled } from '../../../../common/eui_styled_components';
+import { euiStyled } from '../utils/eui_styled_components';
 
 export const LoadingOverlayWrapper: React.FC<React.HTMLAttributes<HTMLDivElement> & {
   isLoading: boolean;

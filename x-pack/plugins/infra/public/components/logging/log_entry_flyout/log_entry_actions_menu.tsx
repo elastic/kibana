@@ -8,9 +8,9 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import url from 'url';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
-import { getTraceUrl } from '../../../../../apm/public/components/shared/Links/apm/ExternalLinks';
+import { getTraceUrl } from '../../../../../../legacy/plugins/apm/public/components/shared/Links/apm/ExternalLinks';
 import { LogEntriesItem } from '../../../../common/http_api';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];

@@ -7,7 +7,7 @@
 import { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface HeaderProps {
   breadcrumbs?: ChromeBreadcrumb[];

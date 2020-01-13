@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import omit from 'lodash/fp/omit';
+import { omit } from 'lodash';
 import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';

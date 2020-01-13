@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
 import { isDisplayable } from '../../utils/is_displayable';
-import { esKuery, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/public';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;
