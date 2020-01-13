@@ -58,7 +58,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            4 day ago
+            3d ago
           </div>
         </div>
       </span>
@@ -97,7 +97,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            4 day ago
+            3d ago
           </div>
         </div>
       </span>
@@ -166,7 +166,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            4 day ago
+            3d ago
           </div>
         </div>
       </span>
@@ -205,7 +205,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            4 day ago
+            3d ago
           </div>
         </div>
       </span>
@@ -214,7 +214,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
 </div>
 `;
 
-exports[`StatusByLocation component renders when many location 1`] = `
+exports[`StatusByLocation component renders when there are many location 1`] = `
 Array [
   .c3 {
   display: inline-block;
@@ -273,7 +273,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -312,7 +312,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -351,7 +351,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -390,7 +390,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -429,7 +429,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -468,7 +468,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -507,7 +507,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>
@@ -546,7 +546,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              4 day ago
+              3d ago
             </div>
           </div>
         </span>

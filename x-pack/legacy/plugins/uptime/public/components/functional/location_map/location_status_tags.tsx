@@ -32,7 +32,7 @@ const TagContainer = styled.div`
   overflow: hidden;
 `;
 
-const OtherDiv = styled.div`
+const OtherLocationsDiv = styled.div`
   padding-left: 18px;
 `;
 
@@ -70,18 +70,18 @@ export const LocationStatusTags = ({ locations }: Props) => {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
-      s: 'few sec',
-      ss: '%s sec',
-      m: 'a min',
-      mm: '%d min',
-      h: 'an hour',
-      hh: '%d hour',
-      d: 'a day',
-      dd: '%d day',
-      M: 'a month',
+      s: '%ds',
+      ss: '%ss',
+      m: '%dm',
+      mm: '%dm',
+      h: '%dh',
+      hh: '%dh',
+      d: '%dd',
+      dd: '%dd',
+      M: '%d Mon',
       MM: '%d Mon',
-      y: 'a year',
-      yy: '%d Year',
+      y: '%d Yr',
+      yy: '%d Yr',
     },
   });
 
@@ -105,7 +105,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
         <span>{upLocations.map((item, ind) => tagLabel(item, ind, gray))}</span>
       </TagContainer>
       {locations.length > 7 && (
-        <OtherDiv>
+        <OtherLocationsDiv>
           <EuiText color="subdued">
             <h4>
               <FormattedMessage
@@ -117,7 +117,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
               />
             </h4>
           </EuiText>
-        </OtherDiv>
+        </OtherLocationsDiv>
       )}
     </>
   );

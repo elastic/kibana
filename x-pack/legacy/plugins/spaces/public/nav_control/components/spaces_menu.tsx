@@ -20,6 +20,7 @@ import { ManageSpacesButton } from './manage_spaces_button';
 import { SpaceAvatar } from '../../space_avatar';
 
 interface Props {
+  id: string;
   spaces: Space[];
   isLoading: boolean;
   onSelectSpace: (space: Space) => void;
@@ -48,6 +49,7 @@ class SpacesMenuUI extends Component<Props, State> {
       : this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
+      id: this.props.id,
       className: 'spcMenu',
       title: intl.formatMessage({
         id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',

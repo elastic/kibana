@@ -5,15 +5,15 @@
  */
 
 import { get } from 'lodash';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
+import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
 
-async function isTaskManagerReady(taskManager: TaskManagerPluginSetupContract | undefined) {
+async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
   const result = await fetch(taskManager);
   return result !== null;
 }
 
-async function fetch(taskManager: TaskManagerPluginSetupContract | undefined) {
+async function fetch(taskManager?: TaskManagerStartContract) {
   if (!taskManager) {
     return null;
   }
@@ -38,7 +38,7 @@ async function fetch(taskManager: TaskManagerPluginSetupContract | undefined) {
   return docs;
 }
 
-export function getUsageCollector(taskManager: TaskManagerPluginSetupContract | undefined) {
+export function getUsageCollector(taskManager?: TaskManagerStartContract) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;
