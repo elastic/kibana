@@ -376,7 +376,13 @@ class HeaderUI extends Component<Props, State> {
               title: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle', {
                 defaultMessage: 'Recent items',
               }),
-              listItems: this.state.recentlyAccessed,
+              listItems: this.state.recentlyAccessed.map(item => ({
+                label: truncateRecentItemLabel(item.label),
+                title: item.title,
+                'aria-label': item.title,
+                href: item.href,
+                iconType: item.euiIconType,
+              })),
             },
           },
         ]}
