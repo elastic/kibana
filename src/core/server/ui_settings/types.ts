@@ -113,6 +113,23 @@ export interface UiSettingsParams {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
+  /*
+   * Allows defining a custom validation applicable to value change on the client.
+   * @deprecated
+   */
+  validation?: ImageValidation | StringValidation;
+}
+
+export interface StringValidation {
+  regexString: string;
+  message: string;
+}
+
+export interface ImageValidation {
+  maxSize: {
+    length: number;
+    description: string;
+  };
 }
 
 /** @internal */
