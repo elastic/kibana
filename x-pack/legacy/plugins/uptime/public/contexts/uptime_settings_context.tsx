@@ -10,7 +10,7 @@ import { UptimeAppProps } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
 
-export interface UMSettingsContextValues {
+export interface UptimeSettingsContextValues {
   basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -26,7 +26,7 @@ const { BASE_PATH, DATE_RANGE_START, DATE_RANGE_END } = CONTEXT_DEFAULTS;
  * These are default values for the context. These defaults are typically
  * overwritten by the Uptime App upon its invocation.
  */
-const defaultContext: UMSettingsContextValues = {
+const defaultContext: UptimeSettingsContextValues = {
   basePath: BASE_PATH,
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,

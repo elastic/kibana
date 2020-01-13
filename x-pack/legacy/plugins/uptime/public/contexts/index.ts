@@ -6,7 +6,7 @@
 
 export { UptimeRefreshContext, UptimeRefreshContextProvider } from './uptime_refresh_context';
 export {
-  UMSettingsContextValues,
+  UptimeSettingsContextValues,
   UptimeSettingsContext,
   UptimeSettingsContextProvider,
 } from './uptime_settings_context';

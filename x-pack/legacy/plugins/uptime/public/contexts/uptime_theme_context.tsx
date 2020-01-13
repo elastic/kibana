@@ -9,7 +9,7 @@ import React, { createContext, useMemo } from 'react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { UptimeAppColors } from '../uptime_app';
 
-export interface UMThemeContextValues {
+export interface UptimeThemeContextValues {
   colors: UptimeAppColors;
 }
 
@@ -17,7 +17,7 @@ export interface UMThemeContextValues {
  * These are default values for the context. These defaults are typically
  * overwritten by the Uptime App upon its invocation.
  */
-const defaultContext: UMThemeContextValues = {
+const defaultContext: UptimeThemeContextValues = {
   colors: {
     danger: euiLightVars.euiColorDanger,
     mean: euiLightVars.euiColorPrimary,
