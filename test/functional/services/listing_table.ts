@@ -25,6 +25,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
   const log = getService('log');
   const retry = getService('retry');
   const { common, header } = getPageObjects(['common', 'header']);
+  const prefixMap = { visualize: 'vis', dashboard: 'dashboard' };
 
   class ListingTable {
     public async getSearchFilter() {
@@ -32,7 +33,12 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       return searchFilter[0];
     }
 
-    public async clearFilter() {
+    public async getSearchFilterValue() {
+      const searchFilter = await this.getSearchFilter();
+      return await searchFilter.getAttribute('value');
+    }
+
+    public async clearSearchFilter() {
       const searchFilter = await this.getSearchFilter();
       await searchFilter.clearValue();
       await searchFilter.click();
@@ -49,11 +55,18 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getItemsCount(appName: 'visualize' | 'dashboard'): Promise<number> {
-      const prefixMap = { visualize: 'vis', dashboard: 'dashboard' };
       const elements = await find.allByCssSelector(
         `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
       );
       return elements.length;
+    }
+
+    async searchAndGetItemsCount(appName: 'visualize' | 'dashboard', name: string) {
+      await this.searchForItemWithName(name);
+      const links = await testSubjects.findAll(
+        `${prefixMap[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
+      );
+      return links.length;
     }
 
     public async searchForItemWithName(name: string) {
@@ -73,6 +86,21 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickDeleteSelected() {
       await testSubjects.click('deleteSelectedItems');
+    }
+
+    async clickItemCheckbox(id: string) {
+      await testSubjects.click(`checkboxSelectRow-${id}`);
+    }
+
+    async deleteDashboard(name: string, id: string) {
+      await this.searchForItemWithName(name);
+      await this.clickItemCheckbox(id);
+      await this.clickDeleteSelected();
+      await common.clickConfirmOnModal();
+    }
+
+    async clickItemLink(appName: 'dashboard' | 'visualize', name: string) {
+      await testSubjects.click(`${appName}ListingTitleLink-${name.split(' ').join('-')}`);
     }
 
     public async checkListingSelectAllCheckbox() {
@@ -99,6 +127,18 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
         }
       }
       return visualizationNames;
+    }
+
+    public async clickNewButton(promptBtnTestSubj: string): Promise<void> {
+      await retry.try(async () => {
+        // newItemButton button is only visible when there are items in the listing table is displayed.
+        if (await testSubjects.exists('newItemButton')) {
+          await testSubjects.click('newItemButton');
+        } else {
+          // no items exist, click createPromptButton to create new dashboard/visualization
+          await testSubjects.click(promptBtnTestSubj);
+        }
+      });
     }
   }
 
