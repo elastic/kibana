@@ -17,7 +17,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiText,
