@@ -14,8 +14,8 @@ const NAVBAR_HEIGHT = 48;
 // The width of the left sidebar in tablet / desktop mode
 const SIDEBAR_WIDTH = 264;
 // The breakpoint under which the sidebar is not visible
-const MOBILE_BREAKPOINT = 768;
 const EUI_PADDING = 16;
+// The max width of a page content.
 const MAX_WIDTH_PAGE = 1200;
 
 interface Props {
