@@ -21,7 +21,6 @@ import {
   createBulkErrorObject,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
