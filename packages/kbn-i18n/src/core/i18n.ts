@@ -166,6 +166,263 @@ export function getRegisteredLocales() {
 }
 
 /**
+ * Top 35 most traded currencies per https://en.wikipedia.org/wiki/Template:Most_traded_currencies
+ * This list is not a full list of currencies, but the ISO standard full list of currencies
+ * does not provide some of the amenities of this Wiki list- a mashup of sources would be required
+ * to provide country name, currency name, and currency symbol.
+ * The full ISO reference: https://www.currency-iso.org/en/home/tables/table-a1.html
+ */
+export function getKnownCurrencies() {
+  return [
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.USD', {
+        defaultMessage: 'United States dollar',
+      }),
+      code: 'USD',
+      symbol: 'US$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.EUR', {
+        defaultMessage: 'Euro',
+      }),
+      code: 'EUR',
+      symbol: '€',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.JPY', {
+        defaultMessage: 'Japanese yen',
+      }),
+      code: 'JPY',
+      symbol: '¥',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.GBP', {
+        defaultMessage: 'Pound sterling',
+      }),
+      code: 'GBP',
+      symbol: '£',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.AUD', {
+        defaultMessage: 'Australian dollar',
+      }),
+      code: 'AUD',
+      symbol: 'A$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.CAD', {
+        defaultMessage: 'Canadian dollar',
+      }),
+      code: 'CAD',
+      symbol: 'C$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.CHF', {
+        defaultMessage: 'Swiss franc',
+      }),
+      code: 'CHF',
+      symbol: 'CHF',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.CNY', {
+        defaultMessage: 'Renminbi',
+      }),
+      code: 'CNY',
+      symbol: '元',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.HKD', {
+        defaultMessage: 'Hong Kong dollar',
+      }),
+      code: 'HKD',
+      symbol: 'HK$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.NZD', {
+        defaultMessage: 'New Zealand dollar',
+      }),
+      code: 'NZD',
+      symbol: 'NZ$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.SEK', {
+        defaultMessage: 'Swedish krona',
+      }),
+      code: 'SEK',
+      symbol: 'kr',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.KRW', {
+        defaultMessage: 'South Korean won',
+      }),
+      code: 'KRW',
+      symbol: '₩',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.SGD', {
+        defaultMessage: 'Singapore dollar',
+      }),
+      code: 'SGD',
+      symbol: 'S$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.NOK', {
+        defaultMessage: 'Norwegian krone',
+      }),
+      code: 'NOK',
+      symbol: 'kr',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.MXN', {
+        defaultMessage: 'Mexican peso',
+      }),
+      code: 'MXN',
+      symbol: '$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.INR', {
+        defaultMessage: 'Indian rupee',
+      }),
+      code: 'INR',
+      symbol: '₹',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.RUB', {
+        defaultMessage: 'Russian ruble',
+      }),
+      code: 'RUB',
+      symbol: '₽',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.ZAR', {
+        defaultMessage: 'South African rand',
+      }),
+      code: 'ZAR',
+      symbol: 'R',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.TRY', {
+        defaultMessage: 'Turkish lira',
+      }),
+      code: 'TRY',
+      symbol: '₺',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.BRL', {
+        defaultMessage: 'Brazilian real',
+      }),
+      code: 'BRL',
+      symbol: 'R$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.TWD', {
+        defaultMessage: 'New Taiwan dollar',
+      }),
+      code: 'TWD',
+      symbol: 'NT$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.DKK', {
+        defaultMessage: 'Danish krone',
+      }),
+      code: 'DKK',
+      symbol: 'kr',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.PLN', {
+        defaultMessage: 'Polish zloty',
+      }),
+      code: 'PLN',
+      symbol: 'zł',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.THB', {
+        defaultMessage: 'Thai baht',
+      }),
+      code: 'THB',
+      symbol: '฿',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.IDR', {
+        defaultMessage: 'Indonesian rupiah',
+      }),
+      code: 'IDR',
+      symbol: 'Rp',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.HUF', {
+        defaultMessage: 'Hungarian forint',
+      }),
+      code: 'HUF',
+      symbol: 'Ft',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.CZK', {
+        defaultMessage: 'Czech koruna',
+      }),
+      code: 'CZK',
+      symbol: 'Kč',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.ILS', {
+        defaultMessage: 'Israeli new shekel',
+      }),
+      code: 'ILS',
+      symbol: '₪',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.CLP', {
+        defaultMessage: 'Chilean peso',
+      }),
+      code: 'CLP',
+      symbol: 'CLP$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.PHP', {
+        defaultMessage: 'Philippine peso',
+      }),
+      code: 'PHP',
+      symbol: '₱',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.AED', {
+        defaultMessage: 'UAE dirham',
+      }),
+      code: 'AED',
+      symbol: 'د.إ',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.COP', {
+        defaultMessage: 'Colombian peso',
+      }),
+      code: 'COP',
+      symbol: 'COL$',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.SAR', {
+        defaultMessage: 'Saudi riyal',
+      }),
+      code: 'SAR',
+      symbol: '﷼',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.MYR', {
+        defaultMessage: 'Malaysian ringgit',
+      }),
+      code: 'MYR',
+      symbol: 'RM',
+    },
+    {
+      name: translate('common.ui.fieldEditor.currency.currencies.RON', {
+        defaultMessage: 'Romanian leu',
+      }),
+      code: 'RON',
+      symbol: 'L',
+    },
+  ];
+}
+
+/**
  * Returns array of locales that can be used with i18n, even if there is no translation.
  * This could be used for number formatting.
  */

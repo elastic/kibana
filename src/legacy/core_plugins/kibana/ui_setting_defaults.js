@@ -22,43 +22,7 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
 
-const topCurrencies = [
-  { name: 'United States dollar', code: 'USD', symbol: 'US$' },
-  { name: 'Euro', code: 'EUR', symbol: '€' },
-  { name: 'Japanese yen', code: 'JPY', symbol: '¥' },
-  { name: 'Pound sterling', code: 'GBP', symbol: '£' },
-  { name: 'Australian dollar', code: 'AUD', symbol: 'A$' },
-  { name: 'Canadian dollar', code: 'CAD', symbol: 'C$' },
-  { name: 'Swiss franc', code: 'CHF', symbol: 'CHF' },
-  { name: 'Renminbi', code: 'CNY', symbol: '元' },
-  { name: 'Hong Kong dollar', code: 'HKD', symbol: 'HK$' },
-  { name: 'New Zealand dollar', code: 'NZD', symbol: 'NZ$' },
-  { name: 'Swedish krona', code: 'SEK', symbol: 'kr' },
-  { name: 'South Korean won', code: 'KRW', symbol: '₩' },
-  { name: 'Singapore dollar', code: 'SGD', symbol: 'S$' },
-  { name: 'Norwegian krone', code: 'NOK', symbol: 'kr' },
-  { name: 'Mexican peso', code: 'MXN', symbol: '$' },
-  { name: 'Indian rupee', code: 'INR', symbol: '₹' },
-  { name: 'Russian ruble', code: 'RUB', symbol: '₽' },
-  { name: 'South African rand', code: 'ZAR', symbol: 'R' },
-  { name: 'Turkish lira', code: 'TRY', symbol: '₺' },
-  { name: 'Brazilian real', code: 'BRL', symbol: 'R$' },
-  { name: 'New Taiwan dollar', code: 'TWD', symbol: 'NT$' },
-  { name: 'Danish krone', code: 'DKK', symbol: 'kr' },
-  { name: 'Polish zloty', code: 'PLN', symbol: 'zł' },
-  { name: 'Thai baht', code: 'THB', symbol: '฿' },
-  { name: 'Indonesian rupiah', code: 'IDR', symbol: 'Rp' },
-  { name: 'Hungarian forint', code: 'HUF', symbol: 'Ft' },
-  { name: 'Czech koruna', code: 'CZK', symbol: 'Kč' },
-  { name: 'Israeli new shekel', code: 'ILS', symbol: '₪' },
-  { name: 'Chilean peso', code: 'CLP', symbol: 'CLP$' },
-  { name: 'Philippine peso', code: 'PHP', symbol: '₱' },
-  { name: 'UAE dirham', code: 'AED', symbol: 'د.إ' },
-  { name: 'Colombian peso', code: 'COP', symbol: 'COL$' },
-  { name: 'Saudi riyal', code: 'SAR', symbol: '﷼' },
-  { name: 'Malaysian ringgit', code: 'MYR', symbol: 'RM' },
-  { name: 'Romanian leu', code: 'RON', symbol: 'L' },
-];
+const topCurrencies = i18n.getKnownCurrencies();
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
