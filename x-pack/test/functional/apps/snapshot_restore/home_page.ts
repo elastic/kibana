@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
+  const es = getService('legacyEs');
 
   describe('Home page', function() {
     this.tags('smoke');
@@ -25,6 +26,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const repositoriesButton = await pageObjects.snapshotRestore.registerRepositoryButton();
       expect(await repositoriesButton.isDisplayed()).to.be(true);
+    });
+
+    describe('Repositories Tab', async () => {
+      before(async () => {
+        await es.snapshot.createRepository({
+          repository: 'my-repository',
+          body: {
+            type: 'fs',
+            settings: {
+              location: '/tmp/es-backups/',
+              compress: true,
+            },
+          },
+          verify: true,
+        });
+        await pageObjects.snapshotRestore.navToRepositories();
+      });
+
+      it('cleanup repository', async () => {
+        await pageObjects.snapshotRestore.viewRepositoryDetails('my-repository');
+        await pageObjects.common.sleep(25000);
+        const cleanupResponse = await pageObjects.snapshotRestore.performRepositoryCleanup();
+        await pageObjects.common.sleep(25000);
+        expect(cleanupResponse).to.contain('results');
+        expect(cleanupResponse).to.contain('deleted_bytes');
+        expect(cleanupResponse).to.contain('deleted_blobs');
+      });
+      after(async () => {
+        await es.snapshot.deleteRepository({
+          repository: 'my-repository',
+        });
+      });
     });
   });
 };
