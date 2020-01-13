@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
+import moment from 'moment';
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
@@ -17,6 +18,7 @@ import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition } from './types';
+import { getGapBetweenRuns } from './utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -57,7 +59,8 @@ export const signalRulesAlertType = ({
         version: schema.number({ defaultValue: 1 }),
       }),
     },
-    async executor({ alertId, services, params }) {
+    // fun fact: previousStartedAt is not actually a Date but a String of a date
+    async executor({ previousStartedAt, alertId, services, params }) {
       const {
         from,
         ruleId,
@@ -70,7 +73,6 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
-
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get('alert', alertId);
       const name: string = savedObject.attributes.name;
@@ -78,9 +80,19 @@ export const signalRulesAlertType = ({
 
       const createdBy: string = savedObject.attributes.createdBy;
       const updatedBy: string = savedObject.attributes.updatedBy;
-      const interval: string = savedObject.attributes.interval;
+      const interval: string = savedObject.attributes.schedule.interval;
       const enabled: boolean = savedObject.attributes.enabled;
-
+      const gap = getGapBetweenRuns({
+        previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
+        interval,
+        from,
+        to,
+      });
+      if (gap != null && gap.asMilliseconds() > 0) {
+        logger.warn(
+          `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
+        );
+      }
       // set searchAfter page size to be the lesser of default page size or maxSignals.
       const searchAfterSize =
         DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
@@ -155,7 +167,7 @@ export const signalRulesAlertType = ({
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions
         logger.error(
-          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${err.message}`
         );
       }
     },
