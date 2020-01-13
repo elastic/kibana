@@ -102,6 +102,23 @@ export interface UiSettingsParams {
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
+  /*
+   * Allows defining a custom validation applicable to value change on the client.
+   * @deprecated
+   */
+  validation?: ImageValidation | StringValidation;
+}
+
+export interface StringValidation {
+  regexString: string;
+  message: string;
+}
+
+export interface ImageValidation {
+  maxSize: {
+    length: number;
+    description: string;
+  };
 }
 
 /** @internal */

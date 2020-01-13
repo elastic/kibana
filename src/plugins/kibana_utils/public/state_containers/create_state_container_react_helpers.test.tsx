@@ -23,15 +23,6 @@ import { act, Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
 
-const create = <S, T extends object>(state: S, transitions: T = {} as T) => {
-  const pureTransitions = {
-    set: () => (newState: S) => newState,
-    ...transitions,
-  };
-  const store = createStateContainer<typeof state, typeof pureTransitions>(state, pureTransitions);
-  return { store, mutators: store.transitions };
-};
-
 let container: HTMLDivElement | null;
 
 beforeEach(() => {
@@ -56,12 +47,12 @@ test('can create React context', () => {
 });
 
 test('<Provider> passes state to <Consumer>', () => {
-  const { store } = create({ hello: 'world' });
-  const { Provider, Consumer } = createStateContainerReactHelpers<typeof store>();
+  const stateContainer = createStateContainer({ hello: 'world' });
+  const { Provider, Consumer } = createStateContainerReactHelpers<typeof stateContainer>();
 
   ReactDOM.render(
-    <Provider value={store}>
-      <Consumer>{(s: typeof store) => s.get().hello}</Consumer>
+    <Provider value={stateContainer}>
+      <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
     </Provider>,
     container
   );
@@ -79,8 +70,8 @@ interface Props1 {
 }
 
 test('<Provider> passes state to connect()()', () => {
-  const { store } = create({ hello: 'Bob' });
-  const { Provider, connect } = createStateContainerReactHelpers();
+  const stateContainer = createStateContainer({ hello: 'Bob' });
+  const { Provider, connect } = createStateContainerReactHelpers<typeof stateContainer>();
 
   const Demo: React.FC<Props1> = ({ message, stop }) => (
     <>
@@ -92,7 +83,7 @@ test('<Provider> passes state to connect()()', () => {
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
   ReactDOM.render(
-    <Provider value={store}>
+    <Provider value={stateContainer}>
       <DemoConnected stop="?" />
     </Provider>,
     container
@@ -101,14 +92,14 @@ test('<Provider> passes state to connect()()', () => {
   expect(container!.innerHTML).toBe('Bob?');
 });
 
-test('context receives Redux store', () => {
-  const { store } = create({ foo: 'bar' });
-  const { Provider, context } = createStateContainerReactHelpers<typeof store>();
+test('context receives stateContainer', () => {
+  const stateContainer = createStateContainer({ foo: 'bar' });
+  const { Provider, context } = createStateContainerReactHelpers<typeof stateContainer>();
 
   ReactDOM.render(
     /* eslint-disable no-shadow */
-    <Provider value={store}>
-      <context.Consumer>{store => store.get().foo}</context.Consumer>
+    <Provider value={stateContainer}>
+      <context.Consumer>{stateContainer => stateContainer.get().foo}</context.Consumer>
     </Provider>,
     /* eslint-enable no-shadow */
     container
@@ -117,21 +108,21 @@ test('context receives Redux store', () => {
   expect(container!.innerHTML).toBe('bar');
 });
 
-xtest('can use multiple stores in one React app', () => {});
+test.todo('can use multiple stores in one React app');
 
 describe('hooks', () => {
   describe('useStore', () => {
-    test('can select store using useStore hook', () => {
-      const { store } = create({ foo: 'bar' });
-      const { Provider, useContainer } = createStateContainerReactHelpers<typeof store>();
+    test('can select store using useContainer hook', () => {
+      const stateContainer = createStateContainer({ foo: 'bar' });
+      const { Provider, useContainer } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
         // eslint-disable-next-line no-shadow
-        const store = useContainer();
-        return <>{store.get().foo}</>;
+        const stateContainer = useContainer();
+        return <>{stateContainer.get().foo}</>;
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -143,15 +134,15 @@ describe('hooks', () => {
 
   describe('useState', () => {
     test('can select state using useState hook', () => {
-      const { store } = create({ foo: 'qux' });
-      const { Provider, useState } = createStateContainerReactHelpers<typeof store>();
+      const stateContainer = createStateContainer({ foo: 'qux' });
+      const { Provider, useState } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
         const { foo } = useState();
         return <>{foo}</>;
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -161,23 +152,20 @@ describe('hooks', () => {
     });
 
     test('re-renders when state changes', () => {
-      const {
-        store,
-        mutators: { setFoo },
-      } = create(
+      const stateContainer = createStateContainer(
         { foo: 'bar' },
         {
           setFoo: (state: { foo: string }) => (foo: string) => ({ ...state, foo }),
         }
       );
-      const { Provider, useState } = createStateContainerReactHelpers<typeof store>();
+      const { Provider, useState } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
         const { foo } = useState();
         return <>{foo}</>;
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -185,7 +173,7 @@ describe('hooks', () => {
 
       expect(container!.innerHTML).toBe('bar');
       act(() => {
-        setFoo('baz');
+        stateContainer.transitions.setFoo('baz');
       });
       expect(container!.innerHTML).toBe('baz');
     });
@@ -193,7 +181,7 @@ describe('hooks', () => {
 
   describe('useTransitions', () => {
     test('useTransitions hook returns mutations that can update state', () => {
-      const { store } = create(
+      const stateContainer = createStateContainer(
         {
           cnt: 0,
         },
@@ -206,7 +194,7 @@ describe('hooks', () => {
       );
 
       const { Provider, useState, useTransitions } = createStateContainerReactHelpers<
-        typeof store
+        typeof stateContainer
       >();
       const Demo: React.FC<{}> = () => {
         const { cnt } = useState();
@@ -220,7 +208,7 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -240,7 +228,7 @@ describe('hooks', () => {
 
   describe('useSelector', () => {
     test('can select deeply nested value', () => {
-      const { store } = create({
+      const stateContainer = createStateContainer({
         foo: {
           bar: {
             baz: 'qux',
@@ -248,14 +236,14 @@ describe('hooks', () => {
         },
       });
       const selector = (state: { foo: { bar: { baz: string } } }) => state.foo.bar.baz;
-      const { Provider, useSelector } = createStateContainerReactHelpers<typeof store>();
+      const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -265,7 +253,7 @@ describe('hooks', () => {
     });
 
     test('re-renders when state changes', () => {
-      const { store, mutators } = create({
+      const stateContainer = createStateContainer({
         foo: {
           bar: {
             baz: 'qux',
@@ -280,7 +268,7 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -288,7 +276,7 @@ describe('hooks', () => {
 
       expect(container!.innerHTML).toBe('qux');
       act(() => {
-        mutators.set({
+        stateContainer.set({
           foo: {
             bar: {
               baz: 'quux',
@@ -300,9 +288,9 @@ describe('hooks', () => {
     });
 
     test("re-renders only when selector's result changes", async () => {
-      const { store, mutators } = create({ a: 'b', foo: 'bar' });
+      const stateContainer = createStateContainer({ a: 'b', foo: 'bar' });
       const selector = (state: { foo: string }) => state.foo;
-      const { Provider, useSelector } = createStateContainerReactHelpers<typeof store>();
+      const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
       const Demo: React.FC<{}> = () => {
@@ -311,7 +299,7 @@ describe('hooks', () => {
         return <>{value}</>;
       };
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -321,14 +309,14 @@ describe('hooks', () => {
       expect(cnt).toBe(1);
 
       act(() => {
-        mutators.set({ a: 'c', foo: 'bar' });
+        stateContainer.set({ a: 'c', foo: 'bar' });
       });
 
       await new Promise(r => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
-        mutators.set({ a: 'd', foo: 'bar 2' });
+        stateContainer.set({ a: 'd', foo: 'bar 2' });
       });
 
       await new Promise(r => setTimeout(r, 1));
@@ -336,9 +324,9 @@ describe('hooks', () => {
     });
 
     test('does not re-render on same shape object', async () => {
-      const { store, mutators } = create({ foo: { bar: 'baz' } });
+      const stateContainer = createStateContainer({ foo: { bar: 'baz' } });
       const selector = (state: { foo: any }) => state.foo;
-      const { Provider, useSelector } = createStateContainerReactHelpers<typeof store>();
+      const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
       const Demo: React.FC<{}> = () => {
@@ -347,7 +335,7 @@ describe('hooks', () => {
         return <>{JSON.stringify(value)}</>;
       };
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -357,14 +345,14 @@ describe('hooks', () => {
       expect(cnt).toBe(1);
 
       act(() => {
-        mutators.set({ foo: { bar: 'baz' } });
+        stateContainer.set({ foo: { bar: 'baz' } });
       });
 
       await new Promise(r => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
-        mutators.set({ foo: { bar: 'qux' } });
+        stateContainer.set({ foo: { bar: 'qux' } });
       });
 
       await new Promise(r => setTimeout(r, 1));
@@ -372,7 +360,7 @@ describe('hooks', () => {
     });
 
     test('can set custom comparator function to prevent re-renders on deep equality', async () => {
-      const { store, mutators } = create(
+      const stateContainer = createStateContainer(
         { foo: { bar: 'baz' } },
         {
           set: () => (newState: { foo: { bar: string } }) => newState,
@@ -380,7 +368,7 @@ describe('hooks', () => {
       );
       const selector = (state: { foo: any }) => state.foo;
       const comparator = (prev: any, curr: any) => JSON.stringify(prev) === JSON.stringify(curr);
-      const { Provider, useSelector } = createStateContainerReactHelpers<typeof store>();
+      const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
       const Demo: React.FC<{}> = () => {
@@ -389,7 +377,7 @@ describe('hooks', () => {
         return <>{JSON.stringify(value)}</>;
       };
       ReactDOM.render(
-        <Provider value={store}>
+        <Provider value={stateContainer}>
           <Demo />
         </Provider>,
         container
@@ -399,13 +387,13 @@ describe('hooks', () => {
       expect(cnt).toBe(1);
 
       act(() => {
-        mutators.set({ foo: { bar: 'baz' } });
+        stateContainer.set({ foo: { bar: 'baz' } });
       });
 
       await new Promise(r => setTimeout(r, 1));
       expect(cnt).toBe(1);
     });
 
-    xtest('unsubscribes when React un-mounts', () => {});
+    test.todo('unsubscribes when React un-mounts');
   });
 });
