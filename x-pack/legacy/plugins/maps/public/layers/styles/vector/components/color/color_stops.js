@@ -21,8 +21,7 @@ export const ColorStops = ({
   function getStopInput(stop, index) {
     const onStopChange = e => {
       const newColorStops = _.cloneDeep(colorStops);
-      const newValue = sanitizeStopInput(e.target.value);
-      newColorStops[index].stop = newValue;
+      newColorStops[index].stop = sanitizeStopInput(e.target.value);
       const invalid = isStopsInvalid(newColorStops);
       onChange({
         colorStops: newColorStops,
