@@ -30,9 +30,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('EEndpoint');
       });
 
@@ -41,6 +39,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('welcomeTitle');
+      });
+
+      it(`endpoint management shows 'Manage Endpoints'`, async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('endpointManagement');
       });
     });
 
@@ -61,9 +68,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('EEndpoint');
       });
     });

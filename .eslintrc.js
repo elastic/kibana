@@ -83,38 +83,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/kibana/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/tile_map/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/vis_type_markdown/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/vis_type_metric/**/*.{js,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/vis_type_table/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/vis_type_vega/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -178,22 +147,9 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
 
@@ -260,6 +216,7 @@ module.exports = {
                   '!x-pack/test/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'src/core/(public|server)/**/*',
+                  'examples/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
@@ -296,11 +253,15 @@ module.exports = {
                   'x-pack/legacy/plugins/**/*',
                   '!x-pack/legacy/plugins/*/server/**/*',
                   '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+
+                  'examples/**/*',
+                  '!examples/**/server/**/*',
                 ],
                 from: [
                   'src/core/server',
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
+                  'examples/**/server/**/*',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
@@ -380,9 +341,8 @@ module.exports = {
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
-        // instructs import/no-extraneous-dependencies to treat modules
-        // in plugins/ or ui/ namespace as "core modules" so they don't
-        // trigger failures for not being listed in package.json
+        // instructs import/no-extraneous-dependencies to treat certain modules
+        // as core modules, even if they aren't listed in package.json
         'import/core-modules': [
           'plugins',
           'legacy/ui',
@@ -736,15 +696,13 @@ module.exports = {
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-catch': 'warn',
+        'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
         // This will be turned on after bug fixes are mostly complete
         // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-return': 'warn',
+        'no-useless-return': 'error',
         // This will be turned on after bug fixers are mostly complete
         // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
@@ -752,14 +710,13 @@ module.exports = {
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
-        // This style will be turned on after most bugs are fixed
-        // 'prefer-template': 'warn',
+        'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
+        'react/display-name': 'error',
         'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        // This style will be turned on after most bugs are fixed
-        // 'react/no-children-prop': 'warn',
+        'react/no-children-prop': 'error',
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
@@ -819,21 +776,6 @@ module.exports = {
         'jsx-a11y/label-has-associated-control': 'off',
         'jsx-a11y/aria-role': 'off',
       },
-    },
-
-    /**
-     * Monitoring overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
-      rules: {
-        'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
-        'no-else-return': 'error',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/monitoring/public/**/*.js'],
-      env: { browser: true },
     },
 
     /**

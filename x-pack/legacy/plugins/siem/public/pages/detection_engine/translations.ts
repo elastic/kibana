@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
 });
 
 export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
-  defaultMessage: 'Last signal:',
+  defaultMessage: 'Last signal',
 });
 
 export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignalTitle', {
@@ -49,5 +49,36 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate(
   'xpack.siem.detectionEngine.emptyActionSecondary',
   {
     defaultMessage: 'Go to documentation',
+  }
+);
+
+export const NO_INDEX_TITLE = i18n.translate('xpack.siem.detectionEngine.noIndexTitle', {
+  defaultMessage: 'Let’s set up your detection engine',
+});
+
+export const NO_INDEX_MSG_BODY = i18n.translate('xpack.siem.detectionEngine.noIndexMsgBody', {
+  defaultMessage:
+    'To use the detection engine, a user with the required cluster and index privileges must first access this page. For more help, contact your administrator.',
+});
+
+export const GO_TO_DOCUMENTATION = i18n.translate(
+  'xpack.siem.detectionEngine.goToDocumentationButton',
+  {
+    defaultMessage: 'View documentation',
+  }
+);
+
+export const USER_UNAUTHENTICATED_TITLE = i18n.translate(
+  'xpack.siem.detectionEngine.userUnauthenticatedTitle',
+  {
+    defaultMessage: 'Detection engine permissions required',
+  }
+);
+
+export const USER_UNAUTHENTICATED_MSG_BODY = i18n.translate(
+  'xpack.siem.detectionEngine.userUnauthenticatedMsgBody',
+  {
+    defaultMessage:
+      'You do not have the required permissions for viewing the detection engine. For more help, contact your administrator.',
   }
 );
