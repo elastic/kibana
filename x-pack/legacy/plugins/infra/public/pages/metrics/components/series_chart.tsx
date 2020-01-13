@@ -9,9 +9,6 @@ import {
   AreaSeries,
   BarSeries,
   ScaleType,
-  getSpecId,
-  DataSeriesColorsValues,
-  CustomSeriesColorsMap,
   RecursivePartial,
   BarSeriesStyle,
   AreaSeriesStyle,
@@ -46,15 +43,9 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       visible: true,
     },
   };
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(id),
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color || '#999');
   return (
     <AreaSeries
-      id={getSpecId(id)}
+      id={id}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -62,7 +53,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       areaSeriesStyle={style}
-      customSeriesColors={color ? customColors : void 0}
+      customSeriesColors={color ? [color] : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );
@@ -79,15 +70,9 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
       opacity: 1,
     },
   };
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(id),
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color || '#999');
   return (
     <BarSeries
-      id={getSpecId(id)}
+      id={id}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -95,7 +80,7 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       barSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? [color] : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );

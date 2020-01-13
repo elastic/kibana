@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
 import { ActionsConfigType } from './types';
-import { TaskManager } from '../../task_manager';
+import { TaskManager } from '../../task_manager/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';

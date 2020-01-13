@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { NotificationsStart, HttpStart } from 'kibana/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform');
 

@@ -52,7 +52,7 @@ if (licenseManagementUiEnabled) {
   };
 
   const initializeTelemetry = ($injector: any) => {
-    const telemetryEnabled = $injector.get('telemetryEnabled');
+    const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
     const Private = $injector.get('Private');
     const telemetryOptInProvider = Private(TelemetryOptInProvider);
     setTelemetryOptInService(telemetryOptInProvider);
@@ -87,6 +87,7 @@ if (licenseManagementUiEnabled) {
                   const unmountApp = await app.mount({ ...npStart } as any, {
                     element,
                     appBasePath: '',
+                    onAppLeave: () => undefined,
                   });
                   manageAngularLifecycle($scope, $route, unmountApp as any);
                 },
