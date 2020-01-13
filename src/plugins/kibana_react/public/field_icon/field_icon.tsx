@@ -75,6 +75,7 @@ export function FieldIcon({
       {...token}
       className={classNames('kbnFieldIcon', className)}
       aria-label={label || type}
+      title={label || type}
       size={size as EuiTokenProps['size']}
       fill={scripted ? 'dark' : undefined}
       {...rest}
