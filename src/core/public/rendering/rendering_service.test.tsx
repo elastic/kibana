@@ -80,7 +80,7 @@ describe('RenderingService#start', () => {
           `);
     });
 
-    it('add the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
+    it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
       const isVisible$ = new BehaviorSubject(true);
       chrome.getIsVisible$.mockReturnValue(isVisible$);
       startService();
@@ -95,7 +95,7 @@ describe('RenderingService#start', () => {
       expect(appWrapper.className).toEqual('app-wrapper');
     });
 
-    it('add the application classes to the AppContainer', () => {
+    it('adds the application classes to the AppContainer', () => {
       const applicationClasses$ = new BehaviorSubject<string[]>([]);
       chrome.getApplicationClasses$.mockReturnValue(applicationClasses$);
       startService();
