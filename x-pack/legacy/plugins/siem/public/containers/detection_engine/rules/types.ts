@@ -96,7 +96,6 @@ export interface PaginationOptions {
 export interface FetchRulesProps {
   pagination?: PaginationOptions;
   filterOptions?: FilterOptions;
-  id?: string;
   signal: AbortSignal;
 }
 

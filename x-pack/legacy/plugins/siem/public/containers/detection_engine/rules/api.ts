@@ -44,7 +44,6 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param pagination desired pagination options (e.g. page/perPage)
- * @param id if specified, will return specific rule if exists
  * @param signal to cancel request
  */
 export const fetchRules = async ({
@@ -58,10 +57,9 @@ export const fetchRules = async ({
     perPage: 20,
     total: 0,
   },
-  id,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const searchQuery = {
+  const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: filterOptions.sortField,
@@ -69,27 +67,19 @@ export const fetchRules = async ({
     ...(filterOptions.filter ? { filter: `alert.attributes.name: ${filterOptions.filter}` } : {}),
   };
 
-  const endpoint = id != null ? DETECTION_ENGINE_RULES_URL : `${DETECTION_ENGINE_RULES_URL}/_find`;
-  const query = id != null ? { id } : searchQuery;
+  const response = await npStart.core.http.fetch<FetchRulesResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_find`,
+    {
+      method: 'GET',
+      query,
+      credentials: 'same-origin',
+      signal,
+      asResponse: true,
+    }
+  );
 
-  const response = await npStart.core.http.fetch<FetchRulesResponse | Rule[]>(endpoint, {
-    method: 'GET',
-    query,
-    credentials: 'same-origin',
-    signal,
-    asResponse: true,
-  });
   await throwIfNotOk(response.response!);
-  const body = response.body!;
-
-  return Array.isArray(body)
-    ? {
-        page: 0,
-        perPage: 1,
-        total: 1,
-        data: body,
-      }
-    : body;
+  return response.body!;
 };
 
 /**
