@@ -82,22 +82,14 @@ export const signalRulesAlertType = ({
         IRuleSavedAttributesSavedObjectAttributes
       >({
         type: ruleStatusSavedObjectType,
-        perPage: 10, // should limit to 5 but since we only allow 5... idk.
+        perPage: 5,
+        sortField: 'statusDate',
+        sortOrder: 'desc',
         search: `"${alertId}"`,
         searchFields: ['alertId'],
       });
       logger.debug(`ruleStatusSavedObjects: ${JSON.stringify(ruleStatusSavedObjects, null, 4)}`);
       if (ruleStatusSavedObjects.saved_objects.length > 0) {
-        ruleStatusSavedObjects.saved_objects.sort((a, b) => {
-          const dateA = new Date(a.attributes.statusDate);
-          const dateB = new Date(b.attributes.statusDate);
-          if (dateA < dateB) {
-            return -1;
-          } else if (dateA === dateB) {
-            return 0;
-          }
-          return 1;
-        });
         // get status objects, update 0th element to executing
         ruleStatusSavedObjects.saved_objects[0].attributes.status = 'executing';
         ruleStatusSavedObjects.saved_objects[0].attributes.statusDate = new Date().toISOString();
@@ -127,7 +119,9 @@ export const signalRulesAlertType = ({
           IRuleSavedAttributesSavedObjectAttributes
         >({
           type: ruleStatusSavedObjectType,
-          perPage: 10, // should limit to 5 but since we only allow 5... idk.
+          perPage: 5,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
           search: `"${alertId}"`,
           searchFields: ['alertId'],
         });

@@ -49,8 +49,8 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
       const ruleStatuses = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>(
         {
           type: ruleStatusSavedObjectType,
-          perPage: 10,
-          search: `"${id}"`,
+          perPage: 5,
+          search: `"${rule?.id}"`,
           searchFields: ['alertId'],
         }
       );
