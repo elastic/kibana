@@ -43,22 +43,6 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
 
 const ML__ID_COPY = 'ml__id_copy';
 
-export const toggleSelectedFieldClassification = (
-  selectedFields: Field[],
-  column: EsFieldName
-): Field[] => {
-  const index = selectedFields.map(field => field.name).indexOf(column);
-  if (index === -1) {
-    const columnField = newJobCapsService.getFieldById(column);
-    if (columnField !== null) {
-      selectedFields.push(columnField);
-    }
-  } else {
-    selectedFields.splice(index, 1);
-  }
-  return selectedFields;
-};
-
 export const isKeywordAndTextType = (fieldName: string): boolean => {
   const { fields } = newJobCapsService;
 
@@ -276,7 +260,7 @@ export const getDefaultFieldsFromJobCaps = (
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
-  // TODO: update type
+
   const allFields: any = [
     {
       id: `${resultsField}.is_training`,
@@ -389,6 +373,20 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
       return docs.some(row => row._source[k] !== null);
     })
     .slice(0, MAX_COLUMNS);
+};
+
+export const toggleSelectedFieldSimple = (
+  selectedFields: EsFieldName[],
+  column: EsFieldName
+): EsFieldName[] => {
+  const index = selectedFields.indexOf(column);
+
+  if (index === -1) {
+    selectedFields.push(column);
+  } else {
+    selectedFields.splice(index, 1);
+  }
+  return selectedFields;
 };
 
 export const toggleSelectedField = (selectedFields: Field[], column: EsFieldName): Field[] => {

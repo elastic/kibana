@@ -118,7 +118,9 @@ export const ResultsTable: FC<Props> = React.memo(
 
     const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
       const { type } = field;
-      const isNumber = BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type);
+      const isNumber =
+        type !== undefined &&
+        (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
 
       const column: ColumnType<TableItem> = {
         field: field.name,

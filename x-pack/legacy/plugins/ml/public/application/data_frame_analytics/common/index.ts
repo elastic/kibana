@@ -39,6 +39,7 @@ export {
   sortRegressionResultsColumns,
   sortRegressionResultsFields,
   toggleSelectedField,
+  toggleSelectedFieldSimple,
   EsId,
   EsDoc,
   EsDocSource,

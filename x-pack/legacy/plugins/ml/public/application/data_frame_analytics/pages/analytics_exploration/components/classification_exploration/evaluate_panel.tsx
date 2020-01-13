@@ -28,6 +28,7 @@ import {
   loadDocsCount,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
+import { isKeywordAndTextType } from '../../../../common/fields';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import {
@@ -37,10 +38,8 @@ import {
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { LoadingPanel } from '../loading_panel';
 import { getColumnData } from './column_data';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 const defaultPanelWidth = 500;
 
@@ -81,18 +80,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoading(true);
 
     try {
-      const { fields } = newJobCapsService;
-      const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
-
-      // If it's a keyword type - check if it has a corresponding text type
-      if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.KEYWORD) {
-        const field = newJobCapsService.getFieldById(dependentVariable.replace(/\.keyword$/, ''));
-        requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.TEXT;
-      } else if (depVarFieldType !== undefined && depVarFieldType === ES_FIELD_TYPES.TEXT) {
-        // If text, check if has corresponding keyword type
-        const field = newJobCapsService.getFieldById(`${dependentVariable}.keyword`);
-        requiresKeyword = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
-      }
+      requiresKeyword = isKeywordAndTextType(dependentVariable);
     } catch (e) {
       // Additional error handling due to missing field type is handled by loadEvalData
       console.error('Unable to load new field types', error); // eslint-disable-line no-console
