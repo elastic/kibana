@@ -5,8 +5,14 @@
  */
 
 import React, { FC, useState } from 'react';
+import { encode } from 'rison-node';
+
 import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
+import { useUrlState } from '../../util/url_state';
+
 import { Tab } from './main_tabs';
 import { TabId } from './navigation_menu';
 
@@ -67,6 +73,7 @@ enum TAB_TEST_SUBJECT {
 type TAB_TEST_SUBJECTS = keyof typeof TAB_TEST_SUBJECT;
 
 export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
+  const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: string) {
     setSelectedTabId(id);
@@ -78,12 +85,16 @@ export const Tabs: FC<Props> = ({ tabId, mainTabId, disableLinks }) => {
     <EuiTabs size="s" className={tabId === 'settings' ? 'mlSubTabs' : ''}>
       {tabs.map((tab: Tab) => {
         const id = tab.id;
+        // globalState (e.g. selected jobs and time range) should be retained when changing pages.
+        // appState will not be considered.
+        const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
+
         return (
           <EuiLink
             data-test-subj={
               TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS] + (id === selectedTabId ? ' selected' : '')
             }
-            href={`#/${id}`}
+            href={`#/${id}${fullGlobalStateString}`}
             key={`${id}-key`}
             color="text"
           >
