@@ -10963,7 +10963,6 @@
     "xpack.snapshotRestore.repositoryDetails.typeS3.serverSideEncryptionLabel": "サーバー側エコシステム",
     "xpack.snapshotRestore.repositoryDetails.typeS3.storageClassLabel": "ストレージクラス",
     "xpack.snapshotRestore.repositoryDetails.typeTitle": "レポジトリタイプ",
-    "xpack.snapshotRestore.repositoryDetails.verificationDetails": "認証情報レポジトリ「{name}」",
     "xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle": "詳細",
     "xpack.snapshotRestore.repositoryDetails.verificationTitle": "認証ステータス",
     "xpack.snapshotRestore.repositoryDetails.verifyButtonLabel": "レポジトリを検証",
