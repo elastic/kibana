@@ -34,7 +34,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -56,7 +56,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -78,7 +78,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -96,7 +96,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -114,7 +114,7 @@ const chartHolderDataSets = [
     {
       key: 'uniqueDestinationIpsHistogram',
       value: null,
-      color: '#490092',
+      color: '#9170B8',
     },
   ],
   [
@@ -134,7 +134,7 @@ const chartHolderDataSets = [
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
       ],
-      color: '#490092',
+      color: '#9170B8',
     },
   ],
 ];
@@ -157,7 +157,7 @@ describe('AreaChartBaseComponent', () => {
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
       ],
-      color: '#490092',
+      color: '#9170B8',
     },
   ];
 

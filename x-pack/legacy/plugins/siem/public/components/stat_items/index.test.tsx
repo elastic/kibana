@@ -135,7 +135,7 @@ describe('Stat Items Component', () => {
             { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
             { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
-          color: '#490092',
+          color: '#9170B8',
         },
       ],
       barChart: [
@@ -143,7 +143,7 @@ describe('Stat Items Component', () => {
         {
           key: 'uniqueDestinationIps',
           value: [{ x: 'uniqueDestinationIps', y: 2354 }],
-          color: '#490092',
+          color: '#9170B8',
         },
       ],
       description: 'UNIQUE_PRIVATE_IPS',
@@ -161,7 +161,7 @@ describe('Stat Items Component', () => {
           key: 'uniqueDestinationIps',
           description: 'Dest.',
           value: 2359,
-          color: '#490092',
+          color: '#9170B8',
           icon: 'cross',
         },
       ],

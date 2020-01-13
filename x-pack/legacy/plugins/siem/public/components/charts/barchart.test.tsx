@@ -22,7 +22,7 @@ const chartDataSets = [
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -32,7 +32,7 @@ const chartDataSets = [
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: '' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -42,7 +42,7 @@ const chartDataSets = [
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -52,7 +52,7 @@ const chartDataSets = [
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -66,7 +66,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
       { key: 'uniqueSourceIps', color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -76,7 +76,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
       {
         key: 'uniqueDestinationIps',
         value: [],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -86,7 +86,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
       {
         key: 'uniqueDestinationIps',
         value: [{}],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -96,7 +96,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -127,7 +127,7 @@ describe('BarChartBaseComponent', () => {
     {
       key: 'uniqueDestinationIps',
       value: [{ y: 2354, x: 'uniqueDestinationIps', g: 'uniqueDestinationIps' }],
-      color: '#490092',
+      color: '#9170B8',
     },
   ];
 
