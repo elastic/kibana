@@ -41,7 +41,7 @@ export abstract class NumeralFormat extends FieldFormat {
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
   });
 
-  protected getConvertedValue(val: any, pattern?: string): string {
+  protected getConvertedValue(val: any): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val !== 'number') {
@@ -54,7 +54,7 @@ export abstract class NumeralFormat extends FieldFormat {
     const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
     numeral.language(defaultLocale);
 
-    const formatted = numeralInst.set(val).format(pattern || this.param('pattern'));
+    const formatted = numeralInst.set(val).format(this.param('pattern'));
 
     numeral.language(previousLocale);
 

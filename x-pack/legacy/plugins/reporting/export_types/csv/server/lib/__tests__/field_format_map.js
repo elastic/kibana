@@ -8,8 +8,13 @@ import expect from '@kbn/expect';
 
 import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
 // Reporting uses an unconventional directory structure so the linter marks this as a violation
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BytesFormat, NumberFormat } from '../../../../../../../../../src/plugins/data/server';
+import {
+  DateFormat,
+  BytesFormat,
+  DefaultNumberFormat,
+  StaticLookupFormat,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../../src/plugins/data/server';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 
@@ -22,33 +27,43 @@ describe('field format map', function() {
       title: 'logstash-*',
       timeFieldName: '@timestamp',
       notExpandable: true,
-      fields: '[{"name":"field1","type":"number"}, {"name":"field2","type":"number"}]',
-      fieldFormatMap: '{"field1":{"id":"bytes","params":{"pattern":"0,0.[0]b"}}}',
+      fields:
+        '[{"name":"field1","type":"number"}, {"name":"field2","type":"date"}, {"name":"field3","type":"string"}]',
+      fieldFormatMap:
+        '{"field1":{"id":"bytes"},"field3":{"id":"static_lookup","params":{"lookupEntries":[{"key":"test","value":"tested"}]}}}',
     },
   };
   const configMock = {};
+  configMock.dateFormat = 'YYYY-MM-DD';
+  configMock['dateFormat:tz'] = 'Europe/London';
   configMock['format:defaultTypeMap'] = {
-    number: { id: 'number', params: {} },
+    number: { id: 'default_number', params: {} },
+    string: { id: 'string', params: {} },
+    date: { id: 'date', params: {} },
+    _default_: { id: 'string', params: {} },
   };
-  configMock['format:number:defaultPattern'] = '0,0.[000]';
   const getConfig = key => configMock[key];
-  const testValue = '4000';
+  const testValue = 'test';
 
-  const fieldFormats = new FieldFormatsService([BytesFormat, NumberFormat], getConfig);
+  const fieldFormats = new FieldFormatsService(
+    [DefaultNumberFormat, BytesFormat, StaticLookupFormat, DateFormat],
+    getConfig
+  );
 
   const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
 
-  it('should build field format map with entry per index pattern field', function() {
-    expect(formatMap.has('field1')).to.be(true);
+  it('should build field format map with entry per index pattern field, excluding numbers', function() {
+    expect(formatMap.has('field1')).to.be(false);
     expect(formatMap.has('field2')).to.be(true);
+    expect(formatMap.has('field3')).to.be(true);
     expect(formatMap.has('field_not_in_index')).to.be(false);
   });
 
   it('should create custom FieldFormat for fields with configured field formatter', function() {
-    expect(formatMap.get('field1').convert(testValue)).to.be('3.9KB');
+    expect(formatMap.get('field3').convert(testValue)).to.be('tested');
   });
 
   it('should create default FieldFormat for fields with no field formatter', function() {
-    expect(formatMap.get('field2').convert(testValue)).to.be('4,000');
+    expect(formatMap.get('field2').convert(1578948388064)).to.be('2020-01-13');
   });
 });

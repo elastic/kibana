@@ -784,7 +784,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:number:defaultLocale': {
-      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
+      name: i18n.translate('kbn.advancedSettings.format.number.formattingLocaleTitle', {
         defaultMessage: 'Numeral.js formatting locale',
       }),
       value: 'en',
@@ -793,11 +793,11 @@ export function getUiSettingDefaults() {
       optionLabels: Object.fromEntries(
         numeralLanguages.map(language => [language.id, language.name])
       ),
-      description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
+      description: i18n.translate('kbn.advancedSettings.format.number.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale. This affects the custom numeral.js formatter and the bytes formatter.`,
         description:
-          'Part of composite text: kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText + ' +
-          'kbn.advancedSettings.format.formattingLocaleText',
+          'Part of composite text: kbn.advancedSettings.format.number.formattingLocaleText + ' +
+          'kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText',
         values: {
           numeralLanguageLink:
             '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +

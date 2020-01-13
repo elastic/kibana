@@ -63,7 +63,6 @@ export class FieldFormatsService {
    * @return {FieldFormat}
    */
   getInstance(conf: FieldFormatConfig): FieldFormat {
-    // @ts-ignore
     return new this._fieldFormats[conf.id](conf.params, this.getConfig);
   }
 

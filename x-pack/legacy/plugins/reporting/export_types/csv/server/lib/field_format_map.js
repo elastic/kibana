@@ -34,6 +34,10 @@ export function fieldFormatMapFactory(indexPatternSavedObject, fieldFormats) {
     if (!formatsMap.has(field.name)) {
       formatsMap.set(field.name, fieldFormats.getDefaultInstance(field.type));
     }
+
+    if (field.type === 'number') {
+      formatsMap.delete(field.name);
+    }
   });
 
   return formatsMap;

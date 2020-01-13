@@ -14,7 +14,7 @@ export const formatBytes = (value: Bytes, format: string) => {
 };
 
 export const useFormatBytes = () => {
-  return (value: Bytes) => formatBytes(value, '0,0.0b');
+  return (value: Bytes) => formatBytes(value, '0,0.[0]b');
 };
 
 export const PreferenceFormattedBytesComponent = ({ value }: { value: Bytes }) => (

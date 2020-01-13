@@ -20,7 +20,10 @@
 import {
   UrlFormat,
   StringFormat,
-  NumberFormat,
+  DefaultNumberFormat,
+  CustomNumberFormat,
+  CurrencyFormat,
+  ShortNumberFormat,
   BytesFormat,
   TruncateFormat,
   RelativeDateFormat,
@@ -43,8 +46,11 @@ export function registerFieldFormats(server) {
   server.registerFieldFormat(RelativeDateFormat);
   server.registerFieldFormat(DurationFormat);
   server.registerFieldFormat(IpFormat);
-  server.registerFieldFormat(NumberFormat);
+  server.registerFieldFormat(DefaultNumberFormat);
+  server.registerFieldFormat(CustomNumberFormat);
   server.registerFieldFormat(PercentFormat);
+  server.registerFieldFormat(CurrencyFormat);
+  server.registerFieldFormat(ShortNumberFormat);
   server.registerFieldFormat(StringFormat);
   server.registerFieldFormat(SourceFormat);
   server.registerFieldFormat(ColorFormat);
