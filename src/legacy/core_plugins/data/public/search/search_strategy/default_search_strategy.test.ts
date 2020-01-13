@@ -112,8 +112,8 @@ describe('defaultSearchStrategy', function() {
     test('should call new search service', () => {
       const config = getConfigStub();
       search({ ...searchArgs, config });
-      expect(newSearchMock).toHaveBeenCalled();
-      expect(searchMock).toHaveBeenCalledTimes(0);
+      expect(searchMock).toHaveBeenCalled();
+      expect(newSearchMock).toHaveBeenCalledTimes(0);
     });
 
     test('should properly abort with new search service', async () => {
