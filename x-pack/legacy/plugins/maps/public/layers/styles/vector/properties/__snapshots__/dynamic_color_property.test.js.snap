@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render categorical legend 1`] = `""`;
+
+exports[`Should render ranged legend 1`] = `
+<RangedStyleLegendRow
+  fieldLabel=""
+  header={
+    <ColorGradient
+      colorRampName="Blues"
+    />
+  }
+  maxLabel="100_format"
+  minLabel="0_format"
+  propertyLabel="Border color"
+/>
+`;

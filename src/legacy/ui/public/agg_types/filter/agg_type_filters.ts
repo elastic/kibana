@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../../../../plugins/data/public';
 import { AggConfig } from '../../vis';
 import { AggType } from '..';
 

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FieldType } from 'ui/index_patterns';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import {
   kbnTypeToMLJobType,
@@ -16,7 +15,7 @@ import {
 describe('ML - field type utils', () => {
   describe('kbnTypeToMLJobType', () => {
     test('returns correct ML_JOB_FIELD_TYPES for KBN_FIELD_TYPES', () => {
-      const field: FieldType = {
+      const field: IFieldType = {
         type: KBN_FIELD_TYPES.NUMBER,
         name: KBN_FIELD_TYPES.NUMBER,
         aggregatable: true,
@@ -37,7 +36,7 @@ describe('ML - field type utils', () => {
     });
 
     test('returns ML_JOB_FIELD_TYPES.KEYWORD for aggregatable KBN_FIELD_TYPES.STRING', () => {
-      const field: FieldType = {
+      const field: IFieldType = {
         type: KBN_FIELD_TYPES.STRING,
         name: KBN_FIELD_TYPES.STRING,
         aggregatable: true,
@@ -46,7 +45,7 @@ describe('ML - field type utils', () => {
     });
 
     test('returns ML_JOB_FIELD_TYPES.TEXT for non-aggregatable KBN_FIELD_TYPES.STRING', () => {
-      const field: FieldType = {
+      const field: IFieldType = {
         type: KBN_FIELD_TYPES.STRING,
         name: KBN_FIELD_TYPES.STRING,
         aggregatable: false,
@@ -55,7 +54,7 @@ describe('ML - field type utils', () => {
     });
 
     test('returns undefined for non-aggregatable "foo"', () => {
-      const field: FieldType = {
+      const field: IFieldType = {
         type: 'foo',
         name: 'foo',
         aggregatable: false,
