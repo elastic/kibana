@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import {
@@ -216,9 +215,6 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        // it consumes elasticsearch observables to provide the same client throughout the context lifetime.
-        const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-        const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
@@ -230,8 +226,8 @@ export class Server {
             client: savedObjectsClient,
           },
           elasticsearch: {
-            adminClient: adminClient.asScoped(req),
-            dataClient: dataClient.asScoped(req),
+            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
           },
           uiSettings: {
             client: uiSettingsClient,
