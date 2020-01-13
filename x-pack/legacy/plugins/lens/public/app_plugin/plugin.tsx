@@ -103,13 +103,13 @@ export class AppPlugin {
           })
         );
         const updateUrlTime = (urlVars: Record<string, string>): void => {
-          const decoded: RisonObject = rison.decode(urlVars._g) as RisonObject;
-          if (!decoded) {
+          const decoded = rison.decode(urlVars._g);
+          if (!isRisonObject(decoded)) {
             return;
           }
           // @ts-ignore
           decoded.time = data.query.timefilter.timefilter.getTime();
-          urlVars._g = rison.encode((decoded as unknown) as RisonObject);
+          urlVars._g = rison.encode(decoded);
         };
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
