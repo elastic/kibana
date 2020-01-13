@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState, useReducer, useCallback, useMemo } from 'react';
+import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
 import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
@@ -16,7 +16,6 @@ import {
   LogEntriesAfterRequest,
 } from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
-import { datemathToEpochMillis } from '../../../utils/datemath';
 
 const DESIRED_BUFFER_PAGES = 2;
 
@@ -47,8 +46,8 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesProps {
-  startDate: string | null;
-  endDate: string | null;
+  startTimestamp: number | null;
+  endTimestamp: number | null;
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
@@ -129,17 +128,8 @@ const useFetchEntriesEffect = (
   const [prevParams, cachePrevParams] = useState(props);
   const [startedStreaming, setStartedStreaming] = useState(false);
 
-  const startTimestamp = useMemo(
-    () => (props.startDate ? datemathToEpochMillis(props.startDate) : null),
-    [props.startDate]
-  );
-  const endTimestamp = useMemo(
-    () => (props.endDate ? datemathToEpochMillis(props.endDate) : null),
-    [props.endDate]
-  );
-
   const runFetchNewEntriesRequest = async (override = {}) => {
-    if (!startTimestamp || !endTimestamp || !props.timeKey) {
+    if (!props.startTimestamp || !props.endTimestamp || !props.timeKey) {
       return;
     }
 
@@ -148,8 +138,8 @@ const useFetchEntriesEffect = (
     try {
       const fetchArgs: LogEntriesRequest = {
         sourceId: props.sourceId,
-        startDate: startTimestamp,
-        endDate: endTimestamp,
+        startDate: props.startTimestamp,
+        endDate: props.endTimestamp,
         query: props.filterQuery || undefined, // FIXME
       };
 
@@ -167,7 +157,7 @@ const useFetchEntriesEffect = (
   };
 
   const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
-    if (!startTimestamp || !endTimestamp) {
+    if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
 
@@ -178,8 +168,8 @@ const useFetchEntriesEffect = (
     try {
       const fetchArgs: LogEntriesRequest = {
         sourceId: props.sourceId,
-        startDate: startTimestamp,
-        endDate: endTimestamp,
+        startDate: props.startTimestamp,
+        endDate: props.endTimestamp,
         query: props.filterQuery || undefined, // FIXME
       };
 
@@ -203,7 +193,7 @@ const useFetchEntriesEffect = (
   };
 
   const fetchNewEntriesEffectDependencies = Object.values(
-    pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startDate', 'endDate'])
+    pick(props, ['sourceId', 'filterQuery', 'timeKey', 'startTimestamp', 'endTimestamp'])
   );
   const fetchNewEntriesEffect = () => {
     if (props.isAutoReloading) return;

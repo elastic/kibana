@@ -7,6 +7,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { TimeKey } from '../../../../common/time';
+import { datemathToEpochMillis } from '../../../utils/datemath';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -34,6 +35,8 @@ export interface LogPositionStateParams {
   visibleTimeInterval: { start: number; end: number } | null;
   startDate: string;
   endDate: string;
+  startTimestamp: number | null;
+  endTimestamp: number | null;
 }
 
 export interface LogPositionCallbacks {
@@ -117,6 +120,11 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     [dateRange]
   );
 
+  const [startTimestamp, endTimestamp] = useMemo(
+    () => [datemathToEpochMillis(dateRange.startDate), datemathToEpochMillis(dateRange.endDate)],
+    [dateRange]
+  );
+
   const state = {
     targetPosition,
     isAutoReloading,
@@ -127,6 +135,8 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,
     ...dateRange,
+    startTimestamp,
+    endTimestamp,
   };
 
   const callbacks = {
