@@ -32,7 +32,7 @@ Create your a state container.
 ```ts
 import { createStateContainer } from 'src/plugins/kibana_utils';
 
-const container = createStateContainer<MyState>(defaultState, {});
+const container = createStateContainer<MyState>(defaultState);
 
 console.log(container.get());
 ```

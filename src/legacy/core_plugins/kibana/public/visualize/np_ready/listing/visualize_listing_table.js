@@ -36,6 +36,7 @@ class VisualizeListingTable extends Component {
     const { visualizeCapabilities, uiSettings, toastNotifications } = getServices();
     return (
       <TableListView
+        headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={this.props.createItem}
@@ -113,12 +114,12 @@ class VisualizeListingTable extends Component {
           <EuiEmptyPrompt
             iconType="visualizeApp"
             title={
-              <h2>
+              <h1 id="visualizeListingHeading">
                 <FormattedMessage
                   id="kbn.visualize.listing.noItemsMessage"
                   defaultMessage="Looks like you don't have any visualizations."
                 />
-              </h2>
+              </h1>
             }
           />
         </div>
@@ -130,12 +131,12 @@ class VisualizeListingTable extends Component {
         <EuiEmptyPrompt
           iconType="visualizeApp"
           title={
-            <h2>
+            <h1 id="visualizeListingHeading">
               <FormattedMessage
                 id="kbn.visualize.listing.createNew.title"
                 defaultMessage="Create your first visualization"
               />
-            </h2>
+            </h1>
           }
           body={
             <Fragment>
