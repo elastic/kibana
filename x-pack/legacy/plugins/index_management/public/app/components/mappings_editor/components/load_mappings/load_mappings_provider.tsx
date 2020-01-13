@@ -19,7 +19,7 @@ import {
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 import { validateMappings, MappingsValidationError } from '../../lib';
 
-const MAX_ERRORS_TO_DISPLAY = 10;
+const MAX_ERRORS_TO_DISPLAY = 1;
 
 type OpenJsonModalFunc = () => void;
 
@@ -50,7 +50,7 @@ const getTexts = (view: ModalView, totalErrors = 0) => ({
             defaultMessage: 'Load and overwrite',
           })
         : i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.acceptWarningLabel', {
-            defaultMessage: 'Drop invalid options',
+            defaultMessage: 'Continue loading',
           }),
     cancel:
       view === 'json'
@@ -67,18 +67,21 @@ const getTexts = (view: ModalView, totalErrors = 0) => ({
     }),
   },
   validationErrors: {
-    title: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle', {
-      defaultMessage:
-        '{totalErrors} {totalErrors, plural, one {invalid option} other {invalid options}} detected in the mappings object',
-      values: {
-        totalErrors,
-      },
-    }),
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle"
+        defaultMessage="{totalErrors} {totalErrors, plural, one {invalid option} other {invalid options}} detected in {mappings} object"
+        values={{
+          totalErrors,
+          // NOTE: This doesn't need internationalization because it's part of the ES API.
+          mappings: <code>mappings</code>,
+        }}
+      />
+    ),
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
       {
-        defaultMessage:
-          'The mappings object contains some invalid options. You can continue to load the mappings object if you drop these invalid options.',
+        defaultMessage: 'If you continue loading the object, only valid options will be accepted.',
       }
     ),
   },
@@ -192,7 +195,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
       >
         {showingAllErrors
           ? i18n.translate('xpack.idxMgmt.mappingsEditor.showFirstErrorsButtonLabel', {
-              defaultMessage: 'Show first {numErrors} errors',
+              defaultMessage: 'Hide errors',
               values: {
                 numErrors: MAX_ERRORS_TO_DISPLAY,
               },
@@ -225,10 +228,13 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
               // The CSS override for the EuiCodeEditor requires a parent .application css class
               <div className="application">
                 <EuiText color="subdued">
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText', {
-                    defaultMessage:
-                      'Provide a mappings object, e.g. the object assigned to an index\'s "mappings" property. Existing mappings and configuration will be overwritten.',
-                  })}
+                  <FormattedMessage
+                    id="xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText"
+                    defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options"
+                    values={{
+                      mappings: <code>mappings</code>,
+                    }}
+                  />
                 </EuiText>
 
                 <EuiSpacer size="m" />
