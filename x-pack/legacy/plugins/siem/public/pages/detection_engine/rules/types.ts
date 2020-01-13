@@ -109,8 +109,8 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
-  timeline_id: string | null;
-  timeline_title: string | null;
+  timeline_id?: string;
+  timeline_title?: string;
   threats: IMitreEnterpriseAttack[];
 }
 
