@@ -27,7 +27,7 @@ const sorting = {
     field: 'anomaly.severity',
     direction: 'desc',
   },
-};
+} as const;
 
 export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
   ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
@@ -71,8 +71,10 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
           />
 
           <BasicTable
+            // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             compressed
+            // @ts-ignore ...which leads to `networks` not "matching" the columns
             items={hosts}
             pagination={pagination}
             sorting={sorting}

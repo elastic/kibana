@@ -9,6 +9,13 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
+import {
+  createBulkErrorObject,
+  BulkError,
+  createSuccessObject,
+  ImportSuccessError,
+  createImportErrorObject,
+} from '../utils';
 
 export const getIdError = ({
   id,
@@ -26,6 +33,34 @@ export const getIdError = ({
   }
 };
 
+export const getIdBulkError = ({
+  id,
+  ruleId,
+}: {
+  id: string | undefined | null;
+  ruleId: string | undefined | null;
+}): BulkError => {
+  if (id != null) {
+    return createBulkErrorObject({
+      ruleId: id,
+      statusCode: 404,
+      message: `id: "${id}" not found`,
+    });
+  } else if (ruleId != null) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 404,
+      message: `rule_id: "${ruleId}" not found`,
+    });
+  } else {
+    return createBulkErrorObject({
+      ruleId: '(unknown id)',
+      statusCode: 404,
+      message: `id or rule_id should have been defined`,
+    });
+  }
+};
+
 export const transformTags = (tags: string[]): string[] => {
   return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
@@ -34,6 +69,8 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    created_at: alert.params.createdAt,
+    updated_at: alert.params.updatedAt,
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -43,7 +80,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     id: alert.id,
     immutable: alert.params.immutable,
     index: alert.params.index,
-    interval: alert.interval,
+    interval: alert.schedule.interval,
     rule_id: alert.params.ruleId,
     language: alert.params.language,
     output_index: alert.params.outputIndex,
@@ -53,6 +90,8 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     query: alert.params.query,
     references: alert.params.references,
     saved_id: alert.params.savedId,
+    timeline_id: alert.params.timelineId,
+    timeline_title: alert.params.timelineTitle,
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
@@ -60,7 +99,23 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,
+    version: alert.params.version,
   });
+};
+
+export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
+  if (rules.length !== 0) {
+    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
+    return `${rulesString}\n`;
+  } else {
+    return '';
+  }
+};
+
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[]
+): Array<Partial<OutputRuleAlertRest>> => {
+  return alerts.map(alert => transformAlertToRule(alert));
 };
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
@@ -77,5 +132,37 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
     return transformAlertToRule(alert);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
+  }
+};
+
+export const transformOrBulkError = (
+  ruleId: string,
+  alert: unknown
+): Partial<OutputRuleAlertRest> | BulkError => {
+  if (isAlertType(alert)) {
+    return transformAlertToRule(alert);
+  } else {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+    });
+  }
+};
+
+export const transformOrImportError = (
+  ruleId: string,
+  alert: unknown,
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  if (isAlertType(alert)) {
+    return createSuccessObject(existingImportSuccessError);
+  } else {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+      existingImportSuccessError,
+    });
   }
 };

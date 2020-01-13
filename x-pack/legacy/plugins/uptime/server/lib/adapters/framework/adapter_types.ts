@@ -5,10 +5,16 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { SavedObjectsLegacyService, RequestHandler, IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  SavedObjectsLegacyService,
+  RequestHandler,
+  IRouter,
+  CallAPIOptions,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
-import { UMRouteDefinition } from '../../../rest_api';
+import { UMKibanaRoute } from '../../../rest_api';
 
 export interface UMFrameworkRouteOptions<
   P extends ObjectType,
@@ -22,19 +28,32 @@ export interface UMFrameworkRouteOptions<
   validate: any;
 }
 
+type APICaller = (
+  endpoint: string,
+  clientParams: Record<string, any>,
+  options?: CallAPIOptions
+) => Promise<any>;
+
+export type UMElasticsearchQueryFn<P, R = any> = (
+  params: { callES: APICaller } & P
+) => Promise<R> | R;
+
+export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
+  client: SavedObjectsClientContract,
+  params: P
+) => Promise<T> | T;
+
 export interface UptimeCoreSetup {
   route: IRouter;
 }
 
 export interface UptimeCorePlugins {
-  elasticsearch: any;
   savedObjects: SavedObjectsLegacyService<any>;
   usageCollection: UsageCollectionSetup;
   xpack: any;
 }
 
 export interface UMBackendFrameworkAdapter {
-  registerRoute(route: UMRouteDefinition): void;
+  registerRoute(route: UMKibanaRoute): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  getSavedObjectsClient(): any;
 }

@@ -7,6 +7,8 @@
 import { pageHelpers, nextTick, setupEnvironment } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.remoteClustersAdd;
 
 describe('Create Remote cluster', () => {

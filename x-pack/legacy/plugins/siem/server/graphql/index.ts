@@ -29,7 +29,9 @@ import { timelineSchema } from './timeline';
 import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
+import { alertsSchema } from './alerts';
 export const schemas = [
+  alertsSchema,
   anomaliesSchema,
   authenticationsSchema,
   ecsSchema,

@@ -58,7 +58,7 @@ describe('check_license', function() {
       set(mockLicenseInfo, 'license.getType', () => 'basic');
     });
 
-    describe('& license is trial, standard, gold, platinum', () => {
+    describe('& license is > basic', () => {
       beforeEach(() => {
         set(mockLicenseInfo, 'license.isOneOf', () => true);
         mockLicenseInfo.feature = () => ({ isEnabled: () => true }); // Security feature is enabled

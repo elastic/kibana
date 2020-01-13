@@ -34,6 +34,19 @@ export const AppGlobalStyle = createGlobalStyle`
   .euiToolTip {
     z-index: 9950 !important;
   }
+
+  /* 
+    overrides the default styling of euiComboBoxOptionsList because it's implemented
+    as a popover, so it's not selectable as a child of the styled component
+  */
+  .euiComboBoxOptionsList {
+    z-index: 9999;
+  }
+
+  /* overrides default styling in angular code that was not theme-friendly */
+  .euiPanel-loading-hide-border {
+    border: none;
+  }
 `;
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -97,7 +110,6 @@ export const FooterContainer = styled.div`
   bottom: 0;
   color: #666;
   left: 0;
-  padding: 8px;
   position: fixed;
   text-align: left;
   user-select: none;

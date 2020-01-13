@@ -1,0 +1,17 @@
+{
+  "rule_id": "9c5f8092-e3f7-4eda-b9d3-56eed28fb157",
+  "risk_score": 50,
+  "description": "Network - Port 8000 Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - Port 8000 Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:8000",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

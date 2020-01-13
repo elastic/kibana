@@ -37,6 +37,8 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       language,
       output_index: outputIndex,
       saved_id: savedId,
+      timeline_id: timelineId,
+      timeline_title: timelineTitle,
       meta,
       filters,
       rule_id: ruleId,
@@ -52,6 +54,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       type,
       threats,
       references,
+      version,
     } = request.payload;
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
@@ -74,6 +77,8 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         language,
         outputIndex,
         savedId,
+        timelineId,
+        timelineTitle,
         meta,
         filters,
         id,
@@ -89,6 +94,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         type,
         threats,
         references,
+        version,
       });
       if (rule != null) {
         return transformOrError(rule);

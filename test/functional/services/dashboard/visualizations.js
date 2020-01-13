@@ -19,10 +19,12 @@
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
+  const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'visEditor', 'header', 'discover']);
 
   return new (class DashboardVisualizations {
     async createAndAddTSVBVisualization(name) {
@@ -72,19 +74,41 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await dashboardAddPanel.addSavedSearch(name);
     }
 
-    async createAndAddMarkdown({ name, markdown }, checkForAddPanel = true) {
+    async clickAddVisualizationButton() {
+      log.debug('DashboardVisualizations.clickAddVisualizationButton');
+      await testSubjects.click('addVisualizationButton');
+    }
+
+    async isNewVisDialogShowing() {
+      log.debug('DashboardVisualizations.isNewVisDialogShowing');
+      return await find.existsByCssSelector('.visNewVisDialog');
+    }
+
+    async ensureNewVisualizationDialogIsShowing() {
+      let isShowing = await this.isNewVisDialogShowing();
+      log.debug(`DashboardVisualizations.ensureNewVisualizationDialogIsShowing:${isShowing}`);
+      if (!isShowing) {
+        await retry.try(async () => {
+          await this.clickAddVisualizationButton();
+          isShowing = await this.isNewVisDialogShowing();
+          log.debug(`DashboardVisualizations.ensureNewVisualizationDialogIsShowing:${isShowing}`);
+          if (!isShowing) {
+            throw new Error('New Vis Dialog still not open, trying again.');
+          }
+        });
+      }
+    }
+
+    async createAndAddMarkdown({ name, markdown }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      if (checkForAddPanel) {
-        await dashboardAddPanel.ensureAddPanelIsShowing();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-      }
+      await this.ensureNewVisualizationDialogIsShowing();
       await PageObjects.visualize.clickMarkdownWidget();
-      await PageObjects.visualize.setMarkdownTxt(markdown);
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setMarkdownTxt(markdown);
+      await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
   })();

@@ -1,0 +1,17 @@
+{
+  "rule_id": "f68d83a1-24cb-4b8d-825b-e8af400b9670",
+  "risk_score": 50,
+  "description": "EQL -Bypass UAC Via sdclt",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL -Bypass UAC Via sdclt",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"sdclt.exe\" and process.args:\"/kickoffelev\" and not process.executable:(\"C:\\Windows\\System32\\sdclt.exe\" or \"C:\\Windows\\System32\\control.exe\" or \"C:\\Windows\\SysWOW64\\sdclt.exe\" or \"C:\\Windows\\SysWOW64\\control.exe\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

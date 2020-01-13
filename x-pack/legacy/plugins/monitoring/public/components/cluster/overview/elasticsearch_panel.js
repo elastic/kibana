@@ -10,7 +10,6 @@ import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import {
   ClusterItemContainer,
   HealthStatusIndicator,
-  BytesUsage,
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
@@ -117,6 +116,9 @@ const logLevelText = {
   fatal: i18n.translate('xpack.monitoring.cluster.overview.esPanel.fatalLogsTooltipText', {
     defaultMessage: 'The number of fatal logs',
   }),
+  unknown: i18n.translate('xpack.monitoring.cluster.overview.esPanel.unknownLogsTooltipText', {
+    defaultMessage: 'Unknown',
+  }),
 };
 
 function renderLog(log) {
@@ -124,7 +126,7 @@ function renderLog(log) {
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       {log.levels.map((level, index) => (
         <EuiFlexItem grow={false} key={index}>
-          <EuiToolTip position="top" content={logLevelText[level.level]}>
+          <EuiToolTip position="top" content={logLevelText[level.level] || logLevelText.unknown}>
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
               {formatNumber(level.count, 'int_commas')}
             </EuiBadge>
@@ -288,7 +290,7 @@ export function ElasticsearchPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
-                <BytesUsage
+                <BytesPercentageUsage
                   usedBytes={get(nodes, 'fs.available_in_bytes')}
                   maxBytes={get(nodes, 'fs.total_in_bytes')}
                 />

@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
+import { configUtilsMock } from './actions_config.mock';
 
 const mockTaskManager = taskManagerMock.create();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+  actionsConfigUtils: configUtilsMock,
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -123,6 +125,7 @@ describe('list()', () => {
       {
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
       },
     ]);
   });

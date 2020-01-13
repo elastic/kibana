@@ -5,7 +5,6 @@
  */
 
 import {
-  DatabaseAdapter,
   UMBackendFrameworkAdapter,
   UMMonitorsAdapter,
   UMMonitorStatesAdapter,
@@ -24,5 +23,4 @@ export interface UMDomainLibs {
 
 export interface UMServerLibs extends UMDomainLibs {
   framework: UMBackendFrameworkAdapter;
-  database?: DatabaseAdapter;
 }

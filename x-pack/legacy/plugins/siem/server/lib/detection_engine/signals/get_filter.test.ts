@@ -509,5 +509,140 @@ describe('get_filter', () => {
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
+
+    test('it works with references and does not add indexes', () => {
+      const esQuery = getQueryFilter(
+        '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
+        'kuery',
+        [],
+        ['my custom index']
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          bool: {
+                            should: [{ match: { 'event.module': 'suricata' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match: { 'event.kind': 'alert' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [{ match: { 'suricata.eve.alert.signature_id': 2610182 } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              {
+                                bool: {
+                                  should: [
+                                    { match: { 'suricata.eve.alert.signature_id': 2610183 } },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                              {
+                                bool: {
+                                  should: [
+                                    {
+                                      bool: {
+                                        should: [
+                                          { match: { 'suricata.eve.alert.signature_id': 2610184 } },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                    {
+                                      bool: {
+                                        should: [
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'suricata.eve.alert.signature_id': 2610185,
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  bool: {
+                                                    should: [
+                                                      {
+                                                        match: {
+                                                          'suricata.eve.alert.signature_id': 2610186,
+                                                        },
+                                                      },
+                                                    ],
+                                                    minimum_should_match: 1,
+                                                  },
+                                                },
+                                                {
+                                                  bool: {
+                                                    should: [
+                                                      {
+                                                        match: {
+                                                          'suricata.eve.alert.signature_id': 2610187,
+                                                        },
+                                                      },
+                                                    ],
+                                                    minimum_should_match: 1,
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
   });
 });

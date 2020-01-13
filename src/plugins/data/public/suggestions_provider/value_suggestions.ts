@@ -19,13 +19,13 @@
 
 import { memoize } from 'lodash';
 
-import { IUiSettingsClient, HttpServiceBase } from 'src/core/public';
+import { IUiSettingsClient, HttpSetup } from 'src/core/public';
 import { IGetSuggestions } from './types';
 import { IFieldType } from '../../common';
 
 export function getSuggestionsProvider(
   uiSettings: IUiSettingsClient,
-  http: HttpServiceBase
+  http: HttpSetup
 ): IGetSuggestions {
   const requestSuggestions = memoize(
     (

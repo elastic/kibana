@@ -62,6 +62,13 @@ describe('Monitoring Check License', () => {
         });
       });
 
+      it('enterprise active license - results true with no message', () => {
+        const result = checkLicense('enterprise', true, 'test-cluster-pqr');
+        expect(result).to.eql({
+          clusterAlerts: { enabled: true },
+        });
+      });
+
       describe('Watcher is not enabled', () => {
         it('platinum active license - watcher disabled - results false with message', () => {
           const result = checkLicense('platinum', true, 'test-cluster-pqr', false);

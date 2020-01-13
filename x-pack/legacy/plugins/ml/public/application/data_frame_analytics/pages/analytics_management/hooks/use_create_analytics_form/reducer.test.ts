@@ -12,10 +12,6 @@ import { ACTION } from './actions';
 import { reducer, validateAdvancedEditor } from './reducer';
 import { getInitialState, JOB_TYPES } from './state';
 
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-}));
-
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({
@@ -140,6 +136,12 @@ describe('useCreateAnalyticsForm', () => {
     // invalid model_memory_limit if empty
     expect(
       validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: '' }))
+        .isValid
+    ).toBe(false);
+    // can still run validation check on model_memory_limit if number type
+    expect(
+      // @ts-ignore number is not assignable to type string - mml gets converted to string prior to creation
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: 100 }))
         .isValid
     ).toBe(false);
   });

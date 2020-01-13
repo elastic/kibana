@@ -1,0 +1,17 @@
+{
+  "rule_id": "59d6a32c-753e-4c19-bb77-1befdc6e0e6a",
+  "risk_score": 50,
+  "description": "Indicates we saw many heartbeat requests without a reply. Might be an attack.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Heartbleed::SSL_Heartbeat_Many_Requests",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Heartbleed::SSL_Heartbeat_Many_Requests\" or rule.name: \"Heartbleed::SSL_Heartbeat_Many_Requests\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -68,6 +68,8 @@ exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Error SERVICE_VERSION 1`] = `undefined`;
+
 exports[`Error SPAN_ACTION 1`] = `undefined`;
 
 exports[`Error SPAN_DURATION 1`] = `undefined`;
@@ -174,6 +176,8 @@ exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Span SERVICE_VERSION 1`] = `undefined`;
+
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
 
 exports[`Span SPAN_DURATION 1`] = `1337`;
@@ -279,6 +283,8 @@ exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_VERSION 1`] = `undefined`;
 
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
 

@@ -1,0 +1,17 @@
+{
+  "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
+  "risk_score": 50,
+  "description": "EQL - Adobe Hijack Persistence",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Adobe Hijack Persistence",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and event.action:\"File created (rule: FileCreate)\" and not process.name:msiexeec.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

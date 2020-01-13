@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { TopNavMenuData } from './top_nav_menu_data';
+import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export class TopNavMenuExtensionsRegistry {
-  private menuItems: TopNavMenuData[];
+  private menuItems: RegisteredTopNavMenuData[];
 
   constructor() {
     this.menuItems = [];
@@ -28,7 +28,7 @@ export class TopNavMenuExtensionsRegistry {
 
   /** @public **/
   // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
-  public register(menuItem: TopNavMenuData) {
+  public register(menuItem: RegisteredTopNavMenuData) {
     this.menuItems.push(menuItem);
   }
 

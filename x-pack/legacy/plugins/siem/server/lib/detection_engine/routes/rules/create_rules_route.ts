@@ -33,6 +33,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: RulesRequest, headers) {
       const {
+        created_at: createdAt,
         description,
         enabled,
         false_positives: falsePositives,
@@ -42,6 +43,8 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         language,
         output_index: outputIndex,
         saved_id: savedId,
+        timeline_id: timelineId,
+        timeline_title: timelineTitle,
         meta,
         filters,
         rule_id: ruleId,
@@ -55,6 +58,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         threats,
         to,
         type,
+        updated_at: updatedAt,
         references,
       } = request.payload;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
@@ -87,6 +91,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          createdAt,
           description,
           enabled,
           falsePositives,
@@ -96,6 +101,8 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           language,
           outputIndex: finalIndex,
           savedId,
+          timelineId,
+          timelineTitle,
           meta,
           filters,
           ruleId: ruleId != null ? ruleId : uuid.v4(),
@@ -109,7 +116,9 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           to,
           type,
           threats,
+          updatedAt,
           references,
+          version: 1,
         });
         return transformOrError(createdRule);
       } catch (err) {

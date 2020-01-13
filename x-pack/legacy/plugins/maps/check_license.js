@@ -21,6 +21,7 @@ export function checkLicense(xPackInfo) {
     'standard',
     'gold',
     'platinum',
+    'enterprise',
     'trial',
   ]);
 

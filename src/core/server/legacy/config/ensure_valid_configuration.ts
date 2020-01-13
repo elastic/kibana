@@ -19,7 +19,7 @@
 
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 import { ConfigService } from '../../config';
-import { LegacyServiceDiscoverPlugins } from '../legacy_service';
+import { LegacyServiceDiscoverPlugins } from '../types';
 import { CriticalError } from '../../errors';
 
 export async function ensureValidConfiguration(

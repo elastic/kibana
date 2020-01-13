@@ -14,7 +14,6 @@ import {
   DEFAULT_OPTIONS,
   DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';
-import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 
 const renderUseMetricsExplorerOptionsHook = () =>
   renderHook(() => useMetricsExplorerOptions(), {
@@ -68,7 +67,7 @@ describe('useMetricExplorerOptions', () => {
     const { result, rerender } = renderUseMetricsExplorerOptionsHook();
     const newOptions: MetricsExplorerOptions = {
       ...DEFAULT_OPTIONS,
-      metrics: [{ aggregation: MetricsExplorerAggregation.count }],
+      metrics: [{ aggregation: 'count' }],
     };
     act(() => {
       result.current.setOptions(newOptions);
@@ -95,7 +94,7 @@ describe('useMetricExplorerOptions', () => {
   it('should load from store when available', () => {
     const newOptions: MetricsExplorerOptions = {
       ...DEFAULT_OPTIONS,
-      metrics: [{ aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' }],
+      metrics: [{ aggregation: 'avg', field: 'system.load.1' }],
     };
     STORE.MetricsExplorerOptions = JSON.stringify(newOptions);
     const { result } = renderUseMetricsExplorerOptionsHook();

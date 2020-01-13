@@ -20,9 +20,7 @@ export const getLinks = (cache: InMemoryCache) => [
   }),
   new HttpLink({
     credentials: 'same-origin',
-    headers: {
-      'kbn-xsrf': chrome.getXsrfToken(),
-    },
+    headers: { 'kbn-xsrf': 'true' },
     uri: `${chrome.getBasePath()}/api/siem/graphql`,
   }),
 ];

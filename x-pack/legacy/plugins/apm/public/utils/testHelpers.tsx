@@ -19,7 +19,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
-import { ESFilter } from '../../typings/elasticsearch';
+import {
+  ESFilter,
+  ESSearchResponse,
+  ESSearchRequest
+} from '../../typings/elasticsearch';
 import {
   ApmPluginContext,
   ApmPluginContextValue
@@ -117,29 +121,41 @@ interface MockSetup {
   };
 }
 
+interface Options {
+  mockResponse?: (
+    request: ESSearchRequest
+  ) => ESSearchResponse<unknown, ESSearchRequest>;
+}
+
 export async function inspectSearchParams(
-  fn: (mockSetup: MockSetup) => Promise<any>
+  fn: (mockSetup: MockSetup) => Promise<any>,
+  options: Options = {}
 ) {
-  const clientSpy = jest.fn().mockReturnValueOnce({
-    hits: {
-      total: 0
-    }
+  const spy = jest.fn().mockImplementation(async request => {
+    return options.mockResponse
+      ? options.mockResponse(request)
+      : {
+          hits: {
+            hits: {
+              total: {
+                value: 0
+              }
+            }
+          }
+        };
   });
 
-  const internalClientSpy = jest.fn().mockReturnValueOnce({
-    hits: {
-      total: 0
-    }
-  });
+  let response;
+  let error;
 
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
     client: {
-      search: clientSpy
+      search: spy
     } as any,
     internalClient: {
-      search: internalClientSpy
+      search: spy
     } as any,
     config: new Proxy(
       {},
@@ -164,21 +180,18 @@ export async function inspectSearchParams(
     dynamicIndexPattern: null as any
   };
   try {
-    await fn(mockSetup);
-  } catch {
+    response = await fn(mockSetup);
+  } catch (err) {
+    error = err;
     // we're only extracting the search params
   }
 
-  let params;
-  if (clientSpy.mock.calls.length) {
-    params = clientSpy.mock.calls[0][0];
-  } else {
-    params = internalClientSpy.mock.calls[0][0];
-  }
-
   return {
-    params,
-    teardown: () => clientSpy.mockClear()
+    params: spy.mock.calls[0][0],
+    response,
+    error,
+    spy,
+    teardown: () => spy.mockClear()
   };
 }
 

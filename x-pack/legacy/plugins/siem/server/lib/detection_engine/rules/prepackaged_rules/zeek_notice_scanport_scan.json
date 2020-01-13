@@ -1,0 +1,17 @@
+{
+  "rule_id": "d09fbf7a-47a7-4130-8dd7-b386cca81a42",
+  "risk_score": 50,
+  "description": "Port scans detect that an attacking host appears to be scanning a single victim host on several ports.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Scan::Port_Scan",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Scan::Port_Scan\" or rule.name: \"Scan::Port_Scan\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -292,7 +292,7 @@ export const WatchHistory = () => {
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
-        items={history}
+        items={history || []}
         columns={columns}
         pagination={PAGINATION}
         sorting={true}

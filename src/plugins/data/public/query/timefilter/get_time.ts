@@ -18,10 +18,10 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange } from '../../../common';
+import { IIndexPattern } from '../..';
+import { TimeRange, IFieldType } from '../../../common';
 
 // TODO: remove this
-import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public';
 import { esFilters } from '../../../common';
 
 interface CalculateBoundsOptions {
@@ -36,7 +36,7 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
 }
 
 export function getTime(
-  indexPattern: IndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
   forceNow?: Date
 ) {
@@ -45,7 +45,7 @@ export function getTime(
     return;
   }
 
-  const timefield: Field | undefined = indexPattern.fields.find(
+  const timefield: IFieldType | undefined = indexPattern.fields.find(
     field => field.name === indexPattern.timeFieldName
   );
 

@@ -260,7 +260,7 @@ filters.range = {
     gt: 1,
     lte: 20,
     lt: 20,
-    time_zone: '+1:00',
+    time_zone: '+01:00',
     format: 'dd/MM/yyyy||yyyy',
     execution: { __one_of: ['index', 'fielddata'] },
   },

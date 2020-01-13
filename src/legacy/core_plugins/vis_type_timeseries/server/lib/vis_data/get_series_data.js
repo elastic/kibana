@@ -48,7 +48,6 @@ export async function getSeriesData(req, panel) {
 
     const data = await searchRequest.search(searches);
     const series = data.map(handleResponseBody(panel));
-
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {

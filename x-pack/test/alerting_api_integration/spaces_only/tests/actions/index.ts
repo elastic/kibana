@@ -17,5 +17,6 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
+    loadTestFile(require.resolve('./type_not_enabled'));
   });
 }

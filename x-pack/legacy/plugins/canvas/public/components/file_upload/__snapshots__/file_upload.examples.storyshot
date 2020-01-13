@@ -20,10 +20,11 @@ exports[`Storyshots components/FileUpload default 1`] = `
       className="euiFilePicker__prompt"
     >
       <svg
-        aria-hidden="true"
+        aria-hidden={true}
         className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
         focusable="false"
         height={16}
+        role="img"
         style={null}
         viewBox="0 0 16 16"
         width={16}

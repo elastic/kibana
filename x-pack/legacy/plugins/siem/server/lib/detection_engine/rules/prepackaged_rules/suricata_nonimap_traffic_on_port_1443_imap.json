@@ -1,0 +1,17 @@
+{
+  "rule_id": "241b6a1d-4f73-4b68-bd98-22e909681930",
+  "risk_score": 50,
+  "description": "Suricata non-IMAP Traffic on Port 1443 (IMAP)",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-IMAP Traffic on Port 1443 (IMAP)",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610010 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

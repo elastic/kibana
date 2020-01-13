@@ -50,7 +50,9 @@ const schema = Joi.object({
     .required(),
   name: Joi.string().required(),
   excludeFromBasePrivileges: Joi.boolean(),
-  validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
+  validLicenses: Joi.array().items(
+    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise')
+  ),
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string().regex(uiCapabilitiesRegex),

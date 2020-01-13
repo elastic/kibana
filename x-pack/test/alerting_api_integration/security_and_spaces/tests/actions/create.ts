@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,6 +52,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'action');
               expect(response.body).to.eql({
                 id: response.body.id,
                 name: 'My action',
@@ -61,7 +62,13 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 },
               });
               expect(typeof response.body.id).to.be('string');
-              objectRemover.add(space.id, response.body.id, 'action');
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'action',
+                id: response.body.id,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -173,6 +180,42 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 error: 'Bad Request',
                 message:
                   'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`should handle create action requests for action types that are not enabled`, async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              name: 'my name',
+              actionTypeId: 'test.not-enabled',
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
               });
               break;
             default:

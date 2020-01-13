@@ -1,0 +1,17 @@
+{
+  "rule_id": "7e969b45-d005-4173-aee7-a7aaa79bc372",
+  "risk_score": 50,
+  "description": "Suricata Category - Network Scan Detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Network Scan Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Detection of a Network Scan\" or rule.category: \"Detection of a Network Scan\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

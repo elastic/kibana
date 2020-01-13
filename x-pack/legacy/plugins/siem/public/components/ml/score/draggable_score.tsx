@@ -20,41 +20,45 @@ export const DraggableScoreComponent = ({
   id: string;
   index?: number;
   score: Anomaly;
-}): JSX.Element => (
-  <DraggableWrapper
-    key={`draggable-score-draggable-wrapper-${id}`}
-    dataProvider={{
-      and: [],
-      enabled: true,
-      id,
-      name: score.entityName,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: score.entityName,
-        value: score.entityValue,
-        operator: IS_OPERATOR,
-      },
-    }}
-    render={(dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : (
-        <>
-          {index !== 0 && (
-            <>
-              {','}
-              <Spacer />
-            </>
-          )}
-          {getScoreString(score.severity)}
-        </>
-      )
-    }
-  />
-);
+}): JSX.Element => {
+  const scoreString = getScoreString(score.severity);
+
+  return (
+    <DraggableWrapper
+      key={`draggable-score-draggable-wrapper-${id}`}
+      dataProvider={{
+        and: [],
+        enabled: true,
+        id,
+        name: score.entityName,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: score.entityName,
+          value: score.entityValue,
+          operator: IS_OPERATOR,
+        },
+      }}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <>
+            {index !== 0 && (
+              <>
+                {','}
+                <Spacer />
+              </>
+            )}
+            {scoreString}
+          </>
+        )
+      }
+    />
+  );
+};
 
 DraggableScoreComponent.displayName = 'DraggableScoreComponent';
 

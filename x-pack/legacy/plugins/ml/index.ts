@@ -78,17 +78,18 @@ export const ml = (kibana: any) => {
       };
 
       const core: MlCoreSetup = {
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
+        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch, // NP
       };
-      const { usageCollection, cloud } = kbnServer.newPlatform.setup.plugins;
+      const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
-        elasticsearch: server.plugins.elasticsearch,
+        elasticsearch: server.plugins.elasticsearch, // legacy
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
+        home,
         usageCollection: usageCollection as UsageCollectionSetup,
         cloud: cloud as CloudSetup,
         ml: this,

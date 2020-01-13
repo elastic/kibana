@@ -89,6 +89,10 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
+      [NetworkTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {

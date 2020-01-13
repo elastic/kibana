@@ -30,8 +30,12 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
-        const firstLicense = licenseMock.create({ license: { uid: 'first', type: 'basic' } });
-        const secondLicense = licenseMock.create({ license: { uid: 'second', type: 'gold' } });
+        const firstLicense = licenseMock.createLicense({
+          license: { uid: 'first', type: 'basic' },
+        });
+        const secondLicense = licenseMock.createLicense({
+          license: { uid: 'second', type: 'gold' },
+        });
         coreSetup.http.get.mockResolvedValueOnce(firstLicense).mockResolvedValueOnce(secondLicense);
 
         const { license$, refresh } = await plugin.setup(coreSetup);
@@ -53,7 +57,7 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
-        const fetchedLicense = licenseMock.create();
+        const fetchedLicense = licenseMock.createLicense();
         coreSetup.http.get.mockResolvedValue(fetchedLicense);
 
         const { refresh } = await plugin.setup(coreSetup);
@@ -71,7 +75,7 @@ describe('licensing plugin', () => {
     describe('#license$', () => {
       it('starts with license saved in sessionStorage if available', async () => {
         const sessionStorage = coreMock.createStorage();
-        const savedLicense = licenseMock.create({ license: { uid: 'saved' } });
+        const savedLicense = licenseMock.createLicense({ license: { uid: 'saved' } });
         sessionStorage.getItem.mockReturnValue(JSON.stringify(savedLicense));
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
@@ -90,12 +94,12 @@ describe('licensing plugin', () => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
-        sessionStorage.getItem.mockReturnValue(JSON.stringify(licenseMock.create()));
+        sessionStorage.getItem.mockReturnValue(JSON.stringify(licenseMock.createLicense()));
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
         coreSetup.http.get.mockImplementation(() =>
-          Promise.resolve(licenseMock.create({ license: { type: types.shift() } }))
+          Promise.resolve(licenseMock.createLicense({ license: { type: types.shift() } }))
         );
         const { license$, refresh } = await plugin.setup(coreSetup);
 
@@ -123,7 +127,7 @@ describe('licensing plugin', () => {
 
         const coreSetup = coreMock.createSetup();
 
-        const fetchedLicense = licenseMock.create({ license: { uid: 'fresh' } });
+        const fetchedLicense = licenseMock.createLicense({ license: { uid: 'fresh' } });
         coreSetup.http.get.mockResolvedValue(fetchedLicense);
 
         const { license$, refresh } = await plugin.setup(coreSetup);
@@ -196,7 +200,7 @@ describe('licensing plugin', () => {
 
       const coreSetup = coreMock.createSetup();
 
-      coreSetup.http.get.mockResolvedValue(licenseMock.create({ signature: 'signature-1' }));
+      coreSetup.http.get.mockResolvedValue(licenseMock.createLicense({ signature: 'signature-1' }));
 
       let registeredInterceptor: HttpInterceptor;
       coreSetup.http.intercept.mockImplementation((interceptor: HttpInterceptor) => {
@@ -321,7 +325,7 @@ describe('licensing plugin', () => {
 
       const coreSetup = coreMock.createSetup();
       coreSetup.http.get.mockResolvedValueOnce(
-        licenseMock.create({ license: { status: 'active', type: 'gold' } })
+        licenseMock.createLicense({ license: { status: 'active', type: 'gold' } })
       );
 
       const { refresh } = await plugin.setup(coreSetup);
@@ -338,8 +342,12 @@ describe('licensing plugin', () => {
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
       const coreSetup = coreMock.createSetup();
-      const activeLicense = licenseMock.create({ license: { status: 'active', type: 'gold' } });
-      const expiredLicense = licenseMock.create({ license: { status: 'expired', type: 'gold' } });
+      const activeLicense = licenseMock.createLicense({
+        license: { status: 'active', type: 'gold' },
+      });
+      const expiredLicense = licenseMock.createLicense({
+        license: { status: 'expired', type: 'gold' },
+      });
       coreSetup.http.get
         .mockResolvedValueOnce(activeLicense)
         .mockResolvedValueOnce(expiredLicense)

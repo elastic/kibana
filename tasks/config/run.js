@@ -152,6 +152,7 @@ module.exports = function(grunt) {
       args: [
         'nyc',
         '--reporter=html',
+        '--reporter=json-summary',
         '--report-dir=./target/kibana-coverage/mocha',
         NODE,
         'scripts/mocha',
@@ -247,6 +248,18 @@ module.exports = function(grunt) {
         'scripts/functional_tests',
         '--config',
         'test/plugin_functional/config.js',
+        '--bail',
+        '--debug',
+      ],
+    }),
+
+    exampleFunctionalTestsRelease: scriptWithGithubChecks({
+      title: 'Example functional tests',
+      cmd: NODE,
+      args: [
+        'scripts/functional_tests',
+        '--config',
+        'test/examples/config.js',
         '--bail',
         '--debug',
       ],

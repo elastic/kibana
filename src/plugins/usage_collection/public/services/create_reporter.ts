@@ -18,12 +18,12 @@
  */
 
 import { Reporter, Storage } from '@kbn/analytics';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;
   debug: boolean;
-  fetch: HttpServiceBase;
+  fetch: HttpSetup;
 }
 
 export function createReporter(config: AnalyicsReporterConfig): Reporter {

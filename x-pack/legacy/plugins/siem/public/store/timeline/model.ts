@@ -10,7 +10,7 @@ import { DataProvider } from '../../components/timeline/data_providers/data_prov
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../components/timeline/body/sort';
-import { Direction, PinnedEvent } from '../../graphql/types';
+import { Direction, PinnedEvent, TimelineNonEcsData } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
@@ -21,6 +21,8 @@ export interface TimelineModel {
   columns: ColumnHeader[];
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
+  /** Events to not be rendered **/
+  deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
@@ -32,6 +34,10 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** If selectAll checkbox in header is checked **/
+  isSelectAllChecked: boolean;
+  /** Events to be rendered as loading **/
+  loadingEventIds: string[];
   savedObjectId: string | null;
   /** When true, this timeline was marked as "favorite" by the user */
   isFavorite: boolean;
@@ -61,8 +67,14 @@ export interface TimelineModel {
     end: number;
   };
   savedQueryId?: string | null;
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** When true, show the timeline flyover */
   show: boolean;
+  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
+  showCheckboxes: boolean;
+  /** When true, shows additional rowRenderers below the PlainRowRenderer **/
+  showRowRenderers: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** Persists the UI state (width) of the timeline flyover */
@@ -78,22 +90,28 @@ export type SubsetTimelineModel = Readonly<
     TimelineModel,
     | 'columns'
     | 'dataProviders'
+    | 'deletedEventIds'
     | 'description'
     | 'eventIdToNoteIds'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'
     | 'isLive'
+    | 'isSelectAllChecked'
     | 'itemsPerPage'
     | 'itemsPerPageOptions'
     | 'kqlMode'
     | 'kqlQuery'
     | 'title'
+    | 'loadingEventIds'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectedEventIds'
     | 'show'
+    | 'showCheckboxes'
+    | 'showRowRenderers'
     | 'sort'
     | 'width'
     | 'isSaving'
@@ -106,6 +124,7 @@ export type SubsetTimelineModel = Readonly<
 export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
   columns: defaultHeaders,
   dataProviders: [],
+  deletedEventIds: [],
   description: '',
   eventIdToNoteIds: {},
   highlightedDropAndProviderId: '',
@@ -113,6 +132,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   filters: [],
   isFavorite: false,
   isLive: false,
+  isSelectAllChecked: false,
   isLoading: false,
   isSaving: false,
   itemsPerPage: 25,
@@ -122,6 +142,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     filterQuery: null,
     filterQueryDraft: null,
   },
+  loadingEventIds: [],
   title: '',
   noteIds: [],
   pinnedEventIds: {},
@@ -131,7 +152,10 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     end: 0,
   },
   savedObjectId: null,
+  selectedEventIds: {},
   show: false,
+  showCheckboxes: false,
+  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,

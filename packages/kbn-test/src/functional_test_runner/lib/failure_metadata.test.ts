@@ -25,7 +25,7 @@ it('collects metadata for the current test', async () => {
   const failureMetadata = new FailureMetadata(lifecycle);
 
   const test1 = {};
-  await lifecycle.beforeEachTest.trigger(test1);
+  await lifecycle.beforeEachRunnable.trigger(test1);
   failureMetadata.add({ foo: 'bar' });
 
   expect(failureMetadata.get(test1)).toMatchInlineSnapshot(`
@@ -35,7 +35,7 @@ it('collects metadata for the current test', async () => {
   `);
 
   const test2 = {};
-  await lifecycle.beforeEachTest.trigger(test2);
+  await lifecycle.beforeEachRunnable.trigger(test2);
   failureMetadata.add({ test: 2 });
 
   expect(failureMetadata.get(test1)).toMatchInlineSnapshot(`
@@ -55,7 +55,7 @@ it('adds messages to the messages state', () => {
   const failureMetadata = new FailureMetadata(lifecycle);
 
   const test1 = {};
-  lifecycle.beforeEachTest.trigger(test1);
+  lifecycle.beforeEachRunnable.trigger(test1);
   failureMetadata.addMessages(['foo', 'bar']);
   failureMetadata.addMessages(['baz']);
 
