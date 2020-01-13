@@ -16,7 +16,6 @@ import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
-import { BUTTON_CLASS } from '../inspect';
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../containers/detection_engine/rules/fetch_index_patterns');
@@ -58,7 +57,8 @@ describe('StatefulEventsViewer', () => {
     ).toBe(true);
   });
 
-  test('it renders a transparent inspect button when it does NOT have mouse focus', async () => {
+  // InspectButtonContainer controls displaying InspectButton components
+  test('it renders InspectButtonContainer', async () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
@@ -75,30 +75,6 @@ describe('StatefulEventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '0', {
-      modifier: `.${BUTTON_CLASS}`,
-    });
-  });
-
-  test('it renders an opaque inspect button when it has mouse focus', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await wait();
-    wrapper.update();
-
-    expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '1', {
-      modifier: `:hover .${BUTTON_CLASS}`,
-    });
+    expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
   });
 });
