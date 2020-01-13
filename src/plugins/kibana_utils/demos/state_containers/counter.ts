@@ -19,14 +19,24 @@
 
 import { createStateContainer } from '../../public/state_containers';
 
-const container = createStateContainer(0, {
-  increment: (cnt: number) => (by: number) => cnt + by,
-  double: (cnt: number) => () => cnt * 2,
-});
+interface State {
+  count: number;
+}
+
+const container = createStateContainer(
+  { count: 0 },
+  {
+    increment: (state: State) => (by: number) => ({ count: state.count + by }),
+    double: (state: State) => () => ({ count: state.count * 2 }),
+  },
+  {
+    count: (state: State) => () => state.count,
+  }
+);
 
 container.transitions.increment(5);
 container.transitions.double();
 
-console.log(container.get()); // eslint-disable-line
+console.log(container.selectors.count()); // eslint-disable-line
 
-export const result = container.get();
+export const result = container.selectors.count();
