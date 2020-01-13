@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { isDisplayable } from '../../utils/is_displayable';
 

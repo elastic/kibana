@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,

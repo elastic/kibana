@@ -8,7 +8,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
-import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerAggregation } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import {
   metricsExplorerAggregationRT,

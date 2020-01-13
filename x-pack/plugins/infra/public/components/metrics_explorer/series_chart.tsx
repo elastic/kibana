@@ -13,7 +13,7 @@ import {
   AreaSeriesStyle,
   BarSeriesStyle,
 } from '@elastic/charts';
-import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import { createMetricLabel } from './helpers/create_metric_label';
 import {

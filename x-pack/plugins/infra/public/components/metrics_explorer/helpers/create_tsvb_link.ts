@@ -8,7 +8,7 @@ import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from 'lodash';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
-import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,

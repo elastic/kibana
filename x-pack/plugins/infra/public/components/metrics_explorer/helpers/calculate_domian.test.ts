@@ -5,7 +5,7 @@
  */
 
 import { calculateDomain } from './calculate_domain';
-import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { MetricsExplorerColor } from '../../../../common/color_palette';
 describe('calculateDomain()', () => {

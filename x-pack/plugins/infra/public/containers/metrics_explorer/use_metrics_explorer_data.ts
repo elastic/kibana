@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../common/graphql/types';
-import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import { fetch } from '../../utils/fetch';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';

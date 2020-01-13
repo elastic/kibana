@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { createFormatter } from '../../../utils/formatters';
 import { InfraFormatterType } from '../../../lib/lib';
 import { metricToFormat } from './metric_to_format';

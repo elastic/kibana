@@ -10,7 +10,7 @@ import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
+} from '../../../common/http_api/metrics_explorer';
 
 export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
   color?: MetricsExplorerColor;

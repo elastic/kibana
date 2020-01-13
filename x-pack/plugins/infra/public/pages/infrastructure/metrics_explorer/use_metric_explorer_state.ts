@@ -9,7 +9,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
-} from '../../../../server/routes/metrics_explorer/types';
+} from '../../../../common/http_api/metrics_explorer';
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
 import {
   MetricsExplorerOptionsContainer,

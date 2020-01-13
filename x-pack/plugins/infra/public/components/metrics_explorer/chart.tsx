@@ -10,7 +10,7 @@ import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,

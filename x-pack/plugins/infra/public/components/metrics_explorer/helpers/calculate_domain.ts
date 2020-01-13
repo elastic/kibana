@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { min, max, sum } from 'lodash';
-import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 
 export const calculateDomain = (
