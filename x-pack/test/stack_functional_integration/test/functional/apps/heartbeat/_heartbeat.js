@@ -6,14 +6,14 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('check heartbeat', function () {
-    before(async function () {
-      await retry.tryForTime(120000, async function () {
+  describe('check heartbeat', function() {
+    before(async function() {
+      await retry.tryForTime(120000, async function() {
         await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
         log.debug('create Index Pattern');
         await PageObjects.settings.createIndexPattern('heartbeat-*');
@@ -22,9 +22,9 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.common.navigateToApp('discover');
     });
 
-    it('heartbeat- should have hit count GT 0', async function () {
+    it('heartbeat- should have hit count GT 0', async function() {
       //  await PageObjects.header.clickDiscover();
-      //await PageObjects.common.navigateToApp('discover');
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('heartbeat-*');
       await retry.tryForTime(40000, async () => {
         await PageObjects.header.setQuickSpan('Today');
@@ -34,6 +34,5 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be.greaterThan('0');
       });
     });
-
   });
-};
+}

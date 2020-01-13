@@ -6,27 +6,25 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize']);
+export default function({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize', 'visChart']);
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('check winlogbeat', function () {
-
-    it('winlogbeat- should have ServiceControlManager label in PieChart', async function () {
-      return PageObjects.common.navigateToApp('visualize');
+  describe('check winlogbeat', function() {
+    it('winlogbeat- should have ServiceControlManager label in PieChart', async function() {
+      await PageObjects.common.navigateToApp('visualize');
       //await PageObjects.visualize.filterVisByName('Sources');
       await PageObjects.visualize.openSavedVisualization('Sources');
       await PageObjects.common.sleep(1000);
       await PageObjects.header.setQuickSpan('Last 7 days');
       await PageObjects.common.sleep(1000);
       await retry.tryForTime(40000, async () => {
-        const pieChart = await PageObjects.visualize.getLegendLabelsList();
+        const pieChart = await PageObjects.visChart.getLegendEntries();
         log.debug('Pie Chart labels = ' + pieChart);
         // we should always have Service Control Manager events in the windows event viewer on our test machine.
         expect(pieChart).to.contain('Service Control Manager');
       });
     });
-
   });
-};
+}
