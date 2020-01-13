@@ -56,7 +56,7 @@ describe('docTable', function() {
       expect(getSort(['lol_nope', 'asc'], indexPattern)).to.eql(defaultSort);
 
       delete indexPattern.timeFieldName;
-      expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql([{ _score: 'desc' }]);
+      expect(getSort(['non-sortable', 'asc'], indexPattern)).to.eql([]);
     });
 
     it('should sort in reverse chrono order otherwise on time based patterns', function() {
@@ -68,9 +68,9 @@ describe('docTable', function() {
     it('should sort by score on non-time patterns', function() {
       delete indexPattern.timeFieldName;
 
-      expect(getSort([], indexPattern)).to.eql([{ _score: 'desc' }]);
-      expect(getSort(['foo'], indexPattern)).to.eql([{ _score: 'desc' }]);
-      expect(getSort({ foo: 'bar' }, indexPattern)).to.eql([{ _score: 'desc' }]);
+      expect(getSort([], indexPattern)).to.eql([]);
+      expect(getSort(['foo'], indexPattern)).to.eql([]);
+      expect(getSort({ foo: 'bar' }, indexPattern)).to.eql([]);
     });
   });
 
@@ -92,14 +92,14 @@ describe('docTable', function() {
       expect(getSort.array([{ lol_nope: 'asc' }], indexPattern)).to.eql([['time', 'desc']]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([['_score', 'desc']]);
+      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([]);
     });
 
     it('should sort by the default when passed an empty sort', () => {
       expect(getSort.array([], indexPattern)).to.eql([['time', 'desc']]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort.array([], indexPattern)).to.eql([['_score', 'desc']]);
+      expect(getSort.array([], indexPattern)).to.eql([]);
     });
   });
 });
