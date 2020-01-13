@@ -13,7 +13,7 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     id: rule.id,
     rule_id: rule.rule_id,
     rule: {
-      href: `#/detection-engine/rules/${encodeURIComponent(rule.id)}`,
+      href: `#/detection-engine/rules/id/${encodeURIComponent(rule.id)}`,
       name: rule.name,
       status: 'Status Placeholder',
     },

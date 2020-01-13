@@ -309,7 +309,7 @@ class HeaderUI extends Component<Props, State> {
       .filter(navLink => !navLink.hidden)
       .map(navLink => ({
         key: navLink.id,
-        label: navLink.title,
+        label: navLink.tooltip ?? navLink.title,
 
         // Use href and onClick to support "open in new tab" and SPA navigation in the same link
         href: navLink.href,
