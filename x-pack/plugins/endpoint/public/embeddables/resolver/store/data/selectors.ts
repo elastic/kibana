@@ -29,7 +29,8 @@ import {
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
 
-/* An isometric projection is a method for representing three dimensional objects in 2 dimensions.
+/**
+ * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
  * More information about isometric projections can be found here https://en.wikipedia.org/wiki/Isometric_projection.
  * In our case, we obtain the isometric projection by rotating the objects 45 degrees in the plane of the screen
  * and arctan(1/sqrt(2)) (~35.3 degrees) through the horizontal axis.
