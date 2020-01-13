@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { BaseStateContainer } from '../state_containers/types';
+import { BaseState, BaseStateContainer } from '../state_containers/types';
 import { IStateStorage } from './state_sync_state_storage';
 
-export interface INullableBaseStateContainer<State> extends BaseStateContainer<State> {
+export interface INullableBaseStateContainer<State extends BaseState>
+  extends BaseStateContainer<State> {
   // State container for stateSync() have to accept "null"
   // for example, set() implementation could handle null and fallback to some default state
   // this is required to handle edge case, when state in storage becomes empty and syncing is in progress.
@@ -29,7 +30,7 @@ export interface INullableBaseStateContainer<State> extends BaseStateContainer<S
 }
 
 export interface IStateSyncConfig<
-  State = unknown,
+  State extends BaseState,
   StateStorage extends IStateStorage = IStateStorage
 > {
   /**

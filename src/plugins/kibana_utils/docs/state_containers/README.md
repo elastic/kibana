@@ -18,14 +18,21 @@ your services or apps.
 ```ts
 import { createStateContainer } from 'src/plugins/kibana_utils';
 
-const container = createStateContainer(0, {
-  increment: (cnt: number) => (by: number) => cnt + by,
-  double: (cnt: number) => () => cnt * 2,
-});
+const container = createStateContainer(
+  { count: 0 },
+  {
+    increment: (state: {count: number}) => (by: number) => ({ count: state.count + by }),
+    double: (state: {count: number}) => () => ({ count: state.count * 2 }),
+  },
+  {
+    count: (state: {count: number}) => () => state.count,
+  }
+);
 
 container.transitions.increment(5);
 container.transitions.double();
-console.log(container.get()); // 10
+
+console.log(container.selectors.count()); // 10
 ```
 
 
