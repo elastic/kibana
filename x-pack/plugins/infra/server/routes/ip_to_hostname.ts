@@ -7,10 +7,6 @@ import { first } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../lib/infra_types';
 
-export interface IpToHostResponse {
-  host: string;
-}
-
 interface HostDoc {
   _source: {
     host: {

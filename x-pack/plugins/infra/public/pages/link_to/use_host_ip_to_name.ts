@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { IpToHostResponse } from '../../../server/routes/ip_to_hostname';
+import { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
 import { fetch } from '../../utils/fetch';
 
 export const useHostIpToName = (ipAddress: string | null, indexPattern: string | null) => {
