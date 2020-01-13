@@ -19,18 +19,9 @@
 
 import { createStateContainer } from './create_state_container';
 
-const create = <S, T extends object>(state: S, transitions: T = {} as T) => {
-  const pureTransitions = {
-    set: () => (newState: S) => newState,
-    ...transitions,
-  };
-  const store = createStateContainer<typeof state, typeof pureTransitions>(state, pureTransitions);
-  return { store, mutators: store.transitions };
-};
-
-test('can create store', () => {
-  const { store } = create({});
-  expect(store).toMatchObject({
+test('can create state container', () => {
+  const stateContainer = createStateContainer({});
+  expect(stateContainer).toMatchObject({
     getState: expect.any(Function),
     state$: expect.any(Object),
     transitions: expect.any(Object),
@@ -45,9 +36,9 @@ test('can set default state', () => {
   const defaultState = {
     foo: 'bar',
   };
-  const { store } = create(defaultState);
-  expect(store.get()).toEqual(defaultState);
-  expect(store.getState()).toEqual(defaultState);
+  const stateContainer = createStateContainer(defaultState);
+  expect(stateContainer.get()).toEqual(defaultState);
+  expect(stateContainer.getState()).toEqual(defaultState);
 });
 
 test('can set state', () => {
@@ -57,12 +48,12 @@ test('can set state', () => {
   const newState = {
     foo: 'baz',
   };
-  const { store, mutators } = create(defaultState);
+  const stateContainer = createStateContainer(defaultState);
 
-  mutators.set(newState);
+  stateContainer.set(newState);
 
-  expect(store.get()).toEqual(newState);
-  expect(store.getState()).toEqual(newState);
+  expect(stateContainer.get()).toEqual(newState);
+  expect(stateContainer.getState()).toEqual(newState);
 });
 
 test('does not shallow merge states', () => {
@@ -72,22 +63,22 @@ test('does not shallow merge states', () => {
   const newState = {
     foo2: 'baz',
   };
-  const { store, mutators } = create(defaultState);
+  const stateContainer = createStateContainer(defaultState);
 
-  mutators.set(newState as any);
+  stateContainer.set(newState as any);
 
-  expect(store.get()).toEqual(newState);
-  expect(store.getState()).toEqual(newState);
+  expect(stateContainer.get()).toEqual(newState);
+  expect(stateContainer.getState()).toEqual(newState);
 });
 
 test('can subscribe and unsubscribe to state changes', () => {
-  const { store, mutators } = create({});
+  const stateContainer = createStateContainer({});
   const spy = jest.fn();
-  const subscription = store.state$.subscribe(spy);
-  mutators.set({ a: 1 });
-  mutators.set({ a: 2 });
+  const subscription = stateContainer.state$.subscribe(spy);
+  stateContainer.set({ a: 1 });
+  stateContainer.set({ a: 2 });
   subscription.unsubscribe();
-  mutators.set({ a: 3 });
+  stateContainer.set({ a: 3 });
 
   expect(spy).toHaveBeenCalledTimes(2);
   expect(spy.mock.calls[0][0]).toEqual({ a: 1 });
@@ -95,16 +86,16 @@ test('can subscribe and unsubscribe to state changes', () => {
 });
 
 test('multiple subscribers can subscribe', () => {
-  const { store, mutators } = create({});
+  const stateContainer = createStateContainer({});
   const spy1 = jest.fn();
   const spy2 = jest.fn();
-  const subscription1 = store.state$.subscribe(spy1);
-  const subscription2 = store.state$.subscribe(spy2);
-  mutators.set({ a: 1 });
+  const subscription1 = stateContainer.state$.subscribe(spy1);
+  const subscription2 = stateContainer.state$.subscribe(spy2);
+  stateContainer.set({ a: 1 });
   subscription1.unsubscribe();
-  mutators.set({ a: 2 });
+  stateContainer.set({ a: 2 });
   subscription2.unsubscribe();
-  mutators.set({ a: 3 });
+  stateContainer.set({ a: 3 });
 
   expect(spy1).toHaveBeenCalledTimes(1);
   expect(spy2).toHaveBeenCalledTimes(2);
@@ -120,19 +111,19 @@ test('can create state container without transitions', () => {
   expect(stateContainer.get()).toEqual(state);
 });
 
-test('creates impure mutators from pure mutators', () => {
-  const { mutators } = create(
+test('creates transitions', () => {
+  const stateContainer = createStateContainer(
     {},
     {
       setFoo: () => (bar: any) => ({ foo: bar }),
     }
   );
 
-  expect(typeof mutators.setFoo).toBe('function');
+  expect(typeof stateContainer.transitions.setFoo).toBe('function');
 });
 
-test('mutators can update state', () => {
-  const { store, mutators } = create(
+test('transitions can update state', () => {
+  const stateContainer = createStateContainer(
     {
       value: 0,
       foo: 'bar',
@@ -143,30 +134,30 @@ test('mutators can update state', () => {
     }
   );
 
-  expect(store.get()).toEqual({
+  expect(stateContainer.get()).toEqual({
     value: 0,
     foo: 'bar',
   });
 
-  mutators.add(11);
-  mutators.setFoo('baz');
+  stateContainer.transitions.add(11);
+  stateContainer.transitions.setFoo('baz');
 
-  expect(store.get()).toEqual({
+  expect(stateContainer.get()).toEqual({
     value: 11,
     foo: 'baz',
   });
 
-  mutators.add(-20);
-  mutators.setFoo('bazooka');
+  stateContainer.transitions.add(-20);
+  stateContainer.transitions.setFoo('bazooka');
 
-  expect(store.get()).toEqual({
+  expect(stateContainer.get()).toEqual({
     value: -9,
     foo: 'bazooka',
   });
 });
 
-test('mutators methods are not bound', () => {
-  const { store, mutators } = create(
+test('transitions methods are not bound', () => {
+  const stateContainer = createStateContainer(
     { value: -3 },
     {
       add: (state: { value: number }) => (increment: number) => ({
@@ -176,13 +167,13 @@ test('mutators methods are not bound', () => {
     }
   );
 
-  expect(store.get()).toEqual({ value: -3 });
-  mutators.add(4);
-  expect(store.get()).toEqual({ value: 1 });
+  expect(stateContainer.get()).toEqual({ value: -3 });
+  stateContainer.transitions.add(4);
+  expect(stateContainer.get()).toEqual({ value: 1 });
 });
 
-test('created mutators are saved in store object', () => {
-  const { store, mutators } = create(
+test('created transitions are saved in stateContainer object', () => {
+  const stateContainer = createStateContainer(
     { value: -3 },
     {
       add: (state: { value: number }) => (increment: number) => ({
@@ -192,55 +183,57 @@ test('created mutators are saved in store object', () => {
     }
   );
 
-  expect(typeof store.transitions.add).toBe('function');
-  mutators.add(5);
-  expect(store.get()).toEqual({ value: 2 });
+  expect(typeof stateContainer.transitions.add).toBe('function');
+  stateContainer.transitions.add(5);
+  expect(stateContainer.get()).toEqual({ value: 2 });
 });
 
-test('throws when state is modified inline - 1', () => {
-  const container = createStateContainer({ a: 'b' }, {});
+test('throws when state is modified inline', () => {
+  const container = createStateContainer({ a: 'b', array: [{ a: 'b' }] });
 
-  let error: TypeError | null = null;
-  try {
+  expect(() => {
     (container.get().a as any) = 'c';
-  } catch (err) {
-    error = err;
-  }
+  }).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot assign to read only property 'a' of object '#<Object>'"`
+  );
 
-  expect(error).toBeInstanceOf(TypeError);
-});
-
-test('throws when state is modified inline - 2', () => {
-  const container = createStateContainer({ a: 'b' }, {});
-
-  let error: TypeError | null = null;
-  try {
+  expect(() => {
     (container.getState().a as any) = 'c';
-  } catch (err) {
-    error = err;
-  }
+  }).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot assign to read only property 'a' of object '#<Object>'"`
+  );
 
-  expect(error).toBeInstanceOf(TypeError);
+  expect(() => {
+    (container.getState().array as any).push('c');
+  }).toThrowErrorMatchingInlineSnapshot(`"Cannot add property 1, object is not extensible"`);
+
+  expect(() => {
+    (container.getState().array[0] as any).c = 'b';
+  }).toThrowErrorMatchingInlineSnapshot(`"Cannot add property c, object is not extensible"`);
+
+  expect(() => {
+    container.set(null as any);
+    expect(container.getState()).toBeNull();
+  }).not.toThrow();
 });
 
-test('throws when state is modified inline in subscription', done => {
+test('throws when state is modified inline in subscription', () => {
   const container = createStateContainer({ a: 'b' }, { set: () => (newState: any) => newState });
 
   container.subscribe(value => {
-    let error: TypeError | null = null;
-    try {
+    expect(() => {
       (value.a as any) = 'd';
-    } catch (err) {
-      error = err;
-    }
-    expect(error).toBeInstanceOf(TypeError);
-    done();
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'a' of object '#<Object>'"`
+    );
   });
+
   container.transitions.set({ a: 'c' });
 });
 
 describe('selectors', () => {
   test('can specify no selectors, or can skip them', () => {
+    createStateContainer({});
     createStateContainer({}, {});
     createStateContainer({}, {}, {});
   });
