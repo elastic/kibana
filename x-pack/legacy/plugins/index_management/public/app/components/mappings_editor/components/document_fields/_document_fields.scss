@@ -1,9 +1,21 @@
 
-.mappingsEditor__documentFields__searchBox__inner {
+/**
+ * 1. We need to add 1 pixel to be pixel perfect
+ * 2. 48px is the height of the Kibana navbar
+ */
+
+ .mappingsEditor__documentFields__searchBox__inner {
   &--is-sticky {
     position: fixed;
       background-color: white;
-      top: 48px;
+      border-bottom: $euiBorderThin;
+      border-left: $euiBorderThin;
+      border-radius: $euiBorderRadius;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: $euiSize $euiSize + $euiSizeS + 1px $euiSize $euiSize; /* [1] */
+      top: 48px; /* [2] */
       left: 0;
       z-index: 10;
   }

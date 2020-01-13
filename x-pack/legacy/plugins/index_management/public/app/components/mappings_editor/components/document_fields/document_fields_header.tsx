@@ -14,43 +14,54 @@ import { SearchBox } from './search_fields';
 interface Props {
   searchValue: string;
   onSearchChange(value: string): void;
+  goBackToSearchResult?: () => void;
 }
 
-export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }: Props) => {
-  const searchBox = useRef<HTMLDivElement | null>(null);
-  // We initially hardcode the height, but we will update it with the DOM value
-  const [searchBoxHeight, setSearchBoxHeight] = useState(40);
+export const DocumentFieldsHeader = React.memo(
+  ({ searchValue, onSearchChange, goBackToSearchResult }: Props) => {
+    const searchBox = useRef<HTMLDivElement | null>(null);
+    // We initially hardcode the height, but we will update it with the DOM value
+    const [searchBoxHeight, setSearchBoxHeight] = useState(40);
 
-  useEffect(() => {
-    if (searchBox.current !== null) {
-      setSearchBoxHeight(searchBox.current.getBoundingClientRect().height);
-    }
-  }, []);
+    useEffect(() => {
+      if (searchBox.current !== null) {
+        setSearchBoxHeight(searchBox.current.getBoundingClientRect().height);
+      }
+    }, []);
 
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
-            defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
-            values={{
-              docsLink: (
-                <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
-                    defaultMessage: 'Learn more.',
-                  })}
-                </EuiLink>
-              ),
-            }}
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
+              defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
+              values={{
+                docsLink: (
+                  <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
+                    {i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink',
+                      {
+                        defaultMessage: 'Learn more.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+
+        {/* We set the height to avoid a UI jump when going "sticky" */}
+        <EuiFlexItem grow={false} style={{ height: `${searchBoxHeight}px` }}>
+          <SearchBox
+            ref={searchBox}
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            goBackToSearchResult={goBackToSearchResult}
           />
-        </EuiText>
-      </EuiFlexItem>
-
-      {/* We set the height to avoid a UI jump when going "sticky" */}
-      <EuiFlexItem grow={false} style={{ height: `${searchBoxHeight}px` }}>
-        <SearchBox ref={searchBox} searchValue={searchValue} onSearchChange={onSearchChange} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
