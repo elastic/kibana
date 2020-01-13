@@ -1,0 +1,10 @@
+
+.mappingsEditor__documentFields__searchBox__inner {
+  &--is-sticky {
+    position: fixed;
+      background-color: white;
+      top: 48px;
+      left: 0;
+      z-index: 10;
+  }
+}
