@@ -56,6 +56,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     dependentVariableOptions,
     description,
     destinationIndex,
+    destinationIndexDefaultSet,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
     destinationIndexNameValid,
@@ -370,7 +371,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 defaultMessage: 'Job ID',
               })}
               value={jobId}
-              onChange={e => setFormState({ jobId: e.target.value })}
+              onChange={e => {
+                if (destinationIndexDefaultSet === false) {
+                  setFormState({ jobId: e.target.value, destinationIndex: e.target.value });
+                } else {
+                  setFormState({ jobId: e.target.value });
+                }
+              }}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel',
                 {
@@ -474,7 +481,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               disabled={isJobCreated}
               placeholder="destination index"
               value={destinationIndex}
-              onChange={e => setFormState({ destinationIndex: e.target.value })}
+              onChange={e => {
+                setFormState({
+                  destinationIndexDefaultSet: true,
+                  destinationIndex: e.target.value,
+                });
+              }}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
                 {

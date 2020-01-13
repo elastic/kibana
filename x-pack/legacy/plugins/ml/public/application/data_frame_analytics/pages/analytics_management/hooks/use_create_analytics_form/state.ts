@@ -49,6 +49,7 @@ export interface State {
     dependentVariableOptions: EuiComboBoxOptionProps[] | [];
     description: string;
     destinationIndex: EsIndexName;
+    destinationIndexDefaultSet: boolean;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
@@ -100,6 +101,7 @@ export const getInitialState = (): State => ({
     dependentVariableOptions: [],
     description: '',
     destinationIndex: '',
+    destinationIndexDefaultSet: false,
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
