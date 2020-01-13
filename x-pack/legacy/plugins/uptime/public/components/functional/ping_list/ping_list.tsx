@@ -139,7 +139,7 @@ export const PingListComponent = ({
       ),
     },
     {
-      align: 'center',
+      align: 'left',
       field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
@@ -148,6 +148,7 @@ export const PingListComponent = ({
     },
     {
       align: 'right',
+      width: '120px',
       dataType: 'number',
       field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
@@ -156,6 +157,7 @@ export const PingListComponent = ({
     },
     {
       align: 'right',
+      width: '100px',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
@@ -167,7 +169,7 @@ export const PingListComponent = ({
         }),
     },
     {
-      align: 'right',
+      align: 'left',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
@@ -185,6 +187,7 @@ export const PingListComponent = ({
     columns.push({
       field: 'http.response.status_code',
       align: 'right',
+      width: '120px',
       name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
         defaultMessage: 'Response code',
       }),
