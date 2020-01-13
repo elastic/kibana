@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { get } from 'lodash';
-import { formatBytesUsage, formatPercentageUsage } from 'plugins/monitoring/lib/format_number';
+import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -88,10 +88,13 @@ export function BytesUsage({ usedBytes, maxBytes }) {
   if (usedBytes && maxBytes) {
     return (
       <span>
-        <EuiText>{formatPercentageUsage(usedBytes, maxBytes)}</EuiText>
-        <EuiText color="subdued" size="s">
-          {formatBytesUsage(usedBytes, maxBytes)}
-        </EuiText>
+        <EuiText>{formatBytesUsage(usedBytes, maxBytes)}</EuiText>
+      </span>
+    );
+  } else if (usedBytes) {
+    return (
+      <span>
+        <EuiText>{formatNumber(usedBytes, 'byte')}</EuiText>
       </span>
     );
   }
