@@ -364,7 +364,7 @@ class TutorialUi extends React.Component {
       }
 
       let icon = this.state.tutorial.euiIconType;
-      if (icon != null && icon.includes('/')) {
+      if (icon && icon.includes('/')) {
         icon = this.props.addBasePath(icon);
       }
 
