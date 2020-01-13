@@ -37,12 +37,12 @@ import { Setting } from '../../types';
 type Category = string;
 
 interface FormProps {
-  settings: { [key: string]: Setting[] };
+  settings: Record<string, Setting[]>;
   categories: Category[];
   categoryCounts: { [key: string]: number };
   clearQuery: () => void;
-  save: () => Promise<void>;
-  clear: () => Promise<void>;
+  save: (key: string, value: any) => Promise<void>;
+  clear: (key: string) => Promise<void>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
 }

@@ -77,7 +77,15 @@ export interface UserProvidedValues<T = any> {
  * UI element type to represent the settings.
  * @public
  * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+export type UiSettingsType =
+  | 'json'
+  | 'markdown'
+  | 'number'
+  | 'select'
+  | 'boolean'
+  | 'string'
+  | 'array'
+  | 'image';
 
 /**
  * UiSettings parameters defined by the plugins.

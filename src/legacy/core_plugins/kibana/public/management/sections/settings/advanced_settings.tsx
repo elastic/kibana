@@ -29,6 +29,8 @@ import { IUiSettingsClient } from '../../../../../../../core/public/';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
+import { Setting } from './types';
+
 import {
   registerDefaultComponents,
   PAGE_TITLE_COMPONENT,
@@ -45,21 +47,27 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: string;
-  filteredSettings: boolean; // todo
+  query: { text: string };
+  filteredSettings: Record<string, Setting[]>;
 }
 
+type GroupedSettings = Record<string, Setting[]>;
+
 export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
-  private settings: any; // todo
-  private groupedSettings: any; // todo
-  private categoryCounts: { [key: string]: number } = {};
+  private settings: Setting[];
+  private groupedSettings: GroupedSettings;
+  private categoryCounts: Record<string, number>;
   private categories: string[] = [];
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
     const { config, query } = this.props;
     const parsedQuery = Query.parse(query ? `ariaName:"${getAriaName(query)}"` : '');
-    this.init(config);
+    this.settings = this.initSettings(config);
+    this.groupedSettings = this.initGroupedSettings(this.settings);
+    this.categories = this.initCategories(this.groupedSettings);
+    this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
+
     this.state = {
       query: parsedQuery,
       footerQueryMatched: false,
@@ -70,20 +78,30 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   init(config: IUiSettingsClient) {
-    this.settings = this.mapConfig(config);
-    this.groupedSettings = this.mapSettings(this.settings);
+    this.settings = this.initSettings(config);
+    this.groupedSettings = this.initGroupedSettings(this.settings);
+    this.categories = this.initCategories(this.groupedSettings);
+    this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
+  }
 
-    this.categories = Object.keys(this.groupedSettings).sort((a, b) => {
+  initSettings = this.mapConfig;
+  initGroupedSettings = this.mapSettings;
+  initCategories(groupedSettings: GroupedSettings) {
+    return Object.keys(groupedSettings).sort((a, b) => {
       if (a === DEFAULT_CATEGORY) return -1;
       if (b === DEFAULT_CATEGORY) return 1;
       if (a > b) return 1;
       return a === b ? 0 : -1;
     });
-
-    this.categoryCounts = Object.keys(this.groupedSettings).reduce((counts, category) => {
-      counts[category] = this.groupedSettings[category].length;
-      return counts;
-    }, {});
+  }
+  initCategoryCounts(groupedSettings: GroupedSettings) {
+    return Object.keys(groupedSettings).reduce(
+      (counts: Record<string, number>, category: string) => {
+        counts[category] = groupedSettings[category].length;
+        return counts;
+      },
+      {}
+    );
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: AdvancedSettingsProps) {
@@ -112,9 +130,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
-  mapSettings(settings) {
+  mapSettings(settings: Setting[]) {
     // Group settings by category
-    return settings.reduce((groupedSettings, setting) => {
+    return settings.reduce((groupedSettings: GroupedSettings, setting) => {
       // We will want to change this logic when we put each category on its
       // own page aka allowing a setting to be included in multiple categories.
       const category = setting.category[0];
@@ -123,7 +141,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     }, {});
   }
 
-  onQueryChange = ({ query }) => {
+  onQueryChange = ({ query }: AdvancedSettingsProps) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
@@ -138,7 +156,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     });
   };
 
-  onFooterQueryMatchChange = matched => {
+  onFooterQueryMatchChange = (matched: boolean) => {
     this.setState({
       footerQueryMatched: matched,
     });
@@ -173,8 +191,12 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.props.config.set}
-          clear={this.props.config.remove}
+          save={async (key, value) => {
+            this.props.config.set(key, value);
+          }}
+          clear={async (key: string) => {
+            this.props.config.remove(key);
+          }}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />

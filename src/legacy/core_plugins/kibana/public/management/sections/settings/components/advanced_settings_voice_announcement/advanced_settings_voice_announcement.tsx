@@ -44,7 +44,7 @@ import { Setting } from '../../types';
 
 interface Props {
   queryText: string;
-  settings: Setting[][];
+  settings: Record<string, Setting[]>;
 }
 
 export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {

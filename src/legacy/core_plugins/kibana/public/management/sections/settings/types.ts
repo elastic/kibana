@@ -17,24 +17,30 @@
  * under the License.
  */
 
+import { UiSettingsType } from '../../../../../../../core/server/ui_settings';
+import { SavedObjectAttribute } from '../../../../../../../core/server/saved_objects/types';
+
 interface Validation {
   regex: RegExp;
   message: string;
 }
 export interface Setting {
+  displayName: string;
   name: string;
+  value: SavedObjectAttribute;
+  description: string;
+  options: string[]; // array of stringa,
+  optionLabels: Record<string, string>;
+  requiresPageReload: boolean;
+  type: UiSettingsType;
+  category: string[];
+  //
   ariaName: string;
   isOverridden: boolean;
-  type: string;
-  value: any;
-  defVal: any;
-  optionLabels: { [key: string]: string };
-  description: string;
-  displayName: string;
+  defVal: SavedObjectAttribute;
   isCustom: boolean;
-  requiresPageReload: boolean;
-  options: {
-    maxSize: number[];
-  };
   validation: Validation;
+  /*
+      readOnly
+  */
 }

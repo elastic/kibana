@@ -18,6 +18,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
+import ReactDOM from 'react-dom';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
@@ -44,11 +45,13 @@ import {
   EuiText,
   EuiSelect,
   EuiSwitch,
+  EuiSwitchEvent,
   keyCodes,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Setting } from '../../types';
+// import { UiSettingsParams } from '../../../../../../../../../core/server/ui_settings';
 
 import { isDefaultValue } from '../../lib';
 
@@ -83,7 +86,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       changeImage: false,
       savedValue: editableValue,
       unsavedValue: editableValue,
-      isJsonArray: type === 'json' ? Array.isArray(JSON.parse(defVal || '{}')) : false,
+      isJsonArray: type === 'json' ? Array.isArray(JSON.parse(String(defVal) || '{}')) : false,
     };
   }
 
@@ -102,7 +105,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     const val = value === null || value === undefined ? defVal : value;
     switch (type) {
       case 'array':
-        return val.join(', ');
+        return (val as string[]).join(', ');
       case 'boolean':
         return !!val;
       case 'number':
@@ -114,16 +117,20 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   }
 
-  getDisplayedDefaultValue(type: string, defVal: Setting['defVal'], optionLabels = {}) {
+  getDisplayedDefaultValue(
+    type: string,
+    defVal: Setting['defVal'],
+    optionLabels: { [key: string]: any } = {}
+  ) {
     if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
     switch (type) {
       case 'array':
-        return defVal.join(', ');
+        return (defVal as string[]).join(', ');
       case 'select':
-        return optionLabels.hasOwnProperty(defVal)
-          ? optionLabels[defVal as string]
+        return optionLabels.hasOwnProperty(String(defVal))
+          ? optionLabels[String(defVal)]
           : String(defVal);
       default:
         return String(defVal);
@@ -174,8 +181,14 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   };
 
-  onFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const value = e.target.value;
+  onFieldChangeSwitch = (e: EuiSwitchEvent) => {
+    return this.onFieldChange(e.target.checked);
+  };
+
+  onFieldChangeEvent = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    this.onFieldChange(e.target.value);
+
+  onFieldChange = (value: any) => {
     const { type, validation } = this.props.setting;
     const { unsavedValue } = this.state;
 
@@ -224,7 +237,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   };
 
-  onImageChange = async files => {
+  onImageChange = async (files: any[]) => {
     if (!files.length) {
       this.clearError();
       this.setState({
@@ -236,7 +249,10 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     const file = files[0];
     const { maxSize } = this.props.setting.validation;
     try {
-      const base64Image = await this.getImageAsBase64(file);
+      let base64Image = '';
+      if (file instanceof File) {
+        base64Image = (await this.getImageAsBase64(file)) as string;
+      }
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
       this.setState({
         isInvalid,
@@ -261,17 +277,13 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   };
 
-  getImageAsBase64(file: any) {
-    if (!(file instanceof File)) {
-      return null;
-    }
-
+  async getImageAsBase64(file: Blob): Promise<string | ArrayBuffer> {
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
     return new Promise((resolve, reject) => {
       reader.onload = () => {
-        resolve(reader.result);
+        resolve(reader.result || undefined);
       };
       reader.onerror = err => {
         reject(err);
@@ -316,20 +328,24 @@ export class Field extends PureComponent<FieldProps, FieldState> {
             settingName: this.props.setting.displayName || this.props.setting.name,
           },
         }),
-        text: (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={() => window.location.reload()}>
-                  {i18n.translate(
-                    'kbn.management.settings.field.requiresPageReloadToastButtonLabel',
-                    { defaultMessage: 'Reload page' }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ),
+        text: element => {
+          const content = (
+            <>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={() => window.location.reload()}>
+                    {i18n.translate(
+                      'kbn.management.settings.field.requiresPageReloadToastButtonLabel',
+                      { defaultMessage: 'Reload page' }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          );
+          ReactDOM.render(content, element);
+          return () => ReactDOM.unmountComponentAtNode(element);
+        },
         color: 'success',
       });
     }
@@ -349,7 +365,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     switch (type) {
       case 'array':
         valueToSave = valueToSave.split(',').map((val: string) => val.trim());
-        isSameValue = valueToSave.join(',') === defVal.join(',');
+        isSameValue = valueToSave.join(',') === (defVal as string[]).join(',');
         break;
       case 'json':
         valueToSave = valueToSave.trim();
@@ -421,7 +437,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
               )
             }
             checked={!!unsavedValue}
-            onChange={this.onFieldChange as React.ChangeEvent<HTMLSelectElement>}
+            onChange={this.onFieldChangeSwitch}
             disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
@@ -456,7 +472,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
         );
       case 'image':
         if (!isDefaultValue(setting) && !changeImage) {
-          return <EuiImage aria-label={ariaName} allowFullScreen url={value} alt={name} />;
+          return (
+            <EuiImage aria-label={ariaName} allowFullScreen url={value as string} alt={name} />
+          );
         } else {
           return (
             <EuiFilePicker
@@ -476,13 +494,13 @@ export class Field extends PureComponent<FieldProps, FieldState> {
           <EuiSelect
             aria-label={ariaName}
             value={unsavedValue}
-            options={options.map(option => {
+            options={(options as string[]).map(option => {
               return {
                 text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
                 value: option,
               };
             })}
-            onChange={this.onFieldChange}
+            onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
@@ -494,7 +512,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
           <EuiFieldNumber
             aria-label={ariaName}
             value={unsavedValue}
-            onChange={this.onFieldChange}
+            onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
@@ -506,7 +524,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
           <EuiFieldText
             aria-label={ariaName}
             value={unsavedValue}
-            onChange={this.onFieldChange}
+            onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
@@ -617,7 +635,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
                     <EuiCodeBlock
                       language="json"
                       paddingSize="s"
-                      overflowHeight={defVal.length >= 500 ? 300 : undefined}
+                      overflowHeight={(defVal as string).length >= 500 ? 300 : undefined}
                     >
                       {this.getDisplayedDefaultValue(type, defVal)}
                     </EuiCodeBlock>
