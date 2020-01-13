@@ -45,6 +45,9 @@ export class ResolverTestPlugin
       }),
       mount: async (_context, params) => {
         const { renderApp } = await import('./applications/resolver_test');
+        /**
+         * Pass a promise which resolves to the Resolver embeddable.
+         */
         return renderApp(params, this.embeddablePromise);
       },
     });

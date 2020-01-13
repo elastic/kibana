@@ -43,29 +43,64 @@ const AppRoot = styled(
       embeddable: embeddablePromise,
       className,
     }: {
+      /**
+       * A promise which resolves to the Resolver embeddable.
+       */
       embeddable: Promise<IEmbeddable | undefined>;
+      /**
+       * A `className` string provided by `styled`
+       */
       className?: string;
     }) => {
+      /**
+       * This state holds the reference to the embeddable, once resolved.
+       */
       const [embeddable, setEmbeddable] = React.useState<IEmbeddable | undefined>(undefined);
+      /**
+       * This state holds the reference to the DOM node that will contain the embeddable.
+       */
       const [renderTarget, setRenderTarget] = React.useState<HTMLDivElement | null>(null);
 
+      /**
+       * Keep component state with the Resolver embeddable.
+       *
+       * If the reference to the embeddablePromise changes, we ignore the stale promise.
+       */
       useEffect(() => {
+        /**
+         * A promise rejection function that will prevent a stale embeddable promise from being resolved
+         * as the current eembeddable.
+         *
+         * If the embeddablePromise itself changes before the old one is resolved, we cancel and restart this effect.
+         */
         let cleanUp;
-        Promise.race([
-          new Promise<never>((_resolve, reject) => {
-            cleanUp = reject;
-          }),
-          embeddablePromise,
-        ]).then(value => {
+
+        const cleanupPromise = new Promise<never>((_resolve, reject) => {
+          cleanUp = reject;
+        });
+
+        /**
+         * Either set the embeddable in state, or cancel and restart this process.
+         */
+        Promise.race([cleanupPromise, embeddablePromise]).then(value => {
           setEmbeddable(value);
         });
 
+        /**
+         * If `embeddablePromise` is changed, the cleanup function is run.
+         */
         return cleanUp;
       }, [embeddablePromise]);
 
+      /**
+       * Render the eembeddable into the DOM node.
+       */
       useEffect(() => {
         if (embeddable && renderTarget) {
           embeddable.render(renderTarget);
+          /**
+           * If the embeddable or DOM node changes then destroy the old embeddable.
+           */
           return () => {
             embeddable.destroy();
           };
@@ -82,6 +117,9 @@ const AppRoot = styled(
     }
   )
 )`
+  /**
+   * Take all available space.
+   */
   display: flex;
   flex-grow: 1;
 `;
