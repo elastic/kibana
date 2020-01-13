@@ -14,7 +14,7 @@
 }
 
 .lnsFieldItem--missing {
-  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, 0.9), $euiColorEmptyShade);
   color: $euiColorDarkShade;
 }
 
@@ -24,10 +24,10 @@
   display: flex;
   align-items: flex-start;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
-              background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
 
   .lnsFieldItem__name {
-    margin-left: $euiSizeXS;
+    margin-left: $euiSizeS;
     flex-grow: 1;
   }
 
@@ -38,6 +38,7 @@
 
   .lnsFieldListPanel__fieldIcon {
     margin-top: 2px;
+    margin-right: 2px;
   }
 
   .lnsFieldItem__infoIcon {

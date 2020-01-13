@@ -169,6 +169,7 @@ export function FieldSelect({
             <EuiFlexItem grow={null}>
               <LensFieldIcon
                 type={((option.value as unknown) as { dataType: DataType }).dataType}
+                fill="none"
               />
             </EuiFlexItem>
             <EuiFlexItem>

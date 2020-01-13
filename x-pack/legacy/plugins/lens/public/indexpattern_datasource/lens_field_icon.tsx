@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { FieldIcon, typeToEuiIconMap } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  FieldIcon,
+  FieldIconProps,
+  typeToEuiIconMap,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { DataType } from '../types';
 import { normalizeOperationDataType } from './utils';
 
@@ -18,13 +22,12 @@ export function getColorForDataType(type: string) {
   return euiPaletteColorBlind()[0];
 }
 
-export function LensFieldIcon({ type }: { type: DataType }) {
+export function LensFieldIcon({ type, fill }: { type: DataType; fill?: FieldIconProps['fill'] }) {
   return (
     <FieldIcon
-      type={normalizeOperationDataType(type)}
       className="lnsFieldListPanel__fieldIcon"
-      size="m"
-      useColor
+      type={normalizeOperationDataType(type)}
+      fill={fill}
     />
   );
 }

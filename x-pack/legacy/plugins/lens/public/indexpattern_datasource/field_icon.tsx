@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { ICON_TYPES, euiPaletteColorBlind, EuiIcon } from '@elastic/eui';
+import { ICON_TYPES, palettes, EuiIcon } from '@elastic/eui';
+import { EuiTokenMapType } from '@elastic/eui/src/components/token/token_map';
 import classNames from 'classnames';
 import { DataType } from '../types';
 
@@ -14,17 +15,29 @@ function stringToNum(s: string) {
 }
 
 function getIconForDataType(dataType: string) {
-  const icons: Partial<Record<string, UnwrapArray<typeof ICON_TYPES>>> = {
-    boolean: 'invert',
-    date: 'calendar',
-    ip: 'ip',
+  const icons: Partial<Record<string, EuiTokenMapType>> = {
+    // boolean: 'invert',
+    // date: 'calendar',
+    // ip: 'ip',
+    string: 'tokenString',
+    number: 'tokenNumber',
+    boolean: 'tokenBoolean',
+    date: 'tokenDate',
+    geo_point: 'tokenGeo',
+    geo_shape: 'tokenGeo',
+    ip: 'tokenIP',
+    // 'tokenRange',
+    // 'tokenShape',
+    // 'tokenObject',
+    // 'tokenNested',
+    // 'tokenAlias',
   };
   return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'empty';
 }
 
 export function getColorForDataType(type: string) {
   const iconType = getIconForDataType(type);
-  const colors = euiPaletteColorBlind();
+  const { colors } = palettes.euiPaletteColorBlind;
   const colorIndex = stringToNum(iconType) % colors.length;
   return colors[colorIndex];
 }
@@ -34,10 +47,9 @@ export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 export function FieldIcon({ type }: { type: DataType }) {
   const iconType = getIconForDataType(type);
 
-  const classes = classNames(
-    'lnsFieldListPanel__fieldIcon',
-    `lnsFieldListPanel__fieldIcon--${type}`
-  );
+  const classes = classNames();
+  // 'lnsFieldListPanel__fieldIcon',
+  // `lnsFieldListPanel__fieldIcon--${type}`
 
   return <EuiIcon type={iconType} color={getColorForDataType(type)} className={classes} />;
 }
