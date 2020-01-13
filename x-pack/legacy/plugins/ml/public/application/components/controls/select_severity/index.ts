@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
-export const severity$: BehaviorSubject<{
-  val: number;
-  display: string;
-  color: string;
-}>;
+export { useTableSeverity, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
