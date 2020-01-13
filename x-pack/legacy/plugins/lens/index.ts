@@ -18,7 +18,7 @@ export const lens: LegacyPluginInitializer = kibana => {
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
     // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data', 'task_manager'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
