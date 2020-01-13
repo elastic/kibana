@@ -5,7 +5,6 @@
  */
 import { getOr } from 'lodash/fp';
 import { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   MatrixHistogramDataTypes,
   MatrixHistogramQueryProps,
@@ -18,6 +17,7 @@ import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
 import { GetMatrixHistogramQuery, GetNetworkDnsQuery } from '../../graphql/types';
+import * as i18n from './translations';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
   alertsType = false,
@@ -31,7 +31,6 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   stackByField,
   startDate,
   sort,
-  title,
   isPtrIncluded,
   isInspected,
   isHistogram,
@@ -44,6 +43,14 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
   const [totalCount, setTotalCount] = useState(-1);
+
+  const getErrorMessage = () => {
+    if (alertsType) return i18n.ERROR_FETCHING_ALERTS_DATA;
+    if (anomaliesType) return i18n.ERROR_FETCHING_ANOMALIES_DATA;
+    if (authenticationsType) return i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA;
+    if (eventsType) return i18n.ERROR_FETCHING_EVENTS_DATA;
+    return i18n.ERROR_FETCHING_DNS_DATA;
+  };
 
   const isDNSQuery = (
     variable: Pick<
@@ -128,16 +135,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setData(null);
               setTotalCount(-1);
               setInspect(null);
-              errorToToaster({
-                title: i18n.translate(
-                  `xpack.siem.component.matrixHistogram.${title}.errorFetchingSignalsDescription`,
-                  {
-                    defaultMessage: `Failed to query ${title}`,
-                  }
-                ),
-                error,
-                dispatchToaster,
-              });
+              errorToToaster({ title: getErrorMessage(), error, dispatchToaster });
               setLoading(false);
             }
           }

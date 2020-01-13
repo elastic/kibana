@@ -54,7 +54,7 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigati
 });
 
 export const NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION = i18n.translate(
-  'xpack.siem.hosts.navigation.authentications.stackByEventType',
+  'xpack.siem.hosts.navigation.eventsStackByEventAction',
   {
     defaultMessage: 'action',
   }
