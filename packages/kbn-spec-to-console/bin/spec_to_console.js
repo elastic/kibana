@@ -28,7 +28,6 @@ const convert = require('../lib/convert');
 program
   .version(packageJSON.version)
   .option('-g --glob []', 'Files to convert')
-  .option('--skip-deprecated-endpoints', 'Skip endpoints marked as deprecated')
   .option('-d --directory []', 'Output directory')
   .parse(process.argv);
 
@@ -38,11 +37,10 @@ if (!program.glob) {
 }
 
 const files = glob.sync(program.glob);
-const skipDeprecatedEndpoints = program.skipDeprecatedEndpoints;
 console.log(files.length, files);
 files.forEach(file => {
   const spec = JSON.parse(fs.readFileSync(file));
-  const output = JSON.stringify(convert(spec, skipDeprecatedEndpoints), null, 2);
+  const output = JSON.stringify(convert(spec), null, 2);
   if (program.directory) {
     const outputName = path.basename(file);
     const outputPath = path.resolve(program.directory, outputName);
