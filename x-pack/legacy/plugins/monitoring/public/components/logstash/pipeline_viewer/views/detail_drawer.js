@@ -164,7 +164,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
   );
 }
 
-function renderIfBasicStats(_vertex) {
+function renderIfBasicStats() {
   return (
     <p>
       <FormattedMessage
@@ -175,7 +175,7 @@ function renderIfBasicStats(_vertex) {
   );
 }
 
-function renderQueueBasicStats(_vertex) {
+function renderQueueBasicStats() {
   return (
     <p>
       <FormattedMessage
@@ -253,7 +253,7 @@ function renderIfBasicInfo(vertex) {
   );
 }
 
-function renderQueueBasicInfo(_vertex) {
+function renderQueueBasicInfo() {
   return (
     <p>
       <FormattedMessage

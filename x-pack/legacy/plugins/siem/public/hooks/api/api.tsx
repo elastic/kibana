@@ -17,13 +17,9 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  *
  * TODO: Refactor to context provider: https://github.com/elastic/siem-team/issues/448
  *
- * @param headers
  * @param signal
  */
-export const getIndexPatterns = async (
-  signal: AbortSignal,
-  kbnVersion: string
-): Promise<IndexPatternSavedObject[]> => {
+export const getIndexPatterns = async (signal: AbortSignal): Promise<IndexPatternSavedObject[]> => {
   const response = await fetch(
     `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
     {
@@ -31,9 +27,8 @@ export const getIndexPatterns = async (
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
-        'kbn-xsrf': kbnVersion,
-        'kbn-version': kbnVersion,
         'kbn-system-api': 'true',
+        'kbn-xsrf': 'true',
       },
       signal,
     }

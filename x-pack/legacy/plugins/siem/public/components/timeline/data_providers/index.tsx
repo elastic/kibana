@@ -5,7 +5,7 @@
  */
 
 import { rgba } from 'polished';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
