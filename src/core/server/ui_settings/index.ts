@@ -26,6 +26,7 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   IUiSettingsClient,
+  DeprecationSettings,
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,

@@ -636,6 +636,14 @@ export interface DeprecationInfo {
 }
 
 // @public
+export interface DeprecationSettings {
+    // (undocumented)
+    docLinksKey: string;
+    // (undocumented)
+    message: string;
+}
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -1928,6 +1936,7 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 // @public
 export interface UiSettingsParams {
     category?: string[];
+    deprecation?: DeprecationSettings;
     description?: string;
     name?: string;
     optionLabels?: Record<string, string>;

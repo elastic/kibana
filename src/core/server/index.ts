@@ -211,6 +211,7 @@ export {
 
 export {
   IUiSettingsClient,
+  DeprecationSettings,
   UiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
