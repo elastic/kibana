@@ -28,7 +28,7 @@ export function indexManagement(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(false),
+          enabled: Joi.boolean().default(true),
         })
         .default();
     },
