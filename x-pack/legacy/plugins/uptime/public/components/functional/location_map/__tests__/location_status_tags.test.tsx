@@ -5,12 +5,18 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
+
+  const start = moment('2020-01-10T12:22:32.567Z');
+  beforeAll(() => {
+    moment.prototype.fromNow = jest.fn((date: string) => start.from(date));
+  });
 
   it('renders when there are many location', () => {
     monitorLocations = [
@@ -69,7 +75,7 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:28.825Z',
+        timestamp: '2020-01-08T12:22:28.825Z',
       },
     ];
     const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
@@ -81,7 +87,7 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
+        timestamp: '2020-01-06T12:22:32.567Z',
       },
       {
         summary: { up: 0, down: 2 },
