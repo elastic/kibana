@@ -28,6 +28,11 @@ const formSerializer: SerializerFunc<MappingsTemplates> = formData => {
   let parsedTemplates;
   try {
     parsedTemplates = JSON.parse(dynamicTemplates);
+
+    if (!Array.isArray(parsedTemplates)) {
+      // User provided an object, but we need an array of objects
+      parsedTemplates = [parsedTemplates];
+    }
   } catch {
     parsedTemplates = [];
   }
