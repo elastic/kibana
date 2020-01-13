@@ -62,7 +62,7 @@ export const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
   number: { icon: 'number', color: colors[0] },
   _source: { icon: 'editorCodeBlock', color: colors[3] },
   string: { icon: 'string', color: colors[4] },
-  nested: { icon: 'nested', color: colors[4] },
+  nested: { icon: 'nested', color: colors[2] },
 };
 
 /**
