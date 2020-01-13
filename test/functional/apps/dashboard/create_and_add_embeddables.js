@@ -84,7 +84,7 @@ export default function({ getService, getPageObjects }) {
 
       describe('is false', () => {
         before(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
         });
@@ -99,7 +99,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
           await PageObjects.header.clickDashboard();

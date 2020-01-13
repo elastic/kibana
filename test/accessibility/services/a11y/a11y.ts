@@ -78,6 +78,11 @@ export function A11yProvider({ getService }: FtrProviderContext) {
     private testAxeReport(report: AxeReport) {
       const errorMsgs = [];
 
+      for (const result of report.incomplete) {
+        // these items require human review and can't be definitively validated
+        log.warning(printResult(chalk.yellow('UNABLE TO VALIDATE'), result));
+      }
+
       for (const result of report.violations) {
         errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
       }
@@ -91,6 +96,11 @@ export function A11yProvider({ getService }: FtrProviderContext) {
       const axeOptions = {
         reporter: 'v2',
         runOnly: ['wcag2a', 'wcag2aa'],
+        rules: {
+          'color-contrast': {
+            enabled: false,
+          },
+        },
       };
 
       await (Wd.driver.manage() as any).setTimeouts({

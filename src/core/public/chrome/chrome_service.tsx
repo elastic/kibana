@@ -168,9 +168,9 @@ export class ChromeService {
     const navSetting =
       settings?.user?.pageNavigation?.userValue || settings.defaults.pageNavigation.value;
 
-    const license = (injectedMetadata.getInjectedVars().xpackInitialInfo as {
+    const license = (injectedMetadata.getInjectedVars()?.xpackInitialInfo as {
       license: { type: string };
-    }).license.type;
+    })?.license?.type;
 
     return {
       navControls,
