@@ -12,7 +12,7 @@ import { LocationStatusTags } from '../';
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
 
-  it('renders when many location', () => {
+  it('renders when there are many location', () => {
     monitorLocations = [
       {
         summary: { up: 0, down: 1 },

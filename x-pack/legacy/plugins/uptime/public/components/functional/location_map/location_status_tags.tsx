@@ -31,7 +31,7 @@ const TagContainer = styled.div`
   overflow: hidden;
 `;
 
-const OtherDiv = styled.div`
+const OtherLocationsDiv = styled.div`
   padding-left: 18px;
 `;
 
@@ -104,7 +104,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
         <span>{upLocations.map((item, ind) => tagLabel(item, ind, gray))}</span>
       </TagContainer>
       {locations.length > 7 && (
-        <OtherDiv>
+        <OtherLocationsDiv>
           <EuiText color="subdued">
             <h4>
               <FormattedMessage
@@ -116,7 +116,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
               />
             </h4>
           </EuiText>
-        </OtherDiv>
+        </OtherLocationsDiv>
       )}
     </>
   );
