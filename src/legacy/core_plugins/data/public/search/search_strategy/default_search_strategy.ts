@@ -65,9 +65,14 @@ function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategyS
   };
 }
 
-function search({ searchRequests, searchService, config }: SearchStrategySearchParams) {
+function search({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
   const abortController = new AbortController();
-  const searchParams = getSearchParams(config);
+  const searchParams = getSearchParams(config, esShardTimeout);
   const promises = searchRequests.map(({ index, body }) => {
     const params = {
       index: index.title || index,

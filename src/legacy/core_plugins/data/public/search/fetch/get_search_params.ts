@@ -29,10 +29,14 @@ export function getMSearchParams(config: IUiSettingsClient) {
   };
 }
 
-export function getSearchParams(config: IUiSettingsClient) {
+export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
   return {
+    rest_total_hits_as_int: true,
+    ignore_unavailable: true,
     ignore_throttled: getIgnoreThrottled(config),
     max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
+    preference: getPreference(config),
+    timeout: getTimeout(esShardTimeout),
   };
 }
 
