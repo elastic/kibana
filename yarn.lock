@@ -18663,10 +18663,10 @@ lodash@^3.10.1:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
-"lodash@npm:@elastic/lodash@3.10.1-kibana3":
-  version "3.10.1-kibana3"
-  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana3.tgz#c0e318245219eeeff535895c429e0cef5058a9ad"
-  integrity sha512-HMfwwT2yAkEQNzHSR1BxgE5YcDMUaZ/skhNyjy1nvM/A4m0Kh940hLZeCqKBCsSaUJz/8A/9cQGd9BaAOCIBLg==
+"lodash@npm:@elastic/lodash@3.10.1-kibana4":
+  version "3.10.1-kibana4"
+  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana4.tgz#d491228fd659b4a1b0dfa08ba9c67a4979b9746d"
+  integrity sha512-geQqXd9ZedRCL+kq5cpeahYWYaYRV0BMXhCwzq4DpnGCVs430FTMS3Wcot3XChZZhCvkwHm15bpNjB312vPxaA==
 
 log-ok@^0.1.1:
   version "0.1.1"
