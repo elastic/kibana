@@ -51,15 +51,19 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         IRuleSavedAttributesSavedObjectAttributes
       >({
         type: ruleStatusSavedObjectType,
-        perPage: 5,
+        perPage: 6,
         sortField: 'statusDate',
         sortOrder: 'desc',
         search: `"${id}"`,
         searchFields: ['alertId'],
       });
+      const toDisplay =
+        lastFiveErrorsForId.saved_objects.length <= 5
+          ? lastFiveErrorsForId.saved_objects
+          : lastFiveErrorsForId.saved_objects.slice(1);
       return {
         ...(await acc),
-        [id]: lastFiveErrorsForId.saved_objects.map(errorItem => errorItem.attributes),
+        [id]: toDisplay.map(errorItem => errorItem.attributes),
       };
     }, {});
     return statuses;
