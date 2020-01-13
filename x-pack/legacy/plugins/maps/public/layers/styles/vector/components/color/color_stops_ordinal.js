@@ -4,39 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { ColorStops } from './color_stops';
 import { EuiFieldNumber } from '@elastic/eui';
 import {
   addOrdinalRow,
-  removeRow,
-  getColorInput,
   isOrdinalStopInvalid,
   isOrdinalStopsInvalid,
-  getDeleteButton,
-  getColorStopRow,
+  DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 
-const DEFAULT_COLOR = '#FF0000';
-
 export const ColorStopsOrdinal = ({
-  colorStops = [{ stop: 0, color: DEFAULT_COLOR }],
+  colorStops = [{ stop: 0, color: DEFAULT_CUSTOM_COLOR }],
   onChange,
 }) => {
-  function getStopInput(stop, index) {
-    const onStopChange = e => {
-      const newColorStops = _.cloneDeep(colorStops);
-      const sanitizedValue = parseFloat(e.target.value);
-      newColorStops[index].stop = isNaN(sanitizedValue) ? '' : sanitizedValue;
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isOrdinalStopsInvalid(newColorStops),
-      });
-    };
+  const sanitizeStopInput = value => {
+    const sanitizedValue = parseFloat(value);
+    return isNaN(sanitizedValue) ? '' : sanitizedValue;
+  };
 
+  const getStopError = (stop, index) => {
     let error;
     if (isOrdinalStopInvalid(stop)) {
       error = i18n.translate('xpack.maps.styles.colorStops.ordinalStop.numberWarningLabel', {
@@ -50,67 +40,38 @@ export const ColorStopsOrdinal = ({
         }
       );
     }
+    return error;
+  };
 
-    return {
-      stopError: error,
-      stopInput: (
-        <EuiFieldNumber
-          aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
-            defaultMessage: 'Stop',
-          })}
-          value={stop}
-          onChange={onStopChange}
-          compressed
-        />
-      ),
-    };
-  }
+  const renderStopInput = (stop, onStopChange) => {
+    return (
+      <EuiFieldNumber
+        aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
+          defaultMessage: 'Stop',
+        })}
+        value={stop}
+        onChange={onStopChange}
+        compressed
+      />
+    );
+  };
 
-  const rows = colorStops.map((colorStop, index) => {
-    const onColorChange = color => {
-      const newColorStops = _.cloneDeep(colorStops);
-      newColorStops[index].color = color;
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isOrdinalStopsInvalid(newColorStops),
-      });
-    };
+  const canDeleteStop = colorStops => {
+    return colorStops.length > 1;
+  };
 
-    const { stopError, stopInput } = getStopInput(colorStop.stop, index);
-    const { colorError, colorInput } = getColorInput(colorStops, onColorChange, colorStop.color);
-    const errors = [];
-    if (stopError) {
-      errors.push(stopError);
-    }
-    if (colorError) {
-      errors.push(colorError);
-    }
-
-    const onAdd = () => {
-      const newColorStops = addOrdinalRow(colorStops, index);
-
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isOrdinalStopsInvalid(newColorStops),
-      });
-    };
-
-    let deleteButton;
-    if (colorStops.length > 1) {
-      const onRemove = () => {
-        const newColorStops = removeRow(colorStops, index);
-        onChange({
-          colorStops: newColorStops,
-          isInvalid: isOrdinalStopsInvalid(newColorStops),
-        });
-      };
-      deleteButton = getDeleteButton(onRemove);
-    }
-
-    return getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd });
-  });
-
-  return <div>{rows}</div>;
+  return (
+    <ColorStops
+      onChange={onChange}
+      colorStops={colorStops}
+      isStopsInvalid={isOrdinalStopsInvalid}
+      sanitizeStopInput={sanitizeStopInput}
+      getStopError={getStopError}
+      renderStopInput={renderStopInput}
+      canDeleteStop={canDeleteStop}
+      addNewRow={addOrdinalRow}
+    />
+  );
 };
 
 ColorStopsOrdinal.propTypes = {

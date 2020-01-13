@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiFieldText } from '@elastic/eui';
-import {
-  addCategoricalRow,
-  removeRow,
-  getColorInput,
-  getDeleteButton,
-  getColorStopRow,
-  DEFAULT_CUSTOM_COLOR,
-  DEFAULT_NEXT_COLOR,
-} from './color_stops_utils';
+import { addCategoricalRow, DEFAULT_CUSTOM_COLOR, DEFAULT_NEXT_COLOR } from './color_stops_utils';
+import { i18n } from '@kbn/i18n';
+import { ColorStops } from './color_stops';
 
 export const ColorStopsCategorical = ({
   colorStops = [
@@ -26,23 +19,32 @@ export const ColorStopsCategorical = ({
   ],
   onChange,
 }) => {
-  function getStopInput(stop, index) {
-    const onStopChange = e => {
-      const newColorStops = _.cloneDeep(colorStops);
-      newColorStops[index].stop = e.target.value;
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: false,
-      });
-    };
+  const sanitizeStopInput = value => {
+    return value;
+  };
 
+  const getStopError = () => {
+    return null;
+  };
+
+  const renderStopInput = (stop, onStopChange, index) => {
     let stopInput;
     if (index === 0) {
       stopInput = (
         <EuiFieldText
-          aria-label="Default stop"
+          aria-label={i18n.translate(
+            'xpack.maps.styles.colorStops.categoricalStop.defaultCategoryAriaLabel',
+            {
+              defaultMessage: 'Default stop',
+            }
+          )}
           value={stop}
-          placeholder={'Default'}
+          placeholder={i18n.translate(
+            'xpack.maps.styles.colorStops.categoricalStop.defaultCategoryPlaceholder',
+            {
+              defaultMessage: 'Default',
+            }
+          )}
           disabled
           onChange={onStopChange}
           compressed
@@ -50,53 +52,38 @@ export const ColorStopsCategorical = ({
       );
     } else {
       stopInput = (
-        <EuiFieldText aria-label="Category" value={stop} onChange={onStopChange} compressed />
+        <EuiFieldText
+          aria-label={i18n.translate(
+            'xpack.maps.styles.colorStops.categoricalStop.categoryAriaLabel',
+            {
+              defaultMessage: 'Category',
+            }
+          )}
+          value={stop}
+          onChange={onStopChange}
+          compressed
+        />
       );
     }
+    return stopInput;
+  };
 
-    return {
-      stopInput: stopInput,
-    };
-  }
+  const canDeleteStop = (colorStops, index) => {
+    return colorStops.length > 2 && index !== 0;
+  };
 
-  const rows = colorStops.map((colorStop, index) => {
-    const onColorChange = color => {
-      const newColorStops = _.cloneDeep(colorStops);
-      newColorStops[index].color = color;
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: false,
-      });
-    };
-
-    const { stopInput } = getStopInput(colorStop.stop, index);
-    const { colorError, colorInput } = getColorInput(colorStops, onColorChange, colorStop.color);
-    const errors = colorError ? [colorError] : [];
-
-    const onAdd = () => {
-      const newColorStops = addCategoricalRow(colorStops, index);
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: false,
-      });
-    };
-
-    let deleteButton;
-    if (colorStops.length > 2) {
-      const onRemove = () => {
-        const newColorStops = removeRow(colorStops, index);
-        onChange({
-          colorStops: newColorStops,
-          isInvalid: false,
-        });
-      };
-      deleteButton = getDeleteButton(onRemove);
-    }
-
-    return getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd });
-  });
-
-  return <div>{rows}</div>;
+  return (
+    <ColorStops
+      onChange={onChange}
+      colorStops={colorStops}
+      isStopsInvalid={() => false}
+      sanitizeStopInput={sanitizeStopInput}
+      getStopError={getStopError}
+      renderStopInput={renderStopInput}
+      canDeleteStop={canDeleteStop}
+      addNewRow={addCategoricalRow}
+    />
+  );
 };
 
 ColorStopsCategorical.propTypes = {
