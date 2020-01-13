@@ -172,7 +172,12 @@ export const ResultsTable: FC<Props> = React.memo(
             break;
           case ES_FIELD_TYPES.DATE:
             column.align = 'right';
-            column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+            column.render = (d: any) => {
+              if (d !== undefined) {
+                return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+              }
+              return d;
+            };
             break;
           default:
             column.render = render;
