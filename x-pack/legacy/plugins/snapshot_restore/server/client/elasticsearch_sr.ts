@@ -7,10 +7,10 @@
 export const elasticsearchJsPlugin = (Client: any, config: any, components: any) => {
   const ca = components.clientAction.factory;
 
-  Client.prototype.slm = components.clientAction.namespaceFactory();
-  const slm = Client.prototype.slm.prototype;
+  Client.prototype.sr = components.clientAction.namespaceFactory();
+  const sr = Client.prototype.sr.prototype;
 
-  slm.policies = ca({
+  sr.policies = ca({
     urls: [
       {
         fmt: '/_slm/policy',
@@ -19,7 +19,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
-  slm.policy = ca({
+  sr.policy = ca({
     urls: [
       {
         fmt: '/_slm/policy/<%=name%>',
@@ -33,7 +33,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
-  slm.deletePolicy = ca({
+  sr.deletePolicy = ca({
     urls: [
       {
         fmt: '/_slm/policy/<%=name%>',
@@ -47,7 +47,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'DELETE',
   });
 
-  slm.executePolicy = ca({
+  sr.executePolicy = ca({
     urls: [
       {
         fmt: '/_slm/policy/<%=name%>/_execute',
@@ -61,7 +61,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'PUT',
   });
 
-  slm.updatePolicy = ca({
+  sr.updatePolicy = ca({
     urls: [
       {
         fmt: '/_slm/policy/<%=name%>',
@@ -75,10 +75,24 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'PUT',
   });
 
-  slm.executeRetention = ca({
+  sr.executeRetention = ca({
     urls: [
       {
         fmt: '/_slm/_execute_retention',
+      },
+    ],
+    method: 'POST',
+  });
+
+  sr.cleanupRepository = ca({
+    urls: [
+      {
+        fmt: '/_snapshot/<%=name%>/_cleanup',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
       },
     ],
     method: 'POST',
