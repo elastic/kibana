@@ -25,8 +25,7 @@ import {
   DataSetupDependencies,
   DataStartDependencies,
 } from './types';
-import { AutocompleteProviderRegister } from './autocomplete';
-import { getSuggestionsProvider } from './suggestions_provider';
+import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
@@ -38,7 +37,7 @@ import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteProviderRegister();
+  private readonly autocomplete = new AutocompleteService();
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
@@ -62,7 +61,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     );
 
     return {
-      autocomplete: this.autocomplete.setup(),
+      autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -83,8 +82,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),
-      // todo: value suggestions
-      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats,
       query: this.queryService.start(core.savedObjects),

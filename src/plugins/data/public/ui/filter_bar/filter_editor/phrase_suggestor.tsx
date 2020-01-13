@@ -69,8 +69,11 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
       return;
     }
     this.setState({ isLoading: true });
-    // todo: value suggestions
-    const suggestions = await this.services.data.getSuggestions(indexPattern, field, value);
+
+    const suggestions = await this.services.data.autocomplete
+      .getSuggestionsProvider()
+      .getSuggestions(indexPattern, field, value);
+
     this.setState({ suggestions, isLoading: false });
   }, 500);
 }

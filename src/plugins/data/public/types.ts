@@ -23,7 +23,6 @@ import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public'
 import { autocomplete } from '.';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
@@ -46,7 +45,6 @@ export interface DataPublicPluginSetup {
 
 export interface DataPublicPluginStart {
   autocomplete: autocomplete.AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
   indexPatterns: IndexPatternsContract;
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
@@ -56,8 +54,6 @@ export interface DataPublicPluginStart {
     SearchBar: React.ComponentType<StatefulSearchBarProps>;
   };
 }
-
-export { IGetSuggestions } from './suggestions_provider/types';
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;

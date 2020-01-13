@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from './autocomplete_provider_register';
+export * from './autocomplete_service';
 export * from './types';

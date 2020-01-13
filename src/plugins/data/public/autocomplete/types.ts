@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AutocompleteProviderRegister } from '.';
+import { AutocompleteService } from '.';
 
 import {
   QuerySyntaxSuggestionType,
@@ -29,10 +29,10 @@ import {
 import { SuggestionsProvider } from './providers/suggestions_provider';
 
 /** @public **/
-export type AutocompletePublicPluginSetup = ReturnType<AutocompleteProviderRegister['setup']>;
+export type AutocompletePublicPluginSetup = ReturnType<AutocompleteService['setup']>;
 
 /** @public **/
-export type AutocompletePublicPluginStart = ReturnType<AutocompleteProviderRegister['start']>;
+export type AutocompletePublicPluginStart = ReturnType<AutocompleteService['start']>;
 
 /** @public **/
 export {

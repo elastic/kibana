@@ -16,6 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IIndexPattern } from '../../../common/index_patterns';
 
-export type SuggestionsProvider = (args: { indexPatterns: IIndexPattern[] }) => Function;
+import { memoize } from 'lodash';
+import { CoreSetup } from 'src/core/public';
+import { IIndexPattern, IFieldType } from '../../../common';
+
+function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
+  // Only cache results for a minute
+  const ttl = Math.floor(Date.now() / 1000 / 60);
+
+  return [ttl, query, title, field.name, JSON.stringify(boolFilter)].join('|');
+}
+
+export class SuggestionsProvider {
+  private core?: CoreSetup;
+
+  setup(core: CoreSetup) {
+    this.core = core;
+  }
+
+  async getSuggestions(
+    indexPattern: IIndexPattern,
+    field: IFieldType,
+    query: string,
+    boolFilter?: any,
+    signal?: AbortSignal
+  ): Promise<any[]> {
+    const shouldSuggestValues = this.core!.uiSettings.get<boolean>('filterEditor:suggestValues');
+    const { title } = indexPattern;
+
+    if (field.type === 'boolean') {
+      return [true, false];
+    } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+      return [];
+    }
+
+    return await this.requestSuggestions(title, field, query, boolFilter, signal);
+  }
+
+  private requestSuggestions = memoize(
+    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
+      this.core!.http.fetch(`/api/kibana/suggestions/values/${index}`, {
+        method: 'POST',
+        body: JSON.stringify({ query, field: field.name, boolFilter }),
+        signal,
+      }),
+    resolver
+  );
+}

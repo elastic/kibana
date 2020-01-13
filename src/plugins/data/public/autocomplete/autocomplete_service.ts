@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { QuerySyntaxProvider, SuggestionsProvider } from './types';
+import { CoreSetup } from 'src/core/public';
+import { QuerySyntaxProvider } from './types';
+import { SuggestionsProvider } from './providers/suggestions_provider';
 
-export class AutocompleteProviderRegister {
+export class AutocompleteService {
   private readonly querySyntaxProviders: Map<string, QuerySyntaxProvider> = new Map();
-
-  /** @internal **/
-  public clearProviders(): void {
-    this.querySyntaxProviders.clear();
-  }
+  private suggestionsProvider: SuggestionsProvider = new SuggestionsProvider();
 
   private addQuerySyntaxProvider = (language: string, provider: QuerySyntaxProvider): void => {
     if (language && provider) {
@@ -36,11 +34,12 @@ export class AutocompleteProviderRegister {
   private getQuerySyntaxProvider = (language: string): QuerySyntaxProvider | undefined =>
     this.querySyntaxProviders.get(language);
 
-  private getSuggestionsProvider = (): SuggestionsProvider =>
-    (() => 'todo' as unknown) as SuggestionsProvider;
+  private getSuggestionsProvider = (): SuggestionsProvider => this.suggestionsProvider;
 
   /** @public **/
-  public setup() {
+  public setup(core: CoreSetup) {
+    this.suggestionsProvider.setup(core);
+
     return {
       addQuerySyntaxProvider: this.addQuerySyntaxProvider,
 
@@ -56,5 +55,10 @@ export class AutocompleteProviderRegister {
       getQuerySyntaxProvider: this.getQuerySyntaxProvider,
       getSuggestionsProvider: this.getSuggestionsProvider,
     };
+  }
+
+  /** @internal **/
+  public clearProviders(): void {
+    this.querySyntaxProviders.clear();
   }
 }
