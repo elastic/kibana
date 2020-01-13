@@ -53,7 +53,7 @@ export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
           >({
             type: ruleStatusSavedObjectType,
             perPage: 6,
-            search: `"${rule?.id}"`,
+            search: `${rule?.id}`,
             searchFields: ['alertId'],
           });
           ruleStatuses.saved_objects.forEach(async obj =>

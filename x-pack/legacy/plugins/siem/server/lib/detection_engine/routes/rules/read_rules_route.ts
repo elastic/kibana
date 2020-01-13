@@ -52,7 +52,7 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
           perPage: 5,
           sortField: 'statusDate',
           sortOrder: 'desc',
-          search: `"${rule?.id}"`,
+          search: `${rule?.id}`,
           searchFields: ['alertId'],
         });
         return transformOrError(rule, ruleStatuses); // update this to run with an array of rule statuses

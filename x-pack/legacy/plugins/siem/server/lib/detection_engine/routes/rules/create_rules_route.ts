@@ -130,7 +130,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           perPage: 10,
           sortField: 'statusDate',
           sortOrder: 'desc',
-          search: `"${createdRule.id}"`,
+          search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
         return transformOrError(createdRule, ruleStatuses.saved_objects[0]);

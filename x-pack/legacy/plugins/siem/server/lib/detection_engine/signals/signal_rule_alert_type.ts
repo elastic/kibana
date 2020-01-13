@@ -84,7 +84,7 @@ export const signalRulesAlertType = ({
         perPage: 6, // 0th element is current status, 1-5 is last 5 failures.
         sortField: 'statusDate',
         sortOrder: 'desc',
-        search: `"${alertId}"`,
+        search: `${alertId}`,
         searchFields: ['alertId'],
       });
       logger.debug(`ruleStatusSavedObjects: ${JSON.stringify(ruleStatusSavedObjects, null, 4)}`);
@@ -95,7 +95,7 @@ export const signalRulesAlertType = ({
         currentStatusSavedObject = await services.savedObjectsClient.create<
           IRuleSavedAttributesSavedObjectAttributes
         >(ruleStatusSavedObjectType, {
-          alertId: `"${alertId}"`, // do a search for this id.
+          alertId: `${alertId}`, // do a search for this id.
           statusDate: date,
           status: 'executing',
           lastFailureAt: '1970-01-01T00:00:00Z', // default to unix epoch time
