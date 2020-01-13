@@ -52,6 +52,9 @@ export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_I
 }
 
 export function getColorRampCenterColor(colorRampName) {
+  if (!colorRampName) {
+    return null;
+  }
   const colorRamp = getColorRamp(colorRampName);
   const centerIndex = Math.floor(colorRamp.value.length / 2);
   return getColor(colorRamp.value, centerIndex);

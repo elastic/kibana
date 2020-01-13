@@ -30,6 +30,10 @@ export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) 
         : defaultColor;
     }
 
+    if (!colorStyleProperty.options.color) {
+      return null;
+    }
+
     const palette = getColorPalette(colorStyleProperty.options.color);
     return palette[0];
   } else {
@@ -46,6 +50,9 @@ export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) 
       return colorStyleProperty.options.customColorRamp[middleIndex].color;
     }
 
+    if (!colorStyleProperty.options.color) {
+      return null;
+    }
     return getColorRampCenterColor(colorStyleProperty.options.color);
   }
 }
