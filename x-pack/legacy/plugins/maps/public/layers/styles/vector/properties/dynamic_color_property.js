@@ -196,13 +196,22 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     if (!paletteStops.length) {
       return null;
     }
+
     const mbStops = [];
-    for (let i = 0; i < paletteStops.length - 1; i++) {
+    let defaultColor = null;
+    for (let i = 0; i < paletteStops.length; i++) {
       const stop = paletteStops[i];
-      mbStops.push(stop.stop);
-      mbStops.push(stop.color);
+      if (stop.isDefault) {
+        defaultColor = stop.color;
+      } else {
+        mbStops.push(stop.stop);
+        mbStops.push(stop.color);
+      }
     }
-    mbStops.push(paletteStops[paletteStops.length - 2].color); //last color is default color
+    if (!defaultColor) {
+      return null;
+    }
+    mbStops.push(defaultColor); //last color is default color
     return ['match', ['get', this._options.field.name], ...mbStops];
   }
 
