@@ -27,7 +27,12 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
+import {
+  fieldWildcardMatcher,
+  createStateContainer,
+  syncState,
+  createKbnUrlStateStorage,
+} from '../../../../../../../../plugins/kibana_utils/public';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -39,42 +44,43 @@ import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
+import { createHashHistory } from 'history';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 
-function updateSourceFiltersTable($scope, $state) {
-  if ($state.tab === 'sourceFilters') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
+const TAB_INDEXED_FIELDS = 'indexedFields';
+const TAB_SCRIPTED_FIELDS = 'scriptedFields';
+const TAB_SOURCE_FILTERS = 'sourceFilters';
 
-      render(
-        <I18nContext>
-          <SourceFiltersTable
-            indexPattern={$scope.indexPattern}
-            filterFilter={$scope.fieldFilter}
-            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-            onAddOrRemoveFilter={() => {
-              $scope.editSections = $scope.editSectionsProvider(
-                $scope.indexPattern,
-                $scope.fieldFilter,
-                $scope.indexPatternListProvider
-              );
-              $scope.refreshFilters();
-              $scope.$apply();
-            }}
-          />
-        </I18nContext>,
-        node
-      );
-    });
-  } else {
-    destroySourceFiltersTable();
-  }
+function updateSourceFiltersTable($scope) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <SourceFiltersTable
+          indexPattern={$scope.indexPattern}
+          filterFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+          onAddOrRemoveFilter={() => {
+            $scope.editSections = $scope.editSectionsProvider(
+              $scope.indexPattern,
+              $scope.fieldFilter,
+              $scope.indexPatternListProvider
+            );
+            $scope.refreshFilters();
+            $scope.$apply();
+          }}
+        />
+      </I18nContext>,
+      node
+    );
+  });
 }
 
 function destroySourceFiltersTable() {
@@ -82,44 +88,40 @@ function destroySourceFiltersTable() {
   node && unmountComponentAtNode(node);
 }
 
-function updateScriptedFieldsTable($scope, $state) {
-  if ($state.tab === 'scriptedFields') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
+function updateScriptedFieldsTable($scope) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
 
-      render(
-        <I18nContext>
-          <ScriptedFieldsTable
-            indexPattern={$scope.indexPattern}
-            fieldFilter={$scope.fieldFilter}
-            scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
-            helpers={{
-              redirectToRoute: (obj, route) => {
-                $scope.kbnUrl.redirectToRoute(obj, route);
-                $scope.$apply();
-              },
-              getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
-            }}
-            onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider(
-                $scope.indexPattern,
-                $scope.fieldFilter,
-                $scope.indexPatternListProvider
-              );
-              $scope.refreshFilters();
+    render(
+      <I18nContext>
+        <ScriptedFieldsTable
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
+          helpers={{
+            redirectToRoute: (obj, route) => {
+              $scope.kbnUrl.changeToRoute(obj, route);
               $scope.$apply();
-            }}
-          />
-        </I18nContext>,
-        node
-      );
-    });
-  } else {
-    destroyScriptedFieldsTable();
-  }
+            },
+            getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+          }}
+          onRemoveField={() => {
+            $scope.editSections = $scope.editSectionsProvider(
+              $scope.indexPattern,
+              $scope.fieldFilter,
+              $scope.indexPatternListProvider
+            );
+            $scope.refreshFilters();
+            $scope.$apply();
+          }}
+        />
+      </I18nContext>,
+      node
+    );
+  });
 }
 
 function destroyScriptedFieldsTable() {
@@ -127,42 +129,109 @@ function destroyScriptedFieldsTable() {
   node && unmountComponentAtNode(node);
 }
 
-function updateIndexedFieldsTable($scope, $state) {
-  if ($state.tab === 'indexedFields') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
+function updateIndexedFieldsTable($scope) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
 
-      render(
-        <I18nContext>
-          <IndexedFieldsTable
-            fields={$scope.fields}
-            indexPattern={$scope.indexPattern}
-            fieldFilter={$scope.fieldFilter}
-            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-            indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
-            helpers={{
-              redirectToRoute: (obj, route) => {
-                $scope.kbnUrl.redirectToRoute(obj, route);
-                $scope.$apply();
-              },
-              getFieldInfo: $scope.getFieldInfo,
-            }}
-          />
-        </I18nContext>,
-        node
-      );
-    });
-  } else {
-    destroyIndexedFieldsTable();
-  }
+    render(
+      <I18nContext>
+        <IndexedFieldsTable
+          fields={$scope.fields}
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+          indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
+          helpers={{
+            redirectToRoute: (obj, route) => {
+              $scope.kbnUrl.changeToRoute(obj, route);
+              $scope.$apply();
+            },
+            getFieldInfo: $scope.getFieldInfo,
+          }}
+        />
+      </I18nContext>,
+      node
+    );
+  });
 }
 
 function destroyIndexedFieldsTable() {
   const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
+}
+
+function handleTabChange($scope, newTab) {
+  switch (newTab) {
+    case TAB_SCRIPTED_FIELDS:
+      destroyIndexedFieldsTable();
+      destroySourceFiltersTable();
+      return updateScriptedFieldsTable($scope);
+    case TAB_INDEXED_FIELDS:
+      destroyScriptedFieldsTable();
+      destroySourceFiltersTable();
+      return updateIndexedFieldsTable($scope);
+    case TAB_SOURCE_FILTERS:
+      destroyIndexedFieldsTable();
+      destroyScriptedFieldsTable();
+      return updateSourceFiltersTable($scope);
+  }
+}
+
+/**
+ * Create state container with sync config for tab navigation specific for edit_index_patter page
+ */
+function createEditIndexPatternPageStateContainer({ useHashedUrl }) {
+  // until angular is used as shell - use hash history
+  const history = createHashHistory();
+  // query param to store app state at
+  const stateStorageKey = '_a';
+  // default app state, when there is no initial state in the url
+  const defaultState = {
+    tab: TAB_INDEXED_FIELDS,
+  };
+  const kbnUrlStateStorage = createKbnUrlStateStorage({
+    useHash: useHashedUrl,
+    history,
+  });
+  // extract starting app state from URL and use it as starting app state in state container
+  const initialStateFromUrl = kbnUrlStateStorage.get(stateStorageKey);
+  const stateContainer = createStateContainer(
+    {
+      ...defaultState,
+      ...initialStateFromUrl,
+    },
+    {
+      setTab: state => tab => ({ ...state, tab }),
+    },
+    {
+      tab: state => () => state.tab,
+    }
+  );
+
+  const { start, stop } = syncState({
+    storageKey: stateStorageKey,
+    stateContainer: {
+      ...stateContainer,
+      // state syncing utility requires state containers to handle "null"
+      set: state => state && stateContainer.set(state),
+    },
+    stateStorage: kbnUrlStateStorage,
+  });
+
+  // makes sure initial url is the same as initial state (this is not really required)
+  kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
+
+  // expose api needed for Controller
+  return {
+    startSyncingState: start,
+    stopSyncingState: stop,
+    setCurrentTab: newTab => stateContainer.transitions.setTab(newTab),
+    getCurrentTab: () => stateContainer.selectors.tab(),
+    state$: stateContainer.state$,
+  };
 }
 
 uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
@@ -187,10 +256,33 @@ uiModules
     Promise,
     config,
     Private,
-    AppState,
     confirmModal
   ) {
-    const $state = ($scope.state = new AppState());
+    const {
+      startSyncingState,
+      stopSyncingState,
+      setCurrentTab,
+      getCurrentTab,
+      state$,
+    } = createEditIndexPatternPageStateContainer({
+      useHashedUrl: config.get('state:storeInSessionStorage'),
+    });
+
+    $scope.getCurrentTab = getCurrentTab;
+    $scope.setCurrentTab = setCurrentTab;
+
+    const stateChangedSub = state$.subscribe(({ tab }) => {
+      handleTabChange($scope, tab);
+      $scope.$applyAsync();
+    });
+    handleTabChange($scope, getCurrentTab()); // setup initial tab depending on initial tab state
+
+    startSyncingState(); // starts syncing state between state container and url
+
+    const destroyState = () => {
+      stateChangedSub.unsubscribe();
+      stopSyncingState();
+    };
 
     $scope.fieldWildcardMatcher = (...args) =>
       fieldWildcardMatcher(...args, config.get('metaFields'));
@@ -219,8 +311,6 @@ uiModules
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
-      updateIndexedFieldsTable($scope, $state);
-      updateScriptedFieldsTable($scope, $state);
     });
 
     $scope.refreshFilters = function() {
@@ -241,18 +331,6 @@ uiModules
     $scope.changeFilter = function(filter, val) {
       $scope[filter] = val || ''; // null causes filter to check for null explicitly
     };
-
-    $scope.changeTab = function(obj) {
-      $state.tab = obj.index;
-      updateIndexedFieldsTable($scope, $state);
-      updateScriptedFieldsTable($scope, $state);
-      updateSourceFiltersTable($scope, $state);
-      $state.save();
-    };
-
-    $scope.$watch('state.tab', function(tab) {
-      if (!tab) $scope.changeTab($scope.editSections[0]);
-    });
 
     $scope.$watchCollection('indexPattern.fields', function() {
       $scope.conflictFields = $scope.indexPattern.fields.filter(field => field.type === 'conflict');
@@ -329,37 +407,43 @@ uiModules
         $scope.fieldFilter,
         managementSetup.indexPattern.list
       );
+
       if ($scope.fieldFilter === undefined) {
         return;
       }
 
-      switch ($state.tab) {
-        case 'indexedFields':
-          updateIndexedFieldsTable($scope, $state);
-        case 'scriptedFields':
-          updateScriptedFieldsTable($scope, $state);
-        case 'sourceFilters':
-          updateSourceFiltersTable($scope, $state);
+      switch (getCurrentTab()) {
+        case TAB_INDEXED_FIELDS:
+          updateIndexedFieldsTable($scope);
+          break;
+        case TAB_SCRIPTED_FIELDS:
+          updateScriptedFieldsTable($scope);
+          break;
+        case TAB_SOURCE_FILTERS:
+          updateSourceFiltersTable($scope);
+          break;
       }
     });
 
     $scope.$watch('indexedFieldTypeFilter', () => {
-      if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
-        updateIndexedFieldsTable($scope, $state);
+      if ($scope.indexedFieldTypeFilter !== undefined && getCurrentTab() === TAB_INDEXED_FIELDS) {
+        updateIndexedFieldsTable($scope);
       }
     });
 
     $scope.$watch('scriptedFieldLanguageFilter', () => {
-      if ($scope.scriptedFieldLanguageFilter !== undefined && $state.tab === 'scriptedFields') {
-        updateScriptedFieldsTable($scope, $state);
+      if (
+        $scope.scriptedFieldLanguageFilter !== undefined &&
+        getCurrentTab() === TAB_SCRIPTED_FIELDS
+      ) {
+        updateScriptedFieldsTable($scope);
       }
     });
 
     $scope.$on('$destroy', () => {
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
+      destroySourceFiltersTable();
+      destroyState();
     });
-
-    updateScriptedFieldsTable($scope, $state);
-    updateSourceFiltersTable($scope, $state);
   });
