@@ -46,18 +46,14 @@
     margin: -$euiSizeS;
     margin-bottom: 0;
     font-size: 0; // eliminates any extra space around img
+    height: 164px;
   }
 
   .canvasAsset__img {
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-
     img {
       width: auto;
       max-width: 100%;
-      height: 164px; // nice default proportions for typical 4x3 images
-      opacity: 0; // only show the background image (which will properly keep proportions)
+      max-height: 164px; // nice default proportions for typical 4x3 images
     }
   }
 }
