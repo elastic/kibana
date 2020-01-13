@@ -46,20 +46,13 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async getReportURL(timeout) {
-      const host = PageObjects.common.getHostPort();
-
       log.debug('getReportURL');
 
-      const url = await testSubjects.getAttribute(
-        'downloadCompletedReportButton',
-        'data-report-url',
-        timeout
-      );
-      const fullUrl = `${host}${url}`;
+      const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href', timeout);
 
-      log.debug(`getReportURL got url: ${fullUrl}`);
+      log.debug(`getReportURL got url: ${url}`);
 
-      return fullUrl;
+      return url;
     }
 
     async removeForceSharedItemsContainerSize() {
@@ -70,9 +63,8 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       `);
     }
 
-    getRawPdfReportData(url) {
-      log.debug(`getRawPdfReportData for ${url}`);
-      let data = []; // List of Buffer objects
+    getResponse(url) {
+      log.debug(`getResponse for ${url}`);
       const auth = config.get('servers.elasticsearch.auth');
       const headers = {
         Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
@@ -89,18 +81,24 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
               headers,
             },
             res => {
-              res.on('data', function(chunk) {
-                data.push(chunk);
-              });
-              res.on('end', function() {
-                data = Buffer.concat(data);
-                resolve(data);
-              });
+              resolve(res);
             }
           )
           .on('error', e => {
             reject(e);
           });
+      });
+    }
+
+    async getRawPdfReportData(url) {
+      const data = []; // List of Buffer objects
+      log.debug(`getRawPdfReportData for ${url}`);
+
+      return new Promise(async (resolve, reject) => {
+        const response = await this.getResponse(url).catch(reject);
+
+        response.on('data', chunk => data.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(data)));
       });
     }
 
@@ -117,10 +115,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async openPngReportingPanel() {
       log.debug('openPngReportingPanel');
       await PageObjects.share.openShareMenuItem('PNG Reports');
-    }
-
-    async clickDownloadReportButton(timeout) {
-      await testSubjects.click('downloadCompletedReportButton', timeout);
     }
 
     async clearToastNotifications() {
@@ -164,7 +158,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async setTimepickerInDataRange() {
       log.debug('Reporting:setTimepickerInDataRange');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      const fromTime = 'Sep 19, 2015 @ 06:31:44.000';
+      const toTime = 'Sep 19, 2015 @ 18:01:44.000';
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
