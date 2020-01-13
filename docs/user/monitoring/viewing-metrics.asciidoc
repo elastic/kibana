@@ -63,7 +63,7 @@ remote monitoring cluster, you must use credentials that are valid on both the
 
 --
 
-.. Create users that have the `monitoring_user` and `kibana_user` 
+.. Create users that have the `monitoring_user` and `kibana_admin` 
 {ref}/built-in-roles.html[built-in roles].
 
 . Open {kib} in your web browser. 

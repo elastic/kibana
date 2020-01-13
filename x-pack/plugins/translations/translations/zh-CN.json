@@ -10075,7 +10075,7 @@
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName": "* 全局（所有工作区）",
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription": "您无权查看所有可用工作区。",
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription": "权限不足",
-    "xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle": "kibana_user",
+    "xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle": "kibana_admin",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails": "授予对选定工作区所有功能的完全访问权限。",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay": "全部",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay": "全部",

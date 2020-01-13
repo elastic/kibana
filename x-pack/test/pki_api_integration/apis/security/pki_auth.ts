@@ -48,7 +48,7 @@ export default function({ getService }: FtrProviderContext) {
         .post('/_security/role_mapping/first_client_pki')
         .ca(CA_CERT)
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { dn: 'CN=first_client' } },
         })
@@ -107,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(response.body).to.eql({
         username: 'first_client',
-        roles: ['kibana_user'],
+        roles: ['kibana_admin'],
         full_name: null,
         email: null,
         enabled: true,

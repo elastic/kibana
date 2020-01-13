@@ -39,11 +39,11 @@ export const API_BASE_PATH = '/api/transform/';
 // - dest index: index, create_index (can be applied to a pattern e.g. df-*)
 //
 // In the UI additional privileges are required:
-// - kibana_user (builtin)
+// - kibana_admin (builtin)
 // - dest index: monitor (applied to df-*)
 // - cluster: monitor
 //
-// Note that users with kibana_user can see all Kibana index patterns and saved searches
+// Note that users with kibana_admin can see all Kibana index patterns and saved searches
 // in the source selection modal when creating a transform, but the wizard will trigger
 // error callouts when there are no sufficient privileges to read the actual source indices.
 

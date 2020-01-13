@@ -79,11 +79,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'customer one',
         email: 'flstest@elastic.com',
         save: true,
-        roles: ['kibana_user', 'a_viewssnrole'],
+        roles: ['kibana_admin', 'a_viewssnrole'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.customer1.roles).to.eql(['kibana_user', 'a_viewssnrole']);
+      expect(users.customer1.roles).to.eql(['kibana_admin', 'a_viewssnrole']);
     });
 
     it('should add new user customer2 ', async function() {
@@ -95,11 +95,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'customer two',
         email: 'flstest@elastic.com',
         save: true,
-        roles: ['kibana_user', 'a_view_no_ssn_role'],
+        roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.customer2.roles).to.eql(['kibana_user', 'a_view_no_ssn_role']);
+      expect(users.customer2.roles).to.eql(['kibana_admin', 'a_view_no_ssn_role']);
     });
 
     it('user customer1 should see ssn', async function() {

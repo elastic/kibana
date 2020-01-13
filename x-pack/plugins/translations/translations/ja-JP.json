@@ -9986,7 +9986,7 @@
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName": "* グローバル (すべてのスペース)",
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription": "利用可能なすべてのスペースを表示する権限がありません。",
     "xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription": "権限が不十分です",
-    "xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle": "kibana_user",
+    "xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle": "kibana_admin",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails": "選択されたスペースの全機能への完全アクセスを許可します。",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay": "すべて",
     "xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay": "すべて",
