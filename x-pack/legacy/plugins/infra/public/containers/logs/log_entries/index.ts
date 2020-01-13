@@ -97,11 +97,16 @@ const shouldFetchNewEntries = ({
   filterQuery,
   topCursor,
   bottomCursor,
+  startTimestamp,
+  endTimestamp,
 }: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
+  const shouldLoadWithNewTimestamps =
+    startTimestamp !== prevParams.startTimestamp || endTimestamp !== prevParams.endTimestamp;
+
   const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
   const shouldLoadAroundNewPosition =
     timeKey && (!topCursor || !bottomCursor || !timeKeyIsBetween(topCursor, bottomCursor, timeKey));
-  return shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
+  return shouldLoadWithNewTimestamps || shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
 };
 
 enum ShouldFetchMoreEntries {
