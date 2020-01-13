@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const ADD_REFERENCE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addReferenceDescription',
   {
-    defaultMessage: 'Add reference',
+    defaultMessage: 'Add reference URL',
   }
 );
 
 export const ADD_FALSE_POSITIVE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addFalsePositiveDescription',
   {
-    defaultMessage: 'Add false positive',
+    defaultMessage: 'Add false positive example',
   }
 );
 
@@ -52,5 +52,12 @@ export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError',
   {
     defaultMessage: 'At least one Technique is required with a Tactic.',
+  }
+);
+
+export const URL_FORMAT_INVALID = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
+  {
+    defaultMessage: 'Url is invalid format',
   }
 );

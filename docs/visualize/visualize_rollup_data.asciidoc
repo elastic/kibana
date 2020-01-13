@@ -6,7 +6,7 @@ beta[]
 
 You can visualize your rolled up data in a variety of charts, tables, maps, and
 more. Most visualizations support rolled up data, with the exception of
-Timelion, TSVB, and Vega visualizations.
+Timelion and Vega visualizations.
 
 To get started, go to *Management > Kibana > Index patterns.*
 If a rollup index is detected in the cluster, *Create index pattern*

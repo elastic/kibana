@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 interface Props {
   hasData: boolean;
-  height: string;
+  height?: string;
   loading?: boolean;
 }
 
@@ -31,7 +31,7 @@ export const LoadingWrapper: FC<Props> = ({ hasData, loading = false, height, ch
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}` }}
+          style={height !== undefined ? { height, marginTop: `-${height}` } : {}}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
