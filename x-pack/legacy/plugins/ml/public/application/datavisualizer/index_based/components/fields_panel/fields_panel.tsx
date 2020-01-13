@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -89,9 +90,20 @@ export const FieldsPanel: FC<Props> = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge>
-                <b>{fieldVisConfigs.length}</b>
-              </EuiBadge>
+              <EuiToolTip
+                position="top"
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.fieldsPanel.countDescription"
+                    defaultMessage="{cardsCount} {cardsCount, plural, one {field exists} other {fields exist}} in documents sampled"
+                    values={{ cardsCount: fieldVisConfigs.length }}
+                  />
+                }
+              >
+                <EuiBadge>
+                  <b>{fieldVisConfigs.length}</b>
+                </EuiBadge>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
@@ -99,7 +111,9 @@ export const FieldsPanel: FC<Props> = ({
                   id="xpack.ml.datavisualizer.fieldsPanel.totalFieldLabel"
                   defaultMessage="Total fields: {wrappedTotalFields}"
                   values={{
-                    wrappedTotalFields: <b>{populatedFieldCount}</b>,
+                    wrappedTotalFields: (
+                      <b>{showAllFields ? populatedFieldCount : totalFieldCount}</b>
+                    ),
                   }}
                 />
               </EuiText>
