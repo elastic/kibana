@@ -66,11 +66,23 @@ export class DynamicColorForm extends React.Component {
     let colorSelect;
     if (styleOptions.field && styleOptions.field.name) {
       const onColorChange = colorOptions => {
+        const newColorOptions = {
+          type: colorOptions.type,
+          color: colorOptions.color,
+        };
+        if (colorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
+          newColorOptions.useCustomColorRamp = colorOptions.useCustomColorMap;
+          newColorOptions.customColorRamp = colorOptions.customColorMap;
+        } else {
+          newColorOptions.useCustomColorPalette = colorOptions.useCustomColorMap;
+          newColorOptions.customColorPalette = colorOptions.customColorMap;
+        }
+
         const oldStyleOptions = { ...styleOptions };
 
-        if (oldStyleOptions.type === !colorOptions.type) {
+        if (oldStyleOptions.type === !newColorOptions.type) {
           delete oldStyleOptions.type;
-          if (colorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
+          if (newColorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
             delete oldStyleOptions.useCustomColorPalette;
             delete oldStyleOptions.customColorPalette;
           } else {
@@ -81,7 +93,7 @@ export class DynamicColorForm extends React.Component {
 
         const newOptions = {
           ...oldStyleOptions,
-          ...colorOptions,
+          ...newColorOptions,
         };
         onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
       };
@@ -100,8 +112,8 @@ export class DynamicColorForm extends React.Component {
             onChange={options => onColorChange(options)}
             colorMapType={COLOR_MAP_TYPE.ORDINAL}
             color={styleOptions.color}
-            customColorRamp={styleOptions.customColorRamp}
-            useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
+            customColorMap={styleOptions.customColorRamp}
+            useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
             compressed
           />
         );
@@ -119,8 +131,8 @@ export class DynamicColorForm extends React.Component {
             onChange={options => onColorChange(options)}
             colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
             color={styleOptions.color}
-            customColorPalette={styleOptions.customColorPalette}
-            useCustomColorPalette={_.get(styleOptions, 'useCustomColorPalette', false)}
+            customColorMap={styleOptions.customColorPalette}
+            useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
             compressed
           />
         );

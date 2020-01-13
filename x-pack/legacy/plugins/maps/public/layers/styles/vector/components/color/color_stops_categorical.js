@@ -39,7 +39,7 @@ export const ColorStopsCategorical = ({
 
     return count
       ? i18n.translate('xpack.maps.styles.colorStops.categoricalStop.noDupesWarningLabel', {
-          defaultMessage: 'Stops should have unique values',
+          defaultMessage: 'Stop values must be unique',
         })
       : null;
   };

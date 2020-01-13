@@ -17,40 +17,19 @@ export class ColorMapSelect extends Component {
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    let newState = null;
-    if (nextProps.customColorRamp !== prevState.prevPropsCustomColorRamp) {
-      newState = {
-        ...{
-          prevPropsCustomColorRamp: nextProps.customColorRamp, // reset tracker to latest value
-          customColorRamp: nextProps.customColorRamp, // reset customColorRamp to latest value
-        },
-      };
+    if (nextProps.customColorMap === prevState.prevPropsCustomColorMap) {
+      return null;
     }
 
-    if (nextProps.customColorPalette !== prevState.prevPropsCustomColorPalette) {
-      if (!newState) {
-        newState = {};
-      }
-      newState = {
-        ...newState,
-        ...{
-          prevPropsCustomColorPalette: nextProps.customColorPalette, // reset tracker to latest value
-          customColorPalette: nextProps.customColorPalette, // reset customColorRamp to latest value
-        },
-      };
-    }
-
-    return newState;
+    return {
+      prevPropsCustomColorMap: nextProps.customColorMap, // reset tracker to latest value
+      customColorMap: nextProps.customColorMap, // reset customColorMap to latest value
+    };
   }
 
   _onColorMapSelect = selectedValue => {
     const useCustomColorMap = selectedValue === CUSTOM_COLOR_MAP;
-    const newProps = {};
-    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      newProps.useCustomColorRamp = useCustomColorMap;
-    } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-      newProps.useCustomColorPalette = useCustomColorMap;
-    }
+    const newProps = { useCustomColorMap };
     newProps.color = useCustomColorMap ? null : selectedValue;
 
     this.props.onChange({
@@ -60,53 +39,43 @@ export class ColorMapSelect extends Component {
   };
 
   _onCustomColorMapChange = ({ colorStops, isInvalid }) => {
-    // Manage invalid custom color ramp in local state
+    // Manage invalid custom color map in local state
     if (isInvalid) {
-      const newState = {};
-      if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-        newState.customColorRamp = colorStops;
-      } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-        newState.customColorPalette = colorStops;
-      }
+      const newState = {
+        customColorMap: colorStops,
+      };
       this.setState(newState);
       return;
     }
 
     const newProps = {};
-    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      newProps.useCustomColorRamp = true;
-      newProps.customColorRamp = colorStops;
-    } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-      newProps.useCustomColorPalette = true;
-      newProps.customColorPalette = colorStops;
-    }
+    newProps.useCustomColorMap = true;
+    newProps.customColorMap = colorStops;
     newProps.type = this.props.colorMapType;
     this.props.onChange(newProps);
   };
 
   render() {
-    const { color, useCustomColorRamp, useCustomColorPalette } = this.props;
+    const { color, useCustomColorMap } = this.props;
 
     let colorStopsInput;
-    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      if (useCustomColorRamp) {
+    if (useCustomColorMap) {
+      if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
         colorStopsInput = (
           <Fragment>
             <EuiSpacer size="s" />
             <ColorStopsOrdinal
-              colorStops={this.state.customColorRamp}
+              colorStops={this.state.customColorMap}
               onChange={this._onCustomColorMapChange}
             />
           </Fragment>
         );
-      }
-    } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-      if (useCustomColorPalette) {
+      } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
         colorStopsInput = (
           <Fragment>
             <EuiSpacer size="s" />
             <ColorStopsCategorical
-              colorStops={this.state.customColorPalette}
+              colorStops={this.state.customColorMap}
               onChange={this._onCustomColorMapChange}
             />
           </Fragment>
@@ -115,7 +84,7 @@ export class ColorMapSelect extends Component {
     }
 
     let valueOfSelected;
-    const colorMapOptions = [
+    const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
         inputDisplay: this.props.customOptionLabel,
@@ -123,14 +92,10 @@ export class ColorMapSelect extends Component {
       ...this.props.colorMapOptions,
     ];
 
-    const useCustom =
-      this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL
-        ? useCustomColorRamp
-        : useCustomColorPalette;
-    if (useCustom) {
+    if (useCustomColorMap) {
       valueOfSelected = CUSTOM_COLOR_MAP;
     } else {
-      if (colorMapOptions.find(option => option.value === color)) {
+      if (colorMapOptionsWithCustom.find(option => option.value === color)) {
         valueOfSelected = color;
       } else {
         valueOfSelected = this.props.colorMapOptions[0].value;
@@ -141,7 +106,7 @@ export class ColorMapSelect extends Component {
     return (
       <Fragment>
         <EuiSuperSelect
-          options={colorMapOptions}
+          options={colorMapOptionsWithCustom}
           onChange={this._onColorMapSelect}
           valueOfSelected={valueOfSelected}
           hasDividers={true}
