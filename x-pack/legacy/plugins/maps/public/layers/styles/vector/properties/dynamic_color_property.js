@@ -21,7 +21,10 @@ import {
 import { VectorIcon } from '../components/legend/vector_icon';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
-import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+import {
+  isCategoricalStopsInvalid,
+  getOtherCategoryLabel,
+} from '../components/color/color_stops_utils';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -141,13 +144,21 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return [];
       }
 
-      return this._options.customColorPalette.map((config, index) => {
-        return {
+      const stops = [];
+      for (let i = 1; i < this._options.customColorPalette.length; i++) {
+        const config = this._options.customColorPalette[i];
+        stops.push({
           stop: config.stop,
           color: config.color,
-          isDefault: index === 0,
-        };
+          isDefault: false,
+        });
+      }
+      stops.push({
+        stop: this._options.customColorPalette[0].stop,
+        color: this._options.customColorPalette[0].color,
+        isDefault: true,
       });
+      return stops;
     }
 
     const fieldMeta = this.getFieldMeta();
@@ -163,9 +174,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
     const stops = [];
     for (let i = 0; i < maxLength; i++) {
+      const isDefault = i === maxLength - 1;
       stops.push({
-        stop: i === 0 ? '__DEFAULT__' : fieldMeta.categories[i - 1].key,
-        isDefault: i === 0,
+        stop: isDefault ? '__DEFAULT__' : fieldMeta.categories[i].key,
+        isDefault: isDefault,
         color: colors[i],
       });
     }
@@ -185,12 +197,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
     const mbStops = [];
-    for (let i = 1; i < paletteStops.length; i++) {
+    for (let i = 0; i < paletteStops.length - 1; i++) {
       const stop = paletteStops[i];
       mbStops.push(stop.stop);
       mbStops.push(stop.color);
     }
-    mbStops.push(paletteStops[0].color); //first color is default color
+    mbStops.push(paletteStops[paletteStops.length - 2].color); //last color is default color
     return ['match', ['get', this._options.field.name], ...mbStops];
   }
 
@@ -271,7 +283,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       if (config.isDefault) {
         textValue = (
           <EuiText size={'xs'}>
-            <EuiTextColor color="secondary">Default</EuiTextColor>
+            <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>
           </EuiText>
         );
       } else {

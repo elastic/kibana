@@ -140,5 +140,11 @@ export function isOrdinalStopsInvalid(colorStops) {
   });
 }
 
+export function getOtherCategoryLabel() {
+  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
+    defaultMessage: 'Other',
+  });
+}
+
 export const DEFAULT_CUSTOM_COLOR = '#FF0000';
 export const DEFAULT_NEXT_COLOR = '#00FF00';

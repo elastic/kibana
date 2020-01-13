@@ -11,6 +11,7 @@ import { EuiFieldText } from '@elastic/eui';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
+  getOtherCategoryLabel,
   DEFAULT_CUSTOM_COLOR,
   DEFAULT_NEXT_COLOR,
 } from './color_stops_utils';
@@ -55,12 +56,7 @@ export const ColorStopsCategorical = ({
             }
           )}
           value={stop}
-          placeholder={i18n.translate(
-            'xpack.maps.styles.colorStops.categoricalStop.otherCategoryPlaceholder',
-            {
-              defaultMessage: 'Other',
-            }
-          )}
+          placeholder={getOtherCategoryLabel()}
           disabled
           onChange={onStopChange}
           compressed
