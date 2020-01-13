@@ -37,13 +37,14 @@ export interface IExpressionFunction<Name extends string, Context, Arguments, Re
   /** The type of the Function */
   type?: TypeToString<UnwrapPromise<Return>>;
   /** The implementation of the Function */
-  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
+  fn(context: Context, args: Arguments, handlers: ExecutionHandlers): Return;
 }
 
-// TODO: Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
-// are not strongly defined.
-export interface FunctionHandlers {
-  [key: string]: (...args: any) => any;
+export interface ExecutionHandlers {
+  /**
+   * Adds
+   */
+  abortSignal?: AbortSignal;
 }
 
 export type AnyExpressionFunction = IExpressionFunction<string, any, any, any>;

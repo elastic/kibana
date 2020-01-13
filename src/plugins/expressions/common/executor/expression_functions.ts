@@ -19,7 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ArgumentType, ExpressionValue, AnyExpressionFunction, FunctionHandlers } from '../types';
+import { ArgumentType, ExpressionValue, AnyExpressionFunction, ExecutionHandlers } from '../types';
 import { IRegistry } from './types';
 import { Executor } from './executor';
 
@@ -82,7 +82,7 @@ export class ExpressionFunction {
   fn: (
     input: ExpressionValue,
     params: Record<string, any>,
-    handlers: FunctionHandlers
+    handlers: ExecutionHandlers
   ) => ExpressionValue;
 
   /**

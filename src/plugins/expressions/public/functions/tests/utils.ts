@@ -18,7 +18,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunction, FunctionHandlers } from '../../../common/types';
+import { AnyExpressionFunction, ExecutionHandlers } from '../../../common/types';
 
 // Takes a function spec and passes in default args,
 // overriding with any provided args.
@@ -28,6 +28,6 @@ export const functionWrapper = <T extends AnyExpressionFunction>(fnSpec: () => T
   return (
     context: object | null,
     args: Record<string, any> = {},
-    handlers: FunctionHandlers = {}
+    handlers: ExecutionHandlers = {}
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };

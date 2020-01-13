@@ -35,7 +35,7 @@ export { ArgumentType } from './arguments';
 export {
   IExpressionFunction as ExpressionFunction,
   AnyExpressionFunction,
-  FunctionHandlers,
+  ExecutionHandlers,
 } from './functions';
 
 export type ExpressionArgAST = string | boolean | number | ExpressionAST;
