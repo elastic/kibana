@@ -81,6 +81,7 @@ export class LegacyPlatformService {
       ...core,
       getStartServices: () => this.startDependencies,
       application: {
+        ...core.application,
         register: notSupported(`core.application.register()`),
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },

@@ -6,8 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-
-import { InfraSnapshotNode, InfraSnapshotNodePath } from '../../graphql/types';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -15,14 +13,15 @@ import {
   InfraWaffleMapNode,
 } from '../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
+import { SnapshotNodePath, SnapshotNode } from '../../../common/http_api/snapshot_api';
 
-export function createId(path: InfraSnapshotNodePath[]) {
+export function createId(path: SnapshotNodePath[]) {
   return path.map(p => p.value).join('/');
 }
 
 function findOrCreateGroupWithNodes(
   groups: InfraWaffleMapGroup[],
-  path: InfraSnapshotNodePath[]
+  path: SnapshotNodePath[]
 ): InfraWaffleMapGroupOfNodes {
   const id = path.length === 0 ? '__all__' : createId(path);
   /**
@@ -62,7 +61,7 @@ function findOrCreateGroupWithNodes(
 
 function findOrCreateGroupWithGroups(
   groups: InfraWaffleMapGroup[],
-  path: InfraSnapshotNodePath[]
+  path: SnapshotNodePath[]
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
   const lastPath = last(path);
@@ -85,7 +84,7 @@ function findOrCreateGroupWithGroups(
   };
 }
 
-export function createWaffleMapNode(node: InfraSnapshotNode): InfraWaffleMapNode {
+export function createWaffleMapNode(node: SnapshotNode): InfraWaffleMapNode {
   const nodePathItem = last(node.path);
   if (!nodePathItem) {
     throw new Error('There must be at least one node path item');
@@ -106,8 +105,8 @@ function withoutGroup(group: InfraWaffleMapGroup) {
   };
 }
 
-export function nodesToWaffleMap(nodes: InfraSnapshotNode[]): InfraWaffleMapGroup[] {
-  return nodes.reduce((groups: InfraWaffleMapGroup[], node: InfraSnapshotNode) => {
+export function nodesToWaffleMap(nodes: SnapshotNode[]): InfraWaffleMapGroup[] {
+  return nodes.reduce((groups: InfraWaffleMapGroup[], node: SnapshotNode) => {
     const waffleNode = createWaffleMapNode(node);
     if (node.path.length === 2) {
       const parentGroup = findOrCreateGroupWithNodes(

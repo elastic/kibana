@@ -21,7 +21,7 @@
     }
   ],
   "enabled": false,
-  "immutable": true,
+  "immutable": false,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
@@ -78,5 +78,6 @@
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
   "timeline_id": "timeline_id",
+  "timeline_title": "timeline_title",
   "version": 1
 }
