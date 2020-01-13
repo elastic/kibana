@@ -105,8 +105,8 @@ export const ColorStopsCategorical = ({
 ColorStopsCategorical.propTypes = {
   /**
    * Array of { stop, color }.
-   * Stops are numbers in strictly ascending order.
-   * The range is from the given stop number (inclusive) to the next stop number (exclusive).
+   * Stops are any strings
+   * Stops cannot include duplicates
    * Colors are color hex strings (3 or 6 character).
    */
   colorStops: PropTypes.arrayOf(
