@@ -10,8 +10,8 @@ import { ScaleType } from '@elastic/charts';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
+import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
@@ -160,12 +160,7 @@ export const MatrixHistogram = React.memo(
             <EuiSelect
               onChange={setSelectedChatOptionCallback}
               options={stackByOptions}
-              prepend={i18n.translate(
-                'xpack.siem.detectionEngine.signals.histogram.stackByOptions.stackByLabel',
-                {
-                  defaultMessage: 'Stack by',
-                }
-              )}
+              prepend={i18n.STACK_BY}
               value={selectedStackByOption?.value}
             />
           )}
