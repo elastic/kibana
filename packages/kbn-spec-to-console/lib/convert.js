@@ -22,7 +22,7 @@ const convertMethods = require('./convert/methods');
 const convertPaths = require('./convert/paths');
 const convertParts = require('./convert/parts');
 
-module.exports = spec => {
+module.exports = (spec, skipDeprecatedEndpoints) => {
   const result = {};
   /**
    * TODO:
@@ -30,7 +30,7 @@ module.exports = spec => {
    * the JSON doc specification has been updated. We need to update this script to take advantage
    * of the added information but it will also require updating console editor autocomplete.
    *
-   * Note: for now we exclude all deprecated patterns from the generated spec to prevent them
+   * Note: for now, in OSS, we exclude all deprecated patterns from the generated spec to prevent them
    * from being used in autocompletion.
    */
   Object.keys(spec).forEach(api => {
@@ -51,7 +51,9 @@ module.exports = spec => {
     const urlComponents = {};
 
     if (source.url.paths) {
-      const paths = source.url.paths.filter(path => !path.deprecated);
+      const paths = skipDeprecatedEndpoints
+        ? source.url.paths.filter(path => !path.deprecated)
+        : source.url.paths;
       patterns = convertPaths(paths);
       paths.forEach(pathsObject => {
         pathsObject.methods.forEach(method => methodSet.add(method));
