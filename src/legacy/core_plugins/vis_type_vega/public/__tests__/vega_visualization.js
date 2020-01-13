@@ -61,7 +61,6 @@ describe('VegaVisualizations', () => {
   beforeEach(
     ngMock.inject((Private, $injector) => {
       vegaVisualizationDependencies = {
-        es: npStart.plugins.data.__LEGACY.esClient,
         serviceSettings: $injector.get('serviceSettings'),
         core: {
           uiSettings: npStart.core.uiSettings,
@@ -72,6 +71,9 @@ describe('VegaVisualizations', () => {
               timefilter: {
                 timefilter: {},
               },
+            },
+            __LEGACY: {
+              esClient: npStart.plugins.data.__LEGACY.esClient,
             },
           },
         },
