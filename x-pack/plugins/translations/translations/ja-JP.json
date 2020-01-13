@@ -6080,8 +6080,6 @@
     "xpack.infra.logs.highlights.goToPreviousHighlightButtonLabel": "前のハイライトにスキップ",
     "xpack.infra.logs.index.settingsTabTitle": "設定",
     "xpack.infra.logs.index.streamTabTitle": "ストリーム",
-    "xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent": "機械学習ロボットがデータの収集を開始するまでしばらくお待ちください。",
-    "xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle": "成功！",
     "xpack.infra.logs.streamPage.documentTitle": "{previousTitle} | ストリーム",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel": "ログエントリーを検索",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.percentSeriesLabel": "パーセント",
