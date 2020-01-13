@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -27,18 +27,23 @@ import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
 import { AppRouter } from './ui';
-import { CapabilitiesService, Capabilities } from './capabilities';
+import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
+  AppBase,
   AppLeaveHandler,
-  LegacyApp,
   AppMount,
   AppMountDeprecated,
   AppMounter,
-  LegacyAppMounter,
-  Mounter,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdatableFields,
+  AppUpdater,
   InternalApplicationSetup,
   InternalApplicationStart,
+  LegacyApp,
+  LegacyAppMounter,
+  Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 
@@ -62,12 +67,13 @@ interface StartDeps {
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
 const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
   mount.length === 2;
-const filterAvailable = (map: Map<string, any>, capabilities: Capabilities) =>
-  new Map(
-    [...map].filter(
+function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
+  return new Map(
+    [...m].filter(
       ([id]) => capabilities.navLinks[id] === undefined || capabilities.navLinks[id] === true
     )
   );
+}
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') =>
@@ -75,17 +81,25 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
     .replace(/\/{2,}/g, '/') // Remove duplicate slashes
     .replace(/\/$/, ''); // Remove trailing slash
 
+const allApplicationsFilter = '__ALL__';
+
+interface AppUpdaterWrapper {
+  application: string;
+  updater: AppUpdater;
+}
+
 /**
  * Service that is responsible for registering new applications.
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App>();
-  private readonly legacyApps = new Map<string, LegacyApp>();
+  private readonly apps = new Map<string, App | LegacyApp>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appLeaveHandlers = new Map<string, AppLeaveHandler>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject();
   private registrationClosed = false;
   private history?: History<any>;
@@ -109,7 +123,21 @@ export class ApplicationService {
     this.navigate = (url, state) =>
       // basePath not needed here because `history` is configured with basename
       this.history ? this.history.push(url, state) : redirectTo(basePath.prepend(url));
+
     this.mountContext = context.createContextContainer();
+
+    const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
+      const updaterId = Symbol();
+      const subscription = updater$.subscribe(updater => {
+        const nextValue = new Map(this.statusUpdaters$.getValue());
+        nextValue.set(updaterId, {
+          application,
+          updater,
+        });
+        this.statusUpdaters$.next(nextValue);
+      });
+      this.subscriptions.push(subscription);
+    };
 
     return {
       registerMountContext: this.mountContext!.registerContext,
@@ -145,7 +173,17 @@ export class ApplicationService {
           this.currentAppId$.next(app.id);
           return unmount;
         };
-        this.apps.set(app.id, app);
+
+        const { updater$, ...appProps } = app;
+        this.apps.set(app.id, {
+          ...appProps,
+          status: app.status ?? AppStatus.accessible,
+          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          legacy: false,
+        });
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
+        }
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
@@ -158,15 +196,25 @@ export class ApplicationService {
 
         if (this.registrationClosed) {
           throw new Error('Applications cannot be registered after "setup"');
-        } else if (this.legacyApps.has(app.id)) {
-          throw new Error(`A legacy application is already registered with the id "${app.id}"`);
+        } else if (this.apps.has(app.id)) {
+          throw new Error(`An application is already registered with the id "${app.id}"`);
         } else if (basename && appRoute!.startsWith(basename)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
         const appBasePath = basePath.prepend(appRoute);
         const mount: LegacyAppMounter = () => redirectTo(appBasePath);
-        this.legacyApps.set(app.id, app);
+
+        const { updater$, ...appProps } = app;
+        this.apps.set(app.id, {
+          ...appProps,
+          status: app.status ?? AppStatus.accessible,
+          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          legacy: true,
+        });
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
+        }
         this.mounters.set(app.id, {
           appRoute,
           appBasePath,
@@ -174,6 +222,8 @@ export class ApplicationService {
           unmountBeforeMounting: true,
         });
       },
+      registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
+        registerStatusUpdater(allApplicationsFilter, appUpdater$),
     };
   }
 
@@ -190,16 +240,35 @@ export class ApplicationService {
       http,
     });
     const availableMounters = filterAvailable(this.mounters, capabilities);
+    const availableApps = filterAvailable(this.apps, capabilities);
+
+    const applications$ = new BehaviorSubject(availableApps);
+    this.statusUpdaters$
+      .pipe(
+        map(statusUpdaters => {
+          return new Map(
+            [...availableApps].map(([id, app]) => [
+              id,
+              updateStatus(app, [...statusUpdaters.values()]),
+            ])
+          );
+        })
+      )
+      .subscribe(apps => applications$.next(apps));
 
     return {
-      availableApps: filterAvailable(this.apps, capabilities),
-      availableLegacyApps: filterAvailable(this.legacyApps, capabilities),
+      applications$,
       capabilities,
       currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
+        const app = applications$.value.get(appId);
+        if (app && app.status !== AppStatus.accessible) {
+          // should probably redirect to the error page instead
+          throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
+        }
         if (await this.shouldNavigate(overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
@@ -259,6 +328,32 @@ export class ApplicationService {
   public stop() {
     this.stop$.next();
     this.currentAppId$.complete();
+    this.statusUpdaters$.complete();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }
+
+const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
+  let changes: Partial<AppUpdatableFields> = {};
+  statusUpdaters.forEach(wrapper => {
+    if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {
+      return;
+    }
+    const fields = wrapper.updater(app);
+    if (fields) {
+      changes = {
+        ...changes,
+        ...fields,
+        // status and navLinkStatus enums are ordered by reversed priority
+        // if multiple updaters wants to change these fields, we will always follow the priority order.
+        status: Math.max(changes.status ?? 0, fields.status ?? 0),
+        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
+      };
+    }
+  });
+  return {
+    ...app,
+    ...changes,
+  };
+};
