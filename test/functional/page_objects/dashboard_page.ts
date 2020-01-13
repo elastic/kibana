@@ -52,50 +52,50 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await PageObjects.common.navigateToApp('dashboard');
     }
 
-    async preserveCrossAppState() {
+    public async preserveCrossAppState() {
       const url = await browser.getCurrentUrl();
       await browser.get(url, false);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickFullScreenMode() {
+    public async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
       await testSubjects.exists('exitFullScreenModeLogo');
       await this.waitForRenderComplete();
     }
 
-    async fullScreenModeMenuItemExists() {
+    public async fullScreenModeMenuItemExists() {
       return await testSubjects.exists('dashboardFullScreenMode');
     }
 
-    async exitFullScreenTextButtonExists() {
+    public async exitFullScreenTextButtonExists() {
       return await testSubjects.exists('exitFullScreenModeText');
     }
 
-    async getExitFullScreenTextButton() {
+    public async getExitFullScreenTextButton() {
       return await testSubjects.find('exitFullScreenModeText');
     }
 
-    async exitFullScreenLogoButtonExists() {
+    public async exitFullScreenLogoButtonExists() {
       return await testSubjects.exists('exitFullScreenModeLogo');
     }
 
-    async getExitFullScreenLogoButton() {
+    public async getExitFullScreenLogoButton() {
       return await testSubjects.find('exitFullScreenModeLogo');
     }
 
-    async clickExitFullScreenLogoButton() {
+    public async clickExitFullScreenLogoButton() {
       await testSubjects.click('exitFullScreenModeLogo');
       await this.waitForRenderComplete();
     }
 
-    async clickExitFullScreenTextButton() {
+    public async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
       await this.waitForRenderComplete();
     }
 
-    async getDashboardIdFromCurrentUrl() {
+    public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
@@ -111,25 +111,25 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
      */
-    async onDashboardLandingPage() {
+    public async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
       return await testSubjects.exists('dashboardLandingPage', {
         timeout: 5000,
       });
     }
 
-    async expectExistsDashboardLandingPage() {
+    public async expectExistsDashboardLandingPage() {
       log.debug(`expectExistsDashboardLandingPage`);
       await testSubjects.existOrFail('dashboardLandingPage');
     }
 
-    async clickDashboardBreadcrumbLink() {
+    public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
       await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
       await this.expectExistsDashboardLandingPage();
     }
 
-    async gotoDashboardLandingPage() {
+    public async gotoDashboardLandingPage() {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
@@ -137,26 +137,26 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async clickClone() {
+    public async clickClone() {
       log.debug('Clicking clone');
       await testSubjects.click('dashboardClone');
     }
 
-    async getCloneTitle() {
+    public async getCloneTitle() {
       return await testSubjects.getAttribute('clonedDashboardTitle', 'value');
     }
 
-    async confirmClone() {
+    public async confirmClone() {
       log.debug('Confirming clone');
       await testSubjects.click('cloneConfirmButton');
     }
 
-    async cancelClone() {
+    public async cancelClone() {
       log.debug('Canceling clone');
       await testSubjects.click('cloneCancelButton');
     }
 
-    async setClonedDashboardTitle(title: string) {
+    public async setClonedDashboardTitle(title: string) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
@@ -164,7 +164,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * Asserts that the duplicate title warning is either displayed or not displayed.
      * @param { displayed: boolean }
      */
-    async expectDuplicateTitleWarningDisplayed({ displayed = true }) {
+    public async expectDuplicateTitleWarningDisplayed({ displayed = true }) {
       if (displayed) {
         await testSubjects.existOrFail('titleDupicateWarnMsg');
       } else {
@@ -176,7 +176,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
      * @param { displayed: boolean }
      */
-    async expectToolbarPaginationDisplayed({ displayed = true }) {
+    public async expectToolbarPaginationDisplayed({ displayed = true }) {
       const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
       if (displayed) {
         await Promise.all(subjects.map(async subj => await testSubjects.existOrFail(subj)));
@@ -185,7 +185,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async switchToEditMode() {
+    public async switchToEditMode() {
       log.debug('Switching to edit mode');
       await testSubjects.click('dashboardEditMode');
       // wait until the count of dashboard panels equals the count of toggle menu icons
@@ -198,34 +198,34 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
-    async getIsInViewMode() {
+    public async getIsInViewMode() {
       log.debug('getIsInViewMode');
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    async clickCancelOutOfEditMode() {
+    public async clickCancelOutOfEditMode() {
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
     }
 
-    async clickNewDashboard() {
+    public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
     }
 
-    async clickCreateDashboardPrompt() {
+    public async clickCreateDashboardPrompt() {
       await testSubjects.click('createDashboardPromptButton');
     }
 
-    async getCreateDashboardPromptExists() {
+    public async getCreateDashboardPromptExists() {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
-    async isOptionsOpen() {
+    public async isOptionsOpen() {
       log.debug('isOptionsOpen');
       return await testSubjects.exists('dashboardOptionsMenu');
     }
 
-    async openOptions() {
+    public async openOptions() {
       log.debug('openOptions');
       const isOpen = await this.isOptionsOpen();
       if (!isOpen) {
@@ -234,20 +234,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     // avoids any 'Object with id x not found' errors when switching tests.
-    async clearSavedObjectsFromAppLinks() {
+    public async clearSavedObjectsFromAppLinks() {
       await PageObjects.header.clickVisualize();
       await PageObjects.visualize.gotoLandingPage();
       await PageObjects.header.clickDashboard();
       await this.gotoDashboardLandingPage();
     }
 
-    async isMarginsOn() {
+    public async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
       return await testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
     }
 
-    async useMargins(on = true) {
+    public async useMargins(on = true) {
       await this.openOptions();
       const isMarginsOn = await this.isMarginsOn();
       if (isMarginsOn !== 'on') {
@@ -255,12 +255,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async gotoDashboardEditMode(dashboardName: string) {
+    public async gotoDashboardEditMode(dashboardName: string) {
       await this.loadSavedDashboard(dashboardName);
       await this.switchToEditMode();
     }
 
-    async renameDashboard(dashboardName: string) {
+    public async renameDashboard(dashboardName: string) {
       log.debug(`Naming dashboard ` + dashboardName);
       await testSubjects.click('dashboardRenameButton');
       await testSubjects.setValue('savedObjectTitle', dashboardName);
@@ -274,7 +274,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * @param dashboardName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
      */
-    async saveDashboard(
+    public async saveDashboard(
       dashboardName: string,
       saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
     ) {
@@ -293,12 +293,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return message;
     }
 
-    async cancelSave() {
+    public async cancelSave() {
       log.debug('Canceling save');
       await testSubjects.click('saveCancelButton');
     }
 
-    async clickSave() {
+    public async clickSave() {
       log.debug('DashboardPage.clickSave');
       await testSubjects.click('confirmSaveSavedObjectButton');
     }
@@ -308,7 +308,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      * @param dashboardTitle {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, waitDialogIsClosed: boolean}}
      */
-    async enterDashboardTitleAndClickSave(
+    public async enterDashboardTitleAndClickSave(
       dashboardTitle: string,
       saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
     ) {
@@ -332,14 +332,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async ensureDuplicateTitleCallout() {
+    public async ensureDuplicateTitleCallout() {
       await testSubjects.existOrFail('titleDupicateWarnMsg');
     }
 
     /**
      * @param dashboardTitle {String}
      */
-    async enterDashboardTitleAndPressEnter(dashboardTitle: string) {
+    public async enterDashboardTitleAndPressEnter(dashboardTitle: string) {
       await testSubjects.click('dashboardSaveMenuItem');
       const modalDialog = await testSubjects.find('savedObjectSaveModal');
 
@@ -352,7 +352,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
-    async loadSavedDashboard(dashboardName: string) {
+    public async loadSavedDashboard(dashboardName: string) {
       log.debug(`Load Saved Dashboard ${dashboardName}`);
 
       await this.gotoDashboardLandingPage();
@@ -366,13 +366,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
-    async getPanelTitles() {
+    public async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
       return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 
-    async getPanelDimensions() {
+    public async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
       return await Promise.all(
         panels.map(async panel => {
@@ -385,13 +385,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       );
     }
 
-    async getPanelCount() {
+    public async getPanelCount() {
       log.debug('getPanelCount');
       const panels = await testSubjects.findAll('embeddablePanel');
       return panels.length;
     }
 
-    getTestVisualizations() {
+    public getTestVisualizations() {
       return [
         { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
@@ -403,23 +403,23 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       ];
     }
 
-    getTestVisualizationNames() {
+    public getTestVisualizationNames() {
       return this.getTestVisualizations().map(visualization => visualization.name);
     }
 
-    getTestVisualizationDescriptions() {
+    public getTestVisualizationDescriptions() {
       return this.getTestVisualizations().map(visualization => visualization.description);
     }
 
-    async getDashboardPanels() {
+    public async getDashboardPanels() {
       return await testSubjects.findAll('embeddablePanel');
     }
 
-    async addVisualizations(visualizations: string[]) {
+    public async addVisualizations(visualizations: string[]) {
       await dashboardAddPanel.addVisualizations(visualizations);
     }
 
-    async setSaveAsNewCheckBox(checked: boolean) {
+    public async setSaveAsNewCheckBox(checked: boolean) {
       log.debug('saveAsNewCheckbox: ' + checked);
       let saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
       const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('aria-checked')) === 'true';
@@ -430,7 +430,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async setStoreTimeWithDashboard(checked: boolean) {
+    public async setStoreTimeWithDashboard(checked: boolean) {
       log.debug('Storing time with dashboard: ' + checked);
       let storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
       const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('aria-checked')) === 'true';
@@ -441,7 +441,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async getSharedItemsCount() {
+    public async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
       const element = await find.byCssSelector(`[${attributeName}]`);
@@ -452,14 +452,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       throw new Error('no element');
     }
 
-    async waitForRenderComplete() {
+    public async waitForRenderComplete() {
       log.debug('waitForRenderComplete');
       const count = await this.getSharedItemsCount();
       // eslint-disable-next-line radix
       await renderable.waitForRender(parseInt(count));
     }
 
-    async getSharedContainerData() {
+    public async getSharedContainerData() {
       log.debug('getSharedContainerData');
       const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
       return {
@@ -469,7 +469,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       };
     }
 
-    async getPanelSharedItemData() {
+    public async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
       const sharedItems = await find.allByCssSelector('[data-shared-item]');
       return await Promise.all(
@@ -482,17 +482,17 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       );
     }
 
-    async checkHideTitle() {
+    public async checkHideTitle() {
       log.debug('ensure that you can click on hide title checkbox');
       await this.openOptions();
       return await testSubjects.click('dashboardPanelTitlesCheckbox');
     }
 
-    async expectMissingSaveOption() {
+    public async expectMissingSaveOption() {
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
     }
 
-    async getNotLoadedVisualizations(vizList: string[]) {
+    public async getNotLoadedVisualizations(vizList: string[]) {
       const checkList = [];
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(

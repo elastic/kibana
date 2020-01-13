@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects }) {
     'header',
     'visualize',
     'discover',
-    'timepicker',
+    'timePicker',
   ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
