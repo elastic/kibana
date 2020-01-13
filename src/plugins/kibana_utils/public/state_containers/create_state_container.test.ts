@@ -113,6 +113,13 @@ test('multiple subscribers can subscribe', () => {
   expect(spy2.mock.calls[1][0]).toEqual({ a: 2 });
 });
 
+test('can create state container without transitions', () => {
+  const state = { foo: 'bar' };
+  const stateContainer = createStateContainer(state);
+  expect(stateContainer.transitions).toEqual({});
+  expect(stateContainer.get()).toEqual(state);
+});
+
 test('creates impure mutators from pure mutators', () => {
   const { mutators } = create(
     {},

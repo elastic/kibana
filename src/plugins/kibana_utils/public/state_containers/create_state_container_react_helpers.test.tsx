@@ -193,12 +193,7 @@ describe('hooks', () => {
 
   describe('useTransitions', () => {
     test('useTransitions hook returns mutations that can update state', () => {
-      const { store } = create<
-        {
-          cnt: number;
-        },
-        any
-      >(
+      const { store } = create(
         {
           cnt: 0,
         },
