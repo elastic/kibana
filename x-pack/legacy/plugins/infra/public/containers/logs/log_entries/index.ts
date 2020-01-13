@@ -7,7 +7,14 @@ import { useEffect, useState, useReducer, useCallback, useMemo } from 'react';
 import createContainer from 'constate';
 import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { LogEntriesResponse, LogEntry, LogEntriesRequest } from '../../../../common/http_api';
+import {
+  LogEntriesResponse,
+  LogEntry,
+  LogEntriesRequest,
+  LogEntriesCenteredRequest,
+  LogEntriesBeforeRequest,
+  LogEntriesAfterRequest,
+} from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 
@@ -133,20 +140,27 @@ const useFetchEntriesEffect = (
   );
 
   const runFetchNewEntriesRequest = async (override = {}) => {
-    if (!startTimestamp || !endTimestamp) {
+    if (!startTimestamp || !endTimestamp || !props.timeKey) {
       return;
     }
 
     dispatch({ type: Action.FetchingNewEntries });
 
     try {
-      const { data: payload } = await fetchLogEntries({
+      const fetchArgs: LogEntriesRequest = {
         sourceId: props.sourceId,
         startDate: startTimestamp,
         endDate: endTimestamp,
-        before: 'last', // TODO distinguish between first load and position-load
         query: props.filterQuery || undefined, // FIXME
-      });
+      };
+
+      if (props.timeKey) {
+        (fetchArgs as LogEntriesCenteredRequest).center = props.timeKey;
+      } else {
+        (fetchArgs as LogEntriesBeforeRequest).before = 'last';
+      }
+
+      const { data: payload } = await fetchLogEntries(fetchArgs);
       dispatch({ type: Action.ReceiveNewEntries, payload });
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
@@ -171,9 +185,9 @@ const useFetchEntriesEffect = (
       };
 
       if (getEntriesBefore) {
-        fetchArgs.before = state.topCursor;
+        (fetchArgs as LogEntriesBeforeRequest).before = state.topCursor;
       } else {
-        fetchArgs.after = state.bottomCursor;
+        (fetchArgs as LogEntriesAfterRequest).after = state.bottomCursor;
       }
 
       const { data: payload } = await fetchLogEntries(fetchArgs);

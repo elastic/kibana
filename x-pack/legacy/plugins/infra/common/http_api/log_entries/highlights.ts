@@ -9,7 +9,7 @@ import {
   logEntriesBaseRequestRT,
   logEntriesBeforeRequestRT,
   logEntriesAfterRequestRT,
-  logEntriesCenteredRT,
+  logEntriesCenteredRequestRT,
   logEntryRT,
 } from './entries';
 import { logEntriesCursorRT } from './common';
@@ -36,7 +36,7 @@ export const logEntriesHighlightsAfterRequestRT = rt.intersection([
 ]);
 
 export const logEntriesHighlightsCenteredRequestRT = rt.intersection([
-  logEntriesCenteredRT,
+  logEntriesCenteredRequestRT,
   highlightsRT,
 ]);
 

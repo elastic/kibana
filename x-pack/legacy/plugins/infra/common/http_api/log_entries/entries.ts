@@ -31,7 +31,7 @@ export const logEntriesAfterRequestRT = rt.intersection([
   rt.type({ after: rt.union([logEntriesCursorRT, rt.literal('first')]) }),
 ]);
 
-export const logEntriesCenteredRT = rt.intersection([
+export const logEntriesCenteredRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
   rt.type({ center: logEntriesCursorRT }),
 ]);
@@ -40,9 +40,13 @@ export const logEntriesRequestRT = rt.union([
   logEntriesBaseRequestRT,
   logEntriesBeforeRequestRT,
   logEntriesAfterRequestRT,
-  logEntriesCenteredRT,
+  logEntriesCenteredRequestRT,
 ]);
 
+export type LogEntriesBaseRequest = rt.TypeOf<typeof logEntriesBaseRequestRT>;
+export type LogEntriesBeforeRequest = rt.TypeOf<typeof logEntriesBeforeRequestRT>;
+export type LogEntriesAfterRequest = rt.TypeOf<typeof logEntriesAfterRequestRT>;
+export type LogEntriesCenteredRequest = rt.TypeOf<typeof logEntriesCenteredRequestRT>;
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 
 // JSON value
