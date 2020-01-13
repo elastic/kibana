@@ -33,7 +33,7 @@ export class DefaultNumberFormat extends IntlNumberFormat {
 
   getParamDefaults = () => ({
     minDecimals: 0,
-    maxDecimals: 3,
+    maxDecimals: this.getConfig?.('format:default_number:maxDecimals'),
   });
 
   getArguments = () => ({

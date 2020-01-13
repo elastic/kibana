@@ -39,7 +39,7 @@ describe('CurrencyFormat', () => {
     expect(formatter.convert(5150000)).toBe('€5,150,000');
   });
 
-  test('decimals', () => {
+  test('default currency decimals', () => {
     config['format:currency:defaultCurrency'] = 'USD';
 
     const formatter = new CurrencyFormat({}, getConfig);
@@ -47,11 +47,12 @@ describe('CurrencyFormat', () => {
     expect(formatter.convert(1234.56789)).toBe('$1,234.57');
   });
 
-  test('2 decimal places', () => {
+  test('config for decimal places', () => {
     config['format:currency:defaultCurrency'] = 'USD';
+    config['format:currency:maxDecimals'] = 0;
 
-    const formatter = new CurrencyFormat({ minDecimals: 2 }, getConfig);
+    const formatter = new CurrencyFormat({}, getConfig);
 
-    expect(formatter.convert(1234)).toBe('$1,234.00');
+    expect(formatter.convert(1234.5678)).toBe('$1,235');
   });
 });

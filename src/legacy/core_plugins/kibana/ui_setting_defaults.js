@@ -783,6 +783,26 @@ export function getUiSettingDefaults() {
         defaultMessage: `This locale will affect number formatting for most formatters.`,
       }),
     },
+    'format:default_number:maxDecimals': {
+      name: i18n.translate('kbn.advancedSettings.format.default_number.maxDecimalsNumber', {
+        defaultMessage: 'Number maximum decimal places',
+      }),
+      value: 3,
+      type: 'number',
+      description: i18n.translate(
+        'kbn.advancedSettings.format.default_number.maxDecimalsDescription',
+        {
+          defaultMessage: `Does not affect currency, bytes, or any formatter using numeral.js`,
+        }
+      ),
+    },
+    'format:currency:maxDecimals': {
+      name: i18n.translate('kbn.advancedSettings.format.currency.maxDecimalsNumber', {
+        defaultMessage: 'Currency maximum decimal places',
+      }),
+      value: 2,
+      type: 'number',
+    },
     'format:number:defaultLocale': {
       name: i18n.translate('kbn.advancedSettings.format.number.formattingLocaleTitle', {
         defaultMessage: 'Numeral.js formatting locale',

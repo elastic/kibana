@@ -41,7 +41,7 @@ export abstract class IntlNumberFormat extends FieldFormat {
 
     if (isNaN(val)) return '';
 
-    const defaultLocale = this.getConfig && this.getConfig('format:defaultLocale');
+    const defaultLocale = this.getConfig?.('format:defaultLocale');
     let locales;
     if (defaultLocale === 'detect') {
       locales = navigator.languages

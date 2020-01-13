@@ -37,12 +37,20 @@ describe('DefaultNumberFormat', () => {
     expect(formatter.convert(5150000)).toBe(`5,150,000`);
   });
 
-  test('number of decimals', () => {
+  test('decimal parameter', () => {
     // Node only contains locale data for `en`, so this is ignored. The fallback is tested here
     config['format:defaultLocale'] = 'ch-DE';
 
     const formatter = new DefaultNumberFormat({ minDecimals: 2 }, getConfig);
 
     expect(formatter.convert(5150000)).toBe(`5,150,000.00`);
+  });
+
+  test('max decimals setting', () => {
+    config['format:default_number:maxDecimals'] = 0;
+
+    const formatter = new DefaultNumberFormat({}, getConfig);
+
+    expect(formatter.convert(10.123456)).toBe(`10`);
   });
 });
