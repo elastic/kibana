@@ -17,12 +17,14 @@
  * under the License.
  */
 
-export function ShieldPageProvider({ getService, getPageObjects }) {
+
+import { delay } from 'bluebird';
+
+export function ShieldPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
   const provisionedEnv = getService('provisionedEnv');
-  const PageObjects = getPageObjects(['header', 'common', 'settings', 'visualize']);
 
   const regularLogin = async (user, pwd) => {
     await testSubjects.setValue('loginUsername', user);
@@ -56,13 +58,13 @@ export function ShieldPageProvider({ getService, getPageObjects }) {
 
     async logoutLogin(user, pwd) {
       await this.logout();
-      await PageObjects.common.sleep(3002);
+      await this.sleep(3002);
       await this.login(user, pwd);
     }
 
     async logout() {
       await testSubjects.click('userMenuButton');
-      await PageObjects.common.sleep(500);
+      await this.sleep(500);
       await testSubjects.click('logoutLink');
 
       // for new K7 app menu
@@ -70,12 +72,17 @@ export function ShieldPageProvider({ getService, getPageObjects }) {
       //     .findByCssSelector('#headerUserMenu')
       //     .click();
       //
-      // await PageObjects.common.sleep(1111);
+      // await sleep(1111);
       // await this.remote.setFindTimeout(defaultFindTimeout)
       //     .findByCssSelector('.euiLink[href="/logout"]')
       //     .click();
       log.debug('### found and clicked log out--------------------------');
-      await PageObjects.common.sleep(8002);
+      await this.sleep(8002);
+    }
+    async sleep(sleepMilliseconds) {
+      log.debug(`... sleep(${sleepMilliseconds}) start`);
+      await delay(sleepMilliseconds);
+      log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
   }
 
