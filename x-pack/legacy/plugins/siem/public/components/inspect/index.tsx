@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 const InspectContainer = styled.div<{ showInspect: boolean }>`
   .euiButtonIcon {
-    ${props => (props.showInspect ? 'opacity: 1;' : 'opacity: 0')}
+    ${props => (props.showInspect ? 'opacity: 1;' : 'opacity: 0;')}
     transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
 `;

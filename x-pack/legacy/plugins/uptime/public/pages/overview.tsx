@@ -21,6 +21,8 @@ import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '.
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
+import { store } from '../state';
+import { setEsKueryString } from '../state/actions';
 import { PageHeader } from './page_header';
 import {
   autocomplete as autocompleteNamespace,
@@ -67,7 +69,6 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  const filterQueryString = search || '';
   let error: any;
   let kueryString: string = '';
   try {
@@ -79,6 +80,7 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
     kueryString = '';
   }
 
+  const filterQueryString = search || '';
   let filters: any | undefined;
   try {
     if (filterQueryString || urlFilters) {
@@ -88,6 +90,15 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
         const ast = esKuery.fromKueryExpression(combinedFilterString);
         const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
+        const searchDSL: string = filterQueryString
+          ? JSON.stringify(
+              esKuery.toElasticsearchQuery(
+                esKuery.fromKueryExpression(filterQueryString),
+                staticIndexPattern
+              )
+            )
+          : '';
+        store.dispatch(setEsKueryString(searchDSL));
       }
     }
   } catch (e) {
@@ -113,13 +124,13 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup
+              {...sharedProps}
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
                 if (urlFilters !== filtersKuery) {
                   updateUrl({ filters: filtersKuery, pagination: '' });
                 }
               }}
-              variables={sharedProps}
             />
           </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
