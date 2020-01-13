@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
-import { scaleValue } from '../style_util';
+import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -29,6 +29,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getField() {
     return this._field;
+  }
+
+  getComputedFieldName() {
+    if (!this.isComplete()) {
+      return null;
+    }
+    return getComputedFieldName(this._styleName, this.getField().getName());
   }
 
   isDynamic() {
@@ -165,12 +172,12 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return null;
   }
 
-  _renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
     return (
       <CategoricalLegend
         style={this}
-        loadIsLinesOnly={loadIsLinesOnly}
-        loadIsPointsOnly={loadIsPointsOnly}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
         symbolId={symbolId}
       />
     );
@@ -180,11 +187,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return <OrdinalLegend style={this} />;
   }
 
-  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     if (this.isRanged()) {
       return this._renderRangeLegend();
     } else if (this.hasBreaks()) {
-      return this._renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId });
+      return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
     } else {
       return null;
     }

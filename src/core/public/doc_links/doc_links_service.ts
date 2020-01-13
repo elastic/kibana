@@ -115,6 +115,9 @@ export class DocLinksService {
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
         },
+        management: {
+          kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
+        },
       },
     });
   }
