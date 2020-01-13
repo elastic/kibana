@@ -87,17 +87,9 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <Memo(InspectButtonComponent)
-                                id=""
-                                inspect={null}
-                                inspectIndex={0}
-                                isInspected={false}
-                                loading={false}
-                                queryId="statItems"
-                                refetch={null}
-                                selectedInspectIndex={0}
-                                setIsInspected={[Function]}
-                                title="KPI HOSTS"
+                              <div
+                                className="sc-AykKF kJqrPG"
+                                data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
@@ -321,17 +313,9 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <Memo(InspectButtonComponent)
-                                id=""
-                                inspect={null}
-                                inspectIndex={0}
-                                isInspected={false}
-                                loading={false}
-                                queryId="statItems"
-                                refetch={null}
-                                selectedInspectIndex={0}
-                                setIsInspected={[Function]}
-                                title="KPI HOSTS"
+                              <div
+                                className="sc-AykKF kJqrPG"
+                                data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
@@ -625,17 +609,9 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             queryId="statItems"
                             title="KPI UNIQUE_PRIVATE_IPS"
                           >
-                            <Memo(InspectButtonComponent)
-                              id=""
-                              inspect={null}
-                              inspectIndex={0}
-                              isInspected={false}
-                              loading={false}
-                              queryId="statItems"
-                              refetch={null}
-                              selectedInspectIndex={0}
-                              setIsInspected={[Function]}
-                              title="KPI UNIQUE_PRIVATE_IPS"
+                            <div
+                              className="sc-AykKF gblzeK"
+                              data-test-subj="transparent-inspect-container"
                             >
                               <EuiButtonIcon
                                 aria-label="Inspect"

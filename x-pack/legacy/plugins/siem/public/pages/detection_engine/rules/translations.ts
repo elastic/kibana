@@ -207,15 +207,15 @@ export const COLUMN_ACTIVATE = i18n.translate(
 );
 
 export const DEFINE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.defineRuleTitle', {
-  defaultMessage: 'Define Rule',
+  defaultMessage: 'Define rule',
 });
 
 export const ABOUT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.aboutRuleTitle', {
-  defaultMessage: 'About Rule',
+  defaultMessage: 'About rule',
 });
 
 export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.scheduleRuleTitle', {
-  defaultMessage: 'Schedule Rule',
+  defaultMessage: 'Schedule rule',
 });
 
 export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
