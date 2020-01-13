@@ -407,4 +407,97 @@ describe('Task Runner', () => {
       }
     `);
   });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
+    taskRunnerFactoryInitializerParams.getServices.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
+    savedObjectsClient.get.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+  });
 });
