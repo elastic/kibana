@@ -133,7 +133,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -157,7 +157,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -222,12 +222,15 @@ describe('http service', () => {
       const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
 
-      await registerAuth((req, res, toolkit) =>
-        toolkit.authenticated({ requestHeaders: authHeaders })
-      );
+      registerAuth((req, res, toolkit) => toolkit.authenticated({ requestHeaders: authHeaders }));
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 
@@ -247,7 +250,12 @@ describe('http service', () => {
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 

@@ -29,6 +29,27 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
     });
 
+    it('applies filters for multiple fields', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.selectFilterItems({
+        location: ['mpls'],
+        port: ['5678'],
+        scheme: ['http'],
+      });
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+    });
+
     it('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
@@ -63,6 +84,28 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
+    });
+
+    describe('snapshot counts', () => {
+      it('updates the snapshot count when status filter is set to down', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('down');
+        const counts = await pageObjects.uptime.getSnapshotCount();
+        expect(counts).to.eql({ up: '0', down: '7' });
+      });
+
+      it('updates the snapshot count when status filter is set to up', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('up');
+        const counts = await pageObjects.uptime.getSnapshotCount();
+        expect(counts).to.eql({ up: '93', down: '0' });
+      });
     });
   });
 };

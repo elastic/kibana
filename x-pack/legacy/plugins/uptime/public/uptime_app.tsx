@@ -5,25 +5,25 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPage } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxProvider } from 'react-redux';
-import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
 import { PluginsStart } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
-import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
-import { UptimeDatePicker, CommonlyUsedRange } from './components/functional/uptime_date_picker';
+import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { getTitle } from './lib/helper/get_title';
 import { store } from './state';
 import { setBasePath, triggerAppRefresh } from './state/actions';
+import { PageRouter } from './routes';
 
 export interface UptimeAppColors {
   danger: string;
@@ -93,7 +93,6 @@ const Application = (props: UptimeAppProps) => {
     };
   }
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
-  const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     renderGlobalHelpControls();
@@ -146,7 +145,7 @@ const Application = (props: UptimeAppProps) => {
       isInfraAvailable,
       isLogsAvailable,
       refreshApp,
-      setHeadingText,
+      commonlyUsedRanges,
     };
   };
 
@@ -166,49 +165,11 @@ const Application = (props: UptimeAppProps) => {
                       <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>
-                            <EuiFlexGroup
-                              alignItems="center"
-                              justifyContent="spaceBetween"
-                              gutterSize="s"
-                            >
-                              <EuiFlexItem>
-                                <EuiTitle>
-                                  <h1>{headingText}</h1>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <UptimeDatePicker
-                                  refreshApp={refreshApp}
-                                  commonlyUsedRanges={commonlyUsedRanges}
-                                  {...rootRouteProps}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                            <EuiSpacer size="s" />
-                            <Switch>
-                              <Route
-                                path="/monitor/:monitorId/:location?"
-                                render={routerProps => (
-                                  <MonitorPage
-                                    query={client.query}
-                                    setBreadcrumbs={setBreadcrumbs}
-                                    {...routerProps}
-                                  />
-                                )}
-                              />
-                              <Route
-                                path="/"
-                                render={routerProps => (
-                                  <OverviewPage
-                                    autocomplete={plugins.data.autocomplete}
-                                    basePath={basePath}
-                                    setBreadcrumbs={setBreadcrumbs}
-                                    {...routerProps}
-                                  />
-                                )}
-                              />
-                              <Route component={NotFoundPage} />
-                            </Switch>
+                            <PageRouter
+                              autocomplete={plugins.data.autocomplete}
+                              basePath={basePath}
+                              setBreadcrumbs={setBreadcrumbs}
+                            />
                           </main>
                         </EuiPage>
                       </UptimeSettingsContext.Provider>

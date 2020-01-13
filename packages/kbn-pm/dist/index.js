@@ -4500,6 +4500,14 @@ var certs_1 = __webpack_require__(422);
 exports.CA_CERT_PATH = certs_1.CA_CERT_PATH;
 exports.ES_KEY_PATH = certs_1.ES_KEY_PATH;
 exports.ES_CERT_PATH = certs_1.ES_CERT_PATH;
+exports.ES_P12_PATH = certs_1.ES_P12_PATH;
+exports.ES_P12_PASSWORD = certs_1.ES_P12_PASSWORD;
+exports.ES_EMPTYPASSWORD_P12_PATH = certs_1.ES_EMPTYPASSWORD_P12_PATH;
+exports.ES_NOPASSWORD_P12_PATH = certs_1.ES_NOPASSWORD_P12_PATH;
+exports.KBN_KEY_PATH = certs_1.KBN_KEY_PATH;
+exports.KBN_CERT_PATH = certs_1.KBN_CERT_PATH;
+exports.KBN_P12_PATH = certs_1.KBN_P12_PATH;
+exports.KBN_P12_PASSWORD = certs_1.KBN_P12_PASSWORD;
 var run_1 = __webpack_require__(423);
 exports.run = run_1.run;
 exports.createFailError = run_1.createFailError;
@@ -36986,6 +36994,14 @@ const path_1 = __webpack_require__(16);
 exports.CA_CERT_PATH = path_1.resolve(__dirname, '../certs/ca.crt');
 exports.ES_KEY_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.key');
 exports.ES_CERT_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.crt');
+exports.ES_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.p12');
+exports.ES_P12_PASSWORD = 'storepass';
+exports.ES_EMPTYPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_emptypassword.p12');
+exports.ES_NOPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_nopassword.p12');
+exports.KBN_KEY_PATH = path_1.resolve(__dirname, '../certs/kibana.key');
+exports.KBN_CERT_PATH = path_1.resolve(__dirname, '../certs/kibana.crt');
+exports.KBN_P12_PATH = path_1.resolve(__dirname, '../certs/kibana.p12');
+exports.KBN_P12_PASSWORD = 'storepass';
 
 
 /***/ }),
@@ -37054,8 +37070,8 @@ const tooling_log_1 = __webpack_require__(415);
 const fail_1 = __webpack_require__(425);
 const flags_1 = __webpack_require__(426);
 async function run(fn, options = {}) {
+    var _a;
     const flags = flags_1.getFlags(process.argv.slice(2), options);
-    const allowUnexpected = options.flags ? options.flags.allowUnexpected : false;
     if (flags.help) {
         process.stderr.write(flags_1.getHelp(options));
         process.exit(1);
@@ -37098,7 +37114,7 @@ async function run(fn, options = {}) {
     const unhookExit = exit_hook_1.default(doCleanup);
     const cleanupTasks = [unhookExit];
     try {
-        if (!allowUnexpected && flags.unexpected.length) {
+        if (!((_a = options.flags) === null || _a === void 0 ? void 0 : _a.allowUnexpected) && flags.unexpected.length) {
             throw fail_1.createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
         }
         try {
@@ -37218,7 +37234,7 @@ const path_1 = __webpack_require__(16);
 const dedent_1 = tslib_1.__importDefault(__webpack_require__(14));
 const getopts_1 = tslib_1.__importDefault(__webpack_require__(427));
 function getFlags(argv, options) {
-    const unexpected = [];
+    const unexpectedNames = new Set();
     const flagOpts = options.flags || {};
     const { verbose, quiet, silent, debug, help, _, ...others } = getopts_1.default(argv, {
         string: flagOpts.string,
@@ -37229,13 +37245,55 @@ function getFlags(argv, options) {
         },
         default: flagOpts.default,
         unknown: (name) => {
-            unexpected.push(name);
-            if (options.flags && options.flags.allowUnexpected) {
-                return true;
-            }
-            return false;
+            unexpectedNames.add(name);
+            return flagOpts.guessTypesForUnexpectedFlags;
         },
     });
+    const unexpected = [];
+    for (const unexpectedName of unexpectedNames) {
+        const matchingArgv = [];
+        iterArgv: for (const [i, v] of argv.entries()) {
+            for (const prefix of ['--', '-']) {
+                if (v.startsWith(prefix)) {
+                    // -/--name=value
+                    if (v.startsWith(`${prefix}${unexpectedName}=`)) {
+                        matchingArgv.push(v);
+                        continue iterArgv;
+                    }
+                    // -/--name (value possibly follows)
+                    if (v === `${prefix}${unexpectedName}`) {
+                        matchingArgv.push(v);
+                        // value follows -/--name
+                        if (argv.length > i + 1 && !argv[i + 1].startsWith('-')) {
+                            matchingArgv.push(argv[i + 1]);
+                        }
+                        continue iterArgv;
+                    }
+                }
+            }
+            // special case for `--no-{flag}` disabling of boolean flags
+            if (v === `--no-${unexpectedName}`) {
+                matchingArgv.push(v);
+                continue iterArgv;
+            }
+            // special case for shortcut flags formatted as `-abc` where `a`, `b`,
+            // and `c` will be three separate unexpected flags
+            if (unexpectedName.length === 1 &&
+                v[0] === '-' &&
+                v[1] !== '-' &&
+                !v.includes('=') &&
+                v.includes(unexpectedName)) {
+                matchingArgv.push(`-${unexpectedName}`);
+                continue iterArgv;
+            }
+        }
+        if (matchingArgv.length) {
+            unexpected.push(...matchingArgv);
+        }
+        else {
+            throw new Error(`unable to find unexpected flag named "${unexpectedName}"`);
+        }
+    }
     return {
         verbose,
         quiet,
@@ -37249,8 +37307,9 @@ function getFlags(argv, options) {
 }
 exports.getFlags = getFlags;
 function getHelp(options) {
+    var _a, _b;
     const usage = options.usage || `node ${path_1.relative(process.cwd(), process.argv[1])}`;
-    const optionHelp = (dedent_1.default((options.flags && options.flags.help) || '') +
+    const optionHelp = (dedent_1.default(((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.flags) === null || _b === void 0 ? void 0 : _b.help) || '') +
         '\n' +
         dedent_1.default `
       --verbose, -v      Log verbosely
@@ -58209,6 +58268,7 @@ function getProjectPaths({
 
   if (!ossOnly) {
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/legacy/plugins/*'));
   }
 
