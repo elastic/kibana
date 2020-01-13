@@ -95,13 +95,13 @@ export const signalRulesAlertType = ({
         currentStatusSavedObject = await services.savedObjectsClient.create<
           IRuleSavedAttributesSavedObjectAttributes
         >(ruleStatusSavedObjectType, {
-          alertId: `${alertId}`, // do a search for this id.
+          alertId, // do a search for this id.
           statusDate: date,
           status: 'executing',
-          lastFailureAt: '1970-01-01T00:00:00Z', // default to unix epoch time
-          lastSuccessAt: '1970-01-01T00:00:00Z',
-          lastFailureMessage: '',
-          lastSuccessMessage: '',
+          lastFailureAt: null,
+          lastSuccessAt: null,
+          lastFailureMessage: null,
+          lastSuccessMessage: null,
         });
       } else {
         // update 0th to executing.
@@ -221,7 +221,7 @@ export const signalRulesAlertType = ({
             currentStatusSavedObject.attributes.status = 'failed';
             currentStatusSavedObject.attributes.statusDate = sDate;
             currentStatusSavedObject.attributes.lastFailureAt = sDate;
-            currentStatusSavedObject.attributes.lastFailureMessage = 'There was an error!!';
+            currentStatusSavedObject.attributes.lastFailureMessage = `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`;
             // current status is failing
             await services.savedObjectsClient.update(
               ruleStatusSavedObjectType,
@@ -253,7 +253,7 @@ export const signalRulesAlertType = ({
           currentStatusSavedObject.attributes.status = 'failed';
           currentStatusSavedObject.attributes.statusDate = sDate;
           currentStatusSavedObject.attributes.lastFailureAt = sDate;
-          currentStatusSavedObject.attributes.lastFailureMessage = JSON.stringify(err, null, 4);
+          currentStatusSavedObject.attributes.lastFailureMessage = err.message;
           // current status is failing
           await services.savedObjectsClient.update(
             ruleStatusSavedObjectType,
@@ -283,7 +283,7 @@ export const signalRulesAlertType = ({
         currentStatusSavedObject.attributes.status = 'failed';
         currentStatusSavedObject.attributes.statusDate = sDate;
         currentStatusSavedObject.attributes.lastFailureAt = sDate;
-        currentStatusSavedObject.attributes.lastFailureMessage = JSON.stringify(exception, null, 4);
+        currentStatusSavedObject.attributes.lastFailureMessage = exception.message;
         // current status is failing
         await services.savedObjectsClient.update(
           ruleStatusSavedObjectType,

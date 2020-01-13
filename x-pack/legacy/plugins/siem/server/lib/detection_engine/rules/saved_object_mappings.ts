@@ -15,19 +15,19 @@ export const ruleStatusSavedObjectMappings: {
   [ruleStatusSavedObjectType]: {
     properties: {
       alertId: {
-        type: 'text',
+        type: 'keyword',
       },
       status: {
         type: 'keyword',
       },
       statusDate: {
-        type: 'keyword', // TODO: CHANGE THIS TO DATE LATER
+        type: 'date',
       },
       lastFailureAt: {
-        type: 'keyword', // TODO: CHANGE THIS TO DATE LATER
+        type: 'date',
       },
       lastSuccessAt: {
-        type: 'keyword', // TODO: CHANGE THIS TO DATE LATER
+        type: 'date',
       },
       lastFailureMessage: {
         type: 'text',

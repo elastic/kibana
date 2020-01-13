@@ -48,18 +48,18 @@ export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
             id,
             ruleId,
           });
-          const ruleStatuses = await savedObjectsClient.find<
-            IRuleSavedAttributesSavedObjectAttributes
-          >({
-            type: ruleStatusSavedObjectType,
-            perPage: 6,
-            search: `${rule?.id}`,
-            searchFields: ['alertId'],
-          });
-          ruleStatuses.saved_objects.forEach(async obj =>
-            savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
-          );
           if (rule != null) {
+            const ruleStatuses = await savedObjectsClient.find<
+              IRuleSavedAttributesSavedObjectAttributes
+            >({
+              type: ruleStatusSavedObjectType,
+              perPage: 6,
+              search: rule.id,
+              searchFields: ['alertId'],
+            });
+            ruleStatuses.saved_objects.forEach(async obj =>
+              savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+            );
             return transformOrBulkError(idOrRuleIdOrUnknown, rule);
           } else {
             return getIdBulkError({ id, ruleId });

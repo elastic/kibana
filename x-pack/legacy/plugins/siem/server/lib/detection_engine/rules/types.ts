@@ -44,10 +44,10 @@ export interface RuleAlertType extends Alert {
 export interface IRuleStatusAttributes {
   alertId: string; // created alert id.
   statusDate: string;
-  lastFailureAt: string;
-  lastFailureMessage: string;
-  lastSuccessAt: string;
-  lastSuccessMessage: string;
+  lastFailureAt: string | null | undefined;
+  lastFailureMessage: string | null | undefined;
+  lastSuccessAt: string | null | undefined;
+  lastSuccessMessage: string | null | undefined;
   status: RuleStatusString;
 }
 

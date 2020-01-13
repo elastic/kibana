@@ -54,7 +54,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
             perPage: 5,
             sortField: 'statusDate',
             sortOrder: 'desc',
-            search: `${rule.id}`,
+            search: rule.id,
             searchFields: ['alertId'],
           });
           return results;

@@ -46,18 +46,18 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
         id,
         ruleId,
       });
-      const ruleStatuses = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>(
-        {
+      if (rule != null) {
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
           type: ruleStatusSavedObjectType,
           perPage: 5,
-          search: `${rule?.id}`,
+          search: rule.id,
           searchFields: ['alertId'],
-        }
-      );
-      ruleStatuses.saved_objects.forEach(async obj =>
-        savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
-      );
-      if (rule != null) {
+        });
+        ruleStatuses.saved_objects.forEach(async obj =>
+          savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+        );
         return transformOrError(rule, ruleStatuses.saved_objects[0]);
       } else {
         return getIdError({ id, ruleId });

@@ -64,7 +64,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         perPage: 6,
         sortField: 'statusDate',
         sortOrder: 'desc',
-        search: `${id}`,
+        search: id,
         searchFields: ['alertId'],
       });
       const toDisplay =

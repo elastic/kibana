@@ -127,7 +127,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           IRuleSavedAttributesSavedObjectAttributes
         >({
           type: ruleStatusSavedObjectType,
-          perPage: 10,
+          perPage: 1,
           sortField: 'statusDate',
           sortOrder: 'desc',
           search: `${createdRule.id}`,
