@@ -5,3 +5,4 @@
  */
 
 export * from './search_result';
+export * from './search_box';
