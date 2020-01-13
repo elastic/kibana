@@ -34,6 +34,6 @@ export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promi
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };

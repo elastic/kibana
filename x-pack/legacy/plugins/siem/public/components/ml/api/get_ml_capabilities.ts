@@ -31,6 +31,6 @@ export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabili
     signal,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };

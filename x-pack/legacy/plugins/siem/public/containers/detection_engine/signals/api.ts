@@ -42,7 +42,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -66,7 +66,7 @@ export const updateSignalStatus = async ({
     signal,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -83,7 +83,7 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
     asResponse: true,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -100,7 +100,7 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
     asResponse: true,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -117,6 +117,6 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Signa
     asResponse: true,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };

@@ -35,7 +35,7 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
     signal,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -78,7 +78,7 @@ export const fetchRules = async ({
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -96,7 +96,7 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     signal,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -118,7 +118,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
     )
   );
 
-  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  await Promise.all(responses.map(response => throwIfNotOk(response.response)));
   return responses.map(response => response.body!);
 };
 
@@ -140,7 +140,7 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> =>
     )
   );
 
-  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  await Promise.all(responses.map(response => throwIfNotOk(response.response)));
   return responses.map(response => response.body!);
 };
 
@@ -172,6 +172,6 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
     )
   );
 
-  await Promise.all(responses.map(response => throwIfNotOk(response.response!)));
+  await Promise.all(responses.map(response => throwIfNotOk(response.response)));
   return responses.map(response => response.body!);
 };

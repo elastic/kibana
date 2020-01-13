@@ -24,7 +24,11 @@ export const getIndexPatterns = async (): Promise<IndexPatternSavedObject[]> => 
   return response.savedObjects;
 };
 
-export const throwIfNotOk = async (response: Response): Promise<void> => {
+export const throwIfNotOk = async (response?: Response): Promise<void> => {
+  if (!response) {
+    throw new ToasterErrors([i18n.NETWORK_ERROR]);
+  }
+
   if (!response.ok) {
     const body = await parseJsonFromBody(response);
     if (body != null && body.message) {

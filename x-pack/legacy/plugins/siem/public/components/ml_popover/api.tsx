@@ -43,7 +43,7 @@ export const checkRecognizer = async ({
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -65,7 +65,7 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
 
@@ -102,7 +102,7 @@ export const setupMlJob = async ({
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   const json = response.body!;
   throwIfErrorAttachedToSetup(json, jobIdErrorFilter);
 
@@ -136,7 +136,7 @@ export const startDatafeeds = async ({
     }
   );
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   const json = await response.body!;
   throwIfErrorAttached(json, datafeedIds);
 
@@ -166,7 +166,7 @@ export const stopDatafeeds = async ({
     }
   );
 
-  await throwIfNotOk(stopDatafeedsResponse.response!);
+  await throwIfNotOk(stopDatafeedsResponse.response);
   const stopDatafeedsResponseJson = await stopDatafeedsResponse.body!;
 
   const datafeedPrefix = 'datafeed-';
@@ -187,7 +187,7 @@ export const stopDatafeeds = async ({
     }
   );
 
-  await throwIfNotOk(closeJobsResponse.response!);
+  await throwIfNotOk(closeJobsResponse.response);
   return [stopDatafeedsResponseJson, closeJobsResponse.body!];
 };
 
@@ -209,6 +209,6 @@ export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]>
     signal,
   });
 
-  await throwIfNotOk(response.response!);
+  await throwIfNotOk(response.response);
   return response.body!;
 };
