@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shareableWorkpads } from './shareables';
-import { CoreSetup } from '../shim';
+import { initializeESFieldsRoute } from './es_fields';
+import { RouteInitializerDeps } from '..';
 
-export function routes(setup: CoreSetup): void {
-  shareableWorkpads(setup.http.route);
+export function initESFieldsRoutes(deps: RouteInitializerDeps) {
+  initializeESFieldsRoute(deps);
 }
