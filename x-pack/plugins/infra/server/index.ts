@@ -8,6 +8,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { config, InfraConfig, InfraServerPlugin } from './plugin';
 
 export { config, InfraConfig };
+export const APP_ID = 'infra';
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

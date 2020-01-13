@@ -7,6 +7,7 @@
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from 'hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { initInfraServer } from './infra_server';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
@@ -25,6 +26,7 @@ import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
 import { InfraStaticSourceConfiguration } from './lib/sources/types';
+import { APP_ID } from '.';
 
 export const config = {
   schema: schema.object({
@@ -41,6 +43,10 @@ export type InfraConfig = TypeOf<typeof config.schema>;
 export interface KbnServer extends Server {
   usage: any;
 }
+
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
 
 export interface InfraPluginSetup {
   defineInternalSourceConfiguration: (
@@ -119,6 +125,14 @@ export class InfraServerPlugin {
 
     plugins.features.registerFeature(METRICS_FEATURE);
     plugins.features.registerFeature(LOGS_FEATURE);
+
+    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+      {
+        path: `/app/${APP_ID}#/logs`,
+        label: logsSampleDataLinkLabel,
+        icon: 'logsApp',
+      },
+    ]);
 
     initInfraServer(this.libs);
 
