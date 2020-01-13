@@ -1,9 +1,10 @@
 ## Common dictionary
 Plugin - a piece of software expressing specific subject of the business unit within the code.
+
 Platform - a set of plugins required to run all other Kibana plugins.
 
 ## New platform principles
-### Explicit business domains separation.
+### Explicit business domains separation
 The plugins code should be structured on the top level to reflect business units.
 ```js
 // GOOD
@@ -19,13 +20,13 @@ src/plugins
   - apm
   - search
 ```
-### Explicit dependencies.
+### Explicit dependencies
 Each plugin should declare dependencies on the other plugins explicitly. Plugins cannot have circular dependencies. Plugins shouldn't have hidden dependencies.
 ```json
 "requiredPlugins": ["b"],
 "optionalPlugins": ["c"],
 ```
-### Explicit API declaration.
+### Explicit API declaration
 Each plugins defines API & extension points explicitly. Any other API is not declared explicitly as public, should be considered private.
 ```js
 // GOOD
