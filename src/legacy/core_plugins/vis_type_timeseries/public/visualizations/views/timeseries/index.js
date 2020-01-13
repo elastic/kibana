@@ -155,11 +155,10 @@ export const TimeSeries = ({
           ) => {
             const stackAccessors = getStackAccessors(stack);
             const isPercentage = stack === STACKED_OPTIONS.PERCENT;
-            const key = `${id}-${label}-${sortIndex}`;
             if (bars.show) {
               return (
                 <BarSeriesDecorator
-                  key={key}
+                  key={id}
                   seriesId={id}
                   seriesGroupId={groupId}
                   name={label.toString()}
@@ -182,7 +181,7 @@ export const TimeSeries = ({
             if (lines.show) {
               return (
                 <AreaSeriesDecorator
-                  key={key}
+                  key={id}
                   seriesId={id}
                   seriesGroupId={groupId}
                   name={label.toString()}
