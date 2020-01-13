@@ -60,7 +60,7 @@ export class Plugin {
             ],
             read: ['config'],
           },
-          ui: ['show'],
+          ui: ['show', 'crud'],
         },
         read: {
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],

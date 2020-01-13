@@ -234,7 +234,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.options;
+    const { maxSize } = this.props.setting.validation;
     try {
       const base64Image = await this.getImageAsBase64(file);
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
