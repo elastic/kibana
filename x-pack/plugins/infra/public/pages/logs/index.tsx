@@ -25,7 +25,7 @@ import {
 } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { useKibana } from '../../../../../../..//src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 

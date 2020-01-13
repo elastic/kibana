@@ -12,7 +12,7 @@ import {
   MetricsExplorerSeries,
   MetricsExplorerRequestBody,
   MetricsExplorerColumn,
-} from '../types';
+} from '../../../../common/http_api/metrics_explorer';
 import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';

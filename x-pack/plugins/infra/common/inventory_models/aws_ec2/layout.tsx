@@ -15,7 +15,8 @@ import { SubSection } from '../../../public/pages/metrics/components/sub_section
 import { LayoutContent } from '../../../public/pages/metrics/components/layout_content';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
-import { withTheme } from '../../../../../common/eui_styled_components';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { withTheme } from '../../../public/utils/eui_styled_components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetadataDetails } from '../../../public/pages/metrics/components/metadata_details';
 

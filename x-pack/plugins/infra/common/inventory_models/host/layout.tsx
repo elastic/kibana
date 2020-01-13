@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '../../../../../common/eui_styled_components/eui_styled_components';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { withTheme } from '../../../public/utils/eui_styled_components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

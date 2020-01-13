@@ -5,7 +5,7 @@
  */
 
 import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
-import { MetricsExplorerRequestBody } from '../types';
+import { MetricsExplorerRequestBody } from '../../../../common/http_api/metrics_explorer';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
   return {

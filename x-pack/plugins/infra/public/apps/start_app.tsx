@@ -15,7 +15,7 @@ import { CoreStart } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { EuiThemeProvider } from '../../utils/eui_styled_components';
+import { EuiThemeProvider } from '../utils/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';

@@ -11,4 +11,6 @@
 // and needs to be situated differently to this index file, so that our code for setting the root template
 // and attempting to start the app doesn't try to run just because another plugin is importing from this file.
 
-export { useTrackPageview } from './hooks/use_track_metric';
+export { useTrackPageview, trackEvent } from './hooks/use_track_metric';
+export { FORMATTERS } from './utils/formatters';
+export { InfraFormatterType } from './lib/lib';

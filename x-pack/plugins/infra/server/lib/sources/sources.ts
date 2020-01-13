@@ -21,7 +21,7 @@ import {
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
 } from './types';
-import { InfraConfig } from '../../../../../../plugins/infra/server';
+import { InfraConfig } from '../../../server';
 
 interface Libs {
   config: InfraConfig;

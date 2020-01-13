@@ -16,8 +16,8 @@ import { InfraLogAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
-import { InfraConfig } from '../../../../../../plugins/infra/server';
-import { CoreSetup } from '../../../../../../../src/core/server';
+import { InfraConfig } from '../../../server';
+import { CoreSetup } from '../../../../../../src/core/server';
 import { InfraServerPluginDeps } from '../adapters/framework/adapter_types';
 
 export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {

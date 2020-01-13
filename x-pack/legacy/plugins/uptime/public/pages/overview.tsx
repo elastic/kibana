@@ -19,7 +19,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { useTrackPageview } from '../../../infra/public';
+import { useTrackPageview } from '../../../../../plugins/infra/public';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 import { store } from '../state';

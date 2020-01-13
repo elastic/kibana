@@ -15,7 +15,8 @@ import { SubSection } from '../../../../public/pages/metrics/components/sub_sect
 import { GaugesSectionVis } from '../../../../public/pages/metrics/components/gauges_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../../public/pages/metrics/components/chart_section_vis';
-import { withTheme } from '../../../../../../common/eui_styled_components';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { withTheme } from '../../../../public/utils/eui_styled_components';
 
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>

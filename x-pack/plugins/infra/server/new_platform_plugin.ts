@@ -24,7 +24,7 @@ import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
-import { APP_ID } from '../index';
+import { APP_ID } from './index';
 import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export interface KbnServer extends Server {

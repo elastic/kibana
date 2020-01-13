@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
-import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
+import { trackEvent } from '../../../../../../../../../plugins/infra/public';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import {
   getOptionLabel,

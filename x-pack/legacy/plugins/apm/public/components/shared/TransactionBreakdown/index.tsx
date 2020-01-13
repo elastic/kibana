@@ -10,7 +10,7 @@ import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown'
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { trackEvent } from '../../../../../infra/public/hooks/use_track_metric';
+import { trackEvent } from '../../../../../../../plugins/infra/public';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {

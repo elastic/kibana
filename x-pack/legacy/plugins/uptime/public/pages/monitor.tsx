@@ -11,7 +11,7 @@ import { MonitorCharts, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
-import { useTrackPageview } from '../../../infra/public';
+import { useTrackPageview } from '../../../../../plugins/infra/public';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 import { PageHeader } from './page_header';
 

@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
-import { DragHandleProps, DropResult } from '../../../../../common/eui_draggable';
+import { DragHandleProps, DropResult } from '../../utils/eui_draggable';
 
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
 import {
