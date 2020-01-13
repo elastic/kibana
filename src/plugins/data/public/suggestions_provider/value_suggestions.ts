@@ -21,7 +21,7 @@ import { memoize } from 'lodash';
 
 import { IUiSettingsClient, HttpSetup } from 'src/core/public';
 import { IGetSuggestions } from './types';
-import { IFieldType } from '../../common';
+import { IIndexPattern, IFieldType } from '../../common';
 
 export function getSuggestionsProvider(
   uiSettings: IUiSettingsClient,
@@ -45,13 +45,15 @@ export function getSuggestionsProvider(
   );
 
   return async (
-    index: string,
+    indexPattern: IIndexPattern,
     field: IFieldType,
     query: string,
     boolFilter?: any,
     signal?: AbortSignal
   ) => {
     const shouldSuggestValues = uiSettings.get('filterEditor:suggestValues');
+    const index = indexPattern.title;
+
     if (field.type === 'boolean') {
       return [true, false];
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {

@@ -151,9 +151,8 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
             },
             "data": Object {
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "addQuerySyntaxProvider": [MockFunction],
+                "getQuerySyntaxProvider": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -771,9 +770,8 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "addQuerySyntaxProvider": [MockFunction],
+                        "getQuerySyntaxProvider": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
@@ -1379,9 +1377,8 @@ exports[`QueryStringInput Should pass the query language to the language switche
             },
             "data": Object {
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "addQuerySyntaxProvider": [MockFunction],
+                "getQuerySyntaxProvider": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -1996,9 +1993,8 @@ exports[`QueryStringInput Should pass the query language to the language switche
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "addQuerySyntaxProvider": [MockFunction],
+                        "getQuerySyntaxProvider": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
@@ -2604,9 +2600,8 @@ exports[`QueryStringInput Should render the given query 1`] = `
             },
             "data": Object {
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "addQuerySyntaxProvider": [MockFunction],
+                "getQuerySyntaxProvider": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -3221,9 +3216,8 @@ exports[`QueryStringInput Should render the given query 1`] = `
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "addQuerySyntaxProvider": [MockFunction],
+                        "getQuerySyntaxProvider": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
