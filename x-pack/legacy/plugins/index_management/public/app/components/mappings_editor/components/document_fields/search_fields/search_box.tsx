@@ -16,6 +16,7 @@ const SIDEBAR_WIDTH = 264;
 // The breakpoint under which the sidebar is not visible
 const MOBILE_BREAKPOINT = 768;
 const EUI_PADDING = 16;
+const MAX_WIDTH_PAGE = 1200;
 
 interface Props {
   searchValue: string;
@@ -39,12 +40,15 @@ export const SearchBox = forwardRef(
     let searchBoxStyle = {};
 
     if (isSearchBoxSticky) {
+      const delta = window.innerWidth - (SIDEBAR_WIDTH + 2 * EUI_PADDING + MAX_WIDTH_PAGE);
+      const offset = Math.abs(Math.max(0, delta));
+
       searchBoxStyle = {
         left: 'auto',
         // When we display the "Back to search results" button, we can reduce the padding bottom
         paddingBottom: isBackToResultsButtonVisible ? `${EUI_PADDING * 0.5}px` : undefined,
         // We add 1 pixel to not overlap the page right border
-        right: `${EUI_PADDING + 1}px`,
+        right: `${EUI_PADDING + 1 + offset * 0.5}px`,
         width: `${351 + 2.5 * EUI_PADDING}px`,
       };
     }
