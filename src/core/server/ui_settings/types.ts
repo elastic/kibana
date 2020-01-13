@@ -106,7 +106,7 @@ export interface UiSettingsParams {
    * Allows defining a custom validation applicable to value change on the client.
    * @deprecated
    */
-  validation: StringValidation | ImageValidation;
+  validation?: StringValidation | ImageValidation;
 }
 
 interface StringValidation {
