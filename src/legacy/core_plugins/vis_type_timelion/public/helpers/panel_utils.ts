@@ -25,9 +25,7 @@ import { IUiSettingsClient } from 'kibana/public';
 
 // @ts-ignore
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
-import { tickFormatters } from './tick_formatters';
 import { xaxisFormatterProvider } from './xaxis_formatter';
-import { generateTicksProvider } from './tick_generator';
 import { Series } from './timelion_request_handler';
 
 export interface Axis {
@@ -46,34 +44,6 @@ export interface Axis {
   tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
   tickGenerator?(axis: Axis): number[];
   units?: { type: string };
-}
-interface IOptions {
-  colors: string[];
-  crosshair: {
-    color: string;
-    lineWidth: number;
-    mode: string;
-  };
-  grid: {
-    autoHighlight: boolean;
-    borderColor: string | null;
-    borderWidth: number;
-    hoverable: boolean;
-    margin: number;
-    show?: boolean;
-  };
-  legend: {
-    backgroundColor: string;
-    labelBoxBorderColor: string;
-    labelFormatter(label: string, series: { _id: number }): string;
-    position: string;
-  };
-  selection: {
-    color: string;
-    mode: string;
-  };
-  xaxis: Axis;
-  yaxes?: Axis[];
 }
 
 interface TimeRangeBounds {
@@ -96,7 +66,7 @@ const colors = [
 
 const SERIES_ID_ATTR = 'data-series-id';
 
-function buildSeriesData(chart: Series[], options: IOptions) {
+function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
   return chart.map((series: Series, seriesIndex: number) => {
     const newSeries: Series = cloneDeep(
       defaults(series, {
@@ -159,7 +129,7 @@ function buildOptions(
   const tickLetterWidth = 7;
   const tickPadding = 45;
 
-  const options: IOptions = {
+  const options: jquery.flot.plotOptions = {
     xaxis: {
       mode: 'time',
       tickLength: 5,
@@ -168,15 +138,6 @@ function buildOptions(
       ticks: Math.floor(clientWidth / (format.length * tickLetterWidth + tickPadding)),
       // Use moment to format ticks so we get timezone correction
       tickFormatter: (val: number) => moment(val).format(format),
-    },
-    selection: {
-      mode: 'x',
-      color: '#ccc',
-    },
-    crosshair: {
-      mode: 'x',
-      color: '#C66',
-      lineWidth: 2,
     },
     colors,
     grid: {
@@ -209,19 +170,6 @@ function buildOptions(
       },
     },
   };
-
-  if (options.yaxes) {
-    options.yaxes.forEach(yaxis => {
-      if (yaxis && yaxis.units) {
-        const formatters = tickFormatters();
-        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-        const byteModes = ['bytes', 'bytes/s'];
-        if (byteModes.includes(yaxis.units.type)) {
-          yaxis.tickGenerator = generateTicksProvider();
-        }
-      }
-    });
-  }
 
   return options;
 }
