@@ -56,7 +56,7 @@ describe('MonitorStatusBar component', () => {
     expect(badgeComponent.find('span.euiBadge--warning')).toBeTruthy();
   });
 
-  it('renders expiring state if validity is greater than 30 days', () => {
+  it('does not render the expiration date with a warning state if expiry date is greater than a month', () => {
     const dateIn40Days = moment()
       .add(40, 'day')
       .toString();
