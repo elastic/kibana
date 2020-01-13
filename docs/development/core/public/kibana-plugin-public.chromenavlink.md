@@ -24,7 +24,7 @@ export interface ChromeNavLink
 |  [id](./kibana-plugin-public.chromenavlink.id.md) | <code>string</code> | A unique identifier for looking up links. |
 |  [linkToLastSubUrl](./kibana-plugin-public.chromenavlink.linktolastsuburl.md) | <code>boolean</code> | Whether or not the subUrl feature should be enabled. |
 |  [order](./kibana-plugin-public.chromenavlink.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
-|  [subUrlBase](./kibana-plugin-public.chromenavlink.suburlbase.md) | <code>string</code> | A url base that legacy apps can set to match deep URLs to an applcation. |
+|  [subUrlBase](./kibana-plugin-public.chromenavlink.suburlbase.md) | <code>string</code> | A url base that legacy apps can set to match deep URLs to an application. |
 |  [title](./kibana-plugin-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
 |  [url](./kibana-plugin-public.chromenavlink.url.md) | <code>string</code> | A url that legacy apps can set to deep link into their applications. |

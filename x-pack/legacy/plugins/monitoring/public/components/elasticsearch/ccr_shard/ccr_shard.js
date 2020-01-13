@@ -110,7 +110,7 @@ export class CcrShard extends PureComponent {
       >
         <Fragment>
           <EuiTitle size="s">
-            <h4>{formatDateTimeLocal(timestamp)}</h4>
+            <h2>{formatDateTimeLocal(timestamp)}</h2>
           </EuiTitle>
           <EuiHorizontalRule />
           <EuiCodeBlock language="json">{JSON.stringify(stat, null, 2)}</EuiCodeBlock>

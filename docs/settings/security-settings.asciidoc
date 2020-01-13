@@ -45,7 +45,7 @@ if this setting isn't the same for all instances of {kib}.
 
 `xpack.security.secureCookies`::
 Sets the `secure` flag of the session cookie. The default value is `false`. It
-is set to `true` if `server.ssl.certificate` and `server.ssl.key` are set. Set
+is automatically set to `true` if `server.ssl.enabled` is set to `true`. Set
 this to `true` if SSL is configured outside of {kib} (for example, you are
 routing requests through a load balancer or proxy).
 
