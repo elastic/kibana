@@ -7,7 +7,7 @@
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName } from '../style_util';
-import { getColorRampStops, getColorPalette } from '../../color_utils';
+import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 import {
@@ -212,7 +212,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     if (this._options.useCustomColorRamp) {
       return this._getOrdinalColorStopsFromCustom();
     } else {
-      return getColorRampStops(this._options.color);
+      return getOrdinalColorRampStops(this._options.color);
     }
   }
 
