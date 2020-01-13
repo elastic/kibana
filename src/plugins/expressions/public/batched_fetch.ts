@@ -110,7 +110,7 @@ export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
  * the related promises.
  */
 async function processBatch(fetchStreaming: BfetchPublicContract['fetchStreaming'], batch: Batch) {
-  const { stream, promise } = fetchStreaming({
+  const { stream } = fetchStreaming({
     url: `/api/interpreter/fns`,
     body: JSON.stringify({
       functions: Object.values(batch).map(({ request }) => request),
@@ -135,7 +135,7 @@ async function processBatch(fetchStreaming: BfetchPublicContract['fetchStreaming
     });
 
   try {
-    await promise;
+    await stream.toPromise();
   } catch (error) {
     Object.values(batch).forEach(({ future }) => {
       future.reject(error);
