@@ -33,6 +33,13 @@ const timeTypeOptions = [
   { value: 'h', text: I18n.HOURS },
 ];
 
+// move optional label to the end of input
+const StyledLabelAppend = styled(EuiFlexItem)`
+  &.euiFlexItem.euiFlexItem--flexGrowZero {
+    margin-left: 31px;
+  }
+`;
+
 const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
@@ -107,9 +114,9 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
         <EuiFlexItem grow={false} component="span">
           {field.label}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} component="span">
+        <StyledLabelAppend grow={false} component="span">
           {field.labelAppend}
-        </EuiFlexItem>
+        </StyledLabelAppend>
       </EuiFlexGroup>
     ),
     [field.label, field.labelAppend]

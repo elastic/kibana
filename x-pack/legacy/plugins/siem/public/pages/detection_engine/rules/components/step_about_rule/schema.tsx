@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
-import * as RuleI18n from '../../translations';
 import { IMitreEnterpriseAttack } from '../../types';
 import {
   FIELD_TYPES,
@@ -18,16 +15,11 @@ import {
   ERROR_CODE,
 } from '../shared_imports';
 import { isMitreAttackInvalid } from '../mitre/helpers';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from './helpers';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
-
-const OptionalFieldLabel = (
-  <EuiText color="subdued" size="xs">
-    {RuleI18n.OPTIONAL_FIELD}
-  </EuiText>
-);
 
 export const schema: FormSchema = {
   name: {
