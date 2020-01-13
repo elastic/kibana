@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { KibanaAssetType } from '../../../../common/types';
+import { KibanaAssetType, DatasetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
 import { loadFieldsFromYaml } from '../../elasticsearch/template/install';
 import * as Registry from '../../../registry';
@@ -32,16 +32,16 @@ export async function installIndexPatterns(
   if (!registryPackageInfo.datasets) return;
   const datasets = registryPackageInfo.datasets;
   // separate logs and metrics datasets
-  const logsDatasets = datasets.filter(dataset => dataset.type === 'logs');
-  const metricsDatasets = datasets.filter(dataset => dataset.type === 'metric');
+  const logsDatasets = datasets.filter(dataset => dataset.type === DatasetType.logs);
+  const metricsDatasets = datasets.filter(dataset => dataset.type === DatasetType.metrics);
   await createIndexPattern({
-    datasetType: 'logs',
+    datasetType: DatasetType.logs,
     datasets: logsDatasets,
     registryPackageInfo,
     savedObjectsClient,
   });
   await createIndexPattern({
-    datasetType: 'metrics',
+    datasetType: DatasetType.metrics,
     datasets: metricsDatasets,
     registryPackageInfo,
     savedObjectsClient,

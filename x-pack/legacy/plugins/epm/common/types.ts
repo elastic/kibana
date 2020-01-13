@@ -128,8 +128,13 @@ export interface Dataset {
   release: string;
   ingest_pipeline: string;
   vars?: VarsEntry[];
-  type: string;
+  type: DatasetType;
   package: string;
+}
+
+export enum DatasetType {
+  logs = 'logs',
+  metrics = 'metrics',
 }
 
 export interface VarsEntry {
