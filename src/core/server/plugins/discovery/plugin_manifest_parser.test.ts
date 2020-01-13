@@ -130,11 +130,11 @@ test('return error when plugin version is missing', async () => {
 
 test('return error when plugin expected Kibana version is lower than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '6.4.2' })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "some-id" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -144,12 +144,12 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'some-id', version: '1.0.0', kibanaVersion: 'non-sem-ver' }))
+      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', kibanaVersion: 'non-sem-ver' }))
     );
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "some-id" is only compatible with Kibana version "non-sem-ver", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with Kibana version "non-sem-ver", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -157,11 +157,11 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
 
 test('return error when plugin config path is not a string', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0', configPath: 2 })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2 })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `The "configPath" in plugin manifest for "some-id" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+    message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -171,12 +171,12 @@ test('return error when plugin config path is an array that contains non-string 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0', configPath: ['config', 2] }))
+      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: ['config', 2] }))
     );
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `The "configPath" in plugin manifest for "some-id" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+    message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -184,11 +184,11 @@ test('return error when plugin config path is an array that contains non-string 
 
 test('return error when plugin expected Kibana version is higher than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.1' })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "some-id" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -196,11 +196,11 @@ test('return error when plugin expected Kibana version is higher than actual ver
 
 test('return error when both `server` and `ui` are set to `false` or missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0' })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "some-id", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
+    message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -208,12 +208,12 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0', server: false, ui: false }))
+      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: false, ui: false }))
     );
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "some-id", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
+    message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -225,7 +225,7 @@ test('return error when manifest contains unrecognized properties', async () => 
       null,
       Buffer.from(
         JSON.stringify({
-          id: 'some-id',
+          id: 'someId',
           version: '7.0.0',
           server: true,
           unknownOne: 'one',
@@ -236,20 +236,68 @@ test('return error when manifest contains unrecognized properties', async () => 
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Manifest for plugin "some-id" contains the following unrecognized properties: unknownOne,unknownTwo. (invalid-manifest, ${pluginManifestPath})`,
+    message: `Manifest for plugin "someId" contains the following unrecognized properties: unknownOne,unknownTwo. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
 });
 
+describe('configPath', () => {
+  test('falls back to plugin id if not specified', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '7.0.0', server: true })));
+    });
+
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.configPath).toBe(manifest.id);
+  });
+
+  test('falls back to plugin id in snakeCase format', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'SomeId', version: '7.0.0', server: true })));
+    });
+
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.configPath).toBe('some_id');
+  });
+
+  test('not formated to snakeCase if defined explicitly as string', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({ id: 'someId', configPath: 'somePath', version: '7.0.0', server: true })
+        )
+      );
+    });
+
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.configPath).toBe('somePath');
+  });
+
+  test('not formated to snakeCase if defined explicitly as an array of strings', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({ id: 'someId', configPath: ['somePath'], version: '7.0.0', server: true })
+        )
+      );
+    });
+
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.configPath).toEqual(['somePath']);
+  });
+});
+
 test('set defaults for all missing optional fields', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0', server: true })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
-    id: 'some-id',
-    configPath: 'some-id',
+    id: 'someId',
+    configPath: 'some_id',
     version: '7.0.0',
     kibanaVersion: '7.0.0',
     optionalPlugins: [],
@@ -265,7 +313,7 @@ test('return all set optional fields as they are in manifest', async () => {
       null,
       Buffer.from(
         JSON.stringify({
-          id: 'some-id',
+          id: 'someId',
           configPath: ['some', 'path'],
           version: 'some-version',
           kibanaVersion: '7.0.0',
@@ -278,7 +326,7 @@ test('return all set optional fields as they are in manifest', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
-    id: 'some-id',
+    id: 'someId',
     configPath: ['some', 'path'],
     version: 'some-version',
     kibanaVersion: '7.0.0',
@@ -295,7 +343,7 @@ test('return manifest when plugin expected Kibana version matches actual version
       null,
       Buffer.from(
         JSON.stringify({
-          id: 'some-id',
+          id: 'someId',
           configPath: 'some-path',
           version: 'some-version',
           kibanaVersion: '7.0.0-alpha2',
@@ -307,7 +355,7 @@ test('return manifest when plugin expected Kibana version matches actual version
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
-    id: 'some-id',
+    id: 'someId',
     configPath: 'some-path',
     version: 'some-version',
     kibanaVersion: '7.0.0-alpha2',
@@ -324,7 +372,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
       null,
       Buffer.from(
         JSON.stringify({
-          id: 'some-id',
+          id: 'someId',
           version: 'some-version',
           kibanaVersion: 'kibana',
           requiredPlugins: ['some-required-plugin'],
@@ -336,8 +384,8 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
-    id: 'some-id',
-    configPath: 'some-id',
+    id: 'someId',
+    configPath: 'some_id',
     version: 'some-version',
     kibanaVersion: 'kibana',
     optionalPlugins: [],
