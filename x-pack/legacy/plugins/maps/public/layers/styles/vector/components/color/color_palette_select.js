@@ -33,8 +33,7 @@ const colorPaletteInputs = COLOR_PALETTES.map(palette => {
       height: '100%',
       display: 'inline-block',
     };
-    // eslint-disable-next-line react/no-danger
-    return <div style={style} dangerouslySetInnerHTML={{ __html: '&nbsp;' }} />;
+    return <div style={style}>&nbsp;</div>;
   });
   return {
     value: palette.id,

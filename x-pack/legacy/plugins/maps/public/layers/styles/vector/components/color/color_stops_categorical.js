@@ -56,9 +56,9 @@ export const ColorStopsCategorical = ({
           )}
           value={stop}
           placeholder={i18n.translate(
-            'xpack.maps.styles.colorStops.categoricalStop.defaultCategoryPlaceholder',
+            'xpack.maps.styles.colorStops.categoricalStop.otherCategoryPlaceholder',
             {
-              defaultMessage: 'Default',
+              defaultMessage: 'Other',
             }
           )}
           disabled
