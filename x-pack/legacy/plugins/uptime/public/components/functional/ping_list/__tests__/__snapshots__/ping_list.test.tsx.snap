@@ -121,7 +121,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "center",
+            "align": "left",
             "field": "observer.geo.name",
             "name": "Location",
             "render": [Function],
@@ -131,15 +131,17 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",
+            "width": "120px",
           },
           Object {
             "align": "right",
             "field": "monitor.duration.us",
             "name": "Duration",
             "render": [Function],
+            "width": "100px",
           },
           Object {
-            "align": "right",
+            "align": "left",
             "field": "error.type",
             "name": "Error type",
             "render": [Function],
@@ -149,6 +151,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "http.response.status_code",
             "name": "Response code",
             "render": [Function],
+            "width": "120px",
           },
           Object {
             "align": "right",
