@@ -122,7 +122,7 @@ export interface PluginManifest {
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
-   * to "id".
+   * to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
 
@@ -163,7 +163,7 @@ export interface DiscoveredPlugin {
   readonly id: PluginName;
 
   /**
-   * Root configuration path used by the plugin, defaults to "id".
+   * Root configuration path used by the plugin, defaults to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
 
