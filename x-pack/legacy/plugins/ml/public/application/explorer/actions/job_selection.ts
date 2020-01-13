@@ -10,13 +10,10 @@ import { map } from 'rxjs/operators';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlJobService } from '../../services/job_service';
 
-import { createJobs, RestoredAppState } from '../explorer_utils';
+import { EXPLORER_ACTION } from '../explorer_constants';
+import { createJobs } from '../explorer_utils';
 
-export function jobSelectionActionCreator(
-  actionName: string,
-  selectedJobIds: string[],
-  { filterData, selectedCells, viewBySwimlaneFieldName }: RestoredAppState
-) {
+export function jobSelectionActionCreator(selectedJobIds: string[]) {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
     map(resp => {
       if (resp.err) {
@@ -32,13 +29,10 @@ export function jobSelectionActionCreator(
       const selectedJobs = jobs.filter(job => job.selected);
 
       return {
-        type: actionName,
+        type: EXPLORER_ACTION.JOB_SELECTION_CHANGE,
         payload: {
           loading: false,
-          selectedCells,
           selectedJobs,
-          viewBySwimlaneFieldName,
-          filterData,
         },
       };
     })
