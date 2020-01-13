@@ -6,12 +6,12 @@
 
 import rt from 'io-ts';
 import { EuiTheme } from '../../../../../common/eui_styled_components';
-import { InfraMetricData } from '../../graphql/types';
 import { InventoryFormatterTypeRT } from '../../../common/inventory_models/types';
 import { MetricsTimeInput } from './containers/with_metrics_time';
+import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export interface LayoutProps {
-  metrics?: InfraMetricData[];
+  metrics?: NodeDetailsMetricData[];
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
@@ -55,7 +55,7 @@ export const VisSectionPropsRT = rt.partial({
 
 export type VisSectionProps = rt.TypeOf<typeof VisSectionPropsRT> & {
   id?: string;
-  metric?: InfraMetricData;
+  metric?: NodeDetailsMetricData;
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;

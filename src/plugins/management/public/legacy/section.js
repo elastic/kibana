@@ -22,7 +22,7 @@ import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
 
 const listeners = [];
 
-export class ManagementSection {
+export class LegacyManagementSection {
   /**
    * @param {string} id
    * @param {object} options
@@ -83,7 +83,11 @@ export class ManagementSection {
    */
 
   register(id, options = {}) {
-    const item = new ManagementSection(id, assign(options, { parent: this }), this.capabilities);
+    const item = new LegacyManagementSection(
+      id,
+      assign(options, { parent: this }),
+      this.capabilities
+    );
 
     if (this.hasItem(id)) {
       throw new Error(`'${id}' is already registered`);

@@ -21,19 +21,20 @@ import React, { FunctionComponent } from 'react';
 import { History } from 'history';
 import { Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { Mounter } from '../types';
+import { Mounter, AppLeaveHandler } from '../types';
 import { AppContainer } from './app_container';
 
 interface Props {
   mounters: Map<string, Mounter>;
   history: History;
+  setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
 }
 
 interface Params {
   appId: string;
 }
 
-export const AppRouter: FunctionComponent<Props> = ({ history, mounters }) => (
+export const AppRouter: FunctionComponent<Props> = ({ history, mounters, setAppLeaveHandler }) => (
   <Router history={history}>
     <Switch>
       {[...mounters].flatMap(([appId, mounter]) =>
@@ -45,7 +46,13 @@ export const AppRouter: FunctionComponent<Props> = ({ history, mounters }) => (
               <Route
                 key={mounter.appRoute}
                 path={mounter.appRoute}
-                render={() => <AppContainer mounter={mounter} appId={appId} />}
+                render={() => (
+                  <AppContainer
+                    mounter={mounter}
+                    appId={appId}
+                    setAppLeaveHandler={setAppLeaveHandler}
+                  />
+                )}
               />,
             ]
       )}
@@ -61,7 +68,9 @@ export const AppRouter: FunctionComponent<Props> = ({ history, mounters }) => (
             ? [appId, mounters.get(appId)]
             : [...mounters].filter(([key]) => key.split(':')[0] === appId)[0] ?? [];
 
-          return <AppContainer mounter={mounter} appId={id} />;
+          return (
+            <AppContainer mounter={mounter} appId={id} setAppLeaveHandler={setAppLeaveHandler} />
+          );
         }}
       />
     </Switch>
