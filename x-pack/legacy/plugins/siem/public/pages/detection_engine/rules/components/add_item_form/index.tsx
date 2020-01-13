@@ -45,6 +45,7 @@ export const AddItem = ({
   isDisabled,
   validate,
 }: AddItemProps) => {
+  const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
 
@@ -53,7 +54,8 @@ export const AddItem = ({
   const removeItem = useCallback(
     (index: number) => {
       const values = field.value as string[];
-      field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+      const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
+      field.setValue(newValues.length === 0 ? [''] : newValues);
       inputsRef.current = [
         ...inputsRef.current.slice(0, index),
         ...inputsRef.current.slice(index + 1),
@@ -70,11 +72,7 @@ export const AddItem = ({
 
   const addItem = useCallback(() => {
     const values = field.value as string[];
-    if (!isEmpty(values) && values[values.length - 1]) {
-      field.setValue([...values, '']);
-    } else if (isEmpty(values)) {
-      field.setValue(['']);
-    }
+    field.setValue([...values, '']);
   }, [field]);
 
   const updateItem = useCallback(
@@ -82,22 +80,7 @@ export const AddItem = ({
       event.persist();
       const values = field.value as string[];
       const value = event.target.value;
-      if (isEmpty(value)) {
-        field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
-        inputsRef.current = [
-          ...inputsRef.current.slice(0, index),
-          ...inputsRef.current.slice(index + 1),
-        ];
-        setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
-        inputsRef.current = inputsRef.current.map((ref, i) => {
-          if (i >= index && inputsRef.current[index] != null) {
-            ref.value = 're-render';
-          }
-          return ref;
-        });
-      } else {
-        field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
-      }
+      field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
     },
     [field]
   );
@@ -131,8 +114,8 @@ export const AddItem = ({
     <MyEuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      error={showValidation ? errorMessage : null}
+      isInvalid={showValidation && isInvalid}
       fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -148,19 +131,24 @@ export const AddItem = ({
             inputsRef.current[index] == null
               ? { value: item }
               : {}),
-            isInvalid: validate == null ? false : validate(item),
+            isInvalid: validate == null ? false : showValidation && validate(item),
           };
           return (
             <div key={index}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow>
-                  <EuiFieldText onChange={e => updateItem(e, index)} fullWidth {...euiFieldProps} />
+                  <EuiFieldText
+                    onBlur={() => setShowValidation(true)}
+                    onChange={e => updateItem(e, index)}
+                    fullWidth
+                    {...euiFieldProps}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="danger"
                     iconType="trash"
-                    isDisabled={isDisabled}
+                    isDisabled={isDisabled || (isEmpty(item) && values.length === 1)}
                     onClick={() => removeItem(index)}
                     aria-label={RuleI18n.DELETE}
                   />
