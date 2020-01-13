@@ -39,7 +39,7 @@ function getOptions(fields, selectedFields) {
     .map(field => {
       return {
         value: field.name,
-        prepend: 'type' in field ? <FieldIcon type={field.type} size="m" useColor /> : null,
+        prepend: 'type' in field ? <FieldIcon type={field.type} fill="none" /> : null,
         label: 'label' in field ? field.label : field.name,
       };
     })
