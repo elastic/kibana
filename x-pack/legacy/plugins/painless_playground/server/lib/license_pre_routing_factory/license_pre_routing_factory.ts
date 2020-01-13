@@ -5,9 +5,10 @@
  */
 
 import Boom from 'boom';
+import { ServerFacade } from '../../../types';
 import { PLUGIN } from '../../../common/constants';
 
-export const licensePreRoutingFactory = server => {
+export const licensePreRoutingFactory = (server: ServerFacade) => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic

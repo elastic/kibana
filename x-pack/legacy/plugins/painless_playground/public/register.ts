@@ -5,10 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
-
-// !xpackInfo.get('features.painless_playground.enableLink', false)
 
 npSetup.plugins.dev_tools.register({
   order: 7,
