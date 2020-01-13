@@ -49,7 +49,7 @@ const mockMappingItems: StatItems = {
       value: null,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -82,7 +82,7 @@ export const mockDisableChartsInitialData = {
       value: undefined,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -109,7 +109,7 @@ export const mockEnableChartsInitialData = {
       value: undefined,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -128,7 +128,7 @@ export const mockEnableChartsInitialData = {
   areaChart: [],
   barChart: [
     {
-      color: '#DB1374',
+      color: '#D36086',
       key: 'uniqueSourcePrivateIps',
       value: [
         {
@@ -165,7 +165,7 @@ export const mockEnableChartsData = {
       ],
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -183,7 +183,7 @@ export const mockEnableChartsData = {
   barChart: [
     {
       key: 'uniqueSourcePrivateIps',
-      color: '#DB1374',
+      color: '#D36086',
       value: [
         {
           x: 'Src.',
@@ -208,7 +208,7 @@ export const mockEnableChartsData = {
       value: 383,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {

@@ -18,7 +18,7 @@ const customWidth = '120px';
 const chartDataSets = [
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
@@ -28,7 +28,7 @@ const chartDataSets = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: '' }],
@@ -38,7 +38,7 @@ const chartDataSets = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
@@ -48,7 +48,7 @@ const chartDataSets = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
@@ -63,7 +63,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   [null],
   [
     [
-      { key: 'uniqueSourceIps', color: '#DB1374' },
+      { key: 'uniqueSourceIps', color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         color: '#490092',
@@ -72,7 +72,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [],
@@ -82,7 +82,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{}], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{}],
@@ -92,7 +92,7 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
@@ -122,7 +122,7 @@ describe('BarChartBaseComponent', () => {
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIps',

@@ -86,7 +86,7 @@ export const mockDestinationLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#DB1374' },
+        options: { color: '#D36086' },
       },
       lineColor: {
         type: 'STATIC',
