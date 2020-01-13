@@ -362,7 +362,7 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  public renderRecentLinks(recentlyAccessed: ExtendedRecentlyAccessedHistoryItem[]) {
+  public renderRecentLinks() {
     return (
       <EuiNavDrawerGroup
         listItems={[
@@ -371,12 +371,12 @@ class HeaderUI extends Component<Props, State> {
               defaultMessage: 'Recently viewed',
             }),
             iconType: 'clock',
-            isDisabled: !(recentlyAccessed.length > 0),
+            isDisabled: !(this.state.recentlyAccessed.length > 0),
             flyoutMenu: {
               title: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle', {
                 defaultMessage: 'Recent items',
               }),
-              listItems: recentlyAccessed,
+              listItems: this.state.recentlyAccessed,
             },
           },
         ]}
@@ -387,14 +387,52 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  public renderGroupedNav() {
+  public renderNavLinks() {
+    const isOSS = this.props.license === 'oss';
+    const disableGroupedNavSetting = this.props.navSetting === 'individual';
+    const showUngroupedNav = isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7;
+
+    if (showUngroupedNav) {
+      return (
+        <EuiNavDrawer
+          ref={this.navDrawerRef}
+          data-test-subj="navDrawer"
+          isLocked={this.props.isLocked}
+          onIsLockedUpdate={this.props.onIsLockedUpdate}
+          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+            defaultMessage: 'Primary',
+          })}
+        >
+          {this.renderRecentLinks()}
+          <EuiHorizontalRule margin="none" />
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={this.state.navLinks}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
+        </EuiNavDrawer>
+      );
+    }
+
     const { undefined: unknowns, [AppCategory.management]: management, ...mainNav } = groupBy(
       this.state.navLinks,
       'category'
     );
 
     return (
-      <>
+      <EuiNavDrawer
+        ref={this.navDrawerRef}
+        data-test-subj="navDrawer"
+        isLocked={this.props.isLocked}
+        onIsLockedUpdate={this.props.onIsLockedUpdate}
+        aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+          defaultMessage: 'Primary',
+        })}
+      >
+        {this.renderRecentLinks()}
+        <EuiHorizontalRule margin="none" />
         <EuiNavDrawerGroup
           data-test-subj="navDrawerAppsMenu"
           aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
@@ -425,56 +463,22 @@ class HeaderUI extends Component<Props, State> {
           ]}
         />
         <EuiHorizontalRule margin="none" />
-        {management.length > 0 && (
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerManagementMenu"
-            aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-              defaultMessage: 'Management navigation links',
-            })}
-            listItems={[
-              {
-                label: getGroupLabel(AppCategory.management),
-                iconType: getGroupIcon(AppCategory.management),
-                flyoutMenu: {
-                  title: getGroupLabel(AppCategory.management),
-                  listItems: sortBy(management, 'order'),
-                },
+        <EuiNavDrawerGroup
+          data-test-subj="navDrawerManagementMenu"
+          aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
+            defaultMessage: 'Management navigation links',
+          })}
+          listItems={[
+            {
+              label: getGroupLabel(AppCategory.management),
+              iconType: getGroupIcon(AppCategory.management),
+              flyoutMenu: {
+                title: getGroupLabel(AppCategory.management),
+                listItems: sortBy(management, 'order'),
               },
-            ]}
-          />
-        )}
-      </>
-    );
-  }
-
-  public renderNavLinks() {
-    const isOSS = this.props.license === 'oss';
-    const disableGroupedNavSetting = this.props.navSetting === 'individual';
-    const showUngroupedNav = isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7;
-
-    return (
-      <EuiNavDrawer
-        ref={this.navDrawerRef}
-        data-test-subj="navDrawer"
-        isLocked={this.props.isLocked}
-        onIsLockedUpdate={this.props.onIsLockedUpdate}
-        aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-          defaultMessage: 'Primary',
-        })}
-      >
-        {this.renderRecentLinks(this.state.recentlyAccessed)}
-        <EuiHorizontalRule margin="none" />
-        {showUngroupedNav ? (
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={this.state.navLinks}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
-        ) : (
-          this.renderGroupedNav()
-        )}
+            },
+          ]}
+        />
       </EuiNavDrawer>
     );
   }
