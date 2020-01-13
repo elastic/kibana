@@ -35,7 +35,6 @@ const callOutProps = {
     defaultMessage: 'Internal Collection Detected',
   }),
   color: 'warning',
-  iconType: 'help',
 };
 
 const description = i18n.translate('xpack.monitoring.internalMonitoringDescription', {
