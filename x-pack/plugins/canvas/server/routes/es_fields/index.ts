@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CheckboxShowCharts, showCharts$ } from './checkbox_showcharts';
+import { initializeESFieldsRoute } from './es_fields';
+import { RouteInitializerDeps } from '..';
+
+export function initESFieldsRoutes(deps: RouteInitializerDeps) {
+  initializeESFieldsRoute(deps);
+}

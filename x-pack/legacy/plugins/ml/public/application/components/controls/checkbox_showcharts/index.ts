@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
-export const showCharts$: BehaviorSubject<boolean>;
+export { useShowCharts, CheckboxShowCharts } from './checkbox_showcharts';
