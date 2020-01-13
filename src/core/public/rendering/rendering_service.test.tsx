@@ -53,7 +53,7 @@ describe('RenderingService#start', () => {
     const { targetDomElement } = getService();
     expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
       <div
-        class="application"
+        class="application class-name"
       >
         <div>
           Hello application!

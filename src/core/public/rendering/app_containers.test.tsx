@@ -29,21 +29,33 @@ describe('AppWrapper', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
 
     const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"app-wrapper\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="app-wrapper"
+      >
+        app-content
+      </div>
+    `);
 
     act(() => chromeVisible$.next(false));
     component.update();
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"app-wrapper hidden-chrome\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="app-wrapper hidden-chrome"
+      >
+        app-content
+      </div>
+    `);
 
     act(() => chromeVisible$.next(true));
     component.update();
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"app-wrapper\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="app-wrapper"
+      >
+        app-content
+      </div>
+    `);
   });
 });
 
@@ -52,26 +64,42 @@ describe('AppContainer', () => {
     const appClasses$ = new BehaviorSubject<string[]>([]);
 
     const component = mount(<AppContainer classes$={appClasses$}>app-content</AppContainer>);
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"application\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="application"
+      >
+        app-content
+      </div>
+    `);
 
     act(() => appClasses$.next(['classA', 'classB']));
     component.update();
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"application classA classB\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="application classA classB"
+      >
+        app-content
+      </div>
+    `);
 
     act(() => appClasses$.next(['classC']));
     component.update();
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"application classC\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="application classC"
+      >
+        app-content
+      </div>
+    `);
 
     act(() => appClasses$.next([]));
     component.update();
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"application\\">app-content</div>"`
-    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="application"
+      >
+        app-content
+      </div>
+    `);
   });
 });
