@@ -39,7 +39,7 @@
     range: {
       category: {scheme: "elastic"}
     }
-    mark: {color: "#00B3A4"}
+    mark: {color: "#5BBAA0"}
   }
   autosize: {type: "fit", contains: "padding"}
 }
