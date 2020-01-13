@@ -17,6 +17,9 @@ import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
+export const DEFAULT_CUSTOM_COLOR = '#FF0000';
+export const DEFAULT_NEXT_COLOR = '#00FF00';
+
 export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
     return colorStops;
@@ -35,23 +38,28 @@ export function addCategoricalRow(colorStops, index) {
 
 export function addRow(colorStops, index, colorMapType) {
   const currentStop = colorStops[index].stop;
-  let delta = 1;
-  if (index === colorStops.length - 1) {
-    // Adding row to end of list.
-    if (index !== 0) {
-      const prevStop = colorStops[index - 1].stop;
-      delta = currentStop - prevStop;
-    }
-  } else {
-    // Adding row in middle of list.
-    const nextStop = colorStops[index + 1].stop;
-    delta = (nextStop - currentStop) / 2;
-  }
 
-  const nextValue = colorMapType === COLOR_MAP_TYPE.ORDINAL ? currentStop + delta : currentStop;
+  let nextValue;
+  if (colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+    let delta = 1;
+    if (index === colorStops.length - 1) {
+      // Adding row to end of list.
+      if (index !== 0) {
+        const prevStop = colorStops[index - 1].stop;
+        delta = currentStop - prevStop;
+      }
+    } else {
+      // Adding row in middle of list.
+      const nextStop = colorStops[index + 1].stop;
+      delta = (nextStop - currentStop) / 2;
+    }
+    nextValue = currentStop + delta;
+  } else {
+    nextValue = currentStop === '' ? currentStop + 'a' : '';
+  }
   const newRow = {
     stop: nextValue,
-    color: '#FF0000',
+    color: DEFAULT_CUSTOM_COLOR,
   };
   return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
 }
@@ -145,6 +153,3 @@ export function getOtherCategoryLabel() {
     defaultMessage: 'Other',
   });
 }
-
-export const DEFAULT_CUSTOM_COLOR = '#FF0000';
-export const DEFAULT_NEXT_COLOR = '#00FF00';
