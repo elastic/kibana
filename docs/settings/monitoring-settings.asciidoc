@@ -66,13 +66,6 @@ both the {es} monitoring cluster and the {es} production cluster.
 
 If not set, {kib} uses the value of the `elasticsearch.password` setting.
 
-`telemetry.enabled`::
-Set to `true` (default) to send cluster statistics to Elastic. Reporting your
-cluster statistics helps us improve your user experience. Your data is never
-shared with anyone. Set to `false` to disable statistics reporting from any
-browser connected to the {kib} instance. You can also opt out through the
-*Advanced Settings* in {kib}.
-
 `xpack.monitoring.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
 health checks. By default, it matches the `elasticsearch.pingTimeout` setting,

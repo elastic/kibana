@@ -91,7 +91,7 @@ function DevToolsWrapper({
             if (mountedTool.current) {
               mountedTool.current.unmountHandler();
             }
-            const params = { element, appBasePath: '' };
+            const params = { element, appBasePath: '', onAppLeave: () => undefined };
             const unmountHandler = isAppMountDeprecated(activeDevTool.mount)
               ? await activeDevTool.mount(appMountContext, params)
               : await activeDevTool.mount(params);

@@ -4,31 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React, { Component } from 'react';
+import React from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
+import { px } from '../../../../../../style/variables';
+import { history } from '../../../../../../utils/history';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
+import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
+import { getAgentMarks } from '../Marks/get_agent_marks';
+import { getErrorMarks } from '../Marks/get_error_marks';
+import { WaterfallFlyout } from './WaterfallFlyout';
+import { WaterfallItem } from './WaterfallItem';
 import {
-  APMQueryParams,
-  fromQuery,
-  toQuery
-} from '../../../../../shared/Links/url_helpers';
-import { history } from '../../../../../../utils/history';
-import { AgentMark } from '../get_agent_marks';
-import { SpanFlyout } from './SpanFlyout';
-import { TransactionFlyout } from './TransactionFlyout';
-import {
-  IServiceColors,
   IWaterfall,
   IWaterfallItem
 } from './waterfall_helpers/waterfall_helpers';
-import { WaterfallItem } from './WaterfallItem';
 
 const Container = styled.div`
   transition: 0.1s padding ease;
@@ -43,138 +38,105 @@ const TIMELINE_MARGINS = {
   bottom: 0
 };
 
+const toggleFlyout = ({
+  item,
+  location
+}: {
+  item?: IWaterfallItem;
+  location: Location;
+}) => {
+  history.replace({
+    ...location,
+    search: fromQuery({
+      ...toQuery(location.search),
+      flyoutDetailTab: undefined,
+      waterfallItemId: item?.id
+    })
+  });
+};
+
+const WaterfallItemsContainer = styled.div<{
+  paddingTop: number;
+}>`
+  padding-top: ${props => px(props.paddingTop)};
+`;
+
 interface Props {
-  agentMarks: AgentMark[];
-  urlParams: IUrlParams;
+  waterfallItemId?: string;
   waterfall: IWaterfall;
   location: Location;
-  serviceColors: IServiceColors;
   exceedsMax: boolean;
 }
 
-export class Waterfall extends Component<Props> {
-  public onOpenFlyout = (item: IWaterfallItem) => {
-    this.setQueryParams({
-      flyoutDetailTab: undefined,
-      waterfallItemId: String(item.id)
-    });
-  };
+export const Waterfall: React.FC<Props> = ({
+  waterfall,
+  exceedsMax,
+  waterfallItemId,
+  location
+}) => {
+  const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
+  const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
-  public onCloseFlyout = () => {
-    this.setQueryParams({
-      flyoutDetailTab: undefined,
-      waterfallItemId: undefined
-    });
-  };
+  const { serviceColors, duration } = waterfall;
 
-  public renderWaterfallItem = (item: IWaterfallItem) => {
-    const { serviceColors, waterfall, urlParams }: Props = this.props;
+  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const errorMarks = getErrorMarks(waterfall.items, serviceColors);
+
+  const renderWaterfallItem = (item: IWaterfallItem) => {
+    if (item.docType === 'error') {
+      return null;
+    }
 
     const errorCount =
       item.docType === 'transaction'
-        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+        ? waterfall.errorsPerTransaction[item.doc.transaction.id]
         : 0;
 
     return (
       <WaterfallItem
         key={item.id}
         timelineMargins={TIMELINE_MARGINS}
-        color={serviceColors[item.serviceName]}
+        color={serviceColors[item.doc.service.name]}
         item={item}
-        totalDuration={waterfall.duration}
-        isSelected={item.id === urlParams.waterfallItemId}
+        totalDuration={duration}
+        isSelected={item.id === waterfallItemId}
         errorCount={errorCount}
-        onClick={() => this.onOpenFlyout(item)}
+        onClick={() => toggleFlyout({ item, location })}
       />
     );
   };
 
-  public getFlyOut = () => {
-    const { waterfall, urlParams } = this.props;
+  return (
+    <Container>
+      {exceedsMax && (
+        <EuiCallOut
+          color="warning"
+          size="s"
+          iconType="alert"
+          title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
+            defaultMessage:
+              'Number of items in this trace exceed what is displayed'
+          })}
+        />
+      )}
+      <StickyContainer>
+        <Timeline
+          marks={[...agentMarks, ...errorMarks]}
+          duration={duration}
+          height={waterfallHeight}
+          margins={TIMELINE_MARGINS}
+        />
+        <WaterfallItemsContainer paddingTop={TIMELINE_MARGINS.top}>
+          {waterfall.items.map(renderWaterfallItem)}
+        </WaterfallItemsContainer>
+      </StickyContainer>
 
-    const currentItem =
-      urlParams.waterfallItemId &&
-      waterfall.itemsById[urlParams.waterfallItemId];
-
-    if (!currentItem) {
-      return null;
-    }
-
-    switch (currentItem.docType) {
-      case 'span':
-        const parentTransaction = waterfall.getTransactionById(
-          currentItem.parentId
-        );
-
-        return (
-          <SpanFlyout
-            totalDuration={waterfall.duration}
-            span={currentItem.span}
-            parentTransaction={parentTransaction}
-            onClose={this.onCloseFlyout}
-          />
-        );
-      case 'transaction':
-        return (
-          <TransactionFlyout
-            transaction={currentItem.transaction}
-            onClose={this.onCloseFlyout}
-            traceRootDuration={waterfall.traceRootDuration}
-            errorCount={currentItem.errorCount}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  public render() {
-    const { waterfall, exceedsMax } = this.props;
-    const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-    const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
-
-    return (
-      <Container>
-        {exceedsMax ? (
-          <EuiCallOut
-            color="warning"
-            size="s"
-            iconType="alert"
-            title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
-              defaultMessage:
-                'Number of items in this trace exceed what is displayed'
-            })}
-          />
-        ) : null}
-        <StickyContainer>
-          <Timeline
-            agentMarks={this.props.agentMarks}
-            duration={waterfall.duration}
-            height={waterfallHeight}
-            margins={TIMELINE_MARGINS}
-          />
-          <div
-            style={{
-              paddingTop: TIMELINE_MARGINS.top
-            }}
-          >
-            {waterfall.orderedItems.map(this.renderWaterfallItem)}
-          </div>
-        </StickyContainer>
-
-        {this.getFlyOut()}
-      </Container>
-    );
-  }
-
-  private setQueryParams(params: APMQueryParams) {
-    const { location } = this.props;
-    history.replace({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...params
-      })
-    });
-  }
-}
+      <WaterfallFlyout
+        waterfallItemId={waterfallItemId}
+        waterfall={waterfall}
+        location={location}
+        toggleFlyout={toggleFlyout}
+      />
+    </Container>
+  );
+};
