@@ -75,7 +75,7 @@ export async function getServiceMapFromTraceIds({
             map_script: {
               lang: 'painless',
               source: `def id;
-                if (!doc['span.id'].empty) {  
+                if (!doc['span.id'].empty) {
                   id = doc['span.id'].value;
                 } else {
                   id = doc['transaction.id'].value;
@@ -106,12 +106,12 @@ export async function getServiceMapFromTraceIds({
                 destination['span.subtype'] = event['span.subtype'];
                 return destination;
               }
-              
+
               def processAndReturnEvent(def context, def eventId) {
                 if (context.processedEvents[eventId] != null) {
                   return context.processedEvents[eventId];
                 }
-                
+
                 def event = context.eventsById[eventId];
 
                 if (event == null) {
@@ -141,7 +141,8 @@ export async function getServiceMapFromTraceIds({
 
                     if (parent['destination.address'] != null
                       && parent['destination.address'] != ""
-                      && parent['span.type'] == 'external'
+                      && (parent['span.type'] == 'external'
+                        || parent['span.type'] == 'messaging')
                       && (parent['service.name'] != event['service.name']
                         || parent['service.environment'] != event['service.environment']
                       )
@@ -154,7 +155,7 @@ export async function getServiceMapFromTraceIds({
 
                 def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
 
-                def currentLocation = new HashMap(service);
+                def currentLocation = service;
 
                 /* only add the current location to the path if it's different from the last one*/
                 if (lastLocation == null || !lastLocation.equals(currentLocation)) {
@@ -162,7 +163,7 @@ export async function getServiceMapFromTraceIds({
                 }
 
                 /* if there is an outgoing span, create a new path */
-                if (event['destination.address'] != null && event['destination.address'] != '') {
+                if (event['span.type'] == 'external' || event['span.type'] == 'messaging') {
                   def outgoingLocation = getDestination(event);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);
@@ -179,7 +180,7 @@ export async function getServiceMapFromTraceIds({
 
               context.processedEvents = new HashMap();
               context.eventsById = new HashMap();
-              
+
               context.paths = new HashSet();
               context.externalToServiceMap = new HashMap();
               context.locationsToRemove = new HashSet();
@@ -195,8 +196,8 @@ export async function getServiceMapFromTraceIds({
               def paths = new HashSet();
 
               for(foundPath in context.paths) {
-                if (!context.locationsToRemove.contains(foundPath)) {  
-                  paths.add(foundPath); 
+                if (!context.locationsToRemove.contains(foundPath)) {
+                  paths.add(foundPath);
                 }
               }
 

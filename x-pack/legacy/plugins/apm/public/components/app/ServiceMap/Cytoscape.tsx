@@ -62,7 +62,6 @@ export function Cytoscape({
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy) {
-      // cy.remove(cy.nodes());
       cy.add(elements);
       cy.trigger('data');
     }
