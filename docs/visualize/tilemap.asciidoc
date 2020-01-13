@@ -1,15 +1,15 @@
 [[tilemap]]
 == Coordinate map
 
-Coordinate maps display geographic areas overlaid with circles keyed to the data determined by the buckets you specify. To use coordinate maps, you plot latitude and longitude coordinates on a map.
+Coordinate maps display geographic areas overlaid with circles keyed to the data determined by the buckets you specify. To use coordinate maps, you plot latitude and longitude coordinates.
 
-Coordinate maps have been replaced with <<maps>>, which offers more functionality and is easier to use.
+NOTE: Coordinate maps have been replaced with <<maps>>, which offers more functionality and is easier to use.
 
-If you still want to create coordinate maps in Visualize:
+To create coordinate maps in Visualize:
 
-. Set `xpack.maps.showMapVisualizationTypes` to `true`.
+* Set `xpack.maps.showMapVisualizationTypes` to `true`.
 
-. To display map tiles, {kib} uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+* To display map tiles, {kib} uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 
@@ -17,7 +17,7 @@ in `kibana.yml`.
 [[coordinate-map-aggregation]]
 === Supported aggregations
 
-Coordinate maps support the following aggregations.
+Coordinate maps support the metric and bucket aggregations.
 
 [float]
 ===== Metric aggregations
