@@ -7,8 +7,8 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { KibanaAssetType, DatasetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
-import { loadFieldsFromYaml } from '../../elasticsearch/template/install';
 import * as Registry from '../../../registry';
+import { loadFieldsFromYaml } from '../../fields/field';
 
 export interface Field {
   name: string;
