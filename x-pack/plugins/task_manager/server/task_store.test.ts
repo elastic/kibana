@@ -17,13 +17,13 @@ import {
   TaskLifecycleResult,
 } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
   SavedObjectsSchema,
   SavedObjectAttributes,
-} from '../../../../../src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
+} from '../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 
@@ -45,7 +45,7 @@ const taskDefinitions: TaskDictionary<TaskDefinition> = {
   },
 };
 
-const savedObjectsClient = savedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 beforeEach(() => jest.resetAllMocks());

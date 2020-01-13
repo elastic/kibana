@@ -12,7 +12,7 @@ import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events
 import { ConcreteTaskInstance, TaskStatus } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 
 let fakeTimer: sinon.SinonFakeTimers;
 

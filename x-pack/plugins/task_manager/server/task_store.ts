@@ -11,12 +11,12 @@ import { Subject, Observable } from 'rxjs';
 import { omit, difference } from 'lodash';
 
 import {
-  SavedObjectsClientContract,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
-} from '../../../../../src/core/server';
+  ISavedObjectsRepository,
+} from '../../../../src/core/server';
 
 import { asOk, asErr } from './lib/result_type';
 
@@ -60,7 +60,7 @@ export interface StoreOpts {
   taskManagerId: string;
   maxAttempts: number;
   definitions: TaskDictionary<TaskDefinition>;
-  savedObjectsRepository: SavedObjectsClientContract;
+  savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
 }
 
@@ -123,7 +123,7 @@ export class TaskStore {
 
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
-  private savedObjectsRepository: SavedObjectsClientContract;
+  private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: SavedObjectsSerializer;
   private events$: Subject<TaskClaim>;
 
