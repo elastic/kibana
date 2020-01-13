@@ -1935,6 +1935,11 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
+    // Warning: (ae-forgotten-export) The symbol "ImageValidation" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "StringValidation" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    validation?: ImageValidation | StringValidation;
     value?: SavedObjectAttribute;
 }
 
