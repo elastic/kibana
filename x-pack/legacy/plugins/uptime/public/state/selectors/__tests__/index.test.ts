@@ -19,16 +19,16 @@ describe('state selectors', () => {
       count: {
         up: 2,
         down: 0,
-        mixed: 0,
         total: 2,
       },
       errors: [],
       loading: false,
     },
-    ui: {
-      basePath: 'yyz',
-      integrationsPopoverOpen: null,
-      lastRefresh: 125,
+    ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
+    monitorStatus: {
+      status: null,
+      monitor: null,
+      loading: false,
     },
   };
 

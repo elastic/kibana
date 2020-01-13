@@ -12,11 +12,14 @@ import {
   IndexParameter,
   BoostParameter,
   CoerceNumberParameter,
+  FormatParameter,
+  LocaleParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import { FormDataProvider } from '../../../../shared_imports';
 
-const getDefaultToggleValue = (param: string, field: FieldType) => {
-  return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
+const getDefaultToggleValue = (param: 'locale' | 'format' | 'boost', field: FieldType) => {
+  return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
 interface Props {
@@ -28,9 +31,28 @@ export const RangeType = ({ field }: Props) => {
     <>
       <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
+
+        <FormDataProvider pathsToWatch="subType">
+          {formData =>
+            formData.subType === 'date_range' ? (
+              <FormatParameter
+                defaultValue={field.source.format}
+                defaultToggleValue={getDefaultToggleValue('format', field.source)}
+              />
+            ) : null
+          }
+        </FormDataProvider>
       </BasicParametersSection>
 
       <AdvancedParametersSection>
+        <FormDataProvider pathsToWatch="subType">
+          {formData =>
+            formData.subType === 'date_range' ? (
+              <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
+            ) : null
+          }
+        </FormDataProvider>
+
         <CoerceNumberParameter />
 
         <StoreParameter />
