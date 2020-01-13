@@ -14,10 +14,9 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   window.onload = function () {
     var files = [
       '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
-      '{{dllBundlePath}}/vendors_0.bundle.dll.js',
-      '{{dllBundlePath}}/vendors_1.bundle.dll.js',
-      '{{dllBundlePath}}/vendors_2.bundle.dll.js',
-      '{{dllBundlePath}}/vendors_3.bundle.dll.js',
+      {{#each dllJsChunks}}
+        '{{this}}',
+      {{/each}}
       '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
       '{{regularBundlePath}}/commons.bundle.js',
       '{{regularBundlePath}}/{{appId}}.bundle.js'

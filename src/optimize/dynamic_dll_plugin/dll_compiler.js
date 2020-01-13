@@ -48,7 +48,7 @@ export class DllCompiler {
     uiBundles = {},
     babelLoaderCacheDir = '',
     threadLoaderPoolConfig = {},
-    chunks = ['0']
+    chunks = Array.from(Array(4).keys()).map(chunkN => `_${chunkN}`)
   ) {
     return {
       uiBundles,
@@ -69,12 +69,11 @@ export class DllCompiler {
     };
   }
 
-  constructor(uiBundles, threadLoaderPoolConfig, logWithMetadata, numberOfChunks) {
+  constructor(uiBundles, threadLoaderPoolConfig, logWithMetadata) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
       uiBundles,
       uiBundles.getCacheDirectory('babel'),
-      threadLoaderPoolConfig,
-      Array.from(Array(numberOfChunks).keys()).map(chunkN => `_${chunkN}`)
+      threadLoaderPoolConfig
     );
     this.logWithMetadata = logWithMetadata || (() => null);
   }

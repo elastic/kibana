@@ -301,7 +301,6 @@ export default class BaseOptimizer {
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
           logWithMetadata: this.logWithMetadata,
-          numberOfChunks: 4,
         }),
 
         new MiniCssExtractPlugin({
