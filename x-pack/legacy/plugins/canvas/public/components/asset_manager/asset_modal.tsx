@@ -70,13 +70,13 @@ export const AssetModal: FunctionComponent<Props> = props => {
   const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
 
   const emptyAssets = (
-    <EuiPanel className="canvasAssetManager__emptyPanel">
+    <div className="canvasAssetManager__emptyPanel">
       <EuiEmptyPrompt
         iconType="importAction"
         title={<h2>{strings.getEmptyAssetsDescription()}</h2>}
         titleSize="xs"
       />
-    </EuiPanel>
+    </div>
   );
 
   return (
