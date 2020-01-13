@@ -32,6 +32,7 @@ const uiExports = {
     order: 9002,
     icon: 'plugins/monitoring/icons/monitoring.svg',
     euiIconType: 'monitoringApp',
+    linkToLastSubUrl: false,
     main: 'plugins/monitoring/legacy',
   },
   injectDefaultVars(server: Server) {
@@ -93,7 +94,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
 
     init(server: Server) {
       const serverConfig = server.config();
-      const { injectUiAppVars, getOSInfo, plugins } = server as typeof server & { getOSInfo?: any };
+      const { getOSInfo, plugins } = server as typeof server & { getOSInfo?: any };
       const log = (...args: Parameters<typeof server.log>) => server.log(...args);
       const route = (...args: Parameters<typeof server.route>) => server.route(...args);
       const expose = (...args: Parameters<typeof server.expose>) => server.expose(...args);
@@ -106,7 +107,6 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
             throw new Error(`Unknown key '${key}'`);
           },
         }),
-        injectUiAppVars,
         log,
         getOSInfo,
         events: {
