@@ -88,6 +88,20 @@ utils.expandLiteralStrings = function(data) {
     // Expand to triple quotes if there are _any_ slashes
     if (string.match(/\\./)) {
       const firstDoubleQuoteIdx = string.indexOf('"');
+      const lastDoubleQuoteIdx = string.lastIndexOf('"');
+
+      // Handle a special case where we may have a value like "\"test\"". We don't
+      // want to expand this to """"test"""" - so we terminate before processing the string
+      // further if we detect this either at the start or end of the double quote section.
+
+      if (string[firstDoubleQuoteIdx + 1] === '\\' && string[firstDoubleQuoteIdx + 2] === '"') {
+        return string;
+      }
+
+      if (string[lastDoubleQuoteIdx - 1] === '"' && string[lastDoubleQuoteIdx - 2] === '\\') {
+        return string;
+      }
+
       const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
       const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
       const jsonValue = JSON.parse(rawStringifiedValue)
