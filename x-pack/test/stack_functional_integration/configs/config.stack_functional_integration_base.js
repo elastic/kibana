@@ -43,22 +43,22 @@ export default async ({ readConfigFile }) => {
     uiSettings: {},
   };
 };
-const splitRight = re => x => re.exec(x)[1];
-function truncate(x) {
-  const dropKibanaPath = splitRight(/^.+kibana\/(.*$)/gm);
-  return dropKibanaPath(x);
-}
-function highLight(x) {
-  const dropTestsPath = splitRight(/^.+test\/functional\/apps\/(.*)\//gm);
-  const cleaned = dropTestsPath(x);
-  const colored = chalk.greenBright.bold(cleaned);
-  return x.replace(cleaned, colored);
-}
 
-function logTest(x) {
-  const normalizeTruncHighlight = pipe(normalize, truncate, highLight);
-  log.info(`### Testing: '${normalizeTruncHighlight(x)}'`);
-  return x;
+const splitRight = re => testPath => re.exec(testPath)[1];
+
+function truncate(testPath) {
+  const dropKibanaPath = splitRight(/^.+kibana[\\/](.*$)/gm);
+  return dropKibanaPath(testPath);
+}
+function highLight(testPath) {
+  const dropTestsPath = splitRight(/^.+test[\\/]functional[\\/]apps[\\/](.*)[\\/]/gm);
+  const cleaned = dropTestsPath(testPath);
+  const colored = chalk.greenBright.bold(cleaned);
+  return testPath.replace(cleaned, colored);
+}
+function logTest(testPath) {
+  log.info(`Testing: '${highLight(truncate(testPath))}'`);
+  return testPath;
 }
 function mutateProtocols(servers, provisionedConfigs) {
   servers.kibana.protocol = provisionedConfigs.ESPROTO;
