@@ -59,19 +59,19 @@ export const logMessagePartRT = rt.union([
   }),
 ]);
 
-export const logColumnRT = rt.union([
-  rt.type({ columnId: rt.string, timestamp: rt.number }),
-  rt.type({
-    columnId: rt.string,
-    field: rt.string,
-    value: rt.unknown,
-    highlights: rt.array(rt.string),
-  }),
-  rt.type({
-    columnId: rt.string,
-    message: rt.array(logMessagePartRT),
-  }),
-]);
+export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt.number });
+export const logFieldColumnRT = rt.type({
+  columnId: rt.string,
+  field: rt.string,
+  value: rt.unknown,
+  highlights: rt.array(rt.string),
+});
+export const logMessageColumnRT = rt.type({
+  columnId: rt.string,
+  message: rt.array(logMessagePartRT),
+});
+
+export const logColumnRT = rt.union([logTimestampColumnRT, logFieldColumnRT, logMessageColumnRT]);
 
 export const logEntryRT = rt.type({
   id: rt.string,
@@ -80,6 +80,9 @@ export const logEntryRT = rt.type({
 });
 
 export type LogMessagepart = rt.TypeOf<typeof logMessagePartRT>;
+export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
+export type LogFieldColumn = rt.TypeOf<typeof logFieldColumnRT>;
+export type LogMessageColumn = rt.TypeOf<typeof logMessageColumnRT>;
 export type LogColumn = rt.TypeOf<typeof logColumnRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
