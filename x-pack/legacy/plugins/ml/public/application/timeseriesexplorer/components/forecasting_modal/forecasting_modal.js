@@ -61,7 +61,7 @@ export const ForecastingModal = injectI18n(
       job: PropTypes.object,
       detectorIndex: PropTypes.number,
       entities: PropTypes.array,
-      loadForForecastId: PropTypes.func,
+      setForecastId: PropTypes.func,
     };
 
     constructor(props) {
@@ -81,7 +81,7 @@ export const ForecastingModal = injectI18n(
     };
 
     viewForecast = forecastId => {
-      this.props.loadForForecastId(forecastId);
+      this.props.setForecastId(forecastId);
       this.closeModal();
     };
 
@@ -279,7 +279,7 @@ export const ForecastingModal = injectI18n(
                     this.setState({
                       jobClosingState: PROGRESS_STATES.DONE,
                     });
-                    this.props.loadForForecastId(forecastId);
+                    this.props.setForecastId(forecastId);
                     this.closeAfterRunningForecast();
                   })
                   .catch(response => {
@@ -297,10 +297,10 @@ export const ForecastingModal = injectI18n(
                     this.setState({
                       jobClosingState: PROGRESS_STATES.ERROR,
                     });
-                    this.props.loadForForecastId(forecastId);
+                    this.props.setForecastId(forecastId);
                   });
               } else {
-                this.props.loadForForecastId(forecastId);
+                this.props.setForecastId(forecastId);
                 this.closeAfterRunningForecast();
               }
             } else {
@@ -327,7 +327,7 @@ export const ForecastingModal = injectI18n(
                   );
 
                   // Try and load any results which may have been created.
-                  this.props.loadForForecastId(forecastId);
+                  this.props.setForecastId(forecastId);
                   this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
                   clearInterval(this.forecastChecker);
                 }

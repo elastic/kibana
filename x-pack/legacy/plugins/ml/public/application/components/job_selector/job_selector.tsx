@@ -4,23 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { PropTypes } from 'prop-types';
-import moment from 'moment';
+import PropTypes from 'prop-types';
 
-import { ml } from '../../services/ml_api_service';
-import { JobSelectorTable } from './job_selector_table';
-import { IdBadges } from './id_badges';
-import { NewSelectionIdBadges } from './new_selection_id_badges';
-import { timefilter } from 'ui/timefilter';
-import {
-  getGroupsFromJobs,
-  normalizeTimes,
-  setGlobalState,
-  setGlobalStateSkipRefresh,
-} from './job_select_service_utils';
-import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,15 +19,42 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-function mergeSelection(jobIds, groupObjs, singleSelection) {
+import { toastNotifications } from 'ui/notify';
+
+import { Dictionary } from '../../../../common/types/common';
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { ml } from '../../services/ml_api_service';
+import { useUrlState } from '../../util/url_state';
+// @ts-ignore
+import { JobSelectorTable } from './job_selector_table';
+// @ts-ignore
+import { IdBadges } from './id_badges';
+// @ts-ignore
+import { NewSelectionIdBadges } from './new_selection_id_badges';
+import {
+  getGroupsFromJobs,
+  getTimeRangeFromSelection,
+  normalizeTimes,
+} from './job_select_service_utils';
+
+interface GroupObj {
+  groupId: string;
+  jobIds: string[];
+}
+function mergeSelection(
+  jobIds: string[],
+  groupObjs: GroupObj[],
+  singleSelection: boolean
+): string[] {
   if (singleSelection) {
     return jobIds;
   }
 
-  const selectedIds = [];
-  const alreadySelected = [];
+  const selectedIds: string[] = [];
+  const alreadySelected: string[] = [];
 
   groupObjs.forEach(group => {
     selectedIds.push(group.groupId);
@@ -58,8 +71,9 @@ function mergeSelection(jobIds, groupObjs, singleSelection) {
   return selectedIds;
 }
 
-function getInitialGroupsMap(selectedGroups) {
-  const map = {};
+type GroupsMap = Dictionary<string[]>;
+function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
+  const map: GroupsMap = {};
 
   if (selectedGroups.length) {
     selectedGroups.forEach(group => {
@@ -73,17 +87,20 @@ function getInitialGroupsMap(selectedGroups) {
 const BADGE_LIMIT = 10;
 const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
-export function JobSelector({
-  dateFormatTz,
-  globalState,
-  jobSelectService$,
-  selectedJobIds,
-  selectedGroups,
-  singleSelection,
-  timeseriesOnly,
-}) {
-  const [jobs, setJobs] = useState([]);
-  const [groups, setGroups] = useState([]);
+interface JobSelectorProps {
+  dateFormatTz: string;
+  singleSelection: boolean;
+  timeseriesOnly: boolean;
+}
+
+export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
+  const [globalState, setGlobalState] = useUrlState('_g');
+
+  const selectedJobIds = globalState?.ml?.jobIds ?? [];
+  const selectedGroups = globalState?.ml?.groups ?? [];
+
+  const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [maps, setMaps] = useState({ groupsMap: getInitialGroupsMap(selectedGroups), jobsMap: {} });
   const [selectedIds, setSelectedIds] = useState(
     mergeSelection(selectedJobIds, selectedGroups, singleSelection)
@@ -96,20 +113,12 @@ export function JobSelector({
   const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
-  const flyoutEl = useRef(null);
+  const flyoutEl = useRef<{ flyout: HTMLElement }>(null);
 
+  // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
-    // listen for update from Single Metric Viewer
-    const subscription = jobSelectService$.subscribe(({ selection, resetSelection }) => {
-      if (resetSelection === true) {
-        setSelectedIds(selection);
-      }
-    });
-
-    return function cleanup() {
-      subscription.unsubscribe();
-    };
-  }, []); // eslint-disable-line
+    setSelectedIds(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+  }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
   // Ensure current selected ids always show up in flyout
   useEffect(() => {
@@ -121,7 +130,9 @@ export function JobSelector({
   const handleResize = useCallback(() => {
     if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
       // get all cols in flyout table
-      const tableHeaderCols = flyoutEl.current.flyout.querySelectorAll('table thead th');
+      const tableHeaderCols: NodeListOf<HTMLElement> = flyoutEl.current.flyout.querySelectorAll(
+        'table thead th'
+      );
       // get the width of the last col
       const derivedWidth = tableHeaderCols[tableHeaderCols.length - 1].offsetWidth - 16;
       const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
@@ -145,21 +156,12 @@ export function JobSelector({
     handleResize();
   }, [handleResize, jobs]);
 
-  // On opening and closing the flyout, optionally update a global `skipRefresh` flag.
-  // This allows us to circumvent race conditions which could happen by triggering both
-  // timefilter and job selector related events in Single Metric Viewer.
-  function closeFlyout(setSkipRefresh = true) {
+  function closeFlyout() {
     setIsFlyoutVisible(false);
-    if (setSkipRefresh) {
-      setGlobalStateSkipRefresh(globalState, false);
-    }
   }
 
-  function showFlyout(setSkipRefresh = true) {
+  function showFlyout() {
     setIsFlyoutVisible(true);
-    if (setSkipRefresh) {
-      setGlobalStateSkipRefresh(globalState, true);
-    }
   }
 
   function handleJobSelectionClick() {
@@ -174,8 +176,8 @@ export function JobSelector({
         setGroups(groupsWithTimerange);
         setMaps({ groupsMap, jobsMap: resp.jobsMap });
       })
-      .catch(err => {
-        console.log('Error fetching jobs', err);
+      .catch((err: any) => {
+        console.error('Error fetching jobs with time range', err); // eslint-disable-line
         toastNotifications.addDanger({
           title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
             defaultMessage: 'An error occurred fetching jobs. Refresh and try again.',
@@ -184,14 +186,14 @@ export function JobSelector({
       });
   }
 
-  function handleNewSelection({ selectionFromTable }) {
+  function handleNewSelection({ selectionFromTable }: { selectionFromTable: any }) {
     setNewSelection(selectionFromTable);
   }
 
   function applySelection() {
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
-    const allNewSelection = [];
-    const groupSelection = [];
+    const allNewSelection: string[] = [];
+    const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
 
     newSelection.forEach(id => {
       if (maps.groupsMap[id] !== undefined) {
@@ -206,68 +208,29 @@ export function JobSelector({
     // create a Set to remove duplicate values
     const allNewSelectionUnique = Array.from(new Set(allNewSelection));
 
-    const isPrevousSelection = isEqual(
-      { selectedJobIds, selectedGroups },
-      { selectedJobIds: allNewSelectionUnique, selectedGroups: groupSelection }
-    );
-
     setSelectedIds(newSelection);
     setNewSelection([]);
 
-    // If the job selection is unchanged, then we close the modal and
-    // disable skipping the timefilter listener flag in globalState.
-    // If the job selection changed, this will not
-    // update skipRefresh yet to avoid firing multiple events via
-    // applyTimeRangeFromSelection() and setGlobalState().
-    closeFlyout(isPrevousSelection);
+    closeFlyout();
 
-    // If the job selection changed, then when
-    // calling `applyTimeRangeFromSelection()` here
-    // Single Metric Viewer will skip an update
-    // triggered by timefilter to avoid a race
-    // condition caused by the job update listener
-    // that's also going to be triggered.
-    applyTimeRangeFromSelection(allNewSelectionUnique);
+    const time = applyTimeRange
+      ? getTimeRangeFromSelection(jobs, allNewSelectionUnique)
+      : undefined;
 
-    // Set `skipRefresh` again to `false` here so after
-    // both the time range and jobs have been updated
-    // Single Metric Viewer should again update itself.
-    setGlobalState(globalState, {
-      selectedIds: allNewSelectionUnique,
-      selectedGroups: groupSelection,
-      skipRefresh: false,
+    setGlobalState({
+      ml: {
+        jobIds: allNewSelectionUnique,
+        groups: groupSelection,
+      },
+      ...(time !== undefined ? { time } : {}),
     });
-  }
-
-  function applyTimeRangeFromSelection(selection) {
-    if (applyTimeRange && jobs.length > 0) {
-      const times = [];
-      jobs.forEach(job => {
-        if (selection.includes(job.job_id)) {
-          if (job.timeRange.from !== undefined) {
-            times.push(job.timeRange.from);
-          }
-          if (job.timeRange.to !== undefined) {
-            times.push(job.timeRange.to);
-          }
-        }
-      });
-      if (times.length) {
-        const min = Math.min(...times);
-        const max = Math.max(...times);
-        timefilter.setTime({
-          from: moment(min).toISOString(),
-          to: moment(max).toISOString(),
-        });
-      }
-    }
   }
 
   function toggleTimerangeSwitch() {
     setApplyTimeRange(!applyTimeRange);
   }
 
-  function removeId(id) {
+  function removeId(id: string) {
     setNewSelection(newSelection.filter(item => item !== id));
   }
 
@@ -315,6 +278,7 @@ export function JobSelector({
     if (isFlyoutVisible) {
       return (
         <EuiFlyout
+          // @ts-ignore
           ref={flyoutEl}
           onClose={closeFlyout}
           aria-labelledby="jobSelectorFlyout"
@@ -423,8 +387,6 @@ export function JobSelector({
 }
 
 JobSelector.propTypes = {
-  globalState: PropTypes.object,
-  jobSelectService$: PropTypes.object,
   selectedJobIds: PropTypes.array,
   singleSelection: PropTypes.bool,
   timeseriesOnly: PropTypes.bool,
