@@ -24,10 +24,15 @@ const convertParts = require('./convert/parts');
 
 module.exports = spec => {
   const result = {};
-  // TODO:
-  // Since https://github.com/elastic/elasticsearch/pull/42346 has been merged into ES master
-  // the JSON doc specification has been updated. We need to update this script to take advantage
-  // of the added information but it will also require updating console's editor autocomplete.
+  /**
+   * TODO:
+   * Since https://github.com/elastic/elasticsearch/pull/42346 has been merged into ES master
+   * the JSON doc specification has been updated. We need to update this script to take advantage
+   * of the added information but it will also require updating console editor autocomplete.
+   *
+   * Note: for now we exclude all deprecated patterns from the generated spec to prevent them
+   * from being used in autocompletion.
+   */
   Object.keys(spec).forEach(api => {
     const source = spec[api];
     if (!source.url) {
@@ -46,8 +51,10 @@ module.exports = spec => {
     const urlComponents = {};
 
     if (source.url.paths) {
-      patterns = convertPaths(source.url.paths);
-      source.url.paths.forEach(pathsObject => {
+      const paths = source.url.paths.filter(path => !path.deprecated);
+      paths.forEach(p => console.log(p.deprecated));
+      patterns = convertPaths(paths);
+      paths.forEach(pathsObject => {
         pathsObject.methods.forEach(method => methodSet.add(method));
         if (pathsObject.parts) {
           for (const partName of Object.keys(pathsObject.parts)) {
