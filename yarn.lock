@@ -3301,11 +3301,6 @@
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
   integrity sha512-HonbGsHFbskh9zRAzA6tabcw18mCOsSEOL2ibGAuVqk6e7nElcRmWO5L4UfIHpDbWBWw+eZYFdsQ1+MEGgpcVA==
 
-"@types/boom@7.2.1":
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.1.tgz#a21e21ba08cc49d17b26baef98e1a77ee4d6cdb0"
-  integrity sha512-kOiap+kSa4DPoookJXQGQyKy1rjZ55tgfKAh9F0m1NUdukkcwVzpSnXPMH42a5L+U++ugdQlh/xFJu/WAdr1aw==
-
 "@types/caseless@*":
   version "0.12.2"
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
@@ -6965,13 +6960,6 @@ boom@5.x.x:
   integrity sha512-Z5BTk6ZRe4tXXQlkqftmsAUANpXmuwlsF5Oov8ThoMbQRzdGTA1ngYRW160GexgOgjsFOKJz0LYhoNi+2AMBUw==
   dependencies:
     hoek "4.x.x"
-
-boom@7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-7.3.0.tgz#733a6d956d33b0b1999da3fe6c12996950d017b9"
-  integrity sha512-Swpoyi2t5+GhOEGw8rEsKvTxFLIDiiKoUc2gsoV6Lyr43LHBIzch3k2MvYUs8RTROrIkVJ3Al0TkaOGjnb+B6A==
-  dependencies:
-    hoek "6.x.x"
 
 boom@7.x.x, boom@^7.1.0, boom@^7.2.0:
   version "7.2.2"
