@@ -208,7 +208,7 @@ function getGroupLabel(groupName: AppCategory) {
       });
     case AppCategory.management:
       return i18n.translate('core.ui.managementNavList.label', {
-        defaultMessage: 'Management',
+        defaultMessage: 'Admin',
       });
     default:
       return groupName;

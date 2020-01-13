@@ -41,7 +41,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.contain('Management');
       });
 
       it(`allows settings to be changed`, async () => {

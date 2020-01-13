@@ -200,7 +200,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        if (await appsMenu.linkExists('Stack Management')) {
+        if (await appsMenu.linkExists('Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -209,7 +209,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        if (!(await appsMenu.linkExists('Stack Management'))) {
+        if (!(await appsMenu.linkExists('Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });
