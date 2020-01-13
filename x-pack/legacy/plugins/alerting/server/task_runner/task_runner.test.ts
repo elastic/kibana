@@ -398,7 +398,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('recovers gracefully when the Alert Task Runner throws an exception when fetching the ApiKey', async () => {
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
     encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockImplementation(() => {
       throw new Error('OMG');
     });
@@ -458,7 +458,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('recovers gracefully when the Alert Task Runner throws an exception when decrypting attributes', async () => {
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
     savedObjectsClient.get.mockImplementation(() => {
       throw new Error('OMG');
     });
