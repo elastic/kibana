@@ -13,6 +13,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsUpdateNamespacesOptions,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -23,6 +24,18 @@ interface SecureSavedObjectsClientWrapperOptions {
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
+}
+
+interface SavedObjectNamespaces {
+  namespaces?: string[];
+}
+
+interface SavedObjectsNamespaces {
+  saved_objects: SavedObjectNamespaces[];
+}
+
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set<T>(arr));
 }
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -52,7 +65,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
 
-    return await this.baseClient.create(type, attributes, options);
+    const savedObject = await this.baseClient.create(type, attributes, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
   }
 
   public async bulkCreate<T = unknown>(
@@ -66,7 +80,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       { objects, options }
     );
 
-    return await this.baseClient.bulkCreate(objects, options);
+    const response = await this.baseClient.bulkCreate(objects, options);
+    return await this.filterSavedObjectsNamespaces(response);
   }
 
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
@@ -78,7 +93,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
     await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
-    return this.baseClient.find<T>(options);
+    const response = await this.baseClient.find<T>(options);
+    return await this.filterSavedObjectsNamespaces(response);
   }
 
   public async bulkGet<T = unknown>(
@@ -90,13 +106,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       options,
     });
 
-    return await this.baseClient.bulkGet<T>(objects, options);
+    const response = await this.baseClient.bulkGet<T>(objects, options);
+    return await this.filterSavedObjectsNamespaces(response);
   }
 
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
-    return await this.baseClient.get<T>(type, id, options);
+    const savedObject = await this.baseClient.get<T>(type, id, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
   }
 
   public async update<T = unknown>(
@@ -112,7 +130,50 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       options,
     });
 
-    return await this.baseClient.update(type, id, attributes, options);
+    const savedObject = await this.baseClient.update(type, id, attributes, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
+  }
+
+  public async updateNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsUpdateNamespacesOptions = {}
+  ) {
+    const existingSavedObject = await this.baseClient.get(type, id);
+    const allNamespaces = [...new Set([...namespaces, ...existingSavedObject.namespaces!])];
+    try {
+      const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
+        'update',
+        allNamespaces
+      );
+      const args = {
+        type,
+        id,
+        namespaces,
+        options,
+      };
+      if (!checkPrivilegesResult.hasAllRequested) {
+        this.auditLogger.savedObjectsAuthorizationFailure(
+          checkPrivilegesResult.username,
+          'updateNamespaces',
+          [type],
+          ['update'],
+          args
+        );
+        throw this.errors.decorateForbiddenError(new Error('Unable to updateNamespaces'));
+      }
+      this.auditLogger.savedObjectsAuthorizationSuccess(
+        checkPrivilegesResult.username,
+        'updateNamespaces',
+        [type],
+        args
+      );
+    } catch (error) {
+      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
+    }
+
+    return await this.baseClient.updateNamespaces(type, id, namespaces, options);
   }
 
   public async bulkUpdate<T = unknown>(
@@ -126,12 +187,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       { objects, options }
     );
 
-    return await this.baseClient.bulkUpdate<T>(objects, options);
+    const response = await this.baseClient.bulkUpdate<T>(objects, options);
+    return await this.filterSavedObjectsNamespaces(response);
   }
 
   private async checkPrivileges(actions: string | string[], namespace?: string) {
     try {
-      return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespace);
+      return await this.checkSavedObjectsPrivilegesAsCurrentUser.dynamically(actions, namespace);
     } catch (error) {
       throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
@@ -178,5 +240,59 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
     return [...new Set(objects.map(o => o.type))];
+  }
+
+  private async filterSavedObjectNamespaces<T extends SavedObjectNamespaces>(
+    savedObject: T
+  ): Promise<T> {
+    if (savedObject.namespaces == null) {
+      return savedObject;
+    }
+
+    const action = this.actions.login;
+    const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
+      action,
+      savedObject.namespaces
+    );
+    const filteredNamespaces = Object.entries(
+      checkPrivilegesResult.spacePrivileges
+    ).map(([spaceId, privileges]) => (privileges[action] === true ? spaceId : '?'));
+    return {
+      ...savedObject,
+      namespaces: filteredNamespaces,
+    };
+  }
+
+  private async filterSavedObjectsNamespaces<T extends SavedObjectsNamespaces>(
+    response: T
+  ): Promise<T> {
+    const { saved_objects: savedObjects } = response;
+    const namespaces = uniq(savedObjects.flatMap(savedObject => savedObject.namespaces || []));
+    if (namespaces.length === 0) {
+      return {
+        ...response,
+        saved_objects: savedObjects,
+      };
+    }
+
+    const action = this.actions.login;
+    const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
+      action,
+      namespaces
+    );
+    const authorizedNamespaces = Object.entries(checkPrivilegesResult.spacePrivileges)
+      .filter(([, privileges]) => privileges[action] === true)
+      .map(([spaceId]) => spaceId);
+    return {
+      ...response,
+      saved_objects: savedObjects.map(savedObject => ({
+        ...savedObject,
+        namespaces:
+          savedObject.namespaces &&
+          savedObject.namespaces.map(namespace =>
+            authorizedNamespaces.includes(namespace) ? namespace : '?'
+          ),
+      })),
+    };
   }
 }

@@ -152,6 +152,12 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
+  public static createConflictError(type: string, id: string) {
+    return SavedObjectsErrorHelpers.decorateConflictError(
+      Boom.conflict(`Saved object [${type}/${id}] conflict`)
+    );
+  }
+
   public static isConflictError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_CONFLICT;
   }

@@ -222,6 +222,7 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsUpdateNamespacesOptions,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,

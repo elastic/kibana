@@ -346,3 +346,54 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:default_and_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "name": "A shared saved-object in the default and space_1 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:only_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "name": "A shared saved-object only in space_1"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:only_space_2",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "name": "A shared saved-object only in space_2"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}

@@ -16,7 +16,7 @@ interface CheckPrivilegesActions {
   version: string;
 }
 
-interface CheckPrivilegesAtResourcesResponse {
+export interface CheckPrivilegesAtResourcesResponse {
   hasAllRequested: boolean;
   username: string;
   resourcePrivileges: {

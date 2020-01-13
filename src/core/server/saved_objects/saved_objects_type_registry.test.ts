@@ -179,6 +179,36 @@ describe('SavedObjectTypeRegistry', () => {
     });
   });
 
+  describe('#isNamespace', () => {
+    it(`returns true when the type is not registered`, () => {
+      expect(registry.isNamespace('unknownType')).toEqual(true);
+    });
+
+    it(`returns false for explicitly namespace agnostic type`, () => {
+      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: true }));
+
+      expect(registry.isNamespace('typeA')).toEqual(false);
+    });
+
+    it(`returns true for explicitly not namespace agnostic type`, () => {
+      registry.registerType(createType({ name: 'typeA', namespaceAgnostic: false }));
+
+      expect(registry.isNamespace('typeA')).toEqual(true);
+    });
+
+    it(`returns false for explicitly namespaces`, () => {
+      registry.registerType(createType({ name: 'typeA', namespaces: true }));
+
+      expect(registry.isNamespace('typeA')).toEqual(false);
+    });
+
+    it(`returns true for explicitly not namespaces type`, () => {
+      registry.registerType(createType({ name: 'typeA', namespaces: false }));
+
+      expect(registry.isNamespace('typeA')).toEqual(true);
+    });
+  });
+
   describe('#isHidden', () => {
     it('returns correct value for the type', () => {
       registry.registerType(createType({ name: 'typeA', hidden: true }));

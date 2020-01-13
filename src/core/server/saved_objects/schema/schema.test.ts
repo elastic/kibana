@@ -46,3 +46,51 @@ describe('#isNamespaceAgnostic', () => {
     expect(result).toBe(false);
   });
 });
+
+describe('#isNamespace', () => {
+  it(`returns true for unknown types`, () => {
+    const schema = new SavedObjectsSchema();
+    const result = schema.isNamespace('bar');
+    expect(result).toBe(true);
+  });
+
+  it(`returns false for explicitly namespace agnostic type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: true,
+      },
+    });
+    const result = schema.isNamespace('foo');
+    expect(result).toBe(false);
+  });
+
+  it(`returns true for explicitly not namespace agnostic type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: false,
+      },
+    });
+    const result = schema.isNamespace('foo');
+    expect(result).toBe(true);
+  });
+
+  it(`returns false for explicitly namespaces`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        namespaces: true,
+      },
+    });
+    const result = schema.isNamespace('foo');
+    expect(result).toBe(false);
+  });
+
+  it(`returns true for explicitly not namespaces type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        namespaces: false,
+      },
+    });
+    const result = schema.isNamespace('foo');
+    expect(result).toBe(true);
+  });
+});

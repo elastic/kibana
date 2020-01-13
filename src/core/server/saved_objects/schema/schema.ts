@@ -24,7 +24,8 @@ import { LegacyConfig } from '../../legacy';
  * @internal
  **/
 interface SavedObjectsSchemaTypeDefinition {
-  isNamespaceAgnostic: boolean;
+  isNamespaceAgnostic?: boolean;
+  namespaces?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;
@@ -83,5 +84,33 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+
+  public isNamespace(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and all types are namespace isolated
+    if (!this.definition) {
+      return true;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return true;
+    }
+    return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.namespaces);
+  }
+
+  public isNamespaces(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and all types are namespace isolated
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return !Boolean(typeSchema.isNamespaceAgnostic) && Boolean(typeSchema.namespaces);
   }
 }

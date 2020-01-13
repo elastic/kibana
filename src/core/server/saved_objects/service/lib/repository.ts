@@ -45,6 +45,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
+  SavedObjectsUpdateNamespacesOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -221,7 +222,6 @@ export class SavedObjectsRepository {
       id,
       migrationVersion,
       overwrite = false,
-      namespace,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
     } = options;
@@ -230,14 +230,51 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const method = id && !overwrite ? 'create' : 'index';
+    // This used to be using `method = id && !overwrite ? 'create' : 'index'`;
+    // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
+    // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
+    // We can leave it the old way, it just feels wrong because now we could potentially
+    // be overwriting a saved-object which exists in another namespace
+    //
+    // ID      |   overwrite | old operation | new operation
+    // null        true        index           create
+    // null        false       index           create
+    // something   true        index           index
+    // something   false       create          create
+    const method = id && overwrite ? 'index' : 'create';
     const time = this._getCurrentTime();
+    let savedObjectNamespace;
+    let savedObjectNamespaces;
+
+    if (this._registry.isNamespace(type) && options.namespace) {
+      savedObjectNamespace = options.namespace;
+    } else if (this._registry.isNamespaces(type)) {
+      if (method === 'index') {
+        const response = await this._callCluster('get', {
+          id: this._serializer.generateRawId(undefined, type, id),
+          index: this.getIndexForType(type),
+          ignore: [404],
+        });
+
+        const docFound = response.found === true;
+        const indexFound = response.status !== 404;
+        if (docFound && indexFound && !this._rawInNamespaces(response, options.namespace)) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id!);
+        }
+        savedObjectNamespaces = docFound
+          ? response._source.namespaces
+          : [options.namespace === undefined ? 'default' : options.namespace];
+      } else {
+        savedObjectNamespaces = [options.namespace === undefined ? 'default' : options.namespace];
+      }
+    }
 
     try {
       const migrated = this._migrator.migrateDocument({
         id,
         type,
-        namespace,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes,
         migrationVersion,
         updated_at: time,
@@ -282,10 +319,10 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace, overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const time = this._getCurrentTime();
-    const bulkCreateParams: object[] = [];
 
-    let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    let bulkGetRequestIndexCounter = 0;
+    const bulkGetDocs: object[] = [];
+    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -297,49 +334,136 @@ export class SavedObjectsRepository {
         };
       }
 
-      const method = object.id && !overwrite ? 'create' : 'index';
-      const expectedResult = {
-        esRequestIndex: requestIndexCounter++,
-        requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            namespace,
-            updated_at: time,
-            references: object.references || [],
-          }) as SavedObjectSanitizedDoc
-        ),
-      };
-
-      bulkCreateParams.push(
-        {
-          [method]: {
-            _id: expectedResult.rawMigratedDoc._id,
-            _index: this.getIndexForType(object.type),
+      // This used to be using `method = object.id && !overwrite ? 'create' : 'index'`;
+      // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
+      // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
+      // We can leave it the old way, it just feels wrong because now we could potentially
+      // be overwriting a saved-object which exists in another namespace
+      //
+      // ID      |   overwrite | old operation | new operation
+      // null        true        index           create
+      // null        false       index           create
+      // something   true        index           index
+      // something   false       create          create
+      const method = object.id && overwrite ? 'index' : 'create';
+      if (method === 'create' || !this._registry.isNamespaces(object.type)) {
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            method,
+            object,
           },
+        };
+      }
+
+      bulkGetDocs.push({
+        _id: this._serializer.generateRawId(namespace, object.type, object.id),
+        _index: this.getIndexForType(object.type),
+        _source: ['type', 'namespaces'],
+      });
+
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          esRequestIndex: bulkGetRequestIndexCounter++,
+          method,
+          object,
         },
-        expectedResult.rawMigratedDoc._source
-      );
-
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      };
     });
 
-    const esResponse = await this._writeToCluster('bulk', {
-      refresh,
-      body: bulkCreateParams,
-    });
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: {
+            docs: bulkGetDocs,
+          },
+          ignore: [404],
+        })
+      : undefined;
+
+    let bulkRequestIndexCounter = 0;
+    const bulkCreateParams: object[] = [];
+    const expectedBulkResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+      expectedBulkGetResult => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
+
+        let savedObjectNamespace;
+        let savedObjectNamespaces;
+        const { esRequestIndex, object, method } = expectedBulkGetResult.value;
+        if (esRequestIndex !== undefined) {
+          const indexFound = bulkGetResponse.status !== 404;
+          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult.found === true;
+          if (indexFound && docFound && !this._rawInNamespaces(actualResult, namespace)) {
+            const { id, type } = object;
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+              },
+            };
+          }
+          savedObjectNamespaces = docFound
+            ? actualResult._source.namespaces
+            : [namespace === undefined ? 'default' : namespace];
+        } else {
+          if (this._registry.isNamespace(object.type)) {
+            savedObjectNamespace = namespace;
+          } else if (this._registry.isNamespaces(object.type)) {
+            savedObjectNamespaces = [namespace === undefined ? 'default' : namespace];
+          }
+        }
+
+        const expectedResult = {
+          esRequestIndex: bulkRequestIndexCounter++,
+          requestedId: object.id,
+          rawMigratedDoc: this._serializer.savedObjectToRaw(
+            this._migrator.migrateDocument({
+              id: object.id,
+              type: object.type,
+              attributes: object.attributes,
+              migrationVersion: object.migrationVersion,
+              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+              updated_at: time,
+              references: object.references || [],
+            }) as SavedObjectSanitizedDoc
+          ),
+        };
+
+        bulkCreateParams.push(
+          {
+            [method]: {
+              _id: expectedResult.rawMigratedDoc._id,
+              _index: this.getIndexForType(object.type),
+            },
+          },
+          expectedResult.rawMigratedDoc._source
+        );
+
+        return { tag: 'Right' as 'Right', value: expectedResult };
+      }
+    );
+
+    const bulkResponse = bulkCreateParams.length
+      ? await this._writeToCluster('bulk', {
+          refresh,
+          body: bulkCreateParams,
+        })
+      : undefined;
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedBulkResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = esResponse.items[esRequestIndex];
+        const response = bulkResponse.items[esRequestIndex];
         const {
           error,
           _id: responseId,
@@ -348,7 +472,7 @@ export class SavedObjectsRepository {
         } = Object.values(response)[0] as any;
 
         const {
-          _source: { type, [type]: attributes, references = [] },
+          _source: { type, [type]: attributes, references = [], namespaces },
         } = rawMigratedDoc;
 
         const id = requestedId || responseId;
@@ -362,6 +486,7 @@ export class SavedObjectsRepository {
         return {
           id,
           type,
+          ...(namespaces && { namespaces }),
           updated_at: time,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -387,27 +512,49 @@ export class SavedObjectsRepository {
 
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
-    const response = await this._writeToCluster('delete', {
+    // Instead of the get, we could always do a _delete_by_query
+    const getResponse = await this._callCluster('get', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (
+      getDocNotFound ||
+      getIndexNotFound ||
+      !this._rawInNamespaces(getResponse, options.namespace)
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    const deleteResponse = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
       refresh,
       ignore: [404],
     });
 
-    const deleted = response.result === 'deleted';
+    const deleted = deleteResponse.result === 'deleted';
     if (deleted) {
       return {};
     }
 
-    const docNotFound = response.result === 'not_found';
-    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
-    if (docNotFound || indexNotFound) {
+    const deleteDocNotFound = deleteResponse.result === 'not_found';
+    const deleteIndexNotFound =
+      deleteResponse.error && deleteResponse.error.type === 'index_not_found_exception';
+    if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response })}`
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+        type,
+        id,
+        response: deleteResponse,
+      })}`
     );
   }
 
@@ -429,7 +576,7 @@ export class SavedObjectsRepository {
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
-    const typesToDelete = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
+    const typesToDelete = allTypes.filter(type => this._registry.isNamespace(type));
 
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
@@ -615,7 +762,7 @@ export class SavedObjectsRepository {
         .map((doc, i) => {
           const { id, type } = supportedTypeObjects[i];
 
-          if (!doc.found) {
+          if (!doc.found || !this._rawInNamespaces(doc, namespace)) {
             return ({
               id,
               type,
@@ -627,6 +774,7 @@ export class SavedObjectsRepository {
           return {
             id,
             type,
+            ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
             ...(time && { updated_at: time }),
             version: encodeHitVersion(doc),
             attributes: doc._source[type],
@@ -666,7 +814,7 @@ export class SavedObjectsRepository {
 
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound) {
+    if (docNotFound || indexNotFound || !this._rawInNamespaces(response, namespace)) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -676,6 +824,7 @@ export class SavedObjectsRepository {
     return {
       id,
       type,
+      ...(response._source.namespaces && { namespaces: response._source.namespaces }),
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
@@ -707,6 +856,23 @@ export class SavedObjectsRepository {
 
     const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
 
+    // Instead of the get, we could always do an _update_by_query
+    const getResponse = await this._callCluster('get', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (
+      getDocNotFound ||
+      getIndexNotFound ||
+      !this._rawInNamespaces(getResponse, options.namespace)
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
     const time = this._getCurrentTime();
 
     const doc = {
@@ -718,8 +884,61 @@ export class SavedObjectsRepository {
       delete doc.references;
     }
 
-    const response = await this._writeToCluster('update', {
+    const updateResponse = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
+      index: this.getIndexForType(type),
+      ...(version && decodeRequestVersion(version)),
+      refresh,
+      ignore: [404],
+      body: {
+        doc,
+      },
+      ...(this._registry.isNamespaces(type) && { _sourceIncludes: ['namespaces'] }),
+    });
+
+    if (updateResponse.status === 404) {
+      // see "404s from missing index" above
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    return {
+      id,
+      type,
+      updated_at: time,
+      version: encodeHitVersion(updateResponse),
+      ...(this._registry.isNamespaces(type) && {
+        namespaces: updateResponse.get._source.namespaces,
+      }),
+      references,
+      attributes,
+    };
+  }
+
+  async updateNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsUpdateNamespacesOptions = {}
+  ): Promise<void> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!this._registry.isNamespaces(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
+    }
+
+    const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const time = this._getCurrentTime();
+
+    const doc = {
+      updated_at: time,
+      namespaces,
+    };
+
+    const updateResponse = await this._writeToCluster('update', {
+      id: this._serializer.generateRawId(undefined, type, id),
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh,
@@ -729,19 +948,12 @@ export class SavedObjectsRepository {
       },
     });
 
-    if (response.status === 404) {
+    if (updateResponse.status === 404) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {
-      id,
-      type,
-      updated_at: time,
-      version: encodeHitVersion(response),
-      references,
-      attributes,
-    };
+    return;
   }
 
   /**
@@ -757,10 +969,11 @@ export class SavedObjectsRepository {
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
-    const bulkUpdateParams: object[] = [];
+    const { namespace } = options;
 
-    let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    let bulkGetRequestIndexCounter = 0;
+    const bulkGetDocs: object[] = [];
+    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -775,7 +988,6 @@ export class SavedObjectsRepository {
       }
 
       const { attributes, references, version } = object;
-      const { namespace } = options;
 
       const documentToSave = {
         [type]: attributes,
@@ -787,29 +999,97 @@ export class SavedObjectsRepository {
         delete documentToSave.references;
       }
 
-      const expectedResult = {
-        type,
-        id,
-        esRequestIndex: requestIndexCounter++,
-        documentToSave,
-      };
-
-      bulkUpdateParams.push(
-        {
-          update: {
-            _id: this._serializer.generateRawId(namespace, type, id),
-            _index: this.getIndexForType(type),
-            ...(version && decodeRequestVersion(version)),
+      if (!this._registry.isNamespaces) {
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            type,
+            id,
+            version,
+            documentToSave,
           },
-        },
-        { doc: documentToSave }
-      );
+        };
+      }
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      bulkGetDocs.push({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespaces'],
+      });
+
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          type,
+          id,
+          version,
+          esRequestIndex: bulkGetRequestIndexCounter++,
+          documentToSave,
+        },
+      };
     });
 
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: {
+            docs: bulkGetDocs,
+          },
+          ignore: [404],
+        })
+      : undefined;
+
+    let bulkUpdateRequestIndexCounter = 0;
+    const bulkUpdateParams: object[] = [];
+    const expectedBulkUpdateResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+      expectedBulkGetResult => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
+
+        const { esRequestIndex, id, type, version, documentToSave } = expectedBulkGetResult.value;
+        let namespaces;
+        if (esRequestIndex !== undefined) {
+          const indexFound = bulkGetResponse.status !== 404;
+          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult.found === true;
+          if (!indexFound || !docFound || !this._rawInNamespaces(actualResult, namespace)) {
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+              },
+            };
+          }
+          namespaces = actualResult._source.namespaces;
+        }
+
+        const expectedResult = {
+          type,
+          id,
+          namespaces,
+          esRequestIndex: bulkUpdateRequestIndexCounter++,
+          documentToSave: expectedBulkGetResult.value.documentToSave,
+        };
+
+        bulkUpdateParams.push(
+          {
+            update: {
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: this.getIndexForType(type),
+              ...(version && decodeRequestVersion(version)),
+            },
+          },
+          { doc: documentToSave }
+        );
+
+        return { tag: 'Right' as 'Right', value: expectedResult };
+      }
+    );
+
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
-    const esResponse = bulkUpdateParams.length
+    const bulkUpdateResponse = bulkUpdateParams.length
       ? await this._writeToCluster('bulk', {
           refresh,
           body: bulkUpdateParams,
@@ -817,13 +1097,13 @@ export class SavedObjectsRepository {
       : {};
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedBulkUpdateResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
 
-        const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = esResponse.items[esRequestIndex];
+        const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
+        const response = bulkUpdateResponse.items[esRequestIndex];
         const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
           response
         )[0] as any;
@@ -839,6 +1119,7 @@ export class SavedObjectsRepository {
         return {
           id,
           type,
+          ...(namespaces && { namespaces }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -913,6 +1194,10 @@ export class SavedObjectsRepository {
           },
         },
         upsert: raw._source,
+        ...getSearchDsl(this._mappings, this._registry, {
+          type,
+          namespace,
+        }),
       },
     });
 
@@ -952,7 +1237,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Returns an array of indices as specified in `this._schema` for each of the
+   * Returns an array of indices as specified in `this._registry` for each of the
    * given `types`. If any of the types don't have an associated index, the
    * default index `this._index` will be included.
    *
@@ -974,6 +1259,19 @@ export class SavedObjectsRepository {
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  private _rawInNamespaces(raw: SavedObjectsRawDoc, namespace?: string) {
+    const rawDocType = raw._source.type as string;
+
+    // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
+    // of the document ID format and don't need to check this
+    if (this._registry.isNamespace(rawDocType) || this._registry.isNamespaceAgnostic(rawDocType)) {
+      return true;
+    }
+
+    const namespaces = raw._source.namespaces as Array<string | null>;
+    return namespaces.includes(namespace === undefined ? 'default' : namespace);
   }
 }
 

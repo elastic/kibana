@@ -19,6 +19,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsUpdateNamespacesOptions,
 } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 
@@ -185,6 +186,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         options
       )
     );
+  }
+
+  public async updateNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options?: SavedObjectsUpdateNamespacesOptions
+  ) {
+    return await this.options.baseClient.updateNamespaces(type, id, namespaces, options);
   }
 
   /**

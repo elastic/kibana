@@ -17,7 +17,9 @@ export default function({ getService }: FtrProviderContext) {
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
-    expectHiddenTypeNotFound: expectHiddenTypeNotFound,
+    expectHiddenTypeNotFound,
+    expectSharedTypeOnlyInSpace1NotFound,
+    expectSharedTypeOnlyInSpace1Results,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
 
@@ -32,6 +34,10 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.DEFAULT.spaceId),
+        },
+        sharedTypeOnlySpace1: {
+          statusCode: 404,
+          response: expectSharedTypeOnlyInSpace1NotFound,
         },
         hiddenType: {
           statusCode: 404,
@@ -55,6 +61,10 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
         },
+        sharedTypeOnlySpace1: {
+          statusCode: 200,
+          response: expectSharedTypeOnlyInSpace1Results,
+        },
         hiddenType: {
           statusCode: 404,
           response: expectHiddenTypeNotFound,
@@ -77,6 +87,10 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
+        },
+        sharedTypeOnlySpace1: {
+          statusCode: 404,
+          response: expectSharedTypeOnlyInSpace1NotFound,
         },
         hiddenType: {
           statusCode: 404,

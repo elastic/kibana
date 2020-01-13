@@ -82,6 +82,7 @@ export interface SavedObject<T = unknown> {
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  namespaces?: string[];
 }
 
 /**
@@ -226,9 +227,13 @@ export interface SavedObjectsType {
    */
   hidden: boolean;
   /**
-   * Is the type global (true), or namespaced (false).
+   * Is the type global (true), or not (false).
    */
-  namespaceAgnostic: boolean;
+  namespaceAgnostic?: boolean;
+  /**
+   * Is the type shareable (true), or not (false).
+   */
+  namespaces?: boolean;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
@@ -365,6 +370,7 @@ export type SavedObjectLegacyMigrationFn = (
  */
 interface SavedObjectsLegacyTypeSchema {
   isNamespaceAgnostic?: boolean;
+  namespaces?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;

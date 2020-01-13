@@ -54,6 +54,7 @@ interface SavedObjectDoc {
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
+  namespaces?: Array<string | null>;
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;

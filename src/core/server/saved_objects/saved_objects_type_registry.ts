@@ -25,16 +25,7 @@ import { SavedObjectsType } from './types';
  *
  * @public
  */
-export type ISavedObjectTypeRegistry = Pick<
-  SavedObjectTypeRegistry,
-  | 'getType'
-  | 'getAllTypes'
-  | 'getIndex'
-  | 'isNamespaceAgnostic'
-  | 'isHidden'
-  | 'getImportableAndExportableTypes'
-  | 'isImportableAndExportable'
->;
+export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
@@ -77,11 +68,27 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
-   * Returns the `namespaceAgnostic` property for given type, or `false` if
-   * the type is not registered.
+   * Returns whether the type is namespace-agnostic (global);
+   * resolves to `false` if the type is not registered
    */
   public isNamespaceAgnostic(type: string) {
     return this.types.get(type)?.namespaceAgnostic ?? false;
+  }
+
+  /**
+   * Returns whether the type is single-namespace (isolated);
+   * resolves to `true` if the type is not registered
+   */
+  public isNamespace(type: string) {
+    return !this.isNamespaceAgnostic(type) && !this.isNamespaces(type);
+  }
+
+  /**
+   * Returns whether the type is multi-namespace (shareable);
+   * resolves to `false` if the type is not registered
+   */
+  public isNamespaces(type: string) {
+    return !this.isNamespaceAgnostic(type) && (this.types.get(type)?.namespaces ?? false);
   }
 
   /**

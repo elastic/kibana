@@ -28,6 +28,7 @@ const create = (): jest.Mocked<ISavedObjectsRepository> => ({
   find: jest.fn(),
   get: jest.fn(),
   update: jest.fn(),
+  updateNamespaces: jest.fn(),
   deleteByNamespace: jest.fn(),
   incrementCounter: jest.fn(),
 });
