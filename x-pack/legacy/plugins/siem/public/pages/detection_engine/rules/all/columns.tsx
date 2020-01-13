@@ -8,7 +8,6 @@
 
 import {
   EuiBadge,
-  EuiHealth,
   EuiIconTip,
   EuiLink,
   EuiTextColor,
@@ -17,7 +16,6 @@ import {
 } from '@elastic/eui';
 import * as H from 'history';
 import React from 'react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
@@ -32,6 +30,7 @@ import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
+import { SeverityBadge } from '../components/severity_badge';
 
 const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
   {
@@ -92,21 +91,7 @@ export const getColumns = (
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
-      render: (value: TableData['severity']) => (
-        <EuiHealth
-          color={
-            value === 'low'
-              ? euiLightVars.euiColorVis0
-              : value === 'medium'
-              ? euiLightVars.euiColorVis5
-              : value === 'high'
-              ? euiLightVars.euiColorVis7
-              : euiLightVars.euiColorVis9
-          }
-        >
-          {value}
-        </EuiHealth>
-      ),
+      render: (value: TableData['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
     },
     {
