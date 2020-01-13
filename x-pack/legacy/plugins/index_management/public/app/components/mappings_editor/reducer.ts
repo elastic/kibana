@@ -297,6 +297,11 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'documentField.createField': {
+      // Make sure to clear the search selection when we add a new field
+      // as it means that the user is not interested anymore in the search result
+      const updatedSearch: State['search'] =
+        state.search.term !== '' ? { term: '', result: [], selected: null } : state.search;
+
       return {
         ...state,
         documentFields: {
@@ -304,9 +309,17 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: action.value,
           status: 'creatingField',
         },
+        search: updatedSearch,
       };
     }
     case 'documentField.editField': {
+      // Make sure to clear the search selection if we edit another field that the one we have selected in our search result
+      const doResetSearch =
+        state.search.selected !== null && state.search.selected !== action.value;
+      const updatedSearch: State['search'] = doResetSearch
+        ? { term: '', result: [], selected: null }
+        : state.search;
+
       return {
         ...state,
         documentFields: {
@@ -314,6 +327,7 @@ export const reducer = (state: State, action: Action): State => {
           status: 'editingField',
           fieldToEdit: action.value,
         },
+        search: updatedSearch,
       };
     }
     case 'documentField.changeStatus':
