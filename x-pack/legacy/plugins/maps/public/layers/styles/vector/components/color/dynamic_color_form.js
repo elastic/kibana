@@ -64,11 +64,23 @@ export class DynamicColorForm extends React.Component {
     let colorSelect;
     if (styleOptions.field && styleOptions.field.name) {
       const onColorChange = colorOptions => {
+        const oldStyleOptions = { ...styleOptions };
+
+        if (oldStyleOptions.type === !colorOptions.type) {
+          delete oldStyleOptions.type;
+          if (colorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
+            delete oldStyleOptions.useCustomColorPalette;
+            delete oldStyleOptions.customColorPalette;
+          } else {
+            delete oldStyleOptions.useCustomColorRamp;
+            delete oldStyleOptions.customColorRamp;
+          }
+        }
+
         const newOptions = {
-          ...styleOptions,
+          ...oldStyleOptions,
           ...colorOptions,
         };
-
         onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
       };
       if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {

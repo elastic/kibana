@@ -140,7 +140,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     ordered.sort((a, b) => {
-      return a.count - b.count;
+      return b.count - a.count;
     });
     const truncated = ordered.slice(0, COLOR_PALETTE_MAX_SIZE);
     return {
