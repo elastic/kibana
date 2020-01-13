@@ -159,7 +159,7 @@ export class TaskRunner {
       params,
       state: alertTypeState,
       startedAt: this.taskInstance.startedAt!,
-      previousStartedAt,
+      previousStartedAt: previousStartedAt && new Date(previousStartedAt),
       spaceId,
       namespace,
       name,

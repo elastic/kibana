@@ -38,9 +38,7 @@ describe('Task Runner', () => {
       scheduledAt: new Date(),
       startedAt: new Date(),
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {
-        startedAt: new Date(Date.now() - 5 * 60 * 1000),
-      },
+      state: {},
       taskType: 'alerting:test',
       params: {
         alertId: '1',
@@ -110,7 +108,13 @@ describe('Task Runner', () => {
   test('successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
       alertType,
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
@@ -141,6 +145,7 @@ describe('Task Runner', () => {
                                       }
                     `);
     expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
+    expect(call.previousStartedAt).toMatchInlineSnapshot(`1969-12-31T23:55:00.000Z`);
     expect(call.state).toMatchInlineSnapshot(`Object {}`);
     expect(call.name).toBe('alert-name');
     expect(call.tags).toEqual(['alert-', '-tags']);
@@ -261,7 +266,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -293,7 +297,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -400,7 +403,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
