@@ -16,6 +16,16 @@ import {
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
+const convertToSnakeCase = (obj: IRuleSavedAttributesSavedObjectAttributes) => {
+  return Object.keys(obj).reduce((acc, item) => {
+    const newKey = item
+      .split(/(?=[A-Z])/)
+      .join('_')
+      .toLowerCase();
+    return { [newKey]: obj[item], ...acc };
+  }, {});
+};
+
 export const createFindRulesStatusRoute: Hapi.ServerRoute = {
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
@@ -63,7 +73,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
           : lastFiveErrorsForId.saved_objects.slice(1);
       return {
         ...(await acc),
-        [id]: toDisplay.map(errorItem => errorItem.attributes),
+        [id]: toDisplay.map(errorItem => convertToSnakeCase(errorItem.attributes)),
       };
     }, {});
     return statuses;

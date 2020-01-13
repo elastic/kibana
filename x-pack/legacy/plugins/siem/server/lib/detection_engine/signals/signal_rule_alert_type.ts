@@ -117,23 +117,6 @@ export const signalRulesAlertType = ({
           }
         );
       }
-      // now create an executing status, and update this status down the line.
-      // create the saved object here
-      // const date = new Date().toISOString();
-      // const currentStatusSavedObject = await services.savedObjectsClient.create<
-      //   IRuleSavedAttributesSavedObjectAttributes
-      // >(ruleStatusSavedObjectType, {
-      //   alertId: `"${alertId}"`, // do a search for this id.
-      //   statusDate: date,
-      //   status: 'executing',
-      //   lastFailureAt: '1970-01-01T00:00:00Z', // default to unix epoch time
-      //   lastSuccessAt: '1970-01-01T00:00:00Z',
-      //   lastFailureMessage: '',
-      //   lastSuccessMessage: '',
-      // });
-      // then in the end of the executor delete all statuses
-      // based on relevant alertIds
-      // then create a new status saved object with bulk create
 
       const name: string = savedObject.attributes.name;
       const tags: string[] = savedObject.attributes.tags;
@@ -294,7 +277,7 @@ export const signalRulesAlertType = ({
         }
       } catch (exception) {
         logger.error(
-          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${err.message}`
+          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${exception.message}`
         );
         const sDate = new Date().toISOString();
         currentStatusSavedObject.attributes.status = 'failed';
