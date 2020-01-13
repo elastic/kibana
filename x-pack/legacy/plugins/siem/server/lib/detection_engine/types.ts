@@ -81,6 +81,7 @@ export type RuleAlertParamsRest = Omit<
     false_positives: RuleAlertParams['falsePositives'];
     saved_id: RuleAlertParams['savedId'];
     timeline_id: RuleAlertParams['timelineId'];
+    timeline_title: RuleAlertParams['timelineTitle'];
     max_signals: RuleAlertParams['maxSignals'];
     risk_score: RuleAlertParams['riskScore'];
     output_index: RuleAlertParams['outputIndex'];
