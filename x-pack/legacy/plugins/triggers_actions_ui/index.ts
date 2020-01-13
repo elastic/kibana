@@ -23,7 +23,7 @@ export function triggersActionsUI(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
           createAlertUiEnabled: Joi.boolean().default(false),
         })
         .default();

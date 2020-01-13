@@ -22,16 +22,6 @@ export function indexManagement(kibana: any) {
     configPrefix: 'xpack.index_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    isEnabled(config: Legacy.KibanaConfig) {
-      return config.get('xpack.index_management.enabled');
-    },
-    config(Joi: Root) {
-      return Joi.object()
-        .keys({
-          enabled: Joi.boolean().default(false),
-        })
-        .default();
-    },
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/index_management'],
