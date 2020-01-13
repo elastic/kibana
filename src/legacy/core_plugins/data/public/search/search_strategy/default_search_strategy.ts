@@ -65,25 +65,26 @@ function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategyS
   };
 }
 
-function search({
-  searchRequests,
-  searchService,
-  config,
-  esShardTimeout,
-}: SearchStrategySearchParams) {
+function search({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
   const promises = searchRequests.map(({ index, body }) => {
-    const params = {
-      index: index.title || index,
-      body,
-      ...searchParams,
-    };
-    const { signal } = abortController;
-    return searchService
-      .search({ params }, { signal })
-      .toPromise()
-      .then(({ rawResponse }) => rawResponse);
+    const searching = es.search({ index: index.title || index, body, ...searchParams });
+    abortController.signal.addEventListener('abort', searching.abort);
+    return searching.catch(({ response }) => JSON.parse(response));
+    /*
+     * Once #44302 is resolved, replace the old implementation with this one -
+     * const params = {
+     *   index: index.title || index,
+     *   body,
+     *   ...searchParams,
+     * };
+     * const { signal } = abortController;
+     * return searchService
+     *   .search({ params }, { signal })
+     *   .toPromise()
+     *   .then(({ rawResponse }) => rawResponse);
+     */
   });
   return {
     searching: Promise.all(promises),
